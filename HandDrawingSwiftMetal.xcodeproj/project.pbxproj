@@ -1,0 +1,629 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
+		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
+		D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* ViewController.swift */; };
+		D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE22752388C00D4A23D /* Main.storyboard */; };
+		D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE52752388E00D4A23D /* Assets.xcassets */; };
+		D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */; };
+		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
+		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
+		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D4E1ECF02752388E00D4A23D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4E1ECD12752388C00D4A23D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4E1ECD82752388C00D4A23D;
+			remoteInfo = HandDrawingSwiftMetal;
+		};
+		D4E1ECFA2752388E00D4A23D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4E1ECD12752388C00D4A23D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4E1ECD82752388C00D4A23D;
+			remoteInfo = HandDrawingSwiftMetal;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D4E1ECE02752388C00D4A23D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D4E1ECE32752388C00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		D4E1ECE52752388E00D4A23D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D4E1ECE82752388E00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D4E1ECEA2752388E00D4A23D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D4E1ECEF2752388E00D4A23D /* HandDrawingSwiftMetalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalTests.swift; sourceTree = "<group>"; };
+		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
+		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D4E1ECD62752388C00D4A23D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECEC2752388E00D4A23D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECF62752388E00D4A23D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D4E1ECD02752388C00D4A23D = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */,
+				D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */,
+				D4E1ECFC2752388E00D4A23D /* HandDrawingSwiftMetalUITests */,
+				D4E1ECDA2752388C00D4A23D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D4E1ECDA2752388C00D4A23D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */,
+				D4E1ECEF2752388E00D4A23D /* HandDrawingSwiftMetalTests.xctest */,
+				D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
+				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
+				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
+				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
+				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
+				D4E1ECEA2752388E00D4A23D /* Info.plist */,
+			);
+			path = HandDrawingSwiftMetal;
+			sourceTree = "<group>";
+		};
+		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
+			);
+			path = HandDrawingSwiftMetalTests;
+			sourceTree = "<group>";
+		};
+		D4E1ECFC2752388E00D4A23D /* HandDrawingSwiftMetalUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */,
+				D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */,
+			);
+			path = HandDrawingSwiftMetalUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D4E1ECD82752388C00D4A23D /* HandDrawingSwiftMetal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4E1ED032752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetal" */;
+			buildPhases = (
+				D4E1ECD52752388C00D4A23D /* Sources */,
+				D4E1ECD62752388C00D4A23D /* Frameworks */,
+				D4E1ECD72752388C00D4A23D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HandDrawingSwiftMetal;
+			productName = HandDrawingSwiftMetal;
+			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D4E1ECEE2752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4E1ED062752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetalTests" */;
+			buildPhases = (
+				D4E1ECEB2752388E00D4A23D /* Sources */,
+				D4E1ECEC2752388E00D4A23D /* Frameworks */,
+				D4E1ECED2752388E00D4A23D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D4E1ECF12752388E00D4A23D /* PBXTargetDependency */,
+			);
+			name = HandDrawingSwiftMetalTests;
+			productName = HandDrawingSwiftMetalTests;
+			productReference = D4E1ECEF2752388E00D4A23D /* HandDrawingSwiftMetalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D4E1ECF82752388E00D4A23D /* HandDrawingSwiftMetalUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4E1ED092752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetalUITests" */;
+			buildPhases = (
+				D4E1ECF52752388E00D4A23D /* Sources */,
+				D4E1ECF62752388E00D4A23D /* Frameworks */,
+				D4E1ECF72752388E00D4A23D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D4E1ECFB2752388E00D4A23D /* PBXTargetDependency */,
+			);
+			name = HandDrawingSwiftMetalUITests;
+			productName = HandDrawingSwiftMetalUITests;
+			productReference = D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D4E1ECD12752388C00D4A23D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1310;
+				LastUpgradeCheck = 1310;
+				TargetAttributes = {
+					D4E1ECD82752388C00D4A23D = {
+						CreatedOnToolsVersion = 13.1;
+					};
+					D4E1ECEE2752388E00D4A23D = {
+						CreatedOnToolsVersion = 13.1;
+						TestTargetID = D4E1ECD82752388C00D4A23D;
+					};
+					D4E1ECF82752388E00D4A23D = {
+						CreatedOnToolsVersion = 13.1;
+						TestTargetID = D4E1ECD82752388C00D4A23D;
+					};
+				};
+			};
+			buildConfigurationList = D4E1ECD42752388C00D4A23D /* Build configuration list for PBXProject "HandDrawingSwiftMetal" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D4E1ECD02752388C00D4A23D;
+			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D4E1ECD82752388C00D4A23D /* HandDrawingSwiftMetal */,
+				D4E1ECEE2752388E00D4A23D /* HandDrawingSwiftMetalTests */,
+				D4E1ECF82752388E00D4A23D /* HandDrawingSwiftMetalUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D4E1ECD72752388C00D4A23D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
+				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
+				D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECED2752388E00D4A23D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECF72752388E00D4A23D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D4E1ECD52752388C00D4A23D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
+				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
+				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECEB2752388E00D4A23D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4E1ECF52752388E00D4A23D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */,
+				D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D4E1ECF12752388E00D4A23D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D4E1ECD82752388C00D4A23D /* HandDrawingSwiftMetal */;
+			targetProxy = D4E1ECF02752388E00D4A23D /* PBXContainerItemProxy */;
+		};
+		D4E1ECFB2752388E00D4A23D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D4E1ECD82752388C00D4A23D /* HandDrawingSwiftMetal */;
+			targetProxy = D4E1ECFA2752388E00D4A23D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D4E1ECE22752388C00D4A23D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D4E1ECE32752388C00D4A23D /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D4E1ECE82752388E00D4A23D /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D4E1ED012752388E00D4A23D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D4E1ED022752388E00D4A23D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D4E1ED042752388E00D4A23D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HandDrawingSwiftMetal/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D4E1ED052752388E00D4A23D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HandDrawingSwiftMetal/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D4E1ED072752388E00D4A23D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HandDrawingSwiftMetal.app/HandDrawingSwiftMetal";
+			};
+			name = Debug;
+		};
+		D4E1ED082752388E00D4A23D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HandDrawingSwiftMetal.app/HandDrawingSwiftMetal";
+			};
+			name = Release;
+		};
+		D4E1ED0A2752388E00D4A23D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HandDrawingSwiftMetal;
+			};
+			name = Debug;
+		};
+		D4E1ED0B2752388E00D4A23D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 59LR79WH8J;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HandDrawingSwiftMetal;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D4E1ECD42752388C00D4A23D /* Build configuration list for PBXProject "HandDrawingSwiftMetal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4E1ED012752388E00D4A23D /* Debug */,
+				D4E1ED022752388E00D4A23D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4E1ED032752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4E1ED042752388E00D4A23D /* Debug */,
+				D4E1ED052752388E00D4A23D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4E1ED062752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4E1ED072752388E00D4A23D /* Debug */,
+				D4E1ED082752388E00D4A23D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4E1ED092752388E00D4A23D /* Build configuration list for PBXNativeTarget "HandDrawingSwiftMetalUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4E1ED0A2752388E00D4A23D /* Debug */,
+				D4E1ED0B2752388E00D4A23D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D4E1ECD12752388C00D4A23D /* Project object */;
+}
