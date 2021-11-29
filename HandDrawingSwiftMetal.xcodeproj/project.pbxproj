@@ -16,6 +16,17 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
+		D4E1ED0E2752507100D4A23D /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED0D2752507100D4A23D /* Canvas.swift */; };
+		D4E1ED102752519900D4A23D /* Drawing.metal in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED0F2752519900D4A23D /* Drawing.metal */; };
+		D4E1ED12275251AD00D4A23D /* Texture.metal in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED11275251AD00D4A23D /* Texture.metal */; };
+		D4E1ED14275251DA00D4A23D /* MTLCommandBufferExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED13275251DA00D4A23D /* MTLCommandBufferExtension.swift */; };
+		D4E1ED162752521000D4A23D /* MTLDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED152752521000D4A23D /* MTLDeviceExtension.swift */; };
+		D4E1ED182752522900D4A23D /* MTLTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */; };
+		D4E1ED1A275252BC00D4A23D /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED19275252BC00D4A23D /* Drawing.swift */; };
+		D4E1ED1C2752584700D4A23D /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */; };
+		D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */; };
+		D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */; };
+		D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED2127525F1700D4A23D /* Interpolation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +60,17 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D4E1ED0D2752507100D4A23D /* Canvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Canvas.swift; sourceTree = "<group>"; };
+		D4E1ED0F2752519900D4A23D /* Drawing.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Drawing.metal; sourceTree = "<group>"; };
+		D4E1ED11275251AD00D4A23D /* Texture.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Texture.metal; sourceTree = "<group>"; };
+		D4E1ED13275251DA00D4A23D /* MTLCommandBufferExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandBufferExtension.swift; sourceTree = "<group>"; };
+		D4E1ED152752521000D4A23D /* MTLDeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLDeviceExtension.swift; sourceTree = "<group>"; };
+		D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtension.swift; sourceTree = "<group>"; };
+		D4E1ED19275252BC00D4A23D /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
+		D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
+		D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
+		D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtension.swift; sourceTree = "<group>"; };
+		D4E1ED2127525F1700D4A23D /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +124,8 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
+				D4E1ED24275260B400D4A23D /* Canvas */,
+				D4E1ED23275260A100D4A23D /* Extension */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
@@ -127,6 +151,31 @@
 			path = HandDrawingSwiftMetalUITests;
 			sourceTree = "<group>";
 		};
+		D4E1ED23275260A100D4A23D /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ED13275251DA00D4A23D /* MTLCommandBufferExtension.swift */,
+				D4E1ED152752521000D4A23D /* MTLDeviceExtension.swift */,
+				D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */,
+				D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */,
+				D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */,
+				D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		D4E1ED24275260B400D4A23D /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ED0F2752519900D4A23D /* Drawing.metal */,
+				D4E1ED11275251AD00D4A23D /* Texture.metal */,
+				D4E1ED2127525F1700D4A23D /* Interpolation.swift */,
+				D4E1ED19275252BC00D4A23D /* Drawing.swift */,
+				D4E1ED0D2752507100D4A23D /* Canvas.swift */,
+			);
+			path = Canvas;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -137,6 +186,7 @@
 				D4E1ECD52752388C00D4A23D /* Sources */,
 				D4E1ECD62752388C00D4A23D /* Frameworks */,
 				D4E1ECD72752388C00D4A23D /* Resources */,
+				D4E1ED0C2752389E00D4A23D /* Swift lint */,
 			);
 			buildRules = (
 			);
@@ -253,14 +303,46 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		D4E1ED0C2752389E00D4A23D /* Swift lint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Swift lint";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint autocorrect --format\n  swiftlint\nelse\n  echo \"SwiftLint does not exist, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D4E1ECD52752388C00D4A23D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
+				D4E1ED182752522900D4A23D /* MTLTextureExtension.swift in Sources */,
+				D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */,
+				D4E1ED14275251DA00D4A23D /* MTLCommandBufferExtension.swift in Sources */,
+				D4E1ED12275251AD00D4A23D /* Texture.metal in Sources */,
+				D4E1ED1A275252BC00D4A23D /* Drawing.swift in Sources */,
+				D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
+				D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */,
+				D4E1ED102752519900D4A23D /* Drawing.metal in Sources */,
+				D4E1ED162752521000D4A23D /* MTLDeviceExtension.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
+				D4E1ED0E2752507100D4A23D /* Canvas.swift in Sources */,
+				D4E1ED1C2752584700D4A23D /* ArrayExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,6 +529,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -475,6 +558,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
