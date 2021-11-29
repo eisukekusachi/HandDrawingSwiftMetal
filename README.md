@@ -1,4 +1,3 @@
 # HandDrawingSwiftMetal
 A drawing app with reference to [jSignature](https://willowsystems.github.io/jSignature/#/about/linesmoothing/).
-
-![img](https://user-images.githubusercontent.com/51893896/143882739-6c8acb5e-7ea6-41c9-b8b0-bd7f088501b1.PNG)
+![IMG_5683](https://user-images.githubusercontent.com/51893896/143883969-2b349f64-04d7-4b3a-95bd-7b97f9ccd178.PNG)
