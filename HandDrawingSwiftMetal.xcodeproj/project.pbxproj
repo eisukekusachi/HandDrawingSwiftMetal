@@ -27,6 +27,8 @@
 		D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */; };
 		D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */; };
 		D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED2127525F1700D4A23D /* Interpolation.swift */; };
+		D4F87D1E279BF5E500906241 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F87D1D279BF5E500906241 /* Utils.swift */; };
+		D4F87D20279BF61B00906241 /* CGFloatExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +73,8 @@
 		D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 		D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtension.swift; sourceTree = "<group>"; };
 		D4E1ED2127525F1700D4A23D /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
+		D4F87D1D279BF5E500906241 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGFloatExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +128,7 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
+				D4F87D1D279BF5E500906241 /* Utils.swift */,
 				D4E1ED24275260B400D4A23D /* Canvas */,
 				D4E1ED23275260A100D4A23D /* Extension */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
@@ -159,6 +164,7 @@
 				D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */,
 				D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */,
 				D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */,
+				D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */,
 				D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */,
 			);
 			path = Extension;
@@ -334,6 +340,7 @@
 				D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */,
 				D4E1ED14275251DA00D4A23D /* MTLCommandBufferExtension.swift in Sources */,
 				D4E1ED12275251AD00D4A23D /* Texture.metal in Sources */,
+				D4F87D1E279BF5E500906241 /* Utils.swift in Sources */,
 				D4E1ED1A275252BC00D4A23D /* Drawing.swift in Sources */,
 				D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
@@ -342,6 +349,7 @@
 				D4E1ED162752521000D4A23D /* MTLDeviceExtension.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D4E1ED0E2752507100D4A23D /* Canvas.swift in Sources */,
+				D4F87D20279BF61B00906241 /* CGFloatExtension.swift in Sources */,
 				D4E1ED1C2752584700D4A23D /* ArrayExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
