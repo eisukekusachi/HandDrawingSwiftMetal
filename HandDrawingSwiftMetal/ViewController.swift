@@ -46,7 +46,6 @@ class ViewController: UIViewController {
         view.tintColor = .lightGray
         return view
     }()
-    private var runOnce: Bool = false
     private let maxDiameter: Float = 44.0
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,16 +74,6 @@ class ViewController: UIViewController {
         diameterSliderView.slider.addTarget(self, action: #selector(sliderValueChanged), for: .valueChanged)
         selectBrush()
     }
-    override func viewDidLayoutSubviews() {
-        if !runOnce {
-            runOnce = true
-            if let drawableSize = canvas.currentDrawable?.texture.size() {
-                canvas.initializeRequiredTextures(drawableSize)
-                canvas.refereshDisplayTexture()
-                canvas.refreshMTKView()
-            }
-        }
-    }
     @objc func selectBrush() {
         canvas.tool = 0
         diameterSliderView.slider.value = canvas.brushDiameter / maxDiameter
@@ -94,9 +83,8 @@ class ViewController: UIViewController {
         diameterSliderView.slider.value = canvas.eraserDiameter / maxDiameter
     }
     @objc func clearCanvas() {
-        canvas.clearCanvas()
-        canvas.refereshDisplayTexture()
-        canvas.refreshMTKView()
+        canvas.clearAllTextures()
+        canvas.referesh()
     }
     @objc func sliderValueChanged(_ sender: UISlider) {
         if canvas.tool == 0 {

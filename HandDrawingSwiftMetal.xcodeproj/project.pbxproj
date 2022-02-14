@@ -22,13 +22,13 @@
 		D4E1ED14275251DA00D4A23D /* MTLCommandBufferExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED13275251DA00D4A23D /* MTLCommandBufferExtension.swift */; };
 		D4E1ED162752521000D4A23D /* MTLDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED152752521000D4A23D /* MTLDeviceExtension.swift */; };
 		D4E1ED182752522900D4A23D /* MTLTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */; };
-		D4E1ED1A275252BC00D4A23D /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED19275252BC00D4A23D /* Drawing.swift */; };
 		D4E1ED1C2752584700D4A23D /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */; };
 		D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */; };
 		D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */; };
 		D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED2127525F1700D4A23D /* Interpolation.swift */; };
-		D4F87D1E279BF5E500906241 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F87D1D279BF5E500906241 /* Utils.swift */; };
+		D4EFB37927B9460C005B8996 /* DrawingObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EFB37827B9460C005B8996 /* DrawingObject.swift */; };
 		D4F87D20279BF61B00906241 /* CGFloatExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */; };
+		D4FF50A127AE0F4200BFC3E5 /* Calc.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FF50A027AE0F4200BFC3E5 /* Calc.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,13 +68,13 @@
 		D4E1ED13275251DA00D4A23D /* MTLCommandBufferExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandBufferExtension.swift; sourceTree = "<group>"; };
 		D4E1ED152752521000D4A23D /* MTLDeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLDeviceExtension.swift; sourceTree = "<group>"; };
 		D4E1ED172752522900D4A23D /* MTLTextureExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtension.swift; sourceTree = "<group>"; };
-		D4E1ED19275252BC00D4A23D /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 		D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtension.swift; sourceTree = "<group>"; };
 		D4E1ED2127525F1700D4A23D /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
-		D4F87D1D279BF5E500906241 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		D4EFB37827B9460C005B8996 /* DrawingObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingObject.swift; sourceTree = "<group>"; };
 		D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGFloatExtension.swift; sourceTree = "<group>"; };
+		D4FF50A027AE0F4200BFC3E5 /* Calc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calc.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +102,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D4AFCB8527A528E7004A2E4D /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ED2127525F1700D4A23D /* Interpolation.swift */,
+				D4FF50A027AE0F4200BFC3E5 /* Calc.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		D4E1ECD02752388C00D4A23D = {
 			isa = PBXGroup;
 			children = (
@@ -128,9 +137,7 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
-				D4F87D1D279BF5E500906241 /* Utils.swift */,
 				D4E1ED24275260B400D4A23D /* Canvas */,
-				D4E1ED23275260A100D4A23D /* Extension */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
@@ -173,11 +180,12 @@
 		D4E1ED24275260B400D4A23D /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
+				D4E1ED0D2752507100D4A23D /* Canvas.swift */,
+				D4EFB37827B9460C005B8996 /* DrawingObject.swift */,
 				D4E1ED0F2752519900D4A23D /* Drawing.metal */,
 				D4E1ED11275251AD00D4A23D /* Texture.metal */,
-				D4E1ED2127525F1700D4A23D /* Interpolation.swift */,
-				D4E1ED19275252BC00D4A23D /* Drawing.swift */,
-				D4E1ED0D2752507100D4A23D /* Canvas.swift */,
+				D4AFCB8527A528E7004A2E4D /* Utils */,
+				D4E1ED23275260A100D4A23D /* Extension */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -326,7 +334,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint autocorrect --format\n  swiftlint\nelse\n  echo \"SwiftLint does not exist, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"SwiftLint does not exist, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -340,8 +348,6 @@
 				D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */,
 				D4E1ED14275251DA00D4A23D /* MTLCommandBufferExtension.swift in Sources */,
 				D4E1ED12275251AD00D4A23D /* Texture.metal in Sources */,
-				D4F87D1E279BF5E500906241 /* Utils.swift in Sources */,
-				D4E1ED1A275252BC00D4A23D /* Drawing.swift in Sources */,
 				D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */,
@@ -351,6 +357,8 @@
 				D4E1ED0E2752507100D4A23D /* Canvas.swift in Sources */,
 				D4F87D20279BF61B00906241 /* CGFloatExtension.swift in Sources */,
 				D4E1ED1C2752584700D4A23D /* ArrayExtension.swift in Sources */,
+				D4EFB37927B9460C005B8996 /* DrawingObject.swift in Sources */,
+				D4FF50A127AE0F4200BFC3E5 /* Calc.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,7 +535,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -543,8 +552,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetal;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HandDrawingSwiftMetal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -556,7 +566,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -572,8 +583,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.eisukekusachi.HandDrawingSwiftMetal;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HandDrawingSwiftMetal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

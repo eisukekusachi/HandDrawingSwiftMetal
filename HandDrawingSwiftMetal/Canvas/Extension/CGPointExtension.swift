@@ -41,20 +41,18 @@ extension CGPoint {
         let resultX: CGFloat = (CGFloat(x) - CGFloat(from.x))
         return atan2(resultY, resultX) * toDegree
     }
-    func distance(_ to: CGPoint) -> CGFloat {
-        return sqrt(pow(to.x - x, 2) + pow(to.y - y, 2))
+    func distance(_ to: CGPoint?) -> CGFloat {
+        guard let value = to else { return 0 }
+        return sqrt(pow(value.x - x, 2) + pow(value.y - y, 2))
     }
-    func multiply(_ value: CGFloat) -> CGPoint {
+    func multiplied(_ value: CGFloat) -> CGPoint {
         return CGPoint(x: x * value, y: y * value)
     }
-    func divide(_ size: CGSize) -> CGPoint {
+    func divided(_ size: CGSize) -> CGPoint {
         return CGPoint(x: x / size.width, y: y / size.height)
     }
     func multiBy2Sub1() -> CGPoint {
         return CGPoint(x: x * 2.0 - 1.0,
                        y: y * 2.0 - 1.0)
-    }
-    func flipY() -> CGPoint {
-        return CGPoint(x: self.x, y: self.y * -1.0)
     }
 }

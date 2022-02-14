@@ -10,29 +10,32 @@ extension MTLCommandBuffer {
     @discardableResult
     func drawGrayPoints(_ pipeline: MTLRenderPipelineState?,
                         vertices: [CGPoint],
-                        transparencyData: [CGFloat]? = nil,
+                        nTransparencyValues: [CGFloat]? = nil,
+                        nAlpha: Float = 1.0,
                         diameter: Float = 2.0,
                         blurSize: Float = 1.5,
-                        nAlpha: Float = 1.0,
                         on dstTexture: MTLTexture?) -> MTLCommandBuffer {
         if vertices.count == 0 { return self }
         guard   let pipeline = pipeline,
                 let dstTexture = dstTexture else { return self }
         var vertexArray: [Float] = []
-        var transparencyArray: [Float] = []
+        var nTransparencyArray: [Float] = []
         var diameterPlusBlurSizeArray: [Float] = []
         for vertex in vertices {
             vertexArray.append(contentsOf: [Float(vertex.x), Float(vertex.y)])
             diameterPlusBlurSizeArray.append(blurSize * 2.0 + diameter)
         }
-        if let transparencyData = transparencyData, vertices.count == transparencyData.count {
-            transparencyArray.append(contentsOf: transparencyData.map { return Float($0) * nAlpha })
+        if let nTransparencyValues = nTransparencyValues, vertices.count == nTransparencyValues.count {
+            nTransparencyArray.append(contentsOf: nTransparencyValues.map { return Float($0) * nAlpha })
         } else {
-            transparencyArray.append(contentsOf: [Float](repeating: 1.0, count: vertexArray.count))
+            nTransparencyArray.append(contentsOf: [Float](repeating: 1.0, count: vertexArray.count))
         }
-        let vertexBuffer = device.makeBuffer(bytes: vertexArray, length: vertexArray.count * MemoryLayout<Float>.size)
-        let diameterPlusBlurSizeBuffer = device.makeBuffer(bytes: diameterPlusBlurSizeArray, length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size)
-        let transparencyBuffer = device.makeBuffer(bytes: transparencyArray, length: transparencyArray.count * MemoryLayout<Float>.size)
+        let vertexBuffer = device.makeBuffer(bytes: vertexArray,
+                                             length: vertexArray.count * MemoryLayout<Float>.size)
+        let diameterPlusBlurSizeBuffer = device.makeBuffer(bytes: diameterPlusBlurSizeArray,
+                                                           length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size)
+        let transparencyBuffer = device.makeBuffer(bytes: nTransparencyArray,
+                                                   length: nTransparencyArray.count * MemoryLayout<Float>.size)
         var blurSize: Float = blurSize
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = dstTexture

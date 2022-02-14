@@ -7,7 +7,7 @@
 
 import MetalKit
 extension MTLTexture {
-    func size() -> CGSize {
+    var size: CGSize {
         return CGSize(width: self.width, height: self.height)
     }
 }

@@ -1,12 +1,12 @@
 //
-//  Utils.swift
+//  Calc.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2022/01/22.
+//  Created by Eisuke Kusachi on 2022/02/05.
 //
 
 import UIKit
-class Utils {
+class Calc {
     class func getAxialSymmetryPoint(_ srcPoint: CGPoint, pallarelLine start: CGPoint, _ to: CGPoint) -> CGPoint? {
         let angle = start.angle(to: to)
         let centerPointParallelLine = start.center(to)

@@ -15,11 +15,27 @@ class Interpolation {
         }
         return result
     }
-    class func bezierCurve(a: CGPoint, b: CGPoint, c: CGPoint, d: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
-        let previousPoint = a
-        let startPoint = b
-        let endPoint = c
-        let nextPoint = d
+    class func firstCurve(startPoint: CGPoint, endPoint: CGPoint, nextPoint: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
+        let cbVector = CGVector(nextPoint, to: endPoint)
+        let baVector = CGVector(endPoint, to: startPoint)
+        let cbaVector = CGVector(dx: cbVector.dx + baVector.dx, dy: cbVector.dy + baVector.dy)
+        let cp1Vector = cbaVector.resizeTo(
+            length: max(0.0, (cbVector.getRadian(baVector.reverse()) / .pi)) * (baVector.length() * handleMaxLengthRatio)
+        )
+        let cp1: CGPoint = CGPoint(x: cp1Vector.dx + endPoint.x, y: cp1Vector.dy + endPoint.y)
+        if  let cp0: CGPoint = Calc.getAxialSymmetryPoint(cp1, pallarelLine: startPoint, endPoint) {
+            let circumference: Int = Int(startPoint.distance(cp0) + cp0.distance(cp1) + cp1.distance(endPoint))
+            let pointNum: Int = max(1, circumference)
+            return Interpolation.cubicCurve(movePoint: startPoint,
+                                            controlPoint1: cp0,
+                                            controlPoint2: cp1,
+                                            endPoint: endPoint,
+                                            pointNum: pointNum,
+                                            addEndPoint: addEndPoint)
+        }
+        return []
+    }
+    class func curve(previousPoint: CGPoint, startPoint: CGPoint, endPoint: CGPoint, nextPoint: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
         let abVector = CGVector(previousPoint, to: startPoint)
         let bcVector = CGVector(startPoint, to: endPoint)
         let cdVector = CGVector(endPoint, to: nextPoint)
@@ -42,33 +58,7 @@ class Interpolation {
                                         pointNum: pointNum,
                                         addEndPoint: addEndPoint)
     }
-    class func firstCurve(a: CGPoint, b: CGPoint, c: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
-        let startPoint: CGPoint = a
-        let endPoint: CGPoint = b
-        let nextPoint: CGPoint = c
-        let cbVector = CGVector(nextPoint, to: endPoint)
-        let baVector = CGVector(endPoint, to: startPoint)
-        let cbaVector = CGVector(dx: cbVector.dx + baVector.dx, dy: cbVector.dy + baVector.dy)
-        let cp1Vector = cbaVector.resizeTo(
-            length: max(0.0, (cbVector.getRadian(baVector.reverse()) / .pi)) * (baVector.length() * handleMaxLengthRatio)
-        )
-        let cp1: CGPoint = CGPoint(x: cp1Vector.dx + endPoint.x, y: cp1Vector.dy + endPoint.y)
-        if  let cp0: CGPoint = Utils.getAxialSymmetryPoint(cp1, pallarelLine: startPoint, endPoint) {
-            let circumference: Int = Int(startPoint.distance(cp0) + cp0.distance(cp1) + cp1.distance(endPoint))
-            let pointNum: Int = max(1, circumference)
-            return Interpolation.cubicCurve(movePoint: startPoint,
-                                            controlPoint1: cp0,
-                                            controlPoint2: cp1,
-                                            endPoint: endPoint,
-                                            pointNum: pointNum,
-                                            addEndPoint: addEndPoint)
-        }
-        return []
-    }
-    class func endCurve(a: CGPoint, b: CGPoint, c: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
-        let previousPoint: CGPoint = a
-        let startPoint: CGPoint = b
-        let endPoint: CGPoint = c
+    class func lastCurve(previousPoint: CGPoint, startPoint: CGPoint, endPoint: CGPoint, addEndPoint: Bool = false) -> [CGPoint] {
         let abVector = CGVector(previousPoint, to: startPoint)
         let bcVector = CGVector(startPoint, to: endPoint)
         let abcVector = CGVector(dx: abVector.dx + bcVector.dx, dy: abVector.dy + bcVector.dy)
@@ -76,7 +66,7 @@ class Interpolation {
             length: max(0.0, (abVector.getRadian(bcVector.reverse()) / .pi)) * (bcVector.length() * handleMaxLengthRatio)
         )
         let cp0: CGPoint = CGPoint(x: cp0Vector.dx + startPoint.x, y: cp0Vector.dy + startPoint.y)
-        if  let cp1: CGPoint = Utils.getAxialSymmetryPoint(cp0, pallarelLine: startPoint, endPoint) {
+        if  let cp1: CGPoint = Calc.getAxialSymmetryPoint(cp0, pallarelLine: startPoint, endPoint) {
             let circumference: Int = Int(startPoint.distance(cp0) + cp0.distance(cp1) + cp1.distance(endPoint))
             let pointNum: Int = max(1, circumference)
             return Interpolation.cubicCurve(movePoint: startPoint,
@@ -88,12 +78,12 @@ class Interpolation {
         }
         return []
     }
-    class func cubicCurve(movePoint: CGPoint,
-                          controlPoint1: CGPoint,
-                          controlPoint2: CGPoint,
-                          endPoint: CGPoint,
-                          pointNum: Int,
-                          addEndPoint: Bool = true) -> [CGPoint] {
+    private class func cubicCurve(movePoint: CGPoint,
+                                  controlPoint1: CGPoint,
+                                  controlPoint2: CGPoint,
+                                  endPoint: CGPoint,
+                                  pointNum: Int,
+                                  addEndPoint: Bool = true) -> [CGPoint] {
         var result: [CGPoint] = []
         var t: CGFloat = 0.0
         let step: CGFloat = 1.0 / CGFloat(pointNum)
