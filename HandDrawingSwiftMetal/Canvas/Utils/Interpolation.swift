@@ -20,7 +20,7 @@ class Interpolation {
         let baVector = CGVector(endPoint, to: startPoint)
         let cbaVector = CGVector(dx: cbVector.dx + baVector.dx, dy: cbVector.dy + baVector.dy)
         let cp1Vector = cbaVector.resizeTo(
-            length: max(0.0, (cbVector.getRadian(baVector.reverse()) / .pi)) * (baVector.length() * handleMaxLengthRatio)
+            length: max(0.0, (cbVector.getRadian(baVector.reversed) / .pi)) * (baVector.length * handleMaxLengthRatio)
         )
         let cp1: CGPoint = CGPoint(x: cp1Vector.dx + endPoint.x, y: cp1Vector.dy + endPoint.y)
         if  let cp0: CGPoint = Calc.getAxialSymmetryPoint(cp1, pallarelLine: startPoint, endPoint) {
@@ -40,12 +40,12 @@ class Interpolation {
         let bcVector = CGVector(startPoint, to: endPoint)
         let cdVector = CGVector(endPoint, to: nextPoint)
         let abcVector = CGVector(dx: abVector.dx + bcVector.dx, dy: abVector.dy + bcVector.dy)
-        let dcbVector = CGVector(dx: bcVector.dx + cdVector.dx, dy: bcVector.dy + cdVector.dy).reverse()
+        let dcbVector = CGVector(dx: bcVector.dx + cdVector.dx, dy: bcVector.dy + cdVector.dy).reversed
         let cp0Vector = abcVector.resizeTo(
-            length: max(0.0, (abVector.getRadian(bcVector.reverse()) / .pi)) * (bcVector.length() * handleMaxLengthRatio)
+            length: max(0.0, (abVector.getRadian(bcVector.reversed) / .pi)) * (bcVector.length * handleMaxLengthRatio)
         )
         let cp1Vector = dcbVector.resizeTo(
-            length: max(0.0, (bcVector.getRadian(cdVector.reverse()) / .pi)) * (bcVector.length() * handleMaxLengthRatio)
+            length: max(0.0, (bcVector.getRadian(cdVector.reversed) / .pi)) * (bcVector.length * handleMaxLengthRatio)
         )
         let cp0 = CGPoint(x: cp0Vector.dx + startPoint.x, y: cp0Vector.dy + startPoint.y)
         let cp1 = CGPoint(x: cp1Vector.dx + endPoint.x, y: cp1Vector.dy + endPoint.y)
@@ -63,7 +63,7 @@ class Interpolation {
         let bcVector = CGVector(startPoint, to: endPoint)
         let abcVector = CGVector(dx: abVector.dx + bcVector.dx, dy: abVector.dy + bcVector.dy)
         let cp0Vector = abcVector.resizeTo(
-            length: max(0.0, (abVector.getRadian(bcVector.reverse()) / .pi)) * (bcVector.length() * handleMaxLengthRatio)
+            length: max(0.0, (abVector.getRadian(bcVector.reversed) / .pi)) * (bcVector.length * handleMaxLengthRatio)
         )
         let cp0: CGPoint = CGPoint(x: cp0Vector.dx + startPoint.x, y: cp0Vector.dy + startPoint.y)
         if  let cp1: CGPoint = Calc.getAxialSymmetryPoint(cp0, pallarelLine: startPoint, endPoint) {
@@ -100,6 +100,33 @@ class Interpolation {
         }
         if addEndPoint {
             result.append(endPoint)
+        }
+        return result
+    }
+    class func split(_ array: [CGPoint], nRatios: [CGFloat]) -> [CGPoint] {
+        var result: [CGPoint] = []
+        if array.count < 1 || nRatios.count == 0 { return result }
+        for i in 0 ..< array.count - 1 {
+            let pt0 = array[i]
+            let pt1 = array[i + 1]
+            let vector = CGVector(pt0, to: pt1)
+            for ratio in nRatios {
+                let newVector = vector.resizeTo(length: vector.length * ratio)
+                result.append(pt0.add(vector: newVector))
+            }
+        }
+        return result
+    }
+    class func split(_ array: [CGFloat], nRatios: [CGFloat]) -> [CGFloat] {
+        var result: [CGFloat] = []
+        if array.count < 1 || nRatios.count == 0 { return result }
+        for i in 0 ..< array.count - 1 {
+            let val0 = array[i]
+            let val1 = array[i + 1]
+            let diff = val1 - val0
+            for ratio in nRatios {
+                result.append(diff * ratio + val0)
+            }
         }
         return result
     }

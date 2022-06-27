@@ -12,16 +12,12 @@ class Canvas: MTKView {
     var brushDiameter: Float = 2.0
     var eraserDiameter: Float = 32.0
     private (set) var drawingTexture: MTLTexture?
-    private var brushNRgb: (Float, Float, Float) = (0.0, 0.0, 0.0)
-    private var brushNAlpha: Float = 1.0
-    private var eraserNAlpha: Float = 1.0
+    private var stroke: Stroke?
+    private var nBrushRgb: (Float, Float, Float) = (0.0, 0.0, 0.0)
+    private var nBrushAlpha: Float = 1.0
+    private var nEraserAlpha: Float = 1.0
     private var textureSize: CGSize = .zero
     private var ratioOfScreenToTexture: CGFloat = 1.0
-    private var touchObject = DrawingObject()
-    private var smoothPointsObject = DrawingObject()
-    private var smoothPointsIndex: Int = 0
-    private var curveIndex: Int = 0
-    private var firstCurveHasBeenDrawnFlag: Bool = false
     // MetalKit
     private var commandQueue: MTLCommandQueue!
     private var displayTexture: MTLTexture?
@@ -37,6 +33,7 @@ class Canvas: MTKView {
     private var cpCopy: MTLComputePipelineState?
     private var refreshMTKViewFlag: Bool = false
     private var runOnce: Bool = false
+    // MARK: - Inialize
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()
@@ -50,7 +47,6 @@ class Canvas: MTKView {
         self.device = MTLCreateSystemDefaultDevice()
         self.commandQueue = device?.makeCommandQueue()
         initializePipelines()
-        prepareForNewCurve()
     }
     private func initializePipelines() {
         psDrawGrayPointsMaxOneOne = device?.maxOneOneRenderPipelineState("vDrawGrayPoints", "fDrawGrayPoints")
@@ -78,112 +74,72 @@ class Canvas: MTKView {
         if !runOnce, let drawableSize = currentDrawable?.texture.size {
             runOnce = true
             initializeTexture(drawableSize)
-            referesh()
+            refreshCanvas()
         }
     }
-    // MARK: Events
+    // MARK: - Touch handling functions
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointWithValue = getTouchPointWithForceValue(touch: event?.allTouches?.first, view: self) else { return }
-        touchObject.append(point: screenPointWithValue.0, value: screenPointWithValue.1)
-        smoothPointsObject.append(object: touchObject.getFirst().multiplyPoints(by: ratioOfScreenToTexture))
+        if stroke == nil {
+            stroke = Stroke()
+        }
+        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
+        stroke?.append(pointInScreen: screenPointWithValue.0,
+                       pressureValue: screenPointWithValue.1,
+                       ratioOfScreenToTexture: ratioOfScreenToTexture)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointWithValue = getTouchPointWithForceValue(touch: event?.allTouches?.first, view: self) else { return }
-        if screenPointWithValue.0.distance(touchObject.points.last) > 1.4 {
-            touchObject.append(point: screenPointWithValue.0, value: screenPointWithValue.1)
+        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
+        stroke?.append(pointInScreen: screenPointWithValue.0,
+                       pressureValue: screenPointWithValue.1,
+                       ratioOfScreenToTexture: ratioOfScreenToTexture)
+        stroke?.makeCurve()
+        if let curveWithShade = stroke?.latestCurveWithShade() {
+            drawPoints(nVertices: curveWithShade.points.vertexCoordinate(textureSize),
+                       nTransparencyValues: curveWithShade.values,
+                       on: drawingTexture)
+            refreshCanvas()
         }
-        smoothPointsObject.append(object: touchObject.smoothed(processedIndex: &smoothPointsIndex).multiplyPoints(by: ratioOfScreenToTexture))
-        var curveObject = DrawingObject()
-        if !firstCurveHasBeenDrawnFlag && smoothPointsObject.pointCount >= 3 {
-            firstCurveHasBeenDrawnFlag = true
-            curveObject.append(object: smoothPointsObject.curvedAtFirst())
-        }
-        curveObject.append(object: smoothPointsObject.curved(processedIndex: &curveIndex))
-        drawPoints(vertices: curveObject.points.vertexCoordinate(textureSize),
-                   nTransparencyValues: curveObject.values,
-                   on: drawingTexture)
-        referesh()
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointWithValue = getTouchPointWithForceValue(touch: event?.allTouches?.first, view: self) else { return }
-        if screenPointWithValue.0.distance(touchObject.points.last) > 1.4 {
-            touchObject.append(point: screenPointWithValue.0, value: screenPointWithValue.1)
+        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
+        stroke?.append(pointInScreen: screenPointWithValue.0,
+                       pressureValue: screenPointWithValue.1,
+                       ratioOfScreenToTexture: ratioOfScreenToTexture,
+                       atTouchesEnded: true)
+        stroke?.makeCurve()
+        if let curveWithShade = stroke?.latestCurveWithShade() {
+            drawPoints(nVertices: curveWithShade.points.vertexCoordinate(textureSize),
+                       nTransparencyValues: curveWithShade.values,
+                       on: drawingTexture)
+            mergeDrawingTextureToCurrentTexture()
+            refreshCanvas()
         }
-        smoothPointsObject.append(object: touchObject.smoothed(processedIndex: &smoothPointsIndex).multiplyPoints(by: ratioOfScreenToTexture))
-        smoothPointsObject.append(object: touchObject.getLast().multiplyPoints(by: ratioOfScreenToTexture))
-        var curveObject = DrawingObject()
-        curveObject.append(object: smoothPointsObject.curved(processedIndex: &curveIndex))
-        curveObject.append(object: smoothPointsObject.curvedAtEnd())
-        // If draw a dot, set the value to 1.0.
-        if curveObject.pointCount == 1 {
-            curveObject.setValue(index: 0, value: 1.0)
-        }
-        drawPoints(vertices: curveObject.points.vertexCoordinate(textureSize),
-                   nTransparencyValues: curveObject.values,
-                   on: drawingTexture)
-        mergeDrawingTextureToCurrentTexture()
-        referesh()
-        prepareForNewCurve()
+        stroke = nil
     }
-    private func getTouchPointWithForceValue(touch: UITouch?, view: UIView) -> (CGPoint, CGFloat)? {
-        guard let touch = touch else { return nil }
-        var force: CGFloat = 1.0
-        if touch.maximumPossibleForce != 0.0 {
-            let amplifier: CGFloat = 4.0
-            let offset: CGFloat = 0.1
-            let t = max(0.0, min((touch.force / touch.maximumPossibleForce) * amplifier - offset, 1.0))
-            force = t * t * (3 - 2 * t)
-        }
-        return (touch.location(in: view), force)
-    }
-    func drawPoints(vertices: [CGPoint],
+    // MARK: - Methods for drawing
+    func drawPoints(nVertices: [CGPoint],
                     nTransparencyValues: [CGFloat]? = nil,
                     nRgb: (Float, Float, Float)? = nil,
                     nAlpha: Float? = nil,
                     diameter: Float? = nil,
-                    maxBlendingGrayscaleTexture: MTLTexture? = nil,
-                    on texture: MTLTexture?) {
-        if vertices.count == 0 { return }
-        var maxBlendingGrayscaleTexture = maxBlendingGrayscaleTexture
-        if maxBlendingGrayscaleTexture == nil { maxBlendingGrayscaleTexture = grayscaleTexture }
+                    maxBlendingGrayscaleTexture maxGrayScaleTexture: MTLTexture? = nil,
+                    on resultTexture: MTLTexture?) {
+        if nVertices.count == 0 { return }
+        let maxBlendingGrayscaleTexture = maxGrayScaleTexture != nil ? maxGrayScaleTexture : grayscaleTexture
         commandQueue?.makeCommandBuffer()?
             .drawGrayPoints(psDrawGrayPointsMaxOneOne,
-                            vertices: vertices,
+                            nVertices: nVertices,
                             nTransparencyValues: nTransparencyValues,
-                            nAlpha: nAlpha ?? (tool == 0 ? brushNAlpha : eraserNAlpha),
+                            nAlpha: nAlpha ?? (tool == 0 ? nBrushAlpha : nEraserAlpha),
                             diameter: diameter ?? (tool == 0 ? brushDiameter : eraserDiameter),
                             on: maxBlendingGrayscaleTexture)
             .colorize(psColorizeGrayscaleTexture,
                       grayscaleTexture: maxBlendingGrayscaleTexture,
-                      nRgb: nRgb ?? (tool == 0 ? brushNRgb : (0, 0, 0)),
-                      to: texture)
+                      nRgb: nRgb ?? (tool == 0 ? nBrushRgb : (0, 0, 0)),
+                      to: resultTexture)
             .commit()
     }
-    func clearAllTextures() {
-        commandQueue?.makeCommandBuffer()?
-            .clear(cpFill, [drawingTexture, currentTexture])
-            .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
-            .commit()
-    }
-    func referesh() {
-        refereshDisplayTexture()
-        refreshMTKView()
-    }
-    private func refereshDisplayTexture() {
-        guard let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
-        commandBuffer.fill(cpFill, nRgb: (1.0, 1.0, 1.0), to: displayTexture)
-        if tool == 0 {
-            commandBuffer
-                .merge(cpMerge, [drawingTexture, currentTexture], to: displayTexture)
-        } else {
-            commandBuffer
-                .copy(cpCopy, currentTexture, to: tmpTexture)
-                .drawTexture(psEraser, drawingTexture, to: tmpTexture, flipY: true)
-                .merge(cpMerge, tmpTexture, to: displayTexture)
-        }
-        commandBuffer.commit()
-    }
-    private func mergeDrawingTextureToCurrentTexture() {
+    func mergeDrawingTextureToCurrentTexture() {
         guard let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
         if tool == 0 {
             commandBuffer
@@ -199,15 +155,32 @@ class Canvas: MTKView {
             .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
         commandBuffer.commit()
     }
+    func refreshCanvas() {
+        refreshDisplayTexture()
+        refreshMTKView()
+    }
+    func clearAllTextures() {
+        commandQueue?.makeCommandBuffer()?
+            .clear(cpFill, [drawingTexture, currentTexture])
+            .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
+            .commit()
+    }
+    private func refreshDisplayTexture() {
+        guard let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
+        commandBuffer.fill(cpFill, nRgb: (1.0, 1.0, 1.0), to: displayTexture)
+        if tool == 0 {
+            commandBuffer
+                .merge(cpMerge, [drawingTexture, currentTexture], to: displayTexture)
+        } else {
+            commandBuffer
+                .copy(cpCopy, currentTexture, to: tmpTexture)
+                .drawTexture(psEraser, drawingTexture, to: tmpTexture, flipY: true)
+                .merge(cpMerge, tmpTexture, to: displayTexture)
+        }
+        commandBuffer.commit()
+    }
     private func refreshMTKView() {
         refreshMTKViewFlag = true
-    }
-    private func prepareForNewCurve() {
-        smoothPointsIndex = 0
-        curveIndex = 0
-        touchObject.removeAll()
-        smoothPointsObject.removeAll()
-        firstCurveHasBeenDrawnFlag = false
     }
 }
 extension Canvas: MTKViewDelegate {

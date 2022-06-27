@@ -84,7 +84,7 @@ class ViewController: UIViewController {
     }
     @objc func clearCanvas() {
         canvas.clearAllTextures()
-        canvas.referesh()
+        canvas.refreshCanvas()
     }
     @objc func sliderValueChanged(_ sender: UISlider) {
         if canvas.tool == 0 {

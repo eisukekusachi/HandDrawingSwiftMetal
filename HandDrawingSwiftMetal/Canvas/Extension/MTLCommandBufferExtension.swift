@@ -9,29 +9,29 @@ import MetalKit
 extension MTLCommandBuffer {
     @discardableResult
     func drawGrayPoints(_ pipeline: MTLRenderPipelineState?,
-                        vertices: [CGPoint],
+                        nVertices: [CGPoint],
                         nTransparencyValues: [CGFloat]? = nil,
                         nAlpha: Float = 1.0,
                         diameter: Float = 2.0,
                         blurSize: Float = 1.5,
                         on dstTexture: MTLTexture?) -> MTLCommandBuffer {
-        if vertices.count == 0 { return self }
+        if nVertices.count == 0 { return self }
         guard   let pipeline = pipeline,
                 let dstTexture = dstTexture else { return self }
-        var vertexArray: [Float] = []
+        var nVertexArray: [Float] = []
         var nTransparencyArray: [Float] = []
         var diameterPlusBlurSizeArray: [Float] = []
-        for vertex in vertices {
-            vertexArray.append(contentsOf: [Float(vertex.x), Float(vertex.y)])
+        for nVertex in nVertices {
+            nVertexArray.append(contentsOf: [Float(nVertex.x), Float(nVertex.y)])
             diameterPlusBlurSizeArray.append(blurSize * 2.0 + diameter)
         }
-        if let nTransparencyValues = nTransparencyValues, vertices.count == nTransparencyValues.count {
+        if let nTransparencyValues = nTransparencyValues, nVertices.count == nTransparencyValues.count {
             nTransparencyArray.append(contentsOf: nTransparencyValues.map { return Float($0) * nAlpha })
         } else {
-            nTransparencyArray.append(contentsOf: [Float](repeating: 1.0, count: vertexArray.count))
+            nTransparencyArray.append(contentsOf: [Float](repeating: nAlpha, count: nVertexArray.count))
         }
-        let vertexBuffer = device.makeBuffer(bytes: vertexArray,
-                                             length: vertexArray.count * MemoryLayout<Float>.size)
+        let vertexBuffer = device.makeBuffer(bytes: nVertexArray,
+                                             length: nVertexArray.count * MemoryLayout<Float>.size)
         let diameterPlusBlurSizeBuffer = device.makeBuffer(bytes: diameterPlusBlurSizeArray,
                                                            length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size)
         let transparencyBuffer = device.makeBuffer(bytes: nTransparencyArray,
@@ -46,7 +46,7 @@ extension MTLCommandBuffer {
         encoder?.setVertexBuffer(diameterPlusBlurSizeBuffer, offset: 0, index: 1)
         encoder?.setVertexBuffer(transparencyBuffer, offset: 0, index: 2)
         encoder?.setFragmentBytes(&blurSize, length: MemoryLayout<Float>.size, index: 0)
-        encoder?.drawPrimitives(type: .point, vertexStart: 0, vertexCount: vertexArray.count / 2)
+        encoder?.drawPrimitives(type: .point, vertexStart: 0, vertexCount: nVertexArray.count / 2)
         encoder?.endEncoding()
         return self
     }

@@ -8,6 +8,18 @@
 import CoreGraphics
 import SpriteKit
 extension CGVector {
+    var angleRadians: CGFloat {
+        return atan2(dy, dx)
+    }
+    var angleDegrees: CGFloat {
+        return angleRadians * 180.0 / .pi
+    }
+    var length: CGFloat {
+        return sqrt(pow(dx, 2) + pow(dy, 2))
+    }
+    var reversed: CGVector {
+        return CGVector(dx: self.dx * -1.0, dy: self.dy * -1.0)
+    }
     init(_ aPoint: CGPoint, to bPoint: CGPoint) {
         self.init(dx: bPoint.x - aPoint.x, dy: bPoint.y - aPoint.y)
     }
@@ -18,30 +30,6 @@ extension CGVector {
     }
     init(angleDegrees: CGFloat, length: CGFloat) {
         self.init(angleRadians: angleDegrees / 180.0 * .pi, length: length)
-    }
-    func reverse() -> CGVector {
-        return CGVector(dx: self.dx * -1.0, dy: self.dy * -1.0)
-    }
-    mutating func negate() {
-        dx *= -1
-        dy *= -1
-    }
-    func angleRadians() -> CGFloat {
-        return atan2(dy, dx)
-    }
-    func angleDegrees() -> CGFloat {
-        return angleRadians() * 180.0 / .pi
-    }
-    func length() -> CGFloat {
-        return sqrt(pow(dx, 2) + pow(dy, 2))
-    }
-    func normalized() -> CGVector {
-        let len = length()
-        return len > 0 ? self / len : CGVector.zero
-    }
-    mutating func normalize() -> CGVector {
-        self = normalized()
-        return self
     }
     func resizeTo(length: CGFloat) -> CGVector {
         var vector = self
@@ -68,7 +56,7 @@ extension CGVector {
         return self.dx * vector.dx + self.dy * vector.dy
     }
     func getRadian(_ vector: CGVector) -> CGFloat {
-        let divisor: CGFloat = self.length() * vector.length()
+        let divisor: CGFloat = self.length * vector.length
         return divisor != 0 ? acos(dotProduct(vector) / divisor) : 0.0
     }
 }
