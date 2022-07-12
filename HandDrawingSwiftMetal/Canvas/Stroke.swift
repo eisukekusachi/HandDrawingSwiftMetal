@@ -15,7 +15,6 @@ struct Stroke {
     private var drawnIndex: Int = 0
     private var isFirstCurveDrawn: Bool = false
     private var atTouchesEnded: Bool = false
-    private let minimumDistance: CGFloat = 1.0
     var firstCurve: PointsWithValues? {
         if smoothPoints.count >= 3,
            let points = smoothPoints.get3Points(indices: 0, 1, 2),
@@ -67,7 +66,7 @@ struct Stroke {
         if touchesInTexture.points.count == 0 {
             smoothPoints.append(point: pointInTexture)
             touchesInTexture.append(point: pointInTexture)
-        } else if getDistanceFromLastPoint(touchesInTexture.points, pointInTexture) > minimumDistance {
+        } else {
             touchesInTexture.append(point: pointInTexture)
         }
         self.atTouchesEnded = atTouchesEnded
@@ -77,7 +76,7 @@ struct Stroke {
         if touchesInTexture.points.count == 0 {
             smoothPoints.append(point: pointInTexture, pressureValue: pressureValue)
             touchesInTexture.append(point: pointInTexture, pressureValue: pressureValue)
-        } else if getDistanceFromLastPoint(touchesInTexture.points, pointInTexture) > minimumDistance {
+        } else {
             touchesInTexture.append(point: pointInTexture, pressureValue: pressureValue)
         }
         self.atTouchesEnded = atTouchesEnded
@@ -131,10 +130,6 @@ struct Stroke {
         if atTouchesEnded {
             if let lastCurve = lastCurve {
                 curveWithShade.append(lastCurve)
-            }
-            // For a dot, alpha is set to 1.0.
-            if curveWithShade.count == 1 {
-                curveWithShade.values = [1.0]
             }
         }
     }
