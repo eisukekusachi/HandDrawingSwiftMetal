@@ -7,6 +7,7 @@
 
 import UIKit
 struct Stroke {
+    var touchType: UITouch.TouchType?
     private (set) var touchesInTexture = PointsWithValues()
     private (set) var smoothPoints = PointsWithValues()
     private (set) var curveWithShade = PointsWithValues()
@@ -15,6 +16,7 @@ struct Stroke {
     private var drawnIndex: Int = 0
     private var isFirstCurveDrawn: Bool = false
     private var atTouchesEnded: Bool = false
+    private var ignoreTouchCount: Int = 0
     var firstCurve: PointsWithValues? {
         if smoothPoints.count >= 3,
            let points = smoothPoints.get3Points(indices: 0, 1, 2),
@@ -72,6 +74,12 @@ struct Stroke {
         self.atTouchesEnded = atTouchesEnded
     }
     mutating func append(pointInScreen: CGPoint, pressureValue: CGFloat, ratioOfScreenToTexture: CGFloat, atTouchesEnded: Bool = false) {
+        if touchType == .pencil {
+            ignoreTouchCount += 1
+            if ignoreTouchCount <= 5 {
+                return
+            }
+        }
         let pointInTexture = pointInScreen.multiplied(ratioOfScreenToTexture)
         if touchesInTexture.points.count == 0 {
             smoothPoints.append(point: pointInTexture, pressureValue: pressureValue)

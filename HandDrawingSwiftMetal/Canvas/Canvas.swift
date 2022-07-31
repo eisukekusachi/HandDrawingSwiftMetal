@@ -81,6 +81,7 @@ class Canvas: MTKView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if stroke == nil {
             stroke = Stroke()
+            stroke?.touchType = event?.allTouches?.first?.type
         }
         guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
         stroke?.append(pointInScreen: screenPointWithValue.0,
