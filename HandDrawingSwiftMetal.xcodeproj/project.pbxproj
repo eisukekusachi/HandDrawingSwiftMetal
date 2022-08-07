@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D4B0C0A4289F610500A4FD7C /* UITouchExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B0C0A3289F610500A4FD7C /* UITouchExtension.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
 		D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* ViewController.swift */; };
@@ -26,7 +27,6 @@
 		D4E1ED1E2752588500D4A23D /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */; };
 		D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */; };
 		D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ED2127525F1700D4A23D /* Interpolation.swift */; };
-		D4ECA5662867FA1700059573 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ECA5652867FA1700059573 /* Utils.swift */; };
 		D4F87D20279BF61B00906241 /* CGFloatExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */; };
 		D4FA2DEB285EF3B600CFE72D /* Stroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FA2DEA285EF3B600CFE72D /* Stroke.swift */; };
 		D4FF50A127AE0F4200BFC3E5 /* Calc.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FF50A027AE0F4200BFC3E5 /* Calc.swift */; };
@@ -50,6 +50,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D4B0C0A3289F610500A4FD7C /* UITouchExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchExtension.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -73,7 +74,6 @@
 		D4E1ED1D2752588500D4A23D /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 		D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVectorExtension.swift; sourceTree = "<group>"; };
 		D4E1ED2127525F1700D4A23D /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
-		D4ECA5652867FA1700059573 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGFloatExtension.swift; sourceTree = "<group>"; };
 		D4FA2DEA285EF3B600CFE72D /* Stroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stroke.swift; sourceTree = "<group>"; };
 		D4FF50A027AE0F4200BFC3E5 /* Calc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calc.swift; sourceTree = "<group>"; };
@@ -109,7 +109,6 @@
 			children = (
 				D4E1ED2127525F1700D4A23D /* Interpolation.swift */,
 				D4FF50A027AE0F4200BFC3E5 /* Calc.swift */,
-				D4ECA5652867FA1700059573 /* Utils.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -176,6 +175,7 @@
 				D4E1ED1F27525AA200D4A23D /* CGVectorExtension.swift */,
 				D4F87D1F279BF61B00906241 /* CGFloatExtension.swift */,
 				D4E1ED1B2752584700D4A23D /* ArrayExtension.swift */,
+				D4B0C0A3289F610500A4FD7C /* UITouchExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -353,9 +353,9 @@
 				D4E1ED12275251AD00D4A23D /* Texture.metal in Sources */,
 				D4E1ED2227525F1700D4A23D /* Interpolation.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
+				D4B0C0A4289F610500A4FD7C /* UITouchExtension.swift in Sources */,
 				D4E1ED2027525AA200D4A23D /* CGVectorExtension.swift in Sources */,
 				D4E1ED102752519900D4A23D /* Drawing.metal in Sources */,
-				D4ECA5662867FA1700059573 /* Utils.swift in Sources */,
 				D4E1ED162752521000D4A23D /* MTLDeviceExtension.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D4E1ED0E2752507100D4A23D /* Canvas.swift in Sources */,

@@ -83,15 +83,15 @@ class Canvas: MTKView {
             stroke = Stroke()
             stroke?.touchType = event?.allTouches?.first?.type
         }
-        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
-        stroke?.append(pointInScreen: screenPointWithValue.0,
-                       pressureValue: screenPointWithValue.1,
+        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
+        stroke?.append(pointInScreen: screenPointAndPressure.0,
+                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
                        ratioOfScreenToTexture: ratioOfScreenToTexture)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
-        stroke?.append(pointInScreen: screenPointWithValue.0,
-                       pressureValue: screenPointWithValue.1,
+        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
+        stroke?.append(pointInScreen: screenPointAndPressure.0,
+                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
                        ratioOfScreenToTexture: ratioOfScreenToTexture)
         stroke?.makeCurve()
         if let curveWithShade = stroke?.latestCurveWithShade() {
@@ -102,9 +102,9 @@ class Canvas: MTKView {
         }
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointWithValue = Utils.getTouchPointWithPressure(touch: event?.allTouches?.first, view: self) else { return }
-        stroke?.append(pointInScreen: screenPointWithValue.0,
-                       pressureValue: screenPointWithValue.1,
+        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
+        stroke?.append(pointInScreen: screenPointAndPressure.0,
+                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
                        ratioOfScreenToTexture: ratioOfScreenToTexture,
                        atTouchesEnded: true)
         stroke?.makeCurve()
@@ -182,6 +182,11 @@ class Canvas: MTKView {
     }
     private func refreshMTKView() {
         refreshMTKViewFlag = true
+    }
+    private func getOptimizedPressureValue(_ pressure: CGFloat) -> CGFloat {
+        let amplifier = 3.0
+        let t = min(pressure * amplifier, 1.0)
+        return t * t * (3 - 2 * t)
     }
 }
 extension Canvas: MTKViewDelegate {
