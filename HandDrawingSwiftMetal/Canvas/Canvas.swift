@@ -171,7 +171,7 @@ class Canvas: MTKView {
         commandBuffer.fill(cpFill, nRgb: (1.0, 1.0, 1.0), to: displayTexture)
         if tool == 0 {
             commandBuffer
-                .merge(cpMerge, [drawingTexture, currentTexture], to: displayTexture)
+                .merge(cpMerge, [currentTexture, drawingTexture], to: displayTexture)
         } else {
             commandBuffer
                 .copy(cpCopy, currentTexture, to: tmpTexture)
