@@ -7,33 +7,58 @@
 
 import UIKit
 import MetalKit
-class Canvas: MTKView {
-    var tool: Int = 0
-    var brushDiameter: Float = 2.0
-    var eraserDiameter: Float = 32.0
-    private (set) var drawingTexture: MTLTexture?
-    private var stroke: Stroke?
-    private var nBrushRgb: (Float, Float, Float) = (0.0, 0.0, 0.0)
-    private var nBrushAlpha: Float = 1.0
-    private var nEraserAlpha: Float = 1.0
-    private var textureSize: CGSize = .zero
-    private var ratioOfScreenToTexture: CGFloat = 1.0
-    // MetalKit
-    private var commandQueue: MTLCommandQueue!
-    private var displayTexture: MTLTexture?
-    private var grayscaleTexture: MTLTexture?
-    private var currentTexture: MTLTexture?
-    private var tmpTexture: MTLTexture?
-    private var psDrawGrayPointsMaxOneOne: MTLRenderPipelineState?
-    private var psDrawTexture: MTLRenderPipelineState?
-    private var psColorizeGrayscaleTexture: MTLComputePipelineState?
-    private var psEraser: MTLRenderPipelineState?
-    private var cpMerge: MTLComputePipelineState?
-    private var cpFill: MTLComputePipelineState?
-    private var cpCopy: MTLComputePipelineState?
-    private var refreshMTKViewFlag: Bool = false
-    private var runOnce: Bool = false
-    // MARK: - Inialize
+
+protocol CanvasDrawingProtocol {
+    
+    var mtlDevice: MTLDevice? { get }
+    
+    var commandBuffer: MTLCommandBuffer? { get }
+    
+    var size: CGSize { get }
+    var drawingMatrix: CGAffineTransform? { get }
+    var currentTexture: MTLTexture? { get }
+    
+    func refreshDisplayTexture(using textures: [MTLTexture?])
+}
+
+protocol CanvasDelegate: AnyObject {
+    
+    func completeTextureSizeDetermination(_ canvas: Canvas)
+}
+
+class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
+    
+    weak var canvasDelegate: CanvasDelegate?
+    
+    var mtlDevice: MTLDevice? {
+        return self.device
+    }
+    var size: CGSize {
+        return frame.size
+    }
+    var commandBuffer: MTLCommandBuffer? {
+        return commandQueue.getBuffer()
+    }
+    
+    var commandQueue: CommandQueue!
+    
+    var drawing: Drawing = BrushDrawing()
+    var transforming: Transforming = TransformingImpl()
+    
+    var matrix: CGAffineTransform = CGAffineTransform.identity
+    var drawingMatrix: CGAffineTransform? {
+        return matrix.getInvertedValue(scale: Aspect.getScaleToFit(frame.size, to: textureSize))
+    }
+    
+    var textureSize: CGSize!
+    var displayTexture: MTLTexture?
+    var currentTexture: MTLTexture?
+    
+    private var defaultFingerInput: FingerGestureRecognizer!
+    private var defaultFingerPoints: SmoothPointStorage?
+    
+    private var displayLink: CADisplayLink?
+    
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()
@@ -43,161 +68,179 @@ class Canvas: MTKView {
         commonInit()
     }
     private func commonInit() {
-        self.delegate = self
         self.device = MTLCreateSystemDefaultDevice()
-        self.commandQueue = device?.makeCommandQueue()
-        initializePipelines()
-    }
-    private func initializePipelines() {
-        psDrawGrayPointsMaxOneOne = device?.maxOneOneRenderPipelineState("vDrawGrayPoints", "fDrawGrayPoints")
-        psDrawTexture = device?.oneOneminussrcalphaRenderPipelineState("vDrawTexture", "fDrawTexture")
-        psEraser = device?.zeroOneminussrcalphaRenderPipelineState("vDrawTexture", "fDrawTexture")
-        psColorizeGrayscaleTexture = device?.computePipielineState("cColorizeGrayscaleTexture")
-        cpFill = device?.computePipielineState("cFill")
-        cpMerge = device?.computePipielineState("cMerge")
-        cpCopy = device?.computePipielineState("cCopy")
-    }
-    private func initializeTexture(_ textureSize: CGSize) {
-        self.textureSize = textureSize
-        ratioOfScreenToTexture = textureSize.height / frame.height
-        grayscaleTexture = device?.makeTexture(textureSize)
-        drawingTexture = device?.makeTexture(textureSize)
-        currentTexture = device?.makeTexture(textureSize)
-        displayTexture = device?.makeTexture(textureSize)
-        tmpTexture = device?.makeTexture(textureSize)
-        commandQueue?.makeCommandBuffer()?
-            .clear(cpFill, [drawingTexture, currentTexture, tmpTexture, displayTexture])
-            .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
-            .commit()
+        let myCommandQueue = self.device!.makeCommandQueue()
+        assert(self.device != nil, "device is nil.")
+        assert(myCommandQueue != nil, "commandQueue is nil.")
+        
+        Pipeline.initalization(self.device!)
+        
+        commandQueue = CommandQueueImpl(queue: myCommandQueue!)
+        
+        defaultFingerPoints = SmoothPointStorage()
+        defaultFingerInput = FingerGestureRecognizer(output: self)
+        addGestureRecognizer(defaultFingerInput)
+        
+        displayLink = CADisplayLink(target: self, selector: #selector(displayLinkUpdate(_:)))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
+        
+        self.delegate = self
+        self.enableSetNeedsDisplay = true
+        self.autoResizeDrawable = true
+        self.isMultipleTouchEnabled = true
+        self.backgroundColor = .white
     }
     override func layoutSubviews() {
-        if !runOnce, let drawableSize = currentDrawable?.texture.size {
-            runOnce = true
-            initializeTexture(drawableSize)
-            refreshCanvas()
+        if  let drawableSize = currentDrawable?.texture.size,
+                displayTexture == nil {
+            
+            initalizeTextures(textureSize: drawableSize)
+            refreshDisplayTexture()
+            setNeedsDisplay()
+        }
+        
+        if  drawing.textureSize == .zero && self.textureSize != .zero {
+            drawing.initalizeTexturesForDrawing(self, textureSize: self.textureSize)
+            setNeedsDisplay()
         }
     }
-    // MARK: - Touch handling functions
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if stroke == nil {
-            stroke = Stroke()
-            stroke?.touchType = event?.allTouches?.first?.type
-        }
-        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
-        stroke?.append(pointInScreen: screenPointAndPressure.0,
-                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
-                       ratioOfScreenToTexture: ratioOfScreenToTexture)
+    
+    func initalizeTextures(textureSize: CGSize) {
+        let minSize: CGFloat = CGFloat(Command.threadgroupSize)
+        assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
+        
+        self.textureSize = textureSize
+        
+        displayTexture = Texture.makeTexture(device, textureSize)
+        currentTexture = Texture.makeTexture(device, textureSize)
+        
+        let commandBuffer = commandQueue.getBuffer()
+        
+        Command.clear(textures: [displayTexture,
+                                 currentTexture],
+                      to: commandBuffer)
+        
+        canvasDelegate?.completeTextureSizeDetermination(self)
     }
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
-        stroke?.append(pointInScreen: screenPointAndPressure.0,
-                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
-                       ratioOfScreenToTexture: ratioOfScreenToTexture)
-        stroke?.makeCurve()
-        if let curveWithShade = stroke?.latestCurveWithShade() {
-            drawPoints(nVertices: curveWithShade.points.vertexCoordinate(textureSize),
-                       nTransparencyValues: curveWithShade.values,
-                       on: drawingTexture)
-            refreshCanvas()
-        }
+    
+    func inject(drawing: Drawing) {
+        self.drawing = drawing
     }
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let screenPointAndPressure = event?.allTouches?.first?.getPointAndPressure(self) else { return }
-        stroke?.append(pointInScreen: screenPointAndPressure.0,
-                       pressureValue: getOptimizedPressureValue(screenPointAndPressure.1),
-                       ratioOfScreenToTexture: ratioOfScreenToTexture,
-                       atTouchesEnded: true)
-        stroke?.makeCurve()
-        if let curveWithShade = stroke?.latestCurveWithShade() {
-            drawPoints(nVertices: curveWithShade.points.vertexCoordinate(textureSize),
-                       nTransparencyValues: curveWithShade.values,
-                       on: drawingTexture)
-            mergeDrawingTextureToCurrentTexture()
-            refreshCanvas()
-        }
-        stroke = nil
+    
+    func prepareForNewDrawing() {
+        defaultFingerPoints?.reset()
+        
+        drawing.reset(self)
+        displayLink?.isPaused = true
     }
-    // MARK: - Methods for drawing
-    func drawPoints(nVertices: [CGPoint],
-                    nTransparencyValues: [CGFloat]? = nil,
-                    nRgb: (Float, Float, Float)? = nil,
-                    nAlpha: Float? = nil,
-                    diameter: Float? = nil,
-                    maxBlendingGrayscaleTexture maxGrayScaleTexture: MTLTexture? = nil,
-                    on resultTexture: MTLTexture?) {
-        if nVertices.count == 0 { return }
-        let maxBlendingGrayscaleTexture = maxGrayScaleTexture != nil ? maxGrayScaleTexture : grayscaleTexture
-        commandQueue?.makeCommandBuffer()?
-            .drawGrayPoints(psDrawGrayPointsMaxOneOne,
-                            nVertices: nVertices,
-                            nTransparencyValues: nTransparencyValues,
-                            nAlpha: nAlpha ?? (tool == 0 ? nBrushAlpha : nEraserAlpha),
-                            diameter: diameter ?? (tool == 0 ? brushDiameter : eraserDiameter),
-                            on: maxBlendingGrayscaleTexture)
-            .colorize(psColorizeGrayscaleTexture,
-                      grayscaleTexture: maxBlendingGrayscaleTexture,
-                      nRgb: nRgb ?? (tool == 0 ? nBrushRgb : (0, 0, 0)),
-                      to: resultTexture)
-            .commit()
+    func refreshDisplayTexture(using textures: [MTLTexture?] = []) {
+        let commandBuffer = commandQueue.getBuffer()
+        
+        Command.draw(onDisplayTexture: displayTexture,
+                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                     textures: textures,
+                     to: commandBuffer)
     }
-    func mergeDrawingTextureToCurrentTexture() {
-        guard let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
-        if tool == 0 {
-            commandBuffer
-                .merge(cpMerge, drawingTexture, to: currentTexture)
-        } else {
-            commandBuffer
-                .copy(cpCopy, currentTexture, to: tmpTexture)
-                .drawTexture(psEraser, drawingTexture, to: tmpTexture, flipY: true)
-                .copy(cpCopy, tmpTexture, to: currentTexture)
-        }
-        commandBuffer
-            .clear(cpFill, drawingTexture)
-            .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
-        commandBuffer.commit()
+    func draw(displayTexture: MTLTexture?,
+              onDrawable drawable: CAMetalDrawable,
+              to commandBuffer: MTLCommandBuffer?) {
+        
+        guard let displayTexture = displayTexture else { return }
+        
+        var canvasMatrix = matrix
+        canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
+        canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
+        
+        let textureBuffers = Buffers.makeTextureBuffers(device: device,
+                                                        textureSize: displayTexture.size,
+                                                        drawableSize: drawable.texture.size,
+                                                        matrix: canvasMatrix,
+                                                        nodes: textureNodes)
+        
+        Command.draw(texture: displayTexture,
+                     buffers: textureBuffers,
+                     on: drawable.texture,
+                     clearColor: (230, 230, 230),
+                     to: commandBuffer)
     }
-    func refreshCanvas() {
+    
+    func clear() {
+        let commandBuffer = commandQueue.getBuffer()
+        
+        Command.clear(textures: [displayTexture,
+                                 currentTexture],
+                      to: commandBuffer)
+        
         refreshDisplayTexture()
-        refreshMTKView()
     }
-    func clearAllTextures() {
-        commandQueue?.makeCommandBuffer()?
-            .clear(cpFill, [drawingTexture, currentTexture])
-            .fill(cpFill, nRgb: (0.0, 0.0, 0.0), to: grayscaleTexture)
-            .commit()
+    
+    func disableDefaultDrawing() {
+        defaultFingerInput.isEnabled = false
+        defaultFingerPoints = nil
     }
-    private func refreshDisplayTexture() {
-        guard let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
-        commandBuffer.fill(cpFill, nRgb: (1.0, 1.0, 1.0), to: displayTexture)
-        if tool == 0 {
-            commandBuffer
-                .merge(cpMerge, [currentTexture, drawingTexture], to: displayTexture)
+    
+    
+    // MARK: Displaylink
+    func setNeedsDisplayForDrawing(_ touchState: TouchState) {
+        
+        if touchState == .ended {
+            displayLink?.isPaused = true
+            setNeedsDisplay()
+            
         } else {
-            commandBuffer
-                .copy(cpCopy, currentTexture, to: tmpTexture)
-                .drawTexture(psEraser, drawingTexture, to: tmpTexture, flipY: true)
-                .merge(cpMerge, tmpTexture, to: displayTexture)
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
+            }
         }
-        commandBuffer.commit()
     }
-    private func refreshMTKView() {
-        refreshMTKViewFlag = true
+    @objc private func displayLinkUpdate(_ displayLink: CADisplayLink) {
+        setNeedsDisplay()
     }
-    private func getOptimizedPressureValue(_ pressure: CGFloat) -> CGFloat {
-        let amplifier = 3.0
-        let t = min(pressure * amplifier, 1.0)
-        return t * t * (3 - 2 * t)
-    }
-}
-extension Canvas: MTKViewDelegate {
+    
+    // MARK: MTKViewDelegate
     func draw(in view: MTKView) {
-        if !refreshMTKViewFlag { return } else { refreshMTKViewFlag = false }
-        guard   let drawable = view.currentDrawable,
-                let commandBuffer = commandQueue?.makeCommandBuffer() else { return }
-        commandBuffer.drawTexture(psDrawTexture, displayTexture, to: drawable.texture)
+        guard let drawable = view.currentDrawable else { return }
+        
+        let commandBuffer = commandQueue.getBuffer()
+        
+        draw(displayTexture: displayTexture,
+             onDrawable: drawable,
+             to: commandBuffer)
+        
         commandBuffer.present(drawable)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
+        
+        commandQueue.reset()
     }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+}
+
+// MARK: Drawing a line on the canvas.
+extension Canvas: FingerGestureRecognizerSender {
+    func sendLocations(_ gesture: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState) {
+        
+        defaultFingerPoints?.appendPoints(touchLocations)
+        
+        let iterator = defaultFingerPoints?.getIterator(endProcessing: touchState == .ended)
+        drawing.execute(iterator, endProcessing: touchState == .ended, toward: self)
+        
+        if touchState == .ended {
+            drawing.finishExecuting(self)
+            prepareForNewDrawing()
+        }
+        
+        drawing.refresh(self)
+        setNeedsDisplayForDrawing(touchState)
+    }
+    func cancel(_ gesture: FingerGestureRecognizer?) {
+        prepareForNewDrawing()
+    }
+}
+
+private extension MTLTexture {
+    var size: CGSize {
+        return CGSize(width: self.width, height: self.height)
+    }
 }
