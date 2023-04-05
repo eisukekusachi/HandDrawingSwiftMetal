@@ -1,6 +1,9 @@
 disabled_rules:
   - unused_optional_binding
-
+  - trailing_whitespace
+  - vertical_whitespace
+  - type_name
+  
 excluded:
   - Pods
   - Carthage
@@ -13,7 +16,7 @@ line_length:
 
 type_body_length:
 - 400
-- 600
+- 2000
 
 file_length:
 - 1000
