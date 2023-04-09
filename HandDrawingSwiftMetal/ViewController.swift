@@ -214,8 +214,8 @@ extension ViewController {
         }
         
         if let texture = canvas.displayTexture,
-           let data = Image.makeCFData(texture, flipY: true),
-           let image = Image.makeImage(cfData: data, width: texture.width, height: texture.height) {
+           let data = UIImage.makeCFData(texture, flipY: true),
+           let image = UIImage.makeImage(cfData: data, width: texture.width, height: texture.height) {
             
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }

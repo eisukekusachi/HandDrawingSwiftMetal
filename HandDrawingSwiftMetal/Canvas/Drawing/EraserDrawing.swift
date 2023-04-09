@@ -37,9 +37,9 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
             
-            self.drawingCellTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-            self.grayscaleTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-            self.eraserTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
+            self.drawingCellTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.eraserTexture = canvas.mtlDevice.makeTexture(textureSize)
         }
         
         clear()

@@ -10,7 +10,7 @@ import MetalKit
 
 protocol CanvasDrawingProtocol {
     
-    var mtlDevice: MTLDevice? { get }
+    var mtlDevice: MTLDevice { get }
     
     var commandBuffer: MTLCommandBuffer? { get }
     
@@ -28,8 +28,8 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
     
     weak var canvasDelegate: CanvasDelegate?
     
-    var mtlDevice: MTLDevice? {
-        return self.device
+    var mtlDevice: MTLDevice {
+        return self.device!
     }
     var size: CGSize {
         return frame.size
@@ -68,7 +68,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         assert(self.device != nil, "device is nil.")
         assert(myCommandQueue != nil, "commandQueue is nil.")
         
-        Pipeline.initalization(self.device!)
+        Pipeline.initalization(mtlDevice)
         
         commandQueue = CommandQueueImpl(queue: myCommandQueue!)
         
@@ -110,8 +110,8 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         
         self.textureSize = textureSize
         
-        displayTexture = Texture.makeTexture(device, textureSize)
-        currentTexture = Texture.makeTexture(device, textureSize)
+        displayTexture = mtlDevice.makeTexture(textureSize)
+        currentTexture = mtlDevice.makeTexture(textureSize)
         
         let commandBuffer = commandQueue.getBuffer()
         
@@ -176,7 +176,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
         
-        let textureBuffers = Buffers.makeTextureBuffers(device: device,
+        let textureBuffers = Buffers.makeTextureBuffers(device: mtlDevice,
                                                         textureSize: displayTexture.size,
                                                         drawableSize: drawable.texture.size,
                                                         matrix: canvasMatrix,

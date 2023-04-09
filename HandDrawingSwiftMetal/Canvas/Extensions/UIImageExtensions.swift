@@ -5,11 +5,10 @@
 //  Created by Eisuke Kusachi on 2023/04/05.
 //
 
-import Foundation
 import MetalKit
 import Accelerate
 
-enum Image {
+extension UIImage {
     
     static func makeCFData(_ texture: MTLTexture?, flipY: Bool = false) -> CFData? {
         guard let texture = texture else { return nil }
