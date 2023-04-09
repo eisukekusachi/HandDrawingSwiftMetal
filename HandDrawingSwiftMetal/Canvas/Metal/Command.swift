@@ -12,8 +12,8 @@ enum Command {
     
     static let threadgroupSize: Int = 16
 
-    static func drawCurve(onGrayscaleTexture texture: MTLTexture?,
-                          buffers: PointBuffers?,
+    static func drawCurve(buffers: PointBuffers?,
+                          onGrayscaleTexture texture: MTLTexture?,
                           to commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.drawGrayPoints != nil, "Call Pipeline.initalization() before here.")
@@ -35,17 +35,6 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func draw(onDisplayTexture displayTexture: MTLTexture?,
-                     backgroundColor: (Int, Int, Int),
-                     textures: [MTLTexture?],
-                     to commandBuffer: MTLCommandBuffer?) {
-        
-        fill(rgb: backgroundColor, dst: displayTexture, to: commandBuffer)
-        
-        merge(dst: displayTexture,
-              textures: textures,
-              to: commandBuffer)
-    }
     static func draw(texture: MTLTexture?,
                      buffers: TextureBuffers?,
                      on dst: MTLTexture?,
@@ -80,26 +69,10 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func makeEraserTexture(buffers: TextureBuffers?,
-                                  currentTexture: MTLTexture?,
-                                  currentDrawingTexture: MTLTexture?,
-                                  result eraserTexture: MTLTexture?,
-                                  to commandBuffer: MTLCommandBuffer?) {
-        
-        copy(src: currentTexture,
-             dst: eraserTexture,
-             to: commandBuffer)
-        
-        makeEraseTexture(buffers: buffers,
-                         src: currentDrawingTexture,
-                         result: eraserTexture,
-                         to: commandBuffer)
-    }
-    
-    private static func makeEraseTexture(buffers: TextureBuffers?,
-                                         src: MTLTexture?,
-                                         result dst: MTLTexture?,
-                                         to commandBuffer: MTLCommandBuffer?) {
+    static func makeEraseTexture(buffers: TextureBuffers?,
+                                 src: MTLTexture?,
+                                 result dst: MTLTexture?,
+                                 to commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.erase != nil, "Call Pipeline.initalization() before here.")
         
@@ -160,14 +133,14 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func fill(rgb: (Int, Int, Int), dst: MTLTexture?, to commandBuffer: MTLCommandBuffer?) {
+    static func fill(_ dst: MTLTexture?, withRGB rgb: (Int, Int, Int), to commandBuffer: MTLCommandBuffer?) {
         
-        fill(rgba: (rgb.0, rgb.1, rgb.2, 255),
-             dst: dst,
+        fill(dst,
+             withRGBA: (rgb.0, rgb.1, rgb.2, 255),
              to: commandBuffer)
     }
-    static func fill(rgba: (Int, Int, Int, Int),
-                     dst: MTLTexture?,
+    static func fill(_ dst: MTLTexture?,
+                     withRGBA rgba: (Int, Int, Int, Int),
                      to commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.fillColor != nil, "Call Pipeline.initalization() before here.")

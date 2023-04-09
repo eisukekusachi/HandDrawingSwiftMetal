@@ -8,40 +8,48 @@
 import Foundation
 import MetalKit
 
-class BrushDrawing: Drawing {
+class BrushDrawingLayer: CanvasDrawingLayer {
     
     var brush = Brush()
     
     var textureSize: CGSize = .zero
     
-    private var grayscaleTexture: MTLTexture?
-    private var drawingTexture: MTLTexture?
+    var canvas: CanvasDrawingProtocol
     
-    func initalizeTexturesForDrawing(_ canvas: Canvas, textureSize: CGSize) {
-        self.textureSize = textureSize
-        
-        self.grayscaleTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-        self.drawingTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-        
-        reset(canvas)
+    var currentLayer: [MTLTexture?] {
+        return [canvas.currentLayer,
+                drawingCellTexture]
     }
     
-    func execute(_ iterator: Iterator<Point>?, endProcessing: Bool, toward canvas: CanvasDrawingProtocol) {
-        guard let iterator = iterator else { return }
-        assert(drawingTexture != nil, "Call initalizeTexturesForDrawing() after the texture size has been determined.")
+    private var drawingCellTexture: MTLTexture!
+    private var grayscaleTexture: MTLTexture!
+    
+    required init(canvas: CanvasDrawingProtocol) {
+        self.canvas = canvas
+    }
+    func initalizeTextures(textureSize: CGSize) {
         
+        if self.textureSize != textureSize {
+            self.textureSize = textureSize
+            
+            self.drawingCellTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
+        }
+        
+        clear()
+    }
+    
+    func drawOnCellTexture(_ iterator: Iterator<Point>, touchState: TouchState) {
+        assert(textureSize != .zero, "Call initalizeTextures() once before here.")
+        
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.size, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,
-                                      matrix: canvas.drawingMatrix,
+                                      matrix: inverseMatrix,
                                       srcSize: canvas.size,
                                       dstSize: textureSize,
-                                      endProcessing: endProcessing)
+                                      endProcessing: touchState == .ended)
         
-        if points.count == 0 { return }
-        
-        guard let grayscaleTexture = grayscaleTexture,
-              let drawingTexture = drawingTexture else { return }
-        
-        let textureSize = CGSize(width: grayscaleTexture.width, height: grayscaleTexture.height)
+        guard points.count != 0 else { return }
         
         let pointBuffers = Buffers.makePointBuffers(device: canvas.mtlDevice,
                                                     points: points,
@@ -49,31 +57,26 @@ class BrushDrawing: Drawing {
                                                     alpha: brush.alpha,
                                                     textureSize: textureSize)
         
-        Command.drawCurve(onGrayscaleTexture: grayscaleTexture,
-                          buffers: pointBuffers,
+        Command.drawCurve(buffers: pointBuffers,
+                          onGrayscaleTexture: grayscaleTexture,
                           to: canvas.commandBuffer)
         
         Command.colorize(grayscaleTexture: grayscaleTexture,
                          with: brush.rgb,
-                         result: drawingTexture,
+                         result: drawingCellTexture,
                          to: canvas.commandBuffer)
     }
-    func finishExecuting(_ canvas: CanvasDrawingProtocol) {
-        if grayscaleTexture == nil || drawingTexture == nil { return }
+    func mergeCellTextureIntoCurrentLayer() {
         
-        Command.merge(dst: canvas.currentTexture,
-                      texture: drawingTexture,
+        Command.merge(dst: canvas.currentLayer,
+                      texture: drawingCellTexture,
                       to: canvas.commandBuffer)
         
-        reset(canvas)
+        clear()
     }
-    func refresh(_ canvas: CanvasDrawingProtocol) {
-        canvas.refreshDisplayTexture(using: [canvas.currentTexture, drawingTexture])
-    }
-    
-    func reset(_ canvas: CanvasDrawingProtocol) {
+    func clear() {
         
-        Command.clear(texture: drawingTexture, to: canvas.commandBuffer)
-        Command.fill(rgb: (0, 0, 0), dst: grayscaleTexture, to: canvas.commandBuffer)
+        Command.clear(texture: drawingCellTexture, to: canvas.commandBuffer)
+        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), to: canvas.commandBuffer)
     }
 }

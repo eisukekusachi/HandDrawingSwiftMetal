@@ -5,25 +5,20 @@
 //  Created by Eisuke Kusachi on 2022/12/25.
 //
 
-import Foundation
 import MetalKit
 import Accelerate
 
-enum Texture {
+extension MTLDevice {
     
-    static func makeTexture(_ device: MTLDevice?, _ size: CGSize) -> MTLTexture? {
-        guard let device = device else {
-            return nil
-        }
-        
+    func makeTexture(_ size: CGSize) -> MTLTexture? {
         let (w, h) = (Int(size.width), Int(size.height))
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: w, height: h, mipmapped: false)
         descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        return device.makeTexture(descriptor: descriptor)
+        return self.makeTexture(descriptor: descriptor)
     }
     
-    static func makeTexture(_ device: MTLDevice?, _ imageName: String) -> MTLTexture? {
-        guard let device = device, let image = UIImage(named: imageName)?.cgImage else {
+    func makeTexture(_ imageName: String) -> MTLTexture? {
+        guard let image = UIImage(named: imageName)?.cgImage else {
             return nil
         }
         
@@ -55,7 +50,7 @@ enum Texture {
         
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: w, height: h, mipmapped: false)
         textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = device.makeTexture(descriptor: textureDescriptor)
+        let texture = self.makeTexture(descriptor: textureDescriptor)
         texture?.replace(region: MTLRegionMake2D(0, 0, w, h),
                          mipmapLevel: 0,
                          slice: 0,
@@ -68,8 +63,8 @@ enum Texture {
         return texture
     }
     
-    static func makeTexture(_ device: MTLDevice?, _ size: CGSize, _ array: [UInt8]?) -> MTLTexture? {
-        guard let device = device, let array = array else {
+    func makeTexture(_ size: CGSize, _ array: [UInt8]?) -> MTLTexture? {
+        guard let array = array else {
             return nil
         }
         
@@ -79,7 +74,7 @@ enum Texture {
         let bytesPerRow = bytesPerPixel * width
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
         textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = device.makeTexture(descriptor: textureDescriptor)
+        let texture = self.makeTexture(descriptor: textureDescriptor)
         texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
                          mipmapLevel: 0,
                          slice: 0,

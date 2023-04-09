@@ -24,8 +24,8 @@ class ViewController: UIViewController {
     private var pencilPoints = DefaultPointStorage()
     private var fingerPoints = SmoothPointStorage()
     
-    private var brushDrawing = BrushDrawing()
-    private var eraserDrawing = EraserDrawing()
+    private lazy var brushDrawing = BrushDrawingLayer(canvas: canvas)
+    private lazy var eraserDrawing = EraserDrawingLayer(canvas: canvas)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +43,7 @@ class ViewController: UIViewController {
         
         canvas.canvasDelegate = self
         
-        canvas.inject(drawing: brushDrawing)
+        canvas.inject(drawingLayer: brushDrawing)
         let pencilInput = PencilGestureRecognizer(output: self)
         let fingerInput = FingerGestureRecognizer(output: self,
                                                   is3DTouchAvailable: traitCollection.forceTouchCapability == .available)
@@ -78,6 +78,13 @@ class ViewController: UIViewController {
         canvas.setNeedsDisplay()
     }
 }
+extension ViewController: CanvasDelegate {
+    func completedTextureInitialization(_ canvas: Canvas) {
+        
+        brushDrawing.initalizeTextures(textureSize: canvas.textureSize)
+        eraserDrawing.initalizeTextures(textureSize: canvas.textureSize)
+    }
+}
 
 extension ViewController: PencilGestureRecognizerSender {
     func sendLocations(_ gesture: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
@@ -96,15 +103,15 @@ extension ViewController: PencilGestureRecognizerSender {
         pencilPoints.appendPoints(touchLocations)
         
         let iterator = pencilPoints.getIterator(endProcessing: touchState == .ended)
-        canvas.drawing.execute(iterator, endProcessing: touchState == .ended, toward: canvas)
+        canvas.drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
         
         if touchState == .ended {
-            canvas.drawing.finishExecuting(canvas)
+            canvas.drawingLayer.mergeCellTextureIntoCurrentLayer()
             canvas.prepareForNewDrawing()
         }
         
-        canvas.drawing.refresh(canvas)
-        canvas.setNeedsDisplayForDrawing(touchState)
+        canvas.refreshDisplayTexture()
+        canvas.setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: touchState == .ended)
         
         if touchState == .ended {
             inputManager.reset()
@@ -134,15 +141,15 @@ extension ViewController: FingerGestureRecognizerSender {
         if actionStateManager.currentState == .drawingOnCanvas {
             
             let iterator = fingerPoints.getIterator(endProcessing: touchState == .ended)
-            canvas.drawing.execute(iterator, endProcessing: touchState == .ended, toward: canvas)
+            canvas.drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
             
             if touchState == .ended {
-                canvas.drawing.finishExecuting(canvas)
+                canvas.drawingLayer.mergeCellTextureIntoCurrentLayer()
                 canvas.prepareForNewDrawing()
             }
             
-            canvas.drawing.refresh(canvas)
-            canvas.setNeedsDisplayForDrawing(touchState)
+            canvas.refreshDisplayTexture()
+            canvas.setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: touchState == .ended)
         }
         
         if actionStateManager.currentState == .transformingCanvas {
@@ -171,14 +178,6 @@ extension ViewController: FingerGestureRecognizerSender {
         cancelOperation()
     }
 }
-extension ViewController: CanvasDelegate {
-    func completeTextureSizeDetermination(_ canvas: Canvas) {
-        
-        brushDrawing.initalizeTexturesForDrawing(canvas, textureSize: canvas.textureSize)
-        eraserDrawing.initalizeTexturesForDrawing(canvas, textureSize: canvas.textureSize)
-    }
-}
-
 
 extension ViewController {
     @IBAction func pushResetTransform(_ sender: UIButton) {
@@ -189,20 +188,20 @@ extension ViewController {
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
         brushDrawing.brush.setValue(rgb: (0, 0, 0))
-        canvas.inject(drawing: brushDrawing)
+        canvas.inject(drawingLayer: brushDrawing)
         
         diameterSlider.value = Float(brushDrawing.brush.diameter) / Float(Brush.maxDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
         brushDrawing.brush.setValue(rgb: (255, 0, 0))
-        canvas.inject(drawing: brushDrawing)
+        canvas.inject(drawingLayer: brushDrawing)
         
         diameterSlider.value = Float(brushDrawing.brush.diameter) / Float(Brush.maxDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
         eraserDrawing.eraser.setValue(alpha: 200)
-        canvas.inject(drawing: eraserDrawing)
+        canvas.inject(drawingLayer: eraserDrawing)
         
         diameterSlider.value = Float(eraserDrawing.eraser.diameter) / Float(Eraser.maxDiameter)
     }
@@ -215,8 +214,8 @@ extension ViewController {
         }
         
         if let texture = canvas.displayTexture,
-           let data = Image.makeCFData(texture, flipY: true),
-           let image = Image.makeImage(cfData: data, width: texture.width, height: texture.height) {
+           let data = UIImage.makeCFData(texture, flipY: true),
+           let image = UIImage.makeImage(cfData: data, width: texture.width, height: texture.height) {
             
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
@@ -233,14 +232,14 @@ extension ViewController {
         canvas.setNeedsDisplay()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
-        if canvas.drawing is BrushDrawing {
+        if canvas.drawingLayer is BrushDrawingLayer {
             let difference: Float = Float(Brush.maxDiameter - Brush.minDiameter)
             let value: Int = Int(difference * sender.value) + Brush.minDiameter
             
             brushDrawing.brush.diameter = value
         }
         
-        if canvas.drawing is EraserDrawing {
+        if canvas.drawingLayer is EraserDrawingLayer {
             let difference: Float = Float(Eraser.maxDiameter - Eraser.minDiameter)
             let value: Int = Int(difference * sender.value) + Eraser.minDiameter
             

@@ -8,49 +8,54 @@
 import Foundation
 import MetalKit
 
-class EraserDrawing: Drawing {
+class EraserDrawingLayer: CanvasDrawingLayer {
     
     var eraser = Eraser()
     
     var textureSize: CGSize = .zero
     
-    private var grayscaleTexture: MTLTexture?
-    private var drawingTexture: MTLTexture?
-    private var eraserTexture: MTLTexture?
+    var canvas: CanvasDrawingProtocol
     
-    private var showEraserTexture: Bool = false
+    var currentLayer: [MTLTexture?] {
+        return isDrawing ? [eraserTexture] : [canvas.currentLayer]
+    }
+    
+    private var drawingCellTexture: MTLTexture!
+    private var grayscaleTexture: MTLTexture!
+    private var eraserTexture: MTLTexture!
     
     private var flippedTextureBuffers: TextureBuffers?
     
-    func initalizeTexturesForDrawing(_ canvas: Canvas, textureSize: CGSize) {
-        self.textureSize = textureSize
-        
+    private var isDrawing: Bool = false
+    
+    required init(canvas: CanvasDrawingProtocol) {
+        self.canvas = canvas
         self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
+    }
+    func initalizeTextures(textureSize: CGSize) {
         
-        self.grayscaleTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-        self.drawingTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
-        self.eraserTexture = Texture.makeTexture(canvas.mtlDevice, textureSize)
+        if self.textureSize != textureSize {
+            self.textureSize = textureSize
+            
+            self.drawingCellTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.eraserTexture = canvas.mtlDevice.makeTexture(textureSize)
+        }
         
-        reset(canvas)
+        clear()
     }
     
-    func execute(_ iterator: Iterator<Point>?, endProcessing: Bool, toward canvas: CanvasDrawingProtocol) {
-        guard let iterator = iterator else { return }
-        assert(drawingTexture != nil, "Call initalizeTexturesForDrawing() after the texture size has been determined.")
+    func drawOnCellTexture(_ iterator: Iterator<Point>, touchState: TouchState) {
+        assert(textureSize != .zero, "Call initalizeTextures() once before here.")
         
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.size, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,
-                                      matrix: canvas.drawingMatrix,
+                                      matrix: inverseMatrix,
                                       srcSize: canvas.size,
                                       dstSize: textureSize,
-                                      endProcessing: endProcessing)
+                                      endProcessing: touchState == .ended)
         
-        if points.count == 0 { return }
-        
-        
-        guard let grayscaleTexture = grayscaleTexture,
-              let drawingTexture = drawingTexture else { return }
-        
-        let textureSize = CGSize(width: grayscaleTexture.width, height: grayscaleTexture.height)
+        guard points.count != 0 else { return }
         
         let pointBuffers = Buffers.makePointBuffers(device: canvas.mtlDevice,
                                                     points: points,
@@ -58,48 +63,49 @@ class EraserDrawing: Drawing {
                                                     alpha: eraser.alpha,
                                                     textureSize: textureSize)
         
-        Command.drawCurve(onGrayscaleTexture: grayscaleTexture,
-                          buffers: pointBuffers,
+        Command.drawCurve(buffers: pointBuffers,
+                          onGrayscaleTexture: grayscaleTexture,
                           to: canvas.commandBuffer)
         
         Command.colorize(grayscaleTexture: grayscaleTexture,
                          with: (0, 0, 0),
-                         result: drawingTexture,
+                         result: drawingCellTexture,
                          to: canvas.commandBuffer)
         
-        Command.makeEraserTexture(buffers: flippedTextureBuffers,
-                                  currentTexture: canvas.currentTexture,
-                                  currentDrawingTexture: drawingTexture,
-                                  result: eraserTexture,
-                                  to: canvas.commandBuffer)
-        
-        showEraserTexture = true
-    }
-    func finishExecuting(_ canvas: CanvasDrawingProtocol) {
-        if grayscaleTexture == nil || drawingTexture == nil { return }
-        
-        Command.makeEraserTexture(buffers: flippedTextureBuffers,
-                                  currentTexture: canvas.currentTexture,
-                                  currentDrawingTexture: drawingTexture,
-                                  result: eraserTexture,
-                                  to: canvas.commandBuffer)
-        
-        Command.copy(src: eraserTexture,
-                     dst: canvas.currentTexture,
+        Command.copy(src: canvas.currentLayer,
+                     dst: eraserTexture,
                      to: canvas.commandBuffer)
         
-        reset(canvas)
+        Command.makeEraseTexture(buffers: flippedTextureBuffers,
+                                 src: drawingCellTexture,
+                                 result: eraserTexture,
+                                 to: canvas.commandBuffer)
         
-        showEraserTexture = false
+        isDrawing = true
     }
-    func refresh(_ canvas: CanvasDrawingProtocol) {
-        canvas.refreshDisplayTexture(using: [showEraserTexture ? eraserTexture : canvas.currentTexture])
-    }
-    
-    func reset(_ canvas: CanvasDrawingProtocol) {
+    func mergeCellTextureIntoCurrentLayer() {
         
-        Command.clear(texture: drawingTexture, to: canvas.commandBuffer)
-        Command.clear(texture: eraserTexture, to: canvas.commandBuffer)
-        Command.fill(rgb: (0, 0, 0), dst: grayscaleTexture, to: canvas.commandBuffer)
+        Command.copy(src: canvas.currentLayer,
+                     dst: eraserTexture,
+                     to: canvas.commandBuffer)
+        
+        Command.makeEraseTexture(buffers: flippedTextureBuffers,
+                                 src: drawingCellTexture,
+                                 result: eraserTexture,
+                                 to: canvas.commandBuffer)
+        
+        Command.copy(src: eraserTexture,
+                     dst: canvas.currentLayer,
+                     to: canvas.commandBuffer)
+        
+        clear()
+        
+        isDrawing = false
+    }
+    func clear() {
+        
+        Command.clear(textures: [eraserTexture,
+                                 drawingCellTexture], to: canvas.commandBuffer)
+        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), to: canvas.commandBuffer)
     }
 }

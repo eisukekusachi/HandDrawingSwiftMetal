@@ -10,28 +10,30 @@ import MetalKit
 
 protocol CanvasDrawingProtocol {
     
-    var mtlDevice: MTLDevice? { get }
+    var mtlDevice: MTLDevice { get }
     
     var commandBuffer: MTLCommandBuffer? { get }
     
     var size: CGSize { get }
-    var drawingMatrix: CGAffineTransform? { get }
-    var currentTexture: MTLTexture? { get }
-    
-    func refreshDisplayTexture(using textures: [MTLTexture?])
+    var matrix: CGAffineTransform { get }
+    var currentLayer: MTLTexture { get }
 }
-
+protocol CanvasTextureLayerProtocol {
+    
+    var mtlDevice: MTLDevice { get }
+    var commandBuffer: MTLCommandBuffer? { get }
+}
 protocol CanvasDelegate: AnyObject {
     
-    func completeTextureSizeDetermination(_ canvas: Canvas)
+    func completedTextureInitialization(_ canvas: Canvas)
 }
 
-class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
+class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLayerProtocol {
     
     weak var canvasDelegate: CanvasDelegate?
     
-    var mtlDevice: MTLDevice? {
-        return self.device
+    var mtlDevice: MTLDevice {
+        return self.device!
     }
     var size: CGSize {
         return frame.size
@@ -39,23 +41,24 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
     var commandBuffer: MTLCommandBuffer? {
         return commandQueue.getBuffer()
     }
+    var currentLayer: MTLTexture {
+        return layers.currentLayer
+    }
     
     var commandQueue: CommandQueue!
     
-    var drawing: Drawing = BrushDrawing()
+    lazy var drawingLayer: CanvasDrawingLayer = BrushDrawingLayer(canvas: self)
     var transforming: Transforming = TransformingImpl()
     
     var matrix: CGAffineTransform = CGAffineTransform.identity
-    var drawingMatrix: CGAffineTransform? {
-        return matrix.getInvertedValue(scale: Aspect.getScaleToFit(frame.size, to: textureSize))
-    }
     
     var textureSize: CGSize!
-    var displayTexture: MTLTexture?
-    var currentTexture: MTLTexture?
+    var displayTexture: MTLTexture!
     
-    private var defaultFingerInput: FingerGestureRecognizer!
-    private var defaultFingerPoints: SmoothPointStorage?
+    private lazy var layers: CanvasLayers = DefaultLayers(canvas: self)
+    
+    private lazy var defaultFingerInput: FingerGestureRecognizer = FingerGestureRecognizer(output: self)
+    private lazy var defaultFingerPoints: SmoothPointStorage? = SmoothPointStorage()
     
     private var displayLink: CADisplayLink?
     
@@ -73,15 +76,11 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         assert(self.device != nil, "device is nil.")
         assert(myCommandQueue != nil, "commandQueue is nil.")
         
-        Pipeline.initalization(self.device!)
+        Pipeline.initalization(mtlDevice)
         
         commandQueue = CommandQueueImpl(queue: myCommandQueue!)
         
-        defaultFingerPoints = SmoothPointStorage()
-        defaultFingerInput = FingerGestureRecognizer(output: self)
-        addGestureRecognizer(defaultFingerInput)
-        
-        displayLink = CADisplayLink(target: self, selector: #selector(displayLinkUpdate(_:)))
+        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
         displayLink?.add(to: .current, forMode: .common)
         displayLink?.isPaused = true
         
@@ -90,20 +89,27 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         self.autoResizeDrawable = true
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
+        
+        self.addGestureRecognizer(defaultFingerInput)
     }
+    func disableDefaultDrawing() {
+        defaultFingerInput.isEnabled = false
+        defaultFingerPoints = nil
+    }
+    
     override func layoutSubviews() {
         if  let drawableSize = currentDrawable?.texture.size,
                 displayTexture == nil {
             
             initalizeTextures(textureSize: drawableSize)
-            refreshDisplayTexture()
-            setNeedsDisplay()
         }
         
-        if  drawing.textureSize == .zero && self.textureSize != .zero {
-            drawing.initalizeTexturesForDrawing(self, textureSize: self.textureSize)
-            setNeedsDisplay()
+        if  drawingLayer.textureSize == .zero && self.textureSize != .zero {
+            drawingLayer.initalizeTextures(textureSize: self.textureSize)
         }
+        
+        refreshDisplayTexture()
+        setNeedsDisplay()
     }
     
     func initalizeTextures(textureSize: CGSize) {
@@ -112,101 +118,72 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         
         self.textureSize = textureSize
         
-        displayTexture = Texture.makeTexture(device, textureSize)
-        currentTexture = Texture.makeTexture(device, textureSize)
+        displayTexture = mtlDevice.makeTexture(textureSize)
+        layers.initalizeLayers(layerSize: textureSize)
         
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.clear(textures: [displayTexture,
-                                 currentTexture],
-                      to: commandBuffer)
-        
-        canvasDelegate?.completeTextureSizeDetermination(self)
+        canvasDelegate?.completedTextureInitialization(self)
     }
     
-    func inject(drawing: Drawing) {
-        self.drawing = drawing
+    func inject(drawingLayer: CanvasDrawingLayer) {
+        self.drawingLayer = drawingLayer
+    }
+    func inject(layers: CanvasLayers) {
+        self.layers = layers
     }
     
+    
+    // MARK: Drawing
     func prepareForNewDrawing() {
         defaultFingerPoints?.reset()
         
-        drawing.reset(self)
+        drawingLayer.clear()
         displayLink?.isPaused = true
     }
-    func refreshDisplayTexture(using textures: [MTLTexture?] = []) {
-        let commandBuffer = commandQueue.getBuffer()
+    func setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: Bool) {
         
-        Command.draw(onDisplayTexture: displayTexture,
-                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                     textures: textures,
-                     to: commandBuffer)
+        if !pauseDisplayLink {
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
+            }
+            
+        } else {
+            displayLink?.isPaused = true
+            setNeedsDisplay()
+        }
     }
-    func draw(displayTexture: MTLTexture?,
-              onDrawable drawable: CAMetalDrawable,
-              to commandBuffer: MTLCommandBuffer?) {
+    func refreshDisplayTexture() {
         
-        guard let displayTexture = displayTexture else { return }
+        layers.flatAllLayers(currentLayer: drawingLayer.currentLayer,
+                             backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                             toDisplayTexture: displayTexture)
+    }
+    func clear() {
+        layers.clear()
+        refreshDisplayTexture()
+    }
+    
+    
+    // MARK: MTKViewDelegate
+    func draw(in view: MTKView) {
+        guard let drawable = view.currentDrawable else { return }
         
         var canvasMatrix = matrix
         canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
         
-        let textureBuffers = Buffers.makeTextureBuffers(device: device,
+        let textureBuffers = Buffers.makeTextureBuffers(device: mtlDevice,
                                                         textureSize: displayTexture.size,
                                                         drawableSize: drawable.texture.size,
                                                         matrix: canvasMatrix,
                                                         nodes: textureNodes)
+        
+        let commandBuffer = commandQueue.getBuffer()
         
         Command.draw(texture: displayTexture,
                      buffers: textureBuffers,
                      on: drawable.texture,
                      clearColor: (230, 230, 230),
                      to: commandBuffer)
-    }
-    
-    func clear() {
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.clear(textures: [displayTexture,
-                                 currentTexture],
-                      to: commandBuffer)
-        
-        refreshDisplayTexture()
-    }
-    
-    func disableDefaultDrawing() {
-        defaultFingerInput.isEnabled = false
-        defaultFingerPoints = nil
-    }
-    
-    
-    // MARK: Displaylink
-    func setNeedsDisplayForDrawing(_ touchState: TouchState) {
-        
-        if touchState == .ended {
-            displayLink?.isPaused = true
-            setNeedsDisplay()
-            
-        } else {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        }
-    }
-    @objc private func displayLinkUpdate(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
-    }
-    
-    // MARK: MTKViewDelegate
-    func draw(in view: MTKView) {
-        guard let drawable = view.currentDrawable else { return }
-        
-        let commandBuffer = commandQueue.getBuffer()
-        
-        draw(displayTexture: displayTexture,
-             onDrawable: drawable,
-             to: commandBuffer)
         
         commandBuffer.present(drawable)
         commandBuffer.commit()
@@ -215,24 +192,32 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         commandQueue.reset()
     }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+    
+    
+    // MARK: Events
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        setNeedsDisplay()
+    }
 }
 
 // MARK: Drawing a line on the canvas.
 extension Canvas: FingerGestureRecognizerSender {
     func sendLocations(_ gesture: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState) {
         
-        defaultFingerPoints?.appendPoints(touchLocations)
+        guard let defaultFingerPoints = defaultFingerPoints else { return }
         
-        let iterator = defaultFingerPoints?.getIterator(endProcessing: touchState == .ended)
-        drawing.execute(iterator, endProcessing: touchState == .ended, toward: self)
+        defaultFingerPoints.appendPoints(touchLocations)
+        
+        let iterator = defaultFingerPoints.getIterator(endProcessing: touchState == .ended)
+        drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
         
         if touchState == .ended {
-            drawing.finishExecuting(self)
+            drawingLayer.mergeCellTextureIntoCurrentLayer()
             prepareForNewDrawing()
         }
         
-        drawing.refresh(self)
-        setNeedsDisplayForDrawing(touchState)
+        refreshDisplayTexture()
+        setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: touchState == .ended)
     }
     func cancel(_ gesture: FingerGestureRecognizer?) {
         prepareForNewDrawing()
