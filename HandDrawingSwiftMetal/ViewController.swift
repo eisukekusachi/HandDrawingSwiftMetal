@@ -78,6 +78,13 @@ class ViewController: UIViewController {
         canvas.setNeedsDisplay()
     }
 }
+extension ViewController: CanvasDelegate {
+    func completedTextureInitialization(_ canvas: Canvas) {
+        
+        brushDrawing.initalizeTextures(textureSize: canvas.textureSize)
+        eraserDrawing.initalizeTextures(textureSize: canvas.textureSize)
+    }
+}
 
 extension ViewController: PencilGestureRecognizerSender {
     func sendLocations(_ gesture: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
@@ -169,13 +176,6 @@ extension ViewController: FingerGestureRecognizerSender {
         guard inputManager.currentInput is FingerGestureRecognizer else { return }
         
         cancelOperation()
-    }
-}
-extension ViewController: CanvasDelegate {
-    func completedTextureInitialization(_ canvas: Canvas) {
-        
-        brushDrawing.initalizeTextures(textureSize: canvas.textureSize)
-        eraserDrawing.initalizeTextures(textureSize: canvas.textureSize)
     }
 }
 

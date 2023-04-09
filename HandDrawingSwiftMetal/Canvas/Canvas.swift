@@ -84,6 +84,11 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         
         self.addGestureRecognizer(defaultFingerInput)
     }
+    func disableDefaultDrawing() {
+        defaultFingerInput.isEnabled = false
+        defaultFingerPoints = nil
+    }
+    
     override func layoutSubviews() {
         if  let drawableSize = currentDrawable?.texture.size,
                 displayTexture == nil {
@@ -121,6 +126,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         self.drawingLayer = drawingLayer
     }
     
+    
     // MARK: Drawing
     func prepareForNewDrawing() {
         defaultFingerPoints?.reset()
@@ -128,55 +134,6 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         drawingLayer.clear()
         displayLink?.isPaused = true
     }
-    func refreshDisplayTexture() {
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.fill(displayTexture,
-                     withRGB: backgroundColor?.rgb ?? (255, 255, 255),
-                     to: commandBuffer)
-        
-        Command.merge(dst: displayTexture,
-                      textures: drawingLayer.currentLayer,
-                      to: commandBuffer)
-    }
-    func draw(displayTexture: MTLTexture,
-              onDrawable drawable: CAMetalDrawable,
-              to commandBuffer: MTLCommandBuffer?) {
-        
-        var canvasMatrix = matrix
-        canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
-        canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
-        
-        let textureBuffers = Buffers.makeTextureBuffers(device: device,
-                                                        textureSize: displayTexture.size,
-                                                        drawableSize: drawable.texture.size,
-                                                        matrix: canvasMatrix,
-                                                        nodes: textureNodes)
-        
-        Command.draw(texture: displayTexture,
-                     buffers: textureBuffers,
-                     on: drawable.texture,
-                     clearColor: (230, 230, 230),
-                     to: commandBuffer)
-    }
-    
-    func clear() {
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.clear(textures: [displayTexture,
-                                 currentTexture],
-                      to: commandBuffer)
-        
-        refreshDisplayTexture()
-    }
-    
-    func disableDefaultDrawing() {
-        defaultFingerInput.isEnabled = false
-        defaultFingerPoints = nil
-    }
-    
-    
-    // MARK: Displaylink
     func setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: Bool) {
         
         if !pauseDisplayLink {
@@ -189,19 +146,49 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
             setNeedsDisplay()
         }
     }
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
+    func refreshDisplayTexture() {
+        let commandBuffer = commandQueue.getBuffer()
+        
+        Command.fill(displayTexture,
+                     withRGB: backgroundColor?.rgb ?? (255, 255, 255),
+                     to: commandBuffer)
+        
+        Command.merge(dst: displayTexture,
+                      textures: drawingLayer.currentLayer,
+                      to: commandBuffer)
     }
+    func clear() {
+        let commandBuffer = commandQueue.getBuffer()
+        
+        Command.clear(textures: [displayTexture,
+                                 currentTexture],
+                      to: commandBuffer)
+        
+        refreshDisplayTexture()
+    }
+    
     
     // MARK: MTKViewDelegate
     func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else { return }
         
+        var canvasMatrix = matrix
+        canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
+        canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
+        
+        let textureBuffers = Buffers.makeTextureBuffers(device: device,
+                                                        textureSize: displayTexture.size,
+                                                        drawableSize: drawable.texture.size,
+                                                        matrix: canvasMatrix,
+                                                        nodes: textureNodes)
+        
         let commandBuffer = commandQueue.getBuffer()
         
-        draw(displayTexture: displayTexture,
-             onDrawable: drawable,
-             to: commandBuffer)
+        Command.draw(texture: displayTexture,
+                     buffers: textureBuffers,
+                     on: drawable.texture,
+                     clearColor: (230, 230, 230),
+                     to: commandBuffer)
         
         commandBuffer.present(drawable)
         commandBuffer.commit()
@@ -210,6 +197,12 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         commandQueue.reset()
     }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+    
+    
+    // MARK: Events
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        setNeedsDisplay()
+    }
 }
 
 // MARK: Drawing a line on the canvas.

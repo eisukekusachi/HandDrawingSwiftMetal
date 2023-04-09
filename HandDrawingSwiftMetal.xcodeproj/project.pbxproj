@@ -160,7 +160,6 @@
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D40D975329DAB02000A82E6A /* Points */,
 				D4B65E1F29DCFC9C00A0542F /* Texture */,
-				D40D975929DAB06A00A82E6A /* Transforming */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -233,20 +232,13 @@
 			path = Metal;
 			sourceTree = "<group>";
 		};
-		D40D975929DAB06A00A82E6A /* Transforming */ = {
-			isa = PBXGroup;
-			children = (
-				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
-			);
-			path = Transforming;
-			sourceTree = "<group>";
-		};
 		D4B65E1F29DCFC9C00A0542F /* Texture */ = {
 			isa = PBXGroup;
 			children = (
-				D40D979A29DAB0DF00A82E6A /* Texture.swift */,
+				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
 				D4B65E5E29DD34A000A0542F /* Image.swift */,
+				D40D979A29DAB0DF00A82E6A /* Texture.swift */,
+				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
 			);
 			path = Texture;
 			sourceTree = "<group>";
