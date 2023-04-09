@@ -17,7 +17,7 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     var canvas: CanvasDrawingProtocol
     
     var currentLayer: [MTLTexture?] {
-        return [canvas.currentTexture,
+        return [canvas.currentLayer,
                 drawingCellTexture]
     }
     
@@ -68,7 +68,7 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     }
     func mergeCellTextureIntoCurrentLayer() {
         
-        Command.merge(dst: canvas.currentTexture,
+        Command.merge(dst: canvas.currentLayer,
                       texture: drawingCellTexture,
                       to: canvas.commandBuffer)
         

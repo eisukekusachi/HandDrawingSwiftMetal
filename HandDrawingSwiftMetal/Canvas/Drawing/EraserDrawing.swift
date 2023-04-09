@@ -17,7 +17,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     var canvas: CanvasDrawingProtocol
     
     var currentLayer: [MTLTexture?] {
-        return isDrawing ? [eraserTexture] : [canvas.currentTexture]
+        return isDrawing ? [eraserTexture] : [canvas.currentLayer]
     }
     
     private var drawingCellTexture: MTLTexture!
@@ -72,7 +72,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
                          result: drawingCellTexture,
                          to: canvas.commandBuffer)
         
-        Command.copy(src: canvas.currentTexture,
+        Command.copy(src: canvas.currentLayer,
                      dst: eraserTexture,
                      to: canvas.commandBuffer)
         
@@ -85,7 +85,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     }
     func mergeCellTextureIntoCurrentLayer() {
         
-        Command.copy(src: canvas.currentTexture,
+        Command.copy(src: canvas.currentLayer,
                      dst: eraserTexture,
                      to: canvas.commandBuffer)
         
@@ -95,7 +95,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
                                  to: canvas.commandBuffer)
         
         Command.copy(src: eraserTexture,
-                     dst: canvas.currentTexture,
+                     dst: canvas.currentLayer,
                      to: canvas.commandBuffer)
         
         clear()

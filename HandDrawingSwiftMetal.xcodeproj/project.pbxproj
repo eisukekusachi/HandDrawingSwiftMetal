@@ -39,6 +39,8 @@
 		D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979C29DAB0DF00A82E6A /* Buffers.swift */; };
 		D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* Transforming.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
+		D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* CanvasLayers.swift */; };
+		D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* DefaultLayers.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */; };
 		D48A7E1329DACA8600D235B1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */; };
@@ -104,6 +106,8 @@
 		D40D979C29DAB0DF00A82E6A /* Buffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffers.swift; sourceTree = "<group>"; };
 		D40D97A429DAB0E800A82E6A /* Transforming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
+		D4646CB829E2922D00987C8E /* CanvasLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasLayers.swift; sourceTree = "<group>"; };
+		D4646CBA29E2932800987C8E /* DefaultLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLayers.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorTest.swift; sourceTree = "<group>"; };
 		D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
@@ -153,6 +157,7 @@
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
 				D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */,
+				D4646CB829E2922D00987C8E /* CanvasLayers.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975629DAB04700A82E6A /* Inputs */,
@@ -238,6 +243,7 @@
 			isa = PBXGroup;
 			children = (
 				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
+				D4646CBA29E2932800987C8E /* DefaultLayers.swift */,
 				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
 			);
 			path = Texture;
@@ -464,11 +470,13 @@
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
 				D40D976129DAB09400A82E6A /* PointStorage.swift in Sources */,
+				D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
+				D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,

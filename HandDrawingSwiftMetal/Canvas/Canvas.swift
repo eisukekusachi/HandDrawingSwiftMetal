@@ -16,15 +16,19 @@ protocol CanvasDrawingProtocol {
     
     var size: CGSize { get }
     var matrix: CGAffineTransform { get }
-    var currentTexture: MTLTexture? { get }
+    var currentLayer: MTLTexture { get }
 }
-
+protocol CanvasTextureLayerProtocol {
+    
+    var mtlDevice: MTLDevice { get }
+    var commandBuffer: MTLCommandBuffer? { get }
+}
 protocol CanvasDelegate: AnyObject {
     
     func completedTextureInitialization(_ canvas: Canvas)
 }
 
-class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
+class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLayerProtocol {
     
     weak var canvasDelegate: CanvasDelegate?
     
@@ -37,6 +41,9 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
     var commandBuffer: MTLCommandBuffer? {
         return commandQueue.getBuffer()
     }
+    var currentLayer: MTLTexture {
+        return layers.currentLayer
+    }
     
     var commandQueue: CommandQueue!
     
@@ -47,7 +54,8 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
     
     var textureSize: CGSize!
     var displayTexture: MTLTexture!
-    var currentTexture: MTLTexture?
+    
+    private lazy var layers: CanvasLayers = DefaultLayers(canvas: self)
     
     private lazy var defaultFingerInput: FingerGestureRecognizer = FingerGestureRecognizer(output: self)
     private lazy var defaultFingerPoints: SmoothPointStorage? = SmoothPointStorage()
@@ -111,19 +119,16 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         self.textureSize = textureSize
         
         displayTexture = mtlDevice.makeTexture(textureSize)
-        currentTexture = mtlDevice.makeTexture(textureSize)
-        
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.clear(textures: [displayTexture,
-                                 currentTexture],
-                      to: commandBuffer)
+        layers.initalizeLayers(layerSize: textureSize)
         
         canvasDelegate?.completedTextureInitialization(self)
     }
     
     func inject(drawingLayer: CanvasDrawingLayer) {
         self.drawingLayer = drawingLayer
+    }
+    func inject(layers: CanvasLayers) {
+        self.layers = layers
     }
     
     
@@ -147,23 +152,13 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol {
         }
     }
     func refreshDisplayTexture() {
-        let commandBuffer = commandQueue.getBuffer()
         
-        Command.fill(displayTexture,
-                     withRGB: backgroundColor?.rgb ?? (255, 255, 255),
-                     to: commandBuffer)
-        
-        Command.merge(dst: displayTexture,
-                      textures: drawingLayer.currentLayer,
-                      to: commandBuffer)
+        layers.flatAllLayers(currentLayer: drawingLayer.currentLayer,
+                             backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                             toDisplayTexture: displayTexture)
     }
     func clear() {
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.clear(textures: [displayTexture,
-                                 currentTexture],
-                      to: commandBuffer)
-        
+        layers.clear()
         refreshDisplayTexture()
     }
     
