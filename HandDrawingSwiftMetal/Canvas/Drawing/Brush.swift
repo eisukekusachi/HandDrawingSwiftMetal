@@ -7,6 +7,16 @@
 
 import Foundation
 
+let initBlurSize: Float = 4.0
+
+struct BlurredSize {
+    var diameter: Int
+    var blurSize: Float
+    var totalSize: Float {
+        return Float(diameter) + blurSize * 2
+    }
+}
+
 struct Brush {
     
     static let minDiameter: Int = 1
