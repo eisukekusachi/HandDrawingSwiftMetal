@@ -27,6 +27,11 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     required init(canvas: CanvasDrawingProtocol) {
         self.canvas = canvas
     }
+    required init(canvas: CanvasDrawingProtocol, color: UIColor?) {
+        self.canvas = canvas
+        
+        self.brush.setValue(color: color)
+    }
     func initalizeTextures(textureSize: CGSize) {
         
         if self.textureSize != textureSize {

@@ -19,9 +19,10 @@ class ViewController: UIViewController {
     
     /// Draw a line on the drawingLayer and merge the drawingLayer to the canvas at the touchEnded
     /// in order to be able to cancel drawing in the middle of a drawing.
-    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas)
-    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas)
+    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas, color: colorData.colorArray[0])
+    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas, alpha: colorData.alpha)
     
+    private let colorData = ColorData()
     
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
@@ -192,20 +193,20 @@ extension ViewController {
         canvas.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
-        brushDrawingLayer.brush.setValue(rgb: (0, 0, 0))
+        brushDrawingLayer.brush.setValue(color: colorData.colorArray[0])
         canvas.inject(drawingLayer: brushDrawingLayer)
         
         diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
-        brushDrawingLayer.brush.setValue(rgb: (255, 0, 0))
+        brushDrawingLayer.brush.setValue(color: colorData.colorArray[1])
         canvas.inject(drawingLayer: brushDrawingLayer)
         
         diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
-        eraserDrawingLayer.eraser.setValue(alpha: 200)
+        eraserDrawingLayer.eraser.setValue(alpha: colorData.alpha)
         canvas.inject(drawingLayer: eraserDrawingLayer)
         
         diameterSlider.value = Float(eraserDrawingLayer.eraser.diameter) / Float(Eraser.maxDiameter)

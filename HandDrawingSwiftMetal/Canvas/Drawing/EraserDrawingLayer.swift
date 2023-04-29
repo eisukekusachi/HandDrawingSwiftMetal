@@ -32,6 +32,12 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         self.canvas = canvas
         self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
     }
+    required init(canvas: CanvasDrawingProtocol, alpha: Int) {
+        self.canvas = canvas
+        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
+        
+        self.eraser.setValue(alpha: alpha)
+    }
     func initalizeTextures(textureSize: CGSize) {
         
         if self.textureSize != textureSize {
