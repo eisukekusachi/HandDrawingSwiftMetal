@@ -62,6 +62,12 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     
     private var displayLink: CADisplayLink?
     
+    init(delegate: CanvasDelegate?) {
+        self.canvasDelegate = delegate
+        
+        super.init(frame: .zero, device: nil)
+        commonInit()
+    }
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()

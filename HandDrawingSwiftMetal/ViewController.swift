@@ -9,7 +9,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    private lazy var canvas = Canvas()
+    private lazy var canvas = Canvas(delegate: self)
     
     private let inputManager = InputManager() /// A manager of finger input and pen input.
     private let actionStateManager = ActionStateManager() /// A manager of one finger drag or two fingers pinch.
@@ -44,7 +44,6 @@ class ViewController: UIViewController {
             canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        canvas.canvasDelegate = self
         canvas.inject(drawingLayer: brushDrawingLayer)
         
         let pencilInput = PencilGestureRecognizer(output: self)
