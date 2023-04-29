@@ -20,7 +20,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         return isDrawing ? [eraserTexture] : [canvas.currentLayer]
     }
     
-    private var drawingCellTexture: MTLTexture!
+    private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
     
@@ -37,7 +37,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
             
-            self.drawingCellTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.drawingTexture = canvas.mtlDevice.makeTexture(textureSize)
             self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
             self.eraserTexture = canvas.mtlDevice.makeTexture(textureSize)
         }
@@ -45,7 +45,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         clear()
     }
     
-    func drawOnCellTexture(_ iterator: Iterator<Point>, touchState: TouchState) {
+    func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initalizeTextures() once before here.")
         
         let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.size, to: textureSize))
@@ -65,38 +65,38 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         
         Command.drawCurve(buffers: pointBuffers,
                           onGrayscaleTexture: grayscaleTexture,
-                          to: canvas.commandBuffer)
+                          canvas.commandBuffer)
         
         Command.colorize(grayscaleTexture: grayscaleTexture,
                          with: (0, 0, 0),
-                         result: drawingCellTexture,
-                         to: canvas.commandBuffer)
+                         result: drawingTexture,
+                         canvas.commandBuffer)
         
-        Command.copy(src: canvas.currentLayer,
-                     dst: eraserTexture,
-                     to: canvas.commandBuffer)
+        Command.copy(dst: eraserTexture,
+                     src: canvas.currentLayer,
+                     canvas.commandBuffer)
         
         Command.makeEraseTexture(buffers: flippedTextureBuffers,
-                                 src: drawingCellTexture,
+                                 src: drawingTexture,
                                  result: eraserTexture,
-                                 to: canvas.commandBuffer)
+                                 canvas.commandBuffer)
         
         isDrawing = true
     }
-    func mergeCellTextureIntoCurrentLayer() {
+    func mergeDrawingLayerIntoCurrentLayer() {
         
-        Command.copy(src: canvas.currentLayer,
-                     dst: eraserTexture,
-                     to: canvas.commandBuffer)
+        Command.copy(dst: eraserTexture,
+                     src: canvas.currentLayer,
+                     canvas.commandBuffer)
         
         Command.makeEraseTexture(buffers: flippedTextureBuffers,
-                                 src: drawingCellTexture,
+                                 src: drawingTexture,
                                  result: eraserTexture,
-                                 to: canvas.commandBuffer)
+                                 canvas.commandBuffer)
         
-        Command.copy(src: eraserTexture,
-                     dst: canvas.currentLayer,
-                     to: canvas.commandBuffer)
+        Command.copy(dst: canvas.currentLayer,
+                     src: eraserTexture,
+                     canvas.commandBuffer)
         
         clear()
         
@@ -105,7 +105,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     func clear() {
         
         Command.clear(textures: [eraserTexture,
-                                 drawingCellTexture], to: canvas.commandBuffer)
-        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), to: canvas.commandBuffer)
+                                 drawingTexture], canvas.commandBuffer)
+        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), canvas.commandBuffer)
     }
 }

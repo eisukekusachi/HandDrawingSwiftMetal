@@ -37,15 +37,15 @@ class DefaultLayers: CanvasLayers {
         
         Command.fill(displayTexture,
                      withRGB: backgroundColor,
-                     to: commandBuffer)
+                     commandBuffer)
         
         Command.merge(dst: displayTexture,
                       textures: currentLayer,
-                      to: commandBuffer)
+                      commandBuffer)
     }
     
     func clear() {
         
-        Command.clear(texture: layer, to: canvas.commandBuffer)
+        Command.clear(texture: layer, canvas.commandBuffer)
     }
 }

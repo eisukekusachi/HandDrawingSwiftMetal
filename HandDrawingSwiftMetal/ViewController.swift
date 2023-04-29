@@ -9,23 +9,26 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    private lazy var canvas = Canvas()
+    
+    private let inputManager = InputManager() /// A manager of finger input and pen input.
+    private let actionStateManager = ActionStateManager() /// A manager of one finger drag or two fingers pinch.
+    
+    private var pencilPoints = DefaultPointStorage()
+    private var fingerPoints = SmoothPointStorage()
+    
+    /// Draw a line on the drawingLayer and merge the drawingLayer to the canvas at the touchEnded
+    /// in order to be able to cancel drawing in the middle of a drawing.
+    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas)
+    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas)
+    
+    
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
         didSet {
             diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         }
     }
-    
-    private let canvas = Canvas()
-    
-    private let inputManager = InputManager()
-    private let actionStateManager = ActionStateManager()
-    
-    private var pencilPoints = DefaultPointStorage()
-    private var fingerPoints = SmoothPointStorage()
-    
-    private lazy var brushDrawing = BrushDrawingLayer(canvas: canvas)
-    private lazy var eraserDrawing = EraserDrawingLayer(canvas: canvas)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,8 +45,8 @@ class ViewController: UIViewController {
         ])
         
         canvas.canvasDelegate = self
+        canvas.inject(drawingLayer: brushDrawingLayer)
         
-        canvas.inject(drawingLayer: brushDrawing)
         let pencilInput = PencilGestureRecognizer(output: self)
         let fingerInput = FingerGestureRecognizer(output: self,
                                                   is3DTouchAvailable: traitCollection.forceTouchCapability == .available)
@@ -63,7 +66,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .white
         overrideUserInterfaceStyle = .light
         
-        diameterSlider.value = Float(brushDrawing.brush.diameter) / Float(Brush.maxDiameter)
+        diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     private func cancelOperation() {
         inputManager.reset()
@@ -79,15 +82,15 @@ class ViewController: UIViewController {
     }
 }
 extension ViewController: CanvasDelegate {
-    func completedTextureInitialization(_ canvas: Canvas) {
+    func didCompletTextureInitialization(_ canvas: Canvas) {
         
-        brushDrawing.initalizeTextures(textureSize: canvas.textureSize)
-        eraserDrawing.initalizeTextures(textureSize: canvas.textureSize)
+        brushDrawingLayer.initalizeTextures(textureSize: canvas.textureSize)
+        eraserDrawingLayer.initalizeTextures(textureSize: canvas.textureSize)
     }
 }
 
 extension ViewController: PencilGestureRecognizerSender {
-    func sendLocations(_ gesture: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
+    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
         
         if inputManager.currentInput is FingerGestureRecognizer {
             
@@ -95,18 +98,19 @@ extension ViewController: PencilGestureRecognizerSender {
             canvas.matrix = canvas.transforming.storedMatrix
             canvas.prepareForNewDrawing()
         }
-        if touchState == .began {
-            inputManager.update(gesture)
-        }
         
+        
+        if touchState == .began {
+            inputManager.update(input)
+        }
         
         pencilPoints.appendPoints(touchLocations)
         
         let iterator = pencilPoints.getIterator(endProcessing: touchState == .ended)
-        canvas.drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
+        canvas.drawingLayer.drawOnDrawingLayer(with: iterator, touchState: touchState)
         
         if touchState == .ended {
-            canvas.drawingLayer.mergeCellTextureIntoCurrentLayer()
+            canvas.drawingLayer.mergeDrawingLayerIntoCurrentLayer()
             canvas.prepareForNewDrawing()
         }
         
@@ -127,24 +131,26 @@ extension ViewController: PencilGestureRecognizerSender {
 }
 
 extension ViewController: FingerGestureRecognizerSender {
-    func sendLocations(_ gesture: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState) {
+    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState) {
+        
         if touchState == .began {
-            inputManager.update(gesture)
+            inputManager.update(input)
         }
         guard inputManager.currentInput is FingerGestureRecognizer else { return }
         
         
         fingerPoints.appendPoints(touchLocations)
         
-        actionStateManager.update(ActionState.getCurrentState(viewTouches: fingerPoints.storedPoints))
+        let currentActionState = ActionState.getCurrentState(viewTouches: fingerPoints.storedPoints)
+        actionStateManager.update(currentActionState)
         
         if actionStateManager.currentState == .drawingOnCanvas {
             
             let iterator = fingerPoints.getIterator(endProcessing: touchState == .ended)
-            canvas.drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
+            canvas.drawingLayer.drawOnDrawingLayer(with: iterator, touchState: touchState)
             
             if touchState == .ended {
-                canvas.drawingLayer.mergeCellTextureIntoCurrentLayer()
+                canvas.drawingLayer.mergeDrawingLayerIntoCurrentLayer()
                 canvas.prepareForNewDrawing()
             }
             
@@ -172,7 +178,7 @@ extension ViewController: FingerGestureRecognizerSender {
             fingerPoints.reset()
         }
     }
-    func cancel(_ gesture: FingerGestureRecognizer?) {
+    func cancel(_ input: FingerGestureRecognizer?) {
         guard inputManager.currentInput is FingerGestureRecognizer else { return }
         
         cancelOperation()
@@ -187,23 +193,23 @@ extension ViewController {
         canvas.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
-        brushDrawing.brush.setValue(rgb: (0, 0, 0))
-        canvas.inject(drawingLayer: brushDrawing)
+        brushDrawingLayer.brush.setValue(rgb: (0, 0, 0))
+        canvas.inject(drawingLayer: brushDrawingLayer)
         
-        diameterSlider.value = Float(brushDrawing.brush.diameter) / Float(Brush.maxDiameter)
+        diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
-        brushDrawing.brush.setValue(rgb: (255, 0, 0))
-        canvas.inject(drawingLayer: brushDrawing)
+        brushDrawingLayer.brush.setValue(rgb: (255, 0, 0))
+        canvas.inject(drawingLayer: brushDrawingLayer)
         
-        diameterSlider.value = Float(brushDrawing.brush.diameter) / Float(Brush.maxDiameter)
+        diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
-        eraserDrawing.eraser.setValue(alpha: 200)
-        canvas.inject(drawingLayer: eraserDrawing)
+        eraserDrawingLayer.eraser.setValue(alpha: 200)
+        canvas.inject(drawingLayer: eraserDrawingLayer)
         
-        diameterSlider.value = Float(eraserDrawing.eraser.diameter) / Float(Eraser.maxDiameter)
+        diameterSlider.value = Float(eraserDrawingLayer.eraser.diameter) / Float(Eraser.maxDiameter)
     }
     
     @IBAction func pushExportButton(_ sender: UIButton) {
@@ -236,14 +242,14 @@ extension ViewController {
             let difference: Float = Float(Brush.maxDiameter - Brush.minDiameter)
             let value: Int = Int(difference * sender.value) + Brush.minDiameter
             
-            brushDrawing.brush.diameter = value
+            brushDrawingLayer.brush.diameter = value
         }
         
         if canvas.drawingLayer is EraserDrawingLayer {
             let difference: Float = Float(Eraser.maxDiameter - Eraser.minDiameter)
             let value: Int = Int(difference * sender.value) + Eraser.minDiameter
             
-            eraserDrawing.eraser.diameter = value
+            eraserDrawingLayer.eraser.diameter = value
         }
     }
 }

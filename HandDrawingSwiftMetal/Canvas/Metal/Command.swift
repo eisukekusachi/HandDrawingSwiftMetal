@@ -14,7 +14,7 @@ enum Command {
 
     static func drawCurve(buffers: PointBuffers?,
                           onGrayscaleTexture texture: MTLTexture?,
-                          to commandBuffer: MTLCommandBuffer?) {
+                          _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.drawGrayPoints != nil, "Call Pipeline.initalization() before here.")
         
@@ -39,7 +39,7 @@ enum Command {
                      buffers: TextureBuffers?,
                      on dst: MTLTexture?,
                      clearColor color: (Int, Int, Int),
-                     to commandBuffer: MTLCommandBuffer?) {
+                     _ commandBuffer: MTLCommandBuffer?) {
         
         guard let buffers = buffers,
               let src = texture,
@@ -72,7 +72,7 @@ enum Command {
     static func makeEraseTexture(buffers: TextureBuffers?,
                                  src: MTLTexture?,
                                  result dst: MTLTexture?,
-                                 to commandBuffer: MTLCommandBuffer?) {
+                                 _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.erase != nil, "Call Pipeline.initalization() before here.")
         
@@ -101,7 +101,7 @@ enum Command {
     static func colorize(grayscaleTexture: MTLTexture?,
                          with rgb: (Int, Int, Int),
                          result dst: MTLTexture?,
-                         to commandBuffer: MTLCommandBuffer?) {
+                         _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.colorize != nil, "Call Pipeline.initalization() before here.")
         
@@ -133,15 +133,13 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func fill(_ dst: MTLTexture?, withRGB rgb: (Int, Int, Int), to commandBuffer: MTLCommandBuffer?) {
+    static func fill(_ dst: MTLTexture?, withRGB rgb: (Int, Int, Int), _ commandBuffer: MTLCommandBuffer?) {
         
-        fill(dst,
-             withRGBA: (rgb.0, rgb.1, rgb.2, 255),
-             to: commandBuffer)
+        fill(dst, withRGBA: (rgb.0, rgb.1, rgb.2, 255), commandBuffer)
     }
     static func fill(_ dst: MTLTexture?,
                      withRGBA rgba: (Int, Int, Int, Int),
-                     to commandBuffer: MTLCommandBuffer?) {
+                     _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.fillColor != nil, "Call Pipeline.initalization() before here.")
         
@@ -174,13 +172,13 @@ enum Command {
     }
     
     
-    static func merge(dst: MTLTexture?, textures: [MTLTexture?], to commandBuffer: MTLCommandBuffer?) {
+    static func merge(dst: MTLTexture?, textures: [MTLTexture?], _ commandBuffer: MTLCommandBuffer?) {
         
         textures.forEach {
-            merge(dst: dst, texture: $0, to: commandBuffer)
+            merge(dst: dst, texture: $0, commandBuffer)
         }
     }
-    static func merge(dst: MTLTexture?, texture: MTLTexture?, to commandBuffer: MTLCommandBuffer?) {
+    static func merge(dst: MTLTexture?, texture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.merge != nil, "Call Pipeline.initalization() before here.")
         
@@ -209,13 +207,13 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func clear(textures: [MTLTexture?], to commandBuffer: MTLCommandBuffer?) {
+    static func clear(textures: [MTLTexture?], _ commandBuffer: MTLCommandBuffer?) {
         
         textures.forEach {
-            clear(texture: $0, to: commandBuffer)
+            clear(texture: $0, commandBuffer)
         }
     }
-    static func clear(texture: MTLTexture?, to commandBuffer: MTLCommandBuffer?) {
+    static func clear(texture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.fillColor != nil, "Call Pipeline.initalization() before here.")
         
@@ -241,7 +239,7 @@ enum Command {
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
-    static func copy(src: MTLTexture?, dst: MTLTexture?, to commandBuffer: MTLCommandBuffer?) {
+    static func copy(dst: MTLTexture?, src: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         
         assert(Pipeline.copy != nil, "Call Pipeline.initalization() before here.")
         
