@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2023/03/28.
 //
 
-import Foundation
+import UIKit
 
 let initBlurSize: Float = 4.0
 
@@ -24,9 +24,19 @@ struct Brush {
     
     var rgb: (Int, Int, Int) = (0, 0, 0)
     var alpha: Int = 200
+    
     var diameter: Int = 8
     var blurSize: Float = initBlurSize
     
+    init(color: UIColor?, diameter: Int? = nil) {
+        if let color = color {
+            rgb = color.rgb
+            alpha = color.alpha
+        }
+        if let diameter = diameter {
+            self.diameter = diameter
+        }
+    }
     init(rgb: (Int, Int, Int)? = nil, alpha: Int? = nil, diameter: Int? = nil) {
         if let rgb = rgb {
             self.rgb = rgb
@@ -53,6 +63,15 @@ struct Brush {
         rgb = (rgb.0, rgb.1, value)
     }
     
+    mutating func setValue(color: UIColor? = nil, diameter: Int? = nil) {
+        if let color = color {
+            rgb = color.rgb
+            alpha = color.alpha
+        }
+        if let diameter = diameter {
+            self.diameter = diameter
+        }
+    }
     mutating func setValue(rgba: (Int, Int, Int, Int)? = nil, diameter: Int? = nil) {
         if let rgba = rgba {
             self.rgb = (rgba.0, rgba.1, rgba.2)

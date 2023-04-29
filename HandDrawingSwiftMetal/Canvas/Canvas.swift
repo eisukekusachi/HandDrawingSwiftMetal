@@ -25,7 +25,7 @@ protocol CanvasTextureLayerProtocol {
 }
 protocol CanvasDelegate: AnyObject {
     
-    func completedTextureInitialization(_ canvas: Canvas)
+    func didCompletTextureInitialization(_ canvas: Canvas)
 }
 
 class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLayerProtocol {
@@ -62,6 +62,12 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     
     private var displayLink: CADisplayLink?
     
+    init(delegate: CanvasDelegate?) {
+        self.canvasDelegate = delegate
+        
+        super.init(frame: .zero, device: nil)
+        commonInit()
+    }
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()
@@ -121,7 +127,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
         displayTexture = mtlDevice.makeTexture(textureSize)
         layers.initalizeLayers(layerSize: textureSize)
         
-        canvasDelegate?.completedTextureInitialization(self)
+        canvasDelegate?.didCompletTextureInitialization(self)
     }
     
     func inject(drawingLayer: CanvasDrawingLayer) {
@@ -183,13 +189,13 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
                      buffers: textureBuffers,
                      on: drawable.texture,
                      clearColor: (230, 230, 230),
-                     to: commandBuffer)
+                     commandBuffer)
         
         commandBuffer.present(drawable)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         
-        commandQueue.reset()
+        commandQueue.disposeCommands()
     }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
     
@@ -209,10 +215,10 @@ extension Canvas: FingerGestureRecognizerSender {
         defaultFingerPoints.appendPoints(touchLocations)
         
         let iterator = defaultFingerPoints.getIterator(endProcessing: touchState == .ended)
-        drawingLayer.drawOnCellTexture(iterator, touchState: touchState)
+        drawingLayer.drawOnDrawingLayer(with: iterator, touchState: touchState)
         
         if touchState == .ended {
-            drawingLayer.mergeCellTextureIntoCurrentLayer()
+            drawingLayer.mergeDrawingLayerIntoCurrentLayer()
             prepareForNewDrawing()
         }
         

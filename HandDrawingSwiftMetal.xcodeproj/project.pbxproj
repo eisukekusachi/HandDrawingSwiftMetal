@@ -18,9 +18,9 @@
 		D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */; };
 		D40D976B29DAB09D00A82E6A /* Eraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* Eraser.swift */; };
 		D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* Brush.swift */; };
-		D40D976D29DAB09D00A82E6A /* BrushDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawing.swift */; };
+		D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */; };
 		D40D976E29DAB09D00A82E6A /* CanvasDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */; };
-		D40D976F29DAB09D00A82E6A /* EraserDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawing.swift */; };
+		D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */; };
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
 		D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */; };
 		D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */; };
@@ -41,6 +41,7 @@
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* CanvasLayers.swift */; };
 		D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* DefaultLayers.swift */; };
+		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */; };
 		D48A7E1329DACA8600D235B1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */; };
@@ -85,9 +86,9 @@
 		D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmoothPointStorage.swift; sourceTree = "<group>"; };
 		D40D976629DAB09C00A82E6A /* Eraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eraser.swift; sourceTree = "<group>"; };
 		D40D976729DAB09C00A82E6A /* Brush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Brush.swift; sourceTree = "<group>"; };
-		D40D976829DAB09C00A82E6A /* BrushDrawing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawing.swift; sourceTree = "<group>"; };
+		D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawingLayer.swift; sourceTree = "<group>"; };
 		D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasDrawingLayer.swift; sourceTree = "<group>"; };
-		D40D976A29DAB09D00A82E6A /* EraserDrawing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawing.swift; sourceTree = "<group>"; };
+		D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawingLayer.swift; sourceTree = "<group>"; };
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
 		D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
@@ -108,6 +109,7 @@
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D4646CB829E2922D00987C8E /* CanvasLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasLayers.swift; sourceTree = "<group>"; };
 		D4646CBA29E2932800987C8E /* DefaultLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLayers.swift; sourceTree = "<group>"; };
+		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorTest.swift; sourceTree = "<group>"; };
 		D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
@@ -186,9 +188,9 @@
 			isa = PBXGroup;
 			children = (
 				D40D976729DAB09C00A82E6A /* Brush.swift */,
-				D40D976829DAB09C00A82E6A /* BrushDrawing.swift */,
+				D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */,
 				D40D976629DAB09C00A82E6A /* Eraser.swift */,
-				D40D976A29DAB09D00A82E6A /* EraserDrawing.swift */,
+				D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -276,6 +278,7 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
@@ -463,7 +466,7 @@
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
-				D40D976F29DAB09D00A82E6A /* EraserDrawing.swift in Sources */,
+				D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,
@@ -473,6 +476,7 @@
 				D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
+				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
@@ -489,7 +493,7 @@
 				D40D97A129DAB0DF00A82E6A /* MTLDeviceExtensions.swift in Sources */,
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */,
-				D40D976D29DAB09D00A82E6A /* BrushDrawing.swift in Sources */,
+				D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */,
 				D40D976029DAB09400A82E6A /* Point.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,

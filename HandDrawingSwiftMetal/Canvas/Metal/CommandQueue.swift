@@ -14,7 +14,7 @@ protocol CommandQueue {
     var queue: MTLCommandQueue { get }
     
     mutating func getBuffer() -> MTLCommandBuffer
-    mutating func reset()
+    mutating func disposeCommands()
 }
 
 struct CommandQueueImpl: CommandQueue {
@@ -32,7 +32,7 @@ struct CommandQueueImpl: CommandQueue {
         }
         return buffer!
     }
-    mutating func reset() {
+    mutating func disposeCommands() {
         self.buffer = nil
     }
 }

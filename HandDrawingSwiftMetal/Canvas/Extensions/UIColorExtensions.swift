@@ -10,17 +10,27 @@ import UIKit
 extension UIColor {
     
     var rgb: (Int, Int, Int) {
-        guard let components = self.cgColor.components, components.count == 4 else { return (255, 255, 255) }
-        return (Int(components[0] * 255),
-                Int(components[1] * 255),
-                Int(components[2] * 255))
+        var red = CGFloat(0)
+        var green = CGFloat(1)
+        var blue = CGFloat(2)
+        getRed(&red, green: &green, blue: &blue, alpha: nil)
+        
+        return (Int(red * 255), Int(green * 255), Int(blue * 255))
+    }
+    var alpha: Int {
+        var alpha = CGFloat(0)
+        getRed(nil, green: nil, blue: nil, alpha: &alpha)
+        
+        return Int(alpha * 255)
     }
     var rgba: (Int, Int, Int, Int) {
-        guard let components = self.cgColor.components, components.count == 4 else { return (255, 255, 255, 255) }
-        return (Int(components[0] * 255),
-                Int(components[1] * 255),
-                Int(components[2] * 255),
-                Int(components[3] * 255))
+        var red = CGFloat(0)
+        var green = CGFloat(1)
+        var blue = CGFloat(2)
+        var alpha = CGFloat(3)
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        
+        return (Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
     
     convenience init(_ red: Int, _ green: Int, _ blue: Int, _ alpha: Int = 255) {
