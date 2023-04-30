@@ -17,10 +17,10 @@ class ViewController: UIViewController {
     private var pencilPoints = DefaultPointStorage()
     private var fingerPoints = SmoothPointStorage()
     
-    /// Draw a line on the drawingLayer and merge the drawingLayer to the canvas at the touchEnded
-    /// in order to be able to cancel drawing in the middle of a drawing.
-    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas, color: colorData.colorArray[0])
-    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas, alpha: colorData.alpha)
+    /// Draw a line on the drawingLayer and merge the drawingLayer to the currentLayer of the canvas at the touchEnded
+    /// in order to be able to cancel drawing in the middle of drawing a line.
+    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas, color: colorData.brushColorArray[0])
+    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas, alpha: colorData.eraserAlpha)
     
     private let colorData = ColorData()
     
@@ -35,6 +35,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         view.addSubview(canvas)
+        view.sendSubviewToBack(canvas)
         
         canvas.translatesAutoresizingMaskIntoConstraints = false
         
@@ -47,13 +48,10 @@ class ViewController: UIViewController {
         
         canvas.inject(drawingLayer: brushDrawingLayer)
         
-        let pencilInput = PencilGestureRecognizer(output: self)
-        let fingerInput = FingerGestureRecognizer(output: self,
-                                                  is3DTouchAvailable: traitCollection.forceTouchCapability == .available)
-        canvas.disableDefaultDrawing()
-        canvas.addGestureRecognizer(pencilInput)
-        canvas.addGestureRecognizer(fingerInput)
-        
+        canvas.disableDefaultGestureRecognizer()
+        canvas.addGestureRecognizer(PencilGestureRecognizer(output: self))
+        canvas.addGestureRecognizer(FingerGestureRecognizer(output: self,
+                                                            is3DTouchAvailable: traitCollection.forceTouchCapability == .available))
         
         /*
         canvas.initalizeTextures(textureSize: CGSize(width: 1000, height: 1000))
@@ -61,10 +59,6 @@ class ViewController: UIViewController {
         canvas.setNeedsDisplay()
         */
         
-        
-        view.sendSubviewToBack(canvas)
-        view.backgroundColor = .white
-        overrideUserInterfaceStyle = .light
         
         diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
@@ -92,6 +86,7 @@ extension ViewController: CanvasDelegate {
 extension ViewController: PencilGestureRecognizerSender {
     func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
         
+        // Cancel drawing a line when the currentInput is the finger input.
         if inputManager.currentInput is FingerGestureRecognizer {
             
             fingerPoints.reset()
@@ -193,20 +188,20 @@ extension ViewController {
         canvas.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
-        brushDrawingLayer.brush.setValue(color: colorData.colorArray[0])
+        brushDrawingLayer.brush.setValue(color: colorData.brushColorArray[0])
         canvas.inject(drawingLayer: brushDrawingLayer)
         
         diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
-        brushDrawingLayer.brush.setValue(color: colorData.colorArray[1])
+        brushDrawingLayer.brush.setValue(color: colorData.brushColorArray[1])
         canvas.inject(drawingLayer: brushDrawingLayer)
         
         diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
-        eraserDrawingLayer.eraser.setValue(alpha: colorData.alpha)
+        eraserDrawingLayer.eraser.setValue(alpha: colorData.eraserAlpha)
         canvas.inject(drawingLayer: eraserDrawingLayer)
         
         diameterSlider.value = Float(eraserDrawingLayer.eraser.diameter) / Float(Eraser.maxDiameter)

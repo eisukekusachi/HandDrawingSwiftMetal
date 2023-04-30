@@ -47,7 +47,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     
     var commandQueue: CommandQueue!
     
-    lazy var drawingLayer: CanvasDrawingLayer = BrushDrawingLayer(canvas: self)
+    lazy var drawingLayer: CanvasDrawingLayer = BrushDrawingLayer(canvas: self, color: .red)
     var transforming: Transforming = TransformingImpl()
     
     var matrix: CGAffineTransform = CGAffineTransform.identity
@@ -98,7 +98,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
         
         self.addGestureRecognizer(defaultFingerInput)
     }
-    func disableDefaultDrawing() {
+    func disableDefaultGestureRecognizer() {
         defaultFingerInput.isEnabled = false
         defaultFingerPoints = nil
     }
