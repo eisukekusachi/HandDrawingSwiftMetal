@@ -19,8 +19,12 @@ class ViewController: UIViewController {
     
     /// Draw a line on the drawingLayer and merge the drawingLayer to the currentLayer of the canvas at the touchEnded
     /// in order to be able to cancel drawing in the middle of drawing a line.
-    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas, color: colorData.brushColorArray[0])
-    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas, alpha: colorData.eraserAlpha)
+    private lazy var brushDrawingLayer = BrushDrawingLayer(canvas: canvas,
+                                                           drawingtoolDiameter: 8,
+                                                           brushColor: colorData.brushColorArray[0])
+    private lazy var eraserDrawingLayer = EraserDrawingLayer(canvas: canvas,
+                                                             drawingtoolDiameter: 32,
+                                                             eraserAlpha: colorData.eraserAlpha)
     
     private let colorData = ColorData()
     
@@ -59,8 +63,7 @@ class ViewController: UIViewController {
         canvas.setNeedsDisplay()
         */
         
-        
-        diameterSlider.value = Float(brushDrawingLayer.brush.diameter) / Float(Brush.maxDiameter)
+        diameterSlider.value = Float(canvas.drawingLayer.drawingtoolDiameter) / Float(Brush.maxDiameter)
     }
     private func cancelOperation() {
         inputManager.reset()
@@ -233,18 +236,18 @@ extension ViewController {
         canvas.setNeedsDisplay()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
+        
+        var value: Int?
+        
         if canvas.drawingLayer is BrushDrawingLayer {
-            let difference: Float = Float(Brush.maxDiameter - Brush.minDiameter)
-            let value: Int = Int(difference * sender.value) + Brush.minDiameter
-            
-            brushDrawingLayer.brush.diameter = value
+            value = Int(sender.value * Float(Brush.maxDiameter - Brush.minDiameter)) + Brush.minDiameter
+        }
+        if canvas.drawingLayer is EraserDrawingLayer {
+            value = Int(sender.value * Float(Eraser.maxDiameter - Eraser.minDiameter)) + Eraser.minDiameter
         }
         
-        if canvas.drawingLayer is EraserDrawingLayer {
-            let difference: Float = Float(Eraser.maxDiameter - Eraser.minDiameter)
-            let value: Int = Int(difference * sender.value) + Eraser.minDiameter
-            
-            eraserDrawingLayer.eraser.diameter = value
+        if let value = value {
+            canvas.drawingLayer.drawingtoolDiameter = value
         }
     }
 }

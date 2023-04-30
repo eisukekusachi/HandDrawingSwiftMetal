@@ -15,9 +15,17 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     var textureSize: CGSize = .zero
     
     var canvas: CanvasDrawingProtocol
-    
     var currentLayer: [MTLTexture?] {
         return isDrawing ? [eraserTexture] : [canvas.currentLayer]
+    }
+    
+    var drawingtoolDiameter: Int {
+        get {
+            return eraser.diameter
+        }
+        set {
+            eraser.diameter = newValue
+        }
     }
     
     private var drawingTexture: MTLTexture!
@@ -32,11 +40,11 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         self.canvas = canvas
         self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
     }
-    required init(canvas: CanvasDrawingProtocol, alpha: Int) {
+    required init(canvas: CanvasDrawingProtocol, drawingtoolDiameter: Int? = nil, eraserAlpha: Int? = nil) {
         self.canvas = canvas
         self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
         
-        self.eraser.setValue(alpha: alpha)
+        self.eraser.setValue(alpha: eraserAlpha, diameter: drawingtoolDiameter)
     }
     func initalizeTextures(textureSize: CGSize) {
         

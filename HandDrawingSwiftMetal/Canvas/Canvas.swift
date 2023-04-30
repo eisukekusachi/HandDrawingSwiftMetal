@@ -47,7 +47,7 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     
     var commandQueue: CommandQueue!
     
-    lazy var drawingLayer: CanvasDrawingLayer = BrushDrawingLayer(canvas: self, color: .red)
+    lazy var drawingLayer: CanvasDrawingLayer = BrushDrawingLayer(canvas: self, brushColor: .red)
     var transforming: Transforming = TransformingImpl()
     
     var matrix: CGAffineTransform = CGAffineTransform.identity

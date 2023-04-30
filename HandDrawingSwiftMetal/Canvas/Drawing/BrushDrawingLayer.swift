@@ -15,10 +15,18 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     var textureSize: CGSize = .zero
     
     var canvas: CanvasDrawingProtocol
-    
     var currentLayer: [MTLTexture?] {
         return [canvas.currentLayer,
                 drawingTexture]
+    }
+    
+    var drawingtoolDiameter: Int {
+        get {
+            return brush.diameter
+        }
+        set {
+            brush.diameter = newValue
+        }
     }
     
     private var drawingTexture: MTLTexture!
@@ -27,10 +35,10 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     required init(canvas: CanvasDrawingProtocol) {
         self.canvas = canvas
     }
-    required init(canvas: CanvasDrawingProtocol, color: UIColor?) {
+    required init(canvas: CanvasDrawingProtocol, drawingtoolDiameter: Int? = nil, brushColor: UIColor? = nil) {
         self.canvas = canvas
         
-        self.brush.setValue(color: color)
+        self.brush.setValue(color: brushColor, diameter: drawingtoolDiameter)
     }
     func initalizeTextures(textureSize: CGSize) {
         

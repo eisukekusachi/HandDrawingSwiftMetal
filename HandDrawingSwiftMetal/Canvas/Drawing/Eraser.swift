@@ -7,13 +7,15 @@
 
 import Foundation
 
+let initEraserSize: Int = 8
+
 struct Eraser {
     
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
     
     var alpha: Int = 200
-    var diameter: Int = 8
+    var diameter: Int = initEraserSize
     var blurSize: Float = initBlurSize
     
     var blurredSize: BlurredSize {
