@@ -8,6 +8,7 @@
 import UIKit
 
 let initBlurSize: Float = 4.0
+let initBrushSize: Int = 8
 
 struct BlurredSize {
     var diameter: Int
@@ -25,7 +26,7 @@ struct Brush {
     var rgb: (Int, Int, Int) = (0, 0, 0)
     var alpha: Int = 200
     
-    var diameter: Int = 8
+    var diameter: Int = initBrushSize
     var blurSize: Float = initBlurSize
     
     init(color: UIColor?, diameter: Int? = nil) {

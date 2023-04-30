@@ -8,12 +8,12 @@
 import UIKit
 
 class ColorData {
-    let colorArray: [UIColor] = [
+    let brushColorArray: [UIColor] = [
         .black,
         Converter.color((255, 0, 0, 200))
         ]
     
-    let alpha: Int = 200
+    let eraserAlpha: Int = 200
 }
 
 enum Converter {
