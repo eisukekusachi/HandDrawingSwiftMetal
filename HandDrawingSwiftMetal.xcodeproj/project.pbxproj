@@ -18,9 +18,9 @@
 		D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */; };
 		D40D976B29DAB09D00A82E6A /* Eraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* Eraser.swift */; };
 		D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* Brush.swift */; };
-		D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */; };
-		D40D976E29DAB09D00A82E6A /* CanvasDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */; };
-		D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */; };
+		D40D976D29DAB09D00A82E6A /* BrushDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */; };
+		D40D976E29DAB09D00A82E6A /* DrawingTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */; };
+		D40D976F29DAB09D00A82E6A /* EraserDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */; };
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
 		D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */; };
 		D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */; };
@@ -90,9 +90,9 @@
 		D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmoothPointStorage.swift; sourceTree = "<group>"; };
 		D40D976629DAB09C00A82E6A /* Eraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eraser.swift; sourceTree = "<group>"; };
 		D40D976729DAB09C00A82E6A /* Brush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Brush.swift; sourceTree = "<group>"; };
-		D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawingLayer.swift; sourceTree = "<group>"; };
-		D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasDrawingLayer.swift; sourceTree = "<group>"; };
-		D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawingLayer.swift; sourceTree = "<group>"; };
+		D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawingTexture.swift; sourceTree = "<group>"; };
+		D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingTextureProtocol.swift; sourceTree = "<group>"; };
+		D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawingTexture.swift; sourceTree = "<group>"; };
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
 		D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
@@ -167,7 +167,6 @@
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
 				D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */,
-				D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */,
 				D4646CB829E2922D00987C8E /* CanvasLayers.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
@@ -198,9 +197,9 @@
 			isa = PBXGroup;
 			children = (
 				D40D976729DAB09C00A82E6A /* Brush.swift */,
-				D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */,
+				D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */,
 				D40D976629DAB09C00A82E6A /* Eraser.swift */,
-				D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */,
+				D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */,
 				D4934F412ADA36C500C52B76 /* DrawingTool.swift */,
 			);
 			path = Drawing;
@@ -257,6 +256,7 @@
 			isa = PBXGroup;
 			children = (
 				D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */,
+				D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -486,7 +486,7 @@
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
-				D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */,
+				D40D976F29DAB09D00A82E6A /* EraserDrawingTexture.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
@@ -511,11 +511,11 @@
 				D40D976B29DAB09D00A82E6A /* Eraser.swift in Sources */,
 				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
-				D40D976E29DAB09D00A82E6A /* CanvasDrawingLayer.swift in Sources */,
+				D40D976E29DAB09D00A82E6A /* DrawingTextureProtocol.swift in Sources */,
 				D40D97A129DAB0DF00A82E6A /* MTLDeviceExtensions.swift in Sources */,
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */,
-				D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */,
+				D40D976D29DAB09D00A82E6A /* BrushDrawingTexture.swift in Sources */,
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,

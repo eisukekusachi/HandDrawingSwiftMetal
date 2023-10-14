@@ -31,8 +31,10 @@ class DefaultLayers: CanvasLayers {
         clear()
     }
     
-    func flatAllLayers(currentLayer: [MTLTexture?], backgroundColor: (Int, Int, Int), toDisplayTexture displayTexture: MTLTexture) {
-        
+    func flatAllLayers(currentTextures: [MTLTexture?],
+                       backgroundColor: (Int, Int, Int),
+                       toDisplayTexture displayTexture: MTLTexture) {
+
         let commandBuffer = canvas.commandBuffer
         
         Command.fill(displayTexture,
@@ -40,7 +42,7 @@ class DefaultLayers: CanvasLayers {
                      commandBuffer)
         
         Command.merge(dst: displayTexture,
-                      textures: currentLayer,
+                      textures: currentTextures,
                       commandBuffer)
     }
     

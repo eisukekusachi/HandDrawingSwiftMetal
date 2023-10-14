@@ -18,6 +18,8 @@ protocol CanvasLayers {
     init(canvas: Canvas)
     func initalizeLayers(layerSize: CGSize)
     
-    func flatAllLayers(currentLayer: [MTLTexture?], backgroundColor: (Int, Int, Int), toDisplayTexture displayTexture: MTLTexture)
+    func flatAllLayers(currentTextures: [MTLTexture?],
+                       backgroundColor: (Int, Int, Int),
+                       toDisplayTexture displayTexture: MTLTexture)
     func clear()
 }

@@ -9,7 +9,7 @@ import UIKit
 
 class Canvas: TextureDisplayView {
 
-    var currentLayer: MTLTexture {
+    var currentTexture: MTLTexture {
         return layers.currentLayer
     }
     
@@ -21,10 +21,9 @@ class Canvas: TextureDisplayView {
     /// A manager of one finger drag or two fingers pinch.
     private let actionStateManager = ActionStateManager()
 
-
-    private var drawingLayer: CanvasDrawingLayer?
-    private var brushDrawingLayer: BrushDrawingLayer!
-    private var eraserDrawingLayer: EraserDrawingLayer!
+    private var drawingTexture: DrawingTextureProtocol?
+    private var brushDrawingTexture: BrushDrawingTexture!
+    private var eraserDrawingTexture: EraserDrawingTexture!
 
     private var transforming: Transforming = TransformingImpl()
 
@@ -50,12 +49,8 @@ class Canvas: TextureDisplayView {
         assert(self.device != nil, "device is nil.")
         assert(cq != nil, "commandQueue is nil.")
 
-        brushDrawingLayer = BrushDrawingLayer(canvas: self,
-                                              drawingtoolDiameter: 8,
-                                              brushColor: .black)
-        eraserDrawingLayer = EraserDrawingLayer(canvas: self,
-                                                drawingtoolDiameter: 32,
-                                                eraserAlpha: 200)
+        brushDrawingTexture = BrushDrawingTexture(canvas: self)
+        eraserDrawingTexture = EraserDrawingTexture(canvas: self)
 
         Pipeline.initalization(self.device!)
 
@@ -81,8 +76,8 @@ class Canvas: TextureDisplayView {
 
         layers.initalizeLayers(layerSize: textureSize)
 
-        brushDrawingLayer.initalizeTextures(textureSize: textureSize)
-        eraserDrawingLayer.initalizeTextures(textureSize: textureSize)
+        brushDrawingTexture.initalizeTextures(textureSize: textureSize)
+        eraserDrawingTexture.initalizeTextures(textureSize: textureSize)
     }
 
     func inject(layers: CanvasLayers) {
@@ -95,12 +90,12 @@ class Canvas: TextureDisplayView {
         fingerPoints.reset()
         pencilPoints.reset()
 
-        drawingLayer?.clear()
+        drawingTexture?.clearDrawingTextures()
     }
     func refreshDisplayTexture() {
-        guard let drawingLayer else { return }
+        guard let drawingTexture else { return }
 
-        layers.flatAllLayers(currentLayer: drawingLayer.currentLayer,
+        layers.flatAllLayers(currentTextures: drawingTexture.currentTextures,
                              backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                              toDisplayTexture: displayTexture)
     }
@@ -108,7 +103,7 @@ class Canvas: TextureDisplayView {
 
 extension Canvas: PencilGestureRecognizerSender {
     func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [TouchPoint], touchState: TouchState) {
-        guard let drawingLayer else { return }
+        guard let drawingTexture else { return }
 
         // Cancel drawing a line when the currentInput is the finger input.
         if inputManager.currentInput is FingerGestureRecognizer {
@@ -125,10 +120,10 @@ extension Canvas: PencilGestureRecognizerSender {
         pencilPoints.appendPoints(touchLocations)
 
         let iterator = pencilPoints.getIterator(endProcessing: touchState == .ended)
-        drawingLayer.drawOnDrawingLayer(with: iterator, touchState: touchState)
+        drawingTexture.drawOnDrawingTexture(with: iterator, touchState: touchState)
 
         if touchState == .ended {
-            drawingLayer.mergeDrawingLayerIntoCurrentLayer()
+            drawingTexture.mergeDrawingTexture(into: currentTexture)
             prepareForNewDrawing()
         }
 
@@ -150,7 +145,7 @@ extension Canvas: PencilGestureRecognizerSender {
 
 extension Canvas: FingerGestureRecognizerSender {
     func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: TouchPoint], touchState: TouchState) {
-        guard let drawingLayer else { return }
+        guard let drawingTexture else { return }
 
         if touchState == .began {
             inputManager.update(input)
@@ -166,10 +161,10 @@ extension Canvas: FingerGestureRecognizerSender {
         if actionStateManager.currentState == .drawingOnCanvas {
 
             let iterator = fingerPoints.getIterator(endProcessing: touchState == .ended)
-            drawingLayer.drawOnDrawingLayer(with: iterator, touchState: touchState)
+            drawingTexture.drawOnDrawingTexture(with: iterator, touchState: touchState)
 
             if touchState == .ended {
-                drawingLayer.mergeDrawingLayerIntoCurrentLayer()
+                drawingTexture.mergeDrawingTexture(into: currentTexture)
                 prepareForNewDrawing()
             }
 
@@ -207,7 +202,7 @@ extension Canvas: FingerGestureRecognizerSender {
 extension Canvas {
     var drawingTool: DrawingTool {
         get {
-            if drawingLayer is EraserDrawingLayer {
+            if drawingTexture is EraserDrawingTexture {
                 return .eraser
             } else {
                 return .brush
@@ -215,31 +210,31 @@ extension Canvas {
         }
         set {
             if newValue == .eraser {
-                drawingLayer = eraserDrawingLayer
+                drawingTexture = eraserDrawingTexture
             } else {
-                drawingLayer = brushDrawingLayer
+                drawingTexture = brushDrawingTexture
             }
         }
     }
 
     var brushDiameter: Int {
-        brushDrawingLayer.brush.diameter
+        brushDrawingTexture.brush.diameter
     }
     func setBrushDiameter(_ diameter: Int) {
-        brushDrawingLayer.brush.diameter = diameter
+        brushDrawingTexture.brush.diameter = diameter
     }
     func setBrushColor(_ color: UIColor) {
-        brushDrawingLayer.brush.setValue(color: color)
+        brushDrawingTexture.brush.setValue(color: color)
     }
 
     var eraserDiameter: Int {
-        eraserDrawingLayer.eraser.diameter
+        eraserDrawingTexture.eraser.diameter
     }
     func setEraserDiameter(_ diameter: Int) {
-        eraserDrawingLayer.eraser.diameter = diameter
+        eraserDrawingTexture.eraser.diameter = diameter
     }
     func setEraserAlpha(_ alpha: Int) {
-        eraserDrawingLayer.eraser.setValue(alpha: alpha)
+        eraserDrawingTexture.eraser.setValue(alpha: alpha)
     }
 
     func clear() {
