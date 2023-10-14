@@ -9,7 +9,7 @@ import UIKit
 
 protocol FingerGestureRecognizerSender {
     
-    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState)
+    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: TouchPoint], touchState: TouchState)
     func cancel(_ input: FingerGestureRecognizer?)
 }
 
@@ -32,37 +32,37 @@ class FingerGestureRecognizer: UIGestureRecognizer {
 extension FingerGestureRecognizer {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: Point] = [:]
-        
+        var locations: [Int: TouchPoint] = [:]
+
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
                 
-                locations[key] = PointImpl(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
         output?.sendLocations(self, touchLocations: locations, touchState: .began)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: Point] = [:]
-        
+        var locations: [Int: TouchPoint] = [:]
+
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
                 
-                locations[key] = PointImpl(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
         output?.sendLocations(self, touchLocations: locations, touchState: .moved)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: Point] = [:]
-        
+        var locations: [Int: TouchPoint] = [:]
+
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
                 
-                locations[key] = PointImpl(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
         output?.sendLocations(self, touchLocations: locations, touchState: .ended)

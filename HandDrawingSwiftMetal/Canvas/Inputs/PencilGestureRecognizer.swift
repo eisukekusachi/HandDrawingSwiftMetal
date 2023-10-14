@@ -9,7 +9,7 @@ import UIKit
 
 protocol PencilGestureRecognizerSender {
     
-    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState)
+    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [TouchPoint], touchState: TouchState)
     func cancel(_ input: PencilGestureRecognizer?)
 }
 
@@ -49,8 +49,8 @@ extension PencilGestureRecognizer {
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        var locations: [Point] = []
-        
+        var locations: [TouchPoint] = []
+
         var isActiveFlag: Bool = false
         
         if let view = view,
@@ -62,7 +62,7 @@ extension PencilGestureRecognizer {
                 if touch.type == .pencil {
                     
                     if isGestureActive {
-                        locations.append(PointImpl(touch: touch, view: view))
+                        locations.append(TouchPoint(touch: touch, view: view))
                     }
                     
                     if isActiveFlag == false, isGestureActive == false, let force = latestForceValue, force != touch.force {
@@ -82,8 +82,8 @@ extension PencilGestureRecognizer {
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        var locations: [Point] = []
-        
+        var locations: [TouchPoint] = []
+
         if let view = view,
            let touch = event?.allTouches?.first,
            let coalescedTouches = event?.coalescedTouches(for: touch) {
@@ -92,7 +92,7 @@ extension PencilGestureRecognizer {
                 let touch = coalescedTouches[index]
                 if touch.type == .pencil {
                     
-                    locations.append(PointImpl(touch: touch, view: view))
+                    locations.append(TouchPoint(touch: touch, view: view))
                 }
             }
         }

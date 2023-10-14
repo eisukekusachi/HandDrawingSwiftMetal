@@ -69,7 +69,7 @@ let flippedTextureNodes = TextureCoorinateNodes(
 enum Buffers {
     
     static func makePointBuffers(device: MTLDevice?,
-                                 points: [Point],
+                                 points: [TouchPoint],
                                  blurredSize: BlurredSize,
                                  alpha: Int,
                                  textureSize: CGSize) -> PointBuffers? {

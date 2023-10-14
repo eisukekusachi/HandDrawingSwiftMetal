@@ -20,7 +20,7 @@ protocol CanvasDrawingLayer {
     init(canvas: Canvas)
     func initalizeTextures(textureSize: CGSize)
     
-    func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState)
+    func drawOnDrawingLayer(with iterator: Iterator<TouchPoint>, touchState: TouchState)
     func mergeDrawingLayerIntoCurrentLayer()
     func clear()
 }

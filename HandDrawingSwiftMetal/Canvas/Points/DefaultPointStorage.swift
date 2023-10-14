@@ -9,9 +9,9 @@ import Foundation
 
 class DefaultPointStorage: PointStorage {
     
-    typealias Input = [Point]
-    typealias StoredPoints = [Point]
-    typealias Output = Point
+    typealias Input = [TouchPoint]
+    typealias StoredPoints = [TouchPoint]
+    typealias Output = TouchPoint
     
     var storedPoints: StoredPoints = []
     var iterator = Iterator<Output>()

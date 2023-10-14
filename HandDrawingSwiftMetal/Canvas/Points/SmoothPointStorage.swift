@@ -9,10 +9,10 @@ import Foundation
 
 class SmoothPointStorage: PointStorage {
     
-    typealias Input = [Int: Point]
-    typealias StoredPoints = [Int: [Point]]
-    typealias Output = Point
-    
+    typealias Input = [Int: TouchPoint]
+    typealias StoredPoints = [Int: [TouchPoint]]
+    typealias Output = TouchPoint
+
     var storedPoints: StoredPoints = [:]
     var iterator = Iterator<Output>()
     var iteratorForSmoothCurve = Iterator<Output>()
@@ -47,8 +47,8 @@ class SmoothPointStorage: PointStorage {
 }
 
 extension SmoothPointStorage {
-    static func average(lhs: Point, rhs: Point) -> Point {
-        
+    static func average(lhs: TouchPoint, rhs: TouchPoint) -> TouchPoint {
+
         var point = lhs
         
         let newLocation = CGPoint(x: (lhs.location.x + rhs.location.x) * 0.5,
@@ -56,10 +56,7 @@ extension SmoothPointStorage {
         
         let newAlpha = (lhs.alpha + rhs.alpha) * 0.5
         
-        point.location = newLocation
-        point.alpha = newAlpha
-        
-        return point
+        return TouchPoint(location: newLocation, alpha: newAlpha)
     }
     static func makeSmoothIterator(src: Iterator<Output>, dst: inout Iterator<Output>, endProcessing: Bool) {
         // Add the first point.

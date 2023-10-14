@@ -10,7 +10,7 @@
 		D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDD529DBC340004618CE /* ActionStateManager.swift */; };
 		D40ACDDC29DBEFFD004618CE /* InputManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */; };
 		D40D975229DAB01900A82E6A /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975129DAB01900A82E6A /* Canvas.swift */; };
-		D40D976029DAB09400A82E6A /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* Point.swift */; };
+		D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* TouchPoint.swift */; };
 		D40D976129DAB09400A82E6A /* PointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* PointStorage.swift */; };
 		D40D976229DAB09400A82E6A /* Iterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975C29DAB09400A82E6A /* Iterator.swift */; };
 		D40D976329DAB09400A82E6A /* DefaultPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */; };
@@ -82,7 +82,7 @@
 		D40ACDD529DBC340004618CE /* ActionStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateManager.swift; sourceTree = "<group>"; };
 		D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputManagerTest.swift; sourceTree = "<group>"; };
 		D40D975129DAB01900A82E6A /* Canvas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Canvas.swift; sourceTree = "<group>"; };
-		D40D975A29DAB09400A82E6A /* Point.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Point.swift; sourceTree = "<group>"; };
+		D40D975A29DAB09400A82E6A /* TouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPoint.swift; sourceTree = "<group>"; };
 		D40D975B29DAB09400A82E6A /* PointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointStorage.swift; sourceTree = "<group>"; };
 		D40D975C29DAB09400A82E6A /* Iterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Iterator.swift; sourceTree = "<group>"; };
 		D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultPointStorage.swift; sourceTree = "<group>"; };
@@ -187,7 +187,7 @@
 				D40D975E29DAB09400A82E6A /* Curve.swift */,
 				D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */,
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
-				D40D975A29DAB09400A82E6A /* Point.swift */,
+				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D40D975B29DAB09400A82E6A /* PointStorage.swift */,
 				D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */,
 			);
@@ -516,7 +516,7 @@
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */,
-				D40D976029DAB09400A82E6A /* Point.swift in Sources */,
+				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,

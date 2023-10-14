@@ -107,7 +107,7 @@ class Canvas: TextureDisplayView {
 }
 
 extension Canvas: PencilGestureRecognizerSender {
-    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [Point], touchState: TouchState) {
+    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [TouchPoint], touchState: TouchState) {
         guard let drawingLayer else { return }
 
         // Cancel drawing a line when the currentInput is the finger input.
@@ -149,7 +149,7 @@ extension Canvas: PencilGestureRecognizerSender {
 }
 
 extension Canvas: FingerGestureRecognizerSender {
-    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: Point], touchState: TouchState) {
+    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: TouchPoint], touchState: TouchState) {
         guard let drawingLayer else { return }
 
         if touchState == .began {

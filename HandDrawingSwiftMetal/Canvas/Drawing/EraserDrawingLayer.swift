@@ -59,7 +59,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         clear()
     }
     
-    func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState) {
+    func drawOnDrawingLayer(with iterator: Iterator<TouchPoint>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initalizeTextures() once before here.")
         
         let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))

@@ -16,7 +16,7 @@ enum ActionState: Int {
     static let activatingDrawingCount: Int = 5
     static let activatingTransformingCount: Int = 3
     
-    static func getCurrentState(viewTouches: [Int: [Point]]) -> ActionState {
+    static func getCurrentState(viewTouches: [Int: [TouchPoint]]) -> ActionState {
         var result: ActionState = .recognizing
     
         if result == .recognizing, let actionState = ActionState.isDrawingGestureOrNot(viewTouches: viewTouches) {
@@ -30,7 +30,7 @@ enum ActionState: Int {
         return result
     }
     
-    static func isDrawingGestureOrNot(viewTouches: [Int: [Point]]) -> ActionState? {
+    static func isDrawingGestureOrNot(viewTouches: [Int: [TouchPoint]]) -> ActionState? {
         if viewTouches.count != 1 { return nil }
         
         if let count = viewTouches.first?.count, count > activatingDrawingCount {
@@ -38,7 +38,7 @@ enum ActionState: Int {
         }
         return nil
     }
-    static func isTransformingGestureOrNot(viewTouches: [Int: [Point]]) -> ActionState? {
+    static func isTransformingGestureOrNot(viewTouches: [Int: [TouchPoint]]) -> ActionState? {
         if viewTouches.count != 2 { return nil }
         
         if let countA = viewTouches.first?.count, countA > activatingTransformingCount,

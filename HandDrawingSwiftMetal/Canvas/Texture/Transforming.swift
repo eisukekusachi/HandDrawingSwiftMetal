@@ -20,15 +20,15 @@ protocol Transforming {
     
     func setInitialValue(scale: CGFloat, position: CGPoint)
     
-    func update(viewTouches: [Int: [Point]], viewSize: CGSize) -> CGAffineTransform?
+    func update(viewTouches: [Int: [TouchPoint]], viewSize: CGSize) -> CGAffineTransform?
     func endTransforming(_ matrix: CGAffineTransform)
     
     func reset()
 }
 
 extension Transforming {
-    func makeTransformationData(_ pointDictionary: [Int: [Point]]) -> TransformationData? {
-        
+    func makeTransformationData(_ pointDictionary: [Int: [TouchPoint]]) -> TransformationData? {
+
         if pointDictionary.count == 2 {
             
             let pointsA = pointDictionary.first
@@ -40,8 +40,8 @@ extension Transforming {
         return nil
     }
     
-    func makeMatrix(_ pointDictionary: [Int: [Point]], viweSize: CGSize) -> CGAffineTransform? {
-        
+    func makeMatrix(_ pointDictionary: [Int: [TouchPoint]], viweSize: CGSize) -> CGAffineTransform? {
+
         guard let transformationData = makeTransformationData(pointDictionary),
               let newMatrix = makeMatrix(center: Calc.getCenter(viweSize),
                                          pointsA: transformationData.pointsA,
@@ -112,7 +112,7 @@ class TransformingImpl: Transforming {
         self.initialPosition = position
     }
     
-    func update(viewTouches: [Int: [Point]], viewSize: CGSize) -> CGAffineTransform? {
+    func update(viewTouches: [Int: [TouchPoint]], viewSize: CGSize) -> CGAffineTransform? {
         guard let data = makeTransformationData(viewTouches),
               let newMatrix = makeMatrix(center: Calc.getCenter(viewSize),
                                          pointsA: data.pointsA,
