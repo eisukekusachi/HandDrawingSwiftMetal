@@ -16,7 +16,7 @@ protocol Transforming {
     
     var initialScale: CGFloat { get }
     var initialPosition: CGPoint { get }
-    var storedMatrix: CGAffineTransform { get }
+    var storedMatrix: CGAffineTransform { get set }
     
     func setInitialValue(scale: CGFloat, position: CGPoint)
     

@@ -20,9 +20,6 @@ struct BlurredSize {
 
 struct Brush {
     
-    static let minDiameter: Int = 1
-    static let maxDiameter: Int = 64
-    
     var rgb: (Int, Int, Int) = (0, 0, 0)
     var alpha: Int = 200
     
@@ -92,5 +89,17 @@ struct Brush {
         if let diameter = diameter {
             self.diameter = diameter
         }
+    }
+}
+
+extension Brush {
+    static let minDiameter: Int = 1
+    static let maxDiameter: Int = 64
+
+    static func diameterIntValue(_ value: Float) -> Int {
+        Int(value * Float(maxDiameter - minDiameter)) + minDiameter
+    }
+    static func diameterFloatValue(_ value: Int) -> Float {
+        Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

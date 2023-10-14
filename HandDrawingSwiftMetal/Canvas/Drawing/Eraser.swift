@@ -11,9 +11,6 @@ let initEraserSize: Int = 8
 
 struct Eraser {
     
-    static let minDiameter: Int = 1
-    static let maxDiameter: Int = 64
-    
     var alpha: Int = 200
     var diameter: Int = initEraserSize
     var blurSize: Float = initBlurSize
@@ -29,5 +26,17 @@ struct Eraser {
         if let diameter = diameter {
             self.diameter = diameter
         }
+    }
+}
+
+extension Eraser {
+    static let minDiameter: Int = 1
+    static let maxDiameter: Int = 64
+
+    static func diameterIntValue(_ value: Float) -> Int {
+        Int(value * Float(maxDiameter - minDiameter)) + minDiameter
+    }
+    static func diameterFloatValue(_ value: Int) -> Float {
+        Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

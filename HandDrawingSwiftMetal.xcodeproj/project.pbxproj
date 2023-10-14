@@ -45,6 +45,7 @@
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */; };
 		D48A7E1329DACA8600D235B1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */; };
+		D4934F422ADA36C500C52B76 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingTool.swift */; };
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
@@ -113,6 +114,7 @@
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorTest.swift; sourceTree = "<group>"; };
 		D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
+		D4934F412ADA36C500C52B76 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */,
 				D40D976629DAB09C00A82E6A /* Eraser.swift */,
 				D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */,
+				D4934F412ADA36C500C52B76 /* DrawingTool.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -500,6 +503,7 @@
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D40D975229DAB01900A82E6A /* Canvas.swift in Sources */,
 				D40D977B29DAB0B400A82E6A /* PencilGestureRecognizer.swift in Sources */,
+				D4934F422ADA36C500C52B76 /* DrawingTool.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
