@@ -14,7 +14,7 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     
     var textureSize: CGSize = .zero
     
-    var canvas: CanvasDrawingProtocol
+    var canvas: Canvas
     var currentLayer: [MTLTexture?] {
         return [canvas.currentLayer,
                 drawingTexture]
@@ -32,10 +32,10 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     
-    required init(canvas: CanvasDrawingProtocol) {
+    required init(canvas: Canvas) {
         self.canvas = canvas
     }
-    required init(canvas: CanvasDrawingProtocol, drawingtoolDiameter: Int? = nil, brushColor: UIColor? = nil) {
+    required init(canvas: Canvas, drawingtoolDiameter: Int? = nil, brushColor: UIColor? = nil) {
         self.canvas = canvas
         
         self.brush.setValue(color: brushColor, diameter: drawingtoolDiameter)
@@ -44,9 +44,9 @@ class BrushDrawingLayer: CanvasDrawingLayer {
         
         if self.textureSize != textureSize {
             self.textureSize = textureSize
-            
-            self.drawingTexture = canvas.mtlDevice.makeTexture(textureSize)
-            self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
+
+            self.drawingTexture = canvas.device!.makeTexture(textureSize)
+            self.grayscaleTexture = canvas.device!.makeTexture(textureSize)
         }
         
         clear()
@@ -55,16 +55,16 @@ class BrushDrawingLayer: CanvasDrawingLayer {
     func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initalizeTextures() once before here.")
         
-        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.size, to: textureSize))
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,
                                       matrix: inverseMatrix,
-                                      srcSize: canvas.size,
+                                      srcSize: canvas.frame.size,
                                       dstSize: textureSize,
                                       endProcessing: touchState == .ended)
         
         guard points.count != 0 else { return }
         
-        let pointBuffers = Buffers.makePointBuffers(device: canvas.mtlDevice,
+        let pointBuffers = Buffers.makePointBuffers(device: canvas.device!,
                                                     points: points,
                                                     blurredSize: brush.blurredSize,
                                                     alpha: brush.alpha,

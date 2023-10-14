@@ -6,35 +6,9 @@
 //
 
 import UIKit
-import MetalKit
 
-protocol CanvasDrawingProtocol {
-    
-    var mtlDevice: MTLDevice { get }
-    
-    var commandBuffer: MTLCommandBuffer? { get }
-    
-    var size: CGSize { get }
-    var matrix: CGAffineTransform { get }
-    var currentLayer: MTLTexture { get }
-}
-protocol CanvasTextureLayerProtocol {
-    
-    var mtlDevice: MTLDevice { get }
-    var commandBuffer: MTLCommandBuffer? { get }
-}
+class Canvas: TextureDisplayView {
 
-class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLayerProtocol {
-
-    var mtlDevice: MTLDevice {
-        return self.device!
-    }
-    var size: CGSize {
-        return frame.size
-    }
-    var commandBuffer: MTLCommandBuffer? {
-        return commandQueue.getBuffer()
-    }
     var currentLayer: MTLTexture {
         return layers.currentLayer
     }
@@ -54,11 +28,6 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
 
     private var transforming: Transforming = TransformingImpl()
 
-    var matrix: CGAffineTransform = CGAffineTransform.identity
-    
-    var textureSize: CGSize!
-    var displayTexture: MTLTexture!
-    
     private lazy var layers: CanvasLayers = DefaultLayers(canvas: self)
     
     private lazy var fingerInput = FingerGestureRecognizer(output: self)
@@ -67,8 +36,6 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     private var pencilPoints = DefaultPointStorage()
     private var fingerPoints = SmoothPointStorage()
 
-    private var displayLink: CADisplayLink?
-    
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()
@@ -79,10 +46,10 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     }
     private func commonInit() {
         self.device = MTLCreateSystemDefaultDevice()
-        let myCommandQueue = self.device!.makeCommandQueue()
+        let cq = self.device!.makeCommandQueue()
         assert(self.device != nil, "device is nil.")
-        assert(myCommandQueue != nil, "commandQueue is nil.")
-        
+        assert(cq != nil, "commandQueue is nil.")
+
         brushDrawingLayer = BrushDrawingLayer(canvas: self,
                                               drawingtoolDiameter: 8,
                                               brushColor: .black)
@@ -90,20 +57,10 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
                                                 drawingtoolDiameter: 32,
                                                 eraserAlpha: 200)
 
-        Pipeline.initalization(mtlDevice)
+        Pipeline.initalization(self.device!)
 
-        commandQueue = CommandQueueImpl(queue: myCommandQueue!)
+        commandQueue = CommandQueue(queue: cq!)
 
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
-        
-        self.delegate = self
-        self.enableSetNeedsDisplay = true
-        self.autoResizeDrawable = true
-        self.isMultipleTouchEnabled = true
-        self.backgroundColor = .white
-        
         addGestureRecognizer(fingerInput)
         addGestureRecognizer(pencilInput)
     }
@@ -120,14 +77,9 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
     }
     
     func initalizeTextures(textureSize: CGSize) {
-        let minSize: CGFloat = CGFloat(Command.threadgroupSize)
-        assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
-        
-        self.textureSize = textureSize
-        
-        displayTexture = mtlDevice.makeTexture(textureSize)
-        layers.initalizeLayers(layerSize: textureSize)
+        super.initializeTextures(textureSize: textureSize)
 
+        layers.initalizeLayers(layerSize: textureSize)
 
         brushDrawingLayer.initalizeTextures(textureSize: textureSize)
         eraserDrawingLayer.initalizeTextures(textureSize: textureSize)
@@ -144,19 +96,6 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
         pencilPoints.reset()
 
         drawingLayer?.clear()
-        displayLink?.isPaused = true
-    }
-    func setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: Bool) {
-        
-        if !pauseDisplayLink {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-            
-        } else {
-            displayLink?.isPaused = true
-            setNeedsDisplay()
-        }
     }
     func refreshDisplayTexture() {
         guard let drawingLayer else { return }
@@ -164,43 +103,6 @@ class Canvas: MTKView, MTKViewDelegate, CanvasDrawingProtocol, CanvasTextureLaye
         layers.flatAllLayers(currentLayer: drawingLayer.currentLayer,
                              backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                              toDisplayTexture: displayTexture)
-    }
-    
-    
-    // MARK: MTKViewDelegate
-    func draw(in view: MTKView) {
-        guard let drawable = view.currentDrawable else { return }
-        
-        var canvasMatrix = matrix
-        canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
-        canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
-        
-        let textureBuffers = Buffers.makeTextureBuffers(device: mtlDevice,
-                                                        textureSize: displayTexture.size,
-                                                        drawableSize: drawable.texture.size,
-                                                        matrix: canvasMatrix,
-                                                        nodes: textureNodes)
-        
-        let commandBuffer = commandQueue.getBuffer()
-        
-        Command.draw(texture: displayTexture,
-                     buffers: textureBuffers,
-                     on: drawable.texture,
-                     clearColor: (230, 230, 230),
-                     commandBuffer)
-        
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-        
-        commandQueue.disposeCommands()
-    }
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
-    
-    
-    // MARK: Events
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
     }
 }
 
@@ -231,7 +133,7 @@ extension Canvas: PencilGestureRecognizerSender {
         }
 
         refreshDisplayTexture()
-        setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: touchState == .ended)
+        runDisplayLinkLoop(touchState != .ended)
 
         if touchState == .ended {
             inputManager.reset()
@@ -272,7 +174,7 @@ extension Canvas: FingerGestureRecognizerSender {
             }
 
             refreshDisplayTexture()
-            setNeedsDisplayByRunningDisplayLink(pauseDisplayLink: touchState == .ended)
+            runDisplayLinkLoop(touchState != .ended)
         }
 
         if actionStateManager.currentState == .transformingCanvas {
@@ -299,13 +201,6 @@ extension Canvas: FingerGestureRecognizerSender {
         guard inputManager.currentInput is FingerGestureRecognizer else { return }
 
         prepareForNewDrawing()
-    }
-}
-
-
-private extension MTLTexture {
-    var size: CGSize {
-        return CGSize(width: self.width, height: self.height)
     }
 }
 

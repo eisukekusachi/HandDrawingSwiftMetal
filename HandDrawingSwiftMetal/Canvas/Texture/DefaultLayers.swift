@@ -9,7 +9,7 @@ import MetalKit
 
 class DefaultLayers: CanvasLayers {
     
-    var canvas: CanvasTextureLayerProtocol!
+    var canvas: Canvas!
     var currentLayer: MTLTexture {
         return layer
     }
@@ -17,7 +17,7 @@ class DefaultLayers: CanvasLayers {
     var layer: MTLTexture!
     var layerSize: CGSize = .zero
     
-    required init(canvas: CanvasTextureLayerProtocol) {
+    required init(canvas: Canvas) {
         self.canvas = canvas
     }
     func initalizeLayers(layerSize: CGSize) {
@@ -25,7 +25,7 @@ class DefaultLayers: CanvasLayers {
         if self.layerSize != layerSize {
             self.layerSize = layerSize
             
-            self.layer = canvas.mtlDevice.makeTexture(layerSize)
+            self.layer = canvas.device!.makeTexture(layerSize)
         }
         
         clear()

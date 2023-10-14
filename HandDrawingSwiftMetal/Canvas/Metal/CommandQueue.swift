@@ -5,34 +5,26 @@
 //  Created by Eisuke Kusachi on 2022/11/03.
 //
 
-import Foundation
 import MetalKit
 
-protocol CommandQueue {
-    
-    var buffer: MTLCommandBuffer? { get }
-    var queue: MTLCommandQueue { get }
-    
-    mutating func getBuffer() -> MTLCommandBuffer
-    mutating func disposeCommands()
-}
+class CommandQueue: CommandQueueProtocol {
+    let queue: MTLCommandQueue
 
-struct CommandQueueImpl: CommandQueue {
-    
-    var buffer: MTLCommandBuffer?
-    var queue: MTLCommandQueue
-    
+    private var buffer: MTLCommandBuffer?
+
     init(queue: MTLCommandQueue) {
         self.queue = queue
     }
-    
-    mutating func getBuffer() -> MTLCommandBuffer {
+
+    /// Return the buffer if available, create the buffer if not.
+    func getOrCreateCommandBuffer() -> MTLCommandBuffer {
         if buffer == nil {
             buffer = queue.makeCommandBuffer()
         }
         return buffer!
     }
-    mutating func disposeCommands() {
+
+    func disposeCommandBuffer() {
         self.buffer = nil
     }
 }

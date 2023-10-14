@@ -14,7 +14,7 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     
     var textureSize: CGSize = .zero
     
-    var canvas: CanvasDrawingProtocol
+    var canvas: Canvas
     var currentLayer: [MTLTexture?] {
         return isDrawing ? [eraserTexture] : [canvas.currentLayer]
     }
@@ -36,14 +36,14 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     
     private var isDrawing: Bool = false
     
-    required init(canvas: CanvasDrawingProtocol) {
+    required init(canvas: Canvas) {
         self.canvas = canvas
-        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
+        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.device!, nodes: flippedTextureNodes)
     }
-    required init(canvas: CanvasDrawingProtocol, drawingtoolDiameter: Int? = nil, eraserAlpha: Int? = nil) {
+    required init(canvas: Canvas, drawingtoolDiameter: Int? = nil, eraserAlpha: Int? = nil) {
         self.canvas = canvas
-        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.mtlDevice, nodes: flippedTextureNodes)
-        
+        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.device!, nodes: flippedTextureNodes)
+
         self.eraser.setValue(alpha: eraserAlpha, diameter: drawingtoolDiameter)
     }
     func initalizeTextures(textureSize: CGSize) {
@@ -51,9 +51,9 @@ class EraserDrawingLayer: CanvasDrawingLayer {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
             
-            self.drawingTexture = canvas.mtlDevice.makeTexture(textureSize)
-            self.grayscaleTexture = canvas.mtlDevice.makeTexture(textureSize)
-            self.eraserTexture = canvas.mtlDevice.makeTexture(textureSize)
+            self.drawingTexture = canvas.device!.makeTexture(textureSize)
+            self.grayscaleTexture = canvas.device!.makeTexture(textureSize)
+            self.eraserTexture = canvas.device!.makeTexture(textureSize)
         }
         
         clear()
@@ -62,16 +62,16 @@ class EraserDrawingLayer: CanvasDrawingLayer {
     func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initalizeTextures() once before here.")
         
-        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.size, to: textureSize))
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,
                                       matrix: inverseMatrix,
-                                      srcSize: canvas.size,
+                                      srcSize: canvas.frame.size,
                                       dstSize: textureSize,
                                       endProcessing: touchState == .ended)
         
         guard points.count != 0 else { return }
         
-        let pointBuffers = Buffers.makePointBuffers(device: canvas.mtlDevice,
+        let pointBuffers = Buffers.makePointBuffers(device: canvas.device!,
                                                     points: points,
                                                     blurredSize: eraser.blurredSize,
                                                     alpha: eraser.alpha,

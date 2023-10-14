@@ -12,12 +12,12 @@ protocol CanvasDrawingLayer {
     
     var textureSize: CGSize { get }
     
-    var canvas: CanvasDrawingProtocol { get }
+    var canvas: Canvas { get }
     var currentLayer: [MTLTexture?] { get }
     
     var drawingtoolDiameter: Int { get set }
     
-    init(canvas: CanvasDrawingProtocol)
+    init(canvas: Canvas)
     func initalizeTextures(textureSize: CGSize)
     
     func drawOnDrawingLayer(with iterator: Iterator<Point>, touchState: TouchState)
