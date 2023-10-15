@@ -12,8 +12,6 @@ class Canvas: TextureDisplayView {
     var currentTexture: MTLTexture {
         return layers.currentLayer
     }
-    
-    var commandQueue: CommandQueue!
 
     /// A manager of finger input and pen input.
     private let inputManager = InputManager()
@@ -44,17 +42,10 @@ class Canvas: TextureDisplayView {
         commonInit()
     }
     private func commonInit() {
-        self.device = MTLCreateSystemDefaultDevice()
-        let cq = self.device!.makeCommandQueue()
-        assert(self.device != nil, "device is nil.")
-        assert(cq != nil, "commandQueue is nil.")
-
         brushDrawingTexture = BrushDrawingTexture(canvas: self)
         eraserDrawingTexture = EraserDrawingTexture(canvas: self)
 
         _ = Pipeline.shared
-
-        commandQueue = CommandQueue(queue: cq!)
 
         addGestureRecognizer(fingerInput)
         addGestureRecognizer(pencilInput)
