@@ -9,15 +9,11 @@ import Foundation
 import MetalKit
 
 enum Command {
-    
     static let threadgroupSize: Int = 16
 
     static func drawCurve(buffers: PointBuffers?,
                           onGrayscaleTexture texture: MTLTexture?,
                           _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.drawGrayPoints != nil, "Call Pipeline.initalization() before here.")
-        
         guard let buffers = buffers else { return }
         
         var blurSize: Float = buffers.blurSize
@@ -26,7 +22,7 @@ enum Command {
         descriptor.colorAttachments[0].loadAction = .load
         
         let encoder = commandBuffer?.makeRenderCommandEncoder(descriptor: descriptor)
-        encoder?.setRenderPipelineState(Pipeline.drawGrayPoints)
+        encoder?.setRenderPipelineState(Pipeline.shared.drawGrayPoints)
         encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
         encoder?.setVertexBuffer(buffers.diameterIncludingBlurBuffer, offset: 0, index: 1)
         encoder?.setVertexBuffer(buffers.alphaBuffer, offset: 0, index: 2)
@@ -40,7 +36,6 @@ enum Command {
                      on dst: MTLTexture?,
                      clearColor color: (Int, Int, Int),
                      _ commandBuffer: MTLCommandBuffer?) {
-        
         guard let buffers = buffers,
               let src = texture,
               let dst = dst else {
@@ -57,7 +52,7 @@ enum Command {
         descriptor.colorAttachments[0].loadAction = .clear
         
         let encoder = commandBuffer?.makeRenderCommandEncoder(descriptor: descriptor)
-        encoder?.setRenderPipelineState(Pipeline.drawTexture)
+        encoder?.setRenderPipelineState(Pipeline.shared.drawTexture)
         encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
         encoder?.setVertexBuffer(buffers.texCoordsBuffer, offset: 0, index: 1)
         encoder?.setFragmentTexture(src, index: 0)
@@ -73,9 +68,6 @@ enum Command {
                                  src: MTLTexture?,
                                  result dst: MTLTexture?,
                                  _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.erase != nil, "Call Pipeline.initalization() before here.")
-        
         guard let buffers = buffers,
               let src = src,
               let dst = dst else {
@@ -86,7 +78,7 @@ enum Command {
         descriptor.colorAttachments[0].loadAction = .load
         
         let encoder = commandBuffer?.makeRenderCommandEncoder(descriptor: descriptor)
-        encoder?.setRenderPipelineState(Pipeline.erase)
+        encoder?.setRenderPipelineState(Pipeline.shared.erase)
         encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
         encoder?.setVertexBuffer(buffers.texCoordsBuffer, offset: 0, index: 1)
         encoder?.setFragmentTexture(src, index: 0)
@@ -102,9 +94,6 @@ enum Command {
                          with rgb: (Int, Int, Int),
                          result dst: MTLTexture?,
                          _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.colorize != nil, "Call Pipeline.initalization() before here.")
-        
         guard let src = grayscaleTexture,
               let dst = dst else {
             return
@@ -125,7 +114,7 @@ enum Command {
                              1.0]
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(Pipeline.colorize)
+        encoder?.setComputePipelineState(Pipeline.shared.colorize)
         encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
         encoder?.setTexture(dst, index: 0)
         encoder?.setTexture(src, index: 1)
@@ -134,15 +123,11 @@ enum Command {
     }
     
     static func fill(_ dst: MTLTexture?, withRGB rgb: (Int, Int, Int), _ commandBuffer: MTLCommandBuffer?) {
-        
         fill(dst, withRGBA: (rgb.0, rgb.1, rgb.2, 255), commandBuffer)
     }
     static func fill(_ dst: MTLTexture?,
                      withRGBA rgba: (Int, Int, Int, Int),
                      _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.fillColor != nil, "Call Pipeline.initalization() before here.")
-        
         guard let dst = dst else {
             return
         }
@@ -164,7 +149,7 @@ enum Command {
         )
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(Pipeline.fillColor)
+        encoder?.setComputePipelineState(Pipeline.shared.fillColor)
         encoder?.setBytes(&nRgba, length: nRgba.count * MemoryLayout<Float>.size, index: 0)
         encoder?.setTexture(dst, index: 0)
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
@@ -173,15 +158,11 @@ enum Command {
     
     
     static func merge(dst: MTLTexture?, textures: [MTLTexture?], _ commandBuffer: MTLCommandBuffer?) {
-        
         textures.forEach {
             merge(dst: dst, texture: $0, commandBuffer)
         }
     }
     static func merge(dst: MTLTexture?, texture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.merge != nil, "Call Pipeline.initalization() before here.")
-        
         guard let src = texture,
               let dst = dst else {
             return
@@ -199,7 +180,7 @@ enum Command {
         )
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(Pipeline.merge)
+        encoder?.setComputePipelineState(Pipeline.shared.merge)
         encoder?.setTexture(dst, index: 0)
         encoder?.setTexture(dst, index: 1)
         encoder?.setTexture(src, index: 2)
@@ -208,15 +189,11 @@ enum Command {
     }
     
     static func clear(textures: [MTLTexture?], _ commandBuffer: MTLCommandBuffer?) {
-        
         textures.forEach {
             clear(texture: $0, commandBuffer)
         }
     }
     static func clear(texture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.fillColor != nil, "Call Pipeline.initalization() before here.")
-        
         guard let texture = texture else {
             return
         }
@@ -233,16 +210,13 @@ enum Command {
         var rgba: [Float] = [0.0, 0.0, 0.0, 0.0]
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(Pipeline.fillColor)
+        encoder?.setComputePipelineState(Pipeline.shared.fillColor)
         encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
         encoder?.setTexture(texture, index: 0)
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
     static func copy(dst: MTLTexture?, src: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        
-        assert(Pipeline.copy != nil, "Call Pipeline.initalization() before here.")
-        
         guard let src = src,
               let dst = dst else { return }
         let threadgroupSize = MTLSize(width: Int(dst.width / 16),
@@ -257,7 +231,7 @@ enum Command {
         )
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(Pipeline.copy)
+        encoder?.setComputePipelineState(Pipeline.shared.copy)
         encoder?.setTexture(dst, index: 0)
         encoder?.setTexture(src, index: 1)
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)

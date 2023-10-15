@@ -52,7 +52,7 @@ class Canvas: TextureDisplayView {
         brushDrawingTexture = BrushDrawingTexture(canvas: self)
         eraserDrawingTexture = EraserDrawingTexture(canvas: self)
 
-        Pipeline.initalization(self.device!)
+        _ = Pipeline.shared
 
         commandQueue = CommandQueue(queue: cq!)
 
