@@ -149,10 +149,10 @@ extension Canvas: FingerGestureRecognizerSender {
 
         fingerPoints.appendPoints(touchLocations)
 
-        let currentActionState = ActionState.getCurrentState(viewTouches: fingerPoints.storedPoints)
+        let currentActionState = ActionStateManager.getState(touchPoints: fingerPoints.storedPoints)
         actionStateManager.update(currentActionState)
 
-        if actionStateManager.currentState == .drawingOnCanvas {
+        if actionStateManager.state == .drawingOnCanvas {
 
             let iterator = fingerPoints.getIterator(endProcessing: touchState == .ended)
             drawingTexture.drawOnDrawingTexture(with: iterator, touchState: touchState)
@@ -166,7 +166,7 @@ extension Canvas: FingerGestureRecognizerSender {
             runDisplayLinkLoop(touchState != .ended)
         }
 
-        if actionStateManager.currentState == .transformingCanvas {
+        if actionStateManager.state == .transformingCanvas {
             if let matrix = transforming.update(viewTouches: fingerPoints.storedPoints,
                                                 viewSize: frame.size) {
                 self.matrix = matrix

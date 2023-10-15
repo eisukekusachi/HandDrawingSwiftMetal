@@ -225,6 +225,7 @@
 		D40D975629DAB04700A82E6A /* Inputs */ = {
 			isa = PBXGroup;
 			children = (
+				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
 				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
 				D40D977729DAB0B400A82E6A /* FingerGestureRecognizer.swift */,
 				D40D977629DAB0B400A82E6A /* GestureManager.swift */,
@@ -270,7 +271,6 @@
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
-				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
 				D4646CBA29E2932800987C8E /* LayerManager.swift */,
 				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
 			);

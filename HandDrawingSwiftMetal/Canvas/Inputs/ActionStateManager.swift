@@ -8,17 +8,31 @@
 import Foundation
 
 class ActionStateManager {
-    
-    private (set) var currentState: ActionState = .recognizing
-    
-    func update(_ value: ActionState) {
-        if currentState != .recognizing {
+    private (set) var state: ActionState = .recognizing
+
+    func update(_ newState: ActionState) {
+        if state != .recognizing {
             return
         }
-        currentState = value
+        state = newState
     }
-    
+
     func reset() {
-        currentState = .recognizing
+        state = .recognizing
+    }
+}
+
+extension ActionStateManager {
+    static func getState(touchPoints: [Int: [TouchPoint]]) -> ActionState {
+        var result: ActionState = .recognizing
+
+        if let actionState = ActionState.isDrawingGesture(touchPoints: touchPoints) {
+            result = actionState
+
+        } else if let actionState = ActionState.isTransformingGesture(touchPoints: touchPoints) {
+            result = actionState
+        }
+
+        return result
     }
 }
