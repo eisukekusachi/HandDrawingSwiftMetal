@@ -19,7 +19,7 @@ class DefaultPointStorage: TouchPointStorageProtocol {
         return iterator
     }
     
-    func reset() {
+    func clear() {
         storedPoints = []
         iterator.reset()
     }

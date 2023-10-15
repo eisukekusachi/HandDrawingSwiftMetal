@@ -11,5 +11,5 @@ protocol TouchPointStorageProtocol {
     var iterator: Iterator<TouchPoint> { get }
 
     func getIterator(endProcessing: Bool) -> Iterator<TouchPoint>
-    func reset()
+    func clear()
 }

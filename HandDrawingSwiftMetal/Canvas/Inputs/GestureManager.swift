@@ -8,13 +8,13 @@
 import UIKit
 
 class GestureManager {
-    private (set) var currentGesture: UIGestureRecognizer?
+    private (set) var currentGesture: GestureProtocol?
 
     /// If the current gesture is a PencilGestureRecognizer, return it as is without any updates..
     @discardableResult
-    func update(_ gesture: UIGestureRecognizer) -> UIGestureRecognizer? {
+    func update(_ gesture: GestureProtocol) -> GestureProtocol? {
         // Check if the current gesture is a PencilGestureRecognizer.
-        if currentGesture is PencilGestureRecognizer {
+        if currentGesture is PencilGesture {
             return currentGesture
 
         } else {

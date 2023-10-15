@@ -33,7 +33,7 @@ class SmoothPointStorage: TouchPointStorageProtocol {
                                               endProcessing: endProcessing)
         return iterator
     }
-    func reset() {
+    func clear() {
         storedPoints = [:]
         iterator.reset()
         iteratorForSmoothCurve.reset()
