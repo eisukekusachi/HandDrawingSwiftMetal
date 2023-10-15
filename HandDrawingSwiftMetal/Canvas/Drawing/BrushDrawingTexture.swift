@@ -56,7 +56,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
         let pointBuffers = Buffers.makePointBuffers(device: canvas.device!,
                                                     points: points,
-                                                    blurredSize: brush.blurredSize,
+                                                    blurredDotSize: brush.blurredDotSize,
                                                     alpha: brush.alpha,
                                                     textureSize: textureSize)
 

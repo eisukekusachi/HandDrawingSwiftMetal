@@ -9,17 +9,17 @@ import Foundation
 
 let initEraserSize: Int = 8
 
-struct Eraser {
-    
+class Eraser {
     var alpha: Int = 200
+
     var diameter: Int = initEraserSize
     var blurSize: Float = initBlurSize
-    
-    var blurredSize: BlurredSize {
-        return BlurredSize(diameter: diameter, blurSize: blurSize)
+
+    var blurredDotSize: BlurredDotSize {
+        return BlurredDotSize(diameter: diameter, blurSize: blurSize)
     }
-    
-    mutating func setValue(alpha: Int? = nil, diameter: Int? = nil) {
+
+    func setValue(alpha: Int? = nil, diameter: Int? = nil) {
         if let alpha = alpha {
             self.alpha = alpha
         }
