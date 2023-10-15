@@ -43,8 +43,8 @@
 		D440DF712ADA9E5100A4E425 /* TextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
-		D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* CanvasLayers.swift */; };
-		D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* DefaultLayers.swift */; };
+		D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */; };
+		D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* LayerManager.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */; };
@@ -116,8 +116,8 @@
 		D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandQueueProtocol.swift; sourceTree = "<group>"; };
-		D4646CB829E2922D00987C8E /* CanvasLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasLayers.swift; sourceTree = "<group>"; };
-		D4646CBA29E2932800987C8E /* DefaultLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLayers.swift; sourceTree = "<group>"; };
+		D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManagerProtocol.swift; sourceTree = "<group>"; };
+		D4646CBA29E2932800987C8E /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorTest.swift; sourceTree = "<group>"; };
@@ -169,7 +169,6 @@
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
 				D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */,
-				D4646CB829E2922D00987C8E /* CanvasLayers.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975629DAB04700A82E6A /* Inputs */,
@@ -177,7 +176,7 @@
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D40D975329DAB02000A82E6A /* Points */,
 				D440DF742ADA9EAC00A4E425 /* Protocols */,
-				D4B65E1F29DCFC9C00A0542F /* Texture */,
+				D4B65E1F29DCFC9C00A0542F /* Layers */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -260,18 +259,19 @@
 			children = (
 				D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */,
 				D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */,
+				D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
 		};
-		D4B65E1F29DCFC9C00A0542F /* Texture */ = {
+		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
 				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D4646CBA29E2932800987C8E /* DefaultLayers.swift */,
+				D4646CBA29E2932800987C8E /* LayerManager.swift */,
 				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
 			);
-			path = Texture;
+			path = Layers;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -498,14 +498,14 @@
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
 				D40D976129DAB09400A82E6A /* PointStorage.swift in Sources */,
-				D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */,
+				D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */,
+				D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,

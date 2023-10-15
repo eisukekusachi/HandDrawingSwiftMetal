@@ -10,7 +10,7 @@ import UIKit
 class Canvas: TextureDisplayView {
 
     var currentTexture: MTLTexture {
-        return layers.currentLayer
+        return layers.currentTexture
     }
 
     /// A manager of finger input and pen input.
@@ -25,8 +25,8 @@ class Canvas: TextureDisplayView {
 
     private var transforming: Transforming = TransformingImpl()
 
-    private lazy var layers: CanvasLayers = DefaultLayers(canvas: self)
-    
+    private lazy var layers: LayerManagerProtocol = LayerManager(canvas: self)
+
     private lazy var fingerInput = FingerGestureRecognizer(output: self)
     private lazy var pencilInput = PencilGestureRecognizer(output: self)
 
@@ -65,13 +65,13 @@ class Canvas: TextureDisplayView {
     func initalizeTextures(textureSize: CGSize) {
         super.initializeTextures(textureSize: textureSize)
 
-        layers.initalizeLayers(layerSize: textureSize)
+        layers.initalizeTextures(textureSize: textureSize)
 
         brushDrawingTexture.initalizeTextures(textureSize: textureSize)
         eraserDrawingTexture.initalizeTextures(textureSize: textureSize)
     }
 
-    func inject(layers: CanvasLayers) {
+    func inject(layers: LayerManagerProtocol) {
         self.layers = layers
     }
     
@@ -86,9 +86,9 @@ class Canvas: TextureDisplayView {
     func refreshDisplayTexture() {
         guard let drawingTexture else { return }
 
-        layers.flatAllLayers(currentTextures: drawingTexture.currentTextures,
-                             backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                             toDisplayTexture: displayTexture)
+        layers.mergeAllTextures(currentTextures: drawingTexture.currentTextures,
+                                backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                to: displayTexture)
     }
 }
 
@@ -229,7 +229,7 @@ extension Canvas {
     }
 
     func clear() {
-        layers.clear()
+        layers.clearTexture()
         refreshDisplayTexture()
     }
 
