@@ -8,64 +8,67 @@
 import UIKit
 
 protocol FingerGestureRecognizerSender {
-    
-    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: TouchPoint], touchState: TouchState)
+    func sendLocations(_ input: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
     func cancel(_ input: FingerGestureRecognizer?)
 }
 
 class FingerGestureRecognizer: UIGestureRecognizer {
-    
     var output: FingerGestureRecognizerSender?
-    
+
     private var is3DTouchAvailable: Bool = false
-    
+
     init(output: FingerGestureRecognizerSender? = nil, is3DTouchAvailable: Bool = false) {
         super.init(target: nil, action: nil)
-        
+
         self.output = output
         self.is3DTouchAvailable = is3DTouchAvailable
-        
+
         allowedTouchTypes = [UITouch.TouchType.direct.rawValue as NSNumber]
     }
 }
 
 extension FingerGestureRecognizer {
-    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: TouchPoint] = [:]
+        var touchPointDictioanry: [Int: TouchPoint] = [:]
 
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
-                
-                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+
+                touchPointDictioanry[key] = TouchPoint(touch: touch,
+                                                       view: view,
+                                                       alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchLocations: locations, touchState: .began)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .began)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: TouchPoint] = [:]
+        var touchPointDictioanry: [Int: TouchPoint] = [:]
 
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
-                
-                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+
+                touchPointDictioanry[key] = TouchPoint(touch: touch,
+                                                       view: view,
+                                                       alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchLocations: locations, touchState: .moved)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .moved)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var locations: [Int: TouchPoint] = [:]
+        var touchPointDictioanry: [Int: TouchPoint] = [:]
 
         event?.allTouches?.forEach { touch in
             if touch.type == .direct, let view = view {
                 let key = ObjectIdentifier(touch).hashValue
-                
-                locations[key] = TouchPoint(touch: touch, view: view, alpha: !is3DTouchAvailable ? 1.0 : nil)
+
+                touchPointDictioanry[key] = TouchPoint(touch: touch, 
+                                                       view: view,
+                                                       alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchLocations: locations, touchState: .ended)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .ended)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         output?.cancel(self)

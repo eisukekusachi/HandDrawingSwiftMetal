@@ -99,7 +99,7 @@ class Canvas: TextureDisplayView {
 }
 
 extension Canvas: PencilGestureRecognizerSender {
-    func sendLocations(_ input: PencilGestureRecognizer?, touchLocations: [TouchPoint], touchState: TouchState) {
+    func sendLocations(_ input: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState) {
         guard let drawingTexture else { return }
 
         // Cancel drawing a line when the currentInput is the finger input.
@@ -111,7 +111,7 @@ extension Canvas: PencilGestureRecognizerSender {
             gestureManager.update(input!)
         }
 
-        pencilPoints.appendPoints(touchLocations)
+        pencilPoints.appendPoints(touchPointArray)
 
         let iterator = pencilPoints.getIterator(endProcessing: touchState == .ended)
         drawingTexture.drawOnDrawingTexture(with: iterator, touchState: touchState)
@@ -138,7 +138,7 @@ extension Canvas: PencilGestureRecognizerSender {
 }
 
 extension Canvas: FingerGestureRecognizerSender {
-    func sendLocations(_ input: FingerGestureRecognizer?, touchLocations: [Int: TouchPoint], touchState: TouchState) {
+    func sendLocations(_ input: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
         guard let drawingTexture else { return }
 
         if touchState == .began {
@@ -147,7 +147,7 @@ extension Canvas: FingerGestureRecognizerSender {
         guard gestureManager.currentGesture is FingerGestureRecognizer else { return }
 
 
-        fingerPoints.appendPoints(touchLocations)
+        fingerPoints.appendPoints(touchPointDictionary)
 
         let currentActionState = ActionStateManager.getState(touchPoints: fingerPoints.storedPoints)
         actionStateManager.update(currentActionState)
