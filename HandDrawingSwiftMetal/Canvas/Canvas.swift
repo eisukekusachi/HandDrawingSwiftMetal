@@ -14,7 +14,7 @@ class Canvas: TextureDisplayView {
     }
 
     /// A manager of finger input and pen input.
-    private let inputManager = InputManager()
+    private let gestureManager = GestureManager()
 
     /// A manager of one finger drag or two fingers pinch.
     private let actionStateManager = ActionStateManager()
@@ -90,6 +90,12 @@ class Canvas: TextureDisplayView {
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                 to: displayTexture)
     }
+    private func cancelFingerDrawing() {
+        drawingTexture?.clearDrawingTextures()
+
+        fingerPoints.reset()
+        transforming.storedMatrix = matrix
+    }
 }
 
 extension Canvas: PencilGestureRecognizerSender {
@@ -97,15 +103,12 @@ extension Canvas: PencilGestureRecognizerSender {
         guard let drawingTexture else { return }
 
         // Cancel drawing a line when the currentInput is the finger input.
-        if inputManager.currentInput is FingerGestureRecognizer {
-
-            fingerPoints.reset()
-            matrix = transforming.storedMatrix
-            prepareForNewDrawing()
+        if gestureManager.currentGesture is FingerGestureRecognizer {
+            cancelFingerDrawing()
         }
 
         if touchState == .began {
-            inputManager.update(input)
+            gestureManager.update(input!)
         }
 
         pencilPoints.appendPoints(touchLocations)
@@ -122,7 +125,7 @@ extension Canvas: PencilGestureRecognizerSender {
         runDisplayLinkLoop(touchState != .ended)
 
         if touchState == .ended {
-            inputManager.reset()
+            gestureManager.reset()
             actionStateManager.reset()
 
             pencilPoints.reset()
@@ -139,9 +142,9 @@ extension Canvas: FingerGestureRecognizerSender {
         guard let drawingTexture else { return }
 
         if touchState == .began {
-            inputManager.update(input)
+            gestureManager.update(input!)
         }
-        guard inputManager.currentInput is FingerGestureRecognizer else { return }
+        guard gestureManager.currentGesture is FingerGestureRecognizer else { return }
 
 
         fingerPoints.appendPoints(touchLocations)
@@ -177,14 +180,14 @@ extension Canvas: FingerGestureRecognizerSender {
         }
 
         if touchState == .ended {
-            inputManager.reset()
+            gestureManager.reset()
             actionStateManager.reset()
 
             fingerPoints.reset()
         }
     }
     func cancel(_ input: FingerGestureRecognizer?) {
-        guard inputManager.currentInput is FingerGestureRecognizer else { return }
+        guard gestureManager.currentGesture is FingerGestureRecognizer else { return }
 
         prepareForNewDrawing()
     }

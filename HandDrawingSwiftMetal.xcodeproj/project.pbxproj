@@ -24,7 +24,7 @@
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
 		D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */; };
 		D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */; };
-		D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977629DAB0B400A82E6A /* InputManager.swift */; };
+		D40D977929DAB0B400A82E6A /* GestureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977629DAB0B400A82E6A /* GestureManager.swift */; };
 		D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977729DAB0B400A82E6A /* FingerGestureRecognizer.swift */; };
 		D40D977B29DAB0B400A82E6A /* PencilGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977829DAB0B400A82E6A /* PencilGestureRecognizer.swift */; };
 		D40D979329DAB0D700A82E6A /* Calc.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979029DAB0D700A82E6A /* Calc.swift */; };
@@ -40,6 +40,7 @@
 		D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* Transforming.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
+		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
 		D440DF712ADA9E5100A4E425 /* TextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
@@ -97,7 +98,7 @@
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
 		D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
-		D40D977629DAB0B400A82E6A /* InputManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputManager.swift; sourceTree = "<group>"; };
+		D40D977629DAB0B400A82E6A /* GestureManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GestureManager.swift; sourceTree = "<group>"; };
 		D40D977729DAB0B400A82E6A /* FingerGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FingerGestureRecognizer.swift; sourceTree = "<group>"; };
 		D40D977829DAB0B400A82E6A /* PencilGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PencilGestureRecognizer.swift; sourceTree = "<group>"; };
 		D40D979029DAB0D700A82E6A /* Calc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Calc.swift; sourceTree = "<group>"; };
@@ -113,6 +114,7 @@
 		D40D97A429DAB0E800A82E6A /* Transforming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
+		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandQueueProtocol.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */,
+				D43906E22ADBA1C600E22361 /* TouchState.swift */,
 			);
 			path = Points;
 			sourceTree = "<group>";
@@ -224,7 +227,7 @@
 			children = (
 				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
 				D40D977729DAB0B400A82E6A /* FingerGestureRecognizer.swift */,
-				D40D977629DAB0B400A82E6A /* InputManager.swift */,
+				D40D977629DAB0B400A82E6A /* GestureManager.swift */,
 				D40D977829DAB0B400A82E6A /* PencilGestureRecognizer.swift */,
 			);
 			path = Inputs;
@@ -507,8 +510,9 @@
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
-				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
+				D40D977929DAB0B400A82E6A /* GestureManager.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,
+				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
