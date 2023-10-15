@@ -23,7 +23,7 @@ class Canvas: TextureDisplayView {
     private var brushDrawingTexture: BrushDrawingTexture!
     private var eraserDrawingTexture: EraserDrawingTexture!
 
-    private var transforming: Transforming = TransformingImpl()
+    private var transforming: Transforming = Transforming()
 
     private lazy var layers: LayerManagerProtocol = LayerManager(canvas: self)
 
@@ -167,16 +167,12 @@ extension Canvas: FingerGestureRecognizerSender {
         }
 
         if actionStateManager.state == .transformingCanvas {
-            if let matrix = transforming.update(viewTouches: fingerPoints.storedPoints,
-                                                viewSize: frame.size) {
-                self.matrix = matrix
-            }
-
-            if touchState == .ended {
-                transforming.endTransforming(matrix)
-            }
-
-            setNeedsDisplay()
+            guard let newMatrix = transforming.update(transformationData: TransformationData.init(touchPoints: fingerPoints.storedPoints),
+                                                      centerPoint: Calc.getCenter(frame.size),
+                                                      touchState: touchState) else { return }
+            matrix = newMatrix
+            
+            runDisplayLinkLoop(touchState != .ended)
         }
 
         if touchState == .ended {
