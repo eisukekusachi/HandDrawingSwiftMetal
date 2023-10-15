@@ -11,12 +11,12 @@ struct TransformationData {
     var pointsA: (CGPoint, CGPoint)?
     var pointsB: (CGPoint, CGPoint)?
 
-    init(touchPoints: [Int: [TouchPoint]]) {
-        if  touchPoints.count == 2,
-            let pointAFirst = touchPoints.first?.first?.location,
-            let pointALast = touchPoints.first?.last?.location,
-            let pointBFirst = touchPoints.last?.first?.location,
-            let pointBLast = touchPoints.last?.last?.location {
+    init(touchPointArrayDictionary: [Int: [TouchPoint]]) {
+        if  touchPointArrayDictionary.count == 2,
+            let pointAFirst = touchPointArrayDictionary.first?.first?.location,
+            let pointALast = touchPointArrayDictionary.first?.last?.location,
+            let pointBFirst = touchPointArrayDictionary.last?.first?.location,
+            let pointBLast = touchPointArrayDictionary.last?.last?.location {
 
             pointsA = (pointAFirst, pointALast)
             pointsB = (pointBFirst, pointBLast)

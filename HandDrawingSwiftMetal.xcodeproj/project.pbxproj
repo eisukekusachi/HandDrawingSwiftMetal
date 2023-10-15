@@ -282,6 +282,15 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
+		D46D07D92ADBEB160093D861 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
@@ -318,9 +327,8 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
-				D48A7DD029DAB81800D235B1 /* Toast.swift */,
-				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D40D975029DAB00100A82E6A /* Canvas */,
+				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,

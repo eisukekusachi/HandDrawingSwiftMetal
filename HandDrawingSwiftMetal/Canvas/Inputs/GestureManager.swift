@@ -24,8 +24,7 @@ class GestureManager {
         }
     }
 
-    // Function to reset the current gesture to nil.
-    func reset() {
+    func clear() {
         currentGesture = nil
     }
 }

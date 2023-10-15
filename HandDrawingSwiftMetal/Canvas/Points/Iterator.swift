@@ -70,7 +70,7 @@ class Iterator<T>: IteratorProtocol {
             append(elems: elems)
         }
     }
-    func reset() {
+    func clear() {
         index = 0
         array = []
     }

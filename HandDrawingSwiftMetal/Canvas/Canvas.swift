@@ -17,9 +17,9 @@ class Canvas: TextureDisplayView {
     private var brushDrawingTexture: BrushDrawingTexture!
     private var eraserDrawingTexture: EraserDrawingTexture!
 
-    private var transforming: Transforming = Transforming()
+    private var transforming: TransformingProtocol!
 
-    private lazy var layers: LayerManagerProtocol = LayerManager(canvas: self)
+    private var layers: LayerManagerProtocol!
 
     /// A manager of finger input and pen input.
     private var gestureManager: GestureManager!
@@ -36,14 +36,17 @@ class Canvas: TextureDisplayView {
         commonInit()
     }
     private func commonInit() {
-        brushDrawingTexture = BrushDrawingTexture(canvas: self)
-        eraserDrawingTexture = EraserDrawingTexture(canvas: self)
-
         _ = Pipeline.shared
 
         gestureManager = GestureManager()
         fingerGesture = FingerGesture(view: self, delegate: self)
         pencilGesture = PencilGesture(view: self, delegate: self)
+
+        brushDrawingTexture = BrushDrawingTexture(canvas: self)
+        eraserDrawingTexture = EraserDrawingTexture(canvas: self)
+
+        transforming = Transforming()
+        layers = LayerManager(canvas: self)
     }
 
     override func layoutSubviews() {
@@ -51,48 +54,31 @@ class Canvas: TextureDisplayView {
                 displayTexture == nil {
             
             initalizeTextures(textureSize: drawableSize)
-        }
 
-        refreshDisplayTexture()
-        setNeedsDisplay()
+            refreshDisplayTexture()
+            setNeedsDisplay()
+        }
     }
     
     func initalizeTextures(textureSize: CGSize) {
         super.initializeTextures(textureSize: textureSize)
 
-        layers.initalizeTextures(textureSize: textureSize)
-
         brushDrawingTexture.initalizeTextures(textureSize: textureSize)
         eraserDrawingTexture.initalizeTextures(textureSize: textureSize)
+
+        layers.initalizeTextures(textureSize: textureSize)
     }
 
     func inject(layers: LayerManagerProtocol) {
         self.layers = layers
     }
-    
-    
-    // MARK: Drawing
+
     func refreshDisplayTexture() {
         guard let drawingTexture else { return }
 
         layers.mergeAllTextures(currentTextures: drawingTexture.currentTextures,
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                 to: displayTexture)
-    }
-    private func cancelFingerDrawing() {
-        fingerGesture.clear()
-        transforming.storedMatrix = matrix
-
-        drawingTexture?.clearDrawingTextures()
-    }
-
-    private func prepareNext() {
-        gestureManager.reset()
-
-        fingerGesture?.clear()
-        pencilGesture?.clear()
-
-        drawingTexture?.clearDrawingTextures()
     }
 }
 
@@ -107,8 +93,10 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
     func transformCanvas(_ gesture: FingerGesture, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
+        let transformationData = TransformationData.init(touchPointArrayDictionary: touchPointArrayDictionary)
+
         guard gestureManager.update(gesture) is FingerGesture,
-              let newMatrix = transforming.update(transformationData: TransformationData.init(touchPoints: touchPointArrayDictionary),
+              let newMatrix = transforming.update(transformationData: transformationData,
                                                   centerPoint: Calc.getCenter(frame.size),
                                                   touchState: touchState) else { return }
         matrix = newMatrix
@@ -193,5 +181,21 @@ extension Canvas {
     func resetMatrix() {
         matrix = CGAffineTransform.identity
         transforming.storedMatrix = matrix
+    }
+
+    private func cancelFingerDrawing() {
+        fingerGesture.clear()
+        transforming.storedMatrix = matrix
+
+        drawingTexture?.clearDrawingTextures()
+    }
+
+    private func prepareNext() {
+        gestureManager.clear()
+
+        fingerGesture?.clear()
+        pencilGesture?.clear()
+
+        drawingTexture?.clearDrawingTextures()
     }
 }
