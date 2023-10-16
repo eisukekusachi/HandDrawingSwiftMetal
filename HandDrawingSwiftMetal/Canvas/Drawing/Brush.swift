@@ -7,18 +7,23 @@
 
 import UIKit
 
-let initBrushSize: Int = 8
-
 class Brush {
-    var rgb: (Int, Int, Int) = (0, 0, 0)
-    var alpha: Int = 200
-
+    var color: UIColor {
+        UIColor(red: CGFloat(rgb.0) / 255.0,
+                green: CGFloat(rgb.1) / 255.0,
+                blue: CGFloat(rgb.1) / 255.0,
+                alpha: CGFloat(alpha) / 255.0)
+    }
     var diameter: Int = initBrushSize
-    var blurSize: Float = initBlurSize
 
     var blurredDotSize: BlurredDotSize {
-        return BlurredDotSize(diameter: diameter, blurSize: blurSize)
+        BlurredDotSize(diameter: diameter, blurSize: blurSize)
     }
+
+    private (set) var rgb: (Int, Int, Int) = (0, 0, 0)
+    private (set) var alpha: Int = 255
+
+    private var blurSize: Float = BlurredDotSize.initBlurSize
 
     init(color: UIColor?, diameter: Int? = nil) {
         if let color = color {
@@ -39,13 +44,6 @@ class Brush {
         if let diameter = diameter {
             self.diameter = diameter
         }
-    }
-
-    var color: UIColor {
-        return UIColor(red: CGFloat(rgb.0) / 255.0,
-                       green: CGFloat(rgb.1) / 255.0,
-                       blue: CGFloat(rgb.1) / 255.0,
-                       alpha: CGFloat(alpha) / 255.0)
     }
 
     func setR(_ value: Int) {
@@ -92,6 +90,8 @@ class Brush {
 extension Brush {
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
+
+    static let initBrushSize: Int = 8
 
     static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter

@@ -12,6 +12,8 @@ class EraserDrawingTexture: DrawingTextureProtocol {
     var eraser = Eraser()
     let tool: DrawingTool = .eraser
 
+    let canvas: Canvas
+
     var drawingTexture: MTLTexture?
 
     var currentTextures: [MTLTexture?] {
@@ -19,8 +21,6 @@ class EraserDrawingTexture: DrawingTextureProtocol {
     }
 
     var textureSize: CGSize = .zero
-
-    let canvas: Canvas
 
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
@@ -104,9 +104,14 @@ class EraserDrawingTexture: DrawingTextureProtocol {
     func mergeDrawingTexture(into dstTexture: MTLTexture) {
         Command.copy(dst: eraserTexture, src: dstTexture, canvas.commandBuffer)
 
-        Command.makeEraseTexture(buffers: flippedTextureBuffers, src: drawingTexture, result: eraserTexture, canvas.commandBuffer)
+        Command.makeEraseTexture(buffers: flippedTextureBuffers, 
+                                 src: drawingTexture,
+                                 result: eraserTexture,
+                                 canvas.commandBuffer)
 
-        Command.copy(dst: dstTexture, src: eraserTexture, canvas.commandBuffer)
+        Command.copy(dst: dstTexture, 
+                     src: eraserTexture, 
+                     canvas.commandBuffer)
 
         clearDrawingTextures()
 
@@ -115,7 +120,11 @@ class EraserDrawingTexture: DrawingTextureProtocol {
 
     /// Clears the drawing textures.
     func clearDrawingTextures() {
-        Command.clear(textures: [eraserTexture, drawingTexture], canvas.commandBuffer)
-        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), canvas.commandBuffer)
+        Command.clear(textures: [eraserTexture, 
+                                 drawingTexture],
+                      canvas.commandBuffer)
+        Command.fill(grayscaleTexture, 
+                     withRGB: (0, 0, 0),
+                     canvas.commandBuffer)
     }
 }

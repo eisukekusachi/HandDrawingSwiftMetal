@@ -7,16 +7,15 @@
 
 import Foundation
 
-let initEraserSize: Int = 8
-
 class Eraser {
-    var alpha: Int = 200
-
     var diameter: Int = initEraserSize
-    var blurSize: Float = initBlurSize
+
+    private (set) var alpha: Int = 255
+
+    private var blurSize: Float = BlurredDotSize.initBlurSize
 
     var blurredDotSize: BlurredDotSize {
-        return BlurredDotSize(diameter: diameter, blurSize: blurSize)
+        BlurredDotSize(diameter: diameter, blurSize: blurSize)
     }
 
     func setValue(alpha: Int? = nil, diameter: Int? = nil) {
@@ -32,6 +31,8 @@ class Eraser {
 extension Eraser {
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
+
+    static let initEraserSize: Int = 8
 
     static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter

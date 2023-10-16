@@ -7,12 +7,12 @@
 
 import Foundation
 
-let initBlurSize: Float = 4.0
-
 struct BlurredDotSize {
     var diameter: Int
     var blurSize: Float
     var totalSize: Float {
         return Float(diameter) + blurSize * 2
     }
+
+    static let initBlurSize: Float = 4.0
 }

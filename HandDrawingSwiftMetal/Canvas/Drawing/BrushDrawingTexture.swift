@@ -16,12 +16,12 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
-    var textureSize: CGSize = .zero
-
     var currentTextures: [MTLTexture?] {
         return [canvas.currentTexture,
                 drawingTexture]
     }
+
+    var textureSize: CGSize = .zero
 
     private var grayscaleTexture: MTLTexture!
 
@@ -78,7 +78,10 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
     /// Merges the drawing texture into the destination texture.
     func mergeDrawingTexture(into dstTexture: MTLTexture) {
-        Command.merge(dst: dstTexture, texture: drawingTexture, canvas.commandBuffer)
+        Command.merge(dst: dstTexture, 
+                      texture: drawingTexture,
+                      canvas.commandBuffer)
+        
         clearDrawingTextures()
     }
 

@@ -34,6 +34,9 @@ class ViewController: UIViewController {
         ])
 
         canvas.drawingTool = .brush
+        canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
+        canvas.eraserAlpha = 150
+
         diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
     }
 }
@@ -70,10 +73,7 @@ extension ViewController {
             exportButton.isUserInteractionEnabled = true
         }
         
-        if let texture = canvas.displayTexture,
-           let data = UIImage.makeCFData(texture, flipY: true),
-           let image = UIImage.makeImage(cfData: data, width: texture.width, height: texture.height) {
-            
+        if let image = canvas.outputImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
