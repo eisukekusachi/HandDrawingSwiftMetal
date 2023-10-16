@@ -40,25 +40,25 @@ class ViewController: UIViewController {
 
 extension ViewController {
     @IBAction func pushResetTransform(_ sender: UIButton) {
-        canvas.resetMatrix()
+        canvas.resetCanvasMatrix()
         canvas.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
         canvas.drawingTool = .brush
-        canvas.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+        canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
 
         diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
         canvas.drawingTool = .brush
-        canvas.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+        canvas.brushColor = UIColor.red.withAlphaComponent(0.75)
 
         diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
         canvas.drawingTool = .eraser
-        canvas.setEraserAlpha(150)
+        canvas.eraserAlpha = 150
 
         diameterSlider.value = Eraser.diameterFloatValue(canvas.eraserDiameter)
     }
@@ -85,15 +85,15 @@ extension ViewController {
         }
     }
     @IBAction func pushClearButton(_ sender: UIButton) {
-        canvas.clear()
+        canvas.clearCanvas()
         canvas.setNeedsDisplay()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvas.drawingTool == .eraser {
-            canvas.setEraserDiameter(Int(Eraser.diameterIntValue(sender.value)))
+            canvas.eraserDiameter = Int(Eraser.diameterIntValue(sender.value))
 
         } else {
-            canvas.setBrushDiameter(Int(Brush.diameterIntValue(sender.value)))
+            canvas.brushDiameter = Int(Brush.diameterIntValue(sender.value))
         }
     }
 }

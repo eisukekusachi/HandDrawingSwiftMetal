@@ -10,7 +10,7 @@ import MetalKit
 protocol LayerManagerProtocol {
     var currentTexture: MTLTexture { get }
 
-    func initalizeTextures(textureSize: CGSize)
+    func initializeTextures(textureSize: CGSize)
 
     func mergeAllTextures(currentTextures: [MTLTexture?],
                           backgroundColor: (Int, Int, Int),

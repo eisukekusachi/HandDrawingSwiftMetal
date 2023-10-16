@@ -17,7 +17,7 @@ protocol DrawingTextureProtocol {
     var toolDiameter: Int { get }
     var textureSize: CGSize { get }
 
-    func initalizeTextures(textureSize: CGSize)
+    func initializeTextures(textureSize: CGSize)
 
     func clearDrawingTextures()
 

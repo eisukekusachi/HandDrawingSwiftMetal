@@ -31,7 +31,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
     required init(canvas: Canvas) {
         self.canvas = canvas
     }
-    func initalizeTextures(textureSize: CGSize) {
+    func initializeTextures(textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 

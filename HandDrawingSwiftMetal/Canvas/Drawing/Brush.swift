@@ -41,6 +41,13 @@ class Brush {
         }
     }
 
+    var color: UIColor {
+        return UIColor(red: CGFloat(rgb.0) / 255.0,
+                       green: CGFloat(rgb.1) / 255.0,
+                       blue: CGFloat(rgb.1) / 255.0,
+                       alpha: CGFloat(alpha) / 255.0)
+    }
+
     func setR(_ value: Int) {
         rgb = (value, rgb.1, rgb.2)
     }

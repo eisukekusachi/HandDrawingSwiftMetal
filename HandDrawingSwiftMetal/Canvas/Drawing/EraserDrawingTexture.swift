@@ -43,7 +43,7 @@ class EraserDrawingTexture: DrawingTextureProtocol {
 
         self.eraser.setValue(alpha: eraserAlpha, diameter: diameter)
     }
-    func initalizeTextures(textureSize: CGSize) {
+    func initializeTextures(textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 
