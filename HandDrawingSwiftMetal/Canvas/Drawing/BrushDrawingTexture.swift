@@ -7,6 +7,7 @@
 
 import MetalKit
 
+/// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
 class BrushDrawingTexture: DrawingTextureProtocol {
     var brush = Brush()
     let tool: DrawingTool = .brush
@@ -16,10 +17,6 @@ class BrushDrawingTexture: DrawingTextureProtocol {
     var drawingTexture: MTLTexture?
 
     var textureSize: CGSize = .zero
-
-    var toolDiameter: Int {
-        brush.diameter
-    }
 
     var currentTextures: [MTLTexture?] {
         return [canvas.currentTexture,
@@ -31,6 +28,8 @@ class BrushDrawingTexture: DrawingTextureProtocol {
     required init(canvas: Canvas) {
         self.canvas = canvas
     }
+
+    /// Initializes the textures for drawing with the specified texture size.
     func initializeTextures(textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
@@ -42,11 +41,13 @@ class BrushDrawingTexture: DrawingTextureProtocol {
         clearDrawingTextures()
     }
 
+    /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        assert(textureSize != .zero, "Call initalizeTextures() once before here.")
+        assert(textureSize != .zero, "Call initializeTextures() once before here.")
 
-        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))
-        let points = Curve.makePoints(iterator: iterator,
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, 
+                                                                                       to: textureSize))
+        let points = Curve.makePoints(iterator: iterator, 
                                       matrix: inverseMatrix,
                                       srcSize: canvas.frame.size,
                                       dstSize: textureSize,
@@ -54,7 +55,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
         guard points.count != 0 else { return }
 
-        let pointBuffers = Buffers.makePointBuffers(device: canvas.device!,
+        let pointBuffers = Buffers.makePointBuffers(device: canvas.device!, 
                                                     points: points,
                                                     blurredDotSize: brush.blurredDotSize,
                                                     alpha: brush.alpha,
@@ -64,7 +65,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
                           onGrayscaleTexture: grayscaleTexture,
                           canvas.commandBuffer)
 
-        Command.colorize(grayscaleTexture: grayscaleTexture,
+        Command.colorize(grayscaleTexture: grayscaleTexture, 
                          with: brush.rgb,
                          result: drawingTexture,
                          canvas.commandBuffer)
@@ -74,13 +75,14 @@ class BrushDrawingTexture: DrawingTextureProtocol {
             clearDrawingTextures()
         }
     }
-    func mergeDrawingTexture(into dstTexture: MTLTexture) {
-        Command.merge(dst: dstTexture,
-                      texture: drawingTexture,
-                      canvas.commandBuffer)
 
+    /// Merges the drawing texture into the destination texture.
+    func mergeDrawingTexture(into dstTexture: MTLTexture) {
+        Command.merge(dst: dstTexture, texture: drawingTexture, canvas.commandBuffer)
         clearDrawingTextures()
     }
+
+    /// Clears the drawing textures.
     func clearDrawingTextures() {
         Command.clear(texture: drawingTexture, canvas.commandBuffer)
         Command.fill(grayscaleTexture, withRGB: (0, 0, 0), canvas.commandBuffer)
