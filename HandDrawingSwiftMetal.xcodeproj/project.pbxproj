@@ -183,12 +183,12 @@
 				D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
-				D40D975629DAB04700A82E6A /* Inputs */,
+				D40D975629DAB04700A82E6A /* Gestures */,
+				D4B65E1F29DCFC9C00A0542F /* Layers */,
 				D40D975729DAB05400A82E6A /* Math */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D40D975329DAB02000A82E6A /* Points */,
 				D440DF742ADA9EAC00A4E425 /* Protocols */,
-				D4B65E1F29DCFC9C00A0542F /* Layers */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -199,8 +199,8 @@
 				D40D975E29DAB09400A82E6A /* Curve.swift */,
 				D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */,
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
-				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */,
+				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D43906E22ADBA1C600E22361 /* TouchState.swift */,
 			);
 			path = Points;
@@ -212,9 +212,9 @@
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D40D976729DAB09C00A82E6A /* Brush.swift */,
 				D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */,
+				D4934F412ADA36C500C52B76 /* DrawingTool.swift */,
 				D40D976629DAB09C00A82E6A /* Eraser.swift */,
 				D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */,
-				D4934F412ADA36C500C52B76 /* DrawingTool.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -223,16 +223,16 @@
 			isa = PBXGroup;
 			children = (
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
-				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
-				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
-				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
+				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
 				D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */,
+				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
+				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		D40D975629DAB04700A82E6A /* Inputs */ = {
+		D40D975629DAB04700A82E6A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
 				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
@@ -243,7 +243,7 @@
 				D46D07D72ADBC51C0093D861 /* PencilGesture.swift */,
 				D40D977829DAB0B400A82E6A /* PencilGestureRecognizer.swift */,
 			);
-			path = Inputs;
+			path = Gestures;
 			sourceTree = "<group>";
 		};
 		D40D975729DAB05400A82E6A /* Math */ = {
@@ -285,8 +285,8 @@
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
+				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
