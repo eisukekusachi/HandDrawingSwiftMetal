@@ -11,7 +11,7 @@ protocol GestureProtocol {
     var gestureRecognizer: UIGestureRecognizer? { get }
     var touchPointStorage: TouchPointStorageProtocol { get }
 
-    init(view: UIView, delegate: AnyObject)
+    init(view: UIView, delegate: AnyObject?)
 
     func clear()
 }

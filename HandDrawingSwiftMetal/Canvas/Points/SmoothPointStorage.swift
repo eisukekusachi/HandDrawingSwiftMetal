@@ -28,9 +28,9 @@ class SmoothPointStorage: TouchPointStorageProtocol {
         }
     }
     func getIterator(endProcessing: Bool = false) -> Iterator<TouchPoint> {
-        SmoothPointStorage.makeSmoothIterator(src: iteratorForSmoothCurve, 
-                                              dst: &iterator,
-                                              endProcessing: endProcessing)
+        SmoothPointStorage.makeIterator(src: iteratorForSmoothCurve,
+                                        dst: &iterator,
+                                        endProcessing: endProcessing)
         return iterator
     }
     func clear() {
@@ -50,9 +50,9 @@ extension SmoothPointStorage {
         
         return TouchPoint(location: newLocation, alpha: newAlpha)
     }
-    static func makeSmoothIterator(src: Iterator<TouchPoint>,
-                                   dst: inout Iterator<TouchPoint>,
-                                   endProcessing: Bool) {
+    static func makeIterator(src: Iterator<TouchPoint>,
+                             dst: inout Iterator<TouchPoint>,
+                             endProcessing: Bool) {
         // Add the first point.
         if src.array.count != 0 && dst.array.count == 0 {
             if let firstElement = src.array.first {

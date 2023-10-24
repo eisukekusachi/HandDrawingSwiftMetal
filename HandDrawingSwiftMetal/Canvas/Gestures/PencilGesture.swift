@@ -19,7 +19,7 @@ class PencilGesture: GestureProtocol {
 
     var delegate: PencilGestureSender?
 
-    required init(view: UIView, delegate: AnyObject) {
+    required init(view: UIView, delegate: AnyObject?) {
         self.delegate = delegate as? PencilGestureSender
 
         gestureRecognizer = PencilGestureRecognizer(output: self)

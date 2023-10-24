@@ -8,7 +8,7 @@
 import UIKit
 
 /// A struct representing a point with position and opacity.
-struct TouchPoint {
+struct TouchPoint: Equatable {
     let location: CGPoint
     let alpha: CGFloat
 

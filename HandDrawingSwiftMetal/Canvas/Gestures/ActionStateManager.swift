@@ -10,7 +10,7 @@ import Foundation
 class ActionStateManager {
     private (set) var state: ActionState = .recognizing
 
-    func update(_ newState: ActionState) {
+    func updateState(_ newState: ActionState) {
         if state != .recognizing {
             return
         }

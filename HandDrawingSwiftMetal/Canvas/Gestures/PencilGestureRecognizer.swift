@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import UIKit
 
 protocol PencilGestureRecognizerSender {
     func sendLocations(_ input: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState)

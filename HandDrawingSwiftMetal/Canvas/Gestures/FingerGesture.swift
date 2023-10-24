@@ -23,7 +23,7 @@ class FingerGesture: GestureProtocol {
     /// A manager of one finger drag or two fingers pinch.
     private let actionStateManager = ActionStateManager()
 
-    required init(view: UIView, delegate: AnyObject) {
+    required init(view: UIView, delegate: AnyObject?) {
         self.delegate = delegate as? FingerGestureSender
 
         gestureRecognizer = FingerGestureRecognizer(output: self,
@@ -44,7 +44,7 @@ extension FingerGesture: FingerGestureRecognizerSender {
         touchPointStorage.appendPoints(touchPointDictionary)
 
         let actionState = ActionStateManager.getState(touchPoints: touchPointStorage.storedPoints)
-        actionStateManager.update(actionState)
+        actionStateManager.updateState(actionState)
 
         switch actionStateManager.state {
         case .recognizing:

@@ -9,32 +9,27 @@ import XCTest
 @testable import HandDrawingSwiftMetal
 
 class InputManagerTest: XCTestCase {
-    
+
+    // When pen input is used, finger input is canceled
+    // because sometimes a user draw a line with an Apple Pencil during user’s palm is on a screen.
     func testInputManager() {
-        
-        XCTContext.runActivity(named: "A scenario that the pencil input is stronger than the finger input") { _ in
-            // Because sometimes a user draw a line with an Apple Pencil during user’s palm is on a screen.
-            
-            let inputManager = InputManager()
-            
-            let fingerInput = FingerGestureRecognizer()
-            let pencilInput = PencilGestureRecognizer()
-            
-            inputManager.update(fingerInput)
-            XCTAssertTrue(inputManager.currentInput is FingerGestureRecognizer)
-            
-            
-            inputManager.update(pencilInput)
-            XCTAssertTrue(inputManager.currentInput is PencilGestureRecognizer, "The pencil input can override the finger input.")
-            
-            inputManager.update(fingerInput)
-            XCTAssertFalse(inputManager.currentInput is FingerGestureRecognizer, "The finger input cannot override the pencil input.")
-            
-            
-            inputManager.reset()
-            
-            inputManager.update(fingerInput)
-            XCTAssertTrue(inputManager.currentInput is FingerGestureRecognizer, "After resetting, the gestureManager can be updated with the finger input.")
-        }
+        let gestureManager = GestureManager()
+
+        let fingerInput = FingerGesture(view: UIView(), delegate: nil)
+        let pencilInput = PencilGesture(view: UIView(), delegate: nil)
+
+        gestureManager.update(fingerInput)
+        XCTAssertTrue(gestureManager.currentGesture is FingerGesture)
+
+        gestureManager.update(pencilInput)
+        XCTAssertTrue(gestureManager.currentGesture is PencilGesture, "The pencil input can override the finger input.")
+
+        gestureManager.update(fingerInput)
+        XCTAssertFalse(gestureManager.currentGesture is FingerGesture, "The finger input cannot override the pencil input.")
+
+        gestureManager.clear()
+
+        gestureManager.update(fingerInput)
+        XCTAssertTrue(gestureManager.currentGesture is FingerGesture, "After resetting, the gestureManager can be updated with the finger input.")
     }
 }
