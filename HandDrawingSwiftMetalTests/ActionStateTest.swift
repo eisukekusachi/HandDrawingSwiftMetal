@@ -36,11 +36,11 @@ class ActionStateTest: XCTestCase {
         var oneFingerInputArrayDictionary: [Int: [TouchPoint]] = [:]
         var twoFingerInputArrayDictionary: [Int: [TouchPoint]] = [:]
 
-        // Add the array and update to determine the gesture
+        // Add the array and update to determine the action
         oneFingerInputArrayDictionary[0] = firstInputs
         let oneFingerActionState = ActionStateManager.getState(touchPoints: oneFingerInputArrayDictionary)
 
-        // Add the array and update to determine the gesture
+        // Add the array and update to determine the action
         twoFingerInputArrayDictionary[0] = firstInputs
         twoFingerInputArrayDictionary[1] = secondInputs
         let twoFingerActionState = ActionStateManager.getState(touchPoints: twoFingerInputArrayDictionary)

@@ -1,5 +1,5 @@
 //
-//  PencilGesture.swift
+//  PencilInput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -7,20 +7,20 @@
 
 import UIKit
 
-protocol PencilGestureSender {
-    func drawOnCanvas(_ gesture: PencilGesture, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func touchEnded(_ gesture: PencilGesture)
-    func cancel(_ gesture: PencilGesture)
+protocol PencilInputSender {
+    func drawOnCanvas(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func touchEnded(_ input: PencilInput)
+    func cancel(_ input: PencilInput)
 }
 
-class PencilGesture: GestureProtocol {
+class PencilInput: InputProtocol {
     var gestureRecognizer: UIGestureRecognizer?
     var touchPointStorage: TouchPointStorageProtocol = DefaultPointStorage()
 
-    var delegate: PencilGestureSender?
+    var delegate: PencilInputSender?
 
     required init(view: UIView, delegate: AnyObject?) {
-        self.delegate = delegate as? PencilGestureSender
+        self.delegate = delegate as? PencilInputSender
 
         gestureRecognizer = PencilGestureRecognizer(output: self)
         view.addGestureRecognizer(gestureRecognizer!)
@@ -31,8 +31,8 @@ class PencilGesture: GestureProtocol {
     }
 }
 
-extension PencilGesture: PencilGestureRecognizerSender {
-    func sendLocations(_ input: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState) {
+extension PencilInput: PencilGestureRecognizerSender {
+    func sendLocations(_ gesture: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState) {
         guard let touchPointStorage = (touchPointStorage as? DefaultPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointArray)
@@ -45,7 +45,7 @@ extension PencilGesture: PencilGestureRecognizerSender {
         }
     }
 
-    func cancel(_ input: PencilGestureRecognizer?) {
+    func cancel(_ gesture: PencilGestureRecognizer?) {
         delegate?.cancel(self)
     }
 }

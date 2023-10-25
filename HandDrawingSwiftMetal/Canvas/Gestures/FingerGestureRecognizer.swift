@@ -8,8 +8,8 @@
 import UIKit
 
 protocol FingerGestureRecognizerSender {
-    func sendLocations(_ input: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
-    func cancel(_ input: FingerGestureRecognizer?)
+    func sendLocations(_ gesture: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
+    func cancel(_ gesture: FingerGestureRecognizer?)
 }
 
 class FingerGestureRecognizer: UIGestureRecognizer {

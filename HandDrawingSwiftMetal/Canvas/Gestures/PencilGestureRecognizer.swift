@@ -8,8 +8,8 @@
 import UIKit
 
 protocol PencilGestureRecognizerSender {
-    func sendLocations(_ input: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState)
-    func cancel(_ input: PencilGestureRecognizer?)
+    func sendLocations(_ gesture: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState)
+    func cancel(_ gesture: PencilGestureRecognizer?)
 }
 
 class PencilGestureRecognizer: UIGestureRecognizer {

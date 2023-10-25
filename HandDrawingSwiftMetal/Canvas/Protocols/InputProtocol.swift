@@ -1,5 +1,5 @@
 //
-//  GestureProtocol.swift
+//  InputProtocol.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -7,7 +7,8 @@
 
 import UIKit
 
-protocol GestureProtocol {
+/// A protocol with UIGestureRecognizer and a TouchPoint storage
+protocol InputProtocol {
     var gestureRecognizer: UIGestureRecognizer? { get }
     var touchPointStorage: TouchPointStorageProtocol { get }
 

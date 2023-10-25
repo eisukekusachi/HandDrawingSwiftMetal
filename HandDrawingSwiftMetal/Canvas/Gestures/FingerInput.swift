@@ -1,5 +1,5 @@
 //
-//  FingerGesture.swift
+//  FingerInput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -8,13 +8,13 @@
 import UIKit
 
 protocol FingerGestureSender {
-    func drawOnCanvas(_ gesture: FingerGesture, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func transformCanvas(_ gesture: FingerGesture, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
-    func touchEnded(_ gesture: FingerGesture)
-    func cancel(_ gesture: FingerGesture)
+    func drawOnCanvas(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func transformCanvas(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
+    func touchEnded(_ input: FingerInput)
+    func cancel(_ input: FingerInput)
 }
 
-class FingerGesture: GestureProtocol {
+class FingerInput: InputProtocol {
     var gestureRecognizer: UIGestureRecognizer?
     var touchPointStorage: TouchPointStorageProtocol = SmoothPointStorage()
 
@@ -37,8 +37,8 @@ class FingerGesture: GestureProtocol {
     }
 }
 
-extension FingerGesture: FingerGestureRecognizerSender {
-    func sendLocations(_ input: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
+extension FingerInput: FingerGestureRecognizerSender {
+    func sendLocations(_ gesture: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
         guard let touchPointStorage = (touchPointStorage as? SmoothPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointDictionary)
@@ -66,7 +66,7 @@ extension FingerGesture: FingerGestureRecognizerSender {
             delegate?.touchEnded(self)
         }
     }
-    func cancel(_ input: FingerGestureRecognizer?) {
+    func cancel(_ gesture: FingerGestureRecognizer?) {
         delegate?.cancel(self)
     }
 }

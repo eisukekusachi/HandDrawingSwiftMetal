@@ -59,9 +59,9 @@ class Canvas: TextureDisplayView {
     private var layers: LayerManagerProtocol!
 
     /// A manager for handling finger and pencil input gestures.
-    private var gestureManager: GestureManager!
-    private var fingerGesture: FingerGesture!
-    private var pencilGesture: PencilGesture!
+    private var inputManager: InputManager!
+    private var fingerInput: FingerInput!
+    private var pencilInput: PencilInput!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -76,10 +76,10 @@ class Canvas: TextureDisplayView {
     private func commonInitialization() {
         _ = Pipeline.shared
 
-        gestureManager = GestureManager()
-        fingerGesture = FingerGesture(view: self, delegate: self)
-        pencilGesture = PencilGesture(view: self, delegate: self)
-        
+        inputManager = InputManager()
+        fingerInput = FingerInput(view: self, delegate: self)
+        pencilInput = PencilInput(view: self, delegate: self)
+
         brushDrawingTexture = BrushDrawingTexture(canvas: self)
         eraserDrawingTexture = EraserDrawingTexture(canvas: self)
         
@@ -121,22 +121,22 @@ class Canvas: TextureDisplayView {
     }
 
     private func cancelFingerDrawing() {
-        fingerGesture.clear()
+        fingerInput.clear()
         transforming.storedMatrix = matrix
         currentDrawingTexture?.clearDrawingTextures()
     }
 
     private func prepareForNextDrawing() {
-        gestureManager.clear()
-        fingerGesture?.clear()
-        pencilGesture?.clear()
+        inputManager.clear()
+        fingerInput?.clear()
+        pencilInput?.clear()
         currentDrawingTexture?.clearDrawingTextures()
     }
 }
 
 extension Canvas: FingerGestureSender {
-    func drawOnCanvas(_ gesture: FingerGesture, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard gestureManager.update(gesture) is FingerGesture,
+    func drawOnCanvas(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+        guard inputManager.updateInput(input) is FingerInput,
               let drawingTexture = currentDrawingTexture
         else { return }
         
@@ -145,9 +145,9 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func transformCanvas(_ gesture: FingerGesture, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
+    func transformCanvas(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        guard gestureManager.update(gesture) is FingerGesture,
+        guard inputManager.updateInput(input) is FingerInput,
               let newMatrix = transforming.update(transformationData: transformationData,
                                                   centerPoint: Calc.getCenter(frame.size),
                                                   touchState: touchState)
@@ -157,37 +157,37 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ gesture: FingerGesture) {
-        guard gestureManager.update(gesture) is FingerGesture else { return }
+    func touchEnded(_ input: FingerInput) {
+        guard inputManager.updateInput(input) is FingerInput else { return }
         prepareForNextDrawing()
     }
 
-    func cancel(_ gesture: FingerGesture) {
-        guard gestureManager.update(gesture) is FingerGesture else { return }
+    func cancel(_ input: FingerInput) {
+        guard inputManager.updateInput(input) is FingerInput else { return }
         prepareForNextDrawing()
     }
 }
 
-extension Canvas: PencilGestureSender {
-    func drawOnCanvas(_ gesture: PencilGesture, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+extension Canvas: PencilInputSender {
+    func drawOnCanvas(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard let drawingTexture = currentDrawingTexture else { return }
 
-        if gestureManager.currentGesture is FingerGesture {
+        if inputManager.currentInput is FingerInput {
             cancelFingerDrawing()
         }
 
-        gestureManager.update(gesture)
+        inputManager.updateInput(input)
 
         drawingTexture.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshDisplayTexture()
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ gesture: PencilGesture) {
+    func touchEnded(_ input: PencilInput) {
         prepareForNextDrawing()
     }
 
-    func cancel(_ gesture: PencilGesture) {
+    func cancel(_ input: PencilInput) {
         prepareForNextDrawing()
     }
 }
