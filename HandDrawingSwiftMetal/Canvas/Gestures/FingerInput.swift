@@ -43,7 +43,7 @@ extension FingerInput: FingerGestureRecognizerSender {
 
         touchPointStorage.appendPoints(touchPointDictionary)
 
-        let actionState = ActionStateManager.getState(touchPoints: touchPointStorage.storedPoints)
+        let actionState = ActionStateManager.getState(touchPointStorage.touchPointsDictionary)
         actionStateManager.updateState(actionState)
 
         switch actionStateManager.state {
@@ -58,7 +58,7 @@ extension FingerInput: FingerGestureRecognizerSender {
 
         case .transformingCanvas:
             delegate?.transformCanvas(self,
-                                      touchPointArrayDictionary: touchPointStorage.storedPoints,
+                                      touchPointArrayDictionary: touchPointStorage.touchPointsDictionary,
                                       touchState: touchState)
         }
 

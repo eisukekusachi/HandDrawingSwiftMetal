@@ -8,22 +8,22 @@
 import Foundation
 
 class SmoothPointStorage: TouchPointStorageProtocol {
-    var storedPoints: [Int: [TouchPoint]] = [:]
+    var touchPointsDictionary: [Int: [TouchPoint]] = [:]
     var iterator = Iterator<TouchPoint>()
     var iteratorForSmoothCurve = Iterator<TouchPoint>()
 
     func appendPoints(_ input: [Int: TouchPoint]) {
         input.keys.forEach { key in
             
-            if storedPoints[key] == nil {
-                storedPoints[key] = []
+            if touchPointsDictionary[key] == nil {
+                touchPointsDictionary[key] = []
             }
             if let elem = input[key] {
-                storedPoints[key]?.append(elem)
+                touchPointsDictionary[key]?.append(elem)
             }
         }
         
-        if let points = storedPoints.first {
+        if let points = touchPointsDictionary.first {
             iteratorForSmoothCurve.update(elems: points)
         }
     }
@@ -34,7 +34,7 @@ class SmoothPointStorage: TouchPointStorageProtocol {
         return iterator
     }
     func clear() {
-        storedPoints = [:]
+        touchPointsDictionary = [:]
         iterator.clear()
         iteratorForSmoothCurve.clear()
     }

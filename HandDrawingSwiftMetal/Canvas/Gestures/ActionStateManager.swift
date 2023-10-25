@@ -23,13 +23,13 @@ class ActionStateManager {
 }
 
 extension ActionStateManager {
-    static func getState(touchPoints: [Int: [TouchPoint]]) -> ActionState {
+    static func getState(_ touchPointsDictionary: [Int: [TouchPoint]]) -> ActionState {
         var result: ActionState = .recognizing
 
-        if let actionState = ActionState.isDrawingGesture(touchPoints: touchPoints) {
+        if let actionState = ActionState.isDrawingGesture(touchPointsDictionary) {
             result = actionState
 
-        } else if let actionState = ActionState.isTransformingGesture(touchPoints: touchPoints) {
+        } else if let actionState = ActionState.isTransformingGesture(touchPointsDictionary) {
             result = actionState
         }
 

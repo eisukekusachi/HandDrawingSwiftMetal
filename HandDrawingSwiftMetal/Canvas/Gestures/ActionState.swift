@@ -17,19 +17,19 @@ extension ActionState {
     static let activatingDrawingCount: Int = 5
     static let activatingTransformingCount: Int = 3
 
-    static func isDrawingGesture(touchPoints: [Int: [TouchPoint]]) -> ActionState? {
-        if touchPoints.count != 1 { return nil }
+    static func isDrawingGesture(_ touchPointsDictionary: [Int: [TouchPoint]]) -> ActionState? {
+        if touchPointsDictionary.count != 1 { return nil }
 
-        if let count = touchPoints.first?.count, count > activatingDrawingCount {
+        if let count = touchPointsDictionary.first?.count, count > activatingDrawingCount {
             return .drawingOnCanvas
         }
         return nil
     }
-    static func isTransformingGesture(touchPoints: [Int: [TouchPoint]]) -> ActionState? {
-        if touchPoints.count != 2 { return nil }
+    static func isTransformingGesture(_ touchPointsDictionary: [Int: [TouchPoint]]) -> ActionState? {
+        if touchPointsDictionary.count != 2 { return nil }
 
-        if let countA = touchPoints.first?.count, countA > activatingTransformingCount,
-           let countB = touchPoints.last?.count, countB > activatingTransformingCount {
+        if let countA = touchPointsDictionary.first?.count, countA > activatingTransformingCount,
+           let countB = touchPointsDictionary.last?.count, countB > activatingTransformingCount {
             return .transformingCanvas
         }
         return nil
