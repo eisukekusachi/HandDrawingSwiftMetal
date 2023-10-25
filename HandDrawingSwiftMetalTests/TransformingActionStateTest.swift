@@ -37,18 +37,18 @@ class TransformingActionStateTest: XCTest {
 
         // Set the first finger data to the array.
         inputArrayDictionary[0] = firstFinger3Inputs
-        XCTAssertEqual(ActionStateManager.getState(touchPoints: inputArrayDictionary), ActionState.recognizing)
+        XCTAssertEqual(ActionStateManager.getState(inputArrayDictionary), ActionState.recognizing)
 
         // Set the second finger data to the array.
         inputArrayDictionary[1] = secondFinger1Inputs
-        XCTAssertEqual(ActionStateManager.getState(touchPoints: inputArrayDictionary), ActionState.recognizing)
+        XCTAssertEqual(ActionStateManager.getState(inputArrayDictionary), ActionState.recognizing)
 
         // Add the first finger data to the array.
         inputArrayDictionary[0]?.append(contentsOf: firstFinger1Inputs)
-        XCTAssertEqual(ActionStateManager.getState(touchPoints: inputArrayDictionary), ActionState.recognizing)
+        XCTAssertEqual(ActionStateManager.getState(inputArrayDictionary), ActionState.recognizing)
 
         // Add the second finger data to the array.
         inputArrayDictionary[1]?.append(contentsOf: secondFinger3Inputs)
-        XCTAssertEqual(ActionStateManager.getState(touchPoints: inputArrayDictionary), ActionState.transformingCanvas)
+        XCTAssertEqual(ActionStateManager.getState(inputArrayDictionary), ActionState.transformingCanvas)
     }
 }

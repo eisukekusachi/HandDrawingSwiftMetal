@@ -29,13 +29,13 @@ class DrawingActionStateTest: XCTest {
         var inputArrayDictionary: [Int: [TouchPoint]] = [:]
 
         inputArrayDictionary[0] = finger5Inputs
-        let actionState0 = ActionStateManager.getState(touchPoints: inputArrayDictionary)
+        let actionState0 = ActionStateManager.getState(inputArrayDictionary)
         XCTAssertEqual(actionState0, ActionState.recognizing)
 
         inputArrayDictionary[0]?.append(contentsOf: finger1Inputs)
 
         // The actionState is determined.
-        let actionState1 = ActionStateManager.getState(touchPoints: inputArrayDictionary)
+        let actionState1 = ActionStateManager.getState(inputArrayDictionary)
         XCTAssertEqual(actionState1, ActionState.drawingOnCanvas)
     }
 }
