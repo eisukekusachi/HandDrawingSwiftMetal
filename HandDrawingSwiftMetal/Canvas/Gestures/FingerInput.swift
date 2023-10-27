@@ -8,8 +8,8 @@
 import UIKit
 
 protocol FingerGestureSender {
-    func drawOnCanvas(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func transformCanvas(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
+    func drawOnTexture(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func transformTexture(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
     func touchEnded(_ input: FingerInput)
     func cancel(_ input: FingerInput)
 }
@@ -52,14 +52,14 @@ extension FingerInput: FingerGestureRecognizerSender {
 
         case .drawingOnCanvas:
             let iterator = touchPointStorage.getIterator(endProcessing: touchState == .ended)
-            delegate?.drawOnCanvas(self, 
-                                   iterator: iterator,
-                                   touchState: touchState)
+            delegate?.drawOnTexture(self,
+                                    iterator: iterator,
+                                    touchState: touchState)
 
         case .transformingCanvas:
-            delegate?.transformCanvas(self,
-                                      touchPointArrayDictionary: touchPointStorage.touchPointsDictionary,
-                                      touchState: touchState)
+            delegate?.transformTexture(self,
+                                       touchPointArrayDictionary: touchPointStorage.touchPointsDictionary,
+                                       touchState: touchState)
         }
 
         if touchState == .ended {

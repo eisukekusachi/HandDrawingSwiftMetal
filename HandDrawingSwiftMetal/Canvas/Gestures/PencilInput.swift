@@ -8,7 +8,7 @@
 import UIKit
 
 protocol PencilInputSender {
-    func drawOnCanvas(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func drawOnTexture(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
     func touchEnded(_ input: PencilInput)
     func cancel(_ input: PencilInput)
 }
@@ -38,7 +38,7 @@ extension PencilInput: PencilGestureRecognizerSender {
         touchPointStorage.appendPoints(touchPointArray)
 
         let iterator = touchPointStorage.getIterator(endProcessing: touchState == .ended)
-        delegate?.drawOnCanvas(self, iterator: iterator, touchState: touchState)
+        delegate?.drawOnTexture(self, iterator: iterator, touchState: touchState)
 
         if touchState == .ended {
             delegate?.touchEnded(self)

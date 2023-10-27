@@ -135,7 +135,7 @@ class Canvas: MTKTextureDisplayView {
 }
 
 extension Canvas: FingerGestureSender {
-    func drawOnCanvas(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+    func drawOnTexture(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerInput,
               let drawingTexture = currentDrawingTexture
         else { return }
@@ -145,7 +145,7 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func transformCanvas(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
+    func transformTexture(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
         guard inputManager.updateInput(input) is FingerInput,
               let newMatrix = transforming.update(transformationData: transformationData,
@@ -169,7 +169,7 @@ extension Canvas: FingerGestureSender {
 }
 
 extension Canvas: PencilInputSender {
-    func drawOnCanvas(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+    func drawOnTexture(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard let drawingTexture = currentDrawingTexture else { return }
 
         if inputManager.currentInput is FingerInput {
