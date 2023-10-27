@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// A user can use drawing tools to draw lines on the texture and then transform it.
 class Canvas: MTKTextureDisplayView {
 
     /// The currently selected drawing tool, either brush or eraser.
