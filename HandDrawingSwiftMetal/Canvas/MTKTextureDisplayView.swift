@@ -1,5 +1,5 @@
 //
-//  TextureDisplayView.swift
+//  MTKTextureDisplayView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/14.
@@ -8,7 +8,7 @@
 import MetalKit
 
 /// A custom view for displaying textures with Metal support.
-class TextureDisplayView: MTKView, MTKViewDelegate {
+class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
     /// The size of the texture to be displayed.
     var textureSize: CGSize!

@@ -41,7 +41,7 @@
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
-		D440DF712ADA9E5100A4E425 /* TextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */; };
+		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
 		D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */; };
@@ -125,7 +125,7 @@
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
-		D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDisplayView.swift; sourceTree = "<group>"; };
+		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandQueueProtocol.swift; sourceTree = "<group>"; };
 		D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManagerProtocol.swift; sourceTree = "<group>"; };
@@ -190,7 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
-				D440DF702ADA9E5100A4E425 /* TextureDisplayView.swift */,
+				D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975629DAB04700A82E6A /* Gestures */,
@@ -575,7 +575,7 @@
 				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingTool.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
-				D440DF712ADA9E5100A4E425 /* TextureDisplayView.swift in Sources */,
+				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

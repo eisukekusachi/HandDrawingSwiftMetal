@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Canvas: TextureDisplayView {
+class Canvas: MTKTextureDisplayView {
 
     /// The currently selected drawing tool, either brush or eraser.
     var drawingTool: DrawingTool {
