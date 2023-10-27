@@ -7,61 +7,52 @@
 
 import Foundation
 
-class SmoothPointStorage: PointStorage {
-    
-    typealias Input = [Int: Point]
-    typealias StoredPoints = [Int: [Point]]
-    typealias Output = Point
-    
-    var storedPoints: StoredPoints = [:]
-    var iterator = Iterator<Output>()
-    var iteratorForSmoothCurve = Iterator<Output>()
-    
-    func appendPoints(_ input: Input) {
-        
+class SmoothPointStorage: TouchPointStorageProtocol {
+    var touchPointsDictionary: [Int: [TouchPoint]] = [:]
+    var iterator = Iterator<TouchPoint>()
+    var iteratorForSmoothCurve = Iterator<TouchPoint>()
+
+    func appendPoints(_ input: [Int: TouchPoint]) {
         input.keys.forEach { key in
             
-            if storedPoints[key] == nil {
-                storedPoints[key] = []
+            if touchPointsDictionary[key] == nil {
+                touchPointsDictionary[key] = []
             }
             if let elem = input[key] {
-                storedPoints[key]?.append(elem)
+                touchPointsDictionary[key]?.append(elem)
             }
         }
         
-        if let points = storedPoints.first {
+        if let points = touchPointsDictionary.first {
             iteratorForSmoothCurve.update(elems: points)
         }
     }
-    func getIterator(endProcessing: Bool = false) -> Iterator<Output> {
-        
-        SmoothPointStorage.makeSmoothIterator(src: iteratorForSmoothCurve, dst: &iterator, endProcessing: endProcessing)
-        
+    func getIterator(endProcessing: Bool = false) -> Iterator<TouchPoint> {
+        SmoothPointStorage.makeIterator(src: iteratorForSmoothCurve,
+                                        dst: &iterator,
+                                        endProcessing: endProcessing)
         return iterator
     }
-    func reset() {
-        storedPoints = [:]
-        iterator.reset()
-        iteratorForSmoothCurve.reset()
+    func clear() {
+        touchPointsDictionary = [:]
+        iterator.clear()
+        iteratorForSmoothCurve.clear()
     }
 }
 
 extension SmoothPointStorage {
-    static func average(lhs: Point, rhs: Point) -> Point {
-        
-        var point = lhs
-        
+    static func average(lhs: TouchPoint,
+                        rhs: TouchPoint) -> TouchPoint {
         let newLocation = CGPoint(x: (lhs.location.x + rhs.location.x) * 0.5,
                                   y: (lhs.location.y + rhs.location.y) * 0.5)
         
         let newAlpha = (lhs.alpha + rhs.alpha) * 0.5
         
-        point.location = newLocation
-        point.alpha = newAlpha
-        
-        return point
+        return TouchPoint(location: newLocation, alpha: newAlpha)
     }
-    static func makeSmoothIterator(src: Iterator<Output>, dst: inout Iterator<Output>, endProcessing: Bool) {
+    static func makeIterator(src: Iterator<TouchPoint>,
+                             dst: inout Iterator<TouchPoint>,
+                             endProcessing: Bool) {
         // Add the first point.
         if src.array.count != 0 && dst.array.count == 0 {
             if let firstElement = src.array.first {

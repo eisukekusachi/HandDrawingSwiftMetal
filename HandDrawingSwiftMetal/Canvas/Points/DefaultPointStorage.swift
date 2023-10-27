@@ -7,25 +7,20 @@
 
 import Foundation
 
-class DefaultPointStorage: PointStorage {
-    
-    typealias Input = [Point]
-    typealias StoredPoints = [Point]
-    typealias Output = Point
-    
-    var storedPoints: StoredPoints = []
-    var iterator = Iterator<Output>()
-    
-    func appendPoints(_ input: Input) {
-        storedPoints.append(contentsOf: input)
-        iterator.update(elems: storedPoints)
+class DefaultPointStorage: TouchPointStorageProtocol {
+    var touchPointArray: [TouchPoint] = []
+    var iterator = Iterator<TouchPoint>()
+
+    func appendPoints(_ touchPoints: [TouchPoint]) {
+        touchPointArray.append(contentsOf: touchPoints)
+        iterator.update(elems: touchPointArray)
     }
-    func getIterator(endProcessing: Bool = false) -> Iterator<Output> {
+    func getIterator(endProcessing: Bool = false) -> Iterator<TouchPoint> {
         return iterator
     }
     
-    func reset() {
-        storedPoints = []
-        iterator.reset()
+    func clear() {
+        touchPointArray = []
+        iterator.clear()
     }
 }

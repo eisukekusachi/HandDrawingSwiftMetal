@@ -10,17 +10,17 @@
 		D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDD529DBC340004618CE /* ActionStateManager.swift */; };
 		D40ACDDC29DBEFFD004618CE /* InputManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */; };
 		D40D975229DAB01900A82E6A /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975129DAB01900A82E6A /* Canvas.swift */; };
-		D40D976029DAB09400A82E6A /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* Point.swift */; };
-		D40D976129DAB09400A82E6A /* PointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* PointStorage.swift */; };
+		D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* TouchPoint.swift */; };
+		D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */; };
 		D40D976229DAB09400A82E6A /* Iterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975C29DAB09400A82E6A /* Iterator.swift */; };
 		D40D976329DAB09400A82E6A /* DefaultPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */; };
 		D40D976429DAB09400A82E6A /* Curve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975E29DAB09400A82E6A /* Curve.swift */; };
 		D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */; };
 		D40D976B29DAB09D00A82E6A /* Eraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* Eraser.swift */; };
 		D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* Brush.swift */; };
-		D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */; };
-		D40D976E29DAB09D00A82E6A /* CanvasDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */; };
-		D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */; };
+		D40D976D29DAB09D00A82E6A /* BrushDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */; };
+		D40D976E29DAB09D00A82E6A /* DrawingTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */; };
+		D40D976F29DAB09D00A82E6A /* EraserDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */; };
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
 		D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */; };
 		D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */; };
@@ -39,13 +39,29 @@
 		D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979C29DAB0DF00A82E6A /* Buffers.swift */; };
 		D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* Transforming.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
-		D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* CanvasLayers.swift */; };
-		D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* DefaultLayers.swift */; };
+		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
+		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
+		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
+		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
+		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
+		D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */; };
+		D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* LayerManager.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
+		D46D07D42ADBC46D0093D861 /* FingerInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46D07D32ADBC46D0093D861 /* FingerInput.swift */; };
+		D46D07D62ADBC4A00093D861 /* InputProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46D07D52ADBC4A00093D861 /* InputProtocol.swift */; };
+		D46D07D82ADBC51C0093D861 /* PencilInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46D07D72ADBC51C0093D861 /* PencilInput.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
-		D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */; };
 		D48A7E1329DACA8600D235B1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */; };
+		D4934F422ADA36C500C52B76 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingTool.swift */; };
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
+		D4BB796B2AE2989200739462 /* IteretorNonNormalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796A2AE2989200739462 /* IteretorNonNormalTest.swift */; };
+		D4BB796D2AE2998B00739462 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796C2AE2998B00739462 /* DefaultIteratorTest.swift */; };
+		D4BB796F2AE299F800739462 /* DrawingIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796E2AE299F800739462 /* DrawingIteratorTest.swift */; };
+		D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */; };
+		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
+		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
+		D4D290002AE7D74400471819 /* DrawingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */; };
+		D4D290022AE7D7BA00471819 /* TransformingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D290012AE7D7B900471819 /* TransformingActionStateTest.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
 		D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* ViewController.swift */; };
@@ -78,17 +94,17 @@
 		D40ACDD529DBC340004618CE /* ActionStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateManager.swift; sourceTree = "<group>"; };
 		D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputManagerTest.swift; sourceTree = "<group>"; };
 		D40D975129DAB01900A82E6A /* Canvas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Canvas.swift; sourceTree = "<group>"; };
-		D40D975A29DAB09400A82E6A /* Point.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Point.swift; sourceTree = "<group>"; };
-		D40D975B29DAB09400A82E6A /* PointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointStorage.swift; sourceTree = "<group>"; };
+		D40D975A29DAB09400A82E6A /* TouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPoint.swift; sourceTree = "<group>"; };
+		D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPointStorageProtocol.swift; sourceTree = "<group>"; };
 		D40D975C29DAB09400A82E6A /* Iterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Iterator.swift; sourceTree = "<group>"; };
 		D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultPointStorage.swift; sourceTree = "<group>"; };
 		D40D975E29DAB09400A82E6A /* Curve.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Curve.swift; sourceTree = "<group>"; };
 		D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmoothPointStorage.swift; sourceTree = "<group>"; };
 		D40D976629DAB09C00A82E6A /* Eraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eraser.swift; sourceTree = "<group>"; };
 		D40D976729DAB09C00A82E6A /* Brush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Brush.swift; sourceTree = "<group>"; };
-		D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawingLayer.swift; sourceTree = "<group>"; };
-		D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasDrawingLayer.swift; sourceTree = "<group>"; };
-		D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawingLayer.swift; sourceTree = "<group>"; };
+		D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushDrawingTexture.swift; sourceTree = "<group>"; };
+		D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingTextureProtocol.swift; sourceTree = "<group>"; };
+		D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EraserDrawingTexture.swift; sourceTree = "<group>"; };
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
 		D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
@@ -107,13 +123,29 @@
 		D40D979C29DAB0DF00A82E6A /* Buffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffers.swift; sourceTree = "<group>"; };
 		D40D97A429DAB0E800A82E6A /* Transforming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
-		D4646CB829E2922D00987C8E /* CanvasLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasLayers.swift; sourceTree = "<group>"; };
-		D4646CBA29E2932800987C8E /* DefaultLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLayers.swift; sourceTree = "<group>"; };
+		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
+		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
+		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
+		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
+		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandQueueProtocol.swift; sourceTree = "<group>"; };
+		D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManagerProtocol.swift; sourceTree = "<group>"; };
+		D4646CBA29E2932800987C8E /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
+		D46D07D32ADBC46D0093D861 /* FingerInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerInput.swift; sourceTree = "<group>"; };
+		D46D07D52ADBC4A00093D861 /* InputProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputProtocol.swift; sourceTree = "<group>"; };
+		D46D07D72ADBC51C0093D861 /* PencilInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilInput.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
-		D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorTest.swift; sourceTree = "<group>"; };
 		D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
+		D4934F412ADA36C500C52B76 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
+		D4BB796A2AE2989200739462 /* IteretorNonNormalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteretorNonNormalTest.swift; sourceTree = "<group>"; };
+		D4BB796C2AE2998B00739462 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
+		D4BB796E2AE299F800739462 /* DrawingIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingIteratorTest.swift; sourceTree = "<group>"; };
+		D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
+		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
+		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
+		D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingActionStateTest.swift; sourceTree = "<group>"; };
+		D4D290012AE7D7B900471819 /* TransformingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingActionStateTest.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -158,15 +190,15 @@
 			isa = PBXGroup;
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
-				D40D976929DAB09D00A82E6A /* CanvasDrawingLayer.swift */,
-				D4646CB829E2922D00987C8E /* CanvasLayers.swift */,
+				D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
-				D40D975629DAB04700A82E6A /* Inputs */,
+				D40D975629DAB04700A82E6A /* Gestures */,
+				D4B65E1F29DCFC9C00A0542F /* Layers */,
 				D40D975729DAB05400A82E6A /* Math */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D40D975329DAB02000A82E6A /* Points */,
-				D4B65E1F29DCFC9C00A0542F /* Texture */,
+				D440DF742ADA9EAC00A4E425 /* Protocols */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -177,9 +209,9 @@
 				D40D975E29DAB09400A82E6A /* Curve.swift */,
 				D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */,
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
-				D40D975A29DAB09400A82E6A /* Point.swift */,
-				D40D975B29DAB09400A82E6A /* PointStorage.swift */,
 				D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */,
+				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
+				D43906E22ADBA1C600E22361 /* TouchState.swift */,
 			);
 			path = Points;
 			sourceTree = "<group>";
@@ -187,10 +219,12 @@
 		D40D975429DAB03400A82E6A /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
+				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D40D976729DAB09C00A82E6A /* Brush.swift */,
-				D40D976829DAB09C00A82E6A /* BrushDrawingLayer.swift */,
+				D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */,
+				D4934F412ADA36C500C52B76 /* DrawingTool.swift */,
 				D40D976629DAB09C00A82E6A /* Eraser.swift */,
-				D40D976A29DAB09D00A82E6A /* EraserDrawingLayer.swift */,
+				D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -199,23 +233,27 @@
 			isa = PBXGroup;
 			children = (
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
-				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
-				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
+				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
+				D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */,
 				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
+				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		D40D975629DAB04700A82E6A /* Inputs */ = {
+		D40D975629DAB04700A82E6A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
+				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
 				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
+				D46D07D32ADBC46D0093D861 /* FingerInput.swift */,
 				D40D977729DAB0B400A82E6A /* FingerGestureRecognizer.swift */,
 				D40D977629DAB0B400A82E6A /* InputManager.swift */,
+				D46D07D72ADBC51C0093D861 /* PencilInput.swift */,
 				D40D977829DAB0B400A82E6A /* PencilGestureRecognizer.swift */,
 			);
-			path = Inputs;
+			path = Gestures;
 			sourceTree = "<group>";
 		};
 		D40D975729DAB05400A82E6A /* Math */ = {
@@ -241,14 +279,36 @@
 			path = Metal;
 			sourceTree = "<group>";
 		};
-		D4B65E1F29DCFC9C00A0542F /* Texture */ = {
+		D440DF742ADA9EAC00A4E425 /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
-				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D4646CBA29E2932800987C8E /* DefaultLayers.swift */,
-				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
+				D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */,
+				D40D976929DAB09D00A82E6A /* DrawingTextureProtocol.swift */,
+				D46D07D52ADBC4A00093D861 /* InputProtocol.swift */,
+				D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */,
+				D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */,
+				D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */,
 			);
-			path = Texture;
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		D46D07D92ADBEB160093D861 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
+				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				D4646CBA29E2932800987C8E /* LayerManager.swift */,
+				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
+				D4C9791B2ADBAA3700BB666D /* TransformationData.swift */,
+			);
+			path = Layers;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -277,9 +337,8 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
-				D48A7DD029DAB81800D235B1 /* Toast.swift */,
-				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D40D975029DAB00100A82E6A /* Canvas */,
+				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
@@ -291,10 +350,15 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
-				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
-				D48A7E0E29DABEC800D235B1 /* IteratorTest.swift */,
 				D48A7E1229DACA8600D235B1 /* ActionStateTest.swift */,
+				D4BB796C2AE2998B00739462 /* DefaultIteratorTest.swift */,
+				D4BB796E2AE299F800739462 /* DrawingIteratorTest.swift */,
+				D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */,
+				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 				D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */,
+				D4BB796A2AE2989200739462 /* IteretorNonNormalTest.swift */,
+				D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */,
+				D4D290012AE7D7B900471819 /* TransformingActionStateTest.swift */,
 			);
 			path = HandDrawingSwiftMetalTests;
 			sourceTree = "<group>";
@@ -463,44 +527,55 @@
 			buildActionMask = 2147483647;
 			files = (
 				D40D976329DAB09400A82E6A /* DefaultPointStorage.swift in Sources */,
+				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
-				D40D976F29DAB09D00A82E6A /* EraserDrawingLayer.swift in Sources */,
+				D40D976F29DAB09D00A82E6A /* EraserDrawingTexture.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
+				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
-				D40D976129DAB09400A82E6A /* PointStorage.swift in Sources */,
-				D4646CB929E2922D00987C8E /* CanvasLayers.swift in Sources */,
+				D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */,
+				D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D4646CBB29E2932800987C8E /* DefaultLayers.swift in Sources */,
+				D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
+				D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,
+				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
+				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
+				D46D07D82ADBC51C0093D861 /* PencilInput.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* Eraser.swift in Sources */,
 				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
-				D40D976E29DAB09D00A82E6A /* CanvasDrawingLayer.swift in Sources */,
+				D40D976E29DAB09D00A82E6A /* DrawingTextureProtocol.swift in Sources */,
 				D40D97A129DAB0DF00A82E6A /* MTLDeviceExtensions.swift in Sources */,
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */,
-				D40D976D29DAB09D00A82E6A /* BrushDrawingLayer.swift in Sources */,
-				D40D976029DAB09400A82E6A /* Point.swift in Sources */,
+				D40D976D29DAB09D00A82E6A /* BrushDrawingTexture.swift in Sources */,
+				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
+				D46D07D62ADBC4A00093D861 /* InputProtocol.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
+				D46D07D42ADBC46D0093D861 /* FingerInput.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D40D975229DAB01900A82E6A /* Canvas.swift in Sources */,
 				D40D977B29DAB0B400A82E6A /* PencilGestureRecognizer.swift in Sources */,
+				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
+				D4934F422ADA36C500C52B76 /* DrawingTool.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
+				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,8 +585,13 @@
 			files = (
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D40ACDDC29DBEFFD004618CE /* InputManagerTest.swift in Sources */,
+				D4D290002AE7D74400471819 /* DrawingActionStateTest.swift in Sources */,
+				D4BB796F2AE299F800739462 /* DrawingIteratorTest.swift in Sources */,
+				D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */,
+				D4BB796D2AE2998B00739462 /* DefaultIteratorTest.swift in Sources */,
 				D48A7E1329DACA8600D235B1 /* ActionStateTest.swift in Sources */,
-				D48A7E0F29DABEC800D235B1 /* IteratorTest.swift in Sources */,
+				D4BB796B2AE2989200739462 /* IteretorNonNormalTest.swift in Sources */,
+				D4D290022AE7D7BA00471819 /* TransformingActionStateTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

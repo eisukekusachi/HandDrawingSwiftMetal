@@ -9,12 +9,12 @@ import Foundation
 
 enum Curve {
     
-    static func makePoints(iterator: Iterator<Point>,
+    static func makePoints(iterator: Iterator<TouchPoint>,
                            matrix: CGAffineTransform? = nil,
                            srcSize: CGSize,
                            dstSize: CGSize,
-                           endProcessing: Bool = false) -> [Point] {
-        var curve: [Point] = []
+                           endProcessing: Bool = false) -> [TouchPoint] {
+        var curve: [TouchPoint] = []
         
         while let subsequece = iterator.next(range: 4) {
             
@@ -67,10 +67,10 @@ enum Curve {
         return curve
     }
     
-    static func makeFirstPoints(iterator: Iterator<Point>,
+    static func makeFirstPoints(iterator: Iterator<TouchPoint>,
                                 matrix: CGAffineTransform? = nil,
                                 srcSize: CGSize,
-                                dstSize: CGSize) -> [Point] {
+                                dstSize: CGSize) -> [TouchPoint] {
         if iterator.array.count < 3 { return [] }
         
         let index0 = 0
@@ -96,10 +96,10 @@ enum Curve {
                                        endPoint: end,
                                        addLastPoint: false)
     }
-    static func makeLastPoints(iterator: Iterator<Point>,
+    static func makeLastPoints(iterator: Iterator<TouchPoint>,
                                matrix: CGAffineTransform? = nil,
                                srcSize: CGSize,
-                               dstSize: CGSize) -> [Point] {
+                               dstSize: CGSize) -> [TouchPoint] {
         if iterator.array.count < 3 { return [] }
         
         let index0 = iterator.array.count - 3

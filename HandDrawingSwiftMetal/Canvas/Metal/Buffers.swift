@@ -67,10 +67,9 @@ let flippedTextureNodes = TextureCoorinateNodes(
 )
 
 enum Buffers {
-    
     static func makePointBuffers(device: MTLDevice?,
-                                 points: [Point],
-                                 blurredSize: BlurredSize,
+                                 points: [TouchPoint],
+                                 blurredDotSize: BlurredDotSize,
                                  alpha: Int,
                                  textureSize: CGSize) -> PointBuffers? {
         var vertexArray: [Float] = []
@@ -83,7 +82,7 @@ enum Buffers {
             
             vertexArray.append(contentsOf: [vertexX, vertexY])
             alphaArray.append(Float($0.alpha) * Float(alpha) / 255.0)
-            diameterPlusBlurSizeArray.append(blurredSize.totalSize)
+            diameterPlusBlurSizeArray.append(blurredDotSize.totalSize)
         }
         
         let vertexBuffer = device?.makeBuffer(bytes: vertexArray,
@@ -100,7 +99,7 @@ enum Buffers {
             return PointBuffers(vertexBuffer: vertexBuffer,
                                 diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
                                 alphaBuffer: transparencyBuffer,
-                                blurSize: blurredSize.blurSize,
+                                blurSize: blurredDotSize.blurSize,
                                 numberOfPoints: vertexArray.count / 2)
         }
         
