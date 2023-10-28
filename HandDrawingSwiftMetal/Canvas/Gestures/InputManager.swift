@@ -15,7 +15,7 @@ class InputManager {
     @discardableResult
     func updateInput(_ input: InputProtocol) -> InputProtocol? {
         // Check if the current input is a PencilInput.
-        if currentInput is PencilInput {
+        if currentInput is PencilDrawingInput {
             return currentInput
 
         } else {

@@ -1,5 +1,5 @@
 //
-//  FingerInput.swift
+//  FingerDrawingInput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -7,24 +7,24 @@
 
 import UIKit
 
-protocol FingerGestureSender {
-    func drawOnTexture(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func transformTexture(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
-    func touchEnded(_ input: FingerInput)
-    func cancel(_ input: FingerInput)
+protocol FingerDrawingInputSender {
+    func drawOnTexture(_ input: FingerDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func transformTexture(_ input: FingerDrawingInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
+    func touchEnded(_ input: FingerDrawingInput)
+    func cancel(_ input: FingerDrawingInput)
 }
 
-class FingerInput: InputProtocol {
+class FingerDrawingInput: InputProtocol {
     var gestureRecognizer: UIGestureRecognizer?
     var touchPointStorage: TouchPointStorageProtocol = SmoothPointStorage()
 
-    var delegate: FingerGestureSender?
+    var delegate: FingerDrawingInputSender?
 
     /// A manager of one finger drag or two fingers pinch.
     private let actionStateManager = ActionStateManager()
 
     required init(view: UIView, delegate: AnyObject?) {
-        self.delegate = delegate as? FingerGestureSender
+        self.delegate = delegate as? FingerDrawingInputSender
 
         gestureRecognizer = FingerGestureRecognizer(output: self,
                                                     is3DTouchAvailable: view.traitCollection.forceTouchCapability == .available)
@@ -37,7 +37,7 @@ class FingerInput: InputProtocol {
     }
 }
 
-extension FingerInput: FingerGestureRecognizerSender {
+extension FingerDrawingInput: FingerGestureRecognizerSender {
     func sendLocations(_ gesture: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
         guard let touchPointStorage = (touchPointStorage as? SmoothPointStorage) else { return }
 
@@ -50,13 +50,13 @@ extension FingerInput: FingerGestureRecognizerSender {
         case .recognizing:
             break
 
-        case .drawingOnCanvas:
+        case .drawing:
             let iterator = touchPointStorage.getIterator(endProcessing: touchState == .ended)
             delegate?.drawOnTexture(self,
                                     iterator: iterator,
                                     touchState: touchState)
 
-        case .transformingCanvas:
+        case .transforming:
             delegate?.transformTexture(self,
                                        touchPointArrayDictionary: touchPointStorage.touchPointsDictionary,
                                        touchState: touchState)
