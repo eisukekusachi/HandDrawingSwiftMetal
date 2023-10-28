@@ -61,8 +61,8 @@ class Canvas: MTKTextureDisplayView {
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
-    private var fingerInput: FingerInput!
-    private var pencilInput: PencilInput!
+    private var fingerInput: FingerDrawingInput!
+    private var pencilInput: PencilDrawingInput!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -78,8 +78,8 @@ class Canvas: MTKTextureDisplayView {
         _ = Pipeline.shared
 
         inputManager = InputManager()
-        fingerInput = FingerInput(view: self, delegate: self)
-        pencilInput = PencilInput(view: self, delegate: self)
+        fingerInput = FingerDrawingInput(view: self, delegate: self)
+        pencilInput = PencilDrawingInput(view: self, delegate: self)
 
         brushDrawingTexture = BrushDrawingTexture(canvas: self)
         eraserDrawingTexture = EraserDrawingTexture(canvas: self)
@@ -135,9 +135,9 @@ class Canvas: MTKTextureDisplayView {
     }
 }
 
-extension Canvas: FingerGestureSender {
-    func drawOnTexture(_ input: FingerInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard inputManager.updateInput(input) is FingerInput,
+extension Canvas: FingerDrawingInputSender {
+    func drawOnTexture(_ input: FingerDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+        guard inputManager.updateInput(input) is FingerDrawingInput,
               let drawingTexture = currentDrawingTexture
         else { return }
         
@@ -146,9 +146,9 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func transformTexture(_ input: FingerInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
+    func transformTexture(_ input: FingerDrawingInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        guard inputManager.updateInput(input) is FingerInput,
+        guard inputManager.updateInput(input) is FingerDrawingInput,
               let newMatrix = transforming.update(transformationData: transformationData,
                                                   centerPoint: Calc.getCenter(frame.size),
                                                   touchState: touchState)
@@ -158,22 +158,22 @@ extension Canvas: FingerGestureSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ input: FingerInput) {
-        guard inputManager.updateInput(input) is FingerInput else { return }
+    func touchEnded(_ input: FingerDrawingInput) {
+        guard inputManager.updateInput(input) is FingerDrawingInput else { return }
         prepareForNextDrawing()
     }
 
-    func cancel(_ input: FingerInput) {
-        guard inputManager.updateInput(input) is FingerInput else { return }
+    func cancel(_ input: FingerDrawingInput) {
+        guard inputManager.updateInput(input) is FingerDrawingInput else { return }
         prepareForNextDrawing()
     }
 }
 
-extension Canvas: PencilInputSender {
-    func drawOnTexture(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+extension Canvas: PencilDrawingInputSender {
+    func drawOnTexture(_ input: PencilDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard let drawingTexture = currentDrawingTexture else { return }
 
-        if inputManager.currentInput is FingerInput {
+        if inputManager.currentInput is FingerDrawingInput {
             cancelFingerDrawing()
         }
 
@@ -184,11 +184,11 @@ extension Canvas: PencilInputSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ input: PencilInput) {
+    func touchEnded(_ input: PencilDrawingInput) {
         prepareForNextDrawing()
     }
 
-    func cancel(_ input: PencilInput) {
+    func cancel(_ input: PencilDrawingInput) {
         prepareForNextDrawing()
     }
 }

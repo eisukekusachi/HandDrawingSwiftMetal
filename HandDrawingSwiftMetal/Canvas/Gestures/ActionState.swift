@@ -9,8 +9,8 @@ import Foundation
 
 enum ActionState: Int {
     case recognizing
-    case drawingOnCanvas
-    case transformingCanvas
+    case drawing
+    case transforming
 }
 
 extension ActionState {
@@ -21,7 +21,7 @@ extension ActionState {
         if touchPointsDictionary.count != 1 { return nil }
 
         if let count = touchPointsDictionary.first?.count, count > activatingDrawingCount {
-            return .drawingOnCanvas
+            return .drawing
         }
         return nil
     }
@@ -30,7 +30,7 @@ extension ActionState {
 
         if let countA = touchPointsDictionary.first?.count, countA > activatingTransformingCount,
            let countB = touchPointsDictionary.last?.count, countB > activatingTransformingCount {
-            return .transformingCanvas
+            return .transforming
         }
         return nil
     }

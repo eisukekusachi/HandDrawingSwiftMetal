@@ -15,8 +15,8 @@ protocol PencilGestureRecognizerSender {
 class PencilGestureRecognizer: UIGestureRecognizer {
     var output: PencilGestureRecognizerSender?
 
-    private var latestForceValue: CGFloat?
-    private var isGestureActive: Bool = false
+    private var latestTouchForce: CGFloat?
+    private var ignoreInitialInaccurateValueFlag: Bool = true
 
     init(output: PencilGestureRecognizerSender? = nil) {
         super.init(target: nil, action: nil)
@@ -30,15 +30,15 @@ class PencilGestureRecognizer: UIGestureRecognizer {
 extension PencilGestureRecognizer {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 
-        latestForceValue = nil
-        isGestureActive = false
+        latestTouchForce = nil
+        ignoreInitialInaccurateValueFlag = true
 
         if let touch = event?.allTouches?.first,
            let coalescedTouches = event?.coalescedTouches(for: touch) {
 
             for index in 0 ..< coalescedTouches.count {
                 let touch = coalescedTouches[index]
-                latestForceValue = touch.force
+                updateIgnoreInitialInaccurateTouchFlag(touch.force)
             }
         }
 
@@ -48,31 +48,21 @@ extension PencilGestureRecognizer {
 
         var locations: [TouchPoint] = []
 
-        var isActiveFlag: Bool = false
-
         if let view = view,
            let touch = event?.allTouches?.first,
            let coalescedTouches = event?.coalescedTouches(for: touch) {
 
             for index in 0 ..< coalescedTouches.count {
                 let touch = coalescedTouches[index]
+                
                 if touch.type == .pencil {
-
-                    if isGestureActive {
+                    if !ignoreInitialInaccurateValueFlag {
                         locations.append(TouchPoint(touch: touch, view: view))
                     }
 
-                    if isActiveFlag == false, isGestureActive == false, let force = latestForceValue, force != touch.force {
-                        isActiveFlag = true
-                    }
-
-                    latestForceValue = touch.force
+                    updateIgnoreInitialInaccurateTouchFlag(touch.force)
                 }
             }
-        }
-
-        if isActiveFlag == true, isGestureActive == false {
-            isGestureActive = true
         }
 
         output?.sendLocations(self, touchPointArray: locations, touchState: .moved)
@@ -93,11 +83,19 @@ extension PencilGestureRecognizer {
                 }
             }
         }
+
         output?.sendLocations(self, touchPointArray: locations, touchState: .ended)
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         output?.cancel(self)
+    }
+
+    private func updateIgnoreInitialInaccurateTouchFlag(_ touchForce: CGFloat) {
+        if ignoreInitialInaccurateValueFlag, let latestTouchForce, latestTouchForce != touchForce {
+            ignoreInitialInaccurateValueFlag = false
+        }
+        latestTouchForce = touchForce
     }
 
     /*

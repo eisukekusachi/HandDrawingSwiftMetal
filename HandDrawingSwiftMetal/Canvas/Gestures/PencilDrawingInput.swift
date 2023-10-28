@@ -1,5 +1,5 @@
 //
-//  PencilInput.swift
+//  PencilDrawingInput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -7,20 +7,20 @@
 
 import UIKit
 
-protocol PencilInputSender {
-    func drawOnTexture(_ input: PencilInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func touchEnded(_ input: PencilInput)
-    func cancel(_ input: PencilInput)
+protocol PencilDrawingInputSender {
+    func drawOnTexture(_ input: PencilDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func touchEnded(_ input: PencilDrawingInput)
+    func cancel(_ input: PencilDrawingInput)
 }
 
-class PencilInput: InputProtocol {
+class PencilDrawingInput: InputProtocol {
     var gestureRecognizer: UIGestureRecognizer?
     var touchPointStorage: TouchPointStorageProtocol = DefaultPointStorage()
 
-    var delegate: PencilInputSender?
+    var delegate: PencilDrawingInputSender?
 
     required init(view: UIView, delegate: AnyObject?) {
-        self.delegate = delegate as? PencilInputSender
+        self.delegate = delegate as? PencilDrawingInputSender
 
         gestureRecognizer = PencilGestureRecognizer(output: self)
         view.addGestureRecognizer(gestureRecognizer!)
@@ -31,7 +31,7 @@ class PencilInput: InputProtocol {
     }
 }
 
-extension PencilInput: PencilGestureRecognizerSender {
+extension PencilDrawingInput: PencilGestureRecognizerSender {
     func sendLocations(_ gesture: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState) {
         guard let touchPointStorage = (touchPointStorage as? DefaultPointStorage) else { return }
 
