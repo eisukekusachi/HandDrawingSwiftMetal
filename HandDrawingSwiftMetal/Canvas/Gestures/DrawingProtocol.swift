@@ -1,5 +1,5 @@
 //
-//  DrawingTextureProtocol.swift
+//  DrawingProtocol.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,7 +8,7 @@
 import MetalKit
 
 /// This protocol encapsulates a series of actions for drawing a single line on a texture.
-protocol DrawingTextureProtocol {
+protocol DrawingProtocol {
     var tool: DrawingTool { get }
 
     var currentDrawingTextures: [MTLTexture?] { get }
