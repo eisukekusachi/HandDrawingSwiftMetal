@@ -7,8 +7,14 @@
 
 import UIKit
 
+protocol CanvasDelegate: AnyObject {
+    func didUndoRedo()
+}
+
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class Canvas: MTKTextureDisplayView {
+
+    weak var canvasDelegate: CanvasDelegate?
 
     /// The currently selected drawing tool, either brush or eraser.
     var drawingTool: DrawingTool {
@@ -52,7 +58,7 @@ class Canvas: MTKTextureDisplayView {
         set { eraserDrawing.eraser.setValue(alpha: newValue)}
     }
 
-    let undoDrawing = UndoDrawing()
+    private let undoDrawing = UndoDrawing()
 
     private var currentDrawing: DrawingProtocol?
     private var brushDrawing: BrushDrawing!
@@ -201,5 +207,50 @@ extension Canvas: PencilDrawingInputSender {
 
     func cancel(_ input: PencilDrawingInput) {
         prepareForNextDrawing()
+    }
+}
+
+// Undo / Redo
+extension Canvas {
+    var canUndo: Bool {
+        undoDrawing.canUndo
+    }
+    var canRedo: Bool {
+        undoDrawing.canRedo
+    }
+
+    func undo() {
+        undoDrawing.performUndo()
+        canvasDelegate?.didUndoRedo()
+    }
+    func redo() {
+        undoDrawing.performRedo()
+        canvasDelegate?.didUndoRedo()
+    }
+
+    func registerDrawingUndoAction(_ currentTexture: MTLTexture) {
+        registerDrawingUndoAction(with: UndoObject(texture: currentTexture))
+
+        undoDrawing.incrementUndoCount()
+        canvasDelegate?.didUndoRedo()
+
+        if let newTexture = duplicateTexture(currentTexture) {
+            layers.setTexture(newTexture)
+        }
+    }
+
+    /// Registers an action to undo the drawing operation.
+    func registerDrawingUndoAction(with undoObject: UndoObject) {
+        undoDrawing.registerUndo(withTarget: self) { [unowned self] _ in
+
+            registerDrawingUndoAction(with: .init(texture: currentTexture))
+
+            canvasDelegate?.didUndoRedo()
+
+            layers.setTexture(undoObject.texture)
+
+            refreshRootTexture()
+            setNeedsDisplay()
+        }
     }
 }

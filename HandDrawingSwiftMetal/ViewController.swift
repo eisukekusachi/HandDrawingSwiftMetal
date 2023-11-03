@@ -18,6 +18,9 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBOutlet weak var undoButton: UIButton!
+    @IBOutlet weak var redoButton: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,11 +36,19 @@ class ViewController: UIViewController {
             canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
+        canvas.canvasDelegate = self
         canvas.drawingTool = .brush
         canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
         canvas.eraserAlpha = 150
 
         diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+
+        refreshUndoRedoButtons()
+    }
+
+    private func refreshUndoRedoButtons() {
+        undoButton.isEnabled = canvas.canUndo
+        redoButton.isEnabled = canvas.canRedo
     }
 }
 
@@ -97,9 +108,15 @@ extension ViewController {
         }
     }
     @IBAction func pushUndoButton() {
-        canvas.undoDrawing.undo()
+        canvas.undo()
     }
     @IBAction func pushRedoButton() {
-        canvas.undoDrawing.redo()
+        canvas.redo()
+    }
+}
+
+extension ViewController: CanvasDelegate {
+    func didUndoRedo() {
+        refreshUndoRedoButtons()
     }
 }

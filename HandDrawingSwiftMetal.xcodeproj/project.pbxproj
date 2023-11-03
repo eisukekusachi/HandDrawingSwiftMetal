@@ -39,7 +39,6 @@
 		D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979C29DAB0DF00A82E6A /* Buffers.swift */; };
 		D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* Transforming.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
-		D422D9C32AF4DCD1004E058B /* Canvas+Undo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C22AF4DCD1004E058B /* Canvas+Undo.swift */; };
 		D422D9C62AF4DD03004E058B /* UndoDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C52AF4DD03004E058B /* UndoDrawing.swift */; };
 		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
@@ -126,7 +125,6 @@
 		D40D979C29DAB0DF00A82E6A /* Buffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffers.swift; sourceTree = "<group>"; };
 		D40D97A429DAB0E800A82E6A /* Transforming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
-		D422D9C22AF4DCD1004E058B /* Canvas+Undo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Canvas+Undo.swift"; sourceTree = "<group>"; };
 		D422D9C52AF4DD03004E058B /* UndoDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDrawing.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
@@ -196,7 +194,6 @@
 			isa = PBXGroup;
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
-				D422D9C22AF4DCD1004E058B /* Canvas+Undo.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975629DAB04700A82E6A /* Gestures */,
@@ -550,7 +547,6 @@
 				D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */,
 				D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
-				D422D9C32AF4DCD1004E058B /* Canvas+Undo.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,

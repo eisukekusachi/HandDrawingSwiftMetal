@@ -17,7 +17,7 @@ class UndoDrawing: UndoManager {
         clear()
     }
 
-    func updateUndoCount() {
+    func incrementUndoCount() {
         if undoCount < levelsOfUndo {
             undoCount += 1
             redoCount = 0
@@ -48,7 +48,7 @@ class UndoDrawing: UndoManager {
         }
         return false
     }
-    
+
     func clear() {
         removeAllActions()
 

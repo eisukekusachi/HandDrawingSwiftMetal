@@ -126,6 +126,8 @@
                     <connections>
                         <outlet property="diameterSlider" destination="d3h-Jn-l09" id="O6g-Am-EF7"/>
                         <outlet property="exportButton" destination="eLs-JK-IPQ" id="Pfv-9P-voq"/>
+                        <outlet property="redoButton" destination="ckJ-z6-HZH" id="nT6-3h-z9l"/>
+                        <outlet property="undoButton" destination="PYn-NR-3Gt" id="Lqq-j3-oZi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
