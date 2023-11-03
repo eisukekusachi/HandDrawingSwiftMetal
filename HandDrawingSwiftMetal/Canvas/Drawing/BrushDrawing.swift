@@ -1,5 +1,5 @@
 //
-//  BrushDrawingTexture.swift
+//  BrushDrawing.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,7 +8,7 @@
 import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class BrushDrawingTexture: DrawingTextureProtocol {
+class BrushDrawing: DrawingProtocol {
     var brush = Brush()
     let tool: DrawingTool = .brush
 
@@ -16,7 +16,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
-    var currentTextures: [MTLTexture?] {
+    var currentDrawingTextures: [MTLTexture?] {
         return [canvas.currentTexture,
                 drawingTexture]
     }
@@ -30,7 +30,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
     }
 
     /// Initializes the textures for drawing with the specified texture size.
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 

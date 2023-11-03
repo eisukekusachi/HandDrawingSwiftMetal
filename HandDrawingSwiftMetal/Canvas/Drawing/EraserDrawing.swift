@@ -1,5 +1,5 @@
 //
-//  EraserDrawingTexture.swift
+//  EraserDrawing.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,7 +8,7 @@
 import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class EraserDrawingTexture: DrawingTextureProtocol {
+class EraserDrawing: DrawingProtocol {
     var eraser = Eraser()
     let tool: DrawingTool = .eraser
 
@@ -16,7 +16,7 @@ class EraserDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
-    var currentTextures: [MTLTexture?] {
+    var currentDrawingTextures: [MTLTexture?] {
         isDrawing ? [eraserTexture] : [canvas.currentTexture]
     }
 
@@ -42,7 +42,7 @@ class EraserDrawingTexture: DrawingTextureProtocol {
     }
 
     /// Initializes the textures for drawing with the specified texture size.
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 
