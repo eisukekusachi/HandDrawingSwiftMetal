@@ -15,6 +15,6 @@ protocol LayerManagerProtocol {
 
     func mergeAllTextures(currentTextures: [MTLTexture?],
                           backgroundColor: (Int, Int, Int),
-                          to displayTexture: MTLTexture)
+                          to dstTexture: MTLTexture)
     func clearTexture()
 }

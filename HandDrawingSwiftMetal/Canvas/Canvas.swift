@@ -90,7 +90,7 @@ class Canvas: MTKTextureDisplayView {
         layers = LayerManager(canvas: self)
     }
 
-    func refreshDisplayTexture() {
+    func refreshRootTexture() {
         guard let currentDrawing else { return }
         layers.mergeAllTextures(currentTextures: currentDrawing.currentDrawingTextures,
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
@@ -99,7 +99,7 @@ class Canvas: MTKTextureDisplayView {
 
     func clearCanvas() {
         layers.clearTexture()
-        refreshDisplayTexture()
+        refreshRootTexture()
     }
 
     /// Reset the canvas transformation matrix to identity.
@@ -128,7 +128,7 @@ extension Canvas: MTKTextureDisplayViewDelegate {
         eraserDrawing.initializeTextures(textureSize: textureSize)
         layers.initializeTextures(textureSize: textureSize)
 
-        refreshDisplayTexture()
+        refreshRootTexture()
     }
 }
 
@@ -139,7 +139,7 @@ extension Canvas: FingerDrawingInputSender {
         else { return }
         
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
-        refreshDisplayTexture()
+        refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
     }
 
@@ -177,7 +177,7 @@ extension Canvas: PencilDrawingInputSender {
         inputManager.updateInput(input)
 
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
-        refreshDisplayTexture()
+        refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
     }
 

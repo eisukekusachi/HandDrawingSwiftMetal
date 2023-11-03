@@ -28,12 +28,12 @@ class LayerManager: LayerManagerProtocol {
 
         clearTexture()
     }
-    func mergeAllTextures(currentTextures: [MTLTexture?], backgroundColor: (Int, Int, Int), to displayTexture: MTLTexture) {
-        Command.fill(displayTexture,
+    func mergeAllTextures(currentTextures: [MTLTexture?], backgroundColor: (Int, Int, Int), to dstTexture: MTLTexture) {
+        Command.fill(dstTexture,
                      withRGB: backgroundColor,
                      canvas.commandBuffer)
 
-        Command.merge(dst: displayTexture,
+        Command.merge(dst: dstTexture,
                       textures: currentTextures,
                       canvas.commandBuffer)
     }
