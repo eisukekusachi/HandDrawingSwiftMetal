@@ -96,4 +96,10 @@ extension ViewController {
             canvas.brushDiameter = Int(Brush.diameterIntValue(sender.value))
         }
     }
+    @IBAction func pushUndoButton() {
+        print("undo")
+    }
+    @IBAction func pushRedoButton() {
+        print("redo")
+    }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -80,6 +80,22 @@
                                     <action selector="dragDiameterSlider:" destination="BYZ-38-t0r" eventType="valueChanged" id="lm9-HC-Nao"/>
                                 </connections>
                             </slider>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PYn-NR-3Gt">
+                                <rect key="frame" x="8" y="59" width="65.333333333333329" height="34.333333333333343"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Undo"/>
+                                <connections>
+                                    <action selector="pushUndoButton" destination="BYZ-38-t0r" eventType="touchUpInside" id="T07-pq-Q0T"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ckJ-z6-HZH">
+                                <rect key="frame" x="321.66666666666669" y="59" width="63.333333333333314" height="34.333333333333343"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Redo"/>
+                                <connections>
+                                    <action selector="pushRedoButton" destination="BYZ-38-t0r" eventType="touchUpInside" id="BaM-L4-5qk"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -87,9 +103,13 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jhq-bH-0ot" secondAttribute="trailing" id="81I-1w-nzL"/>
                             <constraint firstItem="eLs-JK-IPQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Fcc-Cs-rA4"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="-106" id="GDb-U9-iFg"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ckJ-z6-HZH" secondAttribute="trailing" constant="8" id="LXG-mz-ryC"/>
+                            <constraint firstItem="PYn-NR-3Gt" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="LXk-th-AUh"/>
                             <constraint firstItem="eLs-JK-IPQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="VfF-mW-2Fm"/>
+                            <constraint firstItem="ckJ-z6-HZH" firstAttribute="centerY" secondItem="eLs-JK-IPQ" secondAttribute="centerY" id="YH9-1W-kr7"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="ax1-Pc-fwU"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Jhq-bH-0ot" secondAttribute="bottom" id="dCa-hd-lhe"/>
+                            <constraint firstItem="PYn-NR-3Gt" firstAttribute="centerY" secondItem="eLs-JK-IPQ" secondAttribute="centerY" id="eQj-ou-GkO"/>
                             <constraint firstItem="Jhq-bH-0ot" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="wrp-WD-kMg"/>
                         </constraints>
                     </view>
