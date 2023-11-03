@@ -52,12 +52,14 @@ class Canvas: MTKTextureDisplayView {
         set { eraserDrawing.eraser.setValue(alpha: newValue)}
     }
 
+    let undoDrawing = UndoDrawing()
+
     private var currentDrawing: DrawingProtocol?
     private var brushDrawing: BrushDrawing!
     private var eraserDrawing: EraserDrawing!
 
     private var transforming: TransformingProtocol!
-    private var layers: LayerManagerProtocol!
+    private (set) var layers: LayerManagerProtocol!
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
@@ -88,6 +90,8 @@ class Canvas: MTKTextureDisplayView {
         
         transforming = Transforming()
         layers = LayerManager(canvas: self)
+
+        undoDrawing.levelsOfUndo = 8
     }
 
     func refreshRootTexture() {
@@ -98,6 +102,8 @@ class Canvas: MTKTextureDisplayView {
     }
 
     func clearCanvas() {
+        registerDrawingUndoAction(currentTexture)
+
         layers.clearTexture()
         refreshRootTexture()
     }
@@ -137,7 +143,11 @@ extension Canvas: FingerDrawingInputSender {
         guard inputManager.updateInput(input) is FingerDrawingInput,
               let currentDrawing
         else { return }
-        
+
+        if touchState == .ended {
+            registerDrawingUndoAction(currentTexture)
+        }
+
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
@@ -175,6 +185,10 @@ extension Canvas: PencilDrawingInputSender {
         }
 
         inputManager.updateInput(input)
+
+        if touchState == .ended {
+            registerDrawingUndoAction(currentTexture)
+        }
 
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()

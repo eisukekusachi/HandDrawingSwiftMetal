@@ -97,9 +97,9 @@ extension ViewController {
         }
     }
     @IBAction func pushUndoButton() {
-        print("undo")
+        canvas.undoDrawing.undo()
     }
     @IBAction func pushRedoButton() {
-        print("redo")
+        canvas.undoDrawing.redo()
     }
 }

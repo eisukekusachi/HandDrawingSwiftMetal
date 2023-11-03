@@ -159,3 +159,17 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         setNeedsDisplay()
     }
 }
+
+extension MTKTextureDisplayView {
+    func duplicateTexture(_ srcTexture: MTLTexture?) -> MTLTexture? {
+        guard let commandBuffer = commandQueue?.getNewCommandBuffer(),
+              let srcTexture = srcTexture else { return nil }
+
+        let newTexture = device?.makeTexture(srcTexture.size)
+
+        Command.copy(dst: newTexture, src: srcTexture, commandBuffer)
+        commandBuffer.commit()
+
+        return newTexture
+    }
+}

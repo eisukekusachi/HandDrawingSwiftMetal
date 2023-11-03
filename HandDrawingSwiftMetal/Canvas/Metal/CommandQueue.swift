@@ -23,6 +23,9 @@ class CommandQueue: CommandQueueProtocol {
         }
         return buffer!
     }
+    func getNewCommandBuffer() -> MTLCommandBuffer {
+        queue.makeCommandBuffer()!
+    }
 
     func disposeCommandBuffer() {
         self.buffer = nil

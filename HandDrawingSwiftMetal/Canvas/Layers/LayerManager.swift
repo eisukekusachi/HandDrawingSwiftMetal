@@ -38,6 +38,10 @@ class LayerManager: LayerManagerProtocol {
                       canvas.commandBuffer)
     }
 
+    func setTexture(_ texture: MTLTexture) {
+        currentTexture = texture
+    }
+
     func clearTexture() {
         Command.clear(texture: currentTexture,
                       canvas.commandBuffer)
