@@ -18,7 +18,7 @@ class LayerManager: LayerManagerProtocol {
     required init(canvas: Canvas) {
         self.canvas = canvas
     }
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         assert(canvas.device != nil, "Device is nil.")
 
         if self.textureSize != textureSize {

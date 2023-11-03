@@ -11,7 +11,7 @@ protocol LayerManagerProtocol {
 
     var currentTexture: MTLTexture! { get }
 
-    func initializeTextures(textureSize: CGSize)
+    func initializeTextures(_ textureSize: CGSize)
 
     func mergeAllTextures(currentTextures: [MTLTexture?],
                           backgroundColor: (Int, Int, Int),

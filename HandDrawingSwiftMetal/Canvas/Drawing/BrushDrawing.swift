@@ -30,7 +30,7 @@ class BrushDrawing: DrawingProtocol {
     }
 
     /// Initializes the textures for drawing with the specified texture size.
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 

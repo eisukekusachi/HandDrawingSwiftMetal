@@ -17,7 +17,7 @@ protocol DrawingProtocol {
 
     var textureSize: CGSize { get }
 
-    func initializeTextures(textureSize: CGSize)
+    func initializeTextures(_ textureSize: CGSize)
 
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>, touchState: TouchState)
     func mergeDrawingTexture(into dstTexture: MTLTexture)

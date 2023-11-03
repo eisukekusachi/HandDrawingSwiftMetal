@@ -124,9 +124,9 @@ class Canvas: MTKTextureDisplayView {
 
 extension Canvas: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
-        brushDrawing.initializeTextures(textureSize: textureSize)
-        eraserDrawing.initializeTextures(textureSize: textureSize)
-        layers.initializeTextures(textureSize: textureSize)
+        brushDrawing.initializeTextures(textureSize)
+        eraserDrawing.initializeTextures(textureSize)
+        layers.initializeTextures(textureSize)
 
         refreshRootTexture()
     }
