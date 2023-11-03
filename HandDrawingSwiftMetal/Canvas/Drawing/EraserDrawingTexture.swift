@@ -16,7 +16,7 @@ class EraserDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
-    var currentTextures: [MTLTexture?] {
+    var currentDrawingTextures: [MTLTexture?] {
         isDrawing ? [eraserTexture] : [canvas.currentTexture]
     }
 

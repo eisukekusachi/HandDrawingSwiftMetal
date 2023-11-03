@@ -16,7 +16,7 @@ class BrushDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
-    var currentTextures: [MTLTexture?] {
+    var currentDrawingTextures: [MTLTexture?] {
         return [canvas.currentTexture,
                 drawingTexture]
     }

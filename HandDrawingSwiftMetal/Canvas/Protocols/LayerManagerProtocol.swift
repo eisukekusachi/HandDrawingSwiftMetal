@@ -8,7 +8,8 @@
 import MetalKit
 
 protocol LayerManagerProtocol {
-    var currentTexture: MTLTexture { get }
+
+    var currentTexture: MTLTexture! { get }
 
     func initializeTextures(textureSize: CGSize)
 

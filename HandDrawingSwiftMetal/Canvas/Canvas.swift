@@ -92,7 +92,7 @@ class Canvas: MTKTextureDisplayView {
 
     func refreshDisplayTexture() {
         guard let drawingTexture = currentDrawingTexture else { return }
-        layers.mergeAllTextures(currentTextures: drawingTexture.currentTextures,
+        layers.mergeAllTextures(currentTextures: drawingTexture.currentDrawingTextures,
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                 to: rootTexture)
     }

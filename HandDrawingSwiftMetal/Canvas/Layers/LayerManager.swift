@@ -11,11 +11,7 @@ class LayerManager: LayerManagerProtocol {
 
     var canvas: Canvas!
 
-    var currentTexture: MTLTexture {
-        return texture
-    }
-
-    var texture: MTLTexture!
+    private (set) var currentTexture: MTLTexture!
 
     private var textureSize: CGSize = .zero
 
@@ -23,10 +19,11 @@ class LayerManager: LayerManagerProtocol {
         self.canvas = canvas
     }
     func initializeTextures(textureSize: CGSize) {
+        assert(canvas.device != nil, "Device is nil.")
+
         if self.textureSize != textureSize {
             self.textureSize = textureSize
-
-            self.texture = canvas.device!.makeTexture(textureSize)
+            self.currentTexture = canvas.device!.makeTexture(textureSize)
         }
 
         clearTexture()
@@ -42,7 +39,7 @@ class LayerManager: LayerManagerProtocol {
     }
 
     func clearTexture() {
-        Command.clear(texture: texture,
+        Command.clear(texture: currentTexture,
                       canvas.commandBuffer)
     }
 }

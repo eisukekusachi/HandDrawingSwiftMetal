@@ -11,7 +11,7 @@ import MetalKit
 protocol DrawingTextureProtocol {
     var tool: DrawingTool { get }
 
-    var currentTextures: [MTLTexture?] { get }
+    var currentDrawingTextures: [MTLTexture?] { get }
 
     var drawingTexture: MTLTexture? { get }
 
