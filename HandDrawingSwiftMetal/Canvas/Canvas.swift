@@ -7,8 +7,14 @@
 
 import UIKit
 
+protocol CanvasDelegate: AnyObject {
+    func didUndoRedo()
+}
+
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class Canvas: MTKTextureDisplayView {
+
+    weak var canvasDelegate: CanvasDelegate?
 
     /// The currently selected drawing tool, either brush or eraser.
     var drawingTool: DrawingTool {
@@ -52,12 +58,14 @@ class Canvas: MTKTextureDisplayView {
         set { eraserDrawing.eraser.setValue(alpha: newValue)}
     }
 
+    private let undoDrawing = UndoDrawing()
+
     private var currentDrawing: DrawingProtocol?
     private var brushDrawing: BrushDrawing!
     private var eraserDrawing: EraserDrawing!
 
     private var transforming: TransformingProtocol!
-    private var layers: LayerManagerProtocol!
+    private (set) var layers: LayerManagerProtocol!
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
@@ -88,6 +96,8 @@ class Canvas: MTKTextureDisplayView {
         
         transforming = Transforming()
         layers = LayerManager(canvas: self)
+
+        undoDrawing.levelsOfUndo = 8
     }
 
     func refreshRootTexture() {
@@ -98,6 +108,8 @@ class Canvas: MTKTextureDisplayView {
     }
 
     func clearCanvas() {
+        registerDrawingUndoAction(currentTexture)
+
         layers.clearTexture()
         refreshRootTexture()
     }
@@ -137,7 +149,11 @@ extension Canvas: FingerDrawingInputSender {
         guard inputManager.updateInput(input) is FingerDrawingInput,
               let currentDrawing
         else { return }
-        
+
+        if touchState == .ended {
+            registerDrawingUndoAction(currentTexture)
+        }
+
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
@@ -176,6 +192,10 @@ extension Canvas: PencilDrawingInputSender {
 
         inputManager.updateInput(input)
 
+        if touchState == .ended {
+            registerDrawingUndoAction(currentTexture)
+        }
+
         currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
@@ -187,5 +207,50 @@ extension Canvas: PencilDrawingInputSender {
 
     func cancel(_ input: PencilDrawingInput) {
         prepareForNextDrawing()
+    }
+}
+
+// Undo / Redo
+extension Canvas {
+    var canUndo: Bool {
+        undoDrawing.canUndo
+    }
+    var canRedo: Bool {
+        undoDrawing.canRedo
+    }
+
+    func undo() {
+        undoDrawing.performUndo()
+        canvasDelegate?.didUndoRedo()
+    }
+    func redo() {
+        undoDrawing.performRedo()
+        canvasDelegate?.didUndoRedo()
+    }
+
+    func registerDrawingUndoAction(_ currentTexture: MTLTexture) {
+        registerDrawingUndoAction(with: UndoObject(texture: currentTexture))
+
+        undoDrawing.incrementUndoCount()
+        canvasDelegate?.didUndoRedo()
+
+        if let newTexture = duplicateTexture(currentTexture) {
+            layers.setTexture(newTexture)
+        }
+    }
+
+    /// Registers an action to undo the drawing operation.
+    func registerDrawingUndoAction(with undoObject: UndoObject) {
+        undoDrawing.registerUndo(withTarget: self) { [unowned self] _ in
+
+            registerDrawingUndoAction(with: .init(texture: currentTexture))
+
+            canvasDelegate?.didUndoRedo()
+
+            layers.setTexture(undoObject.texture)
+
+            refreshRootTexture()
+            setNeedsDisplay()
+        }
     }
 }

@@ -12,5 +12,7 @@ protocol CommandQueueProtocol {
     var queue: MTLCommandQueue { get }
 
     func getOrCreateCommandBuffer() -> MTLCommandBuffer
+    func getNewCommandBuffer() -> MTLCommandBuffer
+    
     func disposeCommandBuffer()
 }
