@@ -77,6 +77,8 @@ class Canvas: MTKTextureDisplayView {
     private func commonInitialization() {
         _ = Pipeline.shared
 
+        displayViewDelegate = self
+
         inputManager = InputManager()
         fingerInput = FingerDrawingInput(view: self, delegate: self)
         pencilInput = PencilDrawingInput(view: self, delegate: self)
@@ -88,26 +90,11 @@ class Canvas: MTKTextureDisplayView {
         layers = LayerManager(canvas: self)
     }
 
-    override func layoutSubviews() {
-        if let drawableSize = currentDrawable?.texture.size, displayTexture == nil {
-            initializeTextures(textureSize: drawableSize)
-            refreshDisplayTexture()
-            setNeedsDisplay()
-        }
-    }
-
-    override func initializeTextures(textureSize: CGSize) {
-        super.initializeTextures(textureSize: textureSize)
-        brushDrawingTexture.initializeTextures(textureSize: textureSize)
-        eraserDrawingTexture.initializeTextures(textureSize: textureSize)
-        layers.initializeTextures(textureSize: textureSize)
-    }
-
     func refreshDisplayTexture() {
         guard let drawingTexture = currentDrawingTexture else { return }
         layers.mergeAllTextures(currentTextures: drawingTexture.currentTextures,
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                to: displayTexture)
+                                to: rootTexture)
     }
 
     func clearCanvas() {
@@ -132,6 +119,16 @@ class Canvas: MTKTextureDisplayView {
         fingerInput?.clear()
         pencilInput?.clear()
         currentDrawingTexture?.clearDrawingTextures()
+    }
+}
+
+extension Canvas: MTKTextureDisplayViewDelegate {
+    func didChangeTextureSize(_ textureSize: CGSize) {
+        brushDrawingTexture.initializeTextures(textureSize: textureSize)
+        eraserDrawingTexture.initializeTextures(textureSize: textureSize)
+        layers.initializeTextures(textureSize: textureSize)
+
+        refreshDisplayTexture()
     }
 }
 
