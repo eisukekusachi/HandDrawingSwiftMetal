@@ -41,11 +41,19 @@
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D422D9C62AF4DD03004E058B /* UndoDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C52AF4DD03004E058B /* UndoDrawing.swift */; };
 		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
+		D422D9CD2AF5092E004E058B /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9CC2AF5092E004E058B /* FileOutput.swift */; };
+		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
+		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
+		D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D32AF51999004E058B /* CanvasCodableData.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
 		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
+		D4513AA02AF5D10800CA4438 /* Canvas+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */; };
+		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
+		D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */; };
+		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */; };
 		D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* LayerManager.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
@@ -127,11 +135,18 @@
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D422D9C52AF4DD03004E058B /* UndoDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDrawing.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
+		D422D9CC2AF5092E004E058B /* FileOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutput.swift; sourceTree = "<group>"; };
+		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
+		D422D9D32AF51999004E058B /* CanvasCodableData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasCodableData.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandQueueProtocol.swift; path = ../Protocols/CommandQueueProtocol.swift; sourceTree = "<group>"; };
+		D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Canvas+IO.swift"; sourceTree = "<group>"; };
+		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
+		D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+FileIO.swift"; sourceTree = "<group>"; };
+		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LayerManagerProtocol.swift; path = ../Protocols/LayerManagerProtocol.swift; sourceTree = "<group>"; };
 		D4646CBA29E2932800987C8E /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
@@ -170,6 +185,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D422D9D02AF50957004E058B /* ZipArchive in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,8 +210,10 @@
 			isa = PBXGroup;
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
+				D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
+				D422D9C92AF50917004E058B /* FileIO */,
 				D40D975629DAB04700A82E6A /* Gestures */,
 				D4B65E1F29DCFC9C00A0542F /* Layers */,
 				D40D975729DAB05400A82E6A /* Math */,
@@ -237,12 +255,15 @@
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */,
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
+				D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */,
 				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
 				D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */,
 				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
 				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
+				D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -296,6 +317,15 @@
 			path = Undo;
 			sourceTree = "<group>";
 		};
+		D422D9C92AF50917004E058B /* FileIO */ = {
+			isa = PBXGroup;
+			children = (
+				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
+				D422D9CC2AF5092E004E058B /* FileOutput.swift */,
+			);
+			path = FileIO;
+			sourceTree = "<group>";
+		};
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -343,6 +373,7 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
+				D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */,
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
@@ -395,6 +426,9 @@
 			dependencies = (
 			);
 			name = HandDrawingSwiftMetal;
+			packageProductDependencies = (
+				D422D9CF2AF50957004E058B /* ZipArchive */,
+			);
 			productName = HandDrawingSwiftMetal;
 			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
 			productType = "com.apple.product-type.application";
@@ -467,6 +501,9 @@
 				Base,
 			);
 			mainGroup = D4E1ECD02752388C00D4A23D;
+			packageReferences = (
+				D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */,
+			);
 			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -539,7 +576,10 @@
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
 				D40D976F29DAB09D00A82E6A /* EraserDrawing.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
+				D4513AA02AF5D10800CA4438 /* Canvas+IO.swift in Sources */,
+				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
+				D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
@@ -553,12 +593,15 @@
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */,
+				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,
 				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
+				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
+				D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D46D07D82ADBC51C0093D861 /* PencilDrawingInput.swift in Sources */,
 				D422D9C62AF4DD03004E058B /* UndoDrawing.swift in Sources */,
@@ -571,6 +614,7 @@
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGestureRecognizer.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* BrushDrawing.swift in Sources */,
+				D422D9CD2AF5092E004E058B /* FileOutput.swift in Sources */,
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D46D07D62ADBC4A00093D861 /* InputProtocol.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
@@ -774,6 +818,7 @@
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HandDrawingSwiftMetal/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Photo saving.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -805,6 +850,7 @@
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HandDrawingSwiftMetal/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Photo saving.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -961,6 +1007,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ZipArchive/ZipArchive";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D422D9CF2AF50957004E058B /* ZipArchive */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */;
+			productName = ZipArchive;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D4E1ECD12752388C00D4A23D /* Project object */;
 }

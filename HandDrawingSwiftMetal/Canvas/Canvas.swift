@@ -16,6 +16,8 @@ class Canvas: MTKTextureDisplayView {
 
     weak var canvasDelegate: CanvasDelegate?
 
+    private (set) var projectName: String = Calendar.currentDate
+
     /// The currently selected drawing tool, either brush or eraser.
     var drawingTool: DrawingTool {
         get {

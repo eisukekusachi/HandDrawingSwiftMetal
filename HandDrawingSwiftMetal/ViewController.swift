@@ -113,6 +113,14 @@ extension ViewController {
     @IBAction func pushRedoButton() {
         canvas.redo()
     }
+    @IBAction func pushSaveButton() {
+        do {
+            try saveCanvasData(canvas, zipFileName: canvas.fileNamePath)
+
+        } catch {
+            print("Error")
+        }
+    }
 }
 
 extension ViewController: CanvasDelegate {

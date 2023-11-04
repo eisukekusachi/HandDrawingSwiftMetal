@@ -18,11 +18,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="Jhq-bH-0ot">
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="Jhq-bH-0ot">
                                 <rect key="frame" x="8" y="783.66666666666663" width="377" height="34.333333333333371"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h1R-Lz-ZIZ">
-                                        <rect key="frame" x="0.0" y="0.0" width="49.666666666666664" height="34.333333333333336"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="63" height="34.333333333333336"/>
                                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" image="circle.fill" catalog="system"/>
@@ -32,7 +32,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v1q-c7-uXe">
-                                        <rect key="frame" x="55" y="0.0" width="49.666666666666657" height="34.333333333333336"/>
+                                        <rect key="frame" x="63" y="0.0" width="62.666666666666657" height="34.333333333333336"/>
                                         <color key="tintColor" systemColor="systemRedColor"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" image="circle.fill" catalog="system"/>
@@ -42,7 +42,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jHO-fP-tl0">
-                                        <rect key="frame" x="110.00000000000001" y="0.0" width="44.666666666666671" height="34.333333333333336"/>
+                                        <rect key="frame" x="125.66666666666666" y="0.0" width="63" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal">
                                             <imageReference key="image" image="eraser" catalog="system" symbolScale="default"/>
@@ -55,7 +55,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PYn-NR-3Gt">
-                                        <rect key="frame" x="160.33333333333334" y="0.0" width="49" height="34.333333333333336"/>
+                                        <rect key="frame" x="188.66666666666666" y="0.0" width="62.666666666666657" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" image="arrow.uturn.backward.square" catalog="system"/>
                                         <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward.square" catalog="system"/>
@@ -64,7 +64,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ckJ-z6-HZH">
-                                        <rect key="frame" x="214.66666666666666" y="0.0" width="48.999999999999972" height="34.333333333333336"/>
+                                        <rect key="frame" x="251.33333333333331" y="0.0" width="63" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" image="arrow.uturn.forward.square" catalog="system"/>
                                         <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
@@ -72,17 +72,8 @@
                                             <action selector="pushRedoButton" destination="BYZ-38-t0r" eventType="touchUpInside" id="BaM-L4-5qk"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gln-PI-CKL">
-                                        <rect key="frame" x="269" y="0.0" width="54.666666666666686" height="34.333333333333336"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" image="photo" catalog="system"/>
-                                        <buttonConfiguration key="configuration" style="plain" image="photo" catalog="system"/>
-                                        <connections>
-                                            <action selector="pushExportButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="oX5-2c-zE8"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PTP-yu-ezN">
-                                        <rect key="frame" x="329" y="0.0" width="48" height="34.333333333333336"/>
+                                        <rect key="frame" x="314.33333333333331" y="0.0" width="62.666666666666686" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" image="trash" catalog="system"/>
                                         <buttonConfiguration key="configuration" style="plain" image="trash" catalog="system"/>
@@ -93,7 +84,7 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eLs-JK-IPQ">
-                                <rect key="frame" x="90.333333333333329" y="59" width="212.33333333333337" height="34.333333333333343"/>
+                                <rect key="frame" x="8" y="59" width="212.33333333333334" height="34.333333333333343"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Reset the transformation"/>
                                 <connections>
@@ -110,6 +101,28 @@
                                     <action selector="dragDiameterSlider:" destination="BYZ-38-t0r" eventType="valueChanged" id="lm9-HC-Nao"/>
                                 </connections>
                             </slider>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VVQ-nq-vu0">
+                                <rect key="frame" x="282" y="59" width="103" height="34.333333333333343"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZG6-3V-3PC">
+                                        <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.up" catalog="system"/>
+                                        <connections>
+                                            <action selector="pushSaveButton" destination="BYZ-38-t0r" eventType="touchUpInside" id="O9H-NM-YeH"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gln-PI-CKL">
+                                        <rect key="frame" x="48.333333333333314" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="photo" catalog="system"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="photo" catalog="system"/>
+                                        <connections>
+                                            <action selector="pushExportButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="oX5-2c-zE8"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -117,7 +130,9 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jhq-bH-0ot" secondAttribute="trailing" constant="8" id="81I-1w-nzL"/>
                             <constraint firstItem="eLs-JK-IPQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Fcc-Cs-rA4"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="-106" id="GDb-U9-iFg"/>
-                            <constraint firstItem="eLs-JK-IPQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="VfF-mW-2Fm"/>
+                            <constraint firstItem="eLs-JK-IPQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="QGa-TZ-rdp"/>
+                            <constraint firstItem="VVQ-nq-vu0" firstAttribute="centerY" secondItem="eLs-JK-IPQ" secondAttribute="centerY" id="WKJ-1d-t1c"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="VVQ-nq-vu0" secondAttribute="trailing" constant="8" id="ZH7-Qs-FcA"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="ax1-Pc-fwU"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Jhq-bH-0ot" secondAttribute="bottom" id="dCa-hd-lhe"/>
                             <constraint firstItem="Jhq-bH-0ot" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="wrp-WD-kMg"/>
@@ -132,7 +147,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="78" y="-2"/>
+            <point key="canvasLocation" x="77.099236641221367" y="-2.1126760563380285"/>
         </scene>
     </scenes>
     <resources>
@@ -141,6 +156,7 @@
         <image name="circle.fill" catalog="system" width="128" height="123"/>
         <image name="eraser" catalog="system" width="128" height="119"/>
         <image name="photo" catalog="system" width="128" height="93"/>
+        <image name="square.and.arrow.up" catalog="system" width="108" height="128"/>
         <image name="trash" catalog="system" width="117" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
