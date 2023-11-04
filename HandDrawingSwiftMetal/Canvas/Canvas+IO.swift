@@ -9,15 +9,15 @@ import Foundation
 
 extension Canvas {
     var fileNamePath: String {
-        projectName + "." + zipSuffix
+        projectName + "." + Canvas.zipSuffix
     }
-    private var zipSuffix: String {
+    static var zipSuffix: String {
         "zip"
     }
-    private var thumbnailPath: String {
+    static var thumbnailPath: String {
         "thumbnail.png"
     }
-    private var fileDataPath: String {
+    static var jsonFilePath: String {
         "data"
     }
     func write(to folderUrl: URL) throws {
@@ -31,7 +31,7 @@ extension Canvas {
         }
 
         // Thumbnail
-        let imageURL = folderUrl.appendingPathComponent(thumbnailPath)
+        let imageURL = folderUrl.appendingPathComponent(Canvas.thumbnailPath)
         try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
 
         // Data
@@ -40,7 +40,7 @@ extension Canvas {
                                             eraserDiameter: eraserDiameter)
 
         if let jsonData = try? JSONEncoder().encode(codableData) {
-            let jsonUrl = folderUrl.appendingPathComponent(fileDataPath)
+            let jsonUrl = folderUrl.appendingPathComponent(Canvas.jsonFilePath)
             try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
         }
     }

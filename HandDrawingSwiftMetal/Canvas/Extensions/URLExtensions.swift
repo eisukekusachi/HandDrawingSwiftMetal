@@ -17,4 +17,20 @@ extension URL {
     static var workInProgress: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
     }
+
+    func allFileURLs(suffix: String = "") -> [URL] {
+        if FileManager.default.fileExists(atPath: self.path) {
+            do {
+                let urls = try FileManager.default.contentsOfDirectory(at: self,
+                                                                       includingPropertiesForKeys: nil)
+                return urls.filter {
+                    suffix.count == 0 || $0.lastPathComponent.hasSuffix(suffix)
+                }
+
+            } catch {
+                print(error)
+            }
+        }
+        return []
+    }
 }

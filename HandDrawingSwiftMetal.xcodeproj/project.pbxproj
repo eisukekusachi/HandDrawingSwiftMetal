@@ -54,6 +54,7 @@
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
+		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */; };
 		D4646CBB29E2932800987C8E /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4646CBA29E2932800987C8E /* LayerManager.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
@@ -147,6 +148,7 @@
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+FileIO.swift"; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
+		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D4646CB829E2922D00987C8E /* LayerManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LayerManagerProtocol.swift; path = ../Protocols/LayerManagerProtocol.swift; sourceTree = "<group>"; };
 		D4646CBA29E2932800987C8E /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
@@ -326,6 +328,14 @@
 			path = FileIO;
 			sourceTree = "<group>";
 		};
+		D4513AAF2AF63A3C00CA4438 /* FileView */ = {
+			isa = PBXGroup;
+			children = (
+				D4513AAD2AF63A2A00CA4438 /* FileView.swift */,
+			);
+			path = FileView;
+			sourceTree = "<group>";
+		};
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -374,6 +384,7 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */,
+				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
@@ -581,6 +592,7 @@
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
+				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,

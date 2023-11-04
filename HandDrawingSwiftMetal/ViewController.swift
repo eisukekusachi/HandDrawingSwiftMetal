@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class ViewController: UIViewController {
     
@@ -120,6 +121,18 @@ extension ViewController {
         } catch {
             print("Error")
         }
+    }
+    @IBAction func pushLoadButton() {
+        let zipFileList = URL.documents.allFileURLs(suffix: Canvas.zipSuffix).map {
+            $0.lastPathComponent
+        }
+        let fileView = FileView(zipFileList: zipFileList,
+                                didTapItem: { fileName in
+            print(fileName)
+            self.presentedViewController?.dismiss(animated: true)
+        })
+        let vc = UIHostingController(rootView: fileView)
+        self.present(vc, animated: true)
     }
 }
 
