@@ -10,8 +10,8 @@ import SwiftUI
 
 class ViewController: UIViewController {
     
-    private let canvas = Canvas()
-    
+    let canvas = Canvas()
+
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
         didSet {
@@ -50,6 +50,15 @@ class ViewController: UIViewController {
     private func refreshUndoRedoButtons() {
         undoButton.isEnabled = canvas.canUndo
         redoButton.isEnabled = canvas.canRedo
+    }
+    private func refreshAllComponents() {
+        switch canvas.drawingTool {
+        case .brush:
+            diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+        case .eraser:
+            diameterSlider.value = Brush.diameterFloatValue(canvas.eraserDiameter)
+        }
+        refreshUndoRedoButtons()
     }
 }
 
@@ -127,9 +136,18 @@ extension ViewController {
             $0.lastPathComponent
         }
         let fileView = FileView(zipFileList: zipFileList,
-                                didTapItem: { fileName in
-            print(fileName)
-            self.presentedViewController?.dismiss(animated: true)
+                                didTapItem: { [weak self] zipFilePath in
+            guard let self else { return }
+
+            do {
+                try loadCanvasData(zipFilePath: zipFilePath)
+                refreshAllComponents()
+
+            } catch {
+                print("pushLoadButton: \(error)")
+            }
+
+            presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)
         self.present(vc, animated: true)

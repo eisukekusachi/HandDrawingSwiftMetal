@@ -7,7 +7,18 @@
 
 import Foundation
 
-enum DrawingTool {
-    case brush
-    case eraser
+enum DrawingTool: Int {
+    case brush = 0
+    case eraser = 1
+
+    init?(rawValue: Int) {
+        switch rawValue {
+        case 0:
+            self = .brush
+        case 1:
+            self = .eraser
+        default:
+            return nil
+        }
+    }
 }

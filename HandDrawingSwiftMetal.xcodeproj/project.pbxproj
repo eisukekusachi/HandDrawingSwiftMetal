@@ -68,6 +68,9 @@
 		D4BB796B2AE2989200739462 /* IteretorNonNormalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796A2AE2989200739462 /* IteretorNonNormalTest.swift */; };
 		D4BB796D2AE2998B00739462 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796C2AE2998B00739462 /* DefaultIteratorTest.swift */; };
 		D4BB796F2AE299F800739462 /* DrawingIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB796E2AE299F800739462 /* DrawingIteratorTest.swift */; };
+		D4BCB2FF2AF72EF300EA650D /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB2FE2AF72EF300EA650D /* FileInput.swift */; };
+		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
+		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
 		D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
 		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
@@ -162,6 +165,9 @@
 		D4BB796A2AE2989200739462 /* IteretorNonNormalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteretorNonNormalTest.swift; sourceTree = "<group>"; };
 		D4BB796C2AE2998B00739462 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
 		D4BB796E2AE299F800739462 /* DrawingIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingIteratorTest.swift; sourceTree = "<group>"; };
+		D4BCB2FE2AF72EF300EA650D /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
+		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
+		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransformingProtocol.swift; path = ../Protocols/TransformingProtocol.swift; sourceTree = "<group>"; };
@@ -213,6 +219,7 @@
 			children = (
 				D40D975129DAB01900A82E6A /* Canvas.swift */,
 				D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */,
+				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D422D9C92AF50917004E058B /* FileIO */,
@@ -259,6 +266,7 @@
 			children = (
 				D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */,
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
+				D4BCB3022AF7383B00EA650D /* DataExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
 				D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */,
 				D40D979A29DAB0DF00A82E6A /* MTLDeviceExtensions.swift */,
@@ -266,6 +274,7 @@
 				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
 				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
 				D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */,
+				D4BCB3002AF7339200EA650D /* StringExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -322,8 +331,8 @@
 		D422D9C92AF50917004E058B /* FileIO */ = {
 			isa = PBXGroup;
 			children = (
-				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
 				D422D9CC2AF5092E004E058B /* FileOutput.swift */,
+				D4BCB2FE2AF72EF300EA650D /* FileInput.swift */,
 			);
 			path = FileIO;
 			sourceTree = "<group>";
@@ -612,6 +621,7 @@
 				D40D976C29DAB09D00A82E6A /* Brush.swift in Sources */,
 				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
+				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
@@ -630,9 +640,11 @@
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D46D07D62ADBC4A00093D861 /* InputProtocol.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
+				D4BCB2FF2AF72EF300EA650D /* FileInput.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
 				D46D07D42ADBC46D0093D861 /* FingerDrawingInput.swift in Sources */,
+				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D40D975229DAB01900A82E6A /* Canvas.swift in Sources */,
 				D40D977B29DAB0B400A82E6A /* PencilGestureRecognizer.swift in Sources */,

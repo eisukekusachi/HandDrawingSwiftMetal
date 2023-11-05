@@ -16,7 +16,7 @@ class Canvas: MTKTextureDisplayView {
 
     weak var canvasDelegate: CanvasDelegate?
 
-    private (set) var projectName: String = Calendar.currentDate
+    var projectName: String = Calendar.currentDate
 
     /// The currently selected drawing tool, either brush or eraser.
     var drawingTool: DrawingTool {
@@ -60,6 +60,9 @@ class Canvas: MTKTextureDisplayView {
         set { eraserDrawing.eraser.setValue(alpha: newValue)}
     }
 
+    override var undoManager: UndoDrawing {
+        return undoDrawing
+    }
     private let undoDrawing = UndoDrawing()
 
     private var currentDrawing: DrawingProtocol?
@@ -221,6 +224,9 @@ extension Canvas {
         undoDrawing.canRedo
     }
 
+    func clearUndo() {
+        undoDrawing.clear()
+    }
     func undo() {
         undoDrawing.performUndo()
         canvasDelegate?.didUndoRedo()
