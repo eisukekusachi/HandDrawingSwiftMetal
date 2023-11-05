@@ -111,12 +111,25 @@ class Canvas: MTKTextureDisplayView {
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                 to: rootTexture)
     }
+    func newCanvas() {
+        projectName = Calendar.currentDate
 
+        clearUndo()
+
+        resetCanvasMatrix()
+
+        layers.clearTexture()
+        refreshRootTexture()
+
+        setNeedsDisplay()
+    }
     func clearCanvas() {
         registerDrawingUndoAction(currentTexture)
 
         layers.clearTexture()
         refreshRootTexture()
+
+        setNeedsDisplay()
     }
 
     /// Reset the canvas transformation matrix to identity.

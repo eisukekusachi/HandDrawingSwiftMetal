@@ -107,7 +107,6 @@ extension ViewController {
     }
     @IBAction func pushClearButton(_ sender: UIButton) {
         canvas.clearCanvas()
-        canvas.setNeedsDisplay()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvas.drawingTool == .eraser {
@@ -138,6 +137,30 @@ extension ViewController {
         })
         let vc = UIHostingController(rootView: fileView)
         self.present(vc, animated: true)
+    }
+    @IBAction func pushNewButton() {
+        showAlert(title: "Alert",
+                  message: "Do you want to refresh the canvas?",
+                  okHandler: { [weak self] in
+
+            self?.canvas.newCanvas()
+        })
+    }
+
+    func showAlert(title: String, message: String, okHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+        let ok = UIAlertAction(title: "OK", style: .default) { _ in
+            okHandler()
+            self.dismiss(animated: true, completion: nil)
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            self.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(cancel)
+
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
     }
 }
 
