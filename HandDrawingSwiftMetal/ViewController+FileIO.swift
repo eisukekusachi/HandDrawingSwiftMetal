@@ -8,7 +8,48 @@
 import Foundation
 
 extension ViewController {
-    func saveCanvasData(_ canvas: Canvas, zipFileName: String) throws {
+    func saveCanvas() {
+        Task {
+            let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
+            defer {
+                activityIndicatorView.removeFromSuperview()
+            }
+            view.addSubview(activityIndicatorView)
+
+            do {
+                try exportCanvasDataAsZip(canvas, zipFileName: canvas.zipFileNamePath)
+                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
+
+                view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+
+            } catch {
+                view.addSubview(Toast(text: error.localizedDescription))
+            }
+        }
+    }
+    func loadCanvas(zipFilePath: String) {
+        Task {
+            let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
+            defer {
+                activityIndicatorView.removeFromSuperview()
+            }
+            view.addSubview(activityIndicatorView)
+
+            do {
+                try loadCanvasDataFromZip(zipFilePath: zipFilePath)
+                refreshAllComponents()
+
+                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
+
+                view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+
+            } catch {
+                view.addSubview(Toast(text: error.localizedDescription))
+            }
+        }
+    }
+
+    private func exportCanvasDataAsZip(_ canvas: Canvas, zipFileName: String) throws {
 
         let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
         let zipFileUrl = URL.documents.appendingPathComponent(zipFileName)
@@ -24,7 +65,7 @@ extension ViewController {
         try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
     }
 
-    func loadCanvasData(zipFilePath: String) throws {
+    private func loadCanvasDataFromZip(zipFilePath: String) throws {
 
         let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
         let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)

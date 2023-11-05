@@ -71,6 +71,7 @@
 		D4BCB2FF2AF72EF300EA650D /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB2FE2AF72EF300EA650D /* FileInput.swift */; };
 		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
+		D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */; };
 		D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
 		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
@@ -168,6 +169,7 @@
 		D4BCB2FE2AF72EF300EA650D /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
 		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
+		D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TransformingProtocol.swift; path = ../Protocols/TransformingProtocol.swift; sourceTree = "<group>"; };
@@ -350,6 +352,7 @@
 			children = (
 				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+				D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -600,6 +603,7 @@
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */,
+				D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,

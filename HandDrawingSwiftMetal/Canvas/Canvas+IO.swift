@@ -8,7 +8,7 @@
 import Foundation
 
 extension Canvas {
-    var fileNamePath: String {
+    var zipFileNamePath: String {
         projectName + "." + Canvas.zipSuffix
     }
     static var zipSuffix: String {

@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -46,12 +46,12 @@ class ViewController: UIViewController {
 
         refreshUndoRedoButtons()
     }
-
-    private func refreshUndoRedoButtons() {
+    
+    func refreshUndoRedoButtons() {
         undoButton.isEnabled = canvas.canUndo
         redoButton.isEnabled = canvas.canRedo
     }
-    private func refreshAllComponents() {
+    func refreshAllComponents() {
         switch canvas.drawingTool {
         case .brush:
             diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
@@ -124,12 +124,7 @@ extension ViewController {
         canvas.redo()
     }
     @IBAction func pushSaveButton() {
-        do {
-            try saveCanvasData(canvas, zipFileName: canvas.fileNamePath)
-
-        } catch {
-            print("Error")
-        }
+        saveCanvas()
     }
     @IBAction func pushLoadButton() {
         let zipFileList = URL.documents.allFileURLs(suffix: Canvas.zipSuffix).map {
@@ -137,17 +132,9 @@ extension ViewController {
         }
         let fileView = FileView(zipFileList: zipFileList,
                                 didTapItem: { [weak self] zipFilePath in
-            guard let self else { return }
 
-            do {
-                try loadCanvasData(zipFilePath: zipFilePath)
-                refreshAllComponents()
-
-            } catch {
-                print("pushLoadButton: \(error)")
-            }
-
-            presentedViewController?.dismiss(animated: true)
+            self?.loadCanvas(zipFilePath: zipFilePath)
+            self?.presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)
         self.present(vc, animated: true)
