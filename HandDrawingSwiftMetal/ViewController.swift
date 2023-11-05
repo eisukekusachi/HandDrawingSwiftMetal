@@ -6,11 +6,12 @@
 //
 
 import UIKit
+import SwiftUI
 
 class ViewController: UIViewController {
     
-    private let canvas = Canvas()
-    
+    let canvas = Canvas()
+
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
         didSet {
@@ -20,7 +21,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -45,10 +46,19 @@ class ViewController: UIViewController {
 
         refreshUndoRedoButtons()
     }
-
-    private func refreshUndoRedoButtons() {
+    
+    func refreshUndoRedoButtons() {
         undoButton.isEnabled = canvas.canUndo
         redoButton.isEnabled = canvas.canRedo
+    }
+    func refreshAllComponents() {
+        switch canvas.drawingTool {
+        case .brush:
+            diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+        case .eraser:
+            diameterSlider.value = Brush.diameterFloatValue(canvas.eraserDiameter)
+        }
+        refreshUndoRedoButtons()
     }
 }
 
@@ -97,7 +107,6 @@ extension ViewController {
     }
     @IBAction func pushClearButton(_ sender: UIButton) {
         canvas.clearCanvas()
-        canvas.setNeedsDisplay()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvas.drawingTool == .eraser {
@@ -112,6 +121,46 @@ extension ViewController {
     }
     @IBAction func pushRedoButton() {
         canvas.redo()
+    }
+    @IBAction func pushSaveButton() {
+        saveCanvas()
+    }
+    @IBAction func pushLoadButton() {
+        let zipFileList = URL.documents.allFileURLs(suffix: Canvas.zipSuffix).map {
+            $0.lastPathComponent
+        }
+        let fileView = FileView(zipFileList: zipFileList,
+                                didTapItem: { [weak self] zipFilePath in
+
+            self?.loadCanvas(zipFilePath: zipFilePath)
+            self?.presentedViewController?.dismiss(animated: true)
+        })
+        let vc = UIHostingController(rootView: fileView)
+        self.present(vc, animated: true)
+    }
+    @IBAction func pushNewButton() {
+        showAlert(title: "Alert",
+                  message: "Do you want to refresh the canvas?",
+                  okHandler: { [weak self] in
+
+            self?.canvas.newCanvas()
+        })
+    }
+
+    func showAlert(title: String, message: String, okHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+        let ok = UIAlertAction(title: "OK", style: .default) { _ in
+            okHandler()
+            self.dismiss(animated: true, completion: nil)
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            self.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(cancel)
+
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
     }
 }
 
