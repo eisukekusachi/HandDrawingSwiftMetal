@@ -102,7 +102,7 @@
                                 </connections>
                             </slider>
                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VVQ-nq-vu0">
-                                <rect key="frame" x="204.33333333333337" y="59" width="172.66666666666663" height="34.333333333333343"/>
+                                <rect key="frame" x="203.66666666666663" y="59" width="173.33333333333337" height="34.333333333333343"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZG6-3V-3PC">
                                         <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
@@ -113,7 +113,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nCt-Pg-bgS">
-                                        <rect key="frame" x="48.333333333333314" y="0.0" width="48.333333333333343" height="34.333333333333336"/>
+                                        <rect key="frame" x="48.333333333333343" y="0.0" width="48.333333333333343" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
                                         <connections>
@@ -130,9 +130,9 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OKT-5D-Wlq">
-                                        <rect key="frame" x="151.33333333333334" y="0.0" width="21.333333333333343" height="34.333333333333336"/>
+                                        <rect key="frame" x="151.33333333333334" y="0.0" width="22" height="34.333333333333336"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" image="rectangle.portrait.badge.plus.fill" catalog="system"/>
+                                        <state key="normal" image="plus.square.fill.on.square.fill" catalog="system"/>
                                         <connections>
                                             <action selector="pushNewButton" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ava-vn-5JK"/>
                                         </connections>
@@ -171,7 +171,7 @@
         <image name="circle.fill" catalog="system" width="128" height="123"/>
         <image name="eraser" catalog="system" width="128" height="119"/>
         <image name="photo" catalog="system" width="128" height="93"/>
-        <image name="rectangle.portrait.badge.plus.fill" catalog="system" width="120" height="128"/>
+        <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
         <image name="square.and.arrow.down" catalog="system" width="112" height="128"/>
         <image name="square.and.arrow.up" catalog="system" width="108" height="128"/>
         <image name="trash" catalog="system" width="117" height="128"/>
