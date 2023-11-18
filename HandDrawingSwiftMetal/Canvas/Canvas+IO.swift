@@ -61,7 +61,7 @@ extension Canvas {
         }
 
         if let drawingTool = codableData.drawingTool {
-            self.drawingTool = .init(rawValue: drawingTool) ?? .brush
+            self.drawingTool = .init(rawValue: drawingTool)
         }
 
         if let diameter = codableData.brushDiameter {

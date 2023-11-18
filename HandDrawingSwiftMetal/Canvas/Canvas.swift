@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 protocol CanvasDelegate: AnyObject {
     func didUndoRedo()
@@ -19,63 +20,60 @@ class Canvas: MTKTextureDisplayView {
     var projectName: String = Calendar.currentDate
 
     /// The currently selected drawing tool, either brush or eraser.
-    var drawingTool: DrawingTool {
-        get {
-            if currentDrawing is EraserDrawing {
-                return .eraser
-            } else {
-                return .brush
-            }
-        }
-        set {
-            if newValue == .eraser {
-                currentDrawing = eraserDrawing
-            } else {
-                currentDrawing = brushDrawing
-            }
-        }
+    @Published var drawingTool: DrawingToolType = .brush
+
+    var brushDiameter: Int {
+        get { (drawingBrush.drawingTool as? DrawingToolBrush)!.diameter }
+        set { (drawingBrush.drawingTool as? DrawingToolBrush)?.diameter = newValue }
+    }
+    var eraserDiameter: Int {
+        get { (drawingEraser.drawingTool as? DrawingToolEraser)!.diameter }
+        set { (drawingEraser.drawingTool as? DrawingToolEraser)?.diameter = newValue }
+    }
+
+    var brushColor: UIColor {
+        get { (drawingBrush.drawingTool as? DrawingToolBrush)!.color }
+        set { (drawingBrush.drawingTool as? DrawingToolBrush)?.setValue(color: newValue) }
+    }
+    var eraserAlpha: Int {
+        get { (drawingEraser.drawingTool as? DrawingToolEraser)!.alpha }
+        set { (drawingEraser.drawingTool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
     var currentTexture: MTLTexture {
         return layers.currentTexture
     }
 
-    var brushDiameter: Int {
-        get { brushDrawing.brush.diameter }
-        set { brushDrawing.brush.diameter = newValue }
-    }
+    /// Manage texture layers
+    private (set) var layers: LayerManagerProtocol!
 
-    var eraserDiameter: Int {
-        get { eraserDrawing.eraser.diameter }
-        set { eraserDrawing.eraser.diameter = newValue }
-    }
+    /// Manage drawing
+    private var drawing: DrawingProtocol?
 
-    var brushColor: UIColor {
-        get { brushDrawing.brush.color }
-        set { brushDrawing.brush.setValue(color: newValue) }
-    }
+    /// Drawing with a brush
+    private var drawingBrush: DrawingBrush!
 
-    var eraserAlpha: Int {
-        get { eraserDrawing.eraser.alpha }
-        set { eraserDrawing.eraser.setValue(alpha: newValue)}
-    }
+    /// Drawing with an eraser
+    private var drawingEraser: DrawingEraser!
 
+
+    /// Manage transformations
+    private var transforming: TransformingProtocol!
+
+
+    /// An undoManager with undoCount and redoCount
+    /// Override the existing UndoManager
     override var undoManager: UndoDrawing {
         return undoDrawing
     }
     private let undoDrawing = UndoDrawing()
 
-    private var currentDrawing: DrawingProtocol?
-    private var brushDrawing: BrushDrawing!
-    private var eraserDrawing: EraserDrawing!
-
-    private var transforming: TransformingProtocol!
-    private (set) var layers: LayerManagerProtocol!
-
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
     private var fingerInput: FingerDrawingInput!
     private var pencilInput: PencilDrawingInput!
+
+    private var cancellables = Set<AnyCancellable>()
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -90,15 +88,27 @@ class Canvas: MTKTextureDisplayView {
     private func commonInitialization() {
         _ = Pipeline.shared
 
+        $drawingTool
+            .sink { newValue in
+                switch newValue {
+                case .brush:
+                    self.drawing = self.drawingBrush
+                case .eraser:
+                    self.drawing = self.drawingEraser
+                }
+            }
+            .store(in: &cancellables)
+
         displayViewDelegate = self
 
         inputManager = InputManager()
         fingerInput = FingerDrawingInput(view: self, delegate: self)
         pencilInput = PencilDrawingInput(view: self, delegate: self)
 
-        brushDrawing = BrushDrawing(canvas: self)
-        eraserDrawing = EraserDrawing(canvas: self)
-        
+        drawingBrush = DrawingBrush(canvas: self)
+        drawingEraser = DrawingEraser(canvas: self)
+        drawingTool = .brush
+
         transforming = Transforming()
         layers = LayerManager(canvas: self)
 
@@ -106,8 +116,8 @@ class Canvas: MTKTextureDisplayView {
     }
 
     func refreshRootTexture() {
-        guard let currentDrawing else { return }
-        layers.mergeAllTextures(currentTextures: currentDrawing.currentDrawingTextures,
+        guard let drawing else { return }
+        layers.mergeAllTextures(currentTextures: drawing.currentDrawingTextures,
                                 backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                 to: rootTexture)
     }
@@ -141,21 +151,21 @@ class Canvas: MTKTextureDisplayView {
     private func cancelFingerDrawing() {
         fingerInput.clear()
         transforming.storedMatrix = matrix
-        currentDrawing?.clearDrawingTextures()
+        drawing?.clearDrawingTextures()
     }
 
     private func prepareForNextDrawing() {
         inputManager.clear()
         fingerInput?.clear()
         pencilInput?.clear()
-        currentDrawing?.clearDrawingTextures()
+        drawing?.clearDrawingTextures()
     }
 }
 
 extension Canvas: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
-        brushDrawing.initializeTextures(textureSize)
-        eraserDrawing.initializeTextures(textureSize)
+        drawingBrush.initializeTextures(textureSize)
+        drawingEraser.initializeTextures(textureSize)
         layers.initializeTextures(textureSize)
 
         refreshRootTexture()
@@ -165,14 +175,14 @@ extension Canvas: MTKTextureDisplayViewDelegate {
 extension Canvas: FingerDrawingInputSender {
     func drawOnTexture(_ input: FingerDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerDrawingInput,
-              let currentDrawing
+              let drawing
         else { return }
 
         if touchState == .ended {
             registerDrawingUndoAction(currentTexture)
         }
 
-        currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
+        drawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
     }
@@ -202,7 +212,7 @@ extension Canvas: FingerDrawingInputSender {
 
 extension Canvas: PencilDrawingInputSender {
     func drawOnTexture(_ input: PencilDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard let currentDrawing else { return }
+        guard let drawing else { return }
 
         if inputManager.currentInput is FingerDrawingInput {
             cancelFingerDrawing()
@@ -214,7 +224,7 @@ extension Canvas: PencilDrawingInputSender {
             registerDrawingUndoAction(currentTexture)
         }
 
-        currentDrawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
+        drawing.drawOnDrawingTexture(with: iterator, touchState: touchState)
         refreshRootTexture()
         runDisplayLinkLoop(touchState != .ended)
     }

@@ -1,5 +1,5 @@
 //
-//  Brush.swift
+//  DrawingToolBrush.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/03/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Brush {
+class DrawingToolBrush: DrawingTool {
     var color: UIColor {
         UIColor(red: CGFloat(rgb.0) / 255.0,
                 green: CGFloat(rgb.1) / 255.0,
@@ -46,16 +46,6 @@ class Brush {
         }
     }
 
-    func setR(_ value: Int) {
-        rgb = (value, rgb.1, rgb.2)
-    }
-    func setG(_ value: Int) {
-        rgb = (rgb.0, value, rgb.2)
-    }
-    func setB(_ value: Int) {
-        rgb = (rgb.0, rgb.1, value)
-    }
-
     func setValue(color: UIColor? = nil, diameter: Int? = nil) {
         if let color = color {
             rgb = color.rgb
@@ -87,7 +77,7 @@ class Brush {
     }
 }
 
-extension Brush {
+extension DrawingToolBrush {
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
 
