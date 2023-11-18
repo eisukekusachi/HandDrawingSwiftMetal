@@ -11,14 +11,12 @@ enum DrawingToolType: Int {
     case brush = 0
     case eraser = 1
 
-    init?(rawValue: Int) {
+    init(rawValue: Int) {
         switch rawValue {
-        case 0:
-            self = .brush
         case 1:
             self = .eraser
         default:
-            return nil
+            self = .brush
         }
     }
 }
