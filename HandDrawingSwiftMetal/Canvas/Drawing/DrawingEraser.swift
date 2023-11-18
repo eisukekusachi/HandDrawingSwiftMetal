@@ -1,5 +1,5 @@
 //
-//  EraserDrawing.swift
+//  DrawingEraser.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,9 +8,9 @@
 import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class EraserDrawing: DrawingProtocol {
-    var eraser = Eraser()
-    let tool: DrawingTool = .eraser
+class DrawingEraser: DrawingProtocol {
+    var eraser = DrawingToolEraser()
+    let tool: DrawingToolType = .eraser
 
     let canvas: Canvas
 

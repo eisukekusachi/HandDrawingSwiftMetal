@@ -1,5 +1,5 @@
 //
-//  Eraser.swift
+//  DrawingToolEraser.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/03/28.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Eraser {
+class DrawingToolEraser: DrawingTool {
     var diameter: Int = initEraserSize
 
     private (set) var alpha: Int = 255
@@ -28,7 +28,7 @@ class Eraser {
     }
 }
 
-extension Eraser {
+extension DrawingToolEraser {
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
 

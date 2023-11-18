@@ -42,7 +42,7 @@ class ViewController: UIViewController {
         canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
         canvas.eraserAlpha = 150
 
-        diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
 
         refreshUndoRedoButtons()
     }
@@ -54,9 +54,9 @@ class ViewController: UIViewController {
     func refreshAllComponents() {
         switch canvas.drawingTool {
         case .brush:
-            diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
         case .eraser:
-            diameterSlider.value = Brush.diameterFloatValue(canvas.eraserDiameter)
+            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.eraserDiameter)
         }
         refreshUndoRedoButtons()
     }
@@ -71,20 +71,20 @@ extension ViewController {
         canvas.drawingTool = .brush
         canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
 
-        diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
         canvas.drawingTool = .brush
         canvas.brushColor = UIColor.red.withAlphaComponent(0.75)
 
-        diameterSlider.value = Brush.diameterFloatValue(canvas.brushDiameter)
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
         canvas.drawingTool = .eraser
         canvas.eraserAlpha = 150
 
-        diameterSlider.value = Eraser.diameterFloatValue(canvas.eraserDiameter)
+        diameterSlider.value = DrawingToolEraser.diameterFloatValue(canvas.eraserDiameter)
     }
     
     @IBAction func pushExportButton(_ sender: UIButton) {
@@ -110,10 +110,10 @@ extension ViewController {
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvas.drawingTool == .eraser {
-            canvas.eraserDiameter = Int(Eraser.diameterIntValue(sender.value))
+            canvas.eraserDiameter = Int(DrawingToolEraser.diameterIntValue(sender.value))
 
         } else {
-            canvas.brushDiameter = Int(Brush.diameterIntValue(sender.value))
+            canvas.brushDiameter = Int(DrawingToolBrush.diameterIntValue(sender.value))
         }
     }
     @IBAction func pushUndoButton() {

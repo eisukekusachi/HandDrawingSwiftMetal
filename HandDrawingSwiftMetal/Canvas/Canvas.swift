@@ -19,9 +19,9 @@ class Canvas: MTKTextureDisplayView {
     var projectName: String = Calendar.currentDate
 
     /// The currently selected drawing tool, either brush or eraser.
-    var drawingTool: DrawingTool {
+    var drawingTool: DrawingToolType {
         get {
-            if currentDrawing is EraserDrawing {
+            if currentDrawing is DrawingEraser {
                 return .eraser
             } else {
                 return .brush
@@ -66,8 +66,8 @@ class Canvas: MTKTextureDisplayView {
     private let undoDrawing = UndoDrawing()
 
     private var currentDrawing: DrawingProtocol?
-    private var brushDrawing: BrushDrawing!
-    private var eraserDrawing: EraserDrawing!
+    private var brushDrawing: DrawingBrush!
+    private var eraserDrawing: DrawingEraser!
 
     private var transforming: TransformingProtocol!
     private (set) var layers: LayerManagerProtocol!
@@ -96,8 +96,8 @@ class Canvas: MTKTextureDisplayView {
         fingerInput = FingerDrawingInput(view: self, delegate: self)
         pencilInput = PencilDrawingInput(view: self, delegate: self)
 
-        brushDrawing = BrushDrawing(canvas: self)
-        eraserDrawing = EraserDrawing(canvas: self)
+        brushDrawing = DrawingBrush(canvas: self)
+        eraserDrawing = DrawingEraser(canvas: self)
         
         transforming = Transforming()
         layers = LayerManager(canvas: self)

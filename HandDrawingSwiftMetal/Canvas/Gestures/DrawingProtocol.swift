@@ -9,7 +9,7 @@ import MetalKit
 
 /// This protocol encapsulates a series of actions for drawing a single line on a texture.
 protocol DrawingProtocol {
-    var tool: DrawingTool { get }
+    var tool: DrawingToolType { get }
 
     var currentDrawingTextures: [MTLTexture?] { get }
 
