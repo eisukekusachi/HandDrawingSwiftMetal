@@ -7,7 +7,6 @@
 
 import MetalKit
 
-// Undo / Redo
 extension Canvas {
     var canUndo: Bool {
         undoManager.canUndo

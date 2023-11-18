@@ -1,13 +1,14 @@
 //
-//  UndoDrawing.swift
+//  UndoManagerWithCount.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/11/03.
+//  Created by Eisuke Kusachi on 2023/11/18.
 //
 
 import Foundation
 
-class UndoDrawing: UndoManager {
+/// An undoManager with undoCount and redoCount
+class UndoManagerWithCount: UndoManager {
 
     private (set) var undoCount: Int = 0
     private (set) var redoCount: Int = 0

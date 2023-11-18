@@ -61,12 +61,14 @@ class Canvas: MTKTextureDisplayView {
     private var transforming: TransformingProtocol!
 
 
-    /// An undoManager with undoCount and redoCount
-    /// Override the existing UndoManager
-    override var undoManager: UndoDrawing {
-        return undoDrawing
+    /// Override UndoManager with ``UndoManagerWithCount``
+    override var undoManager: UndoManagerWithCount {
+        return undoManagerWithCount
     }
-    private let undoDrawing = UndoDrawing()
+
+    /// An undoManager with undoCount and redoCount
+    private let undoManagerWithCount = UndoManagerWithCount()
+
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
@@ -112,7 +114,7 @@ class Canvas: MTKTextureDisplayView {
         transforming = Transforming()
         layers = LayerManager(canvas: self)
 
-        undoDrawing.levelsOfUndo = 8
+        undoManager.levelsOfUndo = 8
     }
 
     func refreshRootTexture() {
