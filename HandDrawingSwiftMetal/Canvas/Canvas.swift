@@ -61,12 +61,14 @@ class Canvas: MTKTextureDisplayView {
     private var transforming: TransformingProtocol!
 
 
-    /// An undoManager with undoCount and redoCount
-    /// Override the existing UndoManager
-    override var undoManager: UndoDrawing {
-        return undoDrawing
+    /// Override UndoManager with ``UndoManagerWithCount``
+    override var undoManager: UndoManagerWithCount {
+        return undoManagerWithCount
     }
-    private let undoDrawing = UndoDrawing()
+
+    /// An undoManager with undoCount and redoCount
+    private let undoManagerWithCount = UndoManagerWithCount()
+
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
@@ -112,7 +114,7 @@ class Canvas: MTKTextureDisplayView {
         transforming = Transforming()
         layers = LayerManager(canvas: self)
 
-        undoDrawing.levelsOfUndo = 8
+        undoManager.levelsOfUndo = 8
     }
 
     func refreshRootTexture() {
@@ -235,53 +237,5 @@ extension Canvas: PencilDrawingInputSender {
 
     func cancel(_ input: PencilDrawingInput) {
         prepareForNextDrawing()
-    }
-}
-
-// Undo / Redo
-extension Canvas {
-    var canUndo: Bool {
-        undoDrawing.canUndo
-    }
-    var canRedo: Bool {
-        undoDrawing.canRedo
-    }
-
-    func clearUndo() {
-        undoDrawing.clear()
-    }
-    func undo() {
-        undoDrawing.performUndo()
-        canvasDelegate?.didUndoRedo()
-    }
-    func redo() {
-        undoDrawing.performRedo()
-        canvasDelegate?.didUndoRedo()
-    }
-
-    func registerDrawingUndoAction(_ currentTexture: MTLTexture) {
-        registerDrawingUndoAction(with: UndoObject(texture: currentTexture))
-
-        undoDrawing.incrementUndoCount()
-        canvasDelegate?.didUndoRedo()
-
-        if let newTexture = duplicateTexture(currentTexture) {
-            layers.setTexture(newTexture)
-        }
-    }
-
-    /// Registers an action to undo the drawing operation.
-    func registerDrawingUndoAction(with undoObject: UndoObject) {
-        undoDrawing.registerUndo(withTarget: self) { [unowned self] _ in
-
-            registerDrawingUndoAction(with: .init(texture: currentTexture))
-
-            canvasDelegate?.didUndoRedo()
-
-            layers.setTexture(undoObject.texture)
-
-            refreshRootTexture()
-            setNeedsDisplay()
-        }
     }
 }
