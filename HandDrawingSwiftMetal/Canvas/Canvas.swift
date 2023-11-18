@@ -26,7 +26,6 @@ class Canvas: MTKTextureDisplayView {
         get { (drawingBrush.drawingTool as? DrawingToolBrush)!.diameter }
         set { (drawingBrush.drawingTool as? DrawingToolBrush)?.diameter = newValue }
     }
-
     var eraserDiameter: Int {
         get { (drawingEraser.drawingTool as? DrawingToolEraser)!.diameter }
         set { (drawingEraser.drawingTool as? DrawingToolEraser)?.diameter = newValue }
@@ -36,7 +35,6 @@ class Canvas: MTKTextureDisplayView {
         get { (drawingBrush.drawingTool as? DrawingToolBrush)!.color }
         set { (drawingBrush.drawingTool as? DrawingToolBrush)?.setValue(color: newValue) }
     }
-
     var eraserAlpha: Int {
         get { (drawingEraser.drawingTool as? DrawingToolEraser)!.alpha }
         set { (drawingEraser.drawingTool as? DrawingToolEraser)?.setValue(alpha: newValue)}
@@ -46,17 +44,29 @@ class Canvas: MTKTextureDisplayView {
         return layers.currentTexture
     }
 
+    /// Manage texture layers
+    private (set) var layers: LayerManagerProtocol!
+
+    /// Manage drawing
+    private var drawing: DrawingProtocol?
+
+    /// Drawing with a brush
+    private var drawingBrush: DrawingBrush!
+
+    /// Drawing with an eraser
+    private var drawingEraser: DrawingEraser!
+
+
+    /// Manage transformations
+    private var transforming: TransformingProtocol!
+
+
+    /// An undoManager with undoCount and redoCount
+    /// Override the existing UndoManager
     override var undoManager: UndoDrawing {
         return undoDrawing
     }
     private let undoDrawing = UndoDrawing()
-
-    private var drawing: DrawingProtocol?
-    private var drawingBrush: DrawingBrush!
-    private var drawingEraser: DrawingEraser!
-
-    private var transforming: TransformingProtocol!
-    private (set) var layers: LayerManagerProtocol!
 
     /// A manager for handling finger and pencil input gestures.
     private var inputManager: InputManager!
@@ -95,9 +105,9 @@ class Canvas: MTKTextureDisplayView {
         fingerInput = FingerDrawingInput(view: self, delegate: self)
         pencilInput = PencilDrawingInput(view: self, delegate: self)
 
-        drawingTool = .brush
         drawingBrush = DrawingBrush(canvas: self)
         drawingEraser = DrawingEraser(canvas: self)
+        drawingTool = .brush
 
         transforming = Transforming()
         layers = LayerManager(canvas: self)
