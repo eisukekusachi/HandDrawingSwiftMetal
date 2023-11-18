@@ -9,8 +9,7 @@ import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
 class DrawingEraser: DrawingProtocol {
-    var eraser = DrawingToolEraser()
-    let tool: DrawingToolType = .eraser
+    var drawingTool: DrawingTool = DrawingToolEraser()
 
     let canvas: Canvas
 
@@ -34,13 +33,6 @@ class DrawingEraser: DrawingProtocol {
         self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.device, nodes: flippedTextureNodes)
     }
 
-    required init(canvas: Canvas, diameter: Int? = nil, eraserAlpha: Int? = nil) {
-        self.canvas = canvas
-        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.device, nodes: flippedTextureNodes)
-
-        self.eraser.setValue(alpha: eraserAlpha, diameter: diameter)
-    }
-
     /// Initializes the textures for drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
@@ -57,6 +49,7 @@ class DrawingEraser: DrawingProtocol {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initalizeTextures() once before here.")
+        guard let eraser = drawingTool as? DrawingToolEraser else { return }
 
         let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,

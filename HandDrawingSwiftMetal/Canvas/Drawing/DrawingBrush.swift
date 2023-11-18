@@ -9,8 +9,7 @@ import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
 class DrawingBrush: DrawingProtocol {
-    var brush = DrawingToolBrush()
-    let tool: DrawingToolType = .brush
+    var drawingTool: DrawingTool = DrawingToolBrush()
 
     let canvas: Canvas
 
@@ -44,8 +43,9 @@ class DrawingBrush: DrawingProtocol {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>, touchState: TouchState) {
         assert(textureSize != .zero, "Call initializeTextures() once before here.")
-
-        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, 
+        guard let brush = drawingTool as? DrawingToolBrush else { return }
+        
+        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size,
                                                                                        to: textureSize))
         let points = Curve.makePoints(iterator: iterator, 
                                       matrix: inverseMatrix,
