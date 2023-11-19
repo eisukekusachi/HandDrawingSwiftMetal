@@ -228,6 +228,7 @@
 				D459415B2B08EDB000A18653 /* Canvas+Undo.swift */,
 				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
 				D40D975429DAB03400A82E6A /* Drawing */,
+				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D422D9C92AF50917004E058B /* FileIO */,
 				D40D975629DAB04700A82E6A /* Gestures */,
@@ -257,14 +258,9 @@
 		D40D975429DAB03400A82E6A /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
-				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D40D976829DAB09C00A82E6A /* DrawingBrush.swift */,
 				D40D976A29DAB09D00A82E6A /* DrawingEraser.swift */,
 				D40D976929DAB09D00A82E6A /* DrawingProtocol.swift */,
-				D45941572B08B5CF00A18653 /* DrawingTool.swift */,
-				D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */,
-				D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */,
-				D4934F412ADA36C500C52B76 /* DrawingToolType.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -290,14 +286,12 @@
 		D40D975629DAB04700A82E6A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
-				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
 				D40D977629DAB0B400A82E6A /* InputManager.swift */,
 				D46D07D52ADBC4A00093D861 /* GestureWithStorageProtocol.swift */,
-				D46D07D32ADBC46D0093D861 /* FingerGestureWithStorage.swift */,
-				D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */,
 				D40D977729DAB0B400A82E6A /* FingerGesture.swift */,
+				D46D07D32ADBC46D0093D861 /* FingerGestureWithStorage.swift */,
 				D40D977829DAB0B400A82E6A /* PencilGesture.swift */,
+				D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */,
 			);
 			path = Gestures;
 			sourceTree = "<group>";
@@ -363,6 +357,27 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		D4AEFE262B09B1E300EE3EEF /* ActionState */ = {
+			isa = PBXGroup;
+			children = (
+				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
+				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
+			);
+			path = ActionState;
+			sourceTree = "<group>";
+		};
+		D4AEFE272B09B26500EE3EEF /* DrawingTool */ = {
+			isa = PBXGroup;
+			children = (
+				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
+				D45941572B08B5CF00A18653 /* DrawingTool.swift */,
+				D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */,
+				D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */,
+				D4934F412ADA36C500C52B76 /* DrawingToolType.swift */,
+			);
+			path = DrawingTool;
+			sourceTree = "<group>";
+		};
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
@@ -402,6 +417,7 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */,
+				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D46D07D92ADBEB160093D861 /* Utils */,
