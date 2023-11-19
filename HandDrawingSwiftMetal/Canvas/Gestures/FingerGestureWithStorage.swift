@@ -16,7 +16,7 @@ protocol FingerGestureWithStorageSender {
 
 class FingerGestureWithStorage: GestureWithStorageProtocol {
     var gestureRecognizer: UIGestureRecognizer?
-    var touchPointStorage: TouchPointStorageProtocol = SmoothPointStorage()
+    var touchPointStorage: TouchPointStorageProtocol = SmoothTouchPointStorage()
 
     var delegate: FingerGestureWithStorageSender?
 
@@ -39,7 +39,7 @@ class FingerGestureWithStorage: GestureWithStorageProtocol {
 
 extension FingerGestureWithStorage: FingerGestureSender {
     func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
-        guard let touchPointStorage = (touchPointStorage as? SmoothPointStorage) else { return }
+        guard let touchPointStorage = (touchPointStorage as? SmoothTouchPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointDictionary)
 

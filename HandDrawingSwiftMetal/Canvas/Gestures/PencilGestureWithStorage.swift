@@ -15,7 +15,7 @@ protocol PencilGestureWithStorageSender {
 
 class PencilGestureWithStorage: GestureWithStorageProtocol {
     var gestureRecognizer: UIGestureRecognizer?
-    var touchPointStorage: TouchPointStorageProtocol = DefaultPointStorage()
+    var touchPointStorage: TouchPointStorageProtocol = DefaultTouchPointStorage()
 
     var delegate: PencilGestureWithStorageSender?
 
@@ -33,7 +33,7 @@ class PencilGestureWithStorage: GestureWithStorageProtocol {
 
 extension PencilGestureWithStorage: PencilGestureSender {
     func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchState: TouchState) {
-        guard let touchPointStorage = (touchPointStorage as? DefaultPointStorage) else { return }
+        guard let touchPointStorage = (touchPointStorage as? DefaultTouchPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointArray)
 

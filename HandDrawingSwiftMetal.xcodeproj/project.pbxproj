@@ -13,9 +13,9 @@
 		D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* TouchPoint.swift */; };
 		D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */; };
 		D40D976229DAB09400A82E6A /* Iterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975C29DAB09400A82E6A /* Iterator.swift */; };
-		D40D976329DAB09400A82E6A /* DefaultPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */; };
+		D40D976329DAB09400A82E6A /* DefaultTouchPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975D29DAB09400A82E6A /* DefaultTouchPointStorage.swift */; };
 		D40D976429DAB09400A82E6A /* Curve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975E29DAB09400A82E6A /* Curve.swift */; };
-		D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */; };
+		D40D976529DAB09400A82E6A /* SmoothTouchPointStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975F29DAB09400A82E6A /* SmoothTouchPointStorage.swift */; };
 		D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */; };
 		D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */; };
 		D40D976D29DAB09D00A82E6A /* DrawingBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* DrawingBrush.swift */; };
@@ -114,9 +114,9 @@
 		D40D975A29DAB09400A82E6A /* TouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPoint.swift; sourceTree = "<group>"; };
 		D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TouchPointStorageProtocol.swift; path = ../Protocols/TouchPointStorageProtocol.swift; sourceTree = "<group>"; };
 		D40D975C29DAB09400A82E6A /* Iterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Iterator.swift; sourceTree = "<group>"; };
-		D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultPointStorage.swift; sourceTree = "<group>"; };
+		D40D975D29DAB09400A82E6A /* DefaultTouchPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultTouchPointStorage.swift; sourceTree = "<group>"; };
 		D40D975E29DAB09400A82E6A /* Curve.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Curve.swift; sourceTree = "<group>"; };
-		D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmoothPointStorage.swift; sourceTree = "<group>"; };
+		D40D975F29DAB09400A82E6A /* SmoothTouchPointStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmoothTouchPointStorage.swift; sourceTree = "<group>"; };
 		D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolEraser.swift; sourceTree = "<group>"; };
 		D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolBrush.swift; sourceTree = "<group>"; };
 		D40D976829DAB09C00A82E6A /* DrawingBrush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingBrush.swift; sourceTree = "<group>"; };
@@ -245,9 +245,9 @@
 			isa = PBXGroup;
 			children = (
 				D40D975E29DAB09400A82E6A /* Curve.swift */,
-				D40D975D29DAB09400A82E6A /* DefaultPointStorage.swift */,
+				D40D975D29DAB09400A82E6A /* DefaultTouchPointStorage.swift */,
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
-				D40D975F29DAB09400A82E6A /* SmoothPointStorage.swift */,
+				D40D975F29DAB09400A82E6A /* SmoothTouchPointStorage.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */,
 				D43906E22ADBA1C600E22361 /* TouchState.swift */,
@@ -614,7 +614,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D40D976329DAB09400A82E6A /* DefaultPointStorage.swift in Sources */,
+				D40D976329DAB09400A82E6A /* DefaultTouchPointStorage.swift in Sources */,
 				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
@@ -629,7 +629,7 @@
 				D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
-				D40D976529DAB09400A82E6A /* SmoothPointStorage.swift in Sources */,
+				D40D976529DAB09400A82E6A /* SmoothTouchPointStorage.swift in Sources */,
 				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
 				D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */,
