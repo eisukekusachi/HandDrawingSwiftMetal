@@ -7,15 +7,16 @@
 
 import UIKit
 
+/// Manage GestureWithStorage
 class InputManager {
-    private (set) var currentInput: InputProtocol?
+    private (set) var currentInput: GestureWithStorageProtocol?
 
     /// Updates the current input.
-    /// If the current input is a PencilInput, return it as is without any updates.
+    /// If the current input is a Pencil, return it as is without any updates.
     @discardableResult
-    func updateInput(_ input: InputProtocol) -> InputProtocol? {
-        // Check if the current input is a PencilInput.
-        if currentInput is PencilDrawingInput {
+    func updateInput(_ input: GestureWithStorageProtocol) -> GestureWithStorageProtocol? {
+        // Check if the current input is a Pencil.
+        if currentInput is PencilGestureWithStorage {
             return currentInput
 
         } else {

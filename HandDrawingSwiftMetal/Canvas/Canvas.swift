@@ -70,10 +70,10 @@ class Canvas: MTKTextureDisplayView {
     private let undoManagerWithCount = UndoManagerWithCount()
 
 
-    /// A manager for handling finger and pencil input gestures.
+    /// A manager for handling finger and pencil inputs.
     private var inputManager: InputManager!
-    private var fingerInput: FingerDrawingInput!
-    private var pencilInput: PencilDrawingInput!
+    private var fingerInput: FingerGestureWithStorage!
+    private var pencilInput: PencilGestureWithStorage!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -104,8 +104,8 @@ class Canvas: MTKTextureDisplayView {
         displayViewDelegate = self
 
         inputManager = InputManager()
-        fingerInput = FingerDrawingInput(view: self, delegate: self)
-        pencilInput = PencilDrawingInput(view: self, delegate: self)
+        fingerInput = FingerGestureWithStorage(view: self, delegate: self)
+        pencilInput = PencilGestureWithStorage(view: self, delegate: self)
 
         drawingBrush = DrawingBrush(canvas: self)
         drawingEraser = DrawingEraser(canvas: self)
@@ -174,9 +174,9 @@ extension Canvas: MTKTextureDisplayViewDelegate {
     }
 }
 
-extension Canvas: FingerDrawingInputSender {
-    func drawOnTexture(_ input: FingerDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard inputManager.updateInput(input) is FingerDrawingInput,
+extension Canvas: FingerGestureWithStorageSender {
+    func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+        guard inputManager.updateInput(input) is FingerGestureWithStorage,
               let drawing
         else { return }
 
@@ -189,9 +189,9 @@ extension Canvas: FingerDrawingInputSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func transformTexture(_ input: FingerDrawingInput, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
+    func transformTexture(_ input: FingerGestureWithStorage, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        guard inputManager.updateInput(input) is FingerDrawingInput,
+        guard inputManager.updateInput(input) is FingerGestureWithStorage,
               let newMatrix = transforming.update(transformationData: transformationData,
                                                   centerPoint: Calc.getCenter(frame.size),
                                                   touchState: touchState)
@@ -201,22 +201,22 @@ extension Canvas: FingerDrawingInputSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ input: FingerDrawingInput) {
-        guard inputManager.updateInput(input) is FingerDrawingInput else { return }
+    func touchEnded(_ input: FingerGestureWithStorage) {
+        guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
     }
 
-    func cancel(_ input: FingerDrawingInput) {
-        guard inputManager.updateInput(input) is FingerDrawingInput else { return }
+    func cancel(_ input: FingerGestureWithStorage) {
+        guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
     }
 }
 
-extension Canvas: PencilDrawingInputSender {
-    func drawOnTexture(_ input: PencilDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+extension Canvas: PencilGestureWithStorageSender {
+    func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard let drawing else { return }
 
-        if inputManager.currentInput is FingerDrawingInput {
+        if inputManager.currentInput is FingerGestureWithStorage {
             cancelFingerDrawing()
         }
 
@@ -231,11 +231,11 @@ extension Canvas: PencilDrawingInputSender {
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func touchEnded(_ input: PencilDrawingInput) {
+    func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }
 
-    func cancel(_ input: PencilDrawingInput) {
+    func cancel(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }
 }

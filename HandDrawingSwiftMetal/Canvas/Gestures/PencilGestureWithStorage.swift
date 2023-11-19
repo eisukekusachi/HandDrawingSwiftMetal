@@ -1,5 +1,5 @@
 //
-//  PencilDrawingInput.swift
+//  PencilGestureWithStorage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -7,22 +7,22 @@
 
 import UIKit
 
-protocol PencilDrawingInputSender {
-    func drawOnTexture(_ input: PencilDrawingInput, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func touchEnded(_ input: PencilDrawingInput)
-    func cancel(_ input: PencilDrawingInput)
+protocol PencilGestureWithStorageSender {
+    func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func touchEnded(_ input: PencilGestureWithStorage)
+    func cancel(_ input: PencilGestureWithStorage)
 }
 
-class PencilDrawingInput: InputProtocol {
+class PencilGestureWithStorage: GestureWithStorageProtocol {
     var gestureRecognizer: UIGestureRecognizer?
     var touchPointStorage: TouchPointStorageProtocol = DefaultPointStorage()
 
-    var delegate: PencilDrawingInputSender?
+    var delegate: PencilGestureWithStorageSender?
 
     required init(view: UIView, delegate: AnyObject?) {
-        self.delegate = delegate as? PencilDrawingInputSender
+        self.delegate = delegate as? PencilGestureWithStorageSender
 
-        gestureRecognizer = PencilGestureRecognizer(output: self)
+        gestureRecognizer = PencilGesture(output: self)
         view.addGestureRecognizer(gestureRecognizer!)
     }
 
@@ -31,8 +31,8 @@ class PencilDrawingInput: InputProtocol {
     }
 }
 
-extension PencilDrawingInput: PencilGestureRecognizerSender {
-    func sendLocations(_ gesture: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState) {
+extension PencilGestureWithStorage: PencilGestureSender {
+    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchState: TouchState) {
         guard let touchPointStorage = (touchPointStorage as? DefaultPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointArray)
@@ -45,7 +45,7 @@ extension PencilDrawingInput: PencilGestureRecognizerSender {
         }
     }
 
-    func cancel(_ gesture: PencilGestureRecognizer?) {
+    func cancel(_ gesture: PencilGesture?) {
         delegate?.cancel(self)
     }
 }
