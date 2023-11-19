@@ -1,5 +1,5 @@
 //
-//  PencilGestureRecognizer.swift
+//  PencilGesture.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2022/11/28.
@@ -7,18 +7,18 @@
 
 import UIKit
 
-protocol PencilGestureRecognizerSender {
-    func sendLocations(_ gesture: PencilGestureRecognizer?, touchPointArray: [TouchPoint], touchState: TouchState)
-    func cancel(_ gesture: PencilGestureRecognizer?)
+protocol PencilGestureSender {
+    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchState: TouchState)
+    func cancel(_ gesture: PencilGesture?)
 }
 
-class PencilGestureRecognizer: UIGestureRecognizer {
-    var output: PencilGestureRecognizerSender?
+class PencilGesture: UIGestureRecognizer {
+    var output: PencilGestureSender?
 
     private var latestTouchForce: CGFloat?
     private var ignoreInitialInaccurateValueFlag: Bool = true
 
-    init(output: PencilGestureRecognizerSender? = nil) {
+    init(output: PencilGestureSender? = nil) {
         super.init(target: nil, action: nil)
 
         self.output = output
@@ -27,9 +27,8 @@ class PencilGestureRecognizer: UIGestureRecognizer {
     }
 }
 
-extension PencilGestureRecognizer {
+extension PencilGesture {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-
         latestTouchForce = nil
         ignoreInitialInaccurateValueFlag = true
 
@@ -45,7 +44,6 @@ extension PencilGestureRecognizer {
         output?.sendLocations(self, touchPointArray: [], touchState: .began)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-
         var locations: [TouchPoint] = []
 
         if let view = view,
@@ -68,7 +66,6 @@ extension PencilGestureRecognizer {
         output?.sendLocations(self, touchPointArray: locations, touchState: .moved)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-
         var locations: [TouchPoint] = []
 
         if let view = view,

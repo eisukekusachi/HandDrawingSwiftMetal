@@ -1,5 +1,5 @@
 //
-//  FingerGestureRecognizer.swift
+//  FingerGesture.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2022/11/28.
@@ -7,17 +7,17 @@
 
 import UIKit
 
-protocol FingerGestureRecognizerSender {
-    func sendLocations(_ gesture: FingerGestureRecognizer?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
-    func cancel(_ gesture: FingerGestureRecognizer?)
+protocol FingerGestureSender {
+    func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
+    func cancel(_ gesture: FingerGesture?)
 }
 
-class FingerGestureRecognizer: UIGestureRecognizer {
-    var output: FingerGestureRecognizerSender?
+class FingerGesture: UIGestureRecognizer {
+    var output: FingerGestureSender?
 
     private var is3DTouchAvailable: Bool = false
 
-    init(output: FingerGestureRecognizerSender? = nil, is3DTouchAvailable: Bool = false) {
+    init(output: FingerGestureSender? = nil, is3DTouchAvailable: Bool = false) {
         super.init(target: nil, action: nil)
 
         self.output = output
@@ -27,7 +27,7 @@ class FingerGestureRecognizer: UIGestureRecognizer {
     }
 }
 
-extension FingerGestureRecognizer {
+extension FingerGesture {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         var touchPointDictioanry: [Int: TouchPoint] = [:]
 

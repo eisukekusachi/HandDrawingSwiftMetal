@@ -1,5 +1,5 @@
 //
-//  DefaultPointToCurveConverter.swift
+//  DefaultTouchPointStorage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class DefaultPointStorage: TouchPointStorageProtocol {
+class DefaultTouchPointStorage: TouchPointStorageProtocol {
     var touchPointArray: [TouchPoint] = []
     var iterator = Iterator<TouchPoint>()
 

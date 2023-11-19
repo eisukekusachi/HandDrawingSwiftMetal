@@ -8,7 +8,6 @@
 import Foundation
 
 enum Curve {
-    
     static func makePoints(iterator: Iterator<TouchPoint>,
                            matrix: CGAffineTransform? = nil,
                            srcSize: CGSize,

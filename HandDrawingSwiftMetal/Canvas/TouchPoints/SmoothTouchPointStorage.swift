@@ -1,5 +1,5 @@
 //
-//  SmoothPointToCurveConverter.swift
+//  SmoothTouchPointStorage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SmoothPointStorage: TouchPointStorageProtocol {
+class SmoothTouchPointStorage: TouchPointStorageProtocol {
     var touchPointsDictionary: [Int: [TouchPoint]] = [:]
     var iterator = Iterator<TouchPoint>()
     var iteratorForSmoothCurve = Iterator<TouchPoint>()
@@ -28,9 +28,9 @@ class SmoothPointStorage: TouchPointStorageProtocol {
         }
     }
     func getIterator(endProcessing: Bool = false) -> Iterator<TouchPoint> {
-        SmoothPointStorage.makeIterator(src: iteratorForSmoothCurve,
-                                        dst: &iterator,
-                                        endProcessing: endProcessing)
+        SmoothTouchPointStorage.makeIterator(src: iteratorForSmoothCurve,
+                                             dst: &iterator,
+                                             endProcessing: endProcessing)
         return iterator
     }
     func clear() {
@@ -40,7 +40,7 @@ class SmoothPointStorage: TouchPointStorageProtocol {
     }
 }
 
-extension SmoothPointStorage {
+extension SmoothTouchPointStorage {
     static func average(lhs: TouchPoint,
                         rhs: TouchPoint) -> TouchPoint {
         let newLocation = CGPoint(x: (lhs.location.x + rhs.location.x) * 0.5,
