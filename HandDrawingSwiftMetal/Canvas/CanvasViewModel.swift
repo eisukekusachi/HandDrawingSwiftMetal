@@ -28,6 +28,9 @@ class CanvasViewModel {
     var currentTexture: MTLTexture {
         return layerManager.currentTexture
     }
+    var textures: [MTLTexture?] {
+        drawing?.getDrawingTextures(currentTexture) ?? []
+    }
 
     /// Manage texture layers
     private (set) var layerManager: LayerManagerProtocol = LayerManager()
@@ -77,6 +80,25 @@ class CanvasViewModel {
         case .eraser:
             self.drawing = self.drawingEraser
         }
+    }
+    
+    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
+                              matrix: CGAffineTransform,
+                              _ touchState: TouchState,
+                              _ commandBuffer: MTLCommandBuffer) {
+        drawing?.drawOnDrawingTexture(with: iterator,
+                                      matrix: matrix,
+                                      on: currentTexture,
+                                      touchState,
+                                      commandBuffer)
+    }
+    func mergeAllTextures(backgroundColor: (Int, Int, Int),
+                          into dstTexture: MTLTexture,
+                          _ commandBuffer: MTLCommandBuffer) {
+        layerManager.merge(textures: textures,
+                           backgroundColor: backgroundColor,
+                           into: dstTexture,
+                           commandBuffer)
     }
 
     func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {

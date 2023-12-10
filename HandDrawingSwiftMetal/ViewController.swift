@@ -65,7 +65,7 @@ class ViewController: UIViewController {
 
 extension ViewController {
     @IBAction func pushResetTransform(_ sender: UIButton) {
-        canvasView.resetCanvasMatrix()
+        canvasView.resetMatrix()
         canvasView.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {

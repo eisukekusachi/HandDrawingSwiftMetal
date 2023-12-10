@@ -80,25 +80,21 @@ class CanvasView: MTKTextureDisplayView {
         undoManager.levelsOfUndo = 8
     }
 
-    func refreshRootTexture() {
-        guard let viewModel,
-              let drawing = viewModel.drawing
-        else { return }
-
-        viewModel.layerManager.merge(textures: drawing.getDrawingTextures(viewModel.currentTexture),
-                                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                     into: rootTexture,
-                                     commandBuffer)
+    func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {
+        viewModel?.mergeAllTextures(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                    into: rootTexture,
+                                    commandBuffer)
     }
+
     func newCanvas() {
         viewModel?.projectName = Calendar.currentDate
 
         clearUndo()
 
-        resetCanvasMatrix()
+        resetMatrix()
 
         viewModel?.clearCurrentTexture(commandBuffer)
-        refreshRootTexture()
+        refreshRootTexture(commandBuffer)
 
         setNeedsDisplay()
     }
@@ -108,13 +104,13 @@ class CanvasView: MTKTextureDisplayView {
         registerDrawingUndoAction(viewModel.currentTexture)
 
         viewModel.clearCurrentTexture(commandBuffer)
-        refreshRootTexture()
+        refreshRootTexture(commandBuffer)
 
         setNeedsDisplay()
     }
 
     /// Reset the canvas transformation matrix to identity.
-    func resetCanvasMatrix() {
+    func resetMatrix() {
         matrix = CGAffineTransform.identity
         viewModel?.setStoredMatrix(matrix)
     }
@@ -139,39 +135,41 @@ extension CanvasView: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
         viewModel?.initTextures(textureSize)
 
-        refreshRootTexture()
+        refreshRootTexture(commandBuffer)
     }
 }
 
 extension CanvasView: FingerGestureWithStorageSender {
-    func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
+    func drawOnTexture(_ input: FingerGestureWithStorage, 
+                       iterator: Iterator<TouchPoint>,
+                       touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
-              let viewModel,
-              let drawing = viewModel.drawing
+              let viewModel
         else { return }
 
         if touchState == .ended {
             registerDrawingUndoAction(viewModel.currentTexture)
         }
-
-        drawing.drawOnDrawingTexture(with: iterator,
-                                     matrix: matrix,
-                                     on: viewModel.currentTexture,
-                                     touchState,
-                                     commandBuffer)
-        refreshRootTexture()
+        viewModel.drawOnDrawingTexture(with: iterator,
+                                       matrix: matrix,
+                                       touchState,
+                                       commandBuffer)
+        refreshRootTexture(commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
 
-    func transformTexture(_ input: FingerGestureWithStorage, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
-        let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        guard inputManager.updateInput(input) is FingerGestureWithStorage,
-              let newMatrix = viewModel?.getMatrix(transformationData: transformationData,
-                                                   frameCenterPoint: Calc.getCenter(frame.size),
-                                                   touchState: touchState)
+    func transformTexture(_ input: FingerGestureWithStorage, 
+                          touchPointArrayDictionary: [Int: [TouchPoint]],
+                          touchState: TouchState) {
+        guard inputManager.updateInput(input) is FingerGestureWithStorage
         else { return }
 
-        matrix = newMatrix
+        let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
+        if let newMatrix = viewModel?.getMatrix(transformationData: transformationData,
+                                                frameCenterPoint: Calc.getCenter(frame.size),
+                                                touchState: touchState) {
+            matrix = newMatrix
+        }
         runDisplayLinkLoop(touchState != .ended)
     }
 
@@ -187,27 +185,26 @@ extension CanvasView: FingerGestureWithStorageSender {
 }
 
 extension CanvasView: PencilGestureWithStorageSender {
-    func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard let viewModel,
-              let drawing = viewModel.drawing
+    func drawOnTexture(_ input: PencilGestureWithStorage, 
+                       iterator: Iterator<TouchPoint>,
+                       touchState: TouchState) {
+        guard let viewModel
         else { return }
 
         if inputManager.currentInput is FingerGestureWithStorage {
             cancelFingerDrawing()
         }
-
         inputManager.updateInput(input)
 
         if touchState == .ended {
             registerDrawingUndoAction(viewModel.currentTexture)
         }
 
-        drawing.drawOnDrawingTexture(with: iterator,
-                                     matrix: matrix,
-                                     on: viewModel.currentTexture,
-                                     touchState,
-                                     commandBuffer)
-        refreshRootTexture()
+        viewModel.drawOnDrawingTexture(with: iterator,
+                                       matrix: matrix,
+                                       touchState,
+                                       commandBuffer)
+        refreshRootTexture(commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
 

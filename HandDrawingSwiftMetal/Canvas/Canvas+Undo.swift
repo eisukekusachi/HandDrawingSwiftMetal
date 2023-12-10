@@ -49,7 +49,7 @@ extension CanvasView {
 
             viewModel.layerManager.setTexture(undoObject.texture)
 
-            refreshRootTexture()
+            refreshRootTexture(commandBuffer)
             setNeedsDisplay()
         }
     }

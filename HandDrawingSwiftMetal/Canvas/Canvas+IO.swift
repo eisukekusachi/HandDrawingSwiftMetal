@@ -64,7 +64,7 @@ extension CanvasView {
         
         clearUndo()
 
-        refreshRootTexture()
+        refreshRootTexture(commandBuffer)
         setNeedsDisplay()
     }
     
