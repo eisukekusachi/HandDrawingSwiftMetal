@@ -47,7 +47,6 @@
 		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
-		D4513AA02AF5D10800CA4438 /* Canvas+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
@@ -148,7 +147,6 @@
 		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandQueueProtocol.swift; path = ../Protocols/CommandQueueProtocol.swift; sourceTree = "<group>"; };
-		D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Canvas+IO.swift"; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+FileIO.swift"; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
@@ -228,7 +226,6 @@
 				D4C8EE9F2B257330005947EC /* CanvasModel.swift */,
 				D40D975129DAB01900A82E6A /* CanvasView.swift */,
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
-				D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */,
 				D459415B2B08EDB000A18653 /* Canvas+Undo.swift */,
 				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D40D975429DAB03400A82E6A /* Drawing */,
@@ -632,7 +629,6 @@
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
 				D40D976F29DAB09D00A82E6A /* DrawingEraser.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
-				D4513AA02AF5D10800CA4438 /* Canvas+IO.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,

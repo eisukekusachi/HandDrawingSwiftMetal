@@ -53,6 +53,8 @@ class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
     init() {
         $drawingTool
             .sink { [weak self] newValue in
@@ -106,6 +108,7 @@ class CanvasViewModel {
     }
 }
 
+// MARK: IO
 extension CanvasViewModel {
     func saveCanvas(outputImage: UIImage?, to zipFileName: String) throws {
 
@@ -146,6 +149,45 @@ extension CanvasViewModel {
         }
 
         try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
+    }
+    func loadCanvas(zipFilePath: String) throws {
+
+        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
+        let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)
+        let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
+
+        // Clean up the temporary folder when done
+        defer {
+            try? FileManager.default.removeItem(at: folderUrl)
+        }
+
+        // Unzip the contents of the ZIP file
+        try FileManager.createNewDirectory(url: folderUrl)
+
+        try FileInput.unzip(srcZipURL: zipFileUrl, to: folderUrl)
+
+        let data: CanvasModel = try FileInput.loadJson(url: jsonUrl)
+
+        if let textureName = data.textureName,
+           let textureSize = data.textureSize {
+
+            let textureUrl = folderUrl.appendingPathComponent(textureName)
+            let textureData: Data? = try? Data(contentsOf: textureUrl)
+
+            if let texture = device.makeTexture(textureSize, textureData?.encodedHexadecimals) {
+                layerManager.setTexture(texture)
+            }
+        }
+
+        if let drawingTool = data.drawingTool {
+            self.drawingTool = .init(rawValue: drawingTool)
+        }
+        if let diameter = data.brushDiameter {
+            (drawingBrush.tool as? DrawingToolBrush)!.diameter = diameter
+        }
+        if let diameter = data.eraserDiameter {
+            (drawingEraser.tool as? DrawingToolEraser)!.diameter = diameter
+        }
     }
 }
 

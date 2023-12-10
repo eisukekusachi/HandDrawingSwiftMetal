@@ -38,8 +38,9 @@ extension ViewController {
             view.addSubview(activityIndicatorView)
 
             do {
-                try loadCanvasDataFromZip(zipFilePath: zipFilePath)
+                try canvasViewModel.loadCanvas(zipFilePath: zipFilePath)
                 refreshAllComponents()
+                canvasView.refreshCanvas()
 
                 try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
@@ -49,25 +50,5 @@ extension ViewController {
                 view.addSubview(Toast(text: error.localizedDescription))
             }
         }
-    }
-
-    private func loadCanvasDataFromZip(zipFilePath: String) throws {
-
-        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
-        let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)
-        let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
-
-        // Clean up the temporary folder when done
-        defer {
-            try? FileManager.default.removeItem(at: folderUrl)
-        }
-
-        // Unzip the contents of the ZIP file
-        try FileManager.createNewDirectory(url: folderUrl)
-
-        try FileInput.unzip(srcZipURL: zipFileUrl, to: folderUrl)
-
-        let data: CanvasModel = try FileInput.loadJson(url: jsonUrl)
-        canvasView.load(from: data, projectName: zipFilePath.fileName, folderURL: folderUrl)
     }
 }

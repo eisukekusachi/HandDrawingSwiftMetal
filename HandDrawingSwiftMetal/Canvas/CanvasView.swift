@@ -86,6 +86,10 @@ class CanvasView: MTKTextureDisplayView {
                                     commandBuffer)
     }
 
+    func refreshCanvas() {
+        refreshRootTexture(commandBuffer)
+        setNeedsDisplay()
+    }
     func newCanvas() {
         viewModel?.projectName = Calendar.currentDate
 
@@ -94,9 +98,7 @@ class CanvasView: MTKTextureDisplayView {
         resetMatrix()
 
         viewModel?.clearCurrentTexture(commandBuffer)
-        refreshRootTexture(commandBuffer)
-
-        setNeedsDisplay()
+        refreshCanvas()
     }
     func clearCanvas() {
         guard let viewModel else { return }
@@ -104,9 +106,7 @@ class CanvasView: MTKTextureDisplayView {
         registerDrawingUndoAction(viewModel.currentTexture)
 
         viewModel.clearCurrentTexture(commandBuffer)
-        refreshRootTexture(commandBuffer)
-
-        setNeedsDisplay()
+        refreshCanvas()
     }
 
     /// Reset the canvas transformation matrix to identity.
