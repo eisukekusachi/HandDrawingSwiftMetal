@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 
 protocol CanvasDelegate: AnyObject {
     func didUndoRedo()
@@ -18,8 +17,10 @@ class CanvasView: MTKTextureDisplayView {
 
     weak var canvasDelegate: CanvasDelegate?
 
-    /// The currently selected drawing tool, either brush or eraser.
-    @Published var drawingTool: DrawingToolType = .brush
+    var drawingTool: DrawingToolType {
+        get { viewModel!.drawingTool }
+        set { viewModel!.drawingTool = newValue }
+    }
 
     var brushDiameter: Int {
         get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.diameter }
@@ -53,8 +54,6 @@ class CanvasView: MTKTextureDisplayView {
     private var fingerInput: FingerGestureWithStorage!
     private var pencilInput: PencilGestureWithStorage!
 
-    private var cancellables = Set<AnyCancellable>()
-
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInitialization()
@@ -72,19 +71,11 @@ class CanvasView: MTKTextureDisplayView {
     private func commonInitialization() {
         _ = Pipeline.shared
 
-        $drawingTool
-            .sink { [weak self] newValue in
-                self?.viewModel?.setCurrentDrawing(newValue)
-            }
-            .store(in: &cancellables)
-
         displayViewDelegate = self
 
         inputManager = InputManager()
         fingerInput = FingerGestureWithStorage(view: self, delegate: self)
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
-
-        drawingTool = .brush
 
         undoManager.levelsOfUndo = 8
     }

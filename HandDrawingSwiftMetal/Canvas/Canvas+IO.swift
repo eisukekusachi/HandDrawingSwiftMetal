@@ -26,7 +26,7 @@ extension CanvasView {
         // Data
         let codableData = CanvasModel(textureSize: textureSize,
                                       textureName: textureName,
-                                      drawingTool: drawingTool.rawValue,
+                                      drawingTool: viewModel.drawingTool.rawValue,
                                       brushDiameter: brushDiameter,
                                       eraserDiameter: eraserDiameter)
 
@@ -52,7 +52,7 @@ extension CanvasView {
         }
 
         if let drawingTool = model.drawingTool {
-            self.drawingTool = .init(rawValue: drawingTool)
+            viewModel.drawingTool = .init(rawValue: drawingTool)
         }
 
         if let diameter = model.brushDiameter {

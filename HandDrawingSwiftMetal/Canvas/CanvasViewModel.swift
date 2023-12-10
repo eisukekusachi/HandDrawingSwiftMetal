@@ -6,8 +6,12 @@
 //
 
 import MetalKit
+import Combine
 
 class CanvasViewModel {
+
+    /// The currently selected drawing tool, either brush or eraser.
+    @Published var drawingTool: DrawingToolType = .brush
 
     /// Manage drawing
     private (set) var drawing: DrawingProtocol?
@@ -42,6 +46,18 @@ class CanvasViewModel {
     }
     static var jsonFilePath: String {
         "data"
+    }
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        $drawingTool
+            .sink { [weak self] newValue in
+                self?.setCurrentDrawing(newValue)
+            }
+            .store(in: &cancellables)
+
+        drawingTool = .brush
     }
 
     func setFrameSize(_ size: CGSize) {
