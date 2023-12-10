@@ -81,7 +81,7 @@ extension ViewController {
 
         try FileInput.unzip(srcZipURL: zipFileUrl, to: folderUrl)
 
-        let data: CanvasCodableData = try FileInput.loadJson(url: jsonUrl)
+        let data: CanvasModel = try FileInput.loadJson(url: jsonUrl)
         canvasView.load(from: data, projectName: zipFilePath.fileName, folderURL: folderUrl)
     }
 }

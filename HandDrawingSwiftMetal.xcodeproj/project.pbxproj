@@ -42,7 +42,6 @@
 		D422D9CD2AF5092E004E058B /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9CC2AF5092E004E058B /* FileOutput.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
 		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
-		D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D32AF51999004E058B /* CanvasCodableData.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
 		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
@@ -76,6 +75,7 @@
 		D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */; };
 		D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingProtocol.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
+		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
 		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
 		D4D290002AE7D74400471819 /* DrawingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */; };
@@ -143,7 +143,6 @@
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
 		D422D9CC2AF5092E004E058B /* FileOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutput.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
-		D422D9D32AF51999004E058B /* CanvasCodableData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasCodableData.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
@@ -177,6 +176,7 @@
 		D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
 		D4C8EE972B25490B005947EC /* DrawingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingProtocol.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
+		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
 		D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingActionStateTest.swift; sourceTree = "<group>"; };
@@ -225,11 +225,11 @@
 		D40D975029DAB00100A82E6A /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
-				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
+				D4C8EE9F2B257330005947EC /* CanvasModel.swift */,
 				D40D975129DAB01900A82E6A /* CanvasView.swift */,
+				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */,
 				D459415B2B08EDB000A18653 /* Canvas+Undo.swift */,
-				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
 				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D40D975429DAB03400A82E6A /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
@@ -636,7 +636,6 @@
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
-				D422D9D42AF51999004E058B /* CanvasCodableData.swift in Sources */,
 				D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
@@ -646,6 +645,7 @@
 				D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */,
 				D4646CB929E2922D00987C8E /* LayerManagerProtocol.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
+				D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,

@@ -26,34 +26,34 @@ extension CanvasView {
         let textureName = UUID().uuidString
         let textureDataUrl = folderUrl.appendingPathComponent(textureName)
 
+        // Thumbnail
+        let imageURL = folderUrl.appendingPathComponent(CanvasView.thumbnailPath)
+        try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
+
         // Texture
         autoreleasepool {
             try? Data(viewModel.layerManager.currentTexture.bytes).write(to: textureDataUrl)
         }
 
-        // Thumbnail
-        let imageURL = folderUrl.appendingPathComponent(CanvasView.thumbnailPath)
-        try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
-
         // Data
-        let codableData = CanvasCodableData(textureSize: textureSize,
-                                            textureName: textureName,
-                                            drawingTool: drawingTool.rawValue,
-                                            brushDiameter: brushDiameter,
-                                            eraserDiameter: eraserDiameter)
+        let codableData = CanvasModel(textureSize: textureSize,
+                                      textureName: textureName,
+                                      drawingTool: drawingTool.rawValue,
+                                      brushDiameter: brushDiameter,
+                                      eraserDiameter: eraserDiameter)
 
         if let jsonData = try? JSONEncoder().encode(codableData) {
             let jsonUrl = folderUrl.appendingPathComponent(CanvasView.jsonFilePath)
             try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
         }
     }
-    func load(from codableData: CanvasCodableData, projectName: String, folderURL: URL) {
+    func load(from model: CanvasModel, projectName: String, folderURL: URL) {
         guard let viewModel else { return }
 
         self.projectName = projectName
 
-        if let textureName = codableData.textureName,
-           let textureSize = codableData.textureSize {
+        if let textureName = model.textureName,
+           let textureSize = model.textureSize {
 
             let textureUrl = folderURL.appendingPathComponent(textureName)
             let textureData: Data? = try? Data(contentsOf: textureUrl)
@@ -63,14 +63,14 @@ extension CanvasView {
             }
         }
 
-        if let drawingTool = codableData.drawingTool {
+        if let drawingTool = model.drawingTool {
             self.drawingTool = .init(rawValue: drawingTool)
         }
 
-        if let diameter = codableData.brushDiameter {
+        if let diameter = model.brushDiameter {
             self.brushDiameter = diameter
         }
-        if let diameter = codableData.eraserDiameter {
+        if let diameter = model.eraserDiameter {
             self.eraserDiameter = diameter
         }
         
