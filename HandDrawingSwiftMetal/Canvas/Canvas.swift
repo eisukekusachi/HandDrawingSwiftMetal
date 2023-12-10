@@ -14,6 +14,7 @@ protocol CanvasDelegate: AnyObject {
 
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class Canvas: MTKTextureDisplayView {
+    var viewModel: CanvasViewModel?
 
     weak var canvasDelegate: CanvasDelegate?
 
@@ -23,21 +24,21 @@ class Canvas: MTKTextureDisplayView {
     @Published var drawingTool: DrawingToolType = .brush
 
     var brushDiameter: Int {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
+        get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.diameter }
+        set { (viewModel?.drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
     }
     var eraserDiameter: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.diameter }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
+        get { (viewModel?.drawingEraser.tool as? DrawingToolEraser)!.diameter }
+        set { (viewModel?.drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
     }
 
     var brushColor: UIColor {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.color }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
+        get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.color }
+        set { (viewModel?.drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
     }
     var eraserAlpha: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.alpha }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
+        get { (viewModel?.drawingEraser.tool as? DrawingToolEraser)!.alpha }
+        set { (viewModel?.drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
     var currentTexture: MTLTexture {
@@ -46,16 +47,6 @@ class Canvas: MTKTextureDisplayView {
 
     /// Manage texture layers
     private (set) var layers: LayerManagerProtocol = LayerManager()
-
-    /// Manage drawing
-    private var drawing: DrawingProtocol?
-
-    /// Drawing with a brush
-    private var drawingBrush = DrawingBrush()
-
-    /// Drawing with an eraser
-    private var drawingEraser = DrawingEraser()
-
 
     /// Manage transformations
     private var transforming: TransformingProtocol!
@@ -88,22 +79,15 @@ class Canvas: MTKTextureDisplayView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-
-        drawingBrush.frameSize = frame.size
-        drawingEraser.frameSize = frame.size
+        viewModel?.setFrameSize(frame.size)
     }
 
     private func commonInitialization() {
         _ = Pipeline.shared
 
         $drawingTool
-            .sink { newValue in
-                switch newValue {
-                case .brush:
-                    self.drawing = self.drawingBrush
-                case .eraser:
-                    self.drawing = self.drawingEraser
-                }
+            .sink { [weak self] newValue in
+                self?.viewModel?.setCurrentDrawing(newValue)
             }
             .store(in: &cancellables)
 
@@ -121,7 +105,7 @@ class Canvas: MTKTextureDisplayView {
     }
 
     func refreshRootTexture() {
-        guard let drawing else { return }
+        guard let drawing = viewModel?.drawing else { return }
         layers.merge(textures: drawing.getDrawingTextures(currentTexture),
                      backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                      into: rootTexture,
@@ -159,7 +143,7 @@ class Canvas: MTKTextureDisplayView {
         transforming.storedMatrix = matrix
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
-        drawing?.clearDrawingTextures(commandBuffer)
+        viewModel?.drawing?.clearDrawingTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -172,8 +156,7 @@ class Canvas: MTKTextureDisplayView {
 
 extension Canvas: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
+        viewModel?.initTextures(textureSize)
         layers.initTextures(textureSize)
 
         refreshRootTexture()
@@ -183,7 +166,7 @@ extension Canvas: MTKTextureDisplayViewDelegate {
 extension Canvas: FingerGestureWithStorageSender {
     func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
-              let drawing
+              let drawing = viewModel?.drawing
         else { return }
 
         if touchState == .ended {
@@ -224,7 +207,8 @@ extension Canvas: FingerGestureWithStorageSender {
 
 extension Canvas: PencilGestureWithStorageSender {
     func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard let drawing else { return }
+        guard let drawing = viewModel?.drawing 
+        else { return }
 
         if inputManager.currentInput is FingerGestureWithStorage {
             cancelFingerDrawing()

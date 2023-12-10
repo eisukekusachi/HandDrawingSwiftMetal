@@ -9,7 +9,7 @@ import UIKit
 import SwiftUI
 
 class ViewController: UIViewController {
-    
+    let canvasViewModel = CanvasViewModel()
     let canvas = Canvas()
 
     @IBOutlet weak var exportButton: UIButton!
@@ -37,6 +37,7 @@ class ViewController: UIViewController {
             canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
+        canvas.viewModel = canvasViewModel
         canvas.canvasDelegate = self
         canvas.drawingTool = .brush
         canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
