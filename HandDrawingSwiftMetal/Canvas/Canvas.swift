@@ -45,7 +45,7 @@ class Canvas: MTKTextureDisplayView {
     }
 
     /// Manage texture layers
-    private (set) var layers: LayerManagerProtocol!
+    private (set) var layers: LayerManagerProtocol = LayerManager()
 
     /// Manage drawing
     private var drawing: DrawingProtocol?
@@ -116,16 +116,16 @@ class Canvas: MTKTextureDisplayView {
         drawingTool = .brush
 
         transforming = Transforming()
-        layers = LayerManager(canvas: self)
 
         undoManager.levelsOfUndo = 8
     }
 
     func refreshRootTexture() {
         guard let drawing else { return }
-        layers.mergeAllTextures(currentTextures: drawing.getDrawingTextures(currentTexture),
-                                backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                to: rootTexture)
+        layers.merge(textures: drawing.getDrawingTextures(currentTexture),
+                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                     into: rootTexture,
+                     commandBuffer)
     }
     func newCanvas() {
         projectName = Calendar.currentDate
@@ -134,7 +134,7 @@ class Canvas: MTKTextureDisplayView {
 
         resetCanvasMatrix()
 
-        layers.clearTexture()
+        layers.clearTexture(commandBuffer)
         refreshRootTexture()
 
         setNeedsDisplay()
@@ -142,7 +142,7 @@ class Canvas: MTKTextureDisplayView {
     func clearCanvas() {
         registerDrawingUndoAction(currentTexture)
 
-        layers.clearTexture()
+        layers.clearTexture(commandBuffer)
         refreshRootTexture()
 
         setNeedsDisplay()
@@ -174,7 +174,7 @@ extension Canvas: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
         drawingBrush.initTextures(textureSize)
         drawingEraser.initTextures(textureSize)
-        layers.initializeTextures(textureSize)
+        layers.initTextures(textureSize)
 
         refreshRootTexture()
     }
@@ -206,7 +206,7 @@ extension Canvas: FingerGestureWithStorageSender {
                                                   centerPoint: Calc.getCenter(frame.size),
                                                   touchState: touchState)
         else { return }
-        
+
         matrix = newMatrix
         runDisplayLinkLoop(touchState != .ended)
     }

@@ -11,13 +11,11 @@ protocol LayerManagerProtocol {
 
     var currentTexture: MTLTexture! { get }
 
-    func initializeTextures(_ textureSize: CGSize)
-
-    func mergeAllTextures(currentTextures: [MTLTexture?],
-                          backgroundColor: (Int, Int, Int),
-                          to dstTexture: MTLTexture)
-    
+    func initTextures(_ textureSize: CGSize)
+    func merge(textures: [MTLTexture?],
+               backgroundColor: (Int, Int, Int),
+               into dstTexture: MTLTexture,
+               _ commandBuffer: MTLCommandBuffer)
     func setTexture(_ texture: MTLTexture)
-
-    func clearTexture()
+    func clearTexture(_ commandBuffer: MTLCommandBuffer)
 }

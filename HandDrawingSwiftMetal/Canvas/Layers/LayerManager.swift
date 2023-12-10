@@ -9,41 +9,41 @@ import MetalKit
 
 class LayerManager: LayerManagerProtocol {
 
-    var canvas: Canvas!
-
     private (set) var currentTexture: MTLTexture!
+
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     private var textureSize: CGSize = .zero
 
-    required init(canvas: Canvas) {
-        self.canvas = canvas
-    }
-    func initializeTextures(_ textureSize: CGSize) {
-        assert(canvas.device != nil, "Device is nil.")
-
+    func initTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
-            self.currentTexture = canvas.device!.makeTexture(textureSize)
+            self.currentTexture = device.makeTexture(textureSize)
         }
 
-        clearTexture()
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTexture(commandBuffer)
+        commandBuffer.commit()
     }
-    func mergeAllTextures(currentTextures: [MTLTexture?], backgroundColor: (Int, Int, Int), to dstTexture: MTLTexture) {
+    func merge(textures: [MTLTexture?],
+               backgroundColor: (Int, Int, Int),
+               into dstTexture: MTLTexture,
+               _ commandBuffer: MTLCommandBuffer) {
         Command.fill(dstTexture,
                      withRGB: backgroundColor,
-                     canvas.commandBuffer)
+                     commandBuffer)
 
         Command.merge(dst: dstTexture,
-                      textures: currentTextures,
-                      canvas.commandBuffer)
+                      textures: textures,
+                      commandBuffer)
     }
 
     func setTexture(_ texture: MTLTexture) {
         currentTexture = texture
     }
 
-    func clearTexture() {
+    func clearTexture(_ commandBuffer: MTLCommandBuffer) {
         Command.clear(texture: currentTexture,
-                      canvas.commandBuffer)
+                      commandBuffer)
     }
 }
