@@ -14,7 +14,7 @@ protocol TransformingProtocol {
     var storedMatrix: CGAffineTransform { get set }
 
     /// Update the transformation based on view touches and return a new matrix
-    func update(transformationData: TransformationData, 
-                centerPoint: CGPoint,
-                touchState: TouchState) -> CGAffineTransform?
+    func getMatrix(transformationData: TransformationData,
+                   frameCenterPoint: CGPoint,
+                   touchState: TouchState) -> CGAffineTransform?
 }

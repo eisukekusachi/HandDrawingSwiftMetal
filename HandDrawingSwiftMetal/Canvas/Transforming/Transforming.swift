@@ -11,8 +11,11 @@ class Transforming: TransformingProtocol {
 
     var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    func update(transformationData: TransformationData, centerPoint: CGPoint, touchState: TouchState) -> CGAffineTransform? {
-        guard let matrix = makeMatrix(transformationData: transformationData, centerPoint: centerPoint) else { return nil }
+    func getMatrix(transformationData: TransformationData,
+                   frameCenterPoint: CGPoint,
+                   touchState: TouchState) -> CGAffineTransform? {
+        guard let matrix = makeMatrix(transformationData: transformationData,
+                                      centerPoint: frameCenterPoint) else { return nil }
         let newMatrix = storedMatrix.concatenating(matrix)
 
         if touchState == .ended {

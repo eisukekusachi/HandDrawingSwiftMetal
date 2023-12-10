@@ -18,6 +18,9 @@ class CanvasViewModel {
     /// Drawing with an eraser
     var drawingEraser = DrawingEraser()
 
+    /// Manage transformations
+    var transforming: TransformingProtocol = Transforming()
+
     func setFrameSize(_ size: CGSize) {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size
@@ -33,5 +36,19 @@ class CanvasViewModel {
         case .eraser:
             self.drawing = self.drawingEraser
         }
+    }
+}
+
+// Transforming
+extension CanvasViewModel {
+    func getMatrix(transformationData: TransformationData,
+                   frameCenterPoint: CGPoint,
+                   touchState: TouchState) -> CGAffineTransform? {
+        transforming.getMatrix(transformationData: transformationData,
+                               frameCenterPoint: frameCenterPoint,
+                               touchState: touchState)
+    }
+    func setStoredMatrix(_ matrix: CGAffineTransform) {
+        transforming.storedMatrix = matrix
     }
 }

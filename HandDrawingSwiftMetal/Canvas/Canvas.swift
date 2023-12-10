@@ -48,10 +48,6 @@ class Canvas: MTKTextureDisplayView {
     /// Manage texture layers
     private (set) var layers: LayerManagerProtocol = LayerManager()
 
-    /// Manage transformations
-    private var transforming: TransformingProtocol!
-
-
     /// Override UndoManager with ``UndoManagerWithCount``
     override var undoManager: UndoManagerWithCount {
         return undoManagerWithCount
@@ -99,8 +95,6 @@ class Canvas: MTKTextureDisplayView {
 
         drawingTool = .brush
 
-        transforming = Transforming()
-
         undoManager.levelsOfUndo = 8
     }
 
@@ -135,12 +129,12 @@ class Canvas: MTKTextureDisplayView {
     /// Reset the canvas transformation matrix to identity.
     func resetCanvasMatrix() {
         matrix = CGAffineTransform.identity
-        transforming.storedMatrix = matrix
+        viewModel?.setStoredMatrix(matrix)
     }
 
     private func cancelFingerDrawing() {
         fingerInput.clear()
-        transforming.storedMatrix = matrix
+        viewModel?.setStoredMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
         viewModel?.drawing?.clearDrawingTextures(commandBuffer)
@@ -185,9 +179,9 @@ extension Canvas: FingerGestureWithStorageSender {
     func transformTexture(_ input: FingerGestureWithStorage, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState) {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
-              let newMatrix = transforming.update(transformationData: transformationData,
-                                                  centerPoint: Calc.getCenter(frame.size),
-                                                  touchState: touchState)
+              let newMatrix = viewModel?.getMatrix(transformationData: transformationData,
+                                                   frameCenterPoint: Calc.getCenter(frame.size),
+                                                   touchState: touchState)
         else { return }
 
         matrix = newMatrix
