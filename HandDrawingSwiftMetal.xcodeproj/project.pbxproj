@@ -19,7 +19,6 @@
 		D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */; };
 		D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */; };
 		D40D976D29DAB09D00A82E6A /* DrawingBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* DrawingBrush.swift */; };
-		D40D976E29DAB09D00A82E6A /* DrawingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976929DAB09D00A82E6A /* DrawingProtocol.swift */; };
 		D40D976F29DAB09D00A82E6A /* DrawingEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* DrawingEraser.swift */; };
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
 		D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */; };
@@ -75,6 +74,7 @@
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
 		D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */; };
 		D4C8A4D82ADEB59A00A71C9F /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */; };
+		D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingProtocol.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
 		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
 		D4D290002AE7D74400471819 /* DrawingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */; };
@@ -120,7 +120,6 @@
 		D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolEraser.swift; sourceTree = "<group>"; };
 		D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolBrush.swift; sourceTree = "<group>"; };
 		D40D976829DAB09C00A82E6A /* DrawingBrush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingBrush.swift; sourceTree = "<group>"; };
-		D40D976929DAB09D00A82E6A /* DrawingProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DrawingProtocol.swift; path = ../Gestures/DrawingProtocol.swift; sourceTree = "<group>"; };
 		D40D976A29DAB09D00A82E6A /* DrawingEraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingEraser.swift; sourceTree = "<group>"; };
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
 		D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
@@ -175,6 +174,7 @@
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		D4C8A4D72ADEB59A00A71C9F /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
+		D4C8EE972B25490B005947EC /* DrawingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingProtocol.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
 		D4D28FFF2AE7D74400471819 /* DrawingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingActionStateTest.swift; sourceTree = "<group>"; };
@@ -260,7 +260,7 @@
 			children = (
 				D40D976829DAB09C00A82E6A /* DrawingBrush.swift */,
 				D40D976A29DAB09D00A82E6A /* DrawingEraser.swift */,
-				D40D976929DAB09D00A82E6A /* DrawingProtocol.swift */,
+				D4C8EE972B25490B005947EC /* DrawingProtocol.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -666,7 +666,6 @@
 				D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */,
 				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
-				D40D976E29DAB09D00A82E6A /* DrawingProtocol.swift in Sources */,
 				D459415C2B08EDB000A18653 /* Canvas+Undo.swift in Sources */,
 				D40D97A129DAB0DF00A82E6A /* MTLDeviceExtensions.swift in Sources */,
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
@@ -686,6 +685,7 @@
 				D40D977B29DAB0B400A82E6A /* PencilGesture.swift in Sources */,
 				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
+				D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);
