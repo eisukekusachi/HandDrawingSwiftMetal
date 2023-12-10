@@ -28,6 +28,22 @@ class CanvasViewModel {
     /// Manage texture layers
     private (set) var layerManager: LayerManagerProtocol = LayerManager()
 
+    /// The name of the file to be saved
+    var projectName: String = Calendar.currentDate
+    
+    var zipFileNamePath: String {
+        projectName + "." + CanvasViewModel.zipSuffix
+    }
+    static var zipSuffix: String {
+        "zip"
+    }
+    static var thumbnailPath: String {
+        "thumbnail.png"
+    }
+    static var jsonFilePath: String {
+        "data"
+    }
+
     func setFrameSize(_ size: CGSize) {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size

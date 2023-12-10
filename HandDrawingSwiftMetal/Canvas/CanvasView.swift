@@ -18,8 +18,6 @@ class CanvasView: MTKTextureDisplayView {
 
     weak var canvasDelegate: CanvasDelegate?
 
-    var projectName: String = Calendar.currentDate
-
     /// The currently selected drawing tool, either brush or eraser.
     @Published var drawingTool: DrawingToolType = .brush
 
@@ -102,7 +100,7 @@ class CanvasView: MTKTextureDisplayView {
                                      commandBuffer)
     }
     func newCanvas() {
-        projectName = Calendar.currentDate
+        viewModel?.projectName = Calendar.currentDate
 
         clearUndo()
 

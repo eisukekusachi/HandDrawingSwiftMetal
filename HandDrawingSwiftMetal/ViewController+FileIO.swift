@@ -17,7 +17,7 @@ extension ViewController {
             view.addSubview(activityIndicatorView)
 
             do {
-                try exportCanvasDataAsZip(canvasView, zipFileName: canvasView.zipFileNamePath)
+                try exportCanvasDataAsZip(canvasView, zipFileName: canvasViewModel.zipFileNamePath)
                 try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
                 view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
@@ -69,7 +69,7 @@ extension ViewController {
 
         let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
         let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)
-        let jsonUrl = folderUrl.appendingPathComponent(CanvasView.jsonFilePath)
+        let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
 
         // Clean up the temporary folder when done
         defer {
