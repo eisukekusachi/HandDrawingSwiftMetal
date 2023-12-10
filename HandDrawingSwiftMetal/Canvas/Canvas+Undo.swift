@@ -1,5 +1,5 @@
 //
-//  Canvas+Undo.swift
+//  CanvasView+Undo.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/11/18.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-extension Canvas {
+extension CanvasView {
     var canUndo: Bool {
         undoManager.canUndo
     }

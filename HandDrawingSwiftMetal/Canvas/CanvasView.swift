@@ -1,5 +1,5 @@
 //
-//  Canvas.swift
+//  CanvasView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2021/11/27.
@@ -13,7 +13,7 @@ protocol CanvasDelegate: AnyObject {
 }
 
 /// A user can use drawing tools to draw lines on the texture and then transform it.
-class Canvas: MTKTextureDisplayView {
+class CanvasView: MTKTextureDisplayView {
     var viewModel: CanvasViewModel?
 
     weak var canvasDelegate: CanvasDelegate?
@@ -146,7 +146,7 @@ class Canvas: MTKTextureDisplayView {
     }
 }
 
-extension Canvas: MTKTextureDisplayViewDelegate {
+extension CanvasView: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
         viewModel?.initTextures(textureSize)
 
@@ -154,7 +154,7 @@ extension Canvas: MTKTextureDisplayViewDelegate {
     }
 }
 
-extension Canvas: FingerGestureWithStorageSender {
+extension CanvasView: FingerGestureWithStorageSender {
     func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
               let viewModel,
@@ -197,7 +197,7 @@ extension Canvas: FingerGestureWithStorageSender {
     }
 }
 
-extension Canvas: PencilGestureWithStorageSender {
+extension CanvasView: PencilGestureWithStorageSender {
     func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard let viewModel,
               let drawing = viewModel.drawing

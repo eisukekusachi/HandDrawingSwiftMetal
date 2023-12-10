@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDD529DBC340004618CE /* ActionStateManager.swift */; };
 		D40ACDDC29DBEFFD004618CE /* InputManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */; };
-		D40D975229DAB01900A82E6A /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975129DAB01900A82E6A /* Canvas.swift */; };
+		D40D975229DAB01900A82E6A /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975129DAB01900A82E6A /* CanvasView.swift */; };
 		D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* TouchPoint.swift */; };
 		D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */; };
 		D40D976229DAB09400A82E6A /* Iterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975C29DAB09400A82E6A /* Iterator.swift */; };
@@ -111,7 +111,7 @@
 /* Begin PBXFileReference section */
 		D40ACDD529DBC340004618CE /* ActionStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateManager.swift; sourceTree = "<group>"; };
 		D40ACDDB29DBEFFD004618CE /* InputManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputManagerTest.swift; sourceTree = "<group>"; };
-		D40D975129DAB01900A82E6A /* Canvas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Canvas.swift; sourceTree = "<group>"; };
+		D40D975129DAB01900A82E6A /* CanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
 		D40D975A29DAB09400A82E6A /* TouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPoint.swift; sourceTree = "<group>"; };
 		D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TouchPointStorageProtocol.swift; path = ../Protocols/TouchPointStorageProtocol.swift; sourceTree = "<group>"; };
 		D40D975C29DAB09400A82E6A /* Iterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Iterator.swift; sourceTree = "<group>"; };
@@ -226,7 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
-				D40D975129DAB01900A82E6A /* Canvas.swift */,
+				D40D975129DAB01900A82E6A /* CanvasView.swift */,
 				D4513A9F2AF5D10800CA4438 /* Canvas+IO.swift */,
 				D459415B2B08EDB000A18653 /* Canvas+Undo.swift */,
 				D422D9D32AF51999004E058B /* CanvasCodableData.swift */,
@@ -685,7 +685,7 @@
 				D46D07D42ADBC46D0093D861 /* FingerGestureWithStorage.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
-				D40D975229DAB01900A82E6A /* Canvas.swift in Sources */,
+				D40D975229DAB01900A82E6A /* CanvasView.swift in Sources */,
 				D40D977B29DAB0B400A82E6A /* PencilGesture.swift in Sources */,
 				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,

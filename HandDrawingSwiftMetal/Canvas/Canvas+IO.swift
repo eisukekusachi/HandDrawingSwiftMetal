@@ -1,5 +1,5 @@
 //
-//  Canvas+IO.swift
+//  CanvasView+IO.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/11/04.
@@ -7,9 +7,9 @@
 
 import Foundation
 
-extension Canvas {
+extension CanvasView {
     var zipFileNamePath: String {
-        projectName + "." + Canvas.zipSuffix
+        projectName + "." + CanvasView.zipSuffix
     }
     static var zipSuffix: String {
         "zip"
@@ -32,7 +32,7 @@ extension Canvas {
         }
 
         // Thumbnail
-        let imageURL = folderUrl.appendingPathComponent(Canvas.thumbnailPath)
+        let imageURL = folderUrl.appendingPathComponent(CanvasView.thumbnailPath)
         try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
 
         // Data
@@ -43,7 +43,7 @@ extension Canvas {
                                             eraserDiameter: eraserDiameter)
 
         if let jsonData = try? JSONEncoder().encode(codableData) {
-            let jsonUrl = folderUrl.appendingPathComponent(Canvas.jsonFilePath)
+            let jsonUrl = folderUrl.appendingPathComponent(CanvasView.jsonFilePath)
             try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
         }
     }

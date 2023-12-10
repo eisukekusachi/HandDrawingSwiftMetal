@@ -17,7 +17,7 @@ extension ViewController {
             view.addSubview(activityIndicatorView)
 
             do {
-                try exportCanvasDataAsZip(canvas, zipFileName: canvas.zipFileNamePath)
+                try exportCanvasDataAsZip(canvasView, zipFileName: canvasView.zipFileNamePath)
                 try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
                 view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
@@ -49,7 +49,7 @@ extension ViewController {
         }
     }
 
-    private func exportCanvasDataAsZip(_ canvas: Canvas, zipFileName: String) throws {
+    private func exportCanvasDataAsZip(_ canvasView: CanvasView, zipFileName: String) throws {
 
         let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
         let zipFileUrl = URL.documents.appendingPathComponent(zipFileName)
@@ -60,7 +60,7 @@ extension ViewController {
         }
         try FileManager.createNewDirectory(url: folderUrl)
 
-        try canvas.write(to: folderUrl)
+        try canvasView.write(to: folderUrl)
         
         try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
     }
@@ -69,7 +69,7 @@ extension ViewController {
 
         let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
         let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)
-        let jsonUrl = folderUrl.appendingPathComponent(Canvas.jsonFilePath)
+        let jsonUrl = folderUrl.appendingPathComponent(CanvasView.jsonFilePath)
 
         // Clean up the temporary folder when done
         defer {
@@ -82,6 +82,6 @@ extension ViewController {
         try FileInput.unzip(srcZipURL: zipFileUrl, to: folderUrl)
 
         let data: CanvasCodableData = try FileInput.loadJson(url: jsonUrl)
-        canvas.load(from: data, projectName: zipFilePath.fileName, folderURL: folderUrl)
+        canvasView.load(from: data, projectName: zipFilePath.fileName, folderURL: folderUrl)
     }
 }
