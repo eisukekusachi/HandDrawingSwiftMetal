@@ -33,8 +33,8 @@ class LayerManager: LayerManagerProtocol {
                      withRGB: backgroundColor,
                      commandBuffer)
 
-        Command.merge(dst: dstTexture,
-                      textures: textures,
+        Command.merge(textures,
+                      into: dstTexture,
                       commandBuffer)
     }
 

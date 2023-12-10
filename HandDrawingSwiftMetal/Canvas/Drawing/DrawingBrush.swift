@@ -78,8 +78,8 @@ class DrawingBrush: DrawingProtocol {
     func merge(_ srcTexture: MTLTexture?,
                into dstTexture: MTLTexture,
                _ commandBuffer: MTLCommandBuffer) {
-        Command.merge(dst: dstTexture,
-                      texture: srcTexture,
+        Command.merge(srcTexture,
+                      into: dstTexture,
                       commandBuffer)
         clearDrawingTextures(commandBuffer)
     }
