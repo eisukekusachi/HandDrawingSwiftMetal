@@ -34,19 +34,20 @@ extension Canvas {
         canvasDelegate?.didUndoRedo()
 
         if let newTexture = duplicateTexture(currentTexture) {
-            layers.setTexture(newTexture)
+            viewModel?.layerManager.setTexture(newTexture)
         }
     }
 
     /// Registers an action to undo the drawing operation.
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self) { [unowned self] _ in
+            guard let viewModel else { return }
 
-            registerDrawingUndoAction(with: .init(texture: currentTexture))
+            registerDrawingUndoAction(with: .init(texture: viewModel.currentTexture))
 
             canvasDelegate?.didUndoRedo()
 
-            layers.setTexture(undoObject.texture)
+            viewModel.layerManager.setTexture(undoObject.texture)
 
             refreshRootTexture()
             setNeedsDisplay()

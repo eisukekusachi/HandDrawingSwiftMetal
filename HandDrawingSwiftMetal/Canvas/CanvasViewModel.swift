@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2023/12/10.
 //
 
-import Foundation
+import MetalKit
 
 class CanvasViewModel {
 
@@ -21,6 +21,13 @@ class CanvasViewModel {
     /// Manage transformations
     var transforming: TransformingProtocol = Transforming()
 
+    var currentTexture: MTLTexture {
+        return layerManager.currentTexture
+    }
+
+    /// Manage texture layers
+    private (set) var layerManager: LayerManagerProtocol = LayerManager()
+
     func setFrameSize(_ size: CGSize) {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size
@@ -28,6 +35,8 @@ class CanvasViewModel {
     func initTextures(_ size: CGSize) {
         drawingBrush.initTextures(size)
         drawingEraser.initTextures(size)
+
+        layerManager.initTextures(size)
     }
     func setCurrentDrawing(_ type: DrawingToolType) {
         switch type {
@@ -36,6 +45,10 @@ class CanvasViewModel {
         case .eraser:
             self.drawing = self.drawingEraser
         }
+    }
+
+    func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
+        layerManager.clearTexture(commandBuffer)
     }
 }
 

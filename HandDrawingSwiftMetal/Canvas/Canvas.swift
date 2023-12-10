@@ -41,13 +41,6 @@ class Canvas: MTKTextureDisplayView {
         set { (viewModel?.drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
-    var currentTexture: MTLTexture {
-        return layers.currentTexture
-    }
-
-    /// Manage texture layers
-    private (set) var layers: LayerManagerProtocol = LayerManager()
-
     /// Override UndoManager with ``UndoManagerWithCount``
     override var undoManager: UndoManagerWithCount {
         return undoManagerWithCount
@@ -99,11 +92,14 @@ class Canvas: MTKTextureDisplayView {
     }
 
     func refreshRootTexture() {
-        guard let drawing = viewModel?.drawing else { return }
-        layers.merge(textures: drawing.getDrawingTextures(currentTexture),
-                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                     into: rootTexture,
-                     commandBuffer)
+        guard let viewModel,
+              let drawing = viewModel.drawing
+        else { return }
+
+        viewModel.layerManager.merge(textures: drawing.getDrawingTextures(viewModel.currentTexture),
+                                     backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                     into: rootTexture,
+                                     commandBuffer)
     }
     func newCanvas() {
         projectName = Calendar.currentDate
@@ -112,15 +108,17 @@ class Canvas: MTKTextureDisplayView {
 
         resetCanvasMatrix()
 
-        layers.clearTexture(commandBuffer)
+        viewModel?.clearCurrentTexture(commandBuffer)
         refreshRootTexture()
 
         setNeedsDisplay()
     }
     func clearCanvas() {
-        registerDrawingUndoAction(currentTexture)
+        guard let viewModel else { return }
 
-        layers.clearTexture(commandBuffer)
+        registerDrawingUndoAction(viewModel.currentTexture)
+
+        viewModel.clearCurrentTexture(commandBuffer)
         refreshRootTexture()
 
         setNeedsDisplay()
@@ -151,7 +149,6 @@ class Canvas: MTKTextureDisplayView {
 extension Canvas: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
         viewModel?.initTextures(textureSize)
-        layers.initTextures(textureSize)
 
         refreshRootTexture()
     }
@@ -160,16 +157,17 @@ extension Canvas: MTKTextureDisplayViewDelegate {
 extension Canvas: FingerGestureWithStorageSender {
     func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
-              let drawing = viewModel?.drawing
+              let viewModel,
+              let drawing = viewModel.drawing
         else { return }
 
         if touchState == .ended {
-            registerDrawingUndoAction(currentTexture)
+            registerDrawingUndoAction(viewModel.currentTexture)
         }
 
         drawing.drawOnDrawingTexture(with: iterator,
                                      matrix: matrix,
-                                     on: currentTexture,
+                                     on: viewModel.currentTexture,
                                      touchState,
                                      commandBuffer)
         refreshRootTexture()
@@ -201,7 +199,8 @@ extension Canvas: FingerGestureWithStorageSender {
 
 extension Canvas: PencilGestureWithStorageSender {
     func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        guard let drawing = viewModel?.drawing 
+        guard let viewModel,
+              let drawing = viewModel.drawing
         else { return }
 
         if inputManager.currentInput is FingerGestureWithStorage {
@@ -211,12 +210,12 @@ extension Canvas: PencilGestureWithStorageSender {
         inputManager.updateInput(input)
 
         if touchState == .ended {
-            registerDrawingUndoAction(currentTexture)
+            registerDrawingUndoAction(viewModel.currentTexture)
         }
 
         drawing.drawOnDrawingTexture(with: iterator,
                                      matrix: matrix,
-                                     on: currentTexture,
+                                     on: viewModel.currentTexture,
                                      touchState,
                                      commandBuffer)
         refreshRootTexture()

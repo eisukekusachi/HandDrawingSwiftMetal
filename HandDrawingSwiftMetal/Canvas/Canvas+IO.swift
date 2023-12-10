@@ -21,13 +21,14 @@ extension Canvas {
         "data"
     }
     func write(to folderUrl: URL) throws {
+        guard let viewModel else { return }
 
         let textureName = UUID().uuidString
         let textureDataUrl = folderUrl.appendingPathComponent(textureName)
 
         // Texture
         autoreleasepool {
-            try? Data(layers.currentTexture.bytes).write(to: textureDataUrl)
+            try? Data(viewModel.layerManager.currentTexture.bytes).write(to: textureDataUrl)
         }
 
         // Thumbnail
@@ -47,6 +48,8 @@ extension Canvas {
         }
     }
     func load(from codableData: CanvasCodableData, projectName: String, folderURL: URL) {
+        guard let viewModel else { return }
+
         self.projectName = projectName
 
         if let textureName = codableData.textureName,
@@ -56,7 +59,7 @@ extension Canvas {
             let textureData: Data? = try? Data(contentsOf: textureUrl)
 
             if let texture = device?.makeTexture(textureSize, textureData?.encodedHexadecimals) {
-                layers.setTexture(texture)
+                viewModel.layerManager.setTexture(texture)
             }
         }
 
@@ -83,7 +86,7 @@ extension Canvas {
         let textureData: Data? = try? Data(contentsOf: textureUrl)
 
         if let texture = device?.makeTexture(textureSize, textureData?.encodedHexadecimals) {
-            layers.setTexture(texture)
+            viewModel?.layerManager.setTexture(texture)
         }
     }
 }
