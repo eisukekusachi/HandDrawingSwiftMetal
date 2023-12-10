@@ -17,7 +17,9 @@ extension ViewController {
             view.addSubview(activityIndicatorView)
 
             do {
-                try exportCanvasDataAsZip(canvasView, zipFileName: canvasViewModel.zipFileNamePath)
+                try canvasViewModel.saveCanvas(outputImage: canvasView.outputImage,
+                                               to: canvasViewModel.zipFileNamePath)
+
                 try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
                 view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
@@ -47,22 +49,6 @@ extension ViewController {
                 view.addSubview(Toast(text: error.localizedDescription))
             }
         }
-    }
-
-    private func exportCanvasDataAsZip(_ canvasView: CanvasView, zipFileName: String) throws {
-
-        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
-        let zipFileUrl = URL.documents.appendingPathComponent(zipFileName)
-
-        // Clean up the temporary folder when done
-        defer {
-            try? FileManager.default.removeItem(atPath: folderUrl.path)
-        }
-        try FileManager.createNewDirectory(url: folderUrl)
-
-        try canvasView.write(to: folderUrl)
-        
-        try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
     }
 
     private func loadCanvasDataFromZip(zipFilePath: String) throws {

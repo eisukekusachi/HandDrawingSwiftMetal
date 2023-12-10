@@ -8,33 +8,6 @@
 import Foundation
 
 extension CanvasView {
-    func write(to folderUrl: URL) throws {
-        guard let viewModel else { return }
-
-        let textureName = UUID().uuidString
-        let textureDataUrl = folderUrl.appendingPathComponent(textureName)
-
-        // Thumbnail
-        let imageURL = folderUrl.appendingPathComponent(CanvasViewModel.thumbnailPath)
-        try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
-
-        // Texture
-        autoreleasepool {
-            try? Data(viewModel.layerManager.currentTexture.bytes).write(to: textureDataUrl)
-        }
-
-        // Data
-        let codableData = CanvasModel(textureSize: textureSize,
-                                      textureName: textureName,
-                                      drawingTool: viewModel.drawingTool.rawValue,
-                                      brushDiameter: brushDiameter,
-                                      eraserDiameter: eraserDiameter)
-
-        if let jsonData = try? JSONEncoder().encode(codableData) {
-            let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
-            try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
-        }
-    }
     func load(from model: CanvasModel, projectName: String, folderURL: URL) {
         guard let viewModel else { return }
 

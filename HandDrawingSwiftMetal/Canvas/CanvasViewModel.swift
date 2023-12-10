@@ -106,6 +106,49 @@ class CanvasViewModel {
     }
 }
 
+extension CanvasViewModel {
+    func saveCanvas(outputImage: UIImage?, to zipFileName: String) throws {
+
+        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
+        let zipFileUrl = URL.documents.appendingPathComponent(zipFileName)
+
+        // Clean up the temporary folder when done
+        defer {
+            try? FileManager.default.removeItem(atPath: folderUrl.path)
+        }
+        try FileManager.createNewDirectory(url: folderUrl)
+
+
+        let textureSize = layerManager.currentTexture.size
+
+        let textureName = UUID().uuidString
+        let textureDataUrl = folderUrl.appendingPathComponent(textureName)
+
+        // Thumbnail
+        let imageURL = folderUrl.appendingPathComponent(CanvasViewModel.thumbnailPath)
+        try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
+
+        // Texture
+        autoreleasepool {
+            try? Data(layerManager.currentTexture.bytes).write(to: textureDataUrl)
+        }
+
+        // Data
+        let codableData = CanvasModel(textureSize: textureSize,
+                                      textureName: textureName,
+                                      drawingTool: drawingTool.rawValue,
+                                      brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
+                                      eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
+
+        if let jsonData = try? JSONEncoder().encode(codableData) {
+            let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
+            try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
+        }
+
+        try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
+    }
+}
+
 // Transforming
 extension CanvasViewModel {
     func getMatrix(transformationData: TransformationData,
