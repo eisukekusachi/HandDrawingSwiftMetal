@@ -36,15 +36,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         return commandQueue.getOrCreateCommandBuffer()
     }
 
-    /// Accessor for the output image rendered on this view.
-    var outputImage: UIImage? {
-        guard let texture = rootTexture,
-              let data = UIImage.makeCFData(texture, flipY: true),
-              let image = UIImage.makeImage(cfData: data, width: texture.width, height: texture.height) else { return nil }
-
-        return image
-    }
-
     private(set) var rootTexture: MTLTexture!
 
     private(set) var displayLink: CADisplayLink?

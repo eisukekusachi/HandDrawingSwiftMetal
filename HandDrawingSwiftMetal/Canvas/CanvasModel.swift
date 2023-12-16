@@ -11,6 +11,8 @@ struct CanvasModel: Codable {
     let textureSize: CGSize?
     let textureName: String?
 
+    let thumbnailName: String?
+
     let drawingTool: Int?
 
     let brushDiameter: Int?

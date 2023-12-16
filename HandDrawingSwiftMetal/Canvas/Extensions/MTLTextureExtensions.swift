@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import Accelerate
 
 extension MTLTexture {
     var size: CGSize {
@@ -24,5 +25,12 @@ extension MTLTexture {
         self.getBytes(&result, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
 
         return result
+    }
+    var uiImage: UIImage? {
+        guard let data = UIImage.makeCFData(self, flipY: true),
+              let image = UIImage.makeImage(cfData: data,
+                                            width: self.width,
+                                            height: self.height) else { return nil }
+        return image
     }
 }

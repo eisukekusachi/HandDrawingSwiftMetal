@@ -10,17 +10,26 @@ import Foundation
 extension ViewController {
     func saveCanvas() {
         Task {
+            let folderURL = CanvasViewModel.folderURL
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
+                try? FileManager.default.removeItem(atPath: CanvasViewModel.folderURL.path)
                 activityIndicatorView.removeFromSuperview()
             }
             view.addSubview(activityIndicatorView)
 
-            do {
-                try canvasViewModel.saveCanvas(outputImage: canvasView.outputImage,
-                                               to: canvasViewModel.zipFileNamePath)
+            guard let currentTexture = canvasView.currentTexture  else { return }
 
-                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
+            do {
+                // Clean up the temporary folder when done
+                try FileManager.createNewDirectory(url: CanvasViewModel.folderURL)
+
+                try canvasViewModel.saveCanvasAsZipFile(texture: currentTexture,
+                                                        textureName: UUID().uuidString,
+                                                        folderURL: folderURL,
+                                                        zipFileName: canvasViewModel.zipFileNamePath)
+
+                try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
                 view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
 
@@ -31,18 +40,25 @@ extension ViewController {
     }
     func loadCanvas(zipFilePath: String) {
         Task {
+            let folderURL = CanvasViewModel.folderURL
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
+                try? FileManager.default.removeItem(atPath: folderURL.path)
                 activityIndicatorView.removeFromSuperview()
             }
             view.addSubview(activityIndicatorView)
 
             do {
-                try canvasViewModel.loadCanvas(zipFilePath: zipFilePath)
+                // Clean up the temporary folder when done
+                try FileManager.createNewDirectory(url: folderURL)
+
+                let data = try canvasViewModel.loadCanvas(folderURL: folderURL, zipFilePath: zipFilePath)
+
+                try canvasViewModel.applyDataToCanvas(data, folderURL: folderURL, zipFilePath: zipFilePath)
                 refreshAllComponents()
                 canvasView.refreshCanvas()
 
-                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000))
+                try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
                 view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
 

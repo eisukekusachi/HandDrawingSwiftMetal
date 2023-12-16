@@ -32,6 +32,9 @@ class CanvasViewModel {
         drawing?.getDrawingTextures(currentTexture) ?? []
     }
 
+    private var fileIO: FileIO!
+    private var jsonIO: JsonIO!
+
     /// Manage texture layers
     private (set) var layerManager: LayerManager!
 
@@ -47,15 +50,21 @@ class CanvasViewModel {
     static var thumbnailPath: String {
         "thumbnail.png"
     }
-    static var jsonFilePath: String {
+    static var jsonFileName: String {
         "data"
     }
+
+    static let folderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    init(layerManager: LayerManager = LayerManagerImpl()) {
+    init(fileIO: FileIO = FileIOImpl(),
+         jsonIO: JsonIO = JsonIOImpl(),
+         layerManager: LayerManager = LayerManagerImpl()) {
+        self.fileIO = fileIO
+        self.jsonIO = jsonIO
         self.layerManager = layerManager
         
         $drawingTool
@@ -112,84 +121,57 @@ class CanvasViewModel {
 
 // MARK: IO
 extension CanvasViewModel {
-    func saveCanvas(outputImage: UIImage?, to zipFileName: String) throws {
+    func saveCanvasAsZipFile(texture: MTLTexture, 
+                             textureName: String,
+                             thumbnailHeight: CGFloat = 512, 
+                             folderURL: URL,
+                             zipFileName: String) throws {
+        let thumbnailName = CanvasViewModel.thumbnailPath
+        let textureSize = texture.size
 
-        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
-        let zipFileUrl = URL.documents.appendingPathComponent(zipFileName)
+        try fileIO.saveImage(image: texture.uiImage?.resize(height: thumbnailHeight, scale: 1.0),
+                             url: folderURL.appendingPathComponent(thumbnailName))
 
-        // Clean up the temporary folder when done
-        defer {
-            try? FileManager.default.removeItem(atPath: folderUrl.path)
-        }
-        try FileManager.createNewDirectory(url: folderUrl)
+        try fileIO.saveImage(bytes: texture.bytes,
+                             url: folderURL.appendingPathComponent(textureName))
 
+        let data = CanvasModel(textureSize: textureSize,
+                               textureName: textureName,
+                               thumbnailName: thumbnailName,
+                               drawingTool: drawingTool.rawValue,
+                               brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
+                               eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
 
-        let textureSize = layerManager.currentTexture.size
+        try jsonIO.saveJson(data,
+                            to: folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
 
-        let textureName = UUID().uuidString
-        let textureDataUrl = folderUrl.appendingPathComponent(textureName)
-
-        // Thumbnail
-        let imageURL = folderUrl.appendingPathComponent(CanvasViewModel.thumbnailPath)
-        try outputImage?.resize(height: 512, scale: 1.0)?.pngData()?.write(to: imageURL)
-
-        // Texture
-        autoreleasepool {
-            try? Data(layerManager.currentTexture.bytes).write(to: textureDataUrl)
-        }
-
-        // Data
-        let codableData = CanvasModel(textureSize: textureSize,
-                                      textureName: textureName,
-                                      drawingTool: drawingTool.rawValue,
-                                      brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
-                                      eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
-
-        if let jsonData = try? JSONEncoder().encode(codableData) {
-            let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
-            try? String(data: jsonData, encoding: .utf8)?.write(to: jsonUrl, atomically: true, encoding: .utf8)
-        }
-
-        try FileOutput.zip(folderURL: folderUrl, zipFileURL: zipFileUrl)
+        try fileIO.zip(folderURL,
+                       to: URL.documents.appendingPathComponent(zipFileName))
     }
-    func loadCanvas(zipFilePath: String) throws {
+    func loadCanvas(folderURL: URL, zipFilePath: String) throws -> CanvasModel? {
+        try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
+                         to: folderURL)
 
-        let folderUrl = URL.documents.appendingPathComponent("tmpFolder")
-        let zipFileUrl = URL.documents.appendingPathComponent(zipFilePath)
-        let jsonUrl = folderUrl.appendingPathComponent(CanvasViewModel.jsonFilePath)
-
-        // Clean up the temporary folder when done
-        defer {
-            try? FileManager.default.removeItem(at: folderUrl)
+        return try? jsonIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
+    }
+    func applyDataToCanvas(_ data: CanvasModel?, folderURL: URL, zipFilePath: String) throws {
+        guard let textureName = data?.textureName,
+              let textureSize = data?.textureSize,
+              let drawingTool = data?.drawingTool,
+              let brushDiameter = data?.brushDiameter,
+              let eraserDiameter = data?.eraserDiameter,
+              let newTexture = try? layerManager.makeTexture(fromDocumentsFolder: folderURL.appendingPathComponent(textureName),
+                                                             textureSize: textureSize) else {
+            throw FileInputError.failedToApplyData
         }
 
-        // Unzip the contents of the ZIP file
-        try FileManager.createNewDirectory(url: folderUrl)
+        self.drawingTool = .init(rawValue: drawingTool)
+        (drawingBrush.tool as? DrawingToolBrush)!.diameter = brushDiameter
+        (drawingEraser.tool as? DrawingToolEraser)!.diameter = eraserDiameter
 
-        try FileInput.unzip(srcZipURL: zipFileUrl, to: folderUrl)
+        self.layerManager.setTexture(newTexture)
 
-        let data: CanvasModel = try FileInput.loadJson(url: jsonUrl)
-
-        if let textureName = data.textureName,
-           let textureSize = data.textureSize {
-
-            let textureUrl = folderUrl.appendingPathComponent(textureName)
-            let textureData: Data? = try? Data(contentsOf: textureUrl)
-
-            if let texture = LayerManagerImpl.makeTexture(device, textureSize, textureData?.encodedHexadecimals) {
-                layerManager.setTexture(texture)
-            }
-        }
-
-        if let drawingTool = data.drawingTool {
-            self.drawingTool = .init(rawValue: drawingTool)
-        }
-        if let diameter = data.brushDiameter {
-            (drawingBrush.tool as? DrawingToolBrush)!.diameter = diameter
-        }
-        if let diameter = data.eraserDiameter {
-            (drawingEraser.tool as? DrawingToolEraser)!.diameter = diameter
-        }
+        self.projectName = zipFilePath.fileName
     }
 }
 

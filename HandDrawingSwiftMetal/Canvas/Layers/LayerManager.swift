@@ -17,6 +17,6 @@ protocol LayerManager {
                into dstTexture: MTLTexture,
                _ commandBuffer: MTLCommandBuffer)
     func setTexture(_ texture: MTLTexture)
-    func setTexture(url: URL, textureSize: CGSize) throws
+    func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture?
     func clearTexture(_ commandBuffer: MTLCommandBuffer)
 }

@@ -22,6 +22,10 @@ class CanvasView: MTKTextureDisplayView {
         set { viewModel!.drawingTool = newValue }
     }
 
+    var currentTexture: MTLTexture? {
+        viewModel?.currentTexture
+    }
+
     var brushDiameter: Int {
         get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.diameter }
         set { (viewModel?.drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }

@@ -42,14 +42,9 @@ class LayerManagerImpl: LayerManager {
                       commandBuffer)
     }
 
-    func setTexture(url: URL, textureSize: CGSize) throws {
+    func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture? {
         let textureData: Data? = try Data(contentsOf: url)
-
-        guard let texture = LayerManagerImpl.makeTexture(device, textureSize, textureData?.encodedHexadecimals) else {
-            throw LayerManagerError.failedToMakeTexture
-        }
-
-        setTexture(texture)
+        return LayerManagerImpl.makeTexture(device, textureSize, textureData?.encodedHexadecimals)
     }
     func setTexture(_ texture: MTLTexture) {
         currentTexture = texture
@@ -75,7 +70,7 @@ extension LayerManagerImpl {
             .shaderWrite]
         return device.makeTexture(descriptor: textureDescriptor)
     }
-    static func makeTexture(_ device: MTLDevice, _ imageName: String) -> MTLTexture? {
+    static func makeTexture(_ device: MTLDevice, fromBundleImage imageName: String) -> MTLTexture? {
         guard let image = UIImage(named: imageName)?.cgImage else {
             return nil
         }
