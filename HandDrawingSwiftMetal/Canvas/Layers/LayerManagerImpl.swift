@@ -1,27 +1,85 @@
 //
-//  Texture.swift
+//  LayerManagerImpl.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2022/12/25.
+//  Created by Eisuke Kusachi on 2023/12/16.
 //
 
 import MetalKit
 import Accelerate
 
-extension MTLDevice {
-    
-    func makeTexture(_ size: CGSize) -> MTLTexture? {
-        let (w, h) = (Int(size.width), Int(size.height))
-        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: w, height: h, mipmapped: false)
-        descriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        return self.makeTexture(descriptor: descriptor)
+enum LayerManagerError: Error {
+    case failedToMakeTexture
+}
+class LayerManagerImpl: LayerManager {
+
+    private (set) var currentTexture: MTLTexture!
+
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
+    private var textureSize: CGSize = .zero
+
+    func initTextures(_ textureSize: CGSize) {
+        if self.textureSize != textureSize {
+            self.textureSize = textureSize
+            self.currentTexture = LayerManagerImpl.makeTexture(device, textureSize)
+        }
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTexture(commandBuffer)
+        commandBuffer.commit()
     }
-    
-    func makeTexture(_ imageName: String) -> MTLTexture? {
+    func merge(textures: [MTLTexture?],
+               backgroundColor: (Int, Int, Int),
+               into dstTexture: MTLTexture,
+               _ commandBuffer: MTLCommandBuffer) {
+        Command.fill(dstTexture,
+                     withRGB: backgroundColor,
+                     commandBuffer)
+
+        Command.merge(textures,
+                      into: dstTexture,
+                      commandBuffer)
+    }
+
+    func setTexture(url: URL, textureSize: CGSize) throws {
+        let textureData: Data? = try Data(contentsOf: url)
+
+        guard let texture = LayerManagerImpl.makeTexture(device, textureSize, textureData?.encodedHexadecimals) else {
+            throw LayerManagerError.failedToMakeTexture
+        }
+
+        setTexture(texture)
+    }
+    func setTexture(_ texture: MTLTexture) {
+        currentTexture = texture
+    }
+
+    func clearTexture(_ commandBuffer: MTLCommandBuffer) {
+        Command.clear(texture: currentTexture,
+                      commandBuffer)
+    }
+}
+
+extension LayerManagerImpl {
+    static func makeTexture(_ device: MTLDevice, _ size: CGSize, _ pixelFormat: MTLPixelFormat = .bgra8Unorm) -> MTLTexture? {
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: pixelFormat,
+            width: Int(size.width),
+            height: Int(size.height),
+            mipmapped: false
+        )
+        textureDescriptor.usage = [
+            .renderTarget,
+            .shaderRead,
+            .shaderWrite]
+        return device.makeTexture(descriptor: textureDescriptor)
+    }
+    static func makeTexture(_ device: MTLDevice, _ imageName: String) -> MTLTexture? {
         guard let image = UIImage(named: imageName)?.cgImage else {
             return nil
         }
-        
+
         let (w, h) = (Int(image.width), Int(image.height))
         let map: [UInt8] = [2, 1, 0, 3]
         let bytesPerPixel = 4
@@ -47,10 +105,10 @@ extension MTLDevice {
                                        width: vImagePixelCount(image.width),
                                        rowBytes: bytesPerRow)
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
-        
+
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: w, height: h, mipmapped: false)
         textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = self.makeTexture(descriptor: textureDescriptor)
+        let texture = device.makeTexture(descriptor: textureDescriptor)
         texture?.replace(region: MTLRegionMake2D(0, 0, w, h),
                          mipmapLevel: 0,
                          slice: 0,
@@ -59,22 +117,21 @@ extension MTLDevice {
                          bytesPerImage: bytesPerRow * h)
         rgbaBytes.deallocate()
         bgraBytes.deallocate()
-        
+
         return texture
     }
-    
-    func makeTexture(_ size: CGSize, _ array: [UInt8]?) -> MTLTexture? {
-        guard let array = array else {
+    static func makeTexture(_ device: MTLDevice, _ size: CGSize, _ array: [UInt8]?) -> MTLTexture? {
+        guard let array else {
             return nil
         }
-        
+
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
         textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = self.makeTexture(descriptor: textureDescriptor)
+        let texture = device.makeTexture(descriptor: textureDescriptor)
         texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
                          mipmapLevel: 0,
                          slice: 0,

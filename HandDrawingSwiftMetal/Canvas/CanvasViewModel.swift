@@ -33,7 +33,7 @@ class CanvasViewModel {
     }
 
     /// Manage texture layers
-    private (set) var layerManager: LayerManagerProtocol = LayerManager()
+    private (set) var layerManager: LayerManager!
 
     /// The name of the file to be saved
     var projectName: String = Calendar.currentDate
@@ -55,7 +55,9 @@ class CanvasViewModel {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    init() {
+    init(layerManager: LayerManager = LayerManagerImpl()) {
+        self.layerManager = layerManager
+        
         $drawingTool
             .sink { [weak self] newValue in
                 self?.setCurrentDrawing(newValue)
@@ -174,7 +176,7 @@ extension CanvasViewModel {
             let textureUrl = folderUrl.appendingPathComponent(textureName)
             let textureData: Data? = try? Data(contentsOf: textureUrl)
 
-            if let texture = device.makeTexture(textureSize, textureData?.encodedHexadecimals) {
+            if let texture = LayerManagerImpl.makeTexture(device, textureSize, textureData?.encodedHexadecimals) {
                 layerManager.setTexture(texture)
             }
         }

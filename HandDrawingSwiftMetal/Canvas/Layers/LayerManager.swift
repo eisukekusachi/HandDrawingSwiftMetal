@@ -2,48 +2,21 @@
 //  LayerManager.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/04/09.
+//  Created by Eisuke Kusachi on 2023/12/16.
 //
 
 import MetalKit
+import Accelerate
 
-class LayerManager: LayerManagerProtocol {
+protocol LayerManager {
+    var currentTexture: MTLTexture! { get }
 
-    private (set) var currentTexture: MTLTexture!
-
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
-    private var textureSize: CGSize = .zero
-
-    func initTextures(_ textureSize: CGSize) {
-        if self.textureSize != textureSize {
-            self.textureSize = textureSize
-            self.currentTexture = device.makeTexture(textureSize)
-        }
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTexture(commandBuffer)
-        commandBuffer.commit()
-    }
+    func initTextures(_ textureSize: CGSize)
     func merge(textures: [MTLTexture?],
                backgroundColor: (Int, Int, Int),
                into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer) {
-        Command.fill(dstTexture,
-                     withRGB: backgroundColor,
-                     commandBuffer)
-
-        Command.merge(textures,
-                      into: dstTexture,
-                      commandBuffer)
-    }
-
-    func setTexture(_ texture: MTLTexture) {
-        currentTexture = texture
-    }
-
-    func clearTexture(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: currentTexture,
-                      commandBuffer)
-    }
+               _ commandBuffer: MTLCommandBuffer)
+    func setTexture(_ texture: MTLTexture)
+    func setTexture(url: URL, textureSize: CGSize) throws
+    func clearTexture(_ commandBuffer: MTLCommandBuffer)
 }

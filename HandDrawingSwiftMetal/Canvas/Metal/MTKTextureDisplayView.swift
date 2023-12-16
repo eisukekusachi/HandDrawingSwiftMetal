@@ -100,7 +100,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
         self.textureSize = textureSize
-        self.rootTexture = device!.makeTexture(textureSize)
+        self.rootTexture = LayerManagerImpl.makeTexture(device!, textureSize)
 
         displayViewDelegate?.didChangeTextureSize(textureSize)
 
@@ -165,7 +165,7 @@ extension MTKTextureDisplayView {
         guard let commandBuffer = commandQueue?.getNewCommandBuffer(),
               let srcTexture = srcTexture else { return nil }
 
-        let newTexture = device?.makeTexture(srcTexture.size)
+        let newTexture = LayerManagerImpl.makeTexture(device!, srcTexture.size)
 
         Command.copy(dst: newTexture, src: srcTexture, commandBuffer)
         commandBuffer.commit()

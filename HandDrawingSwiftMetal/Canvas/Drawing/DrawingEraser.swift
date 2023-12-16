@@ -34,9 +34,9 @@ class DrawingEraser: DrawingProtocol {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 
-            self.drawingTexture = device.makeTexture(textureSize)
-            self.grayscaleTexture = device.makeTexture(textureSize)
-            self.eraserTexture = device.makeTexture(textureSize)
+            self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
+            self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
+            self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
         }
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
