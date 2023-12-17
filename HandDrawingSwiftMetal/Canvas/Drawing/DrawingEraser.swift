@@ -8,18 +8,15 @@
 import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class DrawingEraser: DrawingProtocol {
-    var drawingTool: DrawingTool = DrawingToolEraser()
-
-    let canvas: Canvas
+class DrawingEraser: Drawing {
+    var tool: DrawingTool = DrawingToolEraser()
 
     var drawingTexture: MTLTexture?
 
-    var currentDrawingTextures: [MTLTexture?] {
-        isDrawing ? [eraserTexture] : [canvas.currentTexture]
-    }
-
+    var frameSize: CGSize = .zero
     var textureSize: CGSize = .zero
+
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
@@ -28,39 +25,45 @@ class DrawingEraser: DrawingProtocol {
 
     private var isDrawing: Bool = false
 
-    required init(canvas: Canvas) {
-        self.canvas = canvas
-        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: canvas.device, nodes: flippedTextureNodes)
+    required init() {
+        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
     }
 
     /// Initializes the textures for drawing with the specified texture size.
-    func initializeTextures(_ textureSize: CGSize) {
+    func initTextures(_ textureSize: CGSize) {
         if self.textureSize != textureSize {
             self.textureSize = textureSize
 
-            self.drawingTexture = canvas.device!.makeTexture(textureSize)
-            self.grayscaleTexture = canvas.device!.makeTexture(textureSize)
-            self.eraserTexture = canvas.device!.makeTexture(textureSize)
+            self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
+            self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
+            self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
         }
 
-        clearDrawingTextures()
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTextures(commandBuffer)
+        commandBuffer.commit()
     }
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>, touchState: TouchState) {
-        assert(textureSize != .zero, "Call initalizeTextures() once before here.")
-        guard let eraser = drawingTool as? DrawingToolEraser else { return }
+    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
+                              matrix: CGAffineTransform,
+                              on dstTexture: MTLTexture,
+                              _ touchState: TouchState,
+                              _ commandBuffer: MTLCommandBuffer) {
+        assert(frameSize != .zero, "Set a value for frameSize once before here.")
+        assert(textureSize != .zero, "Set a value for textureSize once before here.")
+        guard let eraser = tool as? DrawingToolEraser else { return }
 
-        let inverseMatrix = canvas.matrix.getInvertedValue(scale: Aspect.getScaleToFit(canvas.frame.size, to: textureSize))
+        let inverseMatrix = matrix.getInvertedValue(scale: Aspect.getScaleToFit(frameSize, to: textureSize))
         let points = Curve.makePoints(iterator: iterator,
                                       matrix: inverseMatrix,
-                                      srcSize: canvas.frame.size,
+                                      srcSize: frameSize,
                                       dstSize: textureSize,
                                       endProcessing: touchState == .ended)
 
         guard points.count != 0 else { return }
 
-        let pointBuffers = Buffers.makePointBuffers(device: canvas.device,
+        let pointBuffers = Buffers.makePointBuffers(device: device,
                                                     points: points,
                                                     blurredDotSize: eraser.blurredDotSize,
                                                     alpha: eraser.alpha,
@@ -68,56 +71,60 @@ class DrawingEraser: DrawingProtocol {
 
         Command.drawCurve(buffers: pointBuffers,
                           onGrayscaleTexture: grayscaleTexture,
-                          canvas.commandBuffer)
+                          commandBuffer)
 
         Command.colorize(grayscaleTexture: grayscaleTexture,
                          with: (0, 0, 0),
                          result: drawingTexture,
-                         canvas.commandBuffer)
+                         commandBuffer)
 
         Command.copy(dst: eraserTexture,
-                     src: canvas.currentTexture,
-                     canvas.commandBuffer)
+                     src: dstTexture,
+                     commandBuffer)
 
         Command.makeEraseTexture(buffers: flippedTextureBuffers,
                                  src: drawingTexture,
                                  result: eraserTexture,
-                                 canvas.commandBuffer)
+                                 commandBuffer)
 
         isDrawing = true
 
         if touchState == .ended {
-            mergeDrawingTexture(into: canvas.currentTexture)
-            clearDrawingTextures()
+            merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }
 
-
     /// Merges the drawing texture into the destination texture.
-    func mergeDrawingTexture(into dstTexture: MTLTexture) {
-        Command.copy(dst: eraserTexture, src: dstTexture, canvas.commandBuffer)
+    func merge(_ srcTexture: MTLTexture?,
+               into dstTexture: MTLTexture,
+               _ commandBuffer: MTLCommandBuffer) {
+        Command.copy(dst: eraserTexture, src: dstTexture, commandBuffer)
 
-        Command.makeEraseTexture(buffers: flippedTextureBuffers, 
-                                 src: drawingTexture,
+        Command.makeEraseTexture(buffers: flippedTextureBuffers,
+                                 src: srcTexture,
                                  result: eraserTexture,
-                                 canvas.commandBuffer)
+                                 commandBuffer)
 
-        Command.copy(dst: dstTexture, 
-                     src: eraserTexture, 
-                     canvas.commandBuffer)
+        Command.copy(dst: dstTexture,
+                     src: eraserTexture,
+                     commandBuffer)
 
-        clearDrawingTextures()
+        clearDrawingTextures(commandBuffer)
 
         isDrawing = false
     }
 
     /// Clears the drawing textures.
-    func clearDrawingTextures() {
-        Command.clear(textures: [eraserTexture, 
+    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
+        Command.clear(textures: [eraserTexture,
                                  drawingTexture],
-                      canvas.commandBuffer)
-        Command.fill(grayscaleTexture, 
+                      commandBuffer)
+        Command.fill(grayscaleTexture,
                      withRGB: (0, 0, 0),
-                     canvas.commandBuffer)
+                     commandBuffer)
+    }
+
+    func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {
+        isDrawing ? [eraserTexture] : [texture]
     }
 }

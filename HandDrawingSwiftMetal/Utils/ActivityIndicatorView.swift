@@ -24,10 +24,11 @@ class ActivityIndicatorView: UIView {
         addSubview(indicator)
         indicator.layer.cornerRadius = 8
         indicator.frame = CGRect(x: 0, y: 0, width: 64, height: 64)
+        indicator.color = .gray
         indicator.startAnimating()
 
-        backgroundColor = .init(white: 0.0, alpha: 0.1)
-        indicator.backgroundColor = .init(white: 1.0, alpha: 0.5)
+        backgroundColor = .init(white: 0.0, alpha: 0.2)
+        indicator.backgroundColor = .init(white: 1.0, alpha: 0.75)
     }
 
     override func layoutSubviews() {

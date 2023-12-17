@@ -2,15 +2,15 @@
 //  ActionStateTest.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2023/04/03.
+//  Created by Eisuke Kusachi on 2023/12/17.
 //
 
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-class ActionStateTest: XCTestCase {    
-
-    // when the actionState is determined once, it cannot be changed until reset.
+class ActionStateTest: XCTestCase {
+    
+    // When the actionState is determined once, it cannot be changed until reset.
     func testActionState() {
 
         XCTAssertEqual(ActionState.activatingDrawingCount, 5)
@@ -36,11 +36,11 @@ class ActionStateTest: XCTestCase {
         var oneFingerInputArrayDictionary: [Int: [TouchPoint]] = [:]
         var twoFingerInputArrayDictionary: [Int: [TouchPoint]] = [:]
 
-        // Add the array and update to determine the action
+        // Add an array and determine the action state
         oneFingerInputArrayDictionary[0] = firstInputs
         let oneFingerActionState = ActionStateManager.getState(oneFingerInputArrayDictionary)
 
-        // Add the array and update to determine the action
+        // Add an array and determine the action state
         twoFingerInputArrayDictionary[0] = firstInputs
         twoFingerInputArrayDictionary[1] = secondInputs
         let twoFingerActionState = ActionStateManager.getState(twoFingerInputArrayDictionary)
@@ -49,15 +49,17 @@ class ActionStateTest: XCTestCase {
         let actionStateManager = ActionStateManager()
 
         actionStateManager.updateState(oneFingerActionState)
-        XCTAssertEqual(actionStateManager.state, .drawingOnCanvas)
+        XCTAssertEqual(actionStateManager.state, .drawing)
 
 
         actionStateManager.updateState(twoFingerActionState)
-        XCTAssertNotEqual(actionStateManager.state, .transformingCanvas, "The actionState cannot be changed until reset.")
+        XCTAssertNotEqual(actionStateManager.state, .transforming,
+                          "The actionState cannot be changed until reset.")
 
         actionStateManager.reset()
 
         actionStateManager.updateState(twoFingerActionState)
-        XCTAssertEqual(actionStateManager.state, .transformingCanvas, "After resetting, the actionState can be changed.")
+        XCTAssertEqual(actionStateManager.state, .transforming, 
+                       "After resetting, the actionState can be changed.")
     }
 }

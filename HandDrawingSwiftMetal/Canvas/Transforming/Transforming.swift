@@ -1,40 +1,20 @@
 //
-//  MatrixManager.swift
+//  Transforming.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/03/30.
+//  Created by Eisuke Kusachi on 2023/10/15.
 //
 
-import UIKit
+import Foundation
 
-class Transforming: TransformingProtocol {
+/// This protocol provides functionality related to view transformations.
+protocol Transforming {
 
-    var storedMatrix: CGAffineTransform = CGAffineTransform.identity
+    /// Stored transformation matrix
+    var storedMatrix: CGAffineTransform { get set }
 
-    func update(transformationData: TransformationData, centerPoint: CGPoint, touchState: TouchState) -> CGAffineTransform? {
-        guard let matrix = makeMatrix(transformationData: transformationData, centerPoint: centerPoint) else { return nil }
-        let newMatrix = storedMatrix.concatenating(matrix)
-
-        if touchState == .ended {
-            storedMatrix = newMatrix
-        }
-
-        return newMatrix
-    }
-
-    /// Generate a matrix from touch points and view size
-    private func makeMatrix(transformationData: TransformationData, centerPoint: CGPoint) -> CGAffineTransform? {
-        if let pointsA = transformationData.pointsA,
-           let pointsB = transformationData.pointsB,
-           let newMatrix = CGAffineTransform.makeMatrix(center: centerPoint,
-                                                        pointsA: pointsA,
-                                                        pointsB: pointsB,
-                                                        counterRotate: true,
-                                                        flipY: true) {
-            return newMatrix
-
-        } else {
-            return nil
-        }
-    }
+    /// Update the transformation based on view touches and return a new matrix
+    func getMatrix(transformationData: TransformationData,
+                   frameCenterPoint: CGPoint,
+                   touchState: TouchState) -> CGAffineTransform?
 }

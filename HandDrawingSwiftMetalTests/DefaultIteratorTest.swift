@@ -2,14 +2,14 @@
 //  DefaultIteratorTest.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2023/10/20.
+//  Created by Eisuke Kusachi on 2023/12/17.
 //
 
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-class DefaultIIteratorTest: XCTestCase {
-
+class DefaultIteratorTest: XCTestCase {
+    
     func testDefaultIteratorSenarios() {
         let range = 1
 
@@ -23,17 +23,17 @@ class DefaultIIteratorTest: XCTestCase {
         let iterator = Iterator<TouchPoint>()
         iterator.update(elems: inputs)
 
-        var count = 0
+        var index = 0
         while let subsequece = iterator.next(range: range) {
-            if count == 0 {
+            if index == 0 {
                 XCTAssertTrue(iterator.isFirstProcessing)
             }
 
+            let value = subsequece[0]
+            XCTAssertEqual(value, inputs[index])
             XCTAssertEqual(subsequece.count, range)
 
-            XCTAssertEqual(subsequece[0], inputs[count + 0])
-
-            count += 1
+            index += 1
         }
     }
 }

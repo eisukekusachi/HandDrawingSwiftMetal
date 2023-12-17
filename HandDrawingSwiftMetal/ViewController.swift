@@ -7,10 +7,11 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 class ViewController: UIViewController {
-    
-    let canvas = Canvas()
+    let canvasViewModel = CanvasViewModel()
+    let canvasView = CanvasView()
 
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
@@ -22,69 +23,77 @@ class ViewController: UIViewController {
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
 
+    private var cancellables = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.addSubview(canvas)
-        view.sendSubviewToBack(canvas)
-        
-        canvas.translatesAutoresizingMaskIntoConstraints = false
-        
+        view.addSubview(canvasView)
+        view.sendSubviewToBack(canvasView)
+
+        canvasView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            canvas.leftAnchor.constraint(equalTo: view.leftAnchor),
-            canvas.topAnchor.constraint(equalTo: view.topAnchor),
-            canvas.rightAnchor.constraint(equalTo: view.rightAnchor),
-            canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            canvasView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            canvasView.topAnchor.constraint(equalTo: view.topAnchor),
+            canvasView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        canvas.canvasDelegate = self
-        canvas.drawingTool = .brush
-        canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
-        canvas.eraserAlpha = 150
+        canvasView.setViewModel(canvasViewModel)
+        canvasView.drawingTool = .brush
+        canvasView.brushColor = UIColor.black.withAlphaComponent(0.75)
+        canvasView.brushDiameter = 8
+        canvasView.eraserAlpha = 150
+        canvasView.eraserDiameter = 44
 
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
+        canvasView.$undoCount
+            .sink { [weak self] _ in
+                self?.refreshUndoRedoButtons()
+            }
+            .store(in: &cancellables)
 
-        refreshUndoRedoButtons()
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
     }
-    
-    func refreshUndoRedoButtons() {
-        undoButton.isEnabled = canvas.canUndo
-        redoButton.isEnabled = canvas.canRedo
-    }
-    func refreshAllComponents() {
-        switch canvas.drawingTool {
+    func initAllComponents() {
+        switch canvasView.drawingTool {
         case .brush:
-            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
+            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
         case .eraser:
-            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.eraserDiameter)
+            diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.eraserDiameter)
         }
+        canvasView.clearUndo()
         refreshUndoRedoButtons()
+    }
+    func refreshUndoRedoButtons() {
+        undoButton.isEnabled = canvasView.canUndo
+        redoButton.isEnabled = canvasView.canRedo
     }
 }
 
 extension ViewController {
     @IBAction func pushResetTransform(_ sender: UIButton) {
-        canvas.resetCanvasMatrix()
-        canvas.setNeedsDisplay()
+        canvasView.resetMatrix()
+        canvasView.setNeedsDisplay()
     }
     @IBAction func pushBlackColor(_ sender: UIButton) {
-        canvas.drawingTool = .brush
-        canvas.brushColor = UIColor.black.withAlphaComponent(0.75)
+        canvasView.drawingTool = .brush
+        canvasView.brushColor = UIColor.black.withAlphaComponent(0.75)
 
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
     }
     @IBAction func pushRedColor(_ sender: UIButton) {
-        canvas.drawingTool = .brush
-        canvas.brushColor = UIColor.red.withAlphaComponent(0.75)
+        canvasView.drawingTool = .brush
+        canvasView.brushColor = UIColor.red.withAlphaComponent(0.75)
 
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvas.brushDiameter)
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
     }
     
     @IBAction func pushEraserButton(_ sender: UIButton) {
-        canvas.drawingTool = .eraser
-        canvas.eraserAlpha = 150
+        canvasView.drawingTool = .eraser
+        canvasView.eraserAlpha = 150
 
-        diameterSlider.value = DrawingToolEraser.diameterFloatValue(canvas.eraserDiameter)
+        diameterSlider.value = DrawingToolEraser.diameterFloatValue(canvasView.eraserDiameter)
     }
     
     @IBAction func pushExportButton(_ sender: UIButton) {
@@ -94,7 +103,7 @@ extension ViewController {
             exportButton.isUserInteractionEnabled = true
         }
         
-        if let image = canvas.outputImage {
+        if let image = canvasView.currentTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
@@ -106,33 +115,35 @@ extension ViewController {
         }
     }
     @IBAction func pushClearButton(_ sender: UIButton) {
-        canvas.clearCanvas()
+        canvasView.clearCanvas()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
-        if canvas.drawingTool == .eraser {
-            canvas.eraserDiameter = Int(DrawingToolEraser.diameterIntValue(sender.value))
+        if canvasView.drawingTool == .eraser {
+            canvasView.eraserDiameter = Int(DrawingToolEraser.diameterIntValue(sender.value))
 
         } else {
-            canvas.brushDiameter = Int(DrawingToolBrush.diameterIntValue(sender.value))
+            canvasView.brushDiameter = Int(DrawingToolBrush.diameterIntValue(sender.value))
         }
     }
     @IBAction func pushUndoButton() {
-        canvas.undo()
+        canvasView.undo()
     }
     @IBAction func pushRedoButton() {
-        canvas.redo()
+        canvasView.redo()
     }
     @IBAction func pushSaveButton() {
-        saveCanvas()
+        saveCanvas(into: CanvasViewModel.tmpFolderURL,
+                   with: canvasViewModel.zipFileNameName)
     }
     @IBAction func pushLoadButton() {
-        let zipFileList = URL.documents.allFileURLs(suffix: Canvas.zipSuffix).map {
+        let zipFileList = URL.documents.allFileURLs(suffix: CanvasViewModel.zipSuffix).map {
             $0.lastPathComponent
         }
         let fileView = FileView(zipFileList: zipFileList,
                                 didTapItem: { [weak self] zipFilePath in
 
-            self?.loadCanvas(zipFilePath: zipFilePath)
+            self?.loadCanvas(from: zipFilePath,
+                             into: CanvasViewModel.tmpFolderURL)
             self?.presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)
@@ -143,7 +154,7 @@ extension ViewController {
                   message: "Do you want to refresh the canvas?",
                   okHandler: { [weak self] in
 
-            self?.canvas.newCanvas()
+            self?.canvasView.newCanvas()
         })
     }
 
@@ -161,11 +172,5 @@ extension ViewController {
 
         alert.addAction(ok)
         present(alert, animated: true, completion: nil)
-    }
-}
-
-extension ViewController: CanvasDelegate {
-    func didUndoRedo() {
-        refreshUndoRedoButtons()
     }
 }

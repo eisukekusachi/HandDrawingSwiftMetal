@@ -2,7 +2,7 @@
 //  SmoothPointIteratorTest.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2023/10/17.
+//  Created by Eisuke Kusachi on 2023/12/17.
 //
 
 import XCTest
@@ -54,13 +54,12 @@ class SmoothPointIteratorTest: XCTestCase {
         var smoothIterator = Iterator<TouchPoint>()
 
         iterator.update(elems: inputs)
-        SmoothPointStorage.makeIterator(src: iterator,
-                                        dst: &smoothIterator,
-                                        endProcessing: true)
+        SmoothTouchPointStorage.makeIterator(src: iterator,
+                                             dst: &smoothIterator,
+                                             endProcessing: true)
 
         var count: Int = 0
         while let subsequece = smoothIterator.next(range: range) {
-
             XCTAssertEqual([TouchPoint(location: subsequece[0].location,
                                        alpha: round(subsequece[0].alpha * 100) / 100),
 
@@ -76,5 +75,7 @@ class SmoothPointIteratorTest: XCTestCase {
                            results[count])
             count += 1
         }
+
+        XCTAssertEqual(count, results.count, "Executed 4 times.")
     }
 }

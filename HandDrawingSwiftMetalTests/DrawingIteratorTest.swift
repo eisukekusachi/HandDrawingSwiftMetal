@@ -2,7 +2,7 @@
 //  DrawingIteratorTest.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2023/10/20.
+//  Created by Eisuke Kusachi on 2023/12/17.
 //
 
 import XCTest
@@ -63,7 +63,7 @@ class DrawingIteratorTest: XCTestCase {
             .init(location: CGPoint(x: 80, y: 80), alpha: 0.8)
         ]
     ]
-    
+
     func testIteratorWithRange4() {
         let range: Int = 4
 

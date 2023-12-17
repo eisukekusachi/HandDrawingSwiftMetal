@@ -1,8 +1,8 @@
 //
-//  IteretorNonNormalTest.swift
+//  IteratorNonNormalTest.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2023/10/20.
+//  Created by Eisuke Kusachi on 2023/12/17.
 //
 
 import XCTest
@@ -28,7 +28,8 @@ class IteratorNonNormalTest: XCTestCase {
             while let _ = iterator.next(range: 0) {
                 notPassThroughBlock = false
             }
-            XCTAssertTrue(notPassThroughBlock, "Because the range is 0.")
+            XCTAssertTrue(notPassThroughBlock, 
+                          "Because the range is 0.")
         }
 
         XCTContext.runActivity(named: "A scenario with input 4") { _ in
@@ -42,7 +43,8 @@ class IteratorNonNormalTest: XCTestCase {
             while let _ = iterator.next(range: 4) {
                 notPassThroughBlock = false
             }
-            XCTAssertTrue(notPassThroughBlock, "Because the range is greater than the number of array elements.")
+            XCTAssertTrue(notPassThroughBlock, 
+                          "Because the range is greater than the number of array elements.")
         }
     }
 }

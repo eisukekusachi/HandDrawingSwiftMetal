@@ -10,8 +10,8 @@ import Foundation
 /// An undoManager with undoCount and redoCount
 class UndoManagerWithCount: UndoManager {
 
-    private (set) var undoCount: Int = 0
-    private (set) var redoCount: Int = 0
+    @Published private (set) var undoCount: Int = 0
+    @Published private (set) var redoCount: Int = 0
 
     override init() {
         super.init()

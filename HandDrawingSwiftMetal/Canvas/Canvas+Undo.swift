@@ -1,5 +1,5 @@
 //
-//  Canvas+Undo.swift
+//  CanvasView+Undo.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/11/18.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-extension Canvas {
+extension CanvasView {
     var canUndo: Bool {
         undoManager.canUndo
     }
@@ -20,35 +20,31 @@ extension Canvas {
     }
     func undo() {
         undoManager.performUndo()
-        canvasDelegate?.didUndoRedo()
     }
     func redo() {
         undoManager.performRedo()
-        canvasDelegate?.didUndoRedo()
     }
 
     func registerDrawingUndoAction(_ currentTexture: MTLTexture) {
         registerDrawingUndoAction(with: UndoObject(texture: currentTexture))
 
         undoManager.incrementUndoCount()
-        canvasDelegate?.didUndoRedo()
 
         if let newTexture = duplicateTexture(currentTexture) {
-            layers.setTexture(newTexture)
+            viewModel?.setCurrentTexture(newTexture)
         }
     }
 
     /// Registers an action to undo the drawing operation.
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self) { [unowned self] _ in
+            guard let viewModel else { return }
 
-            registerDrawingUndoAction(with: .init(texture: currentTexture))
+            registerDrawingUndoAction(with: .init(texture: viewModel.currentTexture))
 
-            canvasDelegate?.didUndoRedo()
+            viewModel.setCurrentTexture(undoObject.texture)
 
-            layers.setTexture(undoObject.texture)
-
-            refreshRootTexture()
+            refreshRootTexture(commandBuffer)
             setNeedsDisplay()
         }
     }

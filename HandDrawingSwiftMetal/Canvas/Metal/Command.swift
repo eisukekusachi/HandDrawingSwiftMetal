@@ -157,33 +157,33 @@ enum Command {
     }
     
     
-    static func merge(dst: MTLTexture?, textures: [MTLTexture?], _ commandBuffer: MTLCommandBuffer?) {
+    static func merge(_ textures: [MTLTexture?], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         textures.forEach {
-            merge(dst: dst, texture: $0, commandBuffer)
+            merge($0, into: dstTexture, commandBuffer)
         }
     }
-    static func merge(dst: MTLTexture?, texture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        guard let src = texture,
-              let dst = dst else {
+    static func merge(_ srcTexture: MTLTexture?, into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
+        guard let srcTexture = srcTexture,
+              let dstTexture = dstTexture else {
             return
         }
         
-        let threadgroupSize = MTLSize(width: Int(dst.width / 16),
-                                      height: Int(dst.height / 16),
+        let threadgroupSize = MTLSize(width: Int(dstTexture.width / 16),
+                                      height: Int(dstTexture.height / 16),
                                       depth: 1)
         let w = threadgroupSize.width
         let h = threadgroupSize.height
         let threadgroupCount = MTLSize(
-            width: (dst.width  + w - 1) / w,
-            height: (dst.height + h - 1) / h,
+            width: (dstTexture.width  + w - 1) / w,
+            height: (dstTexture.height + h - 1) / h,
             depth: 1
         )
         
         let encoder = commandBuffer?.makeComputeCommandEncoder()
         encoder?.setComputePipelineState(Pipeline.shared.merge)
-        encoder?.setTexture(dst, index: 0)
-        encoder?.setTexture(dst, index: 1)
-        encoder?.setTexture(src, index: 2)
+        encoder?.setTexture(dstTexture, index: 0)
+        encoder?.setTexture(dstTexture, index: 1)
+        encoder?.setTexture(srcTexture, index: 2)
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
