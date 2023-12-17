@@ -43,8 +43,8 @@ class CanvasViewModelTests: XCTestCase {
         // Act
         XCTAssertNoThrow(try canvasViewModel.saveCanvasAsZipFile(texture: mockTexture,
                                                                  textureName: mockTextureFileName,
-                                                                 folderURL: tmpFolderURL,
-                                                                 zipFileName: zipFilePath))
+                                                                 into: tmpFolderURL,
+                                                                 with: zipFilePath))
 
         // Assert
         // The image is output as a canvas and its thumbnail, resulting in a total of 2 images being generated.
@@ -64,8 +64,8 @@ class CanvasViewModelTests: XCTestCase {
         // Act
         var resultModel: CanvasModel?
         do {
-            resultModel = try canvasViewModel.loadCanvas(folderURL: tmpFolderURL,
-                                                         zipFilePath: zipFilePath)
+            resultModel = try canvasViewModel.loadCanvasData(from: zipFilePath,
+                                                             into: tmpFolderURL)
         } catch {
             XCTFail("Failed to load data")
             return
@@ -95,9 +95,9 @@ class CanvasViewModelTests: XCTestCase {
                                 brushDiameter: brushDiameter,
                                 eraserDiameter: eraserDiameter)
         // Act
-        XCTAssertNoThrow(try canvasViewModel.applyDataToCanvas(model,
-                                                               folderURL: tmpFolderURL,
-                                                               zipFilePath: zipFilePath))
+        XCTAssertNoThrow(try canvasViewModel.applyCanvasDataToCanvas(model,
+                                                                     folderURL: tmpFolderURL,
+                                                                     zipFilePath: zipFilePath))
 
         // Assert
         XCTAssertEqual((canvasViewModel.drawingBrush.tool as? DrawingToolBrush)?.diameter, brushDiameter)
