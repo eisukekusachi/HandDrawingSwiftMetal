@@ -6,14 +6,10 @@
 //
 
 import UIKit
-
-protocol CanvasDelegate: AnyObject {
-    func didUndoRedo()
-}
+import Combine
 
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class CanvasView: MTKTextureDisplayView {
-    weak var canvasDelegate: CanvasDelegate?
 
     var drawingTool: DrawingToolType {
         get { viewModel!.drawingTool }
@@ -44,6 +40,8 @@ class CanvasView: MTKTextureDisplayView {
 
     private (set) var viewModel: CanvasViewModel?
 
+    @Published private (set) var undoCount: Int = 0
+
     /// Override UndoManager with ``UndoManagerWithCount``
     override var undoManager: UndoManagerWithCount {
         return undoManagerWithCount
@@ -52,11 +50,12 @@ class CanvasView: MTKTextureDisplayView {
     /// An undoManager with undoCount and redoCount
     private let undoManagerWithCount = UndoManagerWithCount()
 
-
     /// A manager for handling finger and pencil inputs.
     private var inputManager: InputManager!
     private var fingerInput: FingerGestureWithStorage!
     private var pencilInput: PencilGestureWithStorage!
+
+    private var cancellables = Set<AnyCancellable>()
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -84,6 +83,12 @@ class CanvasView: MTKTextureDisplayView {
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
 
         undoManager.levelsOfUndo = 8
+
+        undoManager.$undoCount
+            .sink { [weak self] newValue in
+                self?.undoCount = newValue
+            }
+            .store(in: &cancellables)
     }
 
     func setViewModel(_ viewModel: CanvasViewModel) {

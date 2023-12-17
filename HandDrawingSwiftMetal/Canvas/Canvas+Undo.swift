@@ -20,18 +20,15 @@ extension CanvasView {
     }
     func undo() {
         undoManager.performUndo()
-        canvasDelegate?.didUndoRedo()
     }
     func redo() {
         undoManager.performRedo()
-        canvasDelegate?.didUndoRedo()
     }
 
     func registerDrawingUndoAction(_ currentTexture: MTLTexture) {
         registerDrawingUndoAction(with: UndoObject(texture: currentTexture))
 
         undoManager.incrementUndoCount()
-        canvasDelegate?.didUndoRedo()
 
         if let newTexture = duplicateTexture(currentTexture) {
             viewModel?.layerManager.setTexture(newTexture)
@@ -44,8 +41,6 @@ extension CanvasView {
             guard let viewModel else { return }
 
             registerDrawingUndoAction(with: .init(texture: viewModel.currentTexture))
-
-            canvasDelegate?.didUndoRedo()
 
             viewModel.layerManager.setTexture(undoObject.texture)
 

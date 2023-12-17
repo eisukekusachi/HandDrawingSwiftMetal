@@ -7,6 +7,7 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 class ViewController: UIViewController {
     let canvasViewModel = CanvasViewModel()
@@ -21,6 +22,8 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
+
+    private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +40,6 @@ class ViewController: UIViewController {
             canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        canvasView.canvasDelegate = self
         canvasView.setViewModel(canvasViewModel)
         canvasView.drawingTool = .brush
         canvasView.brushColor = UIColor.black.withAlphaComponent(0.75)
@@ -45,9 +47,13 @@ class ViewController: UIViewController {
         canvasView.eraserAlpha = 150
         canvasView.eraserDiameter = 44
 
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
+        canvasView.$undoCount
+            .sink { [weak self] _ in
+                self?.refreshUndoRedoButtons()
+            }
+            .store(in: &cancellables)
 
-        refreshUndoRedoButtons()
+        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
     }
     
     func refreshUndoRedoButtons() {
@@ -164,11 +170,5 @@ extension ViewController {
 
         alert.addAction(ok)
         present(alert, animated: true, completion: nil)
-    }
-}
-
-extension ViewController: CanvasDelegate {
-    func didUndoRedo() {
-        refreshUndoRedoButtons()
     }
 }
