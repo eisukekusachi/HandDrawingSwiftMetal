@@ -25,10 +25,13 @@ class CanvasViewModel {
     /// Manage transformations
     var transforming: TransformingProtocol = Transforming()
 
+    /// A texture that is selected
     var currentTexture: MTLTexture {
         return layerManager.currentTexture
     }
-    var textures: [MTLTexture?] {
+
+    /// An array containing a texture where a line is drawn and a texture that is selected
+    var activeDrawingTextures: [MTLTexture?] {
         drawing?.getDrawingTextures(currentTexture) ?? []
     }
 
@@ -108,7 +111,7 @@ class CanvasViewModel {
     func mergeAllTextures(backgroundColor: (Int, Int, Int),
                           into dstTexture: MTLTexture,
                           _ commandBuffer: MTLCommandBuffer) {
-        layerManager.merge(textures: textures,
+        layerManager.merge(textures: activeDrawingTextures,
                            backgroundColor: backgroundColor,
                            into: dstTexture,
                            commandBuffer)
