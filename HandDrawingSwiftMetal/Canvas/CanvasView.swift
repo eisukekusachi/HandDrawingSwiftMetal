@@ -13,8 +13,6 @@ protocol CanvasDelegate: AnyObject {
 
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class CanvasView: MTKTextureDisplayView {
-    var viewModel: CanvasViewModel?
-
     weak var canvasDelegate: CanvasDelegate?
 
     var drawingTool: DrawingToolType {
@@ -27,22 +25,24 @@ class CanvasView: MTKTextureDisplayView {
     }
 
     var brushDiameter: Int {
-        get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.diameter }
-        set { (viewModel?.drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
+        get { viewModel!.brushDiameter }
+        set { viewModel?.brushDiameter = newValue }
     }
     var eraserDiameter: Int {
-        get { (viewModel?.drawingEraser.tool as? DrawingToolEraser)!.diameter }
-        set { (viewModel?.drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
+        get { viewModel!.eraserDiameter }
+        set { viewModel?.eraserDiameter = newValue }
     }
 
     var brushColor: UIColor {
-        get { (viewModel?.drawingBrush.tool as? DrawingToolBrush)!.color }
-        set { (viewModel?.drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
+        get { viewModel!.brushColor }
+        set { viewModel?.brushColor = newValue }
     }
     var eraserAlpha: Int {
-        get { (viewModel?.drawingEraser.tool as? DrawingToolEraser)!.alpha }
-        set { (viewModel?.drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
+        get { viewModel!.eraserAlpha }
+        set { viewModel?.eraserAlpha = newValue }
     }
+
+    private (set) var viewModel: CanvasViewModel?
 
     /// Override UndoManager with ``UndoManagerWithCount``
     override var undoManager: UndoManagerWithCount {
@@ -69,6 +69,8 @@ class CanvasView: MTKTextureDisplayView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+
+        assert(viewModel != nil, "viewModel is nil.")
         viewModel?.setFrameSize(frame.size)
     }
 
@@ -82,6 +84,10 @@ class CanvasView: MTKTextureDisplayView {
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
 
         undoManager.levelsOfUndo = 8
+    }
+
+    func setViewModel(_ viewModel: CanvasViewModel) {
+        self.viewModel = viewModel
     }
 
     func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {
@@ -156,7 +162,7 @@ extension CanvasView: FingerGestureWithStorageSender {
         }
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
-                                       touchState,
+                                       touchState: touchState,
                                        commandBuffer)
         refreshRootTexture(commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
@@ -206,7 +212,7 @@ extension CanvasView: PencilGestureWithStorageSender {
 
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
-                                       touchState,
+                                       touchState: touchState,
                                        commandBuffer)
         refreshRootTexture(commandBuffer)
         runDisplayLinkLoop(touchState != .ended)

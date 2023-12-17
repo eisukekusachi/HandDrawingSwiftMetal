@@ -37,11 +37,13 @@ class ViewController: UIViewController {
             canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        canvasView.viewModel = canvasViewModel
         canvasView.canvasDelegate = self
+        canvasView.setViewModel(canvasViewModel)
         canvasView.drawingTool = .brush
         canvasView.brushColor = UIColor.black.withAlphaComponent(0.75)
+        canvasView.brushDiameter = 8
         canvasView.eraserAlpha = 150
+        canvasView.eraserDiameter = 44
 
         diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
 

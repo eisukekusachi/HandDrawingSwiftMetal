@@ -38,12 +38,31 @@ class CanvasViewModel {
     private var fileIO: FileIO!
     private var jsonIO: JsonIO!
 
+
+    var brushDiameter: Int {
+        get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
+        set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
+    }
+    var eraserDiameter: Int {
+        get { (drawingEraser.tool as? DrawingToolEraser)!.diameter }
+        set { (drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
+    }
+
+    var brushColor: UIColor {
+        get { (drawingBrush.tool as? DrawingToolBrush)!.color }
+        set { (drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
+    }
+    var eraserAlpha: Int {
+        get { (drawingEraser.tool as? DrawingToolEraser)!.alpha }
+        set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
+    }
+
     /// Manage texture layers
     private (set) var layerManager: LayerManager!
 
     /// The name of the file to be saved
     var projectName: String = Calendar.currentDate
-    
+
     var zipFileNamePath: String {
         projectName + "." + CanvasViewModel.zipSuffix
     }
@@ -69,14 +88,12 @@ class CanvasViewModel {
         self.fileIO = fileIO
         self.jsonIO = jsonIO
         self.layerManager = layerManager
-        
+
         $drawingTool
             .sink { [weak self] newValue in
                 self?.setCurrentDrawing(newValue)
             }
             .store(in: &cancellables)
-
-        drawingTool = .brush
     }
 
     func setFrameSize(_ size: CGSize) {
@@ -89,6 +106,10 @@ class CanvasViewModel {
 
         layerManager.initTextures(size)
     }
+}
+
+// MARK: Drawing
+extension CanvasViewModel {
     func setCurrentDrawing(_ type: DrawingToolType) {
         switch type {
         case .brush:
@@ -100,7 +121,7 @@ class CanvasViewModel {
     
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
-                              _ touchState: TouchState,
+                              touchState: TouchState,
                               _ commandBuffer: MTLCommandBuffer) {
         drawing?.drawOnDrawingTexture(with: iterator,
                                       matrix: matrix,
@@ -119,6 +140,20 @@ class CanvasViewModel {
 
     func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
         layerManager.clearTexture(commandBuffer)
+    }
+}
+
+// MARK: Transforming
+extension CanvasViewModel {
+    func getMatrix(transformationData: TransformationData,
+                   frameCenterPoint: CGPoint,
+                   touchState: TouchState) -> CGAffineTransform? {
+        transforming.getMatrix(transformationData: transformationData,
+                               frameCenterPoint: frameCenterPoint,
+                               touchState: touchState)
+    }
+    func setStoredMatrix(_ matrix: CGAffineTransform) {
+        transforming.storedMatrix = matrix
     }
 }
 
@@ -175,19 +210,5 @@ extension CanvasViewModel {
         self.layerManager.setTexture(newTexture)
 
         self.projectName = zipFilePath.fileName
-    }
-}
-
-// Transforming
-extension CanvasViewModel {
-    func getMatrix(transformationData: TransformationData,
-                   frameCenterPoint: CGPoint,
-                   touchState: TouchState) -> CGAffineTransform? {
-        transforming.getMatrix(transformationData: transformationData,
-                               frameCenterPoint: frameCenterPoint,
-                               touchState: touchState)
-    }
-    func setStoredMatrix(_ matrix: CGAffineTransform) {
-        transforming.storedMatrix = matrix
     }
 }
