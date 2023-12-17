@@ -55,7 +55,7 @@ extension ViewController {
                 let data = try canvasViewModel.loadCanvas(folderURL: folderURL, zipFilePath: zipFilePath)
 
                 try canvasViewModel.applyDataToCanvas(data, folderURL: folderURL, zipFilePath: zipFilePath)
-                refreshAllComponents()
+                initAllComponents()
                 canvasView.refreshCanvas()
 
                 try await Task.sleep(nanoseconds: UInt64(1_000_000_000))

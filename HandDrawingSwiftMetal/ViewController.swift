@@ -55,19 +55,19 @@ class ViewController: UIViewController {
 
         diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
     }
-    
-    func refreshUndoRedoButtons() {
-        undoButton.isEnabled = canvasView.canUndo
-        redoButton.isEnabled = canvasView.canRedo
-    }
-    func refreshAllComponents() {
+    func initAllComponents() {
         switch canvasView.drawingTool {
         case .brush:
             diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
         case .eraser:
             diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.eraserDiameter)
         }
+        canvasView.clearUndo()
         refreshUndoRedoButtons()
+    }
+    func refreshUndoRedoButtons() {
+        undoButton.isEnabled = canvasView.canUndo
+        redoButton.isEnabled = canvasView.canRedo
     }
 }
 
