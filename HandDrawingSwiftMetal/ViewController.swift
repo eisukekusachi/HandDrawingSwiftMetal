@@ -132,8 +132,8 @@ extension ViewController {
         canvasView.redo()
     }
     @IBAction func pushSaveButton() {
-        saveCanvas(zipFileName: canvasViewModel.zipFileNameName,
-                   tmpFolderURL: CanvasViewModel.tmpFolderURL)
+        saveCanvas(into: CanvasViewModel.tmpFolderURL,
+                   with: canvasViewModel.zipFileNameName)
     }
     @IBAction func pushLoadButton() {
         let zipFileList = URL.documents.allFileURLs(suffix: CanvasViewModel.zipSuffix).map {
@@ -142,8 +142,8 @@ extension ViewController {
         let fileView = FileView(zipFileList: zipFileList,
                                 didTapItem: { [weak self] zipFilePath in
 
-            self?.loadCanvas(zipFilePath: zipFilePath,
-                             tmpFolderURL: CanvasViewModel.tmpFolderURL)
+            self?.loadCanvas(from: zipFilePath,
+                             into: CanvasViewModel.tmpFolderURL)
             self?.presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)

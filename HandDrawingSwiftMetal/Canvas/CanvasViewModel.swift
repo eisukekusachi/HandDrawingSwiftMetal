@@ -161,9 +161,9 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     func saveCanvasAsZipFile(texture: MTLTexture, 
                              textureName: String,
-                             thumbnailHeight: CGFloat = 512, 
-                             folderURL: URL,
-                             zipFileName: String) throws {
+                             thumbnailHeight: CGFloat = 512,
+                             into folderURL: URL,
+                             with zipFileName: String) throws {
         let thumbnailName = CanvasViewModel.thumbnailPath
         let textureSize = texture.size
 
@@ -186,7 +186,7 @@ extension CanvasViewModel {
         try fileIO.zip(folderURL,
                        to: URL.documents.appendingPathComponent(zipFileName))
     }
-    func loadCanvasData(into folderURL: URL, zipFilePath: String) throws -> CanvasModel? {
+    func loadCanvasData(from zipFilePath: String, into folderURL: URL) throws -> CanvasModel? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 

@@ -8,21 +8,21 @@
 import Foundation
 
 extension ViewController {
-    func saveCanvas(zipFileName: String, tmpFolderURL: URL) {
+    func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
         createTemporaryFolder(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
             guard let currentTexture = self?.canvasView.currentTexture  else { return }
 
             try self?.canvasViewModel.saveCanvasAsZipFile(texture: currentTexture,
                                                           textureName: UUID().uuidString,
-                                                          folderURL: folderURL,
-                                                          zipFileName: zipFileName)
+                                                          into: folderURL,
+                                                          with: zipFileName)
         }
     }
-    func loadCanvas(zipFilePath: String, tmpFolderURL: URL) {
+    func loadCanvas(from zipFilePath: String, into tmpFolderURL: URL) {
         createTemporaryFolder(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
 
-            let data = try self?.canvasViewModel.loadCanvasData(into: folderURL,
-                                                                zipFilePath: zipFilePath)
+            let data = try self?.canvasViewModel.loadCanvasData(from: zipFilePath,
+                                                                into: folderURL)
 
             try self?.canvasViewModel.applyCanvasDataToCanvas(data,
                                                               folderURL: folderURL,
