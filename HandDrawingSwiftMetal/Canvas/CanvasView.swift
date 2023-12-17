@@ -135,7 +135,7 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.setStoredMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
-        viewModel?.drawing?.clearDrawingTextures(commandBuffer)
+        viewModel?.clearDrawingTextures(commandBuffer)
         commandBuffer.commit()
     }
 

@@ -61,7 +61,7 @@
 		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
 		D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */; };
-		D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingProtocol.swift */; };
+		D4C8EE982B25490B005947EC /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* Drawing.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
 		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
@@ -161,7 +161,7 @@
 		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
-		D4C8EE972B25490B005947EC /* DrawingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingProtocol.swift; sourceTree = "<group>"; };
+		D4C8EE972B25490B005947EC /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
 		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
@@ -258,9 +258,9 @@
 		D40D975429DAB03400A82E6A /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
+				D4C8EE972B25490B005947EC /* Drawing.swift */,
 				D40D976829DAB09C00A82E6A /* DrawingBrush.swift */,
 				D40D976A29DAB09D00A82E6A /* DrawingEraser.swift */,
-				D4C8EE972B25490B005947EC /* DrawingProtocol.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -382,8 +382,8 @@
 		D4AEFE282B09B56900EE3EEF /* Transforming */ = {
 			isa = PBXGroup;
 			children = (
-				D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */,
 				D4C9791D2ADBAA6400BB666D /* Transforming.swift */,
+				D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */,
 				D4C9791B2ADBAA3700BB666D /* TransformationData.swift */,
 			);
 			path = Transforming;
@@ -684,7 +684,7 @@
 				D40D977B29DAB0B400A82E6A /* PencilGesture.swift in Sources */,
 				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
-				D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */,
+				D4C8EE982B25490B005947EC /* Drawing.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);

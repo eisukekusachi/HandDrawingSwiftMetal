@@ -31,7 +31,7 @@ extension CanvasView {
         undoManager.incrementUndoCount()
 
         if let newTexture = duplicateTexture(currentTexture) {
-            viewModel?.layerManager.setTexture(newTexture)
+            viewModel?.setCurrentTexture(newTexture)
         }
     }
 
@@ -42,7 +42,7 @@ extension CanvasView {
 
             registerDrawingUndoAction(with: .init(texture: viewModel.currentTexture))
 
-            viewModel.layerManager.setTexture(undoObject.texture)
+            viewModel.setCurrentTexture(undoObject.texture)
 
             refreshRootTexture(commandBuffer)
             setNeedsDisplay()

@@ -13,9 +13,6 @@ class CanvasViewModel {
     /// The currently selected drawing tool, either brush or eraser.
     @Published var drawingTool: DrawingToolType = .brush
 
-    /// Manage drawing
-    private (set) var drawing: DrawingProtocol?
-
     /// Drawing with a brush
     var drawingBrush = DrawingBrush()
 
@@ -32,9 +29,6 @@ class CanvasViewModel {
         drawing?.getDrawingTextures(currentTexture) ?? []
     }
 
-    /// Manage file input and output
-    private var fileIO: FileIO!
-    
     var brushDiameter: Int {
         get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
         set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
@@ -53,11 +47,17 @@ class CanvasViewModel {
         set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
+    /// A protocol for managing drawing
+    private var drawing: Drawing?
+
     /// A protocol for managing transformations
-    private (set) var transforming: Transforming!
+    private var transforming: Transforming!
 
     /// A protocol for managing texture layers
-    private (set) var layerManager: LayerManager!
+    private var layerManager: LayerManager!
+
+    /// A protocol for managing file input and output
+    private var fileIO: FileIO!
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
@@ -106,6 +106,9 @@ class CanvasViewModel {
 
         layerManager.initTextures(size)
     }
+    func setCurrentTexture(_ texture: MTLTexture) {
+        layerManager.setTexture(texture)
+    }
 }
 
 // MARK: Drawing
@@ -138,6 +141,9 @@ extension CanvasViewModel {
                            commandBuffer)
     }
 
+    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
+        drawing?.clearDrawingTextures(commandBuffer)
+    }
     func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
         layerManager.clearTexture(commandBuffer)
     }

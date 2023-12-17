@@ -8,7 +8,7 @@
 import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class DrawingEraser: DrawingProtocol {
+class DrawingEraser: Drawing {
     var tool: DrawingTool = DrawingToolEraser()
 
     var drawingTexture: MTLTexture?
