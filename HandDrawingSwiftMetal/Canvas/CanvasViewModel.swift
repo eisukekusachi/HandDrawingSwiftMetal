@@ -186,13 +186,13 @@ extension CanvasViewModel {
         try fileIO.zip(folderURL,
                        to: URL.documents.appendingPathComponent(zipFileName))
     }
-    func loadCanvas(folderURL: URL, zipFilePath: String) throws -> CanvasModel? {
+    func loadCanvasData(into folderURL: URL, zipFilePath: String) throws -> CanvasModel? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
         return try? fileIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
     }
-    func applyDataToCanvas(_ data: CanvasModel?, folderURL: URL, zipFilePath: String) throws {
+    func applyCanvasDataToCanvas(_ data: CanvasModel?, folderURL: URL, zipFilePath: String) throws {
         guard let textureName = data?.textureName,
               let textureSize = data?.textureSize,
               let drawingTool = data?.drawingTool,
