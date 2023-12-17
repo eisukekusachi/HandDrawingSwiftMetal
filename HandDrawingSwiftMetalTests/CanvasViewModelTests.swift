@@ -12,28 +12,24 @@ class CanvasViewModelTests: XCTestCase {
 
     var canvasViewModel: CanvasViewModel!
     var mockFileIO: MockFileIO!
-    var mockJsonIO: MockJsonIO!
     var mockLayerManager: LayerManager!
 
-    let folderURL = CanvasViewModel.folderURL
+    let tmpFolderURL = CanvasViewModel.tmpFolderURL
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     override func setUp() {
         super.setUp()
 
-        mockFileIO = MockFileIO()
-        mockJsonIO = MockJsonIO(textureName: "TextureName", thumbnailName: "ThumnnailName")
+        mockFileIO = MockFileIO(textureName: "TextureName", thumbnailName: "ThumnnailName")
         mockLayerManager = MockLayerManager()
         canvasViewModel = CanvasViewModel(fileIO: mockFileIO,
-                                          jsonIO: mockJsonIO,
                                           layerManager: mockLayerManager)
     }
 
     override func tearDown() {
         canvasViewModel = nil
         mockFileIO = nil
-        mockJsonIO = nil
         mockLayerManager = nil
         super.tearDown()
     }
@@ -47,7 +43,7 @@ class CanvasViewModelTests: XCTestCase {
         // Act
         XCTAssertNoThrow(try canvasViewModel.saveCanvasAsZipFile(texture: mockTexture,
                                                                  textureName: mockTextureFileName,
-                                                                 folderURL: folderURL,
+                                                                 folderURL: tmpFolderURL,
                                                                  zipFileName: zipFilePath))
 
         // Assert
@@ -58,7 +54,7 @@ class CanvasViewModelTests: XCTestCase {
         XCTAssertEqual(mockFileIO.fileNames[1], mockTextureFileName)
 
         // Output the image and save its name in the Model.
-        XCTAssertEqual((mockJsonIO.data as? CanvasModel)?.textureName, mockTextureFileName)
+        XCTAssertEqual((mockFileIO.data as? CanvasModel)?.textureName, mockTextureFileName)
     }
 
     func testLoadCanvas() throws {
@@ -68,7 +64,7 @@ class CanvasViewModelTests: XCTestCase {
         // Act
         var resultModel: CanvasModel?
         do {
-            resultModel = try canvasViewModel.loadCanvas(folderURL: folderURL,
+            resultModel = try canvasViewModel.loadCanvas(folderURL: tmpFolderURL,
                                                          zipFilePath: zipFilePath)
         } catch {
             XCTFail("Failed to load data")
@@ -81,8 +77,8 @@ class CanvasViewModelTests: XCTestCase {
         }
 
         // Assert
-        XCTAssertEqual(resultModel.textureName, mockJsonIO.textureName)
-        XCTAssertEqual(resultModel.thumbnailName, mockJsonIO.thumbnailName)
+        XCTAssertEqual(resultModel.textureName, mockFileIO.textureName)
+        XCTAssertEqual(resultModel.thumbnailName, mockFileIO.thumbnailName)
     }
 
     func testApplyData() throws {
@@ -100,7 +96,7 @@ class CanvasViewModelTests: XCTestCase {
                                 eraserDiameter: eraserDiameter)
         // Act
         XCTAssertNoThrow(try canvasViewModel.applyDataToCanvas(model,
-                                                               folderURL: folderURL,
+                                                               folderURL: tmpFolderURL,
                                                                zipFilePath: zipFilePath))
 
         // Assert
@@ -132,30 +128,26 @@ class MockLayerManager: LayerManager {
     func clearTexture(_ commandBuffer: MTLCommandBuffer) {}
 }
 class MockFileIO: FileIO {
-    var fileNames: [String] = []
-
-    func saveImage(bytes: [UInt8], url: URL) throws {
-        let filePath: String = url.lastPathComponent
-        fileNames.append(filePath.fileName)
-    }
-    func saveImage(image: UIImage?, url: URL) throws {
-        let filePath: String = url.lastPathComponent
-        fileNames.append(filePath.fileName)
-    }
-
-    func zip(_ srcFolderURL: URL, to zipFileURL: URL) throws {}
-    func unzip(_ srcZipURL: URL, to destinationURL: URL) throws {}
-}
-class MockJsonIO: JsonIO {
     typealias T = CanvasModel
     var data: Codable?
     var textureName: String
     var thumbnailName: String
 
+    var fileNames: [String] = []
+
     init(textureName: String,
          thumbnailName: String) {
         self.textureName = textureName
         self.thumbnailName = thumbnailName
+    }
+
+    func saveImage(bytes: [UInt8], to url: URL) throws {
+        let filePath: String = url.lastPathComponent
+        fileNames.append(filePath.fileName)
+    }
+    func saveImage(image: UIImage?, to url: URL) throws {
+        let filePath: String = url.lastPathComponent
+        fileNames.append(filePath.fileName)
     }
 
     func loadJson<T: Codable>(_ url: URL) throws -> T? {
@@ -169,4 +161,7 @@ class MockJsonIO: JsonIO {
     func saveJson<T: Codable>(_ data: T, to jsonUrl: URL) throws {
         self.data = data
     }
+
+    func zip(_ srcFolderURL: URL, to zipFileURL: URL) throws {}
+    func unzip(_ srcZipURL: URL, to destinationURL: URL) throws {}
 }

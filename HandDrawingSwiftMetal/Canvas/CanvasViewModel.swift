@@ -35,10 +35,9 @@ class CanvasViewModel {
         drawing?.getDrawingTextures(currentTexture) ?? []
     }
 
+    /// Manage file input and output
     private var fileIO: FileIO!
-    private var jsonIO: JsonIO!
-
-
+    
     var brushDiameter: Int {
         get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
         set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
@@ -76,17 +75,15 @@ class CanvasViewModel {
         "data"
     }
 
-    static let folderURL = URL.documents.appendingPathComponent("tmpFolder")
+    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(fileIO: FileIO = FileIOImpl(),
-         jsonIO: JsonIO = JsonIOImpl(),
          layerManager: LayerManager = LayerManagerImpl()) {
         self.fileIO = fileIO
-        self.jsonIO = jsonIO
         self.layerManager = layerManager
 
         $drawingTool
@@ -168,10 +165,10 @@ extension CanvasViewModel {
         let textureSize = texture.size
 
         try fileIO.saveImage(image: texture.uiImage?.resize(height: thumbnailHeight, scale: 1.0),
-                             url: folderURL.appendingPathComponent(thumbnailName))
+                             to: folderURL.appendingPathComponent(thumbnailName))
 
         try fileIO.saveImage(bytes: texture.bytes,
-                             url: folderURL.appendingPathComponent(textureName))
+                             to: folderURL.appendingPathComponent(textureName))
 
         let data = CanvasModel(textureSize: textureSize,
                                textureName: textureName,
@@ -180,7 +177,7 @@ extension CanvasViewModel {
                                brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
                                eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
 
-        try jsonIO.saveJson(data,
+        try fileIO.saveJson(data,
                             to: folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
 
         try fileIO.zip(folderURL,
@@ -190,7 +187,7 @@ extension CanvasViewModel {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
-        return try? jsonIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
+        return try? fileIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
     }
     func applyDataToCanvas(_ data: CanvasModel?, folderURL: URL, zipFilePath: String) throws {
         guard let textureName = data?.textureName,

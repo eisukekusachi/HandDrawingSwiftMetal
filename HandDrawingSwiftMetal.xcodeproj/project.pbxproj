@@ -88,8 +88,6 @@
 		D4F1BB3E2B2D436F006EA102 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */; };
 		D4F1BB402B2D46D8006EA102 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */; };
 		D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */; };
-		D4F1BB442B2D4710006EA102 /* JsonIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB432B2D4710006EA102 /* JsonIO.swift */; };
-		D4F1BB462B2D4725006EA102 /* JsonIOImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB452B2D4725006EA102 /* JsonIOImpl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -194,8 +192,6 @@
 		D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOImpl.swift; sourceTree = "<group>"; };
-		D4F1BB432B2D4710006EA102 /* JsonIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonIO.swift; sourceTree = "<group>"; };
-		D4F1BB452B2D4725006EA102 /* JsonIOImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonIOImpl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,8 +336,6 @@
 			children = (
 				D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */,
 				D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */,
-				D4F1BB432B2D4710006EA102 /* JsonIO.swift */,
-				D4F1BB452B2D4725006EA102 /* JsonIOImpl.swift */,
 			);
 			path = FileIO;
 			sourceTree = "<group>";
@@ -639,7 +633,6 @@
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
-				D4F1BB462B2D4725006EA102 /* JsonIOImpl.swift in Sources */,
 				D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
@@ -692,7 +685,6 @@
 				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
 				D4C8EE982B25490B005947EC /* DrawingProtocol.swift in Sources */,
-				D4F1BB442B2D4710006EA102 /* JsonIO.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);

@@ -30,10 +30,24 @@ class FileIOImpl: FileIO {
             throw FileInputError.failedToUnzip
         }
     }
-    func saveImage(bytes: [UInt8], url: URL) throws {
+    func saveImage(bytes: [UInt8], to url: URL) throws {
         try? Data(bytes).write(to: url)
     }
-    func saveImage(image: UIImage?, url: URL) throws {
+    func saveImage(image: UIImage?, to url: URL) throws {
         try? image?.pngData()?.write(to: url)
+    }
+    
+    func loadJson<T: Codable>(_ url: URL) throws -> T? {
+        guard let stringJson: String = try? String(contentsOf: url, encoding: .utf8),
+              let dataJson: Data = stringJson.data(using: .utf8)
+        else {
+            throw FileInputError.failedToLoadJson
+        }
+        return try JSONDecoder().decode(T.self, from: dataJson)
+    }
+    func saveJson<T: Codable>(_ data: T, to jsonURL: URL) throws {
+        if let jsonData = try? JSONEncoder().encode(data) {
+            try String(data: jsonData, encoding: .utf8)?.write(to: jsonURL, atomically: true, encoding: .utf8)
+        }
     }
 }

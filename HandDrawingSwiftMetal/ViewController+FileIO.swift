@@ -10,10 +10,11 @@ import Foundation
 extension ViewController {
     func saveCanvas() {
         Task {
-            let folderURL = CanvasViewModel.folderURL
+            let tmpFolderURL = CanvasViewModel.tmpFolderURL
+
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
-                try? FileManager.default.removeItem(atPath: CanvasViewModel.folderURL.path)
+                try? FileManager.default.removeItem(atPath: tmpFolderURL.path)
                 activityIndicatorView.removeFromSuperview()
             }
             view.addSubview(activityIndicatorView)
@@ -22,11 +23,11 @@ extension ViewController {
 
             do {
                 // Clean up the temporary folder when done
-                try FileManager.createNewDirectory(url: CanvasViewModel.folderURL)
+                try FileManager.createNewDirectory(url: tmpFolderURL)
 
                 try canvasViewModel.saveCanvasAsZipFile(texture: currentTexture,
                                                         textureName: UUID().uuidString,
-                                                        folderURL: folderURL,
+                                                        folderURL: tmpFolderURL,
                                                         zipFileName: canvasViewModel.zipFileNamePath)
 
                 try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
@@ -40,21 +41,25 @@ extension ViewController {
     }
     func loadCanvas(zipFilePath: String) {
         Task {
-            let folderURL = CanvasViewModel.folderURL
+            let tmpFolderURL = CanvasViewModel.tmpFolderURL
+
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
-                try? FileManager.default.removeItem(atPath: folderURL.path)
+                try? FileManager.default.removeItem(atPath: tmpFolderURL.path)
                 activityIndicatorView.removeFromSuperview()
             }
             view.addSubview(activityIndicatorView)
 
             do {
                 // Clean up the temporary folder when done
-                try FileManager.createNewDirectory(url: folderURL)
+                try FileManager.createNewDirectory(url: tmpFolderURL)
 
-                let data = try canvasViewModel.loadCanvas(folderURL: folderURL, zipFilePath: zipFilePath)
+                let data = try canvasViewModel.loadCanvas(folderURL: tmpFolderURL, 
+                                                          zipFilePath: zipFilePath)
 
-                try canvasViewModel.applyDataToCanvas(data, folderURL: folderURL, zipFilePath: zipFilePath)
+                try canvasViewModel.applyDataToCanvas(data, 
+                                                      folderURL: tmpFolderURL,
+                                                      zipFilePath: zipFilePath)
                 initAllComponents()
                 canvasView.refreshCanvas()
 
