@@ -8,10 +8,8 @@
 import Foundation
 
 extension ViewController {
-    func saveCanvas() {
+    func saveCanvas(zipFileName: String, tmpFolderURL: URL) {
         Task {
-            let tmpFolderURL = CanvasViewModel.tmpFolderURL
-
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
                 try? FileManager.default.removeItem(atPath: tmpFolderURL.path)
@@ -28,7 +26,7 @@ extension ViewController {
                 try canvasViewModel.saveCanvasAsZipFile(texture: currentTexture,
                                                         textureName: UUID().uuidString,
                                                         folderURL: tmpFolderURL,
-                                                        zipFileName: canvasViewModel.zipFileNamePath)
+                                                        zipFileName: zipFileName)
 
                 try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
@@ -39,10 +37,8 @@ extension ViewController {
             }
         }
     }
-    func loadCanvas(zipFilePath: String) {
+    func loadCanvas(zipFilePath: String, tmpFolderURL: URL) {
         Task {
-            let tmpFolderURL = CanvasViewModel.tmpFolderURL
-
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {
                 try? FileManager.default.removeItem(atPath: tmpFolderURL.path)

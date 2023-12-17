@@ -56,13 +56,13 @@ class CanvasViewModel {
     /// A protocol for managing transformations
     private (set) var transforming: Transforming!
 
-    /// Manage texture layers
+    /// A protocol for managing texture layers
     private (set) var layerManager: LayerManager!
 
-    /// The name of the file to be saved
+    /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
 
-    var zipFileNamePath: String {
+    var zipFileNameName: String {
         projectName + "." + CanvasViewModel.zipSuffix
     }
     static var zipSuffix: String {
@@ -75,6 +75,7 @@ class CanvasViewModel {
         "data"
     }
 
+    /// A temporary folder URL used for file input and output
     static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     private var cancellables = Set<AnyCancellable>()
