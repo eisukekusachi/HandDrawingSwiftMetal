@@ -34,7 +34,7 @@
 		D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979929DAB0DE00A82E6A /* Pipeline.swift */; };
 		D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979B29DAB0DF00A82E6A /* CommandQueue.swift */; };
 		D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979C29DAB0DF00A82E6A /* Buffers.swift */; };
-		D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* Transforming.swift */; };
+		D40D97A629DAB0E800A82E6A /* TransformingImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
@@ -65,7 +65,7 @@
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
 		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
-		D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */; };
+		D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* Transforming.swift */; };
 		D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */; };
 		D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */; };
 		D4CB0D362B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */; };
@@ -135,7 +135,7 @@
 		D40D979929DAB0DE00A82E6A /* Pipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pipeline.swift; sourceTree = "<group>"; };
 		D40D979B29DAB0DF00A82E6A /* CommandQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandQueue.swift; sourceTree = "<group>"; };
 		D40D979C29DAB0DF00A82E6A /* Buffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffers.swift; sourceTree = "<group>"; };
-		D40D97A429DAB0E800A82E6A /* Transforming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
+		D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformingImpl.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
@@ -165,7 +165,7 @@
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
 		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
-		D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
+		D4C9791D2ADBAA6400BB666D /* Transforming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModelTests.swift; sourceTree = "<group>"; };
 		D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
 		D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
@@ -382,8 +382,8 @@
 		D4AEFE282B09B56900EE3EEF /* Transforming */ = {
 			isa = PBXGroup;
 			children = (
-				D40D97A429DAB0E800A82E6A /* Transforming.swift */,
-				D4C9791D2ADBAA6400BB666D /* TransformingProtocol.swift */,
+				D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */,
+				D4C9791D2ADBAA6400BB666D /* Transforming.swift */,
 				D4C9791B2ADBAA3700BB666D /* TransformationData.swift */,
 			);
 			path = Transforming;
@@ -637,7 +637,7 @@
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D40D976529DAB09400A82E6A /* SmoothTouchPointStorage.swift in Sources */,
-				D40D97A629DAB0E800A82E6A /* Transforming.swift in Sources */,
+				D40D97A629DAB0E800A82E6A /* TransformingImpl.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
 				D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
@@ -651,7 +651,7 @@
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
-				D4C9791E2ADBAA6400BB666D /* TransformingProtocol.swift in Sources */,
+				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */,
 				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,

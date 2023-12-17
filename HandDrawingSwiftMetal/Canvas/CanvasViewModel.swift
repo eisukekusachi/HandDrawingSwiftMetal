@@ -22,9 +22,6 @@ class CanvasViewModel {
     /// Drawing with an eraser
     var drawingEraser = DrawingEraser()
 
-    /// Manage transformations
-    var transforming: TransformingProtocol = Transforming()
-
     /// A texture that is selected
     var currentTexture: MTLTexture {
         return layerManager.currentTexture
@@ -56,6 +53,9 @@ class CanvasViewModel {
         set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
+    /// A protocol for managing transformations
+    private (set) var transforming: Transforming!
+
     /// Manage texture layers
     private (set) var layerManager: LayerManager!
 
@@ -82,8 +82,10 @@ class CanvasViewModel {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(fileIO: FileIO = FileIOImpl(),
+         transforming: Transforming = TransformingImpl(),
          layerManager: LayerManager = LayerManagerImpl()) {
         self.fileIO = fileIO
+        self.transforming = transforming
         self.layerManager = layerManager
 
         $drawingTool
