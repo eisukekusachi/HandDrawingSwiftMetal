@@ -7,26 +7,11 @@
 
 import MetalKit
 
-protocol MTKTextureDisplayViewDelegate: AnyObject {
-    func didChangeTextureSize(_ textureSize: CGSize)
-}
-
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
     /// The size of the texture to be displayed.
-    var textureSize: CGSize? {
-        get {
-            return storedTextureSize
-        }
-        set(newValue) {
-            if newValue != .zero && storedTextureSize != newValue {
-                storedTextureSize = newValue
-            }
-        }
-    }
-
-    var displayViewDelegate: MTKTextureDisplayViewDelegate?
+    @Published private (set) var textureSize: CGSize = .zero
 
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
@@ -42,8 +27,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
     private var commandQueue: CommandQueueProtocol!
 
-    private var storedTextureSize: CGSize?
-
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
         commonInit()
@@ -56,12 +39,8 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
     override func layoutSubviews() {
         guard let currentDrawable else { return }
 
-        if textureSize == nil {
-            textureSize = currentDrawable.texture.size
-        }
-
         if rootTexture == nil {
-            initializeTextures(textureSize: textureSize!)
+            initializeRootTexture(currentDrawable.texture.size)
         }
     }
 
@@ -86,21 +65,17 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         self.backgroundColor = .white
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    func initializeRootTexture(_ textureSize: CGSize) {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
-        self.textureSize = textureSize
         self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
-
-        displayViewDelegate?.didChangeTextureSize(textureSize)
-
-        setNeedsDisplay()
+        self.textureSize = textureSize
     }
 
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
-        assert(storedTextureSize != nil, "It seems that layoutSubviews() is not being called.")
+        assert(textureSize != .zero, "It seems that initializeRootTexture() is not being called.")
 
         guard let drawable = view.currentDrawable else { return }
 

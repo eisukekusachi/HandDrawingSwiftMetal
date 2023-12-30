@@ -54,7 +54,7 @@ class CanvasViewModel {
     private var transforming: Transforming!
 
     /// A protocol for managing texture layers
-    private var layerManager: LayerManager!
+    private (set) var layerManager: LayerManager!
 
     /// A protocol for managing file input and output
     private var fileIO: FileIO!
@@ -100,16 +100,17 @@ class CanvasViewModel {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size
     }
-    func initTextures(_ size: CGSize) -> Bool {
-        if layerManager.textureSize != size {
-            layerManager.initTextures(size)
+    func initTextures(_ size: CGSize) {
+        layerManager.initTextures(size)
 
-            drawingBrush.initTextures(size)
-            drawingEraser.initTextures(size)
+        drawingBrush.initTextures(size)
+        drawingEraser.initTextures(size)
+    }
+    func clearTextures() {
+        layerManager.clearTexture()
 
-            return true
-        }
-        return false
+        drawingBrush.clearDrawingTextures()
+        drawingEraser.clearDrawingTextures()
     }
     func setCurrentTexture(_ texture: MTLTexture) {
         layerManager.setTexture(texture)

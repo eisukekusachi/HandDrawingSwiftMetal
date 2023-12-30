@@ -19,13 +19,12 @@ class LayerManagerImpl: LayerManager {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initTextures(_ textureSize: CGSize) {
-        self.textureSize = textureSize
         self.currentTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.textureSize = textureSize
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTexture(commandBuffer)
-        commandBuffer.commit()
+        clearTexture()
     }
+
     func merge(textures: [MTLTexture?],
                backgroundColor: (Int, Int, Int),
                into dstTexture: MTLTexture,
@@ -47,6 +46,11 @@ class LayerManagerImpl: LayerManager {
         currentTexture = texture
     }
 
+    func clearTexture() {
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTexture(commandBuffer)
+        commandBuffer.commit()
+    }
     func clearTexture(_ commandBuffer: MTLCommandBuffer) {
         Command.clear(texture: currentTexture,
                       commandBuffer)

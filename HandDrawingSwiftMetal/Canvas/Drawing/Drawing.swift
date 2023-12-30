@@ -29,6 +29,9 @@ protocol Drawing {
     func merge(_ srcTexture: MTLTexture?,
                into dstTexture: MTLTexture,
                _ commandBuffer: MTLCommandBuffer)
+    
+    /// Clears the drawing textures.
+    func clearDrawingTextures()
 
     /// Clears the drawing textures.
     func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer)
