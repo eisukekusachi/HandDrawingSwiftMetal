@@ -10,6 +10,7 @@ import Accelerate
 
 protocol LayerManager {
     var currentTexture: MTLTexture! { get }
+    var textureSize: CGSize { get }
 
     func initTextures(_ textureSize: CGSize)
     func merge(textures: [MTLTexture?],

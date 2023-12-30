@@ -148,9 +148,11 @@ class CanvasView: MTKTextureDisplayView {
 
 extension CanvasView: MTKTextureDisplayViewDelegate {
     func didChangeTextureSize(_ textureSize: CGSize) {
-        viewModel?.initTextures(textureSize)
-
-        refreshRootTexture(commandBuffer)
+        if viewModel?.initTextures(textureSize) ?? false {
+            refreshRootTexture(commandBuffer)
+        } else {
+            addSubview(Toast(text: "The initialization is unnecessary because the sizes of the textures are the same."))
+        }
     }
 }
 

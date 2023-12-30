@@ -12,18 +12,15 @@ enum LayerManagerError: Error {
     case failedToMakeTexture
 }
 class LayerManagerImpl: LayerManager {
+    var textureSize: CGSize = .zero
 
     private (set) var currentTexture: MTLTexture!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    private var textureSize: CGSize = .zero
-
     func initTextures(_ textureSize: CGSize) {
-        if self.textureSize != textureSize {
-            self.textureSize = textureSize
-            self.currentTexture = LayerManagerImpl.makeTexture(device, textureSize)
-        }
+        self.textureSize = textureSize
+        self.currentTexture = LayerManagerImpl.makeTexture(device, textureSize)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearTexture(commandBuffer)

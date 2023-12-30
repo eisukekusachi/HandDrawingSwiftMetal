@@ -110,8 +110,9 @@ class CanvasViewModelTests: XCTestCase {
 
 class MockLayerManager: LayerManager {
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
+    
     var currentTexture: MTLTexture!
+    var textureSize: CGSize = .zero
 
     func setTexture(_ texture: MTLTexture) {
         currentTexture = texture

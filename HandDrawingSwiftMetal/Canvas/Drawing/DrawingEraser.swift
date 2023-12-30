@@ -31,13 +31,11 @@ class DrawingEraser: Drawing {
 
     /// Initializes the textures for drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize) {
-        if self.textureSize != textureSize {
-            self.textureSize = textureSize
+        self.textureSize = textureSize
 
-            self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
-            self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
-            self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
-        }
+        self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
+        self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
+        self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(commandBuffer)

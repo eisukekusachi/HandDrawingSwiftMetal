@@ -100,11 +100,16 @@ class CanvasViewModel {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size
     }
-    func initTextures(_ size: CGSize) {
-        drawingBrush.initTextures(size)
-        drawingEraser.initTextures(size)
+    func initTextures(_ size: CGSize) -> Bool {
+        if layerManager.textureSize != size {
+            layerManager.initTextures(size)
 
-        layerManager.initTextures(size)
+            drawingBrush.initTextures(size)
+            drawingEraser.initTextures(size)
+
+            return true
+        }
+        return false
     }
     func setCurrentTexture(_ texture: MTLTexture) {
         layerManager.setTexture(texture)
