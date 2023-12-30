@@ -33,9 +33,9 @@ class DrawingEraser: Drawing {
     func initTextures(_ textureSize: CGSize) {
         self.textureSize = textureSize
 
-        self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
-        self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
-        self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
+        self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.eraserTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(commandBuffer)

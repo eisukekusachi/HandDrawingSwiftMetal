@@ -57,6 +57,7 @@
 		D46D07D82ADBC51C0093D861 /* PencilGestureWithStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingToolType.swift */; };
+		D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */; };
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
 		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
@@ -157,6 +158,7 @@
 		D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilGestureWithStorage.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
+		D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureUtils.swift; sourceTree = "<group>"; };
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
@@ -316,6 +318,7 @@
 				D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */,
 				D40D979729DAB0DE00A82E6A /* Drawing.metal */,
 				D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */,
+				D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */,
 				D40D979929DAB0DE00A82E6A /* Pipeline.swift */,
 				D40D979629DAB0DE00A82E6A /* Texture.metal */,
 			);
@@ -674,6 +677,7 @@
 				D40D976D29DAB09D00A82E6A /* DrawingBrush.swift in Sources */,
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D46D07D62ADBC4A00093D861 /* GestureWithStorageProtocol.swift in Sources */,
+				D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
