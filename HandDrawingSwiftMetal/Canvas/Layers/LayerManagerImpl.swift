@@ -12,17 +12,22 @@ enum LayerManagerError: Error {
     case failedToMakeTexture
 }
 class LayerManagerImpl: LayerManager {
+    @Published var layers: [LayerModel] = []
     var textureSize: CGSize = .zero
 
-    private (set) var currentTexture: MTLTexture!
+    var undoObject: UndoObject {
+        UndoObject.init(texture: layers[0].texture!)
+    }
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initTextures(_ textureSize: CGSize) {
-        self.currentTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        let layer = LayerModel(texture: MTKTextureUtils.makeTexture(device, textureSize))
+        layers.append(layer)
+
         self.textureSize = textureSize
 
-        clearTexture()
+        clearTextures()
     }
 
     func merge(textures: [MTLTexture?],
@@ -43,16 +48,16 @@ class LayerManagerImpl: LayerManager {
         return MTKTextureUtils.makeTexture(device, textureSize, textureData?.encodedHexadecimals)
     }
     func setTexture(_ texture: MTLTexture) {
-        currentTexture = texture
+        layers[0].texture = texture
     }
 
-    func clearTexture() {
+    func clearTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTexture(commandBuffer)
+        clearTextures(commandBuffer)
         commandBuffer.commit()
     }
-    func clearTexture(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: currentTexture,
+    func clearTextures(_ commandBuffer: MTLCommandBuffer) {
+        Command.clear(texture: layers[0].texture,
                       commandBuffer)
     }
 }

@@ -9,8 +9,9 @@ import MetalKit
 import Accelerate
 
 protocol LayerManager {
-    var currentTexture: MTLTexture! { get }
+    var layers: [LayerModel] { get set }
     var textureSize: CGSize { get }
+    var undoObject: UndoObject { get }
 
     func initTextures(_ textureSize: CGSize)
     func merge(textures: [MTLTexture?],
@@ -20,7 +21,7 @@ protocol LayerManager {
     func setTexture(_ texture: MTLTexture)
     func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture?
 
-    func clearTexture()
+    func clearTextures()
 
-    func clearTexture(_ commandBuffer: MTLCommandBuffer)
+    func clearTextures(_ commandBuffer: MTLCommandBuffer)
 }

@@ -20,13 +20,13 @@ class CanvasViewModel {
     var drawingEraser = DrawingEraser()
 
     /// A texture that is selected
-    var currentTexture: MTLTexture {
-        return layerManager.currentTexture
+    var selectedTexture: MTLTexture {
+        return layerManager.layers[0].texture!
     }
 
     /// An array containing a texture where a line is drawn and a texture that is selected
     var activeDrawingTextures: [MTLTexture?] {
-        drawing?.getDrawingTextures(currentTexture) ?? []
+        drawing?.getDrawingTextures(selectedTexture) ?? []
     }
 
     var brushDiameter: Int {
@@ -107,7 +107,7 @@ class CanvasViewModel {
         drawingEraser.initTextures(size)
     }
     func clearTextures() {
-        layerManager.clearTexture()
+        layerManager.clearTextures()
 
         drawingBrush.clearDrawingTextures()
         drawingEraser.clearDrawingTextures()
@@ -134,7 +134,7 @@ extension CanvasViewModel {
                               _ commandBuffer: MTLCommandBuffer) {
         drawing?.drawOnDrawingTexture(with: iterator,
                                       matrix: matrix,
-                                      on: currentTexture,
+                                      on: selectedTexture,
                                       touchState,
                                       commandBuffer)
     }
@@ -151,7 +151,7 @@ extension CanvasViewModel {
         drawing?.clearDrawingTextures(commandBuffer)
     }
     func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
-        layerManager.clearTexture(commandBuffer)
+        layerManager.clearTextures(commandBuffer)
     }
 }
 

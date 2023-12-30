@@ -16,10 +16,6 @@ class CanvasView: MTKTextureDisplayView {
         set { viewModel!.drawingTool = newValue }
     }
 
-    var currentTexture: MTLTexture? {
-        viewModel?.currentTexture
-    }
-
     var brushDiameter: Int {
         get { viewModel!.brushDiameter }
         set { viewModel?.brushDiameter = newValue }
@@ -126,7 +122,7 @@ class CanvasView: MTKTextureDisplayView {
     func clearCanvas() {
         guard let viewModel else { return }
 
-        registerDrawingUndoAction(viewModel.currentTexture)
+        registerDrawingUndoAction()
 
         viewModel.clearCurrentTexture(commandBuffer)
         refreshCanvas()
@@ -163,7 +159,7 @@ extension CanvasView: FingerGestureWithStorageSender {
         else { return }
 
         if touchState == .ended {
-            registerDrawingUndoAction(viewModel.currentTexture)
+            registerDrawingUndoAction()
         }
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
@@ -212,7 +208,7 @@ extension CanvasView: PencilGestureWithStorageSender {
         inputManager.updateInput(input)
 
         if touchState == .ended {
-            registerDrawingUndoAction(viewModel.currentTexture)
+            registerDrawingUndoAction()
         }
 
         viewModel.drawOnDrawingTexture(with: iterator,

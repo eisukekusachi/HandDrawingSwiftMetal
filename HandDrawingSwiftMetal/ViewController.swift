@@ -103,7 +103,7 @@ extension ViewController {
             exportButton.isUserInteractionEnabled = true
         }
         
-        if let image = canvasView.currentTexture?.uiImage {
+        if let image = canvasView.rootTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
