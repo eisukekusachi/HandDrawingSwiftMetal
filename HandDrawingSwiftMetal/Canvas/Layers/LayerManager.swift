@@ -10,6 +10,7 @@ import Accelerate
 
 protocol LayerManager {
     var currentTexture: MTLTexture! { get }
+    var textureSize: CGSize { get }
 
     func initTextures(_ textureSize: CGSize)
     func merge(textures: [MTLTexture?],
@@ -18,5 +19,8 @@ protocol LayerManager {
                _ commandBuffer: MTLCommandBuffer)
     func setTexture(_ texture: MTLTexture)
     func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture?
+
+    func clearTexture()
+
     func clearTexture(_ commandBuffer: MTLCommandBuffer)
 }

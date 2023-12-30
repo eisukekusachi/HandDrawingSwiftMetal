@@ -76,8 +76,6 @@ class CanvasView: MTKTextureDisplayView {
     private func commonInitialization() {
         _ = Pipeline.shared
 
-        displayViewDelegate = self
-
         inputManager = InputManager()
         fingerInput = FingerGestureWithStorage(view: self, delegate: self)
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
@@ -87,6 +85,16 @@ class CanvasView: MTKTextureDisplayView {
         undoManager.$undoCount
             .sink { [weak self] newValue in
                 self?.undoCount = newValue
+            }
+            .store(in: &cancellables)
+
+        $textureSize
+            .sink { [weak self] newSize in
+                guard let self else { return }
+                viewModel?.initTextures(newSize)
+
+                refreshRootTexture(commandBuffer)
+                setNeedsDisplay()
             }
             .store(in: &cancellables)
     }
@@ -143,14 +151,6 @@ class CanvasView: MTKTextureDisplayView {
         inputManager.clear()
         fingerInput?.clear()
         pencilInput?.clear()
-    }
-}
-
-extension CanvasView: MTKTextureDisplayViewDelegate {
-    func didChangeTextureSize(_ textureSize: CGSize) {
-        viewModel?.initTextures(textureSize)
-
-        refreshRootTexture(commandBuffer)
     }
 }
 

@@ -37,7 +37,7 @@ class CanvasViewModelTests: XCTestCase {
     func testSaveCanvas() throws {
         // Arrange
         let zipFilePath = "zipFilePath.zip"
-        let mockTexture = LayerManagerImpl.makeTexture(device, CGSize(width: 100, height: 100))!
+        let mockTexture = MTKTextureUtils.makeTexture(device, CGSize(width: 100, height: 100))!
         let mockTextureFileName = UUID().uuidString
 
         // Act
@@ -110,14 +110,15 @@ class CanvasViewModelTests: XCTestCase {
 
 class MockLayerManager: LayerManager {
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
+    
     var currentTexture: MTLTexture!
+    var textureSize: CGSize = .zero
 
     func setTexture(_ texture: MTLTexture) {
         currentTexture = texture
     }
     func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture? {
-        return LayerManagerImpl.makeTexture(device, textureSize)
+        return MTKTextureUtils.makeTexture(device, textureSize)
     }
 
     func initTextures(_ textureSize: CGSize) {}

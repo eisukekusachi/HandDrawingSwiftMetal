@@ -31,17 +31,13 @@ class DrawingEraser: Drawing {
 
     /// Initializes the textures for drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize) {
-        if self.textureSize != textureSize {
-            self.textureSize = textureSize
+        self.textureSize = textureSize
 
-            self.drawingTexture = LayerManagerImpl.makeTexture(device, textureSize)
-            self.grayscaleTexture = LayerManagerImpl.makeTexture(device, textureSize)
-            self.eraserTexture = LayerManagerImpl.makeTexture(device, textureSize)
-        }
+        self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.eraserTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(commandBuffer)
-        commandBuffer.commit()
+        clearDrawingTextures()
     }
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
@@ -112,6 +108,12 @@ class DrawingEraser: Drawing {
         clearDrawingTextures(commandBuffer)
 
         isDrawing = false
+    }
+
+    func clearDrawingTextures() {
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTextures(commandBuffer)
+        commandBuffer.commit()
     }
 
     /// Clears the drawing textures.
