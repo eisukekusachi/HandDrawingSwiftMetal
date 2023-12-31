@@ -13,17 +13,47 @@ enum LayerManagerError: Error {
 }
 class LayerManager: ObservableObject {
     @Published var layers: [LayerModel] = []
+    @Published var index: Int = 0 {
+        didSet {
+            if index < layers.count {
+                selectedLayer = layers[index]
+            }
+        }
+    }
+    @Published var selectedLayer: LayerModel?
+    @Published var setNeedsDisplay: Bool = false
+
     var textureSize: CGSize = .zero
+    
+    var selectedTexture: MTLTexture {
+        layers[index].texture!
+    }
 
     var undoObject: UndoObject {
-        UndoObject.init(texture: layers[0].texture!)
+        UndoObject.init(texture: layers[index].texture!)
     }
+
+    private var bottomTexture: MTLTexture!
+    private var topTexture: MTLTexture!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initTextures(_ textureSize: CGSize) {
+        layers.removeAll()
         addLayer(textureSize)
+
+        bottomTexture = MTKTextureUtils.makeTexture(device, textureSize)!
+        topTexture = MTKTextureUtils.makeTexture(device, textureSize)!
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+
+        Command.clear(texture: bottomTexture, commandBuffer)
+        Command.clear(texture: topTexture, commandBuffer)
+
+        commandBuffer.commit()
+
         self.textureSize = textureSize
+        self.index = 0
 
         clearTextures()
     }
@@ -36,7 +66,15 @@ class LayerManager: ObservableObject {
                      withRGB: backgroundColor,
                      commandBuffer)
 
+        Command.merge(bottomTexture,
+                      into: dstTexture,
+                      commandBuffer)
+
         Command.merge(textures,
+                      into: dstTexture,
+                      commandBuffer)
+
+        Command.merge(topTexture,
                       into: dstTexture,
                       commandBuffer)
     }
@@ -46,7 +84,12 @@ class LayerManager: ObservableObject {
         return MTKTextureUtils.makeTexture(device, textureSize, textureData?.encodedHexadecimals)
     }
     func setTexture(_ texture: MTLTexture) {
-        layers[0].texture = texture
+        layers[index].texture = texture
+    }
+
+    func isSelected(_ layer: LayerModel) -> Bool {
+        guard let selectedLayer else { return false }
+        return layer.id == selectedLayer.id
     }
 
     func clearTextures() {
@@ -55,11 +98,46 @@ class LayerManager: ObservableObject {
         commandBuffer.commit()
     }
     func clearTextures(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: layers[0].texture,
+        Command.clear(texture: layers[index].texture,
                       commandBuffer)
     }
+    
+    func updateSelectedIndex() {
+        if  let selectedLayer,
+            let resultIndex = layers.firstIndex(of: selectedLayer) {
+            index = resultIndex
+        } else {
+            index = 0
+        }
+    }
     func updateTextureThumbnail() {
-        layers[0].updateThumbnail()
+        layers[index].updateThumbnail()
+    }
+    func updateNonSelectedTextures() {
+        let bottomIndex: Int = index - 1
+        let topIndex: Int = index + 1
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+
+        Command.clear(texture: bottomTexture, commandBuffer)
+        Command.clear(texture: topTexture, commandBuffer)
+
+        if bottomIndex >= 0 {
+            for i in 0 ... bottomIndex {
+                Command.merge(layers[i].texture,
+                              into: bottomTexture,
+                              commandBuffer)
+            }
+        }
+        if topIndex < layers.count {
+            for i in topIndex ..< layers.count {
+                Command.merge(layers[i].texture,
+                              into: topTexture,
+                              commandBuffer)
+            }
+        }
+
+        commandBuffer.commit()
     }
 }
 
@@ -75,6 +153,27 @@ extension LayerManager {
 
         let layer = LayerModel(texture: texture,
                                title: title)
-        layers.append(layer)
+
+        if index < layers.count - 1 {
+            layers.insert(layer, at: index + 1)
+        } else {
+            layers.append(layer)
+        }
+    }
+    func removeLayer() {
+        if layers.count == 1 { return }
+
+        layers.remove(at: index)
+
+        // Updates the value for UI update
+        var curretnIndex = index
+        if curretnIndex > layers.count - 1 {
+            curretnIndex = layers.count - 1
+        }
+        index = curretnIndex
+    }
+    func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
+        layers.move(fromOffsets: source, toOffset: destination)
+        updateNonSelectedTextures()
     }
 }

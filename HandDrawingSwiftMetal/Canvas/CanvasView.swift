@@ -97,6 +97,15 @@ class CanvasView: MTKTextureDisplayView {
 
     func setViewModel(_ viewModel: CanvasViewModel) {
         self.viewModel = viewModel
+
+        self.viewModel?.layerManager.$setNeedsDisplay
+            .sink { [weak self] result in
+                guard result, let commandBuffer = self?.commandBuffer else { return }
+
+                self?.refreshRootTexture(commandBuffer)
+                self?.setNeedsDisplay()
+        }
+        .store(in: &cancellables)
     }
 
     func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {

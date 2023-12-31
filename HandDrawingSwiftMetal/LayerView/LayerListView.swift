@@ -12,22 +12,39 @@ struct LayerListView: View {
 
     var body: some View {
         List {
-            ForEach(Array(layerManager.layers.enumerated()),
-                    id: \.element.id) { _, layer in
-                layerRow(layer: layer)
+            ForEach(Array(layerManager.layers.enumerated().reversed()),
+                    id: \.element.id) { index, layer in
+
+                layerRow(layer: layer,
+                         selected: layerManager.isSelected(layer)) {
+
+                    layerManager.index = index
+                    layerManager.updateNonSelectedTextures()
+                    layerManager.setNeedsDisplay = true
+                }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
+                    .onMove(perform: { source, destination in
+
+                        layerManager.layers = layerManager.layers.reversed()
+                        layerManager.moveLayer(fromOffsets: source, toOffset: destination)
+                        layerManager.layers = layerManager.layers.reversed()
+
+                        layerManager.updateSelectedIndex()
+                        layerManager.updateNonSelectedTextures()
+                        layerManager.setNeedsDisplay = true
+                    })
+                    .listRowSeparator(.hidden)
         }
         .listStyle(PlainListStyle())
     }
 }
 
 extension LayerListView {
-    func layerRow(layer: LayerModel) -> some View {
-        ZStack {
-            Color(backgroundColor)
-                .cornerRadius(8)
+    func layerRow(layer: LayerModel, selected: Bool, didTapRow: @escaping (() -> Void)) -> some View {
+        return ZStack {
+            Color(backgroundColor(selected))
 
             HStack {
                 Spacer()
@@ -39,13 +56,17 @@ extension LayerListView {
                         .frame(width: 32, height: 32)
                         .scaledToFit()
                         .background(Color.white)
+                        .cornerRadius(4)
                 }
 
                 Text(layer.title)
                     .font(.subheadline)
-                    .foregroundColor(Color(textColor))
+                    .foregroundColor(Color(textColor(selected)))
 
                 Spacer()
+            }
+            .onTapGesture {
+                didTapRow()
             }
         }
     }
@@ -53,11 +74,19 @@ extension LayerListView {
 
 // Colors
 extension LayerListView {
-    private var backgroundColor: UIColor {
-        return UIColor(named: "reversalComponent") ?? .clear
+    private func backgroundColor(_ selected: Bool) -> UIColor {
+        if selected {
+            return UIColor(named: "reversalComponent") ?? .clear
+        } else {
+            return UIColor(named: "component") ?? .clear
+        }
     }
-    private var textColor: UIColor {
-        return UIColor(named: "component") ?? .clear
+    private func textColor(_ selected: Bool) -> UIColor {
+        if selected {
+            return UIColor(named: "component") ?? .clear
+        } else {
+            return UIColor(named: "reversalComponent") ?? .clear
+        }
     }
 }
 

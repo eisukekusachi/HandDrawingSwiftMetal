@@ -21,7 +21,7 @@ class CanvasViewModel {
 
     /// A texture that is selected
     var selectedTexture: MTLTexture {
-        return layerManager.layers[0].texture!
+        return layerManager.selectedTexture
     }
 
     /// An array containing a texture where a line is drawn and a texture that is selected
