@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDD529DBC340004618CE /* ActionStateManager.swift */; };
+		D40CDEFF2B411F450059527E /* LayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* LayerView.swift */; };
+		D40CDF032B411F660059527E /* LayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* LayerListView.swift */; };
+		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
+		D40CDF092B4129A60059527E /* ViewController+LayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF082B4129A60059527E /* ViewController+LayerView.swift */; };
+		D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */; };
 		D40D975229DAB01900A82E6A /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975129DAB01900A82E6A /* CanvasView.swift */; };
 		D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* TouchPoint.swift */; };
 		D40D976129DAB09400A82E6A /* TouchPointStorageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */; };
@@ -86,7 +91,6 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
-		D4F1BB3C2B2D4344006EA102 /* LayerManagerImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3B2B2D4344006EA102 /* LayerManagerImpl.swift */; };
 		D4F1BB3E2B2D436F006EA102 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */; };
 		D4F1BB402B2D46D8006EA102 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */; };
 		D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */; };
@@ -111,6 +115,11 @@
 
 /* Begin PBXFileReference section */
 		D40ACDD529DBC340004618CE /* ActionStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateManager.swift; sourceTree = "<group>"; };
+		D40CDEFE2B411F450059527E /* LayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerView.swift; sourceTree = "<group>"; };
+		D40CDF022B411F660059527E /* LayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerListView.swift; sourceTree = "<group>"; };
+		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
+		D40CDF082B4129A60059527E /* ViewController+LayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+LayerView.swift"; sourceTree = "<group>"; };
+		D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStampFormatter.swift; sourceTree = "<group>"; };
 		D40D975129DAB01900A82E6A /* CanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
 		D40D975A29DAB09400A82E6A /* TouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchPoint.swift; sourceTree = "<group>"; };
 		D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TouchPointStorageProtocol.swift; path = ../Protocols/TouchPointStorageProtocol.swift; sourceTree = "<group>"; };
@@ -192,7 +201,6 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		D4F1BB3B2B2D4344006EA102 /* LayerManagerImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManagerImpl.swift; sourceTree = "<group>"; };
 		D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOImpl.swift; sourceTree = "<group>"; };
@@ -224,6 +232,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D40CDEFD2B411B3F0059527E /* LayerView */ = {
+			isa = PBXGroup;
+			children = (
+				D40CDEFE2B411F450059527E /* LayerView.swift */,
+				D40CDF022B411F660059527E /* LayerListView.swift */,
+			);
+			path = LayerView;
+			sourceTree = "<group>";
+		};
 		D40D975029DAB00100A82E6A /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
@@ -359,6 +376,7 @@
 				D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */,
 				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -398,7 +416,6 @@
 			isa = PBXGroup;
 			children = (
 				D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */,
-				D4F1BB3B2B2D4344006EA102 /* LayerManagerImpl.swift */,
 				D4B4AAA12B3FF44100298CFB /* LayerModel.swift */,
 			);
 			path = Layers;
@@ -430,12 +447,15 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
+				D40CDF082B4129A60059527E /* ViewController+LayerView.swift */,
 				D4513AA32AF5D5F800CA4438 /* ViewController+FileIO.swift */,
-				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D40D975029DAB00100A82E6A /* Canvas */,
+				D4513AAF2AF63A3C00CA4438 /* FileView */,
+				D40CDEFD2B411B3F0059527E /* LayerView */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
 			);
@@ -581,6 +601,7 @@
 			files = (
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
+				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,
 				D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -631,11 +652,13 @@
 				D40D976329DAB09400A82E6A /* DefaultTouchPointStorage.swift in Sources */,
 				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
+				D40CDF092B4129A60059527E /* ViewController+LayerView.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
 				D40D976F29DAB09D00A82E6A /* DrawingEraser.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */,
+				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
@@ -666,11 +689,11 @@
 				D4F1BB3E2B2D436F006EA102 /* LayerManager.swift in Sources */,
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
 				D4513AA42AF5D5F800CA4438 /* ViewController+FileIO.swift in Sources */,
+				D40CDEFF2B411F450059527E /* LayerView.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D46D07D82ADBC51C0093D861 /* PencilGestureWithStorage.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */,
-				D4F1BB3C2B2D4344006EA102 /* LayerManagerImpl.swift in Sources */,
 				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,
 				D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */,
 				D4B4AAA22B3FF44100298CFB /* LayerModel.swift in Sources */,
@@ -682,6 +705,7 @@
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D46D07D62ADBC4A00093D861 /* GestureWithStorageProtocol.swift in Sources */,
 				D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */,
+				D40CDF032B411F660059527E /* LayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
@@ -892,7 +916,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -924,7 +948,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

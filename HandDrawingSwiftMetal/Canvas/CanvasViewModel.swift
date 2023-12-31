@@ -53,11 +53,11 @@ class CanvasViewModel {
     /// A protocol for managing transformations
     private var transforming: Transforming!
 
-    /// A protocol for managing texture layers
-    private (set) var layerManager: LayerManager!
-
     /// A protocol for managing file input and output
     private var fileIO: FileIO!
+
+    /// An instance for managing texture layers
+    private (set) var layerManager = LayerManager()
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
@@ -83,11 +83,9 @@ class CanvasViewModel {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(fileIO: FileIO = FileIOImpl(),
-         transforming: Transforming = TransformingImpl(),
-         layerManager: LayerManager = LayerManagerImpl()) {
+         transforming: Transforming = TransformingImpl()) {
         self.fileIO = fileIO
         self.transforming = transforming
-        self.layerManager = layerManager
 
         $drawingTool
             .sink { [weak self] newValue in
@@ -137,6 +135,9 @@ extension CanvasViewModel {
                                       on: selectedTexture,
                                       touchState,
                                       commandBuffer)
+        if touchState == .ended {
+            updateThumbnail()
+        }
     }
     func mergeAllTextures(backgroundColor: (Int, Int, Int),
                           into dstTexture: MTLTexture,
@@ -152,6 +153,12 @@ extension CanvasViewModel {
     }
     func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
         layerManager.clearTextures(commandBuffer)
+    }
+    private func updateThumbnail() {
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
+            layerManager.updateTextureThumbnail()
+        }
     }
 }
 

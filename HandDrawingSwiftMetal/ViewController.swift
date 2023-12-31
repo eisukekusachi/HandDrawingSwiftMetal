@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     let canvasViewModel = CanvasViewModel()
     let canvasView = CanvasView()
 
+    lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.layerManager))
+
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
         didSet {
@@ -130,6 +132,9 @@ extension ViewController {
     }
     @IBAction func pushRedoButton() {
         canvasView.redo()
+    }
+    @IBAction func pushLayerButton() {
+        toggleLayerVisibility()
     }
     @IBAction func pushSaveButton() {
         saveCanvas(into: CanvasViewModel.tmpFolderURL,
