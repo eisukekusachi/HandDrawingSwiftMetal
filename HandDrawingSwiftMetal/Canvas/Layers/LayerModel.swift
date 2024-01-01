@@ -12,11 +12,15 @@ struct LayerModel: Identifiable, Equatable {
     var texture: MTLTexture?
     var title: String
     var thumbnail: UIImage?
+    var isVisible: Bool
+
     init(texture: MTLTexture?,
-         title: String) {
+         title: String,
+         isVisible: Bool = true) {
         self.id = UUID()
         self.texture = texture
         self.title = title
+        self.isVisible = isVisible
 
         updateThumbnail()
     }

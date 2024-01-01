@@ -12,16 +12,23 @@ struct LayerListView: View {
 
     var body: some View {
         List {
-            ForEach(Array(layerManager.layers.enumerated().reversed()),
-                    id: \.element.id) { index, layer in
+            ForEach(Array(layerManager.layers.reversed()),
+                    id: \.id) { layer in
 
                 layerRow(layer: layer,
-                         selected: layerManager.isSelected(layer)) {
-
-                    layerManager.index = index
+                         selected: layerManager.isSelected(layer),
+                         didTapRow: { layer in
+                    if let index = layerManager.getIndexFromLayers(layer) {
+                        layerManager.setSelectedIndex(index)
+                        layerManager.updateNonSelectedTextures()
+                        layerManager.setNeedsDisplay = true
+                    }
+                },
+                         didTapVisibleButton: { layer in
+                    layerManager.setVisibility(layer, !layer.isVisible)
                     layerManager.updateNonSelectedTextures()
                     layerManager.setNeedsDisplay = true
-                }
+                })
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
@@ -42,7 +49,10 @@ struct LayerListView: View {
 }
 
 extension LayerListView {
-    func layerRow(layer: LayerModel, selected: Bool, didTapRow: @escaping (() -> Void)) -> some View {
+    func layerRow(layer: LayerModel, 
+                  selected: Bool,
+                  didTapRow: @escaping ((LayerModel) -> Void),
+                  didTapVisibleButton: @escaping ((LayerModel) -> Void)) -> some View {
         return ZStack {
             Color(backgroundColor(selected))
 
@@ -64,9 +74,19 @@ extension LayerListView {
                     .foregroundColor(Color(textColor(selected)))
 
                 Spacer()
+
+                Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
+                    .frame(width: 32, height: 32)
+                    .foregroundColor(Color(iconColor(layer: layer, selected)))
+                    .onTapGesture {
+                        didTapVisibleButton(layer)
+                    }
+
+                Spacer()
+                    .frame(width: 8)
             }
             .onTapGesture {
-                didTapRow()
+                didTapRow(layer)
             }
         }
     }
@@ -86,6 +106,21 @@ extension LayerListView {
             return UIColor(named: "component") ?? .clear
         } else {
             return UIColor(named: "reversalComponent") ?? .clear
+        }
+    }
+    private func iconColor(layer: LayerModel, _ selected: Bool) -> UIColor {
+        if selected {
+            if layer.isVisible {
+                return .white
+            } else {
+                return .lightGray
+            }
+        } else {
+            if layer.isVisible {
+                return .black
+            } else {
+                return .darkGray
+            }
         }
     }
 }

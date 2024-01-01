@@ -70,9 +70,11 @@ class LayerManager: ObservableObject {
                       into: dstTexture,
                       commandBuffer)
 
-        Command.merge(textures,
-                      into: dstTexture,
-                      commandBuffer)
+        if layers[index].isVisible {
+            Command.merge(textures,
+                          into: dstTexture,
+                          commandBuffer)
+        }
 
         Command.merge(topTexture,
                       into: dstTexture,
@@ -85,6 +87,11 @@ class LayerManager: ObservableObject {
     }
     func setTexture(_ texture: MTLTexture) {
         layers[index].texture = texture
+    }
+    func setVisibility(_ layer: LayerModel, _ isVisible: Bool) {
+        if let index = getIndexFromLayers(layer) {
+            layers[index].isVisible = isVisible
+        }
     }
 
     func isSelected(_ layer: LayerModel) -> Bool {
@@ -101,7 +108,16 @@ class LayerManager: ObservableObject {
         Command.clear(texture: layers[index].texture,
                       commandBuffer)
     }
-    
+
+    func getIndexFromLayers(_ layer: LayerModel) -> Int? {
+        return layers.firstIndex(of: layer)
+    }
+    func setSelectedIndex(_ index: Int) {
+        if index < layers.count {
+            self.index = index
+        }
+    }
+
     func updateSelectedIndex() {
         if  let selectedLayer,
             let resultIndex = layers.firstIndex(of: selectedLayer) {
@@ -123,14 +139,14 @@ class LayerManager: ObservableObject {
         Command.clear(texture: topTexture, commandBuffer)
 
         if bottomIndex >= 0 {
-            for i in 0 ... bottomIndex {
+            for i in 0 ... bottomIndex where layers[i].isVisible {
                 Command.merge(layers[i].texture,
                               into: bottomTexture,
                               commandBuffer)
             }
         }
         if topIndex < layers.count {
-            for i in topIndex ..< layers.count {
+            for i in topIndex ..< layers.count where layers[i].isVisible {
                 Command.merge(layers[i].texture,
                               into: topTexture,
                               commandBuffer)
