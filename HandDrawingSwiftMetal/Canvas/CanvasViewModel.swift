@@ -24,11 +24,6 @@ class CanvasViewModel {
         return layerManager.selectedTexture
     }
 
-    /// An array containing a texture where a line is drawn and a texture that is selected
-    var activeDrawingTextures: [MTLTexture?] {
-        drawing?.getDrawingTextures(selectedTexture) ?? []
-    }
-
     var brushDiameter: Int {
         get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
         set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
@@ -142,7 +137,9 @@ extension CanvasViewModel {
     func mergeAllTextures(backgroundColor: (Int, Int, Int),
                           into dstTexture: MTLTexture,
                           _ commandBuffer: MTLCommandBuffer) {
-        layerManager.merge(textures: activeDrawingTextures,
+        guard let drawingTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
+
+        layerManager.merge(drawingTextures: drawingTextures.compactMap { $0 },
                            backgroundColor: backgroundColor,
                            into: dstTexture,
                            commandBuffer)

@@ -35,6 +35,7 @@ class LayerManager: ObservableObject {
 
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
+    private var currentTexture: MTLTexture!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -44,11 +45,13 @@ class LayerManager: ObservableObject {
 
         bottomTexture = MTKTextureUtils.makeTexture(device, textureSize)!
         topTexture = MTKTextureUtils.makeTexture(device, textureSize)!
+        currentTexture = MTKTextureUtils.makeTexture(device, textureSize)!
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
 
         Command.clear(texture: bottomTexture, commandBuffer)
         Command.clear(texture: topTexture, commandBuffer)
+        Command.clear(texture: currentTexture, commandBuffer)
 
         commandBuffer.commit()
 
@@ -58,7 +61,7 @@ class LayerManager: ObservableObject {
         clearTextures()
     }
 
-    func merge(textures: [MTLTexture?],
+    func merge(drawingTextures: [MTLTexture],
                backgroundColor: (Int, Int, Int),
                into dstTexture: MTLTexture,
                _ commandBuffer: MTLCommandBuffer) {
@@ -71,7 +74,10 @@ class LayerManager: ObservableObject {
                       commandBuffer)
 
         if layers[index].isVisible {
-            Command.merge(textures,
+            updateCurrentTexture(drawingTextures: drawingTextures,
+                                 commandBuffer)
+
+            Command.merge(currentTexture,
                           into: dstTexture,
                           commandBuffer)
         }
@@ -154,6 +160,21 @@ class LayerManager: ObservableObject {
         }
 
         commandBuffer.commit()
+    }
+
+    private func updateCurrentTexture(drawingTextures: [MTLTexture],
+                                      _ commandBuffer: MTLCommandBuffer) {
+        if drawingTextures.count == 0 { return }
+
+        Command.copy(dst: currentTexture,
+                     src: drawingTextures.first!,
+                     commandBuffer)
+
+        for i in 1 ..< drawingTextures.count {
+            Command.merge(drawingTextures[i],
+                          into: currentTexture,
+                          commandBuffer)
+        }
     }
 }
 
