@@ -7,6 +7,18 @@
 
 import MetalKit
 
+struct CanvasModelV2: Codable {
+    let textureSize: CGSize?
+    let layerIndex: Int
+    let layers: [LayerModelCodable?]?
+
+    let thumbnailName: String?
+
+    let drawingTool: Int?
+
+    let brushDiameter: Int?
+    let eraserDiameter: Int?
+}
 struct CanvasModel: Codable {
     let textureSize: CGSize?
     let textureName: String?

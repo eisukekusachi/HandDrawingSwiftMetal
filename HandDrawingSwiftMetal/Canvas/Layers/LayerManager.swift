@@ -28,8 +28,13 @@ class LayerManager: ObservableObject {
 
     var textureSize: CGSize = .zero
     
-    var selectedTexture: MTLTexture {
-        layers[index].texture!
+    var selectedTexture: MTLTexture? {
+        if index < layers.count {
+            return layers[index].texture
+            
+        } else {
+            return nil
+        }
     }
 
     private var bottomTexture: MTLTexture!
@@ -163,6 +168,9 @@ class LayerManager: ObservableObject {
 
         commandBuffer.commit()
     }
+    func updateSelectedTextureAlpha() {
+        selectedTextureAlpha = layers[index].alpha
+    }
     func updateTextureAlpha(_ alpha: Int) {
         layers[index].alpha = alpha
     }
@@ -229,5 +237,44 @@ extension LayerManager {
         layers = object.layers
 
         selectedTextureAlpha = layers[index].alpha
+    }
+}
+
+extension LayerManager {
+    static func convertLayerModelCodableArray(layers: [LayerModel],
+                                              fileIO: FileIO,
+                                              folderURL: URL) async throws -> [LayerModelCodable] {
+        var resultLayers: [LayerModelCodable] = []
+
+        let tasks = layers.map { layer in
+            Task<LayerModelCodable?, Error> {
+                do {
+                    if let texture = layer.texture {
+                        let textureName = UUID().uuidString
+
+                        try fileIO.saveImage(bytes: texture.bytes,
+                                             to: folderURL.appendingPathComponent(textureName))
+
+                        return LayerModelCodable.init(textureName: textureName,
+                                                      title: layer.title,
+                                                      isVisible: layer.isVisible,
+                                                      alpha: layer.alpha)
+                    } else {
+                        return nil
+                    }
+
+                } catch {
+                    return nil
+                }
+            }
+        }
+
+        for task in tasks {
+            if let fileURL = try? await task.value {
+                resultLayers.append(fileURL)
+            }
+        }
+
+        return resultLayers.compactMap { $0 }
     }
 }
