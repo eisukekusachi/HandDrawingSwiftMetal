@@ -18,7 +18,7 @@ struct LayerListView: View {
                 layerRow(layer: layer,
                          selected: layerManager.isSelected(layer),
                          didTapRow: { layer in
-                    if let index = layerManager.getIndexFromLayers(layer) {
+                    if let index = layerManager.layers.firstIndex(of: layer) {
                         layerManager.setSelectedIndex(index)
                         if let alpha = layerManager.selectedLayer?.alpha {
                             layerManager.selectedTextureAlpha = alpha

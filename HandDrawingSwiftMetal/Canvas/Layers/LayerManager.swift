@@ -98,7 +98,7 @@ class LayerManager: ObservableObject {
         layers[index].texture = texture
     }
     func setVisibility(_ layer: LayerModel, _ isVisible: Bool) {
-        if let index = getIndexFromLayers(layer) {
+        if let index = layers.firstIndex(of: layer) {
             layers[index].isVisible = isVisible
         }
     }
@@ -118,9 +118,6 @@ class LayerManager: ObservableObject {
                       commandBuffer)
     }
 
-    func getIndexFromLayers(_ layer: LayerModel) -> Int? {
-        return layers.firstIndex(of: layer)
-    }
     func setSelectedIndex(_ index: Int) {
         if index < layers.count {
             self.index = index
