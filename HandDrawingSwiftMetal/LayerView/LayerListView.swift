@@ -20,6 +20,9 @@ struct LayerListView: View {
                          didTapRow: { layer in
                     if let index = layerManager.getIndexFromLayers(layer) {
                         layerManager.setSelectedIndex(index)
+                        if let alpha = layerManager.selectedLayer?.alpha {
+                            layerManager.selectedTextureAlpha = alpha
+                        }
                         layerManager.updateNonSelectedTextures()
                         layerManager.setNeedsDisplay = true
                     }
@@ -74,6 +77,10 @@ extension LayerListView {
                     .foregroundColor(Color(textColor(selected)))
 
                 Spacer()
+                
+                Text("A: \(layer.alpha)")
+                    .font(.caption2)
+                    .foregroundColor(Color(uiColor: .gray))
 
                 Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
                     .frame(width: 32, height: 32)

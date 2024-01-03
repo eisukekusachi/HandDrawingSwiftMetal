@@ -23,6 +23,8 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var setNeedsDisplay: Bool = false
 
+    @Published var selectedTextureAlpha: Int = 255
+
     var textureSize: CGSize = .zero
     
     var selectedTexture: MTLTexture {
@@ -69,7 +71,7 @@ class LayerManager: ObservableObject {
                      withRGB: backgroundColor,
                      commandBuffer)
 
-        Command.merge(bottomTexture,
+        Command.merge(texture: bottomTexture,
                       into: dstTexture,
                       commandBuffer)
 
@@ -77,12 +79,13 @@ class LayerManager: ObservableObject {
             updateCurrentTexture(drawingTextures: drawingTextures,
                                  commandBuffer)
 
-            Command.merge(currentTexture,
+            Command.merge(texture: currentTexture,
+                          alpha: selectedTextureAlpha,
                           into: dstTexture,
                           commandBuffer)
         }
 
-        Command.merge(topTexture,
+        Command.merge(texture: topTexture,
                       into: dstTexture,
                       commandBuffer)
     }
@@ -146,20 +149,25 @@ class LayerManager: ObservableObject {
 
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
-                Command.merge(layers[i].texture,
+                Command.merge(texture: layers[i].texture,
+                              alpha: layers[i].alpha,
                               into: bottomTexture,
                               commandBuffer)
             }
         }
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
-                Command.merge(layers[i].texture,
+                Command.merge(texture: layers[i].texture,
+                              alpha: layers[i].alpha,
                               into: topTexture,
                               commandBuffer)
             }
         }
 
         commandBuffer.commit()
+    }
+    func updateTextureAlpha(_ alpha: Int) {
+        layers[index].alpha = alpha
     }
 
     private func updateCurrentTexture(drawingTextures: [MTLTexture],
@@ -171,7 +179,7 @@ class LayerManager: ObservableObject {
                      commandBuffer)
 
         for i in 1 ..< drawingTextures.count {
-            Command.merge(drawingTextures[i],
+            Command.merge(texture: drawingTextures[i],
                           into: currentTexture,
                           commandBuffer)
         }

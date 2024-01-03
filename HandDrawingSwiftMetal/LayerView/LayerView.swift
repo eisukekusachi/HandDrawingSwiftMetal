@@ -9,11 +9,15 @@ import SwiftUI
 
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
+    let sliderStyle = SliderStyleImpl(
+        trackLeftColor: UIColor(named: "trackColor")!)
+    let range = 0 ... 255
 
     var body: some View {
         VStack {
             toolbar(layerManager: layerManager)
-            LayerListView(layerManager: layerManager)
+            listView(layerManager: layerManager)
+            selectedTextureAlphaSlider(layerManager: layerManager)
         }
         .padding(8)
         .background(Color.white.opacity(0.75))
@@ -52,6 +56,22 @@ extension LayerView {
         }
         .padding(8)
     }
+    func listView(layerManager: LayerManager) -> some View {
+        LayerListView(layerManager: layerManager)
+    }
+    func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
+        TwoRowsSliderView(
+            title: "Alpha",
+            value: $layerManager.selectedTextureAlpha,
+            style: sliderStyle,
+            range: range) { value in
+                layerManager.updateTextureAlpha(value)
+                layerManager.setNeedsDisplay = true
+        }
+            .padding(.top, 4)
+            .padding([.leading, .trailing, .bottom], 8)
+    }
+
 }
 
 #Preview {

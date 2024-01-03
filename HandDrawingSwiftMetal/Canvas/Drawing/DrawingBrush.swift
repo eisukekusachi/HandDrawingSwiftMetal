@@ -74,7 +74,7 @@ class DrawingBrush: Drawing {
     func merge(_ srcTexture: MTLTexture?,
                into dstTexture: MTLTexture,
                _ commandBuffer: MTLCommandBuffer) {
-        Command.merge(srcTexture,
+        Command.merge(texture: srcTexture,
                       into: dstTexture,
                       commandBuffer)
         clearDrawingTextures(commandBuffer)
