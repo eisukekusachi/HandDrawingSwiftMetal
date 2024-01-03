@@ -80,9 +80,9 @@ class LayerManager: ObservableObject {
                       commandBuffer)
 
         if layers[index].isVisible {
-            updateCurrentTexture(drawingTextures: drawingTextures,
-                                 commandBuffer)
-
+            MTKTextureUtils.makeSingleTexture(from: drawingTextures,
+                                              to: currentTexture,
+                                              commandBuffer)
             Command.merge(texture: currentTexture,
                           alpha: selectedTextureAlpha,
                           into: dstTexture,
@@ -94,10 +94,6 @@ class LayerManager: ObservableObject {
                       commandBuffer)
     }
 
-    func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture? {
-        let textureData: Data? = try Data(contentsOf: url)
-        return MTKTextureUtils.makeTexture(device, textureSize, textureData?.encodedHexadecimals)
-    }
     func setTexture(_ texture: MTLTexture) {
         layers[index].texture = texture
     }
@@ -175,21 +171,6 @@ class LayerManager: ObservableObject {
     }
     func updateTextureAlpha(_ alpha: Int) {
         layers[index].alpha = alpha
-    }
-
-    private func updateCurrentTexture(drawingTextures: [MTLTexture],
-                                      _ commandBuffer: MTLCommandBuffer) {
-        if drawingTextures.count == 0 { return }
-
-        Command.copy(dst: currentTexture,
-                     src: drawingTextures.first!,
-                     commandBuffer)
-
-        for i in 1 ..< drawingTextures.count {
-            Command.merge(texture: drawingTextures[i],
-                          into: currentTexture,
-                          commandBuffer)
-        }
     }
 }
 

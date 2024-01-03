@@ -233,10 +233,9 @@ extension CanvasViewModel {
         var newLayers: [LayerModel] = []
 
         try layers.forEach { layer in
-            if let layer {
-                let textureData: Data = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName))
-                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData.encodedHexadecimals)
-
+            if let layer,
+               let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals {
+                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData)
                 let layerData = LayerModel.init(texture: newTexture,
                                                 title: layer.title,
                                                 isVisible: layer.isVisible,
@@ -260,8 +259,9 @@ extension CanvasViewModel {
               let drawingTool = data?.drawingTool,
               let brushDiameter = data?.brushDiameter,
               let eraserDiameter = data?.eraserDiameter,
-              let newTexture = try? layerManager.makeTexture(fromDocumentsFolder: folderURL.appendingPathComponent(textureName),
-                                                             textureSize: textureSize) else {
+              let newTexture = try MTKTextureUtils.makeTexture(device,
+                                                               url: folderURL.appendingPathComponent(textureName),
+                                                               textureSize: textureSize) else {
             throw FileInputError.failedToApplyData
         }
 
