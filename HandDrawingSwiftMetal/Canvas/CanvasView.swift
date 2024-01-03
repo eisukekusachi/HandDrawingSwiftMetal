@@ -131,11 +131,9 @@ class CanvasView: MTKTextureDisplayView {
 
         resetMatrix()
 
-        viewModel?.layerManager.newLayer(textureSize)
-        viewModel?.layerManager.index = 0
+        viewModel?.layerManager.initLayers(textureSize)
         viewModel?.layerManager.updateNonSelectedTextures()
-        viewModel?.layerManager.updateSelectedTextureAlpha()
-        viewModel?.layerManager.updateSelectedIndex()
+        viewModel?.layerManager.selectedLayerAlpha = 255
         refreshCanvas()
     }
     func clearCanvas() {

@@ -93,20 +93,18 @@ class CanvasViewModel {
         drawingBrush.frameSize = size
         drawingEraser.frameSize = size
     }
-    func initTextures(_ size: CGSize) {
-        layerManager.initTextures(size)
+    func initTextures(_ textureSize: CGSize) {
+        layerManager.initLayers(textureSize)
+        layerManager.initTextures(textureSize)
 
-        drawingBrush.initTextures(size)
-        drawingEraser.initTextures(size)
+        drawingBrush.initTextures(textureSize)
+        drawingEraser.initTextures(textureSize)
     }
     func clearTextures() {
         layerManager.clearTextures()
 
         drawingBrush.clearDrawingTextures()
         drawingEraser.clearDrawingTextures()
-    }
-    func setCurrentTexture(_ texture: MTLTexture) {
-        layerManager.setTexture(texture)
     }
 }
 
@@ -157,7 +155,9 @@ extension CanvasViewModel {
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-            layerManager.updateTextureThumbnail()
+            if let selectedLayer = layerManager.selectedLayer {
+                layerManager.updateThumbnail(selectedLayer)
+            }
         }
     }
 }
@@ -221,9 +221,9 @@ extension CanvasViewModel {
 
     func applyCanvasDataToCanvasV2(_ data: CanvasModelV2?, folderURL: URL, zipFilePath: String) throws {
         guard let layers = data?.layers,
-              let index = data?.layerIndex,
+              let layerIndex = data?.layerIndex,
               let textureSize = data?.textureSize,
-              let drawingTool = data?.drawingTool,
+              let rawValueDrawingTool = data?.drawingTool,
               let brushDiameter = data?.brushDiameter,
               let eraserDiameter = data?.eraserDiameter
         else {
@@ -244,19 +244,19 @@ extension CanvasViewModel {
             }
         }
         layerManager.layers = newLayers
-        layerManager.index = index
-        layerManager.updateSelectedTextureAlpha()
+        layerManager.index = layerIndex
+        layerManager.selectedLayerAlpha = newLayers[layerIndex].alpha
 
-        self.drawingTool = .init(rawValue: drawingTool)
+        drawingTool = .init(rawValue: rawValueDrawingTool)
         (drawingBrush.tool as? DrawingToolBrush)!.diameter = brushDiameter
         (drawingEraser.tool as? DrawingToolEraser)!.diameter = eraserDiameter
 
-        self.projectName = zipFilePath.fileName
+        projectName = zipFilePath.fileName
     }
     func applyCanvasDataToCanvas(_ data: CanvasModel?, folderURL: URL, zipFilePath: String) throws {
         guard let textureName = data?.textureName,
               let textureSize = data?.textureSize,
-              let drawingTool = data?.drawingTool,
+              let rawValueDrawingTool = data?.drawingTool,
               let brushDiameter = data?.brushDiameter,
               let eraserDiameter = data?.eraserDiameter,
               let newTexture = try MTKTextureUtils.makeTexture(device,
@@ -268,15 +268,14 @@ extension CanvasViewModel {
         let layerData = LayerModel.init(texture: newTexture,
                                         title: "NewLayer")
 
-        self.layerManager.layers.removeAll()
-        self.layerManager.layers.append(layerData)
-        self.layerManager.index = 0
-        layerManager.updateSelectedTextureAlpha()
+        layerManager.layers.removeAll()
+        layerManager.layers.append(layerData)
+        layerManager.index = 0
 
-        self.drawingTool = .init(rawValue: drawingTool)
+        drawingTool = .init(rawValue: rawValueDrawingTool)
         (drawingBrush.tool as? DrawingToolBrush)!.diameter = brushDiameter
         (drawingEraser.tool as? DrawingToolEraser)!.diameter = eraserDiameter
 
-        self.projectName = zipFilePath.fileName
+        projectName = zipFilePath.fileName
     }
 }

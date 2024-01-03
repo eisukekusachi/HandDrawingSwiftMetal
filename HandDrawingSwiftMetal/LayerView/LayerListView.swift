@@ -16,35 +16,19 @@ struct LayerListView: View {
                     id: \.id) { layer in
 
                 layerRow(layer: layer,
-                         selected: layerManager.isSelected(layer),
+                         selected: layerManager.selectedLayer == layer,
                          didTapRow: { layer in
-                    if let index = layerManager.layers.firstIndex(of: layer) {
-                        layerManager.setSelectedIndex(index)
-                        if let alpha = layerManager.selectedLayer?.alpha {
-                            layerManager.selectedTextureAlpha = alpha
-                        }
-                        layerManager.updateNonSelectedTextures()
-                        layerManager.setNeedsDisplay = true
-                    }
+                    layerManager.updateSelectedLayer(layer)
                 },
                          didTapVisibleButton: { layer in
-                    layerManager.setVisibility(layer, !layer.isVisible)
-                    layerManager.updateNonSelectedTextures()
-                    layerManager.setNeedsDisplay = true
+                    layerManager.updateVisibility(layer, !layer.isVisible)
                 })
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
                     .onMove(perform: { source, destination in
                         layerManager.addUndoObject = true
-
-                        layerManager.layers = layerManager.layers.reversed()
                         layerManager.moveLayer(fromOffsets: source, toOffset: destination)
-                        layerManager.layers = layerManager.layers.reversed()
-
-                        layerManager.updateSelectedIndex()
-                        layerManager.updateNonSelectedTextures()
-                        layerManager.setNeedsDisplay = true
                     })
                     .listRowSeparator(.hidden)
         }

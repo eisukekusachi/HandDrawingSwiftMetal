@@ -31,9 +31,7 @@ extension LayerView {
 
         return HStack {
             Button(action: {
-                layerManager.addUndoObject = true
                 layerManager.addLayer(layerManager.textureSize)
-                layerManager.updateNonSelectedTextures()
 
             }, label: {
                 Image(systemName: "plus")
@@ -44,10 +42,7 @@ extension LayerView {
                 .frame(width: 16)
 
             Button(action: {
-                layerManager.addUndoObject = true
                 layerManager.removeLayer()
-                layerManager.updateNonSelectedTextures()
-                layerManager.setNeedsDisplay = true
 
             }, label: {
                 Image(systemName: "minus")
@@ -64,11 +59,12 @@ extension LayerView {
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
         TwoRowsSliderView(
             title: "Alpha",
-            value: $layerManager.selectedTextureAlpha,
+            value: $layerManager.selectedLayerAlpha,
             style: sliderStyle,
             range: range) { value in
-                layerManager.updateTextureAlpha(value)
-                layerManager.setNeedsDisplay = true
+                if let layer = layerManager.selectedLayer {
+                    layerManager.updateLayerAlpha(layer, value)
+                }
         }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
