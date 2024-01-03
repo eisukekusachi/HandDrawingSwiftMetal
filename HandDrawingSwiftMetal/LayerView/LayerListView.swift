@@ -36,6 +36,7 @@ struct LayerListView: View {
                 .listRowInsets(EdgeInsets())
             }
                     .onMove(perform: { source, destination in
+                        layerManager.addUndoObject = true
 
                         layerManager.layers = layerManager.layers.reversed()
                         layerManager.moveLayer(fromOffsets: source, toOffset: destination)

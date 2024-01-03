@@ -22,6 +22,7 @@ class LayerManager: ObservableObject {
     }
     @Published var selectedLayer: LayerModel?
     @Published var setNeedsDisplay: Bool = false
+    @Published var addUndoObject: Bool = false
 
     @Published var selectedTextureAlpha: Int = 255
 
@@ -29,10 +30,6 @@ class LayerManager: ObservableObject {
     
     var selectedTexture: MTLTexture {
         layers[index].texture!
-    }
-
-    var undoObject: UndoObject {
-        UndoObject.init(texture: layers[index].texture!)
     }
 
     private var bottomTexture: MTLTexture!
@@ -220,5 +217,17 @@ extension LayerManager {
     func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
         layers.move(fromOffsets: source, toOffset: destination)
         updateNonSelectedTextures()
+    }
+}
+
+extension LayerManager {
+    var undoObject: UndoObject {
+        return UndoObject(index: index, layers: layers)
+    }
+    func setUndoObject(_ object: UndoObject) {
+        index = object.index
+        layers = object.layers
+
+        selectedTextureAlpha = layers[index].alpha
     }
 }

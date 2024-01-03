@@ -27,13 +27,13 @@ extension CanvasView {
 
     func registerDrawingUndoAction() {
         guard let viewModel else { return }
+        if viewModel.layerManager.layers.count == 0 { return }
 
         registerDrawingUndoAction(with: viewModel.layerManager.undoObject)
-
         undoManager.incrementUndoCount()
 
-        if let newTexture = duplicateTexture(viewModel.selectedTexture) {
-            viewModel.setCurrentTexture(newTexture)
+        if let newTexture = duplicateTexture(viewModel.layerManager.selectedTexture) {
+            viewModel.layerManager.setTexture(newTexture)
         }
     }
 
@@ -41,11 +41,12 @@ extension CanvasView {
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self) { [unowned self] _ in
             guard let viewModel else { return }
+            if viewModel.layerManager.layers.count == 0 { return }
 
-            registerDrawingUndoAction(with: .init(texture: viewModel.selectedTexture))
+            registerDrawingUndoAction(with: viewModel.layerManager.undoObject)
+            viewModel.layerManager.setUndoObject(undoObject)
 
-            viewModel.setCurrentTexture(undoObject.texture)
-
+            viewModel.layerManager.updateNonSelectedTextures()
             refreshRootTexture(commandBuffer)
             setNeedsDisplay()
         }

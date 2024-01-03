@@ -31,6 +31,7 @@ extension LayerView {
 
         return HStack {
             Button(action: {
+                layerManager.addUndoObject = true
                 layerManager.addLayer(layerManager.textureSize)
                 layerManager.updateNonSelectedTextures()
 
@@ -43,6 +44,7 @@ extension LayerView {
                 .frame(width: 16)
 
             Button(action: {
+                layerManager.addUndoObject = true
                 layerManager.removeLayer()
                 layerManager.updateNonSelectedTextures()
                 layerManager.setNeedsDisplay = true

@@ -106,6 +106,12 @@ class CanvasView: MTKTextureDisplayView {
                 self?.setNeedsDisplay()
         }
         .store(in: &cancellables)
+
+        self.viewModel?.layerManager.$addUndoObject
+            .sink { [weak self] _ in
+                self?.registerDrawingUndoAction()
+        }
+        .store(in: &cancellables)
     }
 
     func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {
