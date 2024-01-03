@@ -44,8 +44,7 @@ class LayerManager: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initTextures(_ textureSize: CGSize) {
-        layers.removeAll()
-        addLayer(textureSize)
+        newLayer(textureSize)
 
         bottomTexture = MTKTextureUtils.makeTexture(device, textureSize)!
         topTexture = MTKTextureUtils.makeTexture(device, textureSize)!
@@ -64,7 +63,10 @@ class LayerManager: ObservableObject {
 
         clearTextures()
     }
-
+    func newLayer(_ textureSize: CGSize) {
+        layers.removeAll()
+        addLayer(textureSize)
+    }
     func merge(drawingTextures: [MTLTexture],
                backgroundColor: (Int, Int, Int),
                into dstTexture: MTLTexture,
