@@ -116,9 +116,6 @@ extension ViewController {
             view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
         }
     }
-    @IBAction func pushClearButton(_ sender: UIButton) {
-        canvasView.clearCanvas()
-    }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvasView.drawingTool == .eraser {
             canvasView.eraserDiameter = Int(DrawingToolEraser.diameterIntValue(sender.value))

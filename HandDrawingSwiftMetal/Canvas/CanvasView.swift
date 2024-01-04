@@ -122,14 +122,6 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.layerManager.selectedLayerAlpha = 255
         refreshCanvas()
     }
-    func clearCanvas() {
-        registerDrawingUndoAction()
-
-        Command.clear(texture: viewModel?.layerManager.selectedTexture,
-                      commandBuffer)
-
-        refreshCanvas()
-    }
     func refreshCanvas() {
         viewModel?.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
                                   to: rootTexture,
