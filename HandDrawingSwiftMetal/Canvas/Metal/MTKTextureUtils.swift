@@ -84,11 +84,8 @@ enum MTKTextureUtils {
         return texture
     }
     static func makeTexture(_ device: MTLDevice, url: URL, textureSize: CGSize) throws -> MTLTexture? {
-        if let textureData = try Data(contentsOf: url).encodedHexadecimals {
-            return MTKTextureUtils.makeTexture(device, textureSize, textureData)
-        } else {
-            return nil
-        }
+        guard let textureData = try Data(contentsOf: url).encodedHexadecimals else { return nil }
+        return MTKTextureUtils.makeTexture(device, textureSize, textureData)
     }
     static func makeSingleTexture(from drawingTextures: [MTLTexture],
                                   to targetTexture: MTLTexture,
@@ -107,7 +104,6 @@ enum MTKTextureUtils {
             }
         }
     }
-
     static func makeBlankTexture(_ device: MTLDevice, _ textureSize: CGSize) -> MTLTexture {
         let texture = MTKTextureUtils.makeTexture(device, textureSize)!
 

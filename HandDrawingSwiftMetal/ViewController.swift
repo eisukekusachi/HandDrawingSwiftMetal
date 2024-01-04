@@ -137,7 +137,7 @@ extension ViewController {
         toggleLayerVisibility()
     }
     @IBAction func pushSaveButton() {
-        saveCanvas(into: CanvasViewModel.tmpFolderURL,
+        saveCanvas(into: URL.tmpFolderURL,
                    with: canvasViewModel.zipFileNameName)
     }
     @IBAction func pushLoadButton() {
@@ -148,7 +148,7 @@ extension ViewController {
                                 didTapItem: { [weak self] zipFilePath in
 
             self?.loadCanvas(from: zipFilePath,
-                             into: CanvasViewModel.tmpFolderURL)
+                             into: URL.tmpFolderURL)
             self?.presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)

@@ -66,7 +66,7 @@ class CanvasView: MTKTextureDisplayView {
         super.layoutSubviews()
 
         assert(viewModel != nil, "viewModel is nil.")
-        viewModel?.setFrameSize(frame.size)
+        viewModel?.frameSize = frame.size
     }
 
     private func commonInitialization() {
@@ -87,10 +87,8 @@ class CanvasView: MTKTextureDisplayView {
         $textureSize
             .sink { [weak self] newSize in
                 guard let self else { return }
-                viewModel?.initTextures(newSize)
-
-                refreshRootTexture(commandBuffer)
-                setNeedsDisplay()
+                viewModel?.initAllTextures(newSize)
+                refreshCanvas()
             }
             .store(in: &cancellables)
     }
@@ -100,10 +98,8 @@ class CanvasView: MTKTextureDisplayView {
 
         self.viewModel?.layerManager.$setNeedsDisplay
             .sink { [weak self] result in
-                guard result, let commandBuffer = self?.commandBuffer else { return }
-
-                self?.refreshRootTexture(commandBuffer)
-                self?.setNeedsDisplay()
+                guard result, let self else { return }
+                refreshCanvas()
         }
         .store(in: &cancellables)
 
@@ -114,16 +110,6 @@ class CanvasView: MTKTextureDisplayView {
         .store(in: &cancellables)
     }
 
-    func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {
-        viewModel?.mergeAllTextures(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                    into: rootTexture,
-                                    commandBuffer)
-    }
-
-    func refreshCanvas() {
-        refreshRootTexture(commandBuffer)
-        setNeedsDisplay()
-    }
     func newCanvas() {
         viewModel?.projectName = Calendar.currentDate
 
@@ -131,18 +117,24 @@ class CanvasView: MTKTextureDisplayView {
 
         resetMatrix()
 
-        viewModel?.layerManager.initLayers(textureSize)
+        viewModel?.layerManager.initLayerManager(textureSize)
         viewModel?.layerManager.updateNonSelectedTextures()
         viewModel?.layerManager.selectedLayerAlpha = 255
         refreshCanvas()
     }
     func clearCanvas() {
-        guard let viewModel else { return }
-
         registerDrawingUndoAction()
 
-        viewModel.clearCurrentTexture(commandBuffer)
+        Command.clear(texture: viewModel?.layerManager.selectedTexture,
+                      commandBuffer)
+
         refreshCanvas()
+    }
+    func refreshCanvas() {
+        viewModel?.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                  to: rootTexture,
+                                  commandBuffer)
+        setNeedsDisplay()
     }
 
     /// Reset the canvas transformation matrix to identity.
@@ -156,7 +148,7 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.setStoredMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
-        viewModel?.clearDrawingTextures(commandBuffer)
+        viewModel?.drawing?.clearDrawingTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -182,10 +174,11 @@ extension CanvasView: FingerGestureWithStorageSender {
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        refreshRootTexture(commandBuffer)
+        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                 to: rootTexture,
+                                 commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
                           touchState: TouchState) {
@@ -200,12 +193,10 @@ extension CanvasView: FingerGestureWithStorageSender {
         }
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
     }
-
     func cancel(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
@@ -232,14 +223,14 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        refreshRootTexture(commandBuffer)
+        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                 to: rootTexture,
+                                 commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }
-
     func cancel(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }

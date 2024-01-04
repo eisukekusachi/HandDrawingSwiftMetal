@@ -36,3 +36,42 @@ struct LayerModel: Identifiable, Equatable {
         lhs.id == rhs.id
     }
 }
+
+extension LayerModel {
+    static func convertToLayerModelCodableArray(layers: [LayerModel],
+                                                fileIO: FileIO,
+                                                folderURL: URL) async throws -> [LayerModelCodable] {
+        var resultLayers: [LayerModelCodable] = []
+
+        let tasks = layers.map { layer in
+            Task<LayerModelCodable?, Error> {
+                do {
+                    if let texture = layer.texture {
+                        let textureName = UUID().uuidString
+
+                        try fileIO.saveImage(bytes: texture.bytes,
+                                             to: folderURL.appendingPathComponent(textureName))
+
+                        return LayerModelCodable.init(textureName: textureName,
+                                                      title: layer.title,
+                                                      isVisible: layer.isVisible,
+                                                      alpha: layer.alpha)
+                    } else {
+                        return nil
+                    }
+
+                } catch {
+                    return nil
+                }
+            }
+        }
+
+        for task in tasks {
+            if let fileURL = try? await task.value {
+                resultLayers.append(fileURL)
+            }
+        }
+
+        return resultLayers.compactMap { $0 }
+    }
+}

@@ -29,7 +29,7 @@ extension CanvasView {
         guard let viewModel else { return }
         if viewModel.layerManager.layers.count == 0 { return }
 
-        registerDrawingUndoAction(with: viewModel.layerManager.undoObject)
+        registerDrawingUndoAction(with: viewModel.undoObject)
         undoManager.incrementUndoCount()
 
         if  let selectedLayer = viewModel.layerManager.selectedLayer,
@@ -44,12 +44,14 @@ extension CanvasView {
             guard let viewModel else { return }
             if viewModel.layerManager.layers.count == 0 { return }
 
-            registerDrawingUndoAction(with: viewModel.layerManager.undoObject)
-            viewModel.layerManager.setUndoObject(undoObject)
+            registerDrawingUndoAction(with: viewModel.undoObject)
+
+            viewModel.layerManager.index = undoObject.index
+            viewModel.layerManager.layers = undoObject.layers
+            viewModel.layerManager.selectedLayerAlpha = undoObject.layers[undoObject.index].alpha
 
             viewModel.layerManager.updateNonSelectedTextures()
-            refreshRootTexture(commandBuffer)
-            setNeedsDisplay()
+            refreshCanvas()
         }
     }
 }

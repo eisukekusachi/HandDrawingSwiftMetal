@@ -10,7 +10,7 @@ import Foundation
 extension ViewController {
     func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
         createTemporaryFolder(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
-            guard let currentTexture = self?.canvasView.rootTexture  else { return }
+            guard let currentTexture = self?.canvasView.rootTexture else { return }
 
             try self?.canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
                                                           into: folderURL,

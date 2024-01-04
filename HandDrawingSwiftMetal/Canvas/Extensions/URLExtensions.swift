@@ -14,6 +14,10 @@ extension URL {
     static var tmp: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/tmp")
     }
+
+    /// A temporary folder URL used for file input and output
+    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
+
     static var workInProgress: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
     }

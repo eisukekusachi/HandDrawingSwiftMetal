@@ -15,27 +15,22 @@ class LayerManager: ObservableObject {
     @Published var layers: [LayerModel] = []
     @Published var index: Int = 0 {
         didSet {
-            if index < layers.count {
-                selectedLayer = layers[index]
-            }
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
         }
     }
     @Published var selectedLayer: LayerModel?
+    @Published var selectedLayerAlpha: Int = 255
+
     @Published var setNeedsDisplay: Bool = false
     @Published var addUndoObject: Bool = false
 
-    @Published var selectedLayerAlpha: Int = 255
-
-    var textureSize: CGSize = .zero
-    
     var selectedTexture: MTLTexture? {
-        if index < layers.count {
-            return layers[index].texture
-            
-        } else {
-            return nil
-        }
+        guard index < layers.count else { return nil }
+        return layers[index].texture
     }
+
+    private (set) var textureSize: CGSize = .zero
 
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
@@ -43,24 +38,22 @@ class LayerManager: ObservableObject {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func initTextures(_ textureSize: CGSize) {
+    func initLayerManager(_ textureSize: CGSize) {
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        self.textureSize = textureSize
-
-        clearTextures()
-    }
-    func initLayers(_ textureSize: CGSize) {
         layers.removeAll()
         addLayer(textureSize)
         index = 0
+    
+        self.textureSize = textureSize
     }
-    func merge(drawingTextures: [MTLTexture],
-               backgroundColor: (Int, Int, Int),
-               into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer) {
+    func mergeAllTextures(selectedTextures: [MTLTexture],
+                          selectedAlpha: Int,
+                          backgroundColor: (Int, Int, Int),
+                          to dstTexture: MTLTexture,
+                          _ commandBuffer: MTLCommandBuffer) {
         Command.fill(dstTexture,
                      withRGB: backgroundColor,
                      commandBuffer)
@@ -70,11 +63,11 @@ class LayerManager: ObservableObject {
                       commandBuffer)
 
         if layers[index].isVisible {
-            MTKTextureUtils.makeSingleTexture(from: drawingTextures,
+            MTKTextureUtils.makeSingleTexture(from: selectedTextures,
                                               to: currentTexture,
                                               commandBuffer)
             Command.merge(texture: currentTexture,
-                          alpha: selectedLayerAlpha,
+                          alpha: selectedAlpha,
                           into: dstTexture,
                           commandBuffer)
         }
@@ -83,44 +76,61 @@ class LayerManager: ObservableObject {
                       into: dstTexture,
                       commandBuffer)
     }
+}
 
-    func clearTextures() {
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTextures(commandBuffer)
-        commandBuffer.commit()
-    }
-    func clearTextures(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: layers[index].texture,
-                      commandBuffer)
-    }
+// CRUD
+extension LayerManager {
+    func addLayer(_ textureSize: CGSize) {
+        addUndoObject = true
+        
+        let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-    func updateSelectedLayer(_ layer: LayerModel) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        index = layerIndex
-        selectedLayerAlpha = layer.alpha
+        let layer = LayerModel(texture: texture,
+                               title: title)
+
+        if index < layers.count - 1 {
+            layers.insert(layer, at: index + 1)
+        } else {
+            layers.append(layer)
+        }
+
+        updateNonSelectedTextures()
+    }
+    func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
+        layers = layers.reversed()
+        layers.move(fromOffsets: source, toOffset: destination)
+        layers = layers.reversed()
+
+        if let selectedLayer,
+           let layerIndex = layers.firstIndex(of: selectedLayer) {
+            index = layerIndex
+            updateNonSelectedTextures()
+            setNeedsDisplay = true
+        }
+    }
+    func removeLayer() {
+        addUndoObject = true
+
+        if layers.count == 1 { return }
+
+        layers.remove(at: index)
+
+        // Updates the value for UI update
+        var curretnIndex = index
+        if curretnIndex > layers.count - 1 {
+            curretnIndex = layers.count - 1
+        }
+        index = curretnIndex
 
         updateNonSelectedTextures()
         setNeedsDisplay = true
     }
-    func updateSelectedTexture(_ layer: LayerModel, _ texture: MTLTexture) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].texture = texture
-    }
-    func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].isVisible = isVisible
 
-        updateNonSelectedTextures()
-        setNeedsDisplay = true
-    }
     func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
         setNeedsDisplay = true
-    }
-    func updateThumbnail(_ layer: LayerModel) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].updateThumbnail()
     }
     func updateNonSelectedTextures() {
         let bottomIndex: Int = index - 1
@@ -150,104 +160,27 @@ class LayerManager: ObservableObject {
 
         commandBuffer.commit()
     }
-}
-
-extension LayerManager {
-    func addLayer(_ textureSize: CGSize) {
-        addUndoObject = true
-        
-        let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-
-        let layer = LayerModel(texture: texture,
-                               title: title)
-
-        if index < layers.count - 1 {
-            layers.insert(layer, at: index + 1)
-        } else {
-            layers.append(layer)
-        }
-
-        updateNonSelectedTextures()
-    }
-    func removeLayer() {
-        addUndoObject = true
-
-        if layers.count == 1 { return }
-
-        layers.remove(at: index)
-
-        // Updates the value for UI update
-        var curretnIndex = index
-        if curretnIndex > layers.count - 1 {
-            curretnIndex = layers.count - 1
-        }
-        index = curretnIndex
+    func updateSelectedLayer(_ layer: LayerModel) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        index = layerIndex
+        selectedLayerAlpha = layer.alpha
 
         updateNonSelectedTextures()
         setNeedsDisplay = true
     }
-    func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
-        layers = layers.reversed()
-        layers.move(fromOffsets: source, toOffset: destination)
-        layers = layers.reversed()
-
-        if let selectedLayer,
-           let layerIndex = layers.firstIndex(of: selectedLayer) {
-            index = layerIndex
-            updateNonSelectedTextures()
-            setNeedsDisplay = true
-        }
+    func updateSelectedTexture(_ layer: LayerModel, _ texture: MTLTexture) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].texture = texture
     }
-}
-
-extension LayerManager {
-    var undoObject: UndoObject {
-        return UndoObject(index: index, layers: layers)
+    func updateThumbnail(_ layer: LayerModel) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].updateThumbnail()
     }
-    func setUndoObject(_ object: UndoObject) {
-        index = object.index
-        layers = object.layers
+    func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].isVisible = isVisible
 
-        selectedLayerAlpha = layers[index].alpha
-    }
-}
-
-extension LayerManager {
-    static func convertLayerModelCodableArray(layers: [LayerModel],
-                                              fileIO: FileIO,
-                                              folderURL: URL) async throws -> [LayerModelCodable] {
-        var resultLayers: [LayerModelCodable] = []
-
-        let tasks = layers.map { layer in
-            Task<LayerModelCodable?, Error> {
-                do {
-                    if let texture = layer.texture {
-                        let textureName = UUID().uuidString
-
-                        try fileIO.saveImage(bytes: texture.bytes,
-                                             to: folderURL.appendingPathComponent(textureName))
-
-                        return LayerModelCodable.init(textureName: textureName,
-                                                      title: layer.title,
-                                                      isVisible: layer.isVisible,
-                                                      alpha: layer.alpha)
-                    } else {
-                        return nil
-                    }
-
-                } catch {
-                    return nil
-                }
-            }
-        }
-
-        for task in tasks {
-            if let fileURL = try? await task.value {
-                resultLayers.append(fileURL)
-            }
-        }
-
-        return resultLayers.compactMap { $0 }
+        updateNonSelectedTextures()
+        setNeedsDisplay = true
     }
 }

@@ -24,6 +24,13 @@ class CanvasViewModel {
         return layerManager.selectedTexture
     }
 
+    var frameSize: CGSize = .zero {
+        didSet {
+            drawingBrush.frameSize = frameSize
+            drawingEraser.frameSize = frameSize
+        }
+    }
+
     var brushDiameter: Int {
         get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
         set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
@@ -43,7 +50,7 @@ class CanvasViewModel {
     }
 
     /// A protocol for managing drawing
-    private var drawing: Drawing?
+    private (set) var drawing: Drawing?
 
     /// A protocol for managing transformations
     private var transforming: Transforming!
@@ -56,10 +63,11 @@ class CanvasViewModel {
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
-
+    
     var zipFileNameName: String {
         projectName + "." + CanvasViewModel.zipSuffix
     }
+
     static var zipSuffix: String {
         "zip"
     }
@@ -69,9 +77,6 @@ class CanvasViewModel {
     static var jsonFileName: String {
         "data"
     }
-
-    /// A temporary folder URL used for file input and output
-    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -89,22 +94,11 @@ class CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    func setFrameSize(_ size: CGSize) {
-        drawingBrush.frameSize = size
-        drawingEraser.frameSize = size
-    }
-    func initTextures(_ textureSize: CGSize) {
-        layerManager.initLayers(textureSize)
-        layerManager.initTextures(textureSize)
+    func initAllTextures(_ textureSize: CGSize) {
+        layerManager.initLayerManager(textureSize)
 
         drawingBrush.initTextures(textureSize)
         drawingEraser.initTextures(textureSize)
-    }
-    func clearTextures() {
-        layerManager.clearTextures()
-
-        drawingBrush.clearDrawingTextures()
-        drawingEraser.clearDrawingTextures()
     }
 }
 
@@ -134,24 +128,20 @@ extension CanvasViewModel {
             updateThumbnail()
         }
     }
-    func mergeAllTextures(backgroundColor: (Int, Int, Int),
-                          into dstTexture: MTLTexture,
-                          _ commandBuffer: MTLCommandBuffer) {
+    func mergeAllLayers(backgroundColor: (Int, Int, Int),
+                        to dstTexture: MTLTexture,
+                        _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture,
-              let drawingTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
+              let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
+        let selectedAlpha = layerManager.selectedLayerAlpha
 
-        layerManager.merge(drawingTextures: drawingTextures.compactMap { $0 },
-                           backgroundColor: backgroundColor,
-                           into: dstTexture,
-                           commandBuffer)
+        layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
+                                      selectedAlpha: selectedAlpha,
+                                      backgroundColor: backgroundColor,
+                                      to: dstTexture,
+                                      commandBuffer)
     }
 
-    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
-        drawing?.clearDrawingTextures(commandBuffer)
-    }
-    func clearCurrentTexture(_ commandBuffer: MTLCommandBuffer) {
-        layerManager.clearTextures(commandBuffer)
-    }
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
@@ -183,7 +173,7 @@ extension CanvasViewModel {
                              into folderURL: URL,
                              with zipFileName: String) throws {
         Task {
-            let layers = try await LayerManager.convertLayerModelCodableArray(layers: layerManager.layers,
+            let layers = try await LayerModel.convertToLayerModelCodableArray(layers: layerManager.layers,
                                                                               fileIO: fileIO,
                                                                               folderURL: folderURL)
 
@@ -277,5 +267,10 @@ extension CanvasViewModel {
         (drawingEraser.tool as? DrawingToolEraser)!.diameter = eraserDiameter
 
         projectName = zipFilePath.fileName
+    }
+
+    var undoObject: UndoObject {
+        return UndoObject(index: layerManager.index,
+                          layers: layerManager.layers)
     }
 }
