@@ -107,4 +107,15 @@ enum MTKTextureUtils {
             }
         }
     }
+
+    static func makeBlankTexture(_ device: MTLDevice, _ textureSize: CGSize) -> MTLTexture {
+        let texture = MTKTextureUtils.makeTexture(device, textureSize)!
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        Command.clear(texture: texture,
+                      commandBuffer)
+        commandBuffer.commit()
+
+        return texture
+    }
 }

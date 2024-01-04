@@ -44,18 +44,9 @@ class LayerManager: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initTextures(_ textureSize: CGSize) {
-
-        bottomTexture = MTKTextureUtils.makeTexture(device, textureSize)!
-        topTexture = MTKTextureUtils.makeTexture(device, textureSize)!
-        currentTexture = MTKTextureUtils.makeTexture(device, textureSize)!
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-
-        Command.clear(texture: bottomTexture, commandBuffer)
-        Command.clear(texture: topTexture, commandBuffer)
-        Command.clear(texture: currentTexture, commandBuffer)
-
-        commandBuffer.commit()
+        bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
         self.textureSize = textureSize
 
@@ -166,12 +157,7 @@ extension LayerManager {
         addUndoObject = true
         
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        let texture = MTKTextureUtils.makeTexture(device, textureSize)!
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        Command.clear(texture: texture,
-                      commandBuffer)
-        commandBuffer.commit()
+        let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
         let layer = LayerModel(texture: texture,
                                title: title)
