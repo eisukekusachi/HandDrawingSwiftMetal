@@ -77,9 +77,9 @@ extension LayerListView {
                 Spacer()
                     .frame(width: 8)
             }
-            .onTapGesture {
-                didTapRow(layer)
-            }
+        }
+        .onTapGesture {
+            didTapRow(layer)
         }
     }
 }
