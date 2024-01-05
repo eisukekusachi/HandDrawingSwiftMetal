@@ -68,8 +68,8 @@ extension LayerView {
                 .frame(width: 16)
 
             Button(action: {
-                guard let layer = layerManager.selectedLayer else { return }
-                textFieldTitle = layer.title
+                guard let selectedLayer = layerManager.selectedLayer else { return }
+                textFieldTitle = selectedLayer.title
                 isTextFieldPresented = true
 
             }, label: {
@@ -79,9 +79,9 @@ extension LayerView {
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let layer = layerManager.selectedLayer else { return }
-                    layerManager.updateSelectedTitle(layer, 
-                                                     $textFieldTitle.wrappedValue)
+                    guard let selectedLayer = layerManager.selectedLayer else { return }
+                    layerManager.updateTitle(selectedLayer,
+                                             $textFieldTitle.wrappedValue)
                 })
                 Button("Cancel", action: {})
             }
@@ -99,9 +99,8 @@ extension LayerView {
             value: $layerManager.selectedLayerAlpha,
             style: sliderStyle,
             range: range) { value in
-                if let layer = layerManager.selectedLayer {
-                    layerManager.updateLayerAlpha(layer, value)
-                }
+                guard let selectedLayer = layerManager.selectedLayer else { return }
+                layerManager.updateLayerAlpha(selectedLayer, value)
         }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)

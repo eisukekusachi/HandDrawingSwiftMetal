@@ -13,7 +13,7 @@ extension CanvasViewModel {
                               matrix: CGAffineTransform,
                               touchState: TouchState,
                               _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture else { return }
+        guard let selectedTexture = layerManager.selectedTexture else { return }
 
         drawing?.drawOnDrawingTexture(with: iterator,
                                       matrix: matrix,
@@ -27,7 +27,7 @@ extension CanvasViewModel {
     func mergeAllLayers(backgroundColor: (Int, Int, Int),
                         to dstTexture: MTLTexture,
                         _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture,
+        guard let selectedTexture = layerManager.selectedTexture,
               let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
         let selectedAlpha = layerManager.selectedLayerAlpha
 

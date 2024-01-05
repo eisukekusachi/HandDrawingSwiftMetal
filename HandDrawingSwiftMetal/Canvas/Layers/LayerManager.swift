@@ -12,30 +12,31 @@ enum LayerManagerError: Error {
     case failedToMakeTexture
 }
 class LayerManager: ObservableObject {
-    @Published var layers: [LayerModel] = [] {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-        }
-    }
-    @Published var index: Int = 0 {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-        }
-    }
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
     @Published var setNeedsDisplay: Bool = false
     @Published var addUndoObject: Bool = false
 
-    var arrowPointX: CGFloat = 0.0
+    var layers: [LayerModel] = [] {
+        didSet {
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
+        }
+    }
+    var index: Int = 0 {
+        didSet {
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
+        }
+    }
 
     var selectedTexture: MTLTexture? {
         guard index < layers.count else { return nil }
         return layers[index].texture
     }
+
+    var arrowPointX: CGFloat = 0.0
 
     private (set) var textureSize: CGSize = .zero
 
@@ -135,11 +136,6 @@ extension LayerManager {
         setNeedsDisplay = true
     }
 
-    func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].alpha = alpha
-        setNeedsDisplay = true
-    }
     func updateNonSelectedTextures() {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
@@ -168,19 +164,23 @@ extension LayerManager {
 
         commandBuffer.commit()
     }
-    func updateSelectedLayer(_ layer: LayerModel) {
+    func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
         selectedLayerAlpha = layer.alpha
-
         updateNonSelectedTextures()
         setNeedsDisplay = true
     }
-    func updateSelectedTexture(_ layer: LayerModel, _ texture: MTLTexture) {
+    func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].alpha = alpha
+        setNeedsDisplay = true
+    }
+    func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].texture = texture
     }
-    func updateSelectedTitle(_ layer: LayerModel, _ title: String) {
+    func updateTitle(_ layer: LayerModel, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
@@ -191,7 +191,6 @@ extension LayerManager {
     func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].isVisible = isVisible
-
         updateNonSelectedTextures()
         setNeedsDisplay = true
     }

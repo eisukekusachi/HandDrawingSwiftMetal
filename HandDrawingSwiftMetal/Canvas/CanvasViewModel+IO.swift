@@ -8,11 +8,6 @@
 import MetalKit
 
 extension CanvasViewModel {
-    var undoObject: UndoObject {
-        return UndoObject(index: layerManager.index,
-                          layers: layerManager.layers)
-    }
-
     func saveCanvasAsZipFile(rootTexture: MTLTexture,
                              thumbnailHeight: CGFloat = 512,
                              into folderURL: URL,
@@ -24,18 +19,18 @@ extension CanvasViewModel {
 
             let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
             try fileIO.saveImage(image: thumbnail,
-                                 to: folderURL.appendingPathComponent(CanvasViewModel.thumbnailPath))
+                                 to: folderURL.appendingPathComponent(URL.thumbnailPath))
 
             let data = CanvasModelV2(textureSize: rootTexture.size,
                                      layerIndex: layerManager.index,
                                      layers: layers,
-                                     thumbnailName: CanvasViewModel.thumbnailPath,
+                                     thumbnailName: URL.thumbnailPath,
                                      drawingTool: drawingTool.rawValue,
                                      brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
                                      eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
 
             try fileIO.saveJson(data,
-                                to: folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
+                                to: folderURL.appendingPathComponent(URL.jsonFileName))
 
             try fileIO.zip(folderURL,
                            to: URL.documents.appendingPathComponent(zipFileName))
@@ -45,13 +40,13 @@ extension CanvasViewModel {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
-        return try? fileIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
+        return try? fileIO.loadJson(folderURL.appendingPathComponent(URL.jsonFileName))
     }
     func loadCanvasData(from zipFilePath: String, into folderURL: URL) throws -> CanvasModel? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
-        return try? fileIO.loadJson(folderURL.appendingPathComponent(CanvasViewModel.jsonFileName))
+        return try? fileIO.loadJson(folderURL.appendingPathComponent(URL.jsonFileName))
     }
 
     func applyCanvasDataToCanvasV2(_ data: CanvasModelV2?, folderURL: URL, zipFilePath: String) throws {

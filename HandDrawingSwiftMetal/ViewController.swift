@@ -141,7 +141,7 @@ extension ViewController {
                    with: canvasViewModel.zipFileNameName)
     }
     @IBAction func pushLoadButton() {
-        let zipFileList = URL.documents.allFileURLs(suffix: CanvasViewModel.zipSuffix).map {
+        let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
             $0.lastPathComponent
         }
         let fileView = FileView(zipFileList: zipFileList,

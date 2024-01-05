@@ -34,7 +34,7 @@ extension CanvasView {
 
         if  let selectedLayer = viewModel.layerManager.selectedLayer,
             let newTexture = duplicateTexture(viewModel.layerManager.selectedTexture) {
-            viewModel.layerManager.updateSelectedTexture(selectedLayer, newTexture)
+            viewModel.layerManager.updateTexture(selectedLayer, newTexture)
         }
     }
 

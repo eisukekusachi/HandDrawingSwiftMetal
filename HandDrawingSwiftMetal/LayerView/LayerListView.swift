@@ -17,8 +17,8 @@ struct LayerListView: View {
 
                 layerRow(layer: layer,
                          selected: layerManager.selectedLayer == layer,
-                         didTapRow: { layer in
-                    layerManager.updateSelectedLayer(layer)
+                         didTapRow: { selectedLayer in
+                    layerManager.updateLayer(selectedLayer)
                 },
                          didTapVisibleButton: { layer in
                     layerManager.updateVisibility(layer, !layer.isVisible)

@@ -19,11 +19,6 @@ class CanvasViewModel {
     /// Drawing with an eraser
     var drawingEraser = DrawingEraser()
 
-    /// A texture that is selected
-    var selectedTexture: MTLTexture? {
-        return layerManager.selectedTexture
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             drawingBrush.frameSize = frameSize
@@ -53,20 +48,15 @@ class CanvasViewModel {
     var projectName: String = Calendar.currentDate
     
     var zipFileNameName: String {
-        projectName + "." + CanvasViewModel.zipSuffix
+        projectName + "." + URL.zipSuffix
+    }
+
+    var undoObject: UndoObject {
+        return UndoObject(index: layerManager.index,
+                          layers: layerManager.layers)
     }
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
-    static var zipSuffix: String {
-        "zip"
-    }
-    static var thumbnailPath: String {
-        "thumbnail.png"
-    }
-    static var jsonFileName: String {
-        "data"
-    }
 
     /// A protocol for managing drawing
     private (set) var drawing: Drawing?
