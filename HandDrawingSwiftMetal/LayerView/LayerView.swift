@@ -39,14 +39,14 @@ struct LayerView: View {
 
 extension LayerView {
     func toolbar(layerManager: LayerManager) -> some View {
-        let buttonSize: CGFloat = 15
+        let buttonSize: CGFloat = 20
 
         return HStack {
             Button(action: {
                 layerManager.addLayer(layerManager.textureSize)
 
             }, label: {
-                Image(systemName: "plus")
+                Image(systemName: "plus.circle")
                     .buttonModifier(diameter: buttonSize)
             })
 
@@ -57,7 +57,7 @@ extension LayerView {
                 layerManager.removeLayer()
 
             }, label: {
-                Image(systemName: "minus")
+                Image(systemName: "minus.circle")
                     .buttonModifier(diameter: buttonSize)
             })
 
