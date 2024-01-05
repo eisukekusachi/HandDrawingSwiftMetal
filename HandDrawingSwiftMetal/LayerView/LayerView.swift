@@ -10,6 +10,9 @@ import SwiftUI
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
 
+    @State var isTextFieldPresented: Bool = false
+    @State var textFieldTitle: String = ""
+
     let arrowSize: CGSize = .init(width: 18, height: 14)
     let roundedCorner: CGFloat = 12
 
@@ -60,6 +63,28 @@ extension LayerView {
                 Image(systemName: "minus.circle")
                     .buttonModifier(diameter: buttonSize)
             })
+
+            Spacer()
+                .frame(width: 16)
+
+            Button(action: {
+                guard let layer = layerManager.selectedLayer else { return }
+                textFieldTitle = layer.title
+                isTextFieldPresented = true
+
+            }, label: {
+                Image(systemName: "pencil")
+                    .buttonModifier(diameter: buttonSize)
+            })
+            .alert("Enter a title", isPresented: $isTextFieldPresented) {
+                TextField("Enter a title", text: $textFieldTitle)
+                Button("OK", action: {
+                    guard let layer = layerManager.selectedLayer else { return }
+                    layerManager.updateSelectedTitle(layer, 
+                                                     $textFieldTitle.wrappedValue)
+                })
+                Button("Cancel", action: {})
+            }
 
             Spacer()
         }

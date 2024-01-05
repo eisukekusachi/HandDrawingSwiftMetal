@@ -12,7 +12,12 @@ enum LayerManagerError: Error {
     case failedToMakeTexture
 }
 class LayerManager: ObservableObject {
-    @Published var layers: [LayerModel] = []
+    @Published var layers: [LayerModel] = [] {
+        didSet {
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
+        }
+    }
     @Published var index: Int = 0 {
         didSet {
             guard index < layers.count else { return }
@@ -173,6 +178,10 @@ extension LayerManager {
     func updateSelectedTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].texture = texture
+    }
+    func updateSelectedTitle(_ layer: LayerModel, _ title: String) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].title = title
     }
     func updateThumbnail(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
