@@ -105,12 +105,13 @@ extension LayerManager {
         updateNonSelectedTextures()
     }
     func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
+        guard let tmpSelectedLayer = selectedLayer else { return }
+
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)
         layers = layers.reversed()
 
-        if let selectedLayer,
-           let layerIndex = layers.firstIndex(of: selectedLayer) {
+        if let layerIndex = layers.firstIndex(of: tmpSelectedLayer) {
             index = layerIndex
             updateNonSelectedTextures()
             setNeedsDisplay = true
