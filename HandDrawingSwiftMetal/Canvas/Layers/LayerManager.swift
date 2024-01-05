@@ -25,6 +25,8 @@ class LayerManager: ObservableObject {
     @Published var setNeedsDisplay: Bool = false
     @Published var addUndoObject: Bool = false
 
+    var arrowPointX: CGFloat = 0.0
+
     var selectedTexture: MTLTexture? {
         guard index < layers.count else { return nil }
         return layers[index].texture

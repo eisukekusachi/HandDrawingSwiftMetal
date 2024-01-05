@@ -24,6 +24,9 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
+    @IBOutlet weak var layerButton: UIButton!
+
+    @IBOutlet weak var topStackView: UIStackView!
 
     private var cancellables = Set<AnyCancellable>()
 

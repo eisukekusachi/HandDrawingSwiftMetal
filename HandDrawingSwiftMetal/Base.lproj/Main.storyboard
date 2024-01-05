@@ -155,7 +155,9 @@
                     <connections>
                         <outlet property="diameterSlider" destination="d3h-Jn-l09" id="O6g-Am-EF7"/>
                         <outlet property="exportButton" destination="eLs-JK-IPQ" id="Pfv-9P-voq"/>
+                        <outlet property="layerButton" destination="iEb-h1-cPQ" id="NPp-aX-BCU"/>
                         <outlet property="redoButton" destination="ckJ-z6-HZH" id="nT6-3h-z9l"/>
+                        <outlet property="topStackView" destination="VVQ-nq-vu0" id="wPJ-DW-Rf3"/>
                         <outlet property="undoButton" destination="PYn-NR-3Gt" id="Lqq-j3-oZi"/>
                     </connections>
                 </viewController>
@@ -178,7 +180,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
