@@ -13,25 +13,23 @@ extension CanvasViewModel {
                              codableLayers: [LayerModelCodable],
                              into folderURL: URL,
                              with zipFileName: String) throws {
-        Task {
-            let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
-            try FileIOUtils.saveImage(image: thumbnail,
-                                      to: folderURL.appendingPathComponent(URL.thumbnailPath))
+        let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
+        try FileIOUtils.saveImage(image: thumbnail,
+                                  to: folderURL.appendingPathComponent(URL.thumbnailPath))
 
-            let data = CanvasModelV2(textureSize: rootTexture.size,
-                                     layerIndex: layerManager.index,
-                                     layers: codableLayers,
-                                     thumbnailName: URL.thumbnailPath,
-                                     drawingTool: drawingTool.rawValue,
-                                     brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
-                                     eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
+        let data = CanvasModelV2(textureSize: rootTexture.size,
+                                 layerIndex: layerManager.index,
+                                 layers: codableLayers,
+                                 thumbnailName: URL.thumbnailPath,
+                                 drawingTool: drawingTool.rawValue,
+                                 brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
+                                 eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
 
-            try fileIO.saveJson(data,
-                                to: folderURL.appendingPathComponent(URL.jsonFileName))
+        try fileIO.saveJson(data,
+                            to: folderURL.appendingPathComponent(URL.jsonFileName))
 
-            try fileIO.zip(folderURL,
-                           to: URL.documents.appendingPathComponent(zipFileName))
-        }
+        try fileIO.zip(folderURL,
+                       to: URL.documents.appendingPathComponent(zipFileName))
     }
     func loadCanvasDataV2(from zipFilePath: String, into folderURL: URL) throws -> CanvasModelV2? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
