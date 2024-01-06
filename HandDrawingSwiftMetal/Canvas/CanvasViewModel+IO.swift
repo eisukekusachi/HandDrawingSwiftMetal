@@ -10,15 +10,16 @@ import MetalKit
 extension CanvasViewModel {
     func saveCanvasAsZipFile(rootTexture: MTLTexture,
                              thumbnailHeight: CGFloat = 512,
+                             layerIndex: Int,
                              codableLayers: [LayerModelCodable],
-                             into folderURL: URL,
+                             tmpFolderURL: URL,
                              with zipFileName: String) throws {
         let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
         try FileIOUtils.saveImage(image: thumbnail,
-                                  to: folderURL.appendingPathComponent(URL.thumbnailPath))
+                                  to: tmpFolderURL.appendingPathComponent(URL.thumbnailPath))
 
         let data = CanvasModelV2(textureSize: rootTexture.size,
-                                 layerIndex: layerManager.index,
+                                 layerIndex: layerIndex,
                                  layers: codableLayers,
                                  thumbnailName: URL.thumbnailPath,
                                  drawingTool: drawingTool.rawValue,
@@ -26,9 +27,9 @@ extension CanvasViewModel {
                                  eraserDiameter: (drawingEraser.tool as? DrawingToolEraser)!.diameter)
 
         try fileIO.saveJson(data,
-                            to: folderURL.appendingPathComponent(URL.jsonFileName))
+                            to: tmpFolderURL.appendingPathComponent(URL.jsonFileName))
 
-        try fileIO.zip(folderURL,
+        try fileIO.zip(tmpFolderURL,
                        to: URL.documents.appendingPathComponent(zipFileName))
     }
     func loadCanvasDataV2(from zipFilePath: String, into folderURL: URL) throws -> CanvasModelV2? {

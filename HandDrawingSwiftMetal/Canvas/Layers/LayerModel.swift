@@ -61,7 +61,7 @@ extension Array where Element == LayerModelCodable {
 }
 
 extension Array where Element == LayerModel {
-    func convertToLayerModelCodable(folderURL: URL) async throws -> [LayerModelCodable] {
+    func convertToLayerModelCodable(imageFolderURL: URL) async throws -> [LayerModelCodable] {
 
         var resultLayers: [LayerModelCodable] = []
 
@@ -72,7 +72,7 @@ extension Array where Element == LayerModel {
                         let textureName = UUID().uuidString
 
                         try FileIOUtils.saveImage(bytes: texture.bytes,
-                                                  to: folderURL.appendingPathComponent(textureName))
+                                                  to: imageFolderURL.appendingPathComponent(textureName))
 
                         return LayerModelCodable.init(textureName: textureName,
                                                       title: layer.title,

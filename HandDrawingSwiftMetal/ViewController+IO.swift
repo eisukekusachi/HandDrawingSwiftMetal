@@ -9,14 +9,16 @@ import Foundation
 
 extension ViewController {
     func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
-        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
+        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] tmpFolderURL in
             guard   let self,
                     let currentTexture = canvasView.rootTexture else { return }
 
-            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(folderURL: folderURL)
+            let layerIndex = canvasViewModel.layerManager.index
+            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
             try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
+                                                    layerIndex: layerIndex,
                                                     codableLayers: codableLayers,
-                                                    into: folderURL,
+                                                    tmpFolderURL: tmpFolderURL,
                                                     with: zipFileName)
         }
     }
