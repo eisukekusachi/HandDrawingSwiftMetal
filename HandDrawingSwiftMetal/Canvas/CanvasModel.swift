@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct CanvasModelV2: Codable {
+struct CanvasModelV2: Codable, Equatable {
     let textureSize: CGSize?
     let layerIndex: Int
     let layers: [LayerModelCodable?]?
