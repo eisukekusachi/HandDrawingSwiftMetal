@@ -76,6 +76,7 @@
 		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
 		D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */; };
+		D4C02DA12B492311008FD8AF /* FileIOUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C02DA02B492311008FD8AF /* FileIOUtils.swift */; };
 		D4C8EE982B25490B005947EC /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* Drawing.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
 		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
@@ -190,6 +191,7 @@
 		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
+		D4C02DA02B492311008FD8AF /* FileIOUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOUtils.swift; sourceTree = "<group>"; };
 		D4C8EE972B25490B005947EC /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
 		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
@@ -378,6 +380,7 @@
 			children = (
 				D4F1BB3F2B2D46D8006EA102 /* FileIO.swift */,
 				D4F1BB412B2D46F6006EA102 /* FileIOImpl.swift */,
+				D4C02DA02B492311008FD8AF /* FileIOUtils.swift */,
 			);
 			path = FileIO;
 			sourceTree = "<group>";
@@ -749,6 +752,7 @@
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
 				D46D07D42ADBC46D0093D861 /* FingerGestureWithStorage.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
+				D4C02DA12B492311008FD8AF /* FileIOUtils.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D40D975229DAB01900A82E6A /* CanvasView.swift in Sources */,
 				D40D977B29DAB0B400A82E6A /* PencilGesture.swift in Sources */,

@@ -36,21 +36,43 @@ struct LayerModel: Identifiable, Equatable {
         lhs.id == rhs.id
     }
 }
+extension Array where Element == LayerModelCodable {
+    func convertToLayerModel(device: MTLDevice, textureSize: CGSize, folderURL: URL) throws -> [LayerModel] {
+        var layers: [LayerModel] = []
 
-extension LayerModel {
-    static func convertToLayerModelCodableArray(layers: [LayerModel],
-                                                fileIO: FileIO,
-                                                folderURL: URL) async throws -> [LayerModelCodable] {
+        try self.forEach { layer in
+            if  let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals {
+                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData)
+                let layerData = LayerModel.init(texture: newTexture,
+                                                title: layer.title,
+                                                isVisible: layer.isVisible,
+                                                alpha: layer.alpha)
+                layers.append(layerData)
+            }
+        }
+
+        if layers.count == 0 {
+            layers.append(LayerModel.init(texture: MTKTextureUtils.makeTexture(device, textureSize),
+                                          title: TimeStampFormatter.current(template: "MMM dd HH mm ss")))
+        }
+
+        return layers
+    }
+}
+
+extension Array where Element == LayerModel {
+    func convertToLayerModelCodable(folderURL: URL) async throws -> [LayerModelCodable] {
+
         var resultLayers: [LayerModelCodable] = []
 
-        let tasks = layers.map { layer in
+        let tasks = self.map { layer in
             Task<LayerModelCodable?, Error> {
                 do {
                     if let texture = layer.texture {
                         let textureName = UUID().uuidString
 
-                        try fileIO.saveImage(bytes: texture.bytes,
-                                             to: folderURL.appendingPathComponent(textureName))
+                        try FileIOUtils.saveImage(bytes: texture.bytes,
+                                                  to: folderURL.appendingPathComponent(textureName))
 
                         return LayerModelCodable.init(textureName: textureName,
                                                       title: layer.title,

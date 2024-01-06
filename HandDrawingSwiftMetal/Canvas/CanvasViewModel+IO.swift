@@ -13,13 +13,11 @@ extension CanvasViewModel {
                              into folderURL: URL,
                              with zipFileName: String) throws {
         Task {
-            let layers = try await LayerModel.convertToLayerModelCodableArray(layers: layerManager.layers,
-                                                                              fileIO: fileIO,
-                                                                              folderURL: folderURL)
+            let layers = try await layerManager.layers.convertToLayerModelCodable(folderURL: folderURL)
 
             let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
-            try fileIO.saveImage(image: thumbnail,
-                                 to: folderURL.appendingPathComponent(URL.thumbnailPath))
+            try FileIOUtils.saveImage(image: thumbnail,
+                                      to: folderURL.appendingPathComponent(URL.thumbnailPath))
 
             let data = CanvasModelV2(textureSize: rootTexture.size,
                                      layerIndex: layerManager.index,
@@ -60,19 +58,9 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        var newLayers: [LayerModel] = []
-
-        try layers.forEach { layer in
-            if let layer,
-               let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals {
-                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData)
-                let layerData = LayerModel.init(texture: newTexture,
-                                                title: layer.title,
-                                                isVisible: layer.isVisible,
-                                                alpha: layer.alpha)
-                newLayers.append(layerData)
-            }
-        }
+        let newLayers = try layers.compactMap { $0 }.convertToLayerModel(device: device,
+                                                                         textureSize: textureSize,
+                                                                         folderURL: folderURL)
         layerManager.layers = newLayers
         layerManager.index = layerIndex
         layerManager.selectedLayerAlpha = newLayers[layerIndex].alpha

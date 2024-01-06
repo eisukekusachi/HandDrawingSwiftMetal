@@ -30,13 +30,6 @@ class FileIOImpl: FileIO {
             throw FileInputError.failedToUnzip
         }
     }
-    func saveImage(bytes: [UInt8], to url: URL) throws {
-        try? Data(bytes).write(to: url)
-    }
-    func saveImage(image: UIImage?, to url: URL) throws {
-        try? image?.pngData()?.write(to: url)
-    }
-    
     func loadJson<T: Codable>(_ url: URL) throws -> T? {
         guard let stringJson: String = try? String(contentsOf: url, encoding: .utf8),
               let dataJson: Data = stringJson.data(using: .utf8)
