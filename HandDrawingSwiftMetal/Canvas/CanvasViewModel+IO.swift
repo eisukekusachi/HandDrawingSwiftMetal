@@ -10,18 +10,17 @@ import MetalKit
 extension CanvasViewModel {
     func saveCanvasAsZipFile(rootTexture: MTLTexture,
                              thumbnailHeight: CGFloat = 512,
+                             codableLayers: [LayerModelCodable],
                              into folderURL: URL,
                              with zipFileName: String) throws {
         Task {
-            let layers = try await layerManager.layers.convertToLayerModelCodable(folderURL: folderURL)
-
             let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
             try FileIOUtils.saveImage(image: thumbnail,
                                       to: folderURL.appendingPathComponent(URL.thumbnailPath))
 
             let data = CanvasModelV2(textureSize: rootTexture.size,
                                      layerIndex: layerManager.index,
-                                     layers: layers,
+                                     layers: codableLayers,
                                      thumbnailName: URL.thumbnailPath,
                                      drawingTool: drawingTool.rawValue,
                                      brushDiameter: (drawingBrush.tool as? DrawingToolBrush)!.diameter,
