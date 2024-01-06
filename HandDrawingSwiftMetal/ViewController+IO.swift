@@ -9,36 +9,46 @@ import Foundation
 
 extension ViewController {
     func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
-        createTemporaryFolder(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
+        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
             guard let currentTexture = self?.canvasView.rootTexture else { return }
 
-            try self?.canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
-                                                          into: folderURL,
-                                                          with: zipFileName)
+            do {
+                try self?.canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
+                                                              into: folderURL,
+                                                              with: zipFileName)
+            } catch {
+                print(error)
+            }
         }
     }
     func loadCanvas(from zipFilePath: String, into tmpFolderURL: URL) {
-        createTemporaryFolder(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
-            if let data = try self?.canvasViewModel.loadCanvasDataV2(from: zipFilePath,
-                                                                     into: folderURL) {
-                try self?.canvasViewModel.applyCanvasDataToCanvasV2(data,
-                                                                    folderURL: folderURL,
-                                                                    zipFilePath: zipFilePath)
+        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
+            guard let self else { return }
 
-            } else if let data = try self?.canvasViewModel.loadCanvasData(from: zipFilePath,
-                                                                          into: folderURL) {
-                try self?.canvasViewModel.applyCanvasDataToCanvas(data,
-                                                                  folderURL: folderURL,
-                                                                  zipFilePath: zipFilePath)
+            if let data = try canvasViewModel.loadCanvasDataV2(from: zipFilePath, into: folderURL) {
+                guard let textureSize = data.textureSize,
+                      let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(device: canvasViewModel.device,
+                                                                                           textureSize: textureSize,
+                                                                                           folderURL: folderURL) else { return }
+                try canvasViewModel.applyCanvasDataToCanvasV2(data,
+                                                              layers: layers,
+                                                              folderURL: folderURL,
+                                                              zipFilePath: zipFilePath)
+
+            } else if let data = try canvasViewModel.loadCanvasData(from: zipFilePath,
+                                                                    into: folderURL) {
+                try canvasViewModel.applyCanvasDataToCanvas(data,
+                                                            folderURL: folderURL,
+                                                            zipFilePath: zipFilePath)
             }
 
-            self?.initAllComponents()
-            self?.canvasViewModel.layerManager.updateNonSelectedTextures()
-            self?.canvasView.refreshCanvas()
+            initAllComponents()
+            canvasViewModel.layerManager.updateNonSelectedTextures()
+            canvasView.refreshCanvas()
         }
     }
-    private func createTemporaryFolder(tmpFolderURL: URL,
-                                       _ tasks: @escaping (URL) throws -> Void) {
+    private func createTemporaryFolderWithErrorHandling(tmpFolderURL: URL,
+                                                        _ tasks: @escaping (URL) throws -> Void) {
         Task {
             let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
             defer {

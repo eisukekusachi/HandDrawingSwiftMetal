@@ -47,10 +47,11 @@ extension CanvasViewModel {
         return try? fileIO.loadJson(folderURL.appendingPathComponent(URL.jsonFileName))
     }
 
-    func applyCanvasDataToCanvasV2(_ data: CanvasModelV2?, folderURL: URL, zipFilePath: String) throws {
-        guard let layers = data?.layers,
-              let layerIndex = data?.layerIndex,
-              let textureSize = data?.textureSize,
+    func applyCanvasDataToCanvasV2(_ data: CanvasModelV2?,
+                                   layers: [LayerModel],
+                                   folderURL: URL,
+                                   zipFilePath: String) throws {
+        guard let layerIndex = data?.layerIndex,
               let rawValueDrawingTool = data?.drawingTool,
               let brushDiameter = data?.brushDiameter,
               let eraserDiameter = data?.eraserDiameter
@@ -58,12 +59,9 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        let newLayers = try layers.compactMap { $0 }.convertToLayerModel(device: device,
-                                                                         textureSize: textureSize,
-                                                                         folderURL: folderURL)
-        layerManager.layers = newLayers
+        layerManager.layers = layers
         layerManager.index = layerIndex
-        layerManager.selectedLayerAlpha = newLayers[layerIndex].alpha
+        layerManager.selectedLayerAlpha = layers[layerIndex].alpha
 
         drawingTool = .init(rawValue: rawValueDrawingTool)
         (drawingBrush.tool as? DrawingToolBrush)!.diameter = brushDiameter
