@@ -88,16 +88,16 @@ extension LayerListView {
 extension LayerListView {
     private func backgroundColor(_ selected: Bool) -> UIColor {
         if selected {
-            return UIColor(named: "reversalComponent") ?? .clear
-        } else {
             return UIColor(named: "component") ?? .clear
+        } else {
+            return UIColor(named: "reversalComponent") ?? .clear
         }
     }
     private func textColor(_ selected: Bool) -> UIColor {
         if selected {
-            return UIColor(named: "component") ?? .clear
-        } else {
             return UIColor(named: "reversalComponent") ?? .clear
+        } else {
+            return UIColor(named: "component") ?? .clear
         }
     }
     private func iconColor(layer: LayerModel, _ selected: Bool) -> UIColor {
