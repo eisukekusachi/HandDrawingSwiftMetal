@@ -55,6 +55,10 @@ extension LayerListView {
                         .scaledToFit()
                         .background(Color.white)
                         .cornerRadius(4)
+                        .overlay(
+                            Rectangle()
+                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
+                        )
                 }
 
                 Text(layer.title)
