@@ -16,10 +16,6 @@ class CanvasView: MTKTextureDisplayView {
         set { viewModel!.drawingTool = newValue }
     }
 
-    var currentTexture: MTLTexture? {
-        viewModel?.currentTexture
-    }
-
     var brushDiameter: Int {
         get { viewModel!.brushDiameter }
         set { viewModel?.brushDiameter = newValue }
@@ -70,7 +66,7 @@ class CanvasView: MTKTextureDisplayView {
         super.layoutSubviews()
 
         assert(viewModel != nil, "viewModel is nil.")
-        viewModel?.setFrameSize(frame.size)
+        viewModel?.frameSize = frame.size
     }
 
     private func commonInitialization() {
@@ -91,28 +87,29 @@ class CanvasView: MTKTextureDisplayView {
         $textureSize
             .sink { [weak self] newSize in
                 guard let self else { return }
-                viewModel?.initTextures(newSize)
-
-                refreshRootTexture(commandBuffer)
-                setNeedsDisplay()
+                viewModel?.initAllTextures(newSize)
+                refreshCanvas()
             }
             .store(in: &cancellables)
     }
 
     func setViewModel(_ viewModel: CanvasViewModel) {
         self.viewModel = viewModel
+
+        self.viewModel?.layerManager.$setNeedsDisplay
+            .sink { [weak self] result in
+                guard result, let self else { return }
+                refreshCanvas()
+        }
+        .store(in: &cancellables)
+
+        self.viewModel?.layerManager.$addUndoObject
+            .sink { [weak self] _ in
+                self?.registerDrawingUndoAction()
+        }
+        .store(in: &cancellables)
     }
 
-    func refreshRootTexture(_ commandBuffer: MTLCommandBuffer) {
-        viewModel?.mergeAllTextures(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                    into: rootTexture,
-                                    commandBuffer)
-    }
-
-    func refreshCanvas() {
-        refreshRootTexture(commandBuffer)
-        setNeedsDisplay()
-    }
     func newCanvas() {
         viewModel?.projectName = Calendar.currentDate
 
@@ -120,16 +117,16 @@ class CanvasView: MTKTextureDisplayView {
 
         resetMatrix()
 
-        viewModel?.clearCurrentTexture(commandBuffer)
+        viewModel?.layerManager.initLayerManager(textureSize)
+        viewModel?.layerManager.updateNonSelectedTextures()
+        viewModel?.layerManager.selectedLayerAlpha = 255
         refreshCanvas()
     }
-    func clearCanvas() {
-        guard let viewModel else { return }
-
-        registerDrawingUndoAction(viewModel.currentTexture)
-
-        viewModel.clearCurrentTexture(commandBuffer)
-        refreshCanvas()
+    func refreshCanvas() {
+        viewModel?.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                  to: rootTexture,
+                                  commandBuffer)
+        setNeedsDisplay()
     }
 
     /// Reset the canvas transformation matrix to identity.
@@ -143,7 +140,7 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.setStoredMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
-        viewModel?.clearDrawingTextures(commandBuffer)
+        viewModel?.drawing?.clearDrawingTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -163,16 +160,17 @@ extension CanvasView: FingerGestureWithStorageSender {
         else { return }
 
         if touchState == .ended {
-            registerDrawingUndoAction(viewModel.currentTexture)
+            registerDrawingUndoAction()
         }
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        refreshRootTexture(commandBuffer)
+        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                 to: rootTexture,
+                                 commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
                           touchState: TouchState) {
@@ -187,12 +185,10 @@ extension CanvasView: FingerGestureWithStorageSender {
         }
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
     }
-
     func cancel(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
         prepareForNextDrawing()
@@ -212,21 +208,21 @@ extension CanvasView: PencilGestureWithStorageSender {
         inputManager.updateInput(input)
 
         if touchState == .ended {
-            registerDrawingUndoAction(viewModel.currentTexture)
+            registerDrawingUndoAction()
         }
 
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        refreshRootTexture(commandBuffer)
+        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
+                                 to: rootTexture,
+                                 commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
-
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }
-
     func cancel(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()
     }

@@ -57,13 +57,14 @@ kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
 kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
                            texture2d<float, access::write> resultTexture [[ texture(0) ]],
                            texture2d<float, access::read> dstTexture [[ texture(1) ]],
-                           texture2d<float, access::read> srcTexture [[ texture(2) ]]) {
+                           texture2d<float, access::read> srcTexture [[ texture(2) ]],
+                           constant float &alpha [[ buffer(3) ]]) {
     float4 src = srcTexture.read(gid);
     float4 dst = dstTexture.read(gid);
-    float srcA = src[3];
-    float srcB = src[2];
-    float srcG = src[1];
-    float srcR = src[0];
+    float srcA = src[3] * alpha;
+    float srcB = src[2] * alpha;
+    float srcG = src[1] * alpha;
+    float srcR = src[0] * alpha;
     float dstA = dst[3];
     float dstB = dst[2];
     float dstG = dst[1];

@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     let canvasViewModel = CanvasViewModel()
     let canvasView = CanvasView()
 
+    lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.layerManager))
+
     @IBOutlet weak var exportButton: UIButton!
     @IBOutlet weak var diameterSlider: UISlider! {
         didSet {
@@ -22,6 +24,9 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
+    @IBOutlet weak var layerButton: UIButton!
+
+    @IBOutlet weak var topStackView: UIStackView!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -103,7 +108,7 @@ extension ViewController {
             exportButton.isUserInteractionEnabled = true
         }
         
-        if let image = canvasView.currentTexture?.uiImage {
+        if let image = canvasView.rootTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
@@ -113,9 +118,6 @@ extension ViewController {
         } else {
             view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
         }
-    }
-    @IBAction func pushClearButton(_ sender: UIButton) {
-        canvasView.clearCanvas()
     }
     @IBAction func dragDiameterSlider(_ sender: UISlider) {
         if canvasView.drawingTool == .eraser {
@@ -131,19 +133,22 @@ extension ViewController {
     @IBAction func pushRedoButton() {
         canvasView.redo()
     }
+    @IBAction func pushLayerButton() {
+        toggleLayerVisibility()
+    }
     @IBAction func pushSaveButton() {
-        saveCanvas(into: CanvasViewModel.tmpFolderURL,
+        saveCanvas(into: URL.tmpFolderURL,
                    with: canvasViewModel.zipFileNameName)
     }
     @IBAction func pushLoadButton() {
-        let zipFileList = URL.documents.allFileURLs(suffix: CanvasViewModel.zipSuffix).map {
+        let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
             $0.lastPathComponent
         }
         let fileView = FileView(zipFileList: zipFileList,
                                 didTapItem: { [weak self] zipFilePath in
 
             self?.loadCanvas(from: zipFilePath,
-                             into: CanvasViewModel.tmpFolderURL)
+                             into: URL.tmpFolderURL)
             self?.presentedViewController?.dismiss(animated: true)
         })
         let vc = UIHostingController(rootView: fileView)

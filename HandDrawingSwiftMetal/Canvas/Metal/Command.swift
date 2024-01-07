@@ -155,16 +155,17 @@ enum Command {
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
-    
-    
-    static func merge(_ textures: [MTLTexture?], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        textures.forEach {
-            merge($0, into: dstTexture, commandBuffer)
+    static func merge(layers: [LayerModel], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
+        layers.forEach {
+            merge(texture: $0.texture, alpha: $0.alpha, into: dstTexture, commandBuffer)
         }
     }
-    static func merge(_ srcTexture: MTLTexture?, into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
-        guard let srcTexture = srcTexture,
-              let dstTexture = dstTexture else {
+    static func merge(texture: MTLTexture?,
+                      alpha: Int = 255,
+                      into dstTexture: MTLTexture?,
+                      _ commandBuffer: MTLCommandBuffer?) {
+        guard let texture,
+              let dstTexture else {
             return
         }
         
@@ -178,12 +179,14 @@ enum Command {
             height: (dstTexture.height + h - 1) / h,
             depth: 1
         )
-        
+        var alpha: Float = max(0.0, min(Float(alpha) / 255.0, 1.0))
+
         let encoder = commandBuffer?.makeComputeCommandEncoder()
         encoder?.setComputePipelineState(Pipeline.shared.merge)
         encoder?.setTexture(dstTexture, index: 0)
         encoder?.setTexture(dstTexture, index: 1)
-        encoder?.setTexture(srcTexture, index: 2)
+        encoder?.setTexture(texture, index: 2)
+        encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }

@@ -14,6 +14,20 @@ extension URL {
     static var tmp: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/tmp")
     }
+
+    static var zipSuffix: String {
+        "zip"
+    }
+    static var thumbnailPath: String {
+        "thumbnail.png"
+    }
+    static var jsonFileName: String {
+        "data"
+    }
+
+    /// A temporary folder URL used for file input and output
+    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
+
     static var workInProgress: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
     }

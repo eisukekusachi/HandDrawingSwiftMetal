@@ -8,7 +8,6 @@
 import UIKit
 
 class TransformingImpl: Transforming {
-
     var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
     func getMatrix(transformationData: TransformationData,
@@ -23,6 +22,9 @@ class TransformingImpl: Transforming {
         }
 
         return newMatrix
+    }
+    func setStoredMatrix(_ matrix: CGAffineTransform) {
+        storedMatrix = matrix
     }
 
     /// Generate a matrix from touch points and view size

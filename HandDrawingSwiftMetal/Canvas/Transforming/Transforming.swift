@@ -11,10 +11,12 @@ import Foundation
 protocol Transforming {
 
     /// Stored transformation matrix
-    var storedMatrix: CGAffineTransform { get set }
+    var storedMatrix: CGAffineTransform { get }
 
     /// Update the transformation based on view touches and return a new matrix
     func getMatrix(transformationData: TransformationData,
                    frameCenterPoint: CGPoint,
                    touchState: TouchState) -> CGAffineTransform?
+
+    func setStoredMatrix(_ matrix: CGAffineTransform)
 }

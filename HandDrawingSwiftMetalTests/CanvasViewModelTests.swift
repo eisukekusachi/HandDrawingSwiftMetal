@@ -10,159 +10,113 @@ import XCTest
 
 class CanvasViewModelTests: XCTestCase {
 
-    var canvasViewModel: CanvasViewModel!
-    var mockFileIO: MockFileIO!
-    var mockLayerManager: LayerManager!
+    var mockRootTexture: MTLTexture!
 
-    let tmpFolderURL = CanvasViewModel.tmpFolderURL
+    let textureSize = CGSize(width: 100, height: 100)
+    let brushDiameter: Int = 5
+    let eraserDiameter: Int = 10
+
+    let tmpFolderURL = URL.tmpFolderURL
+    let zipFilePath = "zipFilePath.zip"
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
+    lazy var layers = [
+        LayerModel(texture: MTKTextureUtils.makeTexture(device, textureSize), title: "Test0"),
+        LayerModel(texture: MTKTextureUtils.makeTexture(device, textureSize), title: "Test1")
+    ]
+    lazy var codableLayers = [
+        LayerModelCodable(textureName: UUID().uuidString, title: "Test0", isVisible: true, alpha: 255),
+        LayerModelCodable(textureName: UUID().uuidString, title: "Test1", isVisible: true, alpha: 255)
+    ]
+    lazy var canvasModelV2 = CanvasModelV2(textureSize: mockRootTexture.size,
+                                           layerIndex: 0,
+                                           layers: codableLayers,
+                                           thumbnailName: URL.thumbnailPath,
+                                           drawingTool: DrawingToolType.brush.rawValue,
+                                           brushDiameter: brushDiameter,
+                                           eraserDiameter: eraserDiameter)
+
     override func setUp() {
         super.setUp()
-
-        mockFileIO = MockFileIO(textureName: "TextureName", thumbnailName: "ThumnnailName")
-        mockLayerManager = MockLayerManager()
-        canvasViewModel = CanvasViewModel(fileIO: mockFileIO,
-                                          layerManager: mockLayerManager)
+        mockRootTexture = MTKTextureUtils.makeTexture(device, textureSize)!
     }
 
     override func tearDown() {
-        canvasViewModel = nil
-        mockFileIO = nil
-        mockLayerManager = nil
         super.tearDown()
     }
 
-    func testSaveCanvas() throws {
+    func testSaveLoadCanvas() throws {
         // Arrange
-        let zipFilePath = "zipFilePath.zip"
-        let mockTexture = MTKTextureUtils.makeTexture(device, CGSize(width: 100, height: 100))!
-        let mockTextureFileName = UUID().uuidString
+        let mockFileIO = MockFileIO()
+        let canvasViewModel = CanvasViewModel(fileIO: mockFileIO)
+        let layerIndex: Int = 0
+
+        var resultModel: CanvasModelV2?
 
         // Act
-        XCTAssertNoThrow(try canvasViewModel.saveCanvasAsZipFile(texture: mockTexture,
-                                                                 textureName: mockTextureFileName,
-                                                                 into: tmpFolderURL,
+        XCTAssertNoThrow(try canvasViewModel.saveCanvasAsZipFile(rootTexture: mockRootTexture,
+                                                                 layerIndex: layerIndex,
+                                                                 codableLayers: codableLayers,
+                                                                 tmpFolderURL: tmpFolderURL,
                                                                  with: zipFilePath))
 
-        // Assert
-        // The image is output as a canvas and its thumbnail, resulting in a total of 2 images being generated.
-        XCTAssertEqual(mockFileIO.fileNames.count, 2)
-
-        XCTAssertEqual(mockFileIO.fileNames[0], CanvasViewModel.thumbnailPath.fileName)
-        XCTAssertEqual(mockFileIO.fileNames[1], mockTextureFileName)
-
-        // Output the image and save its name in the Model.
-        XCTAssertEqual((mockFileIO.data as? CanvasModel)?.textureName, mockTextureFileName)
-    }
-
-    func testLoadCanvas() throws {
-        // Arrange
-        let zipFilePath = "zipFilePath.zip"
-
-        // Act
-        var resultModel: CanvasModel?
         do {
-            resultModel = try canvasViewModel.loadCanvasData(from: zipFilePath,
-                                                             into: tmpFolderURL)
+            resultModel = try canvasViewModel.loadCanvasDataV2(from: zipFilePath,
+                                                               into: tmpFolderURL)
         } catch {
             XCTFail("Failed to load data")
             return
         }
-
         guard let resultModel else {
             XCTFail("Failed to unwrap")
             return
         }
 
         // Assert
-        XCTAssertEqual(resultModel.textureName, mockFileIO.textureName)
-        XCTAssertEqual(resultModel.thumbnailName, mockFileIO.thumbnailName)
+        XCTAssertEqual(resultModel.textureSize, mockRootTexture.size)
+        XCTAssertEqual(resultModel.layerIndex, layerIndex)
+        XCTAssertEqual(resultModel.layers, codableLayers)
     }
 
     func testApplyData() throws {
         // Arrange
-        let zipFilePath = "zipFilePath.zip"
-        let brushDiameter: Int = 5
-        let eraserDiameter: Int = 10
-        let textureSize = CGSize(width: 100, height: 100)
+        let mockFileIO = MockFileIO()
+        let canvasViewModel = CanvasViewModel(fileIO: mockFileIO)
 
-        let model = CanvasModel(textureSize: textureSize,
-                                textureName: "mockTexture",
-                                thumbnailName: "thumbnail",
-                                drawingTool: DrawingToolType.brush.rawValue,
-                                brushDiameter: brushDiameter,
-                                eraserDiameter: eraserDiameter)
         // Act
-        XCTAssertNoThrow(try canvasViewModel.applyCanvasDataToCanvas(model,
-                                                                     folderURL: tmpFolderURL,
-                                                                     zipFilePath: zipFilePath))
+        XCTAssertNoThrow(try canvasViewModel.applyCanvasDataToCanvasV2(canvasModelV2,
+                                                                       layers: layers,
+                                                                       folderURL: tmpFolderURL,
+                                                                       zipFilePath: zipFilePath))
 
         // Assert
+        let index = canvasModelV2.layerIndex
+        let selectedLayerAlpha = layers[index].alpha
+        XCTAssertEqual(canvasViewModel.layerManager.layers, layers)
+        XCTAssertEqual(canvasViewModel.layerManager.index, index)
+        XCTAssertEqual(canvasViewModel.layerManager.selectedLayerAlpha, selectedLayerAlpha)
         XCTAssertEqual((canvasViewModel.drawingBrush.tool as? DrawingToolBrush)?.diameter, brushDiameter)
         XCTAssertEqual((canvasViewModel.drawingEraser.tool as? DrawingToolEraser)?.diameter, eraserDiameter)
         XCTAssertEqual(canvasViewModel.drawingTool.rawValue, DrawingToolType.brush.rawValue)
-        XCTAssertEqual(canvasViewModel.currentTexture.size, textureSize)
         XCTAssertEqual(canvasViewModel.projectName, zipFilePath.fileName)
     }
 }
 
-class MockLayerManager: LayerManager {
-    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-    
-    var currentTexture: MTLTexture!
-    var textureSize: CGSize = .zero
-
-    func setTexture(_ texture: MTLTexture) {
-        currentTexture = texture
-    }
-    func makeTexture(fromDocumentsFolder url: URL, textureSize: CGSize) throws -> MTLTexture? {
-        return MTKTextureUtils.makeTexture(device, textureSize)
-    }
-
-    func initTextures(_ textureSize: CGSize) {}
-    func merge(textures: [MTLTexture?],
-               backgroundColor: (Int, Int, Int),
-               into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer) {}
-    func clearTexture(_ commandBuffer: MTLCommandBuffer) {}
-}
 class MockFileIO: FileIO {
-    typealias T = CanvasModel
-    var data: Codable?
-    var textureName: String
-    var thumbnailName: String
+    typealias T = CanvasModelV2
 
-    var fileNames: [String] = []
+    var resultData: CanvasModelV2?
 
-    init(textureName: String,
-         thumbnailName: String) {
-        self.textureName = textureName
-        self.thumbnailName = thumbnailName
-    }
-
-    func saveImage(bytes: [UInt8], to url: URL) throws {
-        let filePath: String = url.lastPathComponent
-        fileNames.append(filePath.fileName)
-    }
-    func saveImage(image: UIImage?, to url: URL) throws {
-        let filePath: String = url.lastPathComponent
-        fileNames.append(filePath.fileName)
-    }
-
-    func loadJson<T: Codable>(_ url: URL) throws -> T? {
-        return CanvasModel(textureSize: .init(width: 100, height: 100),
-                           textureName: textureName,
-                           thumbnailName: thumbnailName,
-                           drawingTool: DrawingToolType.brush.rawValue,
-                           brushDiameter: 10,
-                           eraserDiameter: 20) as? T
-    }
     func saveJson<T: Codable>(_ data: T, to jsonUrl: URL) throws {
-        self.data = data
+        self.resultData = data as? CanvasModelV2
+    }
+    func loadJson<T: Codable>(_ url: URL) throws -> T? {
+        return resultData as? T
     }
 
+    func saveImage(bytes: [UInt8], to url: URL) throws {}
+    func saveImage(image: UIImage?, to url: URL) throws {}
     func zip(_ srcFolderURL: URL, to zipFileURL: URL) throws {}
     func unzip(_ srcZipURL: URL, to destinationURL: URL) throws {}
 }
