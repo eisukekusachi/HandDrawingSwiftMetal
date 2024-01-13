@@ -121,9 +121,9 @@ extension LayerManager {
         }
     }
     func removeLayer() {
-        addUndoObject = true
-
         if layers.count == 1 { return }
+
+        addUndoObject = true
 
         layers.remove(at: index)
 
