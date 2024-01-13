@@ -48,7 +48,6 @@ extension CanvasView {
 
             viewModel.layerManager.index = undoObject.index
             viewModel.layerManager.layers = undoObject.layers
-            viewModel.layerManager.selectedLayerAlpha = undoObject.layers[undoObject.index].alpha
 
             viewModel.layerManager.updateNonSelectedTextures()
             refreshCanvas()

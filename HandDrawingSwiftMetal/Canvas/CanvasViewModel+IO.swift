@@ -59,7 +59,6 @@ extension CanvasViewModel {
 
         layerManager.layers = layers
         layerManager.index = layerIndex
-        layerManager.selectedLayerAlpha = layers[layerIndex].alpha
 
         drawingTool = .init(rawValue: rawValueDrawingTool)
         (drawingBrush.tool as? DrawingToolBrush)!.diameter = brushDiameter
