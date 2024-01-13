@@ -22,12 +22,14 @@ class LayerManager: ObservableObject {
         didSet {
             guard index < layers.count else { return }
             selectedLayer = layers[index]
+            selectedLayerAlpha = layers[index].alpha
         }
     }
     var index: Int = 0 {
         didSet {
             guard index < layers.count else { return }
             selectedLayer = layers[index]
+            selectedLayerAlpha = layers[index].alpha
         }
     }
 
@@ -167,7 +169,6 @@ extension LayerManager {
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
-        selectedLayerAlpha = layer.alpha
         updateNonSelectedTextures()
         setNeedsDisplay = true
     }
