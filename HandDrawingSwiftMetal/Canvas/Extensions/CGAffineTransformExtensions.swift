@@ -8,35 +8,6 @@
 import Foundation
 
 extension CGAffineTransform {
-    func getInvertedValue(scale: CGFloat) -> Self {
-        var matrix = self.getInvertedValue(flipY: true)
-        matrix.tx *= scale
-        matrix.ty *= scale
-
-        return matrix
-    }
-    func getInvertedValue(flipY: Bool = false) -> Self {
-
-        let scale = sqrt((self.a * self.a + self.c * self.c))
-        let radian = atan2(self.b, self.a)
-        let iScale: CGFloat = 1.0 / scale
-        let a: CGFloat = cos(radian) * iScale
-        let b: CGFloat = sin(radian) * iScale
-        let c: CGFloat = -sin(radian) * iScale
-        let d: CGFloat = cos(radian) * iScale
-        let matrixTx: CGFloat = -self.tx
-        var matrixTy: CGFloat = -self.ty
-        if flipY {
-            matrixTy *= -1.0
-        }
-        let tx: CGFloat = (matrixTx * a + matrixTy * c)
-        let ty: CGFloat = (matrixTx * b + matrixTy * d)
-
-        return CGAffineTransform.init(a: a, b: b,
-                                      c: c, d: d,
-                                      tx: tx, ty: ty)
-    }
-
     // Generate a matrix from a center point and two points
     static func makeMatrix(center: CGPoint,
                            pointsA: (CGPoint?, CGPoint?),
@@ -85,4 +56,26 @@ extension CGAffineTransform {
                           c: 0.0, d: scale,
                           tx: position.x, ty: position.y)
     }
+
+    func inverted(flipY: Bool = false) -> Self {
+        let currentScale = sqrt(a * a + c * c)
+        let angle = atan2(b, a)
+        let inverseScale = 1.0 / currentScale
+        let newA = cos(angle) * inverseScale
+        let newB = sin(angle) * inverseScale
+        let newC = -sin(angle) * inverseScale
+        let newD = cos(angle) * inverseScale
+        let translationX = -tx
+        var translationY = -ty
+        if flipY {
+            translationY *= -1.0
+        }
+        let newTx = (translationX * newA + translationY * newC)
+        let newTy = (translationX * newB + translationY * newD)
+
+        return CGAffineTransform(a: newA, b: newB,
+                                 c: newC, d: newD,
+                                 tx: newTx, ty: newTy)
+    }
+
 }
