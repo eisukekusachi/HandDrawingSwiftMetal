@@ -50,7 +50,10 @@ class DrawingEraser: Drawing {
         assert(textureSize != .zero, "Set a value for textureSize once before here.")
         guard let eraser = tool as? DrawingToolEraser else { return }
 
-        let inverseMatrix = matrix.getInvertedValue(scale: Aspect.getScaleToFit(frameSize, to: textureSize))
+        let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
+        var inverseMatrix = matrix.inverted(flipY: true)
+        inverseMatrix.tx *= scale
+        inverseMatrix.ty *= scale
         let points = Curve.makePoints(iterator: iterator,
                                       matrix: inverseMatrix,
                                       srcSize: frameSize,
