@@ -54,8 +54,9 @@ class LayerManager: ObservableObject {
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
         layers.removeAll()
-        addLayer(textureSize)
         index = 0
+        
+        addLayer(textureSize)
     
         self.textureSize = textureSize
     }
