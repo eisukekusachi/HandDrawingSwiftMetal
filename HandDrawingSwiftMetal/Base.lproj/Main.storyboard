@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -138,21 +138,30 @@
                                     </button>
                                 </subviews>
                             </stackView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X1E-oe-f8M" customClass="ContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstAttribute="bottom" secondItem="X1E-oe-f8M" secondAttribute="bottom" id="Dem-Qm-VDr"/>
                             <constraint firstItem="eLs-JK-IPQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Fcc-Cs-rA4"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="-106" id="GDb-U9-iFg"/>
+                            <constraint firstItem="X1E-oe-f8M" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="HGb-DN-qQm"/>
                             <constraint firstItem="eLs-JK-IPQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="QGa-TZ-rdp"/>
                             <constraint firstItem="VVQ-nq-vu0" firstAttribute="centerY" secondItem="eLs-JK-IPQ" secondAttribute="centerY" id="WKJ-1d-t1c"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="VVQ-nq-vu0" secondAttribute="trailing" constant="16" id="ZH7-Qs-FcA"/>
                             <constraint firstItem="d3h-Jn-l09" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="ax1-Pc-fwU"/>
+                            <constraint firstAttribute="trailing" secondItem="X1E-oe-f8M" secondAttribute="trailing" id="bX5-cC-GMo"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Jhq-bH-0ot" secondAttribute="bottom" id="dCa-hd-lhe"/>
+                            <constraint firstItem="X1E-oe-f8M" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="vPg-Y5-YSX"/>
                             <constraint firstItem="Jhq-bH-0ot" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="xEU-tL-Yq3"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="contentView" destination="X1E-oe-f8M" id="vSe-e7-VLN"/>
                         <outlet property="diameterSlider" destination="d3h-Jn-l09" id="O6g-Am-EF7"/>
                         <outlet property="exportButton" destination="eLs-JK-IPQ" id="Pfv-9P-voq"/>
                         <outlet property="layerButton" destination="iEb-h1-cPQ" id="NPp-aX-BCU"/>

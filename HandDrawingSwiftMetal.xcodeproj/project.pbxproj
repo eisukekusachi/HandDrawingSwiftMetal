@@ -42,6 +42,9 @@
 		D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979C29DAB0DF00A82E6A /* Buffers.swift */; };
 		D40D97A629DAB0E800A82E6A /* TransformingImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */; };
 		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
+		D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41CACE02B9C01F100B8C7C5 /* ContentView.xib */; };
+		D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE12B9C01F100B8C7C5 /* ContentView.swift */; };
+		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
 		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
 		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
@@ -158,6 +161,9 @@
 		D40D979C29DAB0DF00A82E6A /* Buffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffers.swift; sourceTree = "<group>"; };
 		D40D97A429DAB0E800A82E6A /* TransformingImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformingImpl.swift; sourceTree = "<group>"; };
 		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
+		D41CACE02B9C01F100B8C7C5 /* ContentView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContentView.xib; sourceTree = "<group>"; };
+		D41CACE12B9C01F100B8C7C5 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
@@ -262,6 +268,8 @@
 		D40D975029DAB00100A82E6A /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
+				D41CACE12B9C01F100B8C7C5 /* ContentView.swift */,
+				D41CACE02B9C01F100B8C7C5 /* ContentView.xib */,
 				D4C8EE9F2B257330005947EC /* CanvasModel.swift */,
 				D40D975129DAB01900A82E6A /* CanvasView.swift */,
 				D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */,
@@ -318,6 +326,7 @@
 				D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */,
 				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
 				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
+				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
 				D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */,
 				D4BCB3002AF7339200EA650D /* StringExtensions.swift */,
 				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
@@ -637,6 +646,7 @@
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
 				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,
+				D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */,
 				D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -727,6 +737,7 @@
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4F1BB3E2B2D436F006EA102 /* LayerManager.swift in Sources */,
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
+				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D4513AA42AF5D5F800CA4438 /* ViewController+IO.swift in Sources */,
 				D40CDEFF2B411F450059527E /* LayerView.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
@@ -750,6 +761,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
+				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
 				D46D07D42ADBC46D0093D861 /* FingerGestureWithStorage.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
 				D4C02DA12B492311008FD8AF /* FileIOUtils.swift in Sources */,

@@ -10,6 +10,9 @@ import SwiftUI
 import Combine
 
 class ViewController: UIViewController {
+    
+    @IBOutlet private weak var contentView: ContentView!
+
     let canvasViewModel = CanvasViewModel()
     let canvasView = CanvasView()
 
@@ -33,6 +36,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupContentView()
+
         view.addSubview(canvasView)
         view.sendSubviewToBack(canvasView)
 
@@ -74,6 +79,15 @@ class ViewController: UIViewController {
         undoButton.isEnabled = canvasView.canUndo
         redoButton.isEnabled = canvasView.canRedo
     }
+
+}
+
+extension ViewController {
+
+    private func setupContentView() {
+        contentView.canvasView.setViewModel(canvasViewModel)
+    }
+
 }
 
 extension ViewController {
