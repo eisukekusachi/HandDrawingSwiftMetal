@@ -181,7 +181,7 @@ extension ViewController {
             }
 
             initAllComponents()
-            canvasViewModel.parameters.layerManager.updateNonSelectedTextures()
+            canvasViewModel.parameters.layerManager.updateNonSelectedTextures(commandBuffer: contentView.canvasView.commandBuffer)
 
             canvasViewModel.mergeAllLayers(to: contentView.canvasView.rootTexture,
                                            contentView.canvasView.commandBuffer)

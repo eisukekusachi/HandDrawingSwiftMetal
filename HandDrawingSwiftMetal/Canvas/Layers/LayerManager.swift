@@ -158,34 +158,42 @@ extension LayerManager {
         setNeedsDisplay = true
     }
 
-    func updateNonSelectedTextures() {
+    func updateNonSelectedTextures(commandBuffer: MTLCommandBuffer? = nil) {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        let externalCommandBuffer: MTLCommandBuffer? = commandBuffer
+        let internalCommandBuffer: MTLCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
 
-        Command.clear(texture: bottomTexture, commandBuffer)
-        Command.clear(texture: topTexture, commandBuffer)
+        let currentCommandBuffer = externalCommandBuffer ?? internalCommandBuffer
+
+        Command.clear(texture: bottomTexture, currentCommandBuffer)
+        Command.clear(texture: topTexture, currentCommandBuffer)
 
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
-                Command.merge(texture: layers[i].texture,
-                              alpha: layers[i].alpha,
-                              into: bottomTexture,
-                              commandBuffer)
+                Command.merge(
+                    texture: layers[i].texture,
+                    alpha: layers[i].alpha,
+                    into: bottomTexture,
+                    currentCommandBuffer)
             }
         }
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
-                Command.merge(texture: layers[i].texture,
-                              alpha: layers[i].alpha,
-                              into: topTexture,
-                              commandBuffer)
+                Command.merge(
+                    texture: layers[i].texture,
+                    alpha: layers[i].alpha,
+                    into: topTexture,
+                    currentCommandBuffer)
             }
         }
 
-        commandBuffer.commit()
+        if externalCommandBuffer == nil {
+            currentCommandBuffer.commit()
+        }
     }
+
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex

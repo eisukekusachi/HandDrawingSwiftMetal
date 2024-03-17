@@ -97,9 +97,10 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.resetMatrix()
 
         viewModel?.parameters.layerManager.initLayerManager(textureSize)
-        viewModel?.parameters.layerManager.updateNonSelectedTextures()
+        viewModel?.parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
         viewModel?.mergeAllLayers(to: rootTexture,
                                   commandBuffer)
+        
         viewModel?.parameters.setNeedsDisplaySubject.send(())
     }
 
