@@ -7,16 +7,39 @@
 
 import Foundation
 
-/// This protocol provides functionality related to view transformations.
-protocol Transforming {
+class Transforming {
+    var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    /// Stored transformation matrix
-    var storedMatrix: CGAffineTransform { get }
-
-    /// Update the transformation based on view touches and return a new matrix
     func getMatrix(transformationData: TransformationData,
                    frameCenterPoint: CGPoint,
-                   touchState: TouchState) -> CGAffineTransform?
+                   touchState: TouchState) -> CGAffineTransform? {
+        guard let matrix = makeMatrix(transformationData: transformationData,
+                                      centerPoint: frameCenterPoint) else { return nil }
+        let newMatrix = storedMatrix.concatenating(matrix)
 
-    func setStoredMatrix(_ matrix: CGAffineTransform)
+        if touchState == .ended {
+            storedMatrix = newMatrix
+        }
+
+        return newMatrix
+    }
+    func setStoredMatrix(_ matrix: CGAffineTransform) {
+        storedMatrix = matrix
+    }
+
+    /// Generate a matrix from touch points and view size
+    private func makeMatrix(transformationData: TransformationData, centerPoint: CGPoint) -> CGAffineTransform? {
+        if let pointsA = transformationData.pointsA,
+           let pointsB = transformationData.pointsB,
+           let newMatrix = CGAffineTransform.makeMatrix(center: centerPoint,
+                                                        pointsA: pointsA,
+                                                        pointsB: pointsB,
+                                                        counterRotate: true,
+                                                        flipY: true) {
+            return newMatrix
+
+        } else {
+            return nil
+        }
+    }
 }

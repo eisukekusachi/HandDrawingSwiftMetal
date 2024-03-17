@@ -39,11 +39,11 @@ class CanvasViewModel {
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
+    /// A protocol for managing transformations
+    let transforming = Transforming()
+
     /// A protocol for managing drawing
     private (set) var drawing: Drawing?
-
-    /// A protocol for managing transformations
-    private (set) var transforming: Transforming!
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
@@ -55,10 +55,8 @@ class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(fileIO: FileIO = FileIOImpl(),
-         transforming: Transforming = TransformingImpl()) {
+    init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
-        self.transforming = transforming
 
         parameters.drawingToolSubject.sink { [weak self] tool in
             guard let `self` else { return }
@@ -101,7 +99,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func resetMatrix() {
-        setStoredMatrix(.identity)
+        transforming.setStoredMatrix(.identity)
         parameters.matrixSubject.send(.identity)
     }
 
