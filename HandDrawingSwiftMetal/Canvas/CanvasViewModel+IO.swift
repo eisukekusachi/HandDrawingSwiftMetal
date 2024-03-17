@@ -57,8 +57,8 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        layerManager.layers = layers
-        layerManager.index = layerIndex
+        parameters.layerManager.layers = layers
+        parameters.layerManager.index = layerIndex
 
         parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
         parameters.setBrushDiameter(brushDiameter)
@@ -83,9 +83,9 @@ extension CanvasViewModel {
         let layerData = LayerModel.init(texture: newTexture,
                                         title: "NewLayer")
 
-        layerManager.layers.removeAll()
-        layerManager.layers.append(layerData)
-        layerManager.index = 0
+        parameters.layerManager.layers.removeAll()
+        parameters.layerManager.layers.append(layerData)
+        parameters.layerManager.index = 0
 
         parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
         parameters.setBrushDiameter(brushDiameter)

@@ -13,7 +13,7 @@ extension CanvasViewModel {
                               matrix: CGAffineTransform,
                               touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = layerManager.selectedTexture else { return }
+        guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
 
         drawing?.drawOnDrawingTexture(with: iterator,
                                       matrix: matrix,
@@ -28,21 +28,21 @@ extension CanvasViewModel {
 
     func mergeAllLayers(to dstTexture: MTLTexture,
                         _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = layerManager.selectedTexture,
+        guard let selectedTexture = parameters.layerManager.selectedTexture,
               let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
 
-        layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
-                                      selectedAlpha: layerManager.selectedLayerAlpha,
-                                      backgroundColor: parameters.backgroundColorSubject.value.rgb,
-                                      to: dstTexture,
-                                      commandBuffer)
+        parameters.layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
+                                                 selectedAlpha: parameters.layerManager.selectedLayerAlpha,
+                                                 backgroundColor: parameters.backgroundColorSubject.value.rgb,
+                                                 to: dstTexture,
+                                                 commandBuffer)
     }
     
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-            if let selectedLayer = layerManager.selectedLayer {
-                layerManager.updateThumbnail(selectedLayer)
+            if let selectedLayer = parameters.layerManager.selectedLayer {
+                parameters.layerManager.updateThumbnail(selectedLayer)
             }
         }
     }

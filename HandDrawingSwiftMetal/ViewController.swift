@@ -15,7 +15,7 @@ class ViewController: UIViewController {
 
     let canvasViewModel = CanvasViewModel()
 
-    lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.layerManager))
+    lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.parameters.layerManager))
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -138,8 +138,8 @@ extension ViewController {
             guard   let self,
                     let currentTexture = contentView.canvasView.rootTexture else { return }
 
-            let layerIndex = canvasViewModel.layerManager.index
-            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
+            let layerIndex = canvasViewModel.parameters.layerManager.index
+            let codableLayers = try await canvasViewModel.parameters.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
             try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
                                                     layerIndex: layerIndex,
                                                     codableLayers: codableLayers,
@@ -170,7 +170,7 @@ extension ViewController {
             }
 
             initAllComponents()
-            canvasViewModel.layerManager.updateNonSelectedTextures()
+            canvasViewModel.parameters.layerManager.updateNonSelectedTextures()
 
             canvasViewModel.mergeAllLayers(to: contentView.canvasView.rootTexture,
                                            contentView.canvasView.commandBuffer)
@@ -216,7 +216,7 @@ extension ViewController {
             let viewHeight: CGFloat = 300.0
             let viewX: CGFloat = view.frame.width - (viewWidth + marginRight)
 
-            canvasViewModel.layerManager.arrowPointX = contentView.layerButton.convert(contentView.layerButton.bounds, to: view).midX - viewX
+            canvasViewModel.parameters.layerManager.arrowPointX = contentView.layerButton.convert(contentView.layerButton.bounds, to: view).midX - viewX
 
             view.addSubview(layerViewController.view)
 

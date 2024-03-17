@@ -33,8 +33,8 @@ class CanvasViewModel {
     }
 
     var undoObject: UndoObject {
-        return UndoObject(index: layerManager.index,
-                          layers: layerManager.layers)
+        return UndoObject(index: parameters.layerManager.index,
+                          layers: parameters.layerManager.layers)
     }
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -47,9 +47,6 @@ class CanvasViewModel {
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
-
-    /// An instance for managing texture layers
-    private (set) var layerManager = LayerManager()
 
     private var displayLink: CADisplayLink?
 
@@ -79,7 +76,7 @@ class CanvasViewModel {
     }
 
     func initAllTextures(_ textureSize: CGSize) {
-        layerManager.initLayerManager(textureSize)
+        parameters.layerManager.initLayerManager(textureSize)
 
         drawingBrush.initTextures(textureSize)
         drawingEraser.initTextures(textureSize)

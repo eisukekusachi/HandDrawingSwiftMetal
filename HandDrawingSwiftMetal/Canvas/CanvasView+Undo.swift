@@ -27,14 +27,14 @@ extension CanvasView {
 
     func registerDrawingUndoAction() {
         guard let viewModel else { return }
-        if viewModel.layerManager.layers.count == 0 { return }
+        if viewModel.parameters.layerManager.layers.count == 0 { return }
 
         registerDrawingUndoAction(with: viewModel.undoObject)
         undoManager.incrementUndoCount()
 
-        if  let selectedLayer = viewModel.layerManager.selectedLayer,
-            let newTexture = duplicateTexture(viewModel.layerManager.selectedTexture) {
-            viewModel.layerManager.updateTexture(selectedLayer, newTexture)
+        if  let selectedLayer = viewModel.parameters.layerManager.selectedLayer,
+            let newTexture = duplicateTexture(viewModel.parameters.layerManager.selectedTexture) {
+            viewModel.parameters.layerManager.updateTexture(selectedLayer, newTexture)
         }
     }
 
@@ -42,14 +42,14 @@ extension CanvasView {
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self) { [unowned self] _ in
             guard let viewModel else { return }
-            if viewModel.layerManager.layers.count == 0 { return }
+            if viewModel.parameters.layerManager.layers.count == 0 { return }
 
             registerDrawingUndoAction(with: viewModel.undoObject)
 
-            viewModel.layerManager.index = undoObject.index
-            viewModel.layerManager.layers = undoObject.layers
+            viewModel.parameters.layerManager.index = undoObject.index
+            viewModel.parameters.layerManager.layers = undoObject.layers
 
-            viewModel.layerManager.updateNonSelectedTextures()
+            viewModel.parameters.layerManager.updateNonSelectedTextures()
             viewModel.mergeAllLayers(to: rootTexture,
                                      commandBuffer)
             

@@ -22,6 +22,9 @@ final class DrawingParameters {
 
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
+    /// An instance for managing texture layers
+    let layerManager = LayerManager()
+
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
     private (set) var brushDiameter: Int
