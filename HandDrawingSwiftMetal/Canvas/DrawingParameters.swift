@@ -30,7 +30,7 @@ final class DrawingParameters {
     init(
         brushDiameter: Int = 8,
         eraserDiameter: Int = 44,
-        brushColor: UIColor = .black,
+        brushColor: UIColor = .black.withAlphaComponent(0.75),
         eraserAlpha: Int = 150,
         backgroundColor: UIColor = .white
     ) {
