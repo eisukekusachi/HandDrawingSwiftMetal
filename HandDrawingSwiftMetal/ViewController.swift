@@ -14,22 +14,8 @@ class ViewController: UIViewController {
     @IBOutlet private weak var contentView: ContentView!
 
     let canvasViewModel = CanvasViewModel()
-    let canvasView = CanvasView()
 
     lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.layerManager))
-
-    @IBOutlet weak var exportButton: UIButton!
-    @IBOutlet weak var diameterSlider: UISlider! {
-        didSet {
-            diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-        }
-    }
-    
-    @IBOutlet weak var undoButton: UIButton!
-    @IBOutlet weak var redoButton: UIButton!
-    @IBOutlet weak var layerButton: UIButton!
-
-    @IBOutlet weak var topStackView: UIStackView!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -37,36 +23,15 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         setupContentView()
-
-
-        view.addSubview(canvasView)
-        view.sendSubviewToBack(canvasView)
-
-        canvasView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            canvasView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            canvasView.topAnchor.constraint(equalTo: view.topAnchor),
-            canvasView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            canvasView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-
-        canvasView.setViewModel(canvasViewModel)
-
-        canvasView.$undoCount
-            .sink { [weak self] _ in
-                self?.refreshUndoRedoButtons()
-            }
-            .store(in: &cancellables)
     }
     func initAllComponents() {
 
-        canvasView.clearUndo()
+        contentView.canvasView.clearUndo()
         refreshUndoRedoButtons()
     }
     func refreshUndoRedoButtons() {
-        undoButton.isEnabled = canvasView.canUndo
-        redoButton.isEnabled = canvasView.canRedo
+        contentView.undoButton.isEnabled = contentView.canvasView.canUndo
+        contentView.redoButton.isEnabled = contentView.canvasView.canRedo
     }
 
 }
@@ -76,103 +41,78 @@ extension ViewController {
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
         contentView.applyDrawingParameters(canvasViewModel.parameters)
+
+        contentView.tapResetTransformButton = { [weak self] in
+            guard let `self` else { return }
+            contentView.canvasView.resetMatrix()
+            contentView.canvasView.setNeedsDisplay()
+        }
+
+        contentView.tapSaveButton = { [weak self] in
+            guard let `self` else { return }
+            saveCanvas(into: URL.tmpFolderURL,
+                       with: canvasViewModel.zipFileNameName)
+        }
+        contentView.tapLayerButton = { [weak self] in
+            self?.toggleLayerVisibility()
+        }
+        contentView.tapLoadButton = { [weak self] in
+            guard let `self` else { return }
+            let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
+                $0.lastPathComponent
+            }
+            let fileView = FileView(zipFileList: zipFileList,
+                                    didTapItem: { [weak self] zipFilePath in
+
+                self?.loadCanvas(from: zipFilePath,
+                                 into: URL.tmpFolderURL)
+                self?.presentedViewController?.dismiss(animated: true)
+            })
+            let vc = UIHostingController(rootView: fileView)
+            present(vc, animated: true)
+        }
+        contentView.tapExportImageButton = { [weak self] in
+            guard let `self` else { return }
+            contentView.exportImageButton.debounce()
+
+            if let image = contentView.canvasView.rootTexture?.uiImage {
+                UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
+            }
+        }
+        contentView.tapNewButton = { [weak self] in
+            guard let `self` else { return }
+            showAlert(title: "Alert",
+                      message: "Do you want to refresh the canvas?",
+                      okHandler: { [weak self] in
+
+                self?.contentView.canvasView.newCanvas()
+            })
+        }
+
+        contentView.tapUndoButton = { [weak self] in
+            self?.contentView.canvasView.undo()
+        }
+        contentView.tapRedoButton = { [weak self] in
+            self?.contentView.canvasView.redo()
+        }
+
+        contentView.canvasView.$undoCount
+            .sink { [weak self] _ in
+                self?.refreshUndoRedoButtons()
+            }
+            .store(in: &cancellables)
     }
 
 }
 
 extension ViewController {
-    @IBAction func pushResetTransform(_ sender: UIButton) {
-        canvasView.resetMatrix()
-        canvasView.setNeedsDisplay()
-    }
-    @IBAction func pushBlackColor(_ sender: UIButton) {
-        /*
-        canvasView.drawingTool = .brush
-        canvasView.brushColor = UIColor.black.withAlphaComponent(0.75)
 
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
-        */
-    }
-    @IBAction func pushRedColor(_ sender: UIButton) {
-        /*
-        canvasView.drawingTool = .brush
-        canvasView.brushColor = UIColor.red.withAlphaComponent(0.75)
-
-        diameterSlider.value = DrawingToolBrush.diameterFloatValue(canvasView.brushDiameter)
-        */
-    }
-    
-    @IBAction func pushEraserButton(_ sender: UIButton) {
-        /*
-        canvasView.drawingTool = .eraser
-        canvasView.eraserAlpha = 150
-
-        diameterSlider.value = DrawingToolEraser.diameterFloatValue(canvasView.eraserDiameter)
-        */
-    }
-    
-    @IBAction func pushExportButton(_ sender: UIButton) {
-        // Debounce the button.
-        exportButton.isUserInteractionEnabled = false
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3.0) { [unowned self] in
-            exportButton.isUserInteractionEnabled = true
-        }
-        
-        if let image = canvasView.rootTexture?.uiImage {
-            UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
-        }
-    }
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
             view.addSubview(Toast(text: "Failed"))
         } else {
             view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
         }
-    }
-    @IBAction func dragDiameterSlider(_ sender: UISlider) {
-        /*
-        if canvasView.drawingTool == .eraser {
-            canvasView.eraserDiameter = Int(DrawingToolEraser.diameterIntValue(sender.value))
-
-        } else {
-            canvasView.brushDiameter = Int(DrawingToolBrush.diameterIntValue(sender.value))
-        }
-        */
-    }
-    @IBAction func pushUndoButton() {
-        canvasView.undo()
-    }
-    @IBAction func pushRedoButton() {
-        canvasView.redo()
-    }
-    @IBAction func pushLayerButton() {
-        toggleLayerVisibility()
-    }
-    @IBAction func pushSaveButton() {
-        saveCanvas(into: URL.tmpFolderURL,
-                   with: canvasViewModel.zipFileNameName)
-    }
-    @IBAction func pushLoadButton() {
-        let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
-            $0.lastPathComponent
-        }
-        let fileView = FileView(zipFileList: zipFileList,
-                                didTapItem: { [weak self] zipFilePath in
-
-            self?.loadCanvas(from: zipFilePath,
-                             into: URL.tmpFolderURL)
-            self?.presentedViewController?.dismiss(animated: true)
-        })
-        let vc = UIHostingController(rootView: fileView)
-        self.present(vc, animated: true)
-    }
-    @IBAction func pushNewButton() {
-        showAlert(title: "Alert",
-                  message: "Do you want to refresh the canvas?",
-                  okHandler: { [weak self] in
-
-            self?.canvasView.newCanvas()
-        })
     }
 
     func showAlert(title: String, message: String, okHandler: @escaping () -> Void) {
@@ -190,4 +130,114 @@ extension ViewController {
         alert.addAction(ok)
         present(alert, animated: true, completion: nil)
     }
+
+}
+
+extension ViewController {
+
+    func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
+        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] tmpFolderURL in
+            guard   let self,
+                    let currentTexture = contentView.canvasView.rootTexture else { return }
+
+            let layerIndex = canvasViewModel.layerManager.index
+            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
+            try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
+                                                    layerIndex: layerIndex,
+                                                    codableLayers: codableLayers,
+                                                    tmpFolderURL: tmpFolderURL,
+                                                    with: zipFileName)
+        }
+    }
+
+    func loadCanvas(from zipFilePath: String, into tmpFolderURL: URL) {
+        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
+            guard let self else { return }
+
+            if let data = try canvasViewModel.loadCanvasDataV2(from: zipFilePath, into: folderURL) {
+                guard let textureSize = data.textureSize,
+                      let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(device: canvasViewModel.device,
+                                                                                           textureSize: textureSize,
+                                                                                           folderURL: folderURL) else { return }
+                try canvasViewModel.applyCanvasDataToCanvasV2(data,
+                                                              layers: layers,
+                                                              folderURL: folderURL,
+                                                              zipFilePath: zipFilePath)
+
+            } else if let data = try canvasViewModel.loadCanvasData(from: zipFilePath,
+                                                                    into: folderURL) {
+                try canvasViewModel.applyCanvasDataToCanvas(data,
+                                                            folderURL: folderURL,
+                                                            zipFilePath: zipFilePath)
+            }
+
+            initAllComponents()
+            canvasViewModel.layerManager.updateNonSelectedTextures()
+            contentView.canvasView.refreshCanvas()
+        }
+    }
+
+    private func createTemporaryFolderWithErrorHandling(tmpFolderURL: URL,
+                                                        _ tasks: @escaping (URL) async throws -> Void) {
+        Task {
+            let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
+            defer {
+                try? FileManager.default.removeItem(atPath: tmpFolderURL.path)
+                activityIndicatorView.removeFromSuperview()
+            }
+            view.addSubview(activityIndicatorView)
+
+            do {
+                // Clean up the temporary folder when done
+                try FileManager.createNewDirectory(url: tmpFolderURL)
+
+                try await tasks(tmpFolderURL)
+
+                try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
+
+                view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+
+            } catch {
+                view.addSubview(Toast(text: error.localizedDescription))
+            }
+        }
+    }
+
+}
+
+extension ViewController {
+
+    func toggleLayerVisibility() {
+        if !existHostingController() {
+            let marginRight: CGFloat = 8
+            let viewWidth: CGFloat = 300.0
+            let viewHeight: CGFloat = 300.0
+            let viewX: CGFloat = view.frame.width - (viewWidth + marginRight)
+
+            canvasViewModel.layerManager.arrowPointX = contentView.layerButton.convert(contentView.layerButton.bounds, to: view).midX - viewX
+
+            view.addSubview(layerViewController.view)
+
+            layerViewController.view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                layerViewController.view.topAnchor.constraint(equalTo: contentView.topStackView.bottomAnchor),
+                layerViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -marginRight),
+
+                layerViewController.view.widthAnchor.constraint(equalToConstant: viewWidth),
+                layerViewController.view.heightAnchor.constraint(equalToConstant: viewHeight)
+            ])
+
+            layerViewController.view.backgroundColor = .clear
+
+        } else {
+            layerViewController.view.removeFromSuperview()
+        }
+    }
+
+    func existHostingController() -> Bool {
+        return view.subviews.contains { subview in
+            return subview == layerViewController.view
+        }
+    }
+
 }
