@@ -146,7 +146,7 @@ extension CanvasView: FingerGestureWithStorageSender {
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
 
-        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
     }
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
@@ -162,7 +162,7 @@ extension CanvasView: FingerGestureWithStorageSender {
             matrix = newMatrix
         }
 
-        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
     }
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
@@ -197,7 +197,7 @@ extension CanvasView: PencilGestureWithStorageSender {
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
 
-        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
     }
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()

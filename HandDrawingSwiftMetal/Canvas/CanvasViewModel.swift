@@ -66,9 +66,9 @@ class CanvasViewModel {
         }
         .store(in: &cancellables)
 
-        parameters.runDisplayLinkSubject
-            .sink { [weak self] run in
-                self?.runDisplayLinkLoop(run)
+        parameters.pauseDisplayLinkSubject
+            .sink { [weak self] pause in
+                self?.pauseDisplayLinkLoop(pause)
             }
             .store(in: &cancellables)
 
@@ -96,19 +96,19 @@ extension CanvasViewModel {
     }
 
     /// Start or stop the display link loop based on the 'play' parameter.
-    private func runDisplayLinkLoop(_ play: Bool) {
-        if play {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        } else {
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
             if displayLink?.isPaused == false {
                 // Pause the display link after updating the display.
                 parameters.setNeedsDisplaySubject.send()
                 displayLink?.isPaused = true
             }
+
+        } else {
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
+            }
         }
     }
 
 }
-

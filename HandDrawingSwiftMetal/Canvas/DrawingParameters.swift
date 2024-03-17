@@ -16,7 +16,7 @@ final class DrawingParameters {
 
     let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
-    let runDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
+    let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
 
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
