@@ -101,7 +101,7 @@ class CanvasView: MTKTextureDisplayView {
 
     private func cancelFingerDrawing() {
         fingerInput.clear()
-        viewModel?.transforming.setStoredMatrix(matrix)
+        viewModel?.setMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
         viewModel?.drawing?.clearDrawingTextures(commandBuffer)
@@ -143,9 +143,8 @@ extension CanvasView: FingerGestureWithStorageSender {
         else { return }
 
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        if let newMatrix = viewModel.transforming.getMatrix(transformationData: transformationData,
-                                                            frameCenterPoint: Calc.getCenter(frame.size),
-                                                            touchPhase: touchPhase) {
+        if let newMatrix = viewModel.getMatrix(transformationData: transformationData,
+                                               touchPhase: touchPhase) {
             matrix = newMatrix
         }
 

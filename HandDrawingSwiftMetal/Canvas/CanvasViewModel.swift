@@ -32,11 +32,11 @@ class CanvasViewModel {
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    /// A protocol for managing transformations
-    let transforming = Transforming()
-
     /// A protocol for managing drawing
     private (set) var drawing: Drawing?
+
+    /// A protocol for managing transformations
+    private let transforming = Transforming()
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
@@ -113,6 +113,20 @@ extension CanvasViewModel {
                 displayLink?.isPaused = false
             }
         }
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
+        transforming.getMatrix(transformationData: transformationData,
+                               frameCenterPoint: Calc.getCenter(frameSize),
+                               touchPhase: touchPhase)
+    }
+
+    func setMatrix(_ matrix: CGAffineTransform) {
+        transforming.setStoredMatrix(matrix)
     }
 
 }

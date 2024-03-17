@@ -37,7 +37,7 @@ extension CanvasViewModel {
                                                  to: dstTexture,
                                                  commandBuffer)
     }
-    
+
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
