@@ -173,7 +173,11 @@ extension ViewController {
 
             initAllComponents()
             canvasViewModel.layerManager.updateNonSelectedTextures()
-            contentView.canvasView.refreshCanvas()
+
+            canvasViewModel.mergeAllLayers(to: contentView.canvasView.rootTexture,
+                                           contentView.canvasView.commandBuffer)
+            
+            canvasViewModel.parameters.setNeedsDisplaySubject.send()
         }
     }
 

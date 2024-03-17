@@ -131,6 +131,12 @@ extension ContentView {
                 self?.canvasView.backgroundColor = color
             }
             .store(in: &cancellables)
+
+        parameters.setNeedsDisplaySubject
+            .sink { [weak self] in
+                self?.canvasView.setNeedsDisplay()
+            }
+            .store(in: &cancellables)
     }
 
 }

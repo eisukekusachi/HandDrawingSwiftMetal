@@ -16,6 +16,8 @@ final class DrawingParameters {
 
     let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
+    let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
     private (set) var brushDiameter: Int

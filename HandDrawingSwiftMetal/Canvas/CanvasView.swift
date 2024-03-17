@@ -65,7 +65,9 @@ class CanvasView: MTKTextureDisplayView {
             .sink { [weak self] newSize in
                 guard let self else { return }
                 viewModel?.initAllTextures(newSize)
-                refreshCanvas()
+                viewModel?.mergeAllLayers(to: rootTexture,
+                                          commandBuffer)
+                viewModel?.parameters.setNeedsDisplaySubject.send()
             }
             .store(in: &cancellables)
     }
@@ -76,7 +78,10 @@ class CanvasView: MTKTextureDisplayView {
         self.viewModel?.layerManager.$setNeedsDisplay
             .sink { [weak self] result in
                 guard result, let self else { return }
-                refreshCanvas()
+
+                viewModel.mergeAllLayers(to: rootTexture,
+                                         commandBuffer)
+                viewModel.parameters.setNeedsDisplaySubject.send()
         }
         .store(in: &cancellables)
 
@@ -96,13 +101,9 @@ class CanvasView: MTKTextureDisplayView {
 
         viewModel?.layerManager.initLayerManager(textureSize)
         viewModel?.layerManager.updateNonSelectedTextures()
-        refreshCanvas()
-    }
-    func refreshCanvas() {
-        viewModel?.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                  to: rootTexture,
+        viewModel?.mergeAllLayers(to: rootTexture,
                                   commandBuffer)
-        setNeedsDisplay()
+        viewModel?.parameters.setNeedsDisplaySubject.send(())
     }
 
     /// Reset the canvas transformation matrix to identity.
@@ -142,8 +143,7 @@ extension CanvasView: FingerGestureWithStorageSender {
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                 to: rootTexture,
+        viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
@@ -191,8 +191,7 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        matrix: matrix,
                                        touchState: touchState,
                                        commandBuffer)
-        viewModel.mergeAllLayers(backgroundColor: backgroundColor?.rgb ?? (255, 255, 255),
-                                 to: rootTexture,
+        viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
         runDisplayLinkLoop(touchState != .ended)
     }
