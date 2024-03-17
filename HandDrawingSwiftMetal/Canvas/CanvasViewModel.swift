@@ -48,11 +48,12 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        parameters.drawingToolSubject.sink { [weak self] tool in
-            guard let `self` else { return }
-            drawing = tool == .brush ? parameters.layerManager.drawingBrush : parameters.layerManager.drawingEraser
-        }
-        .store(in: &cancellables)
+        parameters.drawingToolSubject
+            .sink { [weak self] tool in
+                guard let `self` else { return }
+                drawing = tool == .brush ? parameters.layerManager.drawingBrush : parameters.layerManager.drawingEraser
+            }
+            .store(in: &cancellables)
 
         parameters.pauseDisplayLinkSubject
             .sink { [weak self] pause in
