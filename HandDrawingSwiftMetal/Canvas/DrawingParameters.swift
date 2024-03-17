@@ -14,6 +14,8 @@ final class DrawingParameters {
 
     let drawingToolSubject = CurrentValueSubject<DrawingToolType, Never>(.brush)
 
+    let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
+
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
     private (set) var brushDiameter: Int
@@ -25,12 +27,15 @@ final class DrawingParameters {
         brushDiameter: Int = 8,
         eraserDiameter: Int = 44,
         brushColor: UIColor = .black,
-        eraserAlpha: Int = 150
+        eraserAlpha: Int = 150,
+        backgroundColor: UIColor = .white
     ) {
         self.brushDiameter = brushDiameter
         self.eraserDiameter = eraserDiameter
         self.brushColor = brushColor
         self.eraserAlpha = eraserAlpha
+
+        setBackgroundColor(backgroundColor)
     }
 
 }
@@ -90,4 +95,12 @@ extension DrawingParameters {
         eraserDiameter = value
     }
 
+}
+
+extension DrawingParameters {
+
+    func setBackgroundColor(_ color: UIColor) {
+        self.backgroundColorSubject.send(color)
+    }
+    
 }

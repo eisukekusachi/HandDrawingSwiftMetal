@@ -125,6 +125,12 @@ extension ContentView {
                 self?.diameterSlider.value = diameter
             }
             .store(in: &cancellables)
+
+        parameters.backgroundColorSubject
+            .sink { [weak self] color in
+                self?.canvasView.backgroundColor = color
+            }
+            .store(in: &cancellables)
     }
 
 }
