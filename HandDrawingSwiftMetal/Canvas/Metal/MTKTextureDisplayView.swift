@@ -86,17 +86,3 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
     
 }
-
-extension MTKTextureDisplayView {
-    func duplicateTexture(_ srcTexture: MTLTexture?) -> MTLTexture? {
-        guard let commandBuffer = commandQueue?.getNewCommandBuffer(),
-              let srcTexture = srcTexture else { return nil }
-
-        let newTexture = MTKTextureUtils.makeTexture(device!, srcTexture.size)
-
-        Command.copy(dst: newTexture, src: srcTexture, commandBuffer)
-        commandBuffer.commit()
-
-        return newTexture
-    }
-}

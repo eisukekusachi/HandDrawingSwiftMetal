@@ -33,7 +33,7 @@ extension CanvasView {
         undoManager.incrementUndoCount()
 
         if  let selectedLayer = viewModel.parameters.layerManager.selectedLayer,
-            let newTexture = duplicateTexture(viewModel.parameters.layerManager.selectedTexture) {
+            let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, viewModel.parameters.layerManager.selectedTexture) {
             viewModel.parameters.layerManager.updateTexture(selectedLayer, newTexture)
         }
     }
