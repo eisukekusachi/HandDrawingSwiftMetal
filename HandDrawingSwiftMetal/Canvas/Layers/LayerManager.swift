@@ -76,7 +76,7 @@ class LayerManager: ObservableObject {
         layers.removeAll()
         index = 0
         
-        addLayer()
+        addLayer(isUndo: false)
     }
 
     func mergeAllTextures(selectedTextures: [MTLTexture],
@@ -110,9 +110,12 @@ class LayerManager: ObservableObject {
 
 // CRUD
 extension LayerManager {
-    func addLayer() {
-        addUndoObject = true
-        
+   
+    func addLayer(isUndo: Bool = true) {
+        if isUndo {
+            addUndoObject = true
+        }
+
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
@@ -127,6 +130,7 @@ extension LayerManager {
 
         updateNonSelectedTextures()
     }
+
     func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
         guard let tmpSelectedLayer = selectedLayer else { return }
 
