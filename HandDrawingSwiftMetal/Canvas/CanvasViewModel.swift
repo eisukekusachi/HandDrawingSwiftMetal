@@ -68,7 +68,20 @@ class CanvasViewModel {
         displayLink?.add(to: .current, forMode: .common)
         displayLink?.isPaused = true
     }
-    
+
+    func initTexture(canvasRootTexture: MTLTexture) {
+        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else { return }
+
+        let textureSize = parameters.textureSizeSubject.value
+
+        parameters.layerManager.initLayerManager(textureSize)
+
+        mergeAllLayers(to: canvasRootTexture, commandBuffer)
+        commandBuffer.commit()
+
+        parameters.setNeedsDisplaySubject.send()
+    }
+
 }
 
 extension CanvasViewModel {

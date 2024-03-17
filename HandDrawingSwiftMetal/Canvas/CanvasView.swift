@@ -55,18 +55,6 @@ class CanvasView: MTKTextureDisplayView {
             .store(in: &cancellables)
     }
 
-    func refreshTextures() {
-        guard let commandBuffer = device!.makeCommandQueue()?.makeCommandBuffer(),
-              let textureSize = viewModel?.parameters.textureSizeSubject.value else { return }
-
-        viewModel?.parameters.layerManager.initLayerManager(textureSize)
-
-        viewModel?.mergeAllLayers(to: rootTexture, commandBuffer)
-        commandBuffer.commit()
-
-        viewModel?.parameters.setNeedsDisplaySubject.send()
-    }
-
     func setViewModel(_ viewModel: CanvasViewModel) {
         self.viewModel = viewModel
 
