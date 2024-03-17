@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class ContentView: UIView {
 
@@ -25,6 +26,8 @@ final class ContentView: UIView {
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
     
+    private var cancellables = Set<AnyCancellable>()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         instantiateNib()
@@ -39,6 +42,44 @@ final class ContentView: UIView {
     private func commonInit() {
         backgroundColor = .white
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+    }
+
+}
+
+extension ContentView {
+
+    func applyDrawingParameters(_ parameters: DrawingParameters) {
+        bindInputs(parameters)
+        bindModels(parameters)
+    }
+
+    private func bindInputs(_ parameters: DrawingParameters) {
+
+        blackColorButton.addAction(.init { _ in
+            parameters.setDrawingTool(.brush)
+            parameters.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+        }, for: .touchUpInside)
+
+        redColorButton.addAction(.init { _ in
+            parameters.setDrawingTool(.brush)
+            parameters.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+        }, for: .touchUpInside)
+
+        eraserButton.addAction(.init { _ in
+            parameters.setDrawingTool(.eraser)
+        }, for: .touchUpInside)
+
+        diameterSlider.addTarget(
+            parameters,
+            action:#selector(parameters.handleDiameterSlider), for: .valueChanged)
+    }
+    private func bindModels(_ parameters: DrawingParameters) {
+
+        parameters.diameterSubject
+            .sink { [weak self] diameter in
+                self?.diameterSlider.value = diameter
+            }
+            .store(in: &cancellables)
     }
 
 }

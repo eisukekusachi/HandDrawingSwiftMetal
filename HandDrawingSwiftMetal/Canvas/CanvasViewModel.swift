@@ -10,8 +10,7 @@ import Combine
 
 class CanvasViewModel {
 
-    /// The currently selected drawing tool, either brush or eraser.
-    @Published var drawingTool: DrawingToolType = .brush
+    let parameters = DrawingParameters()
 
     /// Drawing with a brush
     var drawingBrush = DrawingBrush()
@@ -24,24 +23,6 @@ class CanvasViewModel {
             drawingBrush.frameSize = frameSize
             drawingEraser.frameSize = frameSize
         }
-    }
-
-    var brushDiameter: Int {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
-    }
-    var eraserDiameter: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.diameter }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
-    }
-
-    var brushColor: UIColor {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.color }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
-    }
-    var eraserAlpha: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.alpha }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
     /// A name of the file to be saved
@@ -77,17 +58,13 @@ class CanvasViewModel {
         self.fileIO = fileIO
         self.transforming = transforming
 
-        $drawingTool
-            .sink { [weak self] newValue in
-                guard let self else { return }
-                switch newValue {
-                case .brush:
-                    self.drawing = self.drawingBrush
-                case .eraser:
-                    self.drawing = self.drawingEraser
-                }
-            }
-            .store(in: &cancellables)
+        parameters.drawingToolSubject.sink { [weak self] tool in
+            guard let `self` else { return }
+            self.drawing = tool == .brush ? self.drawingBrush : self.drawingEraser
+        }
+        .store(in: &cancellables)
+
+        parameters.setDrawingTool(.brush)
     }
 
     func initAllTextures(_ textureSize: CGSize) {

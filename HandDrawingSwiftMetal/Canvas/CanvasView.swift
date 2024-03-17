@@ -11,29 +11,6 @@ import Combine
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class CanvasView: MTKTextureDisplayView {
 
-    var drawingTool: DrawingToolType {
-        get { viewModel!.drawingTool }
-        set { viewModel!.drawingTool = newValue }
-    }
-
-    var brushDiameter: Int {
-        get { viewModel!.brushDiameter }
-        set { viewModel?.brushDiameter = newValue }
-    }
-    var eraserDiameter: Int {
-        get { viewModel!.eraserDiameter }
-        set { viewModel?.eraserDiameter = newValue }
-    }
-
-    var brushColor: UIColor {
-        get { viewModel!.brushColor }
-        set { viewModel?.brushColor = newValue }
-    }
-    var eraserAlpha: Int {
-        get { viewModel!.eraserAlpha }
-        set { viewModel?.eraserAlpha = newValue }
-    }
-
     private (set) var viewModel: CanvasViewModel?
 
     @Published private (set) var undoCount: Int = 0

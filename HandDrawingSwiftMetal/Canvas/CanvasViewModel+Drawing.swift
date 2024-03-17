@@ -17,6 +17,7 @@ extension CanvasViewModel {
 
         drawing?.drawOnDrawingTexture(with: iterator,
                                       matrix: matrix,
+                                      parameters: parameters,
                                       on: selectedTexture,
                                       touchState,
                                       commandBuffer)
