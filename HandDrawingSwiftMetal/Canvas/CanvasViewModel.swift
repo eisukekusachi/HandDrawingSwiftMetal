@@ -12,16 +12,9 @@ class CanvasViewModel {
 
     let parameters = DrawingParameters()
 
-    /// Drawing with a brush
-    var drawingBrush = DrawingBrush()
-
-    /// Drawing with an eraser
-    var drawingEraser = DrawingEraser()
-
     var frameSize: CGSize = .zero {
         didSet {
-            drawingBrush.frameSize = frameSize
-            drawingEraser.frameSize = frameSize
+            parameters.frameSize = frameSize
         }
     }
 
@@ -57,7 +50,7 @@ class CanvasViewModel {
 
         parameters.drawingToolSubject.sink { [weak self] tool in
             guard let `self` else { return }
-            self.drawing = tool == .brush ? self.drawingBrush : self.drawingEraser
+            drawing = tool == .brush ? parameters.layerManager.drawingBrush : parameters.layerManager.drawingEraser
         }
         .store(in: &cancellables)
 
@@ -77,9 +70,6 @@ class CanvasViewModel {
 
     func initAllTextures(_ textureSize: CGSize) {
         parameters.layerManager.initLayerManager(textureSize)
-
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
     }
 
 }

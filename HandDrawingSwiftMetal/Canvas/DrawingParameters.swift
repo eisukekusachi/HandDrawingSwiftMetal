@@ -25,6 +25,12 @@ final class DrawingParameters {
     /// An instance for managing texture layers
     let layerManager = LayerManager()
 
+    var frameSize: CGSize = .zero {
+        didSet {
+            layerManager.frameSize = frameSize
+        }
+    }
+    
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
     private (set) var brushDiameter: Int

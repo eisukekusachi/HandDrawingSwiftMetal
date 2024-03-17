@@ -18,6 +18,19 @@ class LayerManager: ObservableObject {
     @Published var setNeedsDisplay: Bool = false
     @Published var addUndoObject: Bool = false
 
+    var frameSize: CGSize = .zero {
+        didSet {
+            drawingBrush.frameSize = frameSize
+            drawingEraser.frameSize = frameSize
+        }
+    }
+
+    /// Drawing with a brush
+    let drawingBrush = DrawingBrush()
+
+    /// Drawing with an eraser
+    let drawingEraser = DrawingEraser()
+
     var layers: [LayerModel] = [] {
         didSet {
             guard index < layers.count else { return }
@@ -49,6 +62,9 @@ class LayerManager: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initLayerManager(_ textureSize: CGSize) {
+
+        self.textureSize = textureSize
+
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -57,9 +73,11 @@ class LayerManager: ObservableObject {
         index = 0
         
         addLayer(textureSize)
-    
-        self.textureSize = textureSize
+
+        drawingBrush.initTextures(textureSize)
+        drawingEraser.initTextures(textureSize)
     }
+
     func mergeAllTextures(selectedTextures: [MTLTexture],
                           selectedAlpha: Int,
                           backgroundColor: (Int, Int, Int),
