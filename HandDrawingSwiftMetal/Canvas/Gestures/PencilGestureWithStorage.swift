@@ -8,7 +8,7 @@
 import UIKit
 
 protocol PencilGestureWithStorageSender {
-    func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState)
+    func drawOnTexture(_ input: PencilGestureWithStorage, iterator: Iterator<TouchPoint>, touchPhase: UITouch.Phase)
     func touchEnded(_ input: PencilGestureWithStorage)
     func cancel(_ input: PencilGestureWithStorage)
 }
@@ -32,15 +32,15 @@ class PencilGestureWithStorage: GestureWithStorageProtocol {
 }
 
 extension PencilGestureWithStorage: PencilGestureSender {
-    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchState: TouchState) {
+    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchPhase: UITouch.Phase) {
         guard let touchPointStorage = (touchPointStorage as? DefaultTouchPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointArray)
 
-        let iterator = touchPointStorage.getIterator(endProcessing: touchState == .ended)
-        delegate?.drawOnTexture(self, iterator: iterator, touchState: touchState)
+        let iterator = touchPointStorage.getIterator(endProcessing: touchPhase == .ended)
+        delegate?.drawOnTexture(self, iterator: iterator, touchPhase: touchPhase)
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             delegate?.touchEnded(self)
         }
     }

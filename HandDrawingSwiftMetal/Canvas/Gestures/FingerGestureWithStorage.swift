@@ -8,8 +8,8 @@
 import UIKit
 
 protocol FingerGestureWithStorageSender {
-    func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchState: TouchState)
-    func transformTexture(_ input: FingerGestureWithStorage, touchPointArrayDictionary: [Int: [TouchPoint]], touchState: TouchState)
+    func drawOnTexture(_ input: FingerGestureWithStorage, iterator: Iterator<TouchPoint>, touchPhase: UITouch.Phase)
+    func transformTexture(_ input: FingerGestureWithStorage, touchPointArrayDictionary: [Int: [TouchPoint]], touchPhase: UITouch.Phase)
     func touchEnded(_ input: FingerGestureWithStorage)
     func cancel(_ input: FingerGestureWithStorage)
 }
@@ -38,7 +38,7 @@ class FingerGestureWithStorage: GestureWithStorageProtocol {
 }
 
 extension FingerGestureWithStorage: FingerGestureSender {
-    func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState) {
+    func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchPhase: UITouch.Phase) {
         guard let touchPointStorage = (touchPointStorage as? SmoothTouchPointStorage) else { return }
 
         touchPointStorage.appendPoints(touchPointDictionary)
@@ -51,18 +51,18 @@ extension FingerGestureWithStorage: FingerGestureSender {
             break
 
         case .drawing:
-            let iterator = touchPointStorage.getIterator(endProcessing: touchState == .ended)
+            let iterator = touchPointStorage.getIterator(endProcessing: touchPhase == .ended)
             delegate?.drawOnTexture(self,
                                     iterator: iterator,
-                                    touchState: touchState)
+                                    touchPhase: touchPhase)
 
         case .transforming:
             delegate?.transformTexture(self,
                                        touchPointArrayDictionary: touchPointStorage.touchPointsDictionary,
-                                       touchState: touchState)
+                                       touchPhase: touchPhase)
         }
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             delegate?.touchEnded(self)
         }
     }

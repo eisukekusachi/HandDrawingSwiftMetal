@@ -44,7 +44,7 @@ class DrawingEraser: Drawing {
                               matrix: CGAffineTransform,
                               parameters: DrawingParameters,
                               on dstTexture: MTLTexture,
-                              _ touchState: TouchState,
+                              _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
         assert(frameSize != .zero, "Set a value for frameSize once before here.")
         assert(textureSize != .zero, "Set a value for textureSize once before here.")
@@ -57,7 +57,7 @@ class DrawingEraser: Drawing {
                                       matrix: inverseMatrix,
                                       srcSize: frameSize,
                                       dstSize: textureSize,
-                                      endProcessing: touchState == .ended)
+                                      endProcessing: touchPhase == .ended)
 
         guard points.count != 0 else { return }
 
@@ -87,7 +87,7 @@ class DrawingEraser: Drawing {
 
         isDrawing = true
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }

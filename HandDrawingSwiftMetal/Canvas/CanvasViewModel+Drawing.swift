@@ -11,7 +11,7 @@ import MetalKit
 extension CanvasViewModel {
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
-                              touchState: TouchState,
+                              touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture = layerManager.selectedTexture else { return }
 
@@ -19,9 +19,9 @@ extension CanvasViewModel {
                                       matrix: matrix,
                                       parameters: parameters,
                                       on: selectedTexture,
-                                      touchState,
+                                      touchPhase,
                                       commandBuffer)
-        if touchState == .ended {
+        if touchPhase == .ended {
             updateThumbnail()
         }
     }

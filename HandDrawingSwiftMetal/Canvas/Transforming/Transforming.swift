@@ -5,19 +5,19 @@
 //  Created by Eisuke Kusachi on 2023/10/15.
 //
 
-import Foundation
+import UIKit
 
 class Transforming {
     var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
     func getMatrix(transformationData: TransformationData,
                    frameCenterPoint: CGPoint,
-                   touchState: TouchState) -> CGAffineTransform? {
+                   touchPhase: UITouch.Phase) -> CGAffineTransform? {
         guard let matrix = makeMatrix(transformationData: transformationData,
                                       centerPoint: frameCenterPoint) else { return nil }
         let newMatrix = storedMatrix.concatenating(matrix)
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             storedMatrix = newMatrix
         }
 

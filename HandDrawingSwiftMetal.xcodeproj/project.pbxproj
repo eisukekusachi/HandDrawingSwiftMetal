@@ -53,7 +53,6 @@
 		D43294A22B46E66A006915A0 /* CanvasViewModel+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43294A12B46E66A006915A0 /* CanvasViewModel+IO.swift */; };
 		D43294A42B46E6AB006915A0 /* CanvasViewModel+Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43294A32B46E6AB006915A0 /* CanvasViewModel+Drawing.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
-		D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906E22ADBA1C600E22361 /* TouchState.swift */; };
 		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */; };
@@ -169,7 +168,6 @@
 		D43294A12B46E66A006915A0 /* CanvasViewModel+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasViewModel+IO.swift"; sourceTree = "<group>"; };
 		D43294A32B46E6AB006915A0 /* CanvasViewModel+Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasViewModel+Drawing.swift"; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
-		D43906E22ADBA1C600E22361 /* TouchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandQueueProtocol.swift; path = ../Protocols/CommandQueueProtocol.swift; sourceTree = "<group>"; };
@@ -296,7 +294,6 @@
 				D40D975F29DAB09400A82E6A /* SmoothTouchPointStorage.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D40D975B29DAB09400A82E6A /* TouchPointStorageProtocol.swift */,
-				D43906E22ADBA1C600E22361 /* TouchState.swift */,
 			);
 			path = TouchPoints;
 			sourceTree = "<group>";
@@ -724,7 +721,6 @@
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */,
-				D43906E32ADBA1C600E22361 /* TouchState.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,

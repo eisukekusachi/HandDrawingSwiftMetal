@@ -8,7 +8,7 @@
 import UIKit
 
 protocol FingerGestureSender {
-    func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchState: TouchState)
+    func sendLocations(_ gesture: FingerGesture?, touchPointDictionary: [Int: TouchPoint], touchPhase: UITouch.Phase)
     func cancel(_ gesture: FingerGesture?)
 }
 
@@ -40,7 +40,7 @@ extension FingerGesture {
                                                        alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .began)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchPhase: .began)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         var touchPointDictioanry: [Int: TouchPoint] = [:]
@@ -54,7 +54,7 @@ extension FingerGesture {
                                                        alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .moved)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchPhase: .moved)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         var touchPointDictioanry: [Int: TouchPoint] = [:]
@@ -68,7 +68,7 @@ extension FingerGesture {
                                                        alpha: !is3DTouchAvailable ? 1.0 : nil)
             }
         }
-        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchState: .ended)
+        output?.sendLocations(self, touchPointDictionary: touchPointDictioanry, touchPhase: .ended)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         output?.cancel(self)

@@ -125,26 +125,26 @@ class CanvasView: MTKTextureDisplayView {
 extension CanvasView: FingerGestureWithStorageSender {
     func drawOnTexture(_ input: FingerGestureWithStorage, 
                        iterator: Iterator<TouchPoint>,
-                       touchState: TouchState) {
+                       touchPhase: UITouch.Phase) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
               let viewModel
         else { return }
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             registerDrawingUndoAction()
         }
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
-                                       touchState: touchState,
+                                       touchPhase: touchPhase,
                                        commandBuffer)
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
-                          touchState: TouchState) {
+                          touchPhase: UITouch.Phase) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage,
               let viewModel
         else { return }
@@ -152,11 +152,11 @@ extension CanvasView: FingerGestureWithStorageSender {
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
         if let newMatrix = viewModel.transforming.getMatrix(transformationData: transformationData,
                                                             frameCenterPoint: Calc.getCenter(frame.size),
-                                                            touchState: touchState) {
+                                                            touchPhase: touchPhase) {
             matrix = newMatrix
         }
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
@@ -171,7 +171,7 @@ extension CanvasView: FingerGestureWithStorageSender {
 extension CanvasView: PencilGestureWithStorageSender {
     func drawOnTexture(_ input: PencilGestureWithStorage, 
                        iterator: Iterator<TouchPoint>,
-                       touchState: TouchState) {
+                       touchPhase: UITouch.Phase) {
         guard let viewModel
         else { return }
 
@@ -180,18 +180,18 @@ extension CanvasView: PencilGestureWithStorageSender {
         }
         inputManager.updateInput(input)
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             registerDrawingUndoAction()
         }
 
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
-                                       touchState: touchState,
+                                       touchPhase: touchPhase,
                                        commandBuffer)
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchState == .ended)
+        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()

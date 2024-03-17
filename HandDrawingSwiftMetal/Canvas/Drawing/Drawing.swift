@@ -22,7 +22,7 @@ protocol Drawing {
                               matrix: CGAffineTransform,
                               parameters: DrawingParameters,
                               on dstTexture: MTLTexture,
-                              _ touchState: TouchState,
+                              _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer)
 
     /// Merges textures
