@@ -137,6 +137,10 @@ extension ContentView {
                 self?.canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
+
+        parameters.matrixSubject
+            .assign(to: \.matrix, on: canvasView)
+            .store(in: &cancellables)
     }
 
 }

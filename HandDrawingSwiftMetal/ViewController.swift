@@ -43,9 +43,7 @@ extension ViewController {
         contentView.applyDrawingParameters(canvasViewModel.parameters)
 
         contentView.tapResetTransformButton = { [weak self] in
-            guard let `self` else { return }
-            contentView.canvasView.resetMatrix()
-            contentView.canvasView.setNeedsDisplay()
+            self?.canvasViewModel.didTapResetTransformButton()
         }
 
         contentView.tapSaveButton = { [weak self] in

@@ -16,6 +16,8 @@ final class DrawingParameters {
 
     let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
+    let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+
     let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
 
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()

@@ -97,19 +97,13 @@ class CanvasView: MTKTextureDisplayView {
 
         clearUndo()
 
-        resetMatrix()
+        viewModel?.resetMatrix()
 
         viewModel?.layerManager.initLayerManager(textureSize)
         viewModel?.layerManager.updateNonSelectedTextures()
         viewModel?.mergeAllLayers(to: rootTexture,
                                   commandBuffer)
         viewModel?.parameters.setNeedsDisplaySubject.send(())
-    }
-
-    /// Reset the canvas transformation matrix to identity.
-    func resetMatrix() {
-        matrix = CGAffineTransform.identity
-        viewModel?.setStoredMatrix(matrix)
     }
 
     private func cancelFingerDrawing() {

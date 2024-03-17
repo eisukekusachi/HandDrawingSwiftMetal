@@ -91,6 +91,24 @@ class CanvasViewModel {
 
 extension CanvasViewModel {
 
+    func didTapResetTransformButton() {
+        resetMatrix()
+        parameters.setNeedsDisplaySubject.send()
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func resetMatrix() {
+        setStoredMatrix(.identity)
+        parameters.matrixSubject.send(.identity)
+    }
+
+}
+
+extension CanvasViewModel {
+
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
         parameters.setNeedsDisplaySubject.send()
     }
