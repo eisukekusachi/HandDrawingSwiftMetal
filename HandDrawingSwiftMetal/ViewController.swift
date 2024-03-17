@@ -24,6 +24,12 @@ class ViewController: UIViewController {
         
         setupContentView()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        canvasViewModel.frameSize = view.frame.size
+    }
+    
     func initAllComponents() {
 
         contentView.canvasView.clearUndo()

@@ -39,13 +39,6 @@ class CanvasView: MTKTextureDisplayView {
         commonInitialization()
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        assert(viewModel != nil, "viewModel is nil.")
-        viewModel?.frameSize = frame.size
-    }
-
     private func commonInitialization() {
         _ = Pipeline.shared
 
