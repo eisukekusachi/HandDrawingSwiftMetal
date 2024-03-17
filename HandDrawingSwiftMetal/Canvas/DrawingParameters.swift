@@ -18,6 +18,8 @@ final class DrawingParameters {
 
     let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
+    let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
+
     let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
 
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()

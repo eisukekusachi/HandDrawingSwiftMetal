@@ -10,9 +10,6 @@ import MetalKit
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
-    /// The size of the texture to be displayed.
-    @Published private (set) var textureSize: CGSize = .zero
-
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
 
@@ -34,14 +31,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         commonInit()
     }
 
-    override func layoutSubviews() {
-        guard let currentDrawable else { return }
-
-        if rootTexture == nil {
-            initializeRootTexture(currentDrawable.texture.size)
-        }
-    }
-
     private func commonInit() {
         self.device = MTLCreateSystemDefaultDevice()
         let commandQueue = self.device!.makeCommandQueue()
@@ -58,18 +47,15 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         self.backgroundColor = .white
     }
 
-    func initializeRootTexture(_ textureSize: CGSize) {
+    func initRootTexture(_ textureSize: CGSize) {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
         self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
-        self.textureSize = textureSize
     }
 
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
-        assert(textureSize != .zero, "It seems that initializeRootTexture() is not being called.")
-
         guard let drawable = view.currentDrawable else { return }
 
         var canvasMatrix = matrix

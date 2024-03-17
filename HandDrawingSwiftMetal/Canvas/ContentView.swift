@@ -141,6 +141,13 @@ extension ContentView {
         parameters.matrixSubject
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
+
+        parameters.textureSizeSubject
+            .sink { [weak self] textureSize in
+                guard let `self`, textureSize != .zero else { return }
+                canvasView.initRootTexture(textureSize)
+            }
+            .store(in: &cancellables)
     }
 
 }

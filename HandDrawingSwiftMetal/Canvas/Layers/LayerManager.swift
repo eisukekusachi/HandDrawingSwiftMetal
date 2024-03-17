@@ -7,11 +7,13 @@
 
 import MetalKit
 import Accelerate
+import Combine
 
 enum LayerManagerError: Error {
     case failedToMakeTexture
 }
 class LayerManager: ObservableObject {
+
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
@@ -53,7 +55,7 @@ class LayerManager: ObservableObject {
 
     var arrowPointX: CGFloat = 0.0
 
-    private (set) var textureSize: CGSize = .zero
+    private var textureSize: CGSize = .zero
 
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
@@ -62,20 +64,19 @@ class LayerManager: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initLayerManager(_ textureSize: CGSize) {
-
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
+        drawingBrush.initTextures(textureSize)
+        drawingEraser.initTextures(textureSize)
+        
         layers.removeAll()
         index = 0
         
-        addLayer(textureSize)
-
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
+        addLayer()
     }
 
     func mergeAllTextures(selectedTextures: [MTLTexture],
@@ -109,7 +110,7 @@ class LayerManager: ObservableObject {
 
 // CRUD
 extension LayerManager {
-    func addLayer(_ textureSize: CGSize) {
+    func addLayer() {
         addUndoObject = true
         
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")

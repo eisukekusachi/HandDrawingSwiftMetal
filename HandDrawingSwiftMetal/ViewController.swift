@@ -28,6 +28,11 @@ class ViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
+
+        if canvasViewModel.parameters.textureSizeSubject.value == .zero {
+            canvasViewModel.parameters.textureSizeSubject.send(contentView.canvasView.drawableSize)
+            contentView.canvasView.refreshTextures()
+        }
     }
     
     func initAllComponents() {

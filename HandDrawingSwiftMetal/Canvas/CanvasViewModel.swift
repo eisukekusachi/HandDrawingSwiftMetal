@@ -68,11 +68,7 @@ class CanvasViewModel {
         displayLink?.add(to: .current, forMode: .common)
         displayLink?.isPaused = true
     }
-
-    func initAllTextures(_ textureSize: CGSize) {
-        parameters.layerManager.initLayerManager(textureSize)
-    }
-
+    
 }
 
 extension CanvasViewModel {

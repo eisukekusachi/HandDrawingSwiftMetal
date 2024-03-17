@@ -53,16 +53,18 @@ class CanvasView: MTKTextureDisplayView {
                 self?.undoCount = newValue
             }
             .store(in: &cancellables)
+    }
 
-        $textureSize
-            .sink { [weak self] newSize in
-                guard let self else { return }
-                viewModel?.initAllTextures(newSize)
-                viewModel?.mergeAllLayers(to: rootTexture,
-                                          commandBuffer)
-                viewModel?.parameters.setNeedsDisplaySubject.send()
-            }
-            .store(in: &cancellables)
+    func refreshTextures() {
+        guard let commandBuffer = device!.makeCommandQueue()?.makeCommandBuffer(),
+              let textureSize = viewModel?.parameters.textureSizeSubject.value else { return }
+
+        viewModel?.parameters.layerManager.initLayerManager(textureSize)
+
+        viewModel?.mergeAllLayers(to: rootTexture, commandBuffer)
+        commandBuffer.commit()
+
+        viewModel?.parameters.setNeedsDisplaySubject.send()
     }
 
     func setViewModel(_ viewModel: CanvasViewModel) {
@@ -86,6 +88,8 @@ class CanvasView: MTKTextureDisplayView {
     }
 
     func newCanvas() {
+        guard let textureSize = viewModel?.parameters.textureSizeSubject.value else { return }
+
         viewModel?.projectName = Calendar.currentDate
 
         clearUndo()
