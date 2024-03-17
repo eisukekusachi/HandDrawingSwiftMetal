@@ -23,8 +23,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
     private(set) var rootTexture: MTLTexture!
 
-    private(set) var displayLink: CADisplayLink?
-
     private var commandQueue: CommandQueueProtocol!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
@@ -52,11 +50,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         assert(commandQueue != nil, "CommandQueue is nil.")
 
         self.commandQueue = CommandQueue(queue: commandQueue!)
-
-        // Configure the display link for rendering.
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
 
         self.delegate = self
         self.enableSetNeedsDisplay = true
@@ -105,25 +98,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
-
-    /// Start or stop the display link loop based on the 'play' parameter.
-    func runDisplayLinkLoop(_ play: Bool) {
-        if play {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        } else {
-            if displayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                setNeedsDisplay()
-                displayLink?.isPaused = true
-            }
-        }
-    }
-
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
-    }
+    
 }
 
 extension MTKTextureDisplayView {

@@ -145,21 +145,24 @@ extension CanvasView: FingerGestureWithStorageSender {
                                        commandBuffer)
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
-        runDisplayLinkLoop(touchState != .ended)
+
+        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
     }
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
                           touchState: TouchState) {
-        guard inputManager.updateInput(input) is FingerGestureWithStorage
+        guard inputManager.updateInput(input) is FingerGestureWithStorage,
+              let viewModel
         else { return }
 
         let transformationData = TransformationData(touchPointArrayDictionary: touchPointArrayDictionary)
-        if let newMatrix = viewModel?.getMatrix(transformationData: transformationData,
-                                                frameCenterPoint: Calc.getCenter(frame.size),
-                                                touchState: touchState) {
+        if let newMatrix = viewModel.getMatrix(transformationData: transformationData,
+                                               frameCenterPoint: Calc.getCenter(frame.size),
+                                               touchState: touchState) {
             matrix = newMatrix
         }
-        runDisplayLinkLoop(touchState != .ended)
+
+        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
     }
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
@@ -193,7 +196,8 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        commandBuffer)
         viewModel.mergeAllLayers(to: rootTexture,
                                  commandBuffer)
-        runDisplayLinkLoop(touchState != .ended)
+
+        viewModel.parameters.runDisplayLinkSubject.send(touchState != .ended)
     }
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()

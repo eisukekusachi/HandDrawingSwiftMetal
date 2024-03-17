@@ -16,6 +16,8 @@ final class DrawingParameters {
 
     let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
+    let runDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
+
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
     private (set) var brushColor: UIColor
