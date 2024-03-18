@@ -128,7 +128,8 @@ extension ViewController {
 
     func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            self?.contentView.canvasView.newCanvas()
+            guard let rootTexture = self?.contentView.canvasView.rootTexture else { return }
+            self?.canvasViewModel.newCanvas(rootTexture: rootTexture)
         }
     }
 

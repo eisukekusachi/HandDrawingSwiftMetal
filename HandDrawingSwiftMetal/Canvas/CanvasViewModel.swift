@@ -91,6 +91,26 @@ extension CanvasViewModel {
         parameters.setNeedsDisplaySubject.send()
     }
 
+    func newCanvas(rootTexture: MTLTexture) {
+        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+        else { return }
+
+        projectName = Calendar.currentDate
+
+        parameters.clearUndoSubject.send()
+
+        resetMatrix()
+
+        let textureSize = parameters.textureSizeSubject.value
+        parameters.layerManager.initLayerManager(textureSize)
+        parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
+        mergeAllLayers(to: rootTexture, commandBuffer)
+
+        commandBuffer.commit()
+
+        parameters.setNeedsDisplaySubject.send(())
+    }
+
 }
 
 extension CanvasViewModel {

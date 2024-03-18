@@ -75,23 +75,6 @@ class CanvasView: MTKTextureDisplayView {
         .store(in: &cancellables)
     }
 
-    func newCanvas() {
-        guard let textureSize = viewModel?.parameters.textureSizeSubject.value else { return }
-
-        viewModel?.projectName = Calendar.currentDate
-
-        clearUndo()
-
-        viewModel?.resetMatrix()
-
-        viewModel?.parameters.layerManager.initLayerManager(textureSize)
-        viewModel?.parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
-        viewModel?.mergeAllLayers(to: rootTexture,
-                                  commandBuffer)
-        
-        viewModel?.parameters.setNeedsDisplaySubject.send(())
-    }
-
     private func cancelFingerDrawing() {
         fingerInput.clear()
         viewModel?.setMatrix(matrix)

@@ -138,6 +138,12 @@ extension ContentView {
             }
             .store(in: &cancellables)
 
+        parameters.clearUndoSubject
+            .sink { [weak self] in
+                self?.canvasView.clearUndo()
+            }
+            .store(in: &cancellables)
+
         parameters.matrixSubject
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
