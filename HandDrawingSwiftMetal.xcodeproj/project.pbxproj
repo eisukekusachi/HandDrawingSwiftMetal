@@ -68,6 +68,8 @@
 		D46D07D82ADBC51C0093D861 /* PencilGestureWithStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingToolType.swift */; };
+		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
+		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */; };
 		D4B4AAA22B3FF44100298CFB /* LayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AAA12B3FF44100298CFB /* LayerModel.swift */; };
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
@@ -184,6 +186,8 @@
 		D46D07D72ADBC51C0093D861 /* PencilGestureWithStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilGestureWithStorage.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
+		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
+		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureUtils.swift; sourceTree = "<group>"; };
 		D4B4AAA12B3FF44100298CFB /* LayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerModel.swift; sourceTree = "<group>"; };
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
@@ -397,6 +401,8 @@
 				D42F409E2B44035A00B32707 /* IntSlider.swift */,
 				D42F409C2B44033300B32707 /* SliderStyle.swift */,
 				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
+				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
+				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -728,6 +734,7 @@
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,
+				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4F1BB3E2B2D436F006EA102 /* LayerManager.swift in Sources */,
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
@@ -743,6 +750,7 @@
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
 				D459415C2B08EDB000A18653 /* CanvasView+Undo.swift in Sources */,
 				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
+				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D40D977A29DAB0B400A82E6A /* FingerGesture.swift in Sources */,
 				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* DrawingBrush.swift in Sources */,

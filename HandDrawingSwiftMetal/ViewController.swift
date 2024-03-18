@@ -17,12 +17,15 @@ class ViewController: UIViewController {
 
     lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.parameters.layerManager))
 
+    private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
+
     private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupContentView()
+        setupNewCanvasDialogPresenter()
     }
     
     override func viewDidLayoutSubviews() {
@@ -90,12 +93,7 @@ extension ViewController {
         }
         contentView.tapNewButton = { [weak self] in
             guard let `self` else { return }
-            showAlert(title: "Alert",
-                      message: "Do you want to refresh the canvas?",
-                      okHandler: { [weak self] in
-
-                self?.contentView.canvasView.newCanvas()
-            })
+            newCanvasDialogPresenter.presentAlert(on: self)
         }
 
         contentView.tapUndoButton = { [weak self] in
@@ -124,20 +122,14 @@ extension ViewController {
         }
     }
 
-    func showAlert(title: String, message: String, okHandler: @escaping () -> Void) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+}
 
-        let ok = UIAlertAction(title: "OK", style: .default) { _ in
-            okHandler()
-            self.dismiss(animated: true, completion: nil)
-        }
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            self.dismiss(animated: true, completion: nil)
-        }
-        alert.addAction(cancel)
+extension ViewController {
 
-        alert.addAction(ok)
-        present(alert, animated: true, completion: nil)
+    func setupNewCanvasDialogPresenter() {
+        newCanvasDialogPresenter.onTapButton = { [weak self] in
+            self?.contentView.canvasView.newCanvas()
+        }
     }
 
 }
