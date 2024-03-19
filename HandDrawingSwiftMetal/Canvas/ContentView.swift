@@ -115,7 +115,8 @@ extension ContentView {
 
         diameterSlider.addTarget(
             parameters,
-            action:#selector(parameters.handleDiameterSlider), for: .valueChanged)
+            action:#selector(parameters.handleDiameterSlider),
+            for: .valueChanged)
     }
     
     private func bindModels(_ parameters: DrawingParameters) {
@@ -160,7 +161,6 @@ extension ContentView {
         parameters.mergeLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
-
                 parameters.mergeAllLayers(to: canvasView.rootTexture, canvasView.commandBuffer)
                 canvasView.setNeedsDisplay()
             }
