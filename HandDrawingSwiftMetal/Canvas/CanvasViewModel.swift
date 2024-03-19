@@ -64,7 +64,7 @@ class CanvasViewModel {
 
         let textureSize = parameters.textureSizeSubject.value
 
-        parameters.layerManager.initLayerManager(textureSize)
+        parameters.layerManager.reset(textureSize)
 
         parameters.mergeAllLayers(to: canvasRootTexture, commandBuffer)
         commandBuffer.commit()
@@ -92,7 +92,7 @@ extension CanvasViewModel {
         resetMatrix()
 
         let textureSize = parameters.textureSizeSubject.value
-        parameters.layerManager.initLayerManager(textureSize)
+        parameters.layerManager.reset(textureSize)
         parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
         parameters.mergeAllLayers(to: rootTexture, commandBuffer)
 
