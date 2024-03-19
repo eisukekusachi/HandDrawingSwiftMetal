@@ -62,8 +62,8 @@ class CanvasView: MTKTextureDisplayView {
             .sink { [weak self] result in
                 guard result, let self else { return }
 
-                viewModel.mergeAllLayers(to: rootTexture,
-                                         commandBuffer)
+                viewModel.parameters.mergeAllLayers(to: rootTexture,
+                                                    commandBuffer)
                 viewModel.parameters.setNeedsDisplaySubject.send()
         }
         .store(in: &cancellables)
@@ -106,8 +106,8 @@ extension CanvasView: FingerGestureWithStorageSender {
                                        matrix: matrix,
                                        touchPhase: touchPhase,
                                        commandBuffer)
-        viewModel.mergeAllLayers(to: rootTexture,
-                                 commandBuffer)
+        viewModel.parameters.mergeAllLayers(to: rootTexture,
+                                            commandBuffer)
 
         viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
@@ -156,8 +156,8 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        matrix: matrix,
                                        touchPhase: touchPhase,
                                        commandBuffer)
-        viewModel.mergeAllLayers(to: rootTexture,
-                                 commandBuffer)
+        viewModel.parameters.mergeAllLayers(to: rootTexture,
+                                            commandBuffer)
 
         viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }

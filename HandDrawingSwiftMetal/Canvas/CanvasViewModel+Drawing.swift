@@ -26,18 +26,6 @@ extension CanvasViewModel {
         }
     }
 
-    func mergeAllLayers(to dstTexture: MTLTexture,
-                        _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = parameters.layerManager.selectedTexture,
-              let selectedTextures = parameters.drawing?.getDrawingTextures(selectedTexture) else { return }
-
-        parameters.layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
-                                                 selectedAlpha: parameters.layerManager.selectedLayerAlpha,
-                                                 backgroundColor: parameters.backgroundColorSubject.value.rgb,
-                                                 to: dstTexture,
-                                                 commandBuffer)
-    }
-
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
