@@ -24,6 +24,8 @@ final class DrawingParameters {
 
     let clearUndoSubject = PassthroughSubject<Void, Never>()
 
+    let mergeLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
     /// An instance for managing texture layers
