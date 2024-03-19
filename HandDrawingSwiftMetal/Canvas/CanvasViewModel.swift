@@ -68,9 +68,7 @@ extension CanvasViewModel {
         parameters.setNeedsDisplaySubject.send()
     }
 
-    func newCanvas() {
-        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
-        else { return }
+    func didTapNewCanvasButton() {
 
         projectName = Calendar.currentDate
 
@@ -78,14 +76,7 @@ extension CanvasViewModel {
 
         resetMatrix()
 
-        let textureSize = parameters.textureSizeSubject.value
-        parameters.layerManager.reset(textureSize)
-        parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
         parameters.initLayerManager()
-
-        commandBuffer.commit()
-
-        parameters.setNeedsDisplaySubject.send(())
     }
 
 }

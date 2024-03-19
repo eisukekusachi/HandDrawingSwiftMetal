@@ -114,11 +114,9 @@ extension ViewController {
 
 extension ViewController {
 
-    @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if let _ = error {
-            view.addSubview(Toast(text: "Failed"))
-        } else {
-            view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+    func setupNewCanvasDialogPresenter() {
+        newCanvasDialogPresenter.onTapButton = { [weak self] in
+            self?.canvasViewModel.didTapNewCanvasButton()
         }
     }
 
@@ -126,9 +124,11 @@ extension ViewController {
 
 extension ViewController {
 
-    func setupNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = { [weak self] in
-            self?.canvasViewModel.parameters.initLayerManager()
+    @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let _ = error {
+            view.addSubview(Toast(text: "Failed"))
+        } else {
+            view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
         }
     }
 
