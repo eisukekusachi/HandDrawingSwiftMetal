@@ -88,6 +88,16 @@ extension CanvasViewModel {
         parameters.matrixSubject.send(.identity)
     }
 
+    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
+        transforming.getMatrix(transformationData: transformationData,
+                               frameCenterPoint: Calc.getCenter(frameSize),
+                               touchPhase: touchPhase)
+    }
+
+    func setMatrix(_ matrix: CGAffineTransform) {
+        transforming.setStoredMatrix(matrix)
+    }
+
 }
 
 extension CanvasViewModel {
@@ -110,20 +120,6 @@ extension CanvasViewModel {
                 displayLink?.isPaused = false
             }
         }
-    }
-
-}
-
-extension CanvasViewModel {
-
-    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
-        transforming.getMatrix(transformationData: transformationData,
-                               frameCenterPoint: Calc.getCenter(frameSize),
-                               touchPhase: touchPhase)
-    }
-
-    func setMatrix(_ matrix: CGAffineTransform) {
-        transforming.setStoredMatrix(matrix)
     }
 
 }
