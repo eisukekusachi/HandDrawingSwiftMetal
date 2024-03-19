@@ -17,9 +17,9 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    @Published var addUndoObject: Bool = false
-
     let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+
+    let addUndoObjectSubject = PassthroughSubject<Void, Never>()
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -114,7 +114,7 @@ extension LayerManager {
    
     func addLayer(isUndo: Bool = true) {
         if isUndo {
-            addUndoObject = true
+            addUndoObjectSubject.send()
         }
 
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
@@ -148,7 +148,7 @@ extension LayerManager {
     func removeLayer() {
         if layers.count == 1 { return }
 
-        addUndoObject = true
+        addUndoObjectSubject.send()
 
         layers.remove(at: index)
 

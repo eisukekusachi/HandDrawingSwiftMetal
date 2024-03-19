@@ -165,6 +165,13 @@ extension ContentView {
                 canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
+
+        parameters.layerManager.addUndoObjectSubject
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.canvasView.registerDrawingUndoAction()
+            }
+            .store(in: &cancellables)
     }
 
 }

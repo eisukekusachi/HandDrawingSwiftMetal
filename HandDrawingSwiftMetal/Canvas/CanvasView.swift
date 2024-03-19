@@ -57,12 +57,6 @@ class CanvasView: MTKTextureDisplayView {
 
     func setViewModel(_ viewModel: CanvasViewModel) {
         self.viewModel = viewModel
-
-        self.viewModel?.parameters.layerManager.$addUndoObject
-            .sink { [weak self] _ in
-                self?.registerDrawingUndoAction()
-        }
-        .store(in: &cancellables)
     }
 
     private func cancelFingerDrawing() {

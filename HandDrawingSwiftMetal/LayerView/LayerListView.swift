@@ -27,7 +27,7 @@ struct LayerListView: View {
                 .listRowInsets(EdgeInsets())
             }
                     .onMove(perform: { source, destination in
-                        layerManager.addUndoObject = true
+                        layerManager.addUndoObjectSubject.send()
                         layerManager.moveLayer(fromOffsets: source, toOffset: destination)
                     })
                     .listRowSeparator(.hidden)
