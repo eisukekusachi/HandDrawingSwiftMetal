@@ -76,7 +76,9 @@ extension CanvasViewModel {
 
         resetMatrix()
 
-        parameters.initLayerManager()
+        parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
+
+        parameters.mergeLayersToRootTextureSubject.send()
     }
 
 }

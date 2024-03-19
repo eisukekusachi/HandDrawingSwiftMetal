@@ -148,17 +148,20 @@ extension ContentView {
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
 
+        parameters.textureSizeSubject
+            .sink { [weak self] textureSize in
+                guard let `self`, textureSize != .zero else { return }
+                parameters.initLayers(textureSize: textureSize)
+                canvasView.initRootTexture(textureSize: textureSize)
+                parameters.mergeLayersToRootTextureSubject.send()
+            }
+            .store(in: &cancellables)
+
         parameters.mergeLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
                 parameters.mergeAllLayers(to: canvasView.rootTexture)
-            }
-            .store(in: &cancellables)
-
-        parameters.textureSizeSubject
-            .sink { [weak self] textureSize in
-                guard let `self`, textureSize != .zero else { return }
-                canvasView.initRootTexture(textureSize)
+                canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
     }

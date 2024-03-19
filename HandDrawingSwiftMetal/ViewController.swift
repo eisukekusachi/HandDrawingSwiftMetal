@@ -34,7 +34,6 @@ class ViewController: UIViewController {
 
         if canvasViewModel.parameters.textureSizeSubject.value == .zero {
             canvasViewModel.parameters.textureSizeSubject.send(contentView.canvasView.drawableSize)
-            canvasViewModel.parameters.initLayerManager()
         }
     }
     

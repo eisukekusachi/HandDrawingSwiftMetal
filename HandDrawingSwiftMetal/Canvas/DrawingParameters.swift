@@ -142,13 +142,8 @@ extension DrawingParameters {
 
 extension DrawingParameters {
 
-    func initLayerManager() {
-        let textureSize = textureSizeSubject.value
-
+    func initLayers(textureSize: CGSize) {
         layerManager.reset(textureSize)
-
-        mergeLayersToRootTextureSubject.send()
-        setNeedsDisplaySubject.send()
     }
 
     func mergeAllLayers(to dstTexture: MTLTexture?,
