@@ -13,8 +13,6 @@ class CanvasView: MTKTextureDisplayView {
 
     private (set) var viewModel: CanvasViewModel?
 
-    @Published private (set) var undoCount: Int = 0
-
     /// Override UndoManager with ``UndoManagerWithCount``
     override var undoManager: UndoManagerWithCount {
         return undoManagerWithCount
@@ -47,12 +45,6 @@ class CanvasView: MTKTextureDisplayView {
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
 
         undoManager.levelsOfUndo = 8
-
-        undoManager.$undoCount
-            .sink { [weak self] newValue in
-                self?.undoCount = newValue
-            }
-            .store(in: &cancellables)
     }
 
     func setViewModel(_ viewModel: CanvasViewModel) {

@@ -53,6 +53,9 @@ final class ContentView: UIView {
 
     private func commonInit() {
         backgroundColor = .white
+        
+        initUndoComponents()
+
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
 
@@ -117,6 +120,13 @@ extension ContentView {
             parameters,
             action:#selector(parameters.handleDiameterSlider),
             for: .valueChanged)
+
+        canvasView.undoManager.refreshUndoComponentsObjectSubject
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.refreshUndoComponents()
+            }
+            .store(in: &cancellables)
     }
     
     private func bindModels(_ parameters: DrawingParameters) {
@@ -165,13 +175,20 @@ extension ContentView {
                 canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
+    }
 
-        parameters.layerManager.addUndoObjectSubject
-            .sink { [weak self] in
-                guard let `self` else { return }
-                self.canvasView.registerDrawingUndoAction()
-            }
-            .store(in: &cancellables)
+}
+
+extension ContentView {
+
+    func initUndoComponents() {
+        canvasView.clearUndo()
+        refreshUndoComponents()
+    }
+
+    func refreshUndoComponents() {
+        undoButton.isEnabled = canvasView.canUndo
+        redoButton.isEnabled = canvasView.canRedo
     }
 
 }

@@ -37,16 +37,6 @@ class ViewController: UIViewController {
         }
     }
     
-    func initAllComponents() {
-
-        contentView.canvasView.clearUndo()
-        refreshUndoRedoButtons()
-    }
-    func refreshUndoRedoButtons() {
-        contentView.undoButton.isEnabled = contentView.canvasView.canUndo
-        contentView.redoButton.isEnabled = contentView.canvasView.canRedo
-    }
-
 }
 
 extension ViewController {
@@ -101,12 +91,6 @@ extension ViewController {
         contentView.tapRedoButton = { [weak self] in
             self?.contentView.canvasView.redo()
         }
-
-        contentView.canvasView.$undoCount
-            .sink { [weak self] _ in
-                self?.refreshUndoRedoButtons()
-            }
-            .store(in: &cancellables)
     }
 
 }
@@ -171,7 +155,8 @@ extension ViewController {
                                                             zipFilePath: zipFilePath)
             }
 
-            initAllComponents()
+            contentView.initUndoComponents()
+
             canvasViewModel.parameters.layerManager.updateNonSelectedTextures(commandBuffer: contentView.canvasView.commandBuffer)
 
             canvasViewModel.parameters.mergeAllLayers(to: contentView.canvasView.rootTexture,

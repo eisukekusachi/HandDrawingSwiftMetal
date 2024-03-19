@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import Combine
 
 /// An undoManager with undoCount and redoCount
 class UndoManagerWithCount: UndoManager {
 
-    @Published private (set) var undoCount: Int = 0
-    @Published private (set) var redoCount: Int = 0
+    let refreshUndoComponentsObjectSubject = PassthroughSubject<Void, Never>()
+
+    private (set) var undoCount: Int = 0
+    private (set) var redoCount: Int = 0
 
     override init() {
         super.init()
@@ -22,6 +25,7 @@ class UndoManagerWithCount: UndoManager {
         if undoCount < levelsOfUndo {
             undoCount += 1
             redoCount = 0
+            refreshUndoComponentsObjectSubject.send()
         }
     }
 
@@ -32,6 +36,7 @@ class UndoManagerWithCount: UndoManager {
 
             undoCount -= 1
             redoCount += 1
+            refreshUndoComponentsObjectSubject.send()
 
             return true
         }
@@ -44,6 +49,7 @@ class UndoManagerWithCount: UndoManager {
 
             undoCount += 1
             redoCount -= 1
+            refreshUndoComponentsObjectSubject.send()
 
             return true
         }
@@ -55,5 +61,6 @@ class UndoManagerWithCount: UndoManager {
 
         undoCount = 0
         redoCount = 0
+        refreshUndoComponentsObjectSubject.send()
     }
 }
