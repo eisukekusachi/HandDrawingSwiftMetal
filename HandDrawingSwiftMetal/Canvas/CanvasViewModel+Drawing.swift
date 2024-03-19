@@ -15,12 +15,12 @@ extension CanvasViewModel {
                               _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
 
-        drawing?.drawOnDrawingTexture(with: iterator,
-                                      matrix: matrix,
-                                      parameters: parameters,
-                                      on: selectedTexture,
-                                      touchPhase,
-                                      commandBuffer)
+        parameters.drawing?.drawOnDrawingTexture(with: iterator,
+                                                 matrix: matrix,
+                                                 parameters: parameters,
+                                                 on: selectedTexture,
+                                                 touchPhase,
+                                                 commandBuffer)
         if touchPhase == .ended {
             updateThumbnail()
         }
@@ -29,7 +29,7 @@ extension CanvasViewModel {
     func mergeAllLayers(to dstTexture: MTLTexture,
                         _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture = parameters.layerManager.selectedTexture,
-              let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
+              let selectedTextures = parameters.drawing?.getDrawingTextures(selectedTexture) else { return }
 
         parameters.layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
                                                  selectedAlpha: parameters.layerManager.selectedLayerAlpha,

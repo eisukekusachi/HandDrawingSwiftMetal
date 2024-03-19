@@ -34,13 +34,20 @@ final class DrawingParameters {
             layerManager.frameSize = frameSize
         }
     }
-    
+
+    /// A protocol for managing drawing
+    private (set) var drawing: Drawing?
+
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
     private (set) var brushDiameter: Int
     private (set) var eraserDiameter: Int
 
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
     private var blurSize: Float = BlurredDotSize.initBlurSize
+
+    private var cancellables = Set<AnyCancellable>()
 
     init(
         brushDiameter: Int = 8,
@@ -55,6 +62,13 @@ final class DrawingParameters {
         self.eraserAlpha = eraserAlpha
 
         setBackgroundColor(backgroundColor)
+
+        drawingToolSubject
+            .sink { [weak self] tool in
+                guard let `self` else { return }
+                drawing = tool == .brush ? layerManager.drawingBrush : layerManager.drawingEraser
+            }
+            .store(in: &cancellables)
     }
 
 }

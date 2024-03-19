@@ -32,9 +32,6 @@ class CanvasViewModel {
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    /// A protocol for managing drawing
-    private (set) var drawing: Drawing?
-
     /// A protocol for managing transformations
     private let transforming = Transforming()
 
@@ -47,13 +44,6 @@ class CanvasViewModel {
 
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
-
-        parameters.drawingToolSubject
-            .sink { [weak self] tool in
-                guard let `self` else { return }
-                drawing = tool == .brush ? parameters.layerManager.drawingBrush : parameters.layerManager.drawingEraser
-            }
-            .store(in: &cancellables)
 
         parameters.pauseDisplayLinkSubject
             .sink { [weak self] pause in
