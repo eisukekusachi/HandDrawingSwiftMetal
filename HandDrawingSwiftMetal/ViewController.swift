@@ -34,7 +34,7 @@ class ViewController: UIViewController {
 
         if canvasViewModel.parameters.textureSizeSubject.value == .zero {
             canvasViewModel.parameters.textureSizeSubject.send(contentView.canvasView.drawableSize)
-            canvasViewModel.initTexture(canvasRootTexture: contentView.canvasView.rootTexture)
+            canvasViewModel.parameters.initLayerManager()
         }
     }
     
@@ -128,8 +128,7 @@ extension ViewController {
 
     func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            guard let rootTexture = self?.contentView.canvasView.rootTexture else { return }
-            self?.canvasViewModel.newCanvas(rootTexture: rootTexture)
+            self?.canvasViewModel.parameters.initLayerManager()
         }
     }
 

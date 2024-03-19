@@ -59,19 +59,6 @@ class CanvasViewModel {
         displayLink?.isPaused = true
     }
 
-    func initTexture(canvasRootTexture: MTLTexture) {
-        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else { return }
-
-        let textureSize = parameters.textureSizeSubject.value
-
-        parameters.layerManager.reset(textureSize)
-
-        parameters.mergeAllLayers(to: canvasRootTexture, commandBuffer)
-        commandBuffer.commit()
-
-        parameters.setNeedsDisplaySubject.send()
-    }
-
 }
 
 extension CanvasViewModel {
@@ -81,7 +68,7 @@ extension CanvasViewModel {
         parameters.setNeedsDisplaySubject.send()
     }
 
-    func newCanvas(rootTexture: MTLTexture) {
+    func newCanvas() {
         guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else { return }
 
@@ -94,7 +81,7 @@ extension CanvasViewModel {
         let textureSize = parameters.textureSizeSubject.value
         parameters.layerManager.reset(textureSize)
         parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
-        parameters.mergeAllLayers(to: rootTexture, commandBuffer)
+        parameters.initLayerManager()
 
         commandBuffer.commit()
 
