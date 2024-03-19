@@ -147,22 +147,17 @@ extension DrawingParameters {
     }
 
     func mergeAllLayers(to dstTexture: MTLTexture?,
-                        _ commandBuffer: MTLCommandBuffer? = nil) {
+                        _ commandBuffer: MTLCommandBuffer) {
         guard   let dstTexture,
                 let selectedTexture = layerManager.selectedTexture,
-                let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
-
-        let localCommandBuffer = commandBuffer ?? device.makeCommandQueue()!.makeCommandBuffer()!
+                let selectedTextures = drawing?.getDrawingTextures(selectedTexture)
+        else { return }
 
         layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
                                       selectedAlpha: layerManager.selectedLayerAlpha,
                                       backgroundColor: backgroundColorSubject.value.rgb,
                                       to: dstTexture,
-                                      localCommandBuffer)
-
-        if commandBuffer == nil {
-            localCommandBuffer.commit()
-        }
+                                      commandBuffer)
     }
 
 }

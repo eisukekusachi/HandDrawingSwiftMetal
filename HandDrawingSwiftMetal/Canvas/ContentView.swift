@@ -160,7 +160,8 @@ extension ContentView {
         parameters.mergeLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
-                parameters.mergeAllLayers(to: canvasView.rootTexture)
+
+                parameters.mergeAllLayers(to: canvasView.rootTexture, canvasView.commandBuffer)
                 canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
