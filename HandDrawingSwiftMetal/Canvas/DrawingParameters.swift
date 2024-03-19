@@ -71,6 +71,13 @@ final class DrawingParameters {
                 drawing = tool == .brush ? layerManager.drawingBrush : layerManager.drawingEraser
             }
             .store(in: &cancellables)
+
+        layerManager.setNeedsDisplaySubject
+            .sink { [weak self] in
+                guard let `self` else { return }
+                mergeLayersToRootTextureSubject.send()
+            }
+            .store(in: &cancellables)
     }
 
 }

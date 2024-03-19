@@ -58,16 +58,6 @@ class CanvasView: MTKTextureDisplayView {
     func setViewModel(_ viewModel: CanvasViewModel) {
         self.viewModel = viewModel
 
-        self.viewModel?.parameters.layerManager.$setNeedsDisplay
-            .sink { [weak self] result in
-                guard result, let self else { return }
-
-                viewModel.parameters.mergeAllLayers(to: rootTexture,
-                                                    commandBuffer)
-                viewModel.parameters.setNeedsDisplaySubject.send()
-        }
-        .store(in: &cancellables)
-
         self.viewModel?.parameters.layerManager.$addUndoObject
             .sink { [weak self] _ in
                 self?.registerDrawingUndoAction()

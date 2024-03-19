@@ -17,8 +17,9 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    @Published var setNeedsDisplay: Bool = false
     @Published var addUndoObject: Bool = false
+
+    let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -141,7 +142,7 @@ extension LayerManager {
         if let layerIndex = layers.firstIndex(of: tmpSelectedLayer) {
             index = layerIndex
             updateNonSelectedTextures()
-            setNeedsDisplay = true
+            setNeedsDisplaySubject.send()
         }
     }
     func removeLayer() {
@@ -159,7 +160,7 @@ extension LayerManager {
         index = curretnIndex
 
         updateNonSelectedTextures()
-        setNeedsDisplay = true
+        setNeedsDisplaySubject.send()
     }
 
     func updateNonSelectedTextures(commandBuffer: MTLCommandBuffer? = nil) {
@@ -202,12 +203,12 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
         updateNonSelectedTextures()
-        setNeedsDisplay = true
+        setNeedsDisplaySubject.send()
     }
     func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
-        setNeedsDisplay = true
+        setNeedsDisplaySubject.send()
     }
     func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
@@ -225,6 +226,6 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].isVisible = isVisible
         updateNonSelectedTextures()
-        setNeedsDisplay = true
+        setNeedsDisplaySubject.send()
     }
 }
