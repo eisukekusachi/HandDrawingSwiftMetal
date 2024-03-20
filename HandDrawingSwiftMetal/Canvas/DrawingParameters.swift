@@ -37,6 +37,11 @@ final class DrawingParameters {
         }
     }
 
+    var undoObject: UndoObject {
+        return UndoObject(index: layerManager.index,
+                          layers: layerManager.layers)
+    }
+
     /// A protocol for managing drawing
     private (set) var drawing: Drawing?
 

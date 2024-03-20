@@ -25,11 +25,6 @@ class CanvasViewModel {
         projectName + "." + URL.zipSuffix
     }
 
-    var undoObject: UndoObject {
-        return UndoObject(index: parameters.layerManager.index,
-                          layers: parameters.layerManager.layers)
-    }
-
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     /// A protocol for managing transformations

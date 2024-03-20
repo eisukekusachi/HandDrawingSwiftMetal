@@ -29,7 +29,7 @@ extension CanvasView {
         guard let viewModel else { return }
         if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-        registerDrawingUndoAction(with: viewModel.undoObject)
+        registerDrawingUndoAction(with: viewModel.parameters.undoObject)
         undoManager.incrementUndoCount()
 
         if  let selectedLayer = viewModel.parameters.layerManager.selectedLayer,
@@ -44,7 +44,7 @@ extension CanvasView {
             guard let viewModel else { return }
             if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-            registerDrawingUndoAction(with: viewModel.undoObject)
+            registerDrawingUndoAction(with: viewModel.parameters.undoObject)
 
             viewModel.parameters.layerManager.index = undoObject.index
             viewModel.parameters.layerManager.layers = undoObject.layers
