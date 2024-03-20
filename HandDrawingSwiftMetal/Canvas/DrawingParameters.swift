@@ -24,9 +24,9 @@ final class DrawingParameters {
 
     let clearUndoSubject = PassthroughSubject<Void, Never>()
 
-    let mergeLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    let executeCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+    let executeCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
 
     /// An instance for managing texture layers
     let layerManager = LayerManager()
@@ -72,10 +72,10 @@ final class DrawingParameters {
             }
             .store(in: &cancellables)
 
-        layerManager.mergeLayersToRootTextureSubject
+        layerManager.executeCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
-                mergeLayersToRootTextureSubject.send()
+                executeCommandToMergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
     }
@@ -153,18 +153,22 @@ extension DrawingParameters {
         layerManager.reset(textureSize)
     }
 
-    func mergeAllLayers(to dstTexture: MTLTexture?,
-                        _ commandBuffer: MTLCommandBuffer) {
+    func addCommandToMergeAllLayers(
+        onto dstTexture: MTLTexture?,
+        to commandBuffer: MTLCommandBuffer
+    ) {
         guard   let dstTexture,
                 let selectedTexture = layerManager.selectedTexture,
                 let selectedTextures = drawing?.getDrawingTextures(selectedTexture)
         else { return }
 
-        layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
-                                      selectedAlpha: layerManager.selectedLayerAlpha,
-                                      backgroundColor: backgroundColorSubject.value.rgb,
-                                      to: dstTexture,
-                                      commandBuffer)
+        layerManager.addCommandToMergeAllLayers(
+            selectedTextures: selectedTextures.compactMap { $0 },
+            selectedAlpha: layerManager.selectedLayerAlpha,
+            backgroundColor: backgroundColorSubject.value.rgb,
+            onto: dstTexture,
+            to: commandBuffer
+        )
     }
 
 }

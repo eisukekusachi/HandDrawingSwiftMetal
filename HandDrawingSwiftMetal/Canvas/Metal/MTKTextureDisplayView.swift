@@ -54,6 +54,10 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
     }
 
+    func executeCommandsInCommandBuffer() {
+        setNeedsDisplay()
+    }
+
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else { return }
@@ -80,7 +84,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.disposeCommandBuffer()
+        commandQueue.setCommandBufferToNil()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}

@@ -143,12 +143,6 @@ extension ContentView {
             }
             .store(in: &cancellables)
 
-        parameters.setNeedsDisplaySubject
-            .sink { [weak self] in
-                self?.canvasView.setNeedsDisplay()
-            }
-            .store(in: &cancellables)
-
         parameters.clearUndoSubject
             .sink { [weak self] in
                 self?.canvasView.clearUndo()
@@ -162,17 +156,30 @@ extension ContentView {
         parameters.textureSizeSubject
             .sink { [weak self] textureSize in
                 guard let `self`, textureSize != .zero else { return }
+
                 parameters.initLayers(textureSize: textureSize)
                 canvasView.initRootTexture(textureSize: textureSize)
-                parameters.mergeLayersToRootTextureSubject.send()
+
+                parameters.executeCommandToMergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
 
-        parameters.mergeLayersToRootTextureSubject
+        parameters.executeCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
-                parameters.mergeAllLayers(to: canvasView.rootTexture, canvasView.commandBuffer)
-                canvasView.setNeedsDisplay()
+                
+                parameters.addCommandToMergeAllLayers(
+                    onto: canvasView.rootTexture,
+                    to: canvasView.commandBuffer
+                )
+
+                canvasView.executeCommandsInCommandBuffer()
+            }
+            .store(in: &cancellables)
+
+        parameters.executeCommandsInCommandBuffer
+            .sink { [weak self] in
+                self?.canvasView.executeCommandsInCommandBuffer()
             }
             .store(in: &cancellables)
     }

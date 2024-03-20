@@ -65,7 +65,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        parameters.setNeedsDisplaySubject.send()
+        parameters.executeCommandsInCommandBuffer.send()
     }
 
     func didTapNewCanvasButton() {
@@ -78,7 +78,7 @@ extension CanvasViewModel {
 
         parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
 
-        parameters.mergeLayersToRootTextureSubject.send()
+        parameters.executeCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
 }
@@ -105,7 +105,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        parameters.setNeedsDisplaySubject.send()
+        parameters.executeCommandsInCommandBuffer.send()
     }
 
     /// Start or stop the display link loop based on the 'play' parameter.
@@ -113,7 +113,7 @@ extension CanvasViewModel {
         if pause {
             if displayLink?.isPaused == false {
                 // Pause the display link after updating the display.
-                parameters.setNeedsDisplaySubject.send()
+                parameters.executeCommandsInCommandBuffer.send()
                 displayLink?.isPaused = true
             }
 

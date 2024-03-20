@@ -17,7 +17,7 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    let mergeLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    let executeCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let addUndoObjectSubject = PassthroughSubject<Void, Never>()
 
@@ -80,11 +80,13 @@ class LayerManager: ObservableObject {
         addLayer(isUndo: false)
     }
 
-    func mergeAllTextures(selectedTextures: [MTLTexture],
-                          selectedAlpha: Int,
-                          backgroundColor: (Int, Int, Int),
-                          to dstTexture: MTLTexture,
-                          _ commandBuffer: MTLCommandBuffer) {
+    func addCommandToMergeAllLayers(
+        selectedTextures: [MTLTexture],
+        selectedAlpha: Int,
+        backgroundColor: (Int, Int, Int),
+        onto dstTexture: MTLTexture,
+        to commandBuffer: MTLCommandBuffer
+    ) {
         Command.fill(dstTexture,
                      withRGB: backgroundColor,
                      commandBuffer)
@@ -108,7 +110,9 @@ class LayerManager: ObservableObject {
                       commandBuffer)
     }
 
-    func addCommandToMergeUnselectedLayers(to commandBuffer: MTLCommandBuffer) {
+    func addCommandToMergeUnselectedLayers(
+        to commandBuffer: MTLCommandBuffer
+    ) {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
@@ -199,7 +203,7 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
 
-        mergeLayersToRootTextureSubject.send()
+        executeCommandToMergeAllLayersToRootTextureSubject.send()
     }
     func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
@@ -225,7 +229,7 @@ extension LayerManager {
         addCommandToMergeUnselectedLayers(to: commandBuffer)
         commandBuffer.commit()
 
-        mergeLayersToRootTextureSubject.send()
+        executeCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
 }

@@ -157,12 +157,16 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(to: contentView.canvasView.commandBuffer)
+            canvasViewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(
+                to: contentView.canvasView.commandBuffer
+            )
 
-            canvasViewModel.parameters.mergeAllLayers(to: contentView.canvasView.rootTexture,
-                                                      contentView.canvasView.commandBuffer)
-            
-            canvasViewModel.parameters.setNeedsDisplaySubject.send()
+            canvasViewModel.parameters.addCommandToMergeAllLayers(
+                onto: contentView.canvasView.rootTexture,
+                to: contentView.canvasView.commandBuffer
+            )
+
+            canvasViewModel.parameters.executeCommandsInCommandBuffer.send()
         }
     }
 

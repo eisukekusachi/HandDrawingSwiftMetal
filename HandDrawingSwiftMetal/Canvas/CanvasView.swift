@@ -78,12 +78,16 @@ extension CanvasView: FingerGestureWithStorageSender {
         if touchPhase == .ended {
             registerDrawingUndoAction()
         }
+
         viewModel.drawOnDrawingTexture(with: iterator,
                                        matrix: matrix,
                                        touchPhase: touchPhase,
                                        commandBuffer)
-        viewModel.parameters.mergeAllLayers(to: rootTexture,
-                                            commandBuffer)
+
+        viewModel.parameters.addCommandToMergeAllLayers(
+            onto: rootTexture,
+            to: commandBuffer
+        )
 
         viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
@@ -132,8 +136,11 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        matrix: matrix,
                                        touchPhase: touchPhase,
                                        commandBuffer)
-        viewModel.parameters.mergeAllLayers(to: rootTexture,
-                                            commandBuffer)
+
+        viewModel.parameters.addCommandToMergeAllLayers(
+            onto: rootTexture,
+            to: commandBuffer
+        )
 
         viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }

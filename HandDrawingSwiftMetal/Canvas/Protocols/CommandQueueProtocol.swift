@@ -14,5 +14,5 @@ protocol CommandQueueProtocol {
     func getOrCreateCommandBuffer() -> MTLCommandBuffer
     func getNewCommandBuffer() -> MTLCommandBuffer
     
-    func disposeCommandBuffer()
+    func setCommandBufferToNil()
 }
