@@ -78,7 +78,7 @@ extension CanvasViewModel {
 
         parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
 
-        parameters.executeCommandToMergeAllLayersToRootTextureSubject.send()
+        parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
 }

@@ -24,7 +24,7 @@ final class DrawingParameters {
 
     let clearUndoSubject = PassthroughSubject<Void, Never>()
 
-    let executeCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let commitCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
 
@@ -72,10 +72,10 @@ final class DrawingParameters {
             }
             .store(in: &cancellables)
 
-        layerManager.executeCommandToMergeAllLayersToRootTextureSubject
+        layerManager.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
-                executeCommandToMergeAllLayersToRootTextureSubject.send()
+                commitCommandToMergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
     }

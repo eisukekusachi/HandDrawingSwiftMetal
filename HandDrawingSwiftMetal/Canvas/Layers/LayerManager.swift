@@ -17,7 +17,7 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    let executeCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let addUndoObjectSubject = PassthroughSubject<Void, Never>()
 
@@ -203,7 +203,7 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
 
-        executeCommandToMergeAllLayersToRootTextureSubject.send()
+        commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
     func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
@@ -229,7 +229,7 @@ extension LayerManager {
         addCommandToMergeUnselectedLayers(to: commandBuffer)
         commandBuffer.commit()
 
-        executeCommandToMergeAllLayersToRootTextureSubject.send()
+        commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
 }

@@ -160,11 +160,11 @@ extension ContentView {
                 parameters.initLayers(textureSize: textureSize)
                 canvasView.initRootTexture(textureSize: textureSize)
 
-                parameters.executeCommandToMergeAllLayersToRootTextureSubject.send()
+                parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
 
-        parameters.executeCommandToMergeAllLayersToRootTextureSubject
+        parameters.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
                 
