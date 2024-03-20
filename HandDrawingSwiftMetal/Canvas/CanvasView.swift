@@ -35,8 +35,7 @@ class CanvasView: MTKTextureDisplayView {
     }
 
     private func commonInitialization() {
-        _ = Pipeline.shared
-
+        
         inputManager = InputManager()
         fingerInput = FingerGestureWithStorage(view: self, delegate: self)
         pencilInput = PencilGestureWithStorage(view: self, delegate: self)
