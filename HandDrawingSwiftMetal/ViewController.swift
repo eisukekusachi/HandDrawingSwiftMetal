@@ -15,9 +15,9 @@ class ViewController: UIViewController {
 
     let canvasViewModel = CanvasViewModel()
 
-    lazy var layerViewController = UIHostingController<LayerView>(rootView: LayerView(layerManager: canvasViewModel.parameters.layerManager))
-
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
+
+    private let layerViewPresenter = LayerViewPresenter()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -26,6 +26,7 @@ class ViewController: UIViewController {
         
         setupContentView()
         setupNewCanvasDialogPresenter()
+        setupLayerViewPresenter()
     }
     
     override func viewDidLayoutSubviews() {
@@ -55,7 +56,7 @@ extension ViewController {
                        with: canvasViewModel.zipFileNameName)
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.toggleLayerVisibility()
+            self?.layerViewPresenter.toggleVisible()
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
@@ -101,6 +102,13 @@ extension ViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             self?.canvasViewModel.didTapNewCanvasButton()
         }
+    }
+
+    func setupLayerViewPresenter() {
+        layerViewPresenter.setupLayerViewPresenter(
+            layerManager: canvasViewModel.parameters.layerManager,
+            targetView: contentView.layerButton,
+            on: self)
     }
 
 }
@@ -193,43 +201,6 @@ extension ViewController {
             } catch {
                 view.addSubview(Toast(text: error.localizedDescription))
             }
-        }
-    }
-
-}
-
-extension ViewController {
-
-    func toggleLayerVisibility() {
-        if !existHostingController() {
-            let marginRight: CGFloat = 8
-            let viewWidth: CGFloat = 300.0
-            let viewHeight: CGFloat = 300.0
-            let viewX: CGFloat = view.frame.width - (viewWidth + marginRight)
-
-            canvasViewModel.parameters.layerManager.arrowPointX = contentView.layerButton.convert(contentView.layerButton.bounds, to: view).midX - viewX
-
-            view.addSubview(layerViewController.view)
-
-            layerViewController.view.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                layerViewController.view.topAnchor.constraint(equalTo: contentView.topStackView.bottomAnchor),
-                layerViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -marginRight),
-
-                layerViewController.view.widthAnchor.constraint(equalToConstant: viewWidth),
-                layerViewController.view.heightAnchor.constraint(equalToConstant: viewHeight)
-            ])
-
-            layerViewController.view.backgroundColor = .clear
-
-        } else {
-            layerViewController.view.removeFromSuperview()
-        }
-    }
-
-    func existHostingController() -> Bool {
-        return view.subviews.contains { subview in
-            return subview == layerViewController.view
         }
     }
 

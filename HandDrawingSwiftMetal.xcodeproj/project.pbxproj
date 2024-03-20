@@ -93,6 +93,7 @@
 		D4CB0D3E2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D3D2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift */; };
 		D4CB0D402B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D3F2B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift */; };
 		D4CB0D422B2EB19F00A4DCC1 /* TransformingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D412B2EB19F00A4DCC1 /* TransformingActionStateTest.swift */; };
+		D4CBCE452BAA936E0053F198 /* LayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* LayerViewPresenter.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
@@ -211,6 +212,7 @@
 		D4CB0D3D2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorNonNormalTest.swift; sourceTree = "<group>"; };
 		D4CB0D3F2B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
 		D4CB0D412B2EB19F00A4DCC1 /* TransformingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingActionStateTest.swift; sourceTree = "<group>"; };
+		D4CBCE442BAA936E0053F198 /* LayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -403,6 +405,7 @@
 				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
+				D4CBCE442BAA936E0053F198 /* LayerViewPresenter.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -727,6 +730,7 @@
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D42F40A12B45052B00B32707 /* LayerModelCodable.swift in Sources */,
 				D40D977929DAB0B400A82E6A /* InputManager.swift in Sources */,
+				D4CBCE452BAA936E0053F198 /* LayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D4CA45562BA70E7800F49045 /* DrawingPoint.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,
