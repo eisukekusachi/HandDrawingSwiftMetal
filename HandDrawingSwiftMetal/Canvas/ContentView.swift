@@ -182,6 +182,12 @@ extension ContentView {
                 self?.canvasView.commitCommandsInCommandBuffer()
             }
             .store(in: &cancellables)
+
+        parameters.layerManager.addUndoObjectToUndoStackSubject
+            .sink { [weak self] in
+                self?.canvasView.registerDrawingUndoAction()
+            }
+            .store(in: &cancellables)
     }
 
 }

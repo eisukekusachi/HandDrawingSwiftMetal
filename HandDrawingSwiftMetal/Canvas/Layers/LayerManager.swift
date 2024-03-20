@@ -19,7 +19,7 @@ class LayerManager: ObservableObject {
 
     let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    let addUndoObjectSubject = PassthroughSubject<Void, Never>()
+    let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -145,7 +145,7 @@ extension LayerManager {
    
     func addLayer(isUndo: Bool = true) {
         if isUndo {
-            addUndoObjectSubject.send()
+            addUndoObjectToUndoStackSubject.send()
         }
 
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
@@ -179,7 +179,7 @@ extension LayerManager {
     func removeLayer() {
         if layers.count == 1 { return }
 
-        addUndoObjectSubject.send()
+        addUndoObjectToUndoStackSubject.send()
 
         layers.remove(at: index)
 
