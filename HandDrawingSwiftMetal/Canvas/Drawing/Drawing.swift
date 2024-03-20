@@ -9,7 +9,6 @@ import MetalKit
 
 /// This protocol encapsulates a series of actions for drawing a single line on a texture.
 protocol Drawing {
-    var tool: DrawingTool { get }
 
     var drawingTexture: MTLTexture? { get }
 
@@ -21,8 +20,9 @@ protocol Drawing {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
+                              parameters: DrawingParameters,
                               on dstTexture: MTLTexture,
-                              _ touchState: TouchState,
+                              _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer)
 
     /// Merges textures

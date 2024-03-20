@@ -9,7 +9,6 @@ import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
 class DrawingBrush: Drawing {
-    var tool: DrawingTool = DrawingToolBrush()
 
     var drawingTexture: MTLTexture?
 
@@ -33,12 +32,12 @@ class DrawingBrush: Drawing {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
+                              parameters: DrawingParameters,
                               on dstTexture: MTLTexture,
-                              _ touchState: TouchState,
+                              _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
         assert(frameSize != .zero, "Set a value for frameSize once before here.")
         assert(textureSize != .zero, "Set a value for textureSize once before here.")
-        guard let brush = tool as? DrawingToolBrush else { return }
 
         let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
         var inverseMatrix = matrix.inverted(flipY: true)
@@ -48,14 +47,14 @@ class DrawingBrush: Drawing {
                                       matrix: inverseMatrix,
                                       srcSize: frameSize,
                                       dstSize: textureSize,
-                                      endProcessing: touchState == .ended)
+                                      endProcessing: touchPhase == .ended)
 
         guard points.count != 0 else { return }
 
         let pointBuffers = Buffers.makePointBuffers(device: device,
                                                     points: points,
-                                                    blurredDotSize: brush.blurredDotSize,
-                                                    alpha: brush.alpha,
+                                                    blurredDotSize: parameters.brushDotSize,
+                                                    alpha: parameters.brushColor.alpha,
                                                     textureSize: textureSize)
 
         Command.drawCurve(buffers: pointBuffers,
@@ -63,11 +62,11 @@ class DrawingBrush: Drawing {
                           commandBuffer)
 
         Command.colorize(grayscaleTexture: grayscaleTexture,
-                         with: brush.rgb,
+                         with: parameters.brushColor.rgb,
                          result: drawingTexture,
                          commandBuffer)
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }

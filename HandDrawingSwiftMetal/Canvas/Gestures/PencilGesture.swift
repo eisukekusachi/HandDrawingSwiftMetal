@@ -8,7 +8,7 @@
 import UIKit
 
 protocol PencilGestureSender {
-    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchState: TouchState)
+    func sendLocations(_ gesture: PencilGesture?, touchPointArray: [TouchPoint], touchPhase: UITouch.Phase)
     func cancel(_ gesture: PencilGesture?)
 }
 
@@ -41,7 +41,7 @@ extension PencilGesture {
             }
         }
 
-        output?.sendLocations(self, touchPointArray: [], touchState: .began)
+        output?.sendLocations(self, touchPointArray: [], touchPhase: .began)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         var locations: [TouchPoint] = []
@@ -63,7 +63,7 @@ extension PencilGesture {
             }
         }
 
-        output?.sendLocations(self, touchPointArray: locations, touchState: .moved)
+        output?.sendLocations(self, touchPointArray: locations, touchPhase: .moved)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         var locations: [TouchPoint] = []
@@ -81,7 +81,7 @@ extension PencilGesture {
             }
         }
 
-        output?.sendLocations(self, touchPointArray: locations, touchState: .ended)
+        output?.sendLocations(self, touchPointArray: locations, touchPhase: .ended)
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {

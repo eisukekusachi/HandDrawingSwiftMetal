@@ -10,90 +10,113 @@ import Combine
 
 class CanvasViewModel {
 
-    /// The currently selected drawing tool, either brush or eraser.
-    @Published var drawingTool: DrawingToolType = .brush
-
-    /// Drawing with a brush
-    var drawingBrush = DrawingBrush()
-
-    /// Drawing with an eraser
-    var drawingEraser = DrawingEraser()
+    let parameters = DrawingParameters()
 
     var frameSize: CGSize = .zero {
         didSet {
-            drawingBrush.frameSize = frameSize
-            drawingEraser.frameSize = frameSize
+            parameters.frameSize = frameSize
         }
-    }
-
-    var brushDiameter: Int {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.diameter }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.diameter = newValue }
-    }
-    var eraserDiameter: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.diameter }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.diameter = newValue }
-    }
-
-    var brushColor: UIColor {
-        get { (drawingBrush.tool as? DrawingToolBrush)!.color }
-        set { (drawingBrush.tool as? DrawingToolBrush)?.setValue(color: newValue) }
-    }
-    var eraserAlpha: Int {
-        get { (drawingEraser.tool as? DrawingToolEraser)!.alpha }
-        set { (drawingEraser.tool as? DrawingToolEraser)?.setValue(alpha: newValue)}
     }
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
-    
+
     var zipFileNameName: String {
         projectName + "." + URL.zipSuffix
     }
 
-    var undoObject: UndoObject {
-        return UndoObject(index: layerManager.index,
-                          layers: layerManager.layers)
-    }
-
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    /// A protocol for managing drawing
-    private (set) var drawing: Drawing?
-
     /// A protocol for managing transformations
-    private (set) var transforming: Transforming!
+    private let transforming = Transforming()
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
 
-    /// An instance for managing texture layers
-    private (set) var layerManager = LayerManager()
+    private var displayLink: CADisplayLink?
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(fileIO: FileIO = FileIOImpl(),
-         transforming: Transforming = TransformingImpl()) {
+    init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
-        self.transforming = transforming
 
-        $drawingTool
-            .sink { [weak self] newValue in
-                guard let self else { return }
-                switch newValue {
-                case .brush:
-                    self.drawing = self.drawingBrush
-                case .eraser:
-                    self.drawing = self.drawingEraser
-                }
+        parameters.pauseDisplayLinkSubject
+            .sink { [weak self] pause in
+                self?.pauseDisplayLinkLoop(pause)
             }
             .store(in: &cancellables)
+
+        parameters.setDrawingTool(.brush)
+
+        // Configure the display link for rendering.
+        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
     }
 
-    func initAllTextures(_ textureSize: CGSize) {
-        layerManager.initLayerManager(textureSize)
+}
 
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
+extension CanvasViewModel {
+
+    func didTapResetTransformButton() {
+        resetMatrix()
+        parameters.commitCommandsInCommandBuffer.send()
     }
+
+    func didTapNewCanvasButton() {
+
+        projectName = Calendar.currentDate
+
+        parameters.clearUndoSubject.send()
+
+        resetMatrix()
+
+        parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
+
+        parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func resetMatrix() {
+        transforming.setStoredMatrix(.identity)
+        parameters.matrixSubject.send(.identity)
+    }
+
+    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
+        transforming.getMatrix(transformationData: transformationData,
+                               frameCenterPoint: Calc.getCenter(frameSize),
+                               touchPhase: touchPhase)
+    }
+
+    func setMatrix(_ matrix: CGAffineTransform) {
+        transforming.setStoredMatrix(matrix)
+    }
+
+}
+
+extension CanvasViewModel {
+
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        parameters.commitCommandsInCommandBuffer.send()
+    }
+
+    /// Start or stop the display link loop based on the 'play' parameter.
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
+            if displayLink?.isPaused == false {
+                // Pause the display link after updating the display.
+                parameters.commitCommandsInCommandBuffer.send()
+                displayLink?.isPaused = true
+            }
+
+        } else {
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
+            }
+        }
+    }
+
 }

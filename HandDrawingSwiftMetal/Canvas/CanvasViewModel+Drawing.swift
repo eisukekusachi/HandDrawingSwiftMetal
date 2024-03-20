@@ -11,38 +11,26 @@ import MetalKit
 extension CanvasViewModel {
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
-                              touchState: TouchState,
+                              touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = layerManager.selectedTexture else { return }
+        guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
 
-        drawing?.drawOnDrawingTexture(with: iterator,
-                                      matrix: matrix,
-                                      on: selectedTexture,
-                                      touchState,
-                                      commandBuffer)
-        if touchState == .ended {
+        parameters.drawing?.drawOnDrawingTexture(with: iterator,
+                                                 matrix: matrix,
+                                                 parameters: parameters,
+                                                 on: selectedTexture,
+                                                 touchPhase,
+                                                 commandBuffer)
+        if touchPhase == .ended {
             updateThumbnail()
         }
-    }
-    func mergeAllLayers(backgroundColor: (Int, Int, Int),
-                        to dstTexture: MTLTexture,
-                        _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = layerManager.selectedTexture,
-              let selectedTextures = drawing?.getDrawingTextures(selectedTexture) else { return }
-        let selectedAlpha = layerManager.selectedLayerAlpha
-
-        layerManager.mergeAllTextures(selectedTextures: selectedTextures.compactMap { $0 },
-                                      selectedAlpha: selectedAlpha,
-                                      backgroundColor: backgroundColor,
-                                      to: dstTexture,
-                                      commandBuffer)
     }
 
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-            if let selectedLayer = layerManager.selectedLayer {
-                layerManager.updateThumbnail(selectedLayer)
+            if let selectedLayer = parameters.layerManager.selectedLayer {
+                parameters.layerManager.updateThumbnail(selectedLayer)
             }
         }
     }

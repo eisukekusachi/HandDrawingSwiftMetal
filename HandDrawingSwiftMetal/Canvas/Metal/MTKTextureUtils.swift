@@ -114,4 +114,20 @@ enum MTKTextureUtils {
 
         return texture
     }
+
+    static func duplicateTexture(_ device: MTLDevice, _ sourceTexture: MTLTexture?) -> MTLTexture? {
+        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer(),
+              let sourceTexture else { return nil }
+
+        let newTexture = MTKTextureUtils.makeTexture(device, sourceTexture.size)
+
+        Command.copy(
+            dst: newTexture,
+            src: sourceTexture,
+            commandBuffer)
+        commandBuffer.commit()
+
+        return newTexture
+    }
+
 }

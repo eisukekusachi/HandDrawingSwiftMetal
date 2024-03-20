@@ -46,7 +46,7 @@ extension LayerView {
 
         return HStack {
             Button(action: {
-                layerManager.addLayer(layerManager.textureSize)
+                layerManager.addLayer()
 
             }, label: {
                 Image(systemName: "plus.circle")

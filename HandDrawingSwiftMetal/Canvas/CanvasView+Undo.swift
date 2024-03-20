@@ -27,14 +27,15 @@ extension CanvasView {
 
     func registerDrawingUndoAction() {
         guard let viewModel else { return }
-        if viewModel.layerManager.layers.count == 0 { return }
+        
+        if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-        registerDrawingUndoAction(with: viewModel.undoObject)
+        registerDrawingUndoAction(with: viewModel.parameters.undoObject)
         undoManager.incrementUndoCount()
 
-        if  let selectedLayer = viewModel.layerManager.selectedLayer,
-            let newTexture = duplicateTexture(viewModel.layerManager.selectedTexture) {
-            viewModel.layerManager.updateTexture(selectedLayer, newTexture)
+        if  let selectedTexture = viewModel.parameters.layerManager.selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, selectedTexture) {
+            viewModel.parameters.layerManager.updateSelectedLayerTexture(newTexture)
         }
     }
 
@@ -42,15 +43,21 @@ extension CanvasView {
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self) { [unowned self] _ in
             guard let viewModel else { return }
-            if viewModel.layerManager.layers.count == 0 { return }
+            if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-            registerDrawingUndoAction(with: viewModel.undoObject)
+            registerDrawingUndoAction(with: viewModel.parameters.undoObject)
 
-            viewModel.layerManager.index = undoObject.index
-            viewModel.layerManager.layers = undoObject.layers
+            viewModel.parameters.layerManager.update(undoObject: undoObject)
 
-            viewModel.layerManager.updateNonSelectedTextures()
-            refreshCanvas()
+            viewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(
+                to: commandBuffer
+            )
+            viewModel.parameters.addCommandToMergeAllLayers(
+                onto: rootTexture,
+                to: commandBuffer
+            )
+
+            viewModel.parameters.commitCommandsInCommandBuffer.send()
         }
     }
 }

@@ -9,7 +9,6 @@ import MetalKit
 
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
 class DrawingEraser: Drawing {
-    var tool: DrawingTool = DrawingToolEraser()
 
     var drawingTexture: MTLTexture?
 
@@ -43,12 +42,12 @@ class DrawingEraser: Drawing {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
+                              parameters: DrawingParameters,
                               on dstTexture: MTLTexture,
-                              _ touchState: TouchState,
+                              _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
         assert(frameSize != .zero, "Set a value for frameSize once before here.")
         assert(textureSize != .zero, "Set a value for textureSize once before here.")
-        guard let eraser = tool as? DrawingToolEraser else { return }
 
         let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
         var inverseMatrix = matrix.inverted(flipY: true)
@@ -58,14 +57,14 @@ class DrawingEraser: Drawing {
                                       matrix: inverseMatrix,
                                       srcSize: frameSize,
                                       dstSize: textureSize,
-                                      endProcessing: touchState == .ended)
+                                      endProcessing: touchPhase == .ended)
 
         guard points.count != 0 else { return }
 
         let pointBuffers = Buffers.makePointBuffers(device: device,
                                                     points: points,
-                                                    blurredDotSize: eraser.blurredDotSize,
-                                                    alpha: eraser.alpha,
+                                                    blurredDotSize: parameters.eraserDotSize,
+                                                    alpha: parameters.eraserAlpha,
                                                     textureSize: textureSize)
 
         Command.drawCurve(buffers: pointBuffers,
@@ -88,7 +87,7 @@ class DrawingEraser: Drawing {
 
         isDrawing = true
 
-        if touchState == .ended {
+        if touchPhase == .ended {
             merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }

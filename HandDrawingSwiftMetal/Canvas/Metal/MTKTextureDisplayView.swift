@@ -10,9 +10,6 @@ import MetalKit
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
-    /// The size of the texture to be displayed.
-    @Published private (set) var textureSize: CGSize = .zero
-
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
 
@@ -22,8 +19,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
     }
 
     private(set) var rootTexture: MTLTexture!
-
-    private(set) var displayLink: CADisplayLink?
 
     private var commandQueue: CommandQueueProtocol!
 
@@ -36,14 +31,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         commonInit()
     }
 
-    override func layoutSubviews() {
-        guard let currentDrawable else { return }
-
-        if rootTexture == nil {
-            initializeRootTexture(currentDrawable.texture.size)
-        }
-    }
-
     private func commonInit() {
         self.device = MTLCreateSystemDefaultDevice()
         let commandQueue = self.device!.makeCommandQueue()
@@ -53,11 +40,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
 
         self.commandQueue = CommandQueue(queue: commandQueue!)
 
-        // Configure the display link for rendering.
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
-
         self.delegate = self
         self.enableSetNeedsDisplay = true
         self.autoResizeDrawable = true
@@ -65,18 +47,19 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         self.backgroundColor = .white
     }
 
-    func initializeRootTexture(_ textureSize: CGSize) {
+    func initRootTexture(textureSize: CGSize) {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
         self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
-        self.textureSize = textureSize
+    }
+
+    func commitCommandsInCommandBuffer() {
+        setNeedsDisplay()
     }
 
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
-        assert(textureSize != .zero, "It seems that initializeRootTexture() is not being called.")
-
         guard let drawable = view.currentDrawable else { return }
 
         var canvasMatrix = matrix
@@ -101,41 +84,9 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.disposeCommandBuffer()
+        commandQueue.setCommandBufferToNil()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
-
-    /// Start or stop the display link loop based on the 'play' parameter.
-    func runDisplayLinkLoop(_ play: Bool) {
-        if play {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        } else {
-            if displayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                setNeedsDisplay()
-                displayLink?.isPaused = true
-            }
-        }
-    }
-
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
-    }
-}
-
-extension MTKTextureDisplayView {
-    func duplicateTexture(_ srcTexture: MTLTexture?) -> MTLTexture? {
-        guard let commandBuffer = commandQueue?.getNewCommandBuffer(),
-              let srcTexture = srcTexture else { return nil }
-
-        let newTexture = MTKTextureUtils.makeTexture(device!, srcTexture.size)
-
-        Command.copy(dst: newTexture, src: srcTexture, commandBuffer)
-        commandBuffer.commit()
-
-        return newTexture
-    }
+    
 }
