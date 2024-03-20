@@ -210,6 +210,11 @@ extension LayerManager {
 
         commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
+
+    func updateSelectedLayerTexture(_ texture: MTLTexture) {
+        layers[index].texture = texture
+    }
+
     func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].texture = texture

@@ -27,14 +27,15 @@ extension CanvasView {
 
     func registerDrawingUndoAction() {
         guard let viewModel else { return }
+        
         if viewModel.parameters.layerManager.layers.count == 0 { return }
 
         registerDrawingUndoAction(with: viewModel.parameters.undoObject)
         undoManager.incrementUndoCount()
 
-        if  let selectedLayer = viewModel.parameters.layerManager.selectedLayer,
-            let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, viewModel.parameters.layerManager.selectedTexture) {
-            viewModel.parameters.layerManager.updateTexture(selectedLayer, newTexture)
+        if  let selectedTexture = viewModel.parameters.layerManager.selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, selectedTexture) {
+            viewModel.parameters.layerManager.updateSelectedLayerTexture(newTexture)
         }
     }
 
