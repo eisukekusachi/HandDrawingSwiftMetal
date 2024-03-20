@@ -72,7 +72,7 @@ final class DrawingParameters {
             }
             .store(in: &cancellables)
 
-        layerManager.setNeedsDisplaySubject
+        layerManager.mergeLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
                 mergeLayersToRootTextureSubject.send()

@@ -17,7 +17,7 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+    let mergeLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let addUndoObjectSubject = PassthroughSubject<Void, Never>()
 
@@ -129,7 +129,7 @@ extension LayerManager {
             layers.append(layer)
         }
 
-        updateNonSelectedTextures()
+        didUpdatedAllLayers()
     }
 
     func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
@@ -141,8 +141,8 @@ extension LayerManager {
 
         if let layerIndex = layers.firstIndex(of: tmpSelectedLayer) {
             index = layerIndex
-            updateNonSelectedTextures()
-            setNeedsDisplaySubject.send()
+
+            didUpdatedAllLayers()
         }
     }
     func removeLayer() {
@@ -159,8 +159,7 @@ extension LayerManager {
         }
         index = curretnIndex
 
-        updateNonSelectedTextures()
-        setNeedsDisplaySubject.send()
+        didUpdatedAllLayers()
     }
 
     func updateNonSelectedTextures(commandBuffer: MTLCommandBuffer? = nil) {
@@ -202,13 +201,14 @@ extension LayerManager {
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
-        updateNonSelectedTextures()
-        setNeedsDisplaySubject.send()
+
+        didUpdatedAllLayers()
     }
     func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
-        setNeedsDisplaySubject.send()
+
+        mergeLayersToRootTextureSubject.send()
     }
     func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
@@ -225,7 +225,13 @@ extension LayerManager {
     func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].isVisible = isVisible
-        updateNonSelectedTextures()
-        setNeedsDisplaySubject.send()
+
+        didUpdatedAllLayers()
     }
+
+    private func didUpdatedAllLayers() {
+        updateNonSelectedTextures()
+        mergeLayersToRootTextureSubject.send()
+    }
+
 }
