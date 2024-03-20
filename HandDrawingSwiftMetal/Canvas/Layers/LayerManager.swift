@@ -193,6 +193,11 @@ extension LayerManager {
         didUpdatedAllLayers()
     }
 
+    func update(undoObject: UndoObject) {
+        index = undoObject.index
+        layers = undoObject.layers
+    }
+
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex

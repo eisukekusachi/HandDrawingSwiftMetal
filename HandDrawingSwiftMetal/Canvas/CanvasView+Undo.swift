@@ -46,8 +46,7 @@ extension CanvasView {
 
             registerDrawingUndoAction(with: viewModel.parameters.undoObject)
 
-            viewModel.parameters.layerManager.index = undoObject.index
-            viewModel.parameters.layerManager.layers = undoObject.layers
+            viewModel.parameters.layerManager.update(undoObject: undoObject)
 
             viewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(
                 to: commandBuffer
