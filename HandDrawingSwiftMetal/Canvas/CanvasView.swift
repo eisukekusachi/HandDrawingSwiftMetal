@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class CanvasView: MTKTextureDisplayView {
@@ -25,8 +24,6 @@ class CanvasView: MTKTextureDisplayView {
     private var inputManager: InputManager!
     private var fingerInput: FingerGestureWithStorage!
     private var pencilInput: PencilGestureWithStorage!
-
-    private var cancellables = Set<AnyCancellable>()
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
