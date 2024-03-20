@@ -65,7 +65,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        parameters.executeCommandsInCommandBuffer.send()
+        parameters.commitCommandsInCommandBuffer.send()
     }
 
     func didTapNewCanvasButton() {
@@ -105,7 +105,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        parameters.executeCommandsInCommandBuffer.send()
+        parameters.commitCommandsInCommandBuffer.send()
     }
 
     /// Start or stop the display link loop based on the 'play' parameter.
@@ -113,7 +113,7 @@ extension CanvasViewModel {
         if pause {
             if displayLink?.isPaused == false {
                 // Pause the display link after updating the display.
-                parameters.executeCommandsInCommandBuffer.send()
+                parameters.commitCommandsInCommandBuffer.send()
                 displayLink?.isPaused = true
             }
 

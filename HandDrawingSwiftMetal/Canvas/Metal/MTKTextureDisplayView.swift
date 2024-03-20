@@ -54,7 +54,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
     }
 
-    func executeCommandsInCommandBuffer() {
+    func commitCommandsInCommandBuffer() {
         setNeedsDisplay()
     }
 

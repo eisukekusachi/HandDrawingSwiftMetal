@@ -166,7 +166,7 @@ extension ViewController {
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.parameters.executeCommandsInCommandBuffer.send()
+            canvasViewModel.parameters.commitCommandsInCommandBuffer.send()
         }
     }
 

@@ -26,7 +26,7 @@ final class DrawingParameters {
 
     let executeCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    let executeCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
+    let commitCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
 
     /// An instance for managing texture layers
     let layerManager = LayerManager()

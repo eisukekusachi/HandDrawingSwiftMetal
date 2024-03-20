@@ -57,7 +57,7 @@ extension CanvasView {
                 to: commandBuffer
             )
 
-            viewModel.parameters.executeCommandsInCommandBuffer.send()
+            viewModel.parameters.commitCommandsInCommandBuffer.send()
         }
     }
 }
