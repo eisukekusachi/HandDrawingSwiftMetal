@@ -49,7 +49,7 @@ extension CanvasView {
             viewModel.parameters.layerManager.index = undoObject.index
             viewModel.parameters.layerManager.layers = undoObject.layers
 
-            viewModel.parameters.layerManager.updateNonSelectedTextures(commandBuffer: commandBuffer)
+            viewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(to: commandBuffer)
             viewModel.parameters.mergeAllLayers(to: rootTexture,
                                                 commandBuffer)
             

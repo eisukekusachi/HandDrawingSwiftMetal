@@ -107,6 +107,33 @@ class LayerManager: ObservableObject {
                       into: dstTexture,
                       commandBuffer)
     }
+
+    func addCommandToMergeUnselectedLayers(to commandBuffer: MTLCommandBuffer) {
+        let bottomIndex: Int = index - 1
+        let topIndex: Int = index + 1
+
+        Command.clear(texture: bottomTexture, commandBuffer)
+        Command.clear(texture: topTexture, commandBuffer)
+
+        if bottomIndex >= 0 {
+            for i in 0 ... bottomIndex where layers[i].isVisible {
+                Command.merge(
+                    texture: layers[i].texture,
+                    alpha: layers[i].alpha,
+                    into: bottomTexture,
+                    commandBuffer)
+            }
+        }
+        if topIndex < layers.count {
+            for i in topIndex ..< layers.count where layers[i].isVisible {
+                Command.merge(
+                    texture: layers[i].texture,
+                    alpha: layers[i].alpha,
+                    into: topTexture,
+                    commandBuffer)
+            }
+        }
+    }
 }
 
 // CRUD
@@ -162,42 +189,6 @@ extension LayerManager {
         didUpdatedAllLayers()
     }
 
-    func updateNonSelectedTextures(commandBuffer: MTLCommandBuffer? = nil) {
-        let bottomIndex: Int = index - 1
-        let topIndex: Int = index + 1
-
-        let externalCommandBuffer: MTLCommandBuffer? = commandBuffer
-        let internalCommandBuffer: MTLCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-
-        let currentCommandBuffer = externalCommandBuffer ?? internalCommandBuffer
-
-        Command.clear(texture: bottomTexture, currentCommandBuffer)
-        Command.clear(texture: topTexture, currentCommandBuffer)
-
-        if bottomIndex >= 0 {
-            for i in 0 ... bottomIndex where layers[i].isVisible {
-                Command.merge(
-                    texture: layers[i].texture,
-                    alpha: layers[i].alpha,
-                    into: bottomTexture,
-                    currentCommandBuffer)
-            }
-        }
-        if topIndex < layers.count {
-            for i in topIndex ..< layers.count where layers[i].isVisible {
-                Command.merge(
-                    texture: layers[i].texture,
-                    alpha: layers[i].alpha,
-                    into: topTexture,
-                    currentCommandBuffer)
-            }
-        }
-
-        if externalCommandBuffer == nil {
-            currentCommandBuffer.commit()
-        }
-    }
-
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
@@ -230,7 +221,10 @@ extension LayerManager {
     }
 
     private func didUpdatedAllLayers() {
-        updateNonSelectedTextures()
+        let commandBuffer: MTLCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        addCommandToMergeUnselectedLayers(to: commandBuffer)
+        commandBuffer.commit()
+
         mergeLayersToRootTextureSubject.send()
     }
 
