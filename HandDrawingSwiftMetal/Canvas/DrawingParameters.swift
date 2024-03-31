@@ -22,8 +22,6 @@ final class DrawingParameters {
 
     let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
 
-    let clearUndoSubject = PassthroughSubject<Void, Never>()
-
     let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let commitCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
@@ -35,11 +33,6 @@ final class DrawingParameters {
         didSet {
             layerManager.frameSize = frameSize
         }
-    }
-
-    var undoObject: UndoObject {
-        return UndoObject(index: layerManager.index,
-                          layers: layerManager.layers)
     }
 
     /// A protocol for managing drawing

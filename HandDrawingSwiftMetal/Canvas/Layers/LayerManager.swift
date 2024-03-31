@@ -19,7 +19,10 @@ class LayerManager: ObservableObject {
 
     let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
+        addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
+    }
+    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -165,6 +168,8 @@ extension LayerManager {
 
     func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
         guard let tmpSelectedLayer = selectedLayer else { return }
+
+        addUndoObjectToUndoStackSubject.send()
 
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)

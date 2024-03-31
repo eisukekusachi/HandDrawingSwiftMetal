@@ -27,6 +27,8 @@ class ViewController: UIViewController {
         setupContentView()
         setupNewCanvasDialogPresenter()
         setupLayerViewPresenter()
+
+        bindViewModel()
     }
     
     override func viewDidLayoutSubviews() {
@@ -93,6 +95,21 @@ extension ViewController {
         contentView.tapRedoButton = { [weak self] in
             self?.contentView.canvasView.redo()
         }
+    }
+
+    private func bindViewModel() {
+
+        canvasViewModel.clearUndoPublisher
+            .sink { [weak self] in
+                self?.contentView.canvasView.clearUndo()
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.addUndoObjectToUndoStackPublisher
+            .sink { [weak self] in
+                self?.contentView.canvasView.registerDrawingUndoAction()
+            }
+            .store(in: &cancellables)
     }
 
 }

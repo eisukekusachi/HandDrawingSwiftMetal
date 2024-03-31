@@ -30,7 +30,7 @@ extension CanvasView {
         
         if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-        registerDrawingUndoAction(with: viewModel.parameters.undoObject)
+        registerDrawingUndoAction(with: viewModel.undoObject)
         undoManager.incrementUndoCount()
 
         if  let selectedTexture = viewModel.parameters.layerManager.selectedTexture,
@@ -45,7 +45,7 @@ extension CanvasView {
             guard let viewModel else { return }
             if viewModel.parameters.layerManager.layers.count == 0 { return }
 
-            registerDrawingUndoAction(with: viewModel.parameters.undoObject)
+            registerDrawingUndoAction(with: viewModel.undoObject)
 
             viewModel.parameters.layerManager.update(undoObject: undoObject)
 

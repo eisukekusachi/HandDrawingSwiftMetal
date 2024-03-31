@@ -143,12 +143,6 @@ extension ContentView {
             }
             .store(in: &cancellables)
 
-        parameters.clearUndoSubject
-            .sink { [weak self] in
-                self?.canvasView.clearUndo()
-            }
-            .store(in: &cancellables)
-
         parameters.matrixSubject
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
@@ -180,12 +174,6 @@ extension ContentView {
         parameters.commitCommandsInCommandBuffer
             .sink { [weak self] in
                 self?.canvasView.commitCommandsInCommandBuffer()
-            }
-            .store(in: &cancellables)
-
-        parameters.layerManager.addUndoObjectToUndoStackSubject
-            .sink { [weak self] in
-                self?.canvasView.registerDrawingUndoAction()
             }
             .store(in: &cancellables)
     }

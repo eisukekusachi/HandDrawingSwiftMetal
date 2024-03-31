@@ -25,6 +25,19 @@ class CanvasViewModel {
         projectName + "." + URL.zipSuffix
     }
 
+    var undoObject: UndoObject {
+        return UndoObject(index: parameters.layerManager.index,
+                          layers: parameters.layerManager.layers)
+    }
+
+    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
+        addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
+    }
+
+    var clearUndoPublisher: AnyPublisher<Void, Never> {
+        clearUndoSubject.eraseToAnyPublisher()
+    }
+
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     /// A protocol for managing transformations
@@ -33,12 +46,21 @@ class CanvasViewModel {
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
 
+
+    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+
+    private let clearUndoSubject = PassthroughSubject<Void, Never>()
+
     private var displayLink: CADisplayLink?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
+
+        parameters.layerManager.addUndoObjectToUndoStackPublisher
+            .subscribe(addUndoObjectToUndoStackSubject)
+            .store(in: &cancellables)
 
         parameters.pauseDisplayLinkSubject
             .sink { [weak self] pause in
@@ -65,9 +87,9 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
 
-        projectName = Calendar.currentDate
+        clearUndoSubject.send()
 
-        parameters.clearUndoSubject.send()
+        projectName = Calendar.currentDate
 
         resetMatrix()
 
