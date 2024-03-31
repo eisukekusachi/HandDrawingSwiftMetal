@@ -15,12 +15,14 @@ extension CanvasViewModel {
                               _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
 
-        parameters.drawing?.drawOnDrawingTexture(with: iterator,
-                                                 matrix: matrix,
-                                                 parameters: parameters,
-                                                 on: selectedTexture,
-                                                 touchPhase,
-                                                 commandBuffer)
+        parameters.drawingLayer?.drawOnDrawingTexture(
+            with: iterator,
+            matrix: matrix,
+            parameters: parameters,
+            on: selectedTexture,
+            touchPhase,
+            commandBuffer)
+
         if touchPhase == .ended {
             updateThumbnail()
         }

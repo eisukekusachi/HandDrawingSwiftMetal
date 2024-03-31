@@ -26,16 +26,15 @@ class LayerManager: ObservableObject {
 
     var frameSize: CGSize = .zero {
         didSet {
-            drawingBrush.frameSize = frameSize
-            drawingEraser.frameSize = frameSize
+            drawingBrushLayer.frameSize = frameSize
+            drawingEraserLayer.frameSize = frameSize
         }
     }
 
     /// Drawing with a brush
-    let drawingBrush = DrawingBrush()
-
+    let drawingBrushLayer = DrawingBrushLayer()
     /// Drawing with an eraser
-    let drawingEraser = DrawingEraser()
+    let drawingEraserLayer = DrawingEraserLayer()
 
     var layers: [LayerModel] = [] {
         didSet {
@@ -74,9 +73,9 @@ class LayerManager: ObservableObject {
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
-        
+        drawingBrushLayer.initTextures(textureSize)
+        drawingEraserLayer.initTextures(textureSize)
+
         layers.removeAll()
         index = 0
         

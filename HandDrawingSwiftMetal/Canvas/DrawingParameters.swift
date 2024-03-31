@@ -36,7 +36,7 @@ final class DrawingParameters {
     }
 
     /// A protocol for managing drawing
-    private (set) var drawing: Drawing?
+    private (set) var drawingLayer: DrawingLayer?
 
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
@@ -66,7 +66,7 @@ final class DrawingParameters {
         drawingToolSubject
             .sink { [weak self] tool in
                 guard let `self` else { return }
-                drawing = tool == .brush ? layerManager.drawingBrush : layerManager.drawingEraser
+                drawingLayer = tool == .brush ? layerManager.drawingBrushLayer : layerManager.drawingEraserLayer
             }
             .store(in: &cancellables)
 
@@ -157,7 +157,7 @@ extension DrawingParameters {
     ) {
         guard   let dstTexture,
                 let selectedTexture = layerManager.selectedTexture,
-                let selectedTextures = drawing?.getDrawingTextures(selectedTexture)
+                let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
         else { return }
 
         layerManager.addCommandToMergeAllLayers(
