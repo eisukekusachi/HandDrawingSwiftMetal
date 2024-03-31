@@ -48,6 +48,7 @@ extension ViewController {
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+        subscribeEvents()
 
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
@@ -112,6 +113,16 @@ extension ViewController {
             .store(in: &cancellables)
     }
 
+    private func subscribeEvents() {
+        let fingerInputGestureRecognizer = FingerInputGestureRecognizer()
+        let pencilInputGestureRecognizer = PencilInputGestureRecognizer()
+
+        view.addGestureRecognizer(fingerInputGestureRecognizer)
+        view.addGestureRecognizer(pencilInputGestureRecognizer)
+
+        fingerInputGestureRecognizer.gestureDelegate = self
+        pencilInputGestureRecognizer.gestureDelegate = self
+    }
 }
 
 extension ViewController {
@@ -220,6 +231,22 @@ extension ViewController {
                 view.addSubview(Toast(text: error.localizedDescription))
             }
         }
+    }
+
+}
+
+extension ViewController: FingerInputGestureSender {
+
+    func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
+
+    }
+
+}
+
+extension ViewController: PencilInputGestureSender {
+
+    func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
+
     }
 
 }

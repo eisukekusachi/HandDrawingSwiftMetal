@@ -80,6 +80,15 @@ class CanvasViewModel {
 
 extension CanvasViewModel {
 
+    func handleFingerInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
+
+    }
+    func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
+
+    }
+}
+extension CanvasViewModel {
+
     func didTapResetTransformButton() {
         resetMatrix()
         drawingTool.commitCommandsInCommandBuffer.send()
