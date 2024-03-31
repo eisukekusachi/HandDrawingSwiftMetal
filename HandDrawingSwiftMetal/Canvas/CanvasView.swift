@@ -52,7 +52,7 @@ class CanvasView: MTKTextureDisplayView {
         viewModel?.setMatrix(matrix)
 
         let commandBuffer = device!.makeCommandQueue()!.makeCommandBuffer()!
-        viewModel?.parameters.layerManager.drawingLayer?.clearDrawingTextures(commandBuffer)
+        viewModel?.drawingTool.layerManager.drawingLayer?.clearDrawingTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -80,12 +80,12 @@ extension CanvasView: FingerGestureWithStorageSender {
                                        touchPhase: touchPhase,
                                        commandBuffer)
 
-        viewModel.parameters.addCommandToMergeAllLayers(
+        viewModel.drawingTool.addCommandToMergeAllLayers(
             onto: rootTexture,
             to: commandBuffer
         )
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
+        viewModel.drawingTool.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func transformTexture(_ input: FingerGestureWithStorage, 
                           touchPointArrayDictionary: [Int: [TouchPoint]],
@@ -100,7 +100,7 @@ extension CanvasView: FingerGestureWithStorageSender {
             matrix = newMatrix
         }
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
+        viewModel.drawingTool.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func touchEnded(_ input: FingerGestureWithStorage) {
         guard inputManager.updateInput(input) is FingerGestureWithStorage else { return }
@@ -133,12 +133,12 @@ extension CanvasView: PencilGestureWithStorageSender {
                                        touchPhase: touchPhase,
                                        commandBuffer)
 
-        viewModel.parameters.addCommandToMergeAllLayers(
+        viewModel.drawingTool.addCommandToMergeAllLayers(
             onto: rootTexture,
             to: commandBuffer
         )
 
-        viewModel.parameters.pauseDisplayLinkSubject.send(touchPhase == .ended)
+        viewModel.drawingTool.pauseDisplayLinkSubject.send(touchPhase == .ended)
     }
     func touchEnded(_ input: PencilGestureWithStorage) {
         prepareForNextDrawing()

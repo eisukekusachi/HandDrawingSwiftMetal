@@ -47,7 +47,7 @@ extension ViewController {
 
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
-        contentView.applyDrawingParameters(canvasViewModel.parameters)
+        contentView.applyDrawingParameters(canvasViewModel.drawingTool)
 
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
@@ -124,7 +124,7 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         layerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.parameters.layerManager,
+            layerManager: canvasViewModel.drawingTool.layerManager,
             targetView: contentView.layerButton,
             on: self)
     }
@@ -150,8 +150,8 @@ extension ViewController {
             guard   let self,
                     let currentTexture = contentView.canvasView.rootTexture else { return }
 
-            let layerIndex = canvasViewModel.parameters.layerManager.index
-            let codableLayers = try await canvasViewModel.parameters.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
+            let layerIndex = canvasViewModel.drawingTool.layerManager.index
+            let codableLayers = try await canvasViewModel.drawingTool.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
             try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
                                                     layerIndex: layerIndex,
                                                     codableLayers: codableLayers,
@@ -183,16 +183,16 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(
+            canvasViewModel.drawingTool.layerManager.addCommandToMergeUnselectedLayers(
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.parameters.addCommandToMergeAllLayers(
+            canvasViewModel.drawingTool.addCommandToMergeAllLayers(
                 onto: contentView.canvasView.rootTexture,
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.parameters.commitCommandsInCommandBuffer.send()
+            canvasViewModel.drawingTool.commitCommandsInCommandBuffer.send()
         }
     }
 

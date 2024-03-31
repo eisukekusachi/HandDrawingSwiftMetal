@@ -13,12 +13,12 @@ extension CanvasViewModel {
                               matrix: CGAffineTransform,
                               touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
-        guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
+        guard let selectedTexture = drawingTool.layerManager.selectedTexture else { return }
 
-        parameters.layerManager.drawingLayer?.drawOnDrawingTexture(
+        drawingTool.layerManager.drawingLayer?.drawOnDrawingTexture(
             with: iterator,
             matrix: matrix,
-            parameters: parameters,
+            parameters: drawingTool,
             on: selectedTexture,
             touchPhase,
             commandBuffer)
@@ -31,8 +31,8 @@ extension CanvasViewModel {
     private func updateThumbnail() {
         Task { @MainActor in
             try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-            if let selectedLayer = parameters.layerManager.selectedLayer {
-                parameters.layerManager.updateThumbnail(selectedLayer)
+            if let selectedLayer = drawingTool.layerManager.selectedLayer {
+                drawingTool.layerManager.updateThumbnail(selectedLayer)
             }
         }
     }

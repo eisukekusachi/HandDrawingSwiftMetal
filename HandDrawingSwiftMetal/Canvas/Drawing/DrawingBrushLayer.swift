@@ -32,7 +32,7 @@ class DrawingBrushLayer: DrawingLayer {
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
     func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
                               matrix: CGAffineTransform,
-                              parameters: DrawingParameters,
+                              parameters: DrawingToolModel,
                               on dstTexture: MTLTexture,
                               _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {

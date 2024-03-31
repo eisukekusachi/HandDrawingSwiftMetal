@@ -22,9 +22,9 @@ extension CanvasViewModel {
                                  layerIndex: layerIndex,
                                  layers: codableLayers,
                                  thumbnailName: URL.thumbnailPath,
-                                 drawingTool: parameters.drawingToolSubject.value.rawValue,
-                                 brushDiameter: parameters.brushDiameter,
-                                 eraserDiameter: parameters.eraserDiameter)
+                                 drawingTool: drawingTool.drawingToolSubject.value.rawValue,
+                                 brushDiameter: drawingTool.brushDiameter,
+                                 eraserDiameter: drawingTool.eraserDiameter)
 
         try fileIO.saveJson(data,
                             to: tmpFolderURL.appendingPathComponent(URL.jsonFileName))
@@ -57,12 +57,12 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        parameters.layerManager.layers = layers
-        parameters.layerManager.index = layerIndex
+        drawingTool.layerManager.layers = layers
+        drawingTool.layerManager.index = layerIndex
 
-        parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
-        parameters.setBrushDiameter(brushDiameter)
-        parameters.setEraserDiameter(eraserDiameter)
+        drawingTool.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
 
         projectName = zipFilePath.fileName
     }
@@ -83,13 +83,13 @@ extension CanvasViewModel {
         let layerData = LayerModel.init(texture: newTexture,
                                         title: "NewLayer")
 
-        parameters.layerManager.layers.removeAll()
-        parameters.layerManager.layers.append(layerData)
-        parameters.layerManager.index = 0
+        drawingTool.layerManager.layers.removeAll()
+        drawingTool.layerManager.layers.append(layerData)
+        drawingTool.layerManager.index = 0
 
-        parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
-        parameters.setBrushDiameter(brushDiameter)
-        parameters.setEraserDiameter(eraserDiameter)
+        drawingTool.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
 
         projectName = zipFilePath.fileName
     }

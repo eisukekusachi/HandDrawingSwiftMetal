@@ -1,5 +1,5 @@
 //
-//  DrawingParameters.swift
+//  DrawingToolModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/09.
@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DrawingParameters {
+final class DrawingToolModel {
 
     let diameterSubject = CurrentValueSubject<Float, Never>(1.0)
 
@@ -76,7 +76,7 @@ final class DrawingParameters {
 
 }
 
-extension DrawingParameters {
+extension DrawingToolModel {
 
     func setDrawingTool(_ tool: DrawingToolType) {
 
@@ -99,7 +99,7 @@ extension DrawingParameters {
 
 }
 
-extension DrawingParameters {
+extension DrawingToolModel {
 
     var brushDotSize: BlurredDotSize {
         BlurredDotSize(diameter: brushDiameter, blurSize: blurSize)
@@ -133,7 +133,7 @@ extension DrawingParameters {
 
 }
 
-extension DrawingParameters {
+extension DrawingToolModel {
 
     func setBackgroundColor(_ color: UIColor) {
         self.backgroundColorSubject.send(color)
@@ -141,7 +141,7 @@ extension DrawingParameters {
     
 }
 
-extension DrawingParameters {
+extension DrawingToolModel {
 
     func initLayers(textureSize: CGSize) {
         layerManager.reset(textureSize)

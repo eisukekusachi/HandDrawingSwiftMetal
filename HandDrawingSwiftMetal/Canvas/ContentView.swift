@@ -63,12 +63,12 @@ final class ContentView: UIView {
 
 extension ContentView {
 
-    func applyDrawingParameters(_ parameters: DrawingParameters) {
-        bindInputs(parameters)
-        bindModels(parameters)
+    func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
+        bindInputs(drawingTool)
+        bindModels(drawingTool)
     }
 
-    private func bindInputs(_ parameters: DrawingParameters) {
+    private func bindInputs(_ drawingTool: DrawingToolModel) {
 
         resetTransformButton.addAction(.init { [weak self] _ in
             self?.tapResetTransformButton?()
@@ -95,17 +95,17 @@ extension ContentView {
         }, for: .touchUpInside)
 
         blackColorButton.addAction(.init { _ in
-            parameters.setDrawingTool(.brush)
-            parameters.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+            drawingTool.setDrawingTool(.brush)
+            drawingTool.setBrushColor(UIColor.black.withAlphaComponent(0.75))
         }, for: .touchUpInside)
 
         redColorButton.addAction(.init { _ in
-            parameters.setDrawingTool(.brush)
-            parameters.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+            drawingTool.setDrawingTool(.brush)
+            drawingTool.setBrushColor(UIColor.red.withAlphaComponent(0.75))
         }, for: .touchUpInside)
 
         eraserButton.addAction(.init { _ in
-            parameters.setDrawingTool(.eraser)
+            drawingTool.setDrawingTool(.eraser)
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
@@ -117,8 +117,8 @@ extension ContentView {
         }, for: .touchUpInside)
 
         diameterSlider.addTarget(
-            parameters,
-            action:#selector(parameters.handleDiameterSlider),
+            drawingTool,
+            action:#selector(drawingTool.handleDiameterSlider),
             for: .valueChanged)
 
         canvasView.undoManager.refreshUndoComponentsObjectSubject
@@ -129,40 +129,40 @@ extension ContentView {
             .store(in: &cancellables)
     }
     
-    private func bindModels(_ parameters: DrawingParameters) {
+    private func bindModels(_ drawingTool: DrawingToolModel) {
 
-        parameters.diameterSubject
+        drawingTool.diameterSubject
             .sink { [weak self] diameter in
                 self?.diameterSlider.value = diameter
             }
             .store(in: &cancellables)
 
-        parameters.backgroundColorSubject
+        drawingTool.backgroundColorSubject
             .sink { [weak self] color in
                 self?.canvasView.backgroundColor = color
             }
             .store(in: &cancellables)
 
-        parameters.matrixSubject
+        drawingTool.matrixSubject
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
 
-        parameters.textureSizeSubject
+        drawingTool.textureSizeSubject
             .sink { [weak self] textureSize in
                 guard let `self`, textureSize != .zero else { return }
 
-                parameters.initLayers(textureSize: textureSize)
+                drawingTool.initLayers(textureSize: textureSize)
                 canvasView.initRootTexture(textureSize: textureSize)
 
-                parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
+                drawingTool.commitCommandToMergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
 
-        parameters.commitCommandToMergeAllLayersToRootTextureSubject
+        drawingTool.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 guard let `self` else { return }
                 
-                parameters.addCommandToMergeAllLayers(
+                drawingTool.addCommandToMergeAllLayers(
                     onto: canvasView.rootTexture,
                     to: canvasView.commandBuffer
                 )
@@ -171,7 +171,7 @@ extension ContentView {
             }
             .store(in: &cancellables)
 
-        parameters.commitCommandsInCommandBuffer
+        drawingTool.commitCommandsInCommandBuffer
             .sink { [weak self] in
                 self?.canvasView.commitCommandsInCommandBuffer()
             }

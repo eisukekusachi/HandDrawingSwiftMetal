@@ -10,11 +10,11 @@ import Combine
 
 class CanvasViewModel {
 
-    let parameters = DrawingParameters()
+    let drawingTool = DrawingToolModel()
 
     var frameSize: CGSize = .zero {
         didSet {
-            parameters.frameSize = frameSize
+            drawingTool.frameSize = frameSize
         }
     }
 
@@ -26,8 +26,8 @@ class CanvasViewModel {
     }
 
     var undoObject: UndoObject {
-        return UndoObject(index: parameters.layerManager.index,
-                          layers: parameters.layerManager.layers)
+        return UndoObject(index: drawingTool.layerManager.index,
+                          layers: drawingTool.layerManager.layers)
     }
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
@@ -58,17 +58,17 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        parameters.layerManager.addUndoObjectToUndoStackPublisher
+        drawingTool.layerManager.addUndoObjectToUndoStackPublisher
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
-        parameters.pauseDisplayLinkSubject
+        drawingTool.pauseDisplayLinkSubject
             .sink { [weak self] pause in
                 self?.pauseDisplayLinkLoop(pause)
             }
             .store(in: &cancellables)
 
-        parameters.setDrawingTool(.brush)
+        drawingTool.setDrawingTool(.brush)
 
         // Configure the display link for rendering.
         displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
@@ -82,7 +82,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        parameters.commitCommandsInCommandBuffer.send()
+        drawingTool.commitCommandsInCommandBuffer.send()
     }
 
     func didTapNewCanvasButton() {
@@ -93,9 +93,9 @@ extension CanvasViewModel {
 
         resetMatrix()
 
-        parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
+        drawingTool.initLayers(textureSize: drawingTool.textureSizeSubject.value)
 
-        parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
+        drawingTool.commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
 }
@@ -103,15 +103,15 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if parameters.textureSizeSubject.value == .zero &&
+        if drawingTool.textureSizeSubject.value == .zero &&
            frameSize.isSameRatio(drawableSize) {
-            parameters.textureSizeSubject.send(drawableSize)
+            drawingTool.textureSizeSubject.send(drawableSize)
         }
     }
 
     func resetMatrix() {
         transforming.setStoredMatrix(.identity)
-        parameters.matrixSubject.send(.identity)
+        drawingTool.matrixSubject.send(.identity)
     }
 
     func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
@@ -129,7 +129,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        parameters.commitCommandsInCommandBuffer.send()
+        drawingTool.commitCommandsInCommandBuffer.send()
     }
 
     /// Start or stop the display link loop based on the 'play' parameter.
@@ -137,7 +137,7 @@ extension CanvasViewModel {
         if pause {
             if displayLink?.isPaused == false {
                 // Pause the display link after updating the display.
-                parameters.commitCommandsInCommandBuffer.send()
+                drawingTool.commitCommandsInCommandBuffer.send()
                 displayLink?.isPaused = true
             }
 
