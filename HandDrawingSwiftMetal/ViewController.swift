@@ -33,9 +33,10 @@ class ViewController: UIViewController {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
 
-        if canvasViewModel.parameters.textureSizeSubject.value == .zero {
-            canvasViewModel.parameters.textureSizeSubject.send(contentView.canvasView.drawableSize)
-        }
+        canvasViewModel.initTextureSizeIfSizeIsZero(
+            frameSize: view.frame.size,
+            drawableSize: contentView.canvasView.drawableSize
+        )
     }
     
 }

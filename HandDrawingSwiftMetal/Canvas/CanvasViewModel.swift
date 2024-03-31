@@ -80,6 +80,13 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
+        if parameters.textureSizeSubject.value == .zero &&
+           frameSize.isSameRatio(drawableSize) {
+            parameters.textureSizeSubject.send(drawableSize)
+        }
+    }
+
     func resetMatrix() {
         transforming.setStoredMatrix(.identity)
         parameters.matrixSubject.send(.identity)
