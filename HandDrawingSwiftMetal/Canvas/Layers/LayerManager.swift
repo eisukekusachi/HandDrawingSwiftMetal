@@ -31,11 +31,6 @@ class LayerManager: ObservableObject {
         }
     }
 
-    /// Drawing with a brush
-    let drawingBrushLayer = DrawingBrushLayer()
-    /// Drawing with an eraser
-    let drawingEraserLayer = DrawingEraserLayer()
-
     var layers: [LayerModel] = [] {
         didSet {
             guard index < layers.count else { return }
@@ -57,6 +52,13 @@ class LayerManager: ObservableObject {
     }
 
     var arrowPointX: CGFloat = 0.0
+
+    /// A protocol for managing current drawing layer
+    private (set) var drawingLayer: DrawingLayer?
+    /// Drawing with a brush
+    private let drawingBrushLayer = DrawingBrushLayer()
+    /// Drawing with an eraser
+    private let drawingEraserLayer = DrawingEraserLayer()
 
     private var textureSize: CGSize = .zero
 
@@ -80,6 +82,10 @@ class LayerManager: ObservableObject {
         index = 0
         
         addLayer(isUndo: false)
+    }
+
+    func setDrawingLayer(_ tool: DrawingToolType) {
+        drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
     }
 
     func addCommandToMergeAllLayers(

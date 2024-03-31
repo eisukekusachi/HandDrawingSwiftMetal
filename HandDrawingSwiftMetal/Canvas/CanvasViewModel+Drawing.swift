@@ -15,7 +15,7 @@ extension CanvasViewModel {
                               _ commandBuffer: MTLCommandBuffer) {
         guard let selectedTexture = parameters.layerManager.selectedTexture else { return }
 
-        parameters.drawingLayer?.drawOnDrawingTexture(
+        parameters.layerManager.drawingLayer?.drawOnDrawingTexture(
             with: iterator,
             matrix: matrix,
             parameters: parameters,
