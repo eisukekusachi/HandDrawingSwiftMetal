@@ -72,37 +72,6 @@ enum Buffers {
                                  blurredDotSize: BlurredDotSize,
                                  alpha: Int,
                                  textureSize: CGSize) -> PointBuffers? {
-        var vertexArray: [Float] = []
-        var alphaArray: [Float] = []
-        var diameterPlusBlurSizeArray: [Float] = []
-        
-        points.forEach {
-            let vertexX: Float = Float($0.location.x / textureSize.width) * 2.0 - 1.0
-            let vertexY: Float = Float($0.location.y / textureSize.height) * 2.0 - 1.0
-            
-            vertexArray.append(contentsOf: [vertexX, vertexY])
-            alphaArray.append(Float($0.alpha) * Float(alpha) / 255.0)
-            diameterPlusBlurSizeArray.append(blurredDotSize.totalSize)
-        }
-        
-        let vertexBuffer = device?.makeBuffer(bytes: vertexArray,
-                                              length: vertexArray.count * MemoryLayout<Float>.size)
-        let transparencyBuffer = device?.makeBuffer(bytes: alphaArray,
-                                                    length: alphaArray.count * MemoryLayout<Float>.size)
-        let diameterPlusBlurSizeBuffer = device?.makeBuffer(bytes: diameterPlusBlurSizeArray,
-                                                            length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size)
-        
-        if let vertexBuffer = vertexBuffer,
-           let transparencyBuffer = transparencyBuffer,
-           let diameterPlusBlurSizeBuffer = diameterPlusBlurSizeBuffer {
-            
-            return PointBuffers(vertexBuffer: vertexBuffer,
-                                diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
-                                alphaBuffer: transparencyBuffer,
-                                blurSize: blurredDotSize.blurSize,
-                                numberOfPoints: vertexArray.count / 2)
-        }
-        
         return nil
     }
     

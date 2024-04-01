@@ -15,64 +15,19 @@ enum Interpolator {
                            startPoint: TouchPoint,
                            endPoint: TouchPoint,
                            addLastPoint: Bool = false) -> [TouchPoint] {
-        var curve: [TouchPoint] = []
-
-        let locations = Interpolator.firstCurve(pointA: previousPoint.location,
-                                                pointB: startPoint.location,
-                                                pointC: endPoint.location,
-                                                addLastPoint: addLastPoint)
-        let alphaArray = Interpolator.linear(begin: previousPoint.alpha,
-                                             change: startPoint.alpha,
-                                             duration: locations.count)
-        
-        for i in 0 ..< locations.count {
-            curve.append(TouchPoint(location: locations[i],
-                                    alpha: alphaArray[i]))
-        }
-        
-        return curve
+        return []
     }
     static func curve(previousPoint: TouchPoint,
                       startPoint: TouchPoint,
                       endPoint: TouchPoint,
                       nextPoint: TouchPoint) -> [TouchPoint] {
-        var curve: [TouchPoint] = []
-
-        let locations = Interpolator.curve(previousPoint: previousPoint.location,
-                                           startPoint: startPoint.location,
-                                           endPoint: endPoint.location,
-                                           nextPoint: nextPoint.location)
-        let alphaArray = Interpolator.linear(begin: startPoint.alpha,
-                                             change: endPoint.alpha,
-                                             duration: locations.count)
-        
-        for i in 0 ..< locations.count {
-            curve.append(TouchPoint(location: locations[i],
-                                    alpha: alphaArray[i]))
-        }
-        
-        return curve
+        return []
     }
     static func lastCurve(startPoint: TouchPoint,
                           endPoint: TouchPoint,
                           nextPoint: TouchPoint,
                           addLastPoint: Bool = false) -> [TouchPoint] {
-        var curve: [TouchPoint] = []
-
-        let locations = Interpolator.lastCurve(pointA: startPoint.location,
-                                               pointB: endPoint.location,
-                                               pointC: nextPoint.location,
-                                               addLastPoint: addLastPoint)
-        let alphaArray = Interpolator.linear(begin: endPoint.alpha,
-                                             change: nextPoint.alpha,
-                                             duration: locations.count)
-        
-        for i in 0 ..< locations.count {
-            curve.append(TouchPoint(location: locations[i],
-                                    alpha: alphaArray[i]))
-        }
-        
-        return curve
+        return []
     }
     
     private static func firstCurve(pointA: CGPoint,
