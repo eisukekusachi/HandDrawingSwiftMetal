@@ -8,7 +8,7 @@
 import UIKit
 
 protocol PencilInputGestureSender {
-    func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?)
+    func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
 }
 
 final class PencilInputGestureRecognizer: UIGestureRecognizer {
@@ -21,16 +21,19 @@ final class PencilInputGestureRecognizer: UIGestureRecognizer {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let view else { return }
         gestureDelegate?.sendPencilTouches(touches, with: event, on: view)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let view else { return }
         gestureDelegate?.sendPencilTouches(touches, with: event, on: view)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let view else { return }
         gestureDelegate?.sendPencilTouches(touches, with: event, on: view)
     }
-
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let view else { return }
         gestureDelegate?.sendPencilTouches(touches, with: event, on: view)
     }
 

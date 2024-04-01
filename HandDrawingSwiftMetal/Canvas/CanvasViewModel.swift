@@ -38,6 +38,8 @@ class CanvasViewModel {
         clearUndoSubject.eraseToAnyPublisher()
     }
 
+    private let touchManager = TouchManager()
+
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     /// A protocol for managing transformations
@@ -80,12 +82,25 @@ class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func handleFingerInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
-
+    func handleFingerInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+        defer {
+            touchManager.removeIfTouchPhaseIsEnded(touches: touches)
+            if touchManager.touchPointsDictionary.isEmpty {
+                print("touchPointArray is empty.")
+            }
+        }
+        touchManager.appendFingerTouches(event, in: view)
     }
-    func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView?) {
-
+    func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+        defer {
+            touchManager.removeIfTouchPhaseIsEnded(touches: touches)
+            if touchManager.touchPointsDictionary.isEmpty {
+                print("touchPointArray is empty.")
+            }
+        }
+        touchManager.appendPencilTouches(event, in: view)
     }
+
 }
 extension CanvasViewModel {
 
