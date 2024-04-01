@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40ACDD529DBC340004618CE /* ActionStateManager.swift */; };
 		D40CDEFF2B411F450059527E /* LayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* LayerView.swift */; };
 		D40CDF032B411F660059527E /* LayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* LayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -54,6 +53,7 @@
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D4541E842BBACF1A00C96741 /* TouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E832BBACF1A00C96741 /* TouchManager.swift */; };
+		D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E872BBAE43F00C96741 /* ActionManager.swift */; };
 		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
 		D459415C2B08EDB000A18653 /* CanvasView+Undo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
@@ -122,7 +122,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D40ACDD529DBC340004618CE /* ActionStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateManager.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* LayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* LayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -168,6 +167,7 @@
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D4541E832BBACF1A00C96741 /* TouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchManager.swift; sourceTree = "<group>"; };
+		D4541E872BBAE43F00C96741 /* ActionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionManager.swift; sourceTree = "<group>"; };
 		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasView+Undo.swift"; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
@@ -418,7 +418,7 @@
 			isa = PBXGroup;
 			children = (
 				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D40ACDD529DBC340004618CE /* ActionStateManager.swift */,
+				D4541E872BBAE43F00C96741 /* ActionManager.swift */,
 			);
 			path = ActionState;
 			sourceTree = "<group>";
@@ -693,6 +693,7 @@
 				D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
+				D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
@@ -737,7 +738,6 @@
 				D4B4AAA22B3FF44100298CFB /* LayerModel.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
 				D459415C2B08EDB000A18653 /* CanvasView+Undo.swift in Sources */,
-				D40ACDD629DBC340004618CE /* ActionStateManager.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* DrawingBrushLayer.swift in Sources */,

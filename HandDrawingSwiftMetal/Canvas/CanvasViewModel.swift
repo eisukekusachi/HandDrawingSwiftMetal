@@ -39,6 +39,7 @@ class CanvasViewModel {
     }
 
     private let touchManager = TouchManager()
+    private let actionManager = ActionManager()
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -86,16 +87,30 @@ extension CanvasViewModel {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
             if touchManager.touchPointsDictionary.isEmpty {
-                print("touchPointArray is empty.")
+                actionManager.reset()
             }
         }
         touchManager.appendFingerTouches(event, in: view)
+
+        let newState: ActionState = .init(from: touchManager.touchPointsDictionary)
+
+        switch actionManager.updateState(newState) {
+        case .drawing:
+            print("drawing")
+
+        case .transforming:
+            print("transforming")
+
+        default:
+            break
+        }
     }
+
     func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
             if touchManager.touchPointsDictionary.isEmpty {
-                print("touchPointArray is empty.")
+                actionManager.reset()
             }
         }
         touchManager.appendPencilTouches(event, in: view)
