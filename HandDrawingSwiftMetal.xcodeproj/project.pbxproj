@@ -54,6 +54,8 @@
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D4541E842BBACF1A00C96741 /* TouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E832BBACF1A00C96741 /* TouchManager.swift */; };
 		D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E872BBAE43F00C96741 /* ActionManager.swift */; };
+		D4541E922BBC160B00C96741 /* DotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E912BBC160B00C96741 /* DotPoint.swift */; };
+		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
 		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
 		D459415C2B08EDB000A18653 /* CanvasView+Undo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
@@ -77,7 +79,6 @@
 		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
 		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
 		D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* Transforming.swift */; };
-		D4CA45562BA70E7800F49045 /* DrawingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CA45552BA70E7800F49045 /* DrawingPoint.swift */; };
 		D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */; };
 		D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */; };
 		D4CB0D362B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */; };
@@ -168,6 +169,8 @@
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D4541E832BBACF1A00C96741 /* TouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchManager.swift; sourceTree = "<group>"; };
 		D4541E872BBAE43F00C96741 /* ActionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionManager.swift; sourceTree = "<group>"; };
+		D4541E912BBC160B00C96741 /* DotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotPoint.swift; sourceTree = "<group>"; };
+		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasView+Undo.swift"; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
@@ -191,7 +194,6 @@
 		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* Transforming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
-		D4CA45552BA70E7800F49045 /* DrawingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingPoint.swift; sourceTree = "<group>"; };
 		D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModelTests.swift; sourceTree = "<group>"; };
 		D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
 		D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
@@ -288,9 +290,9 @@
 		D40D975329DAB02000A82E6A /* TouchPoints */ = {
 			isa = PBXGroup;
 			children = (
-				D4CA45552BA70E7800F49045 /* DrawingPoint.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 				D4541E832BBACF1A00C96741 /* TouchManager.swift */,
+				D4541E912BBC160B00C96741 /* DotPoint.swift */,
 			);
 			path = TouchPoints;
 			sourceTree = "<group>";
@@ -310,6 +312,7 @@
 			children = (
 				D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */,
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
+				D4541E932BBC167200C96741 /* CGPointExtensions.swift */,
 				D4BCB3022AF7383B00EA650D /* DataExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
 				D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */,
@@ -718,7 +721,6 @@
 				D42F40A12B45052B00B32707 /* LayerModelCodable.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* LayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
-				D4CA45562BA70E7800F49045 /* DrawingPoint.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */,
 				D40D97A029DAB0DF00A82E6A /* Pipeline.swift in Sources */,
@@ -730,6 +732,7 @@
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D40CDEFF2B411F450059527E /* LayerView.swift in Sources */,
+				D4541E922BBC160B00C96741 /* DotPoint.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */,
@@ -758,6 +761,7 @@
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
 				D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
+				D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */,
 				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
