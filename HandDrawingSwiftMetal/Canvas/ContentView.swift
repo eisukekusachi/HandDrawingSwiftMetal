@@ -174,13 +174,13 @@ extension ContentView {
                     to: canvasView.commandBuffer
                 )
 
-                canvasView.commitCommandsInCommandBuffer()
+                canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
 
-        drawingTool.commitCommandsInCommandBuffer
+        drawingTool.setNeedsDisplayPublisher
             .sink { [weak self] in
-                self?.canvasView.commitCommandsInCommandBuffer()
+                self?.canvasView.setNeedsDisplay()
             }
             .store(in: &cancellables)
     }

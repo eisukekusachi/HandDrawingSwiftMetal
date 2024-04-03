@@ -42,7 +42,10 @@ final class DrawingToolModel {
 
     let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    let commitCommandsInCommandBuffer = PassthroughSubject<Void, Never>()
+    var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
+        setNeedsDisplaySubject.eraseToAnyPublisher()
+    }
+    private let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
 
     /// An instance for managing texture layers
     let layerManager = LayerManager()
@@ -160,6 +163,10 @@ extension DrawingToolModel {
 }
 
 extension DrawingToolModel {
+
+    func setNeedsDisplay() {
+        setNeedsDisplaySubject.send()
+    }
 
     func initLayers(textureSize: CGSize) {
         layerManager.reset(textureSize)

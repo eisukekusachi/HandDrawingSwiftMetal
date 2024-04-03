@@ -209,7 +209,7 @@ extension ViewController {
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.drawingTool.commitCommandsInCommandBuffer.send()
+            contentView.canvasView.setNeedsDisplay()
         }
     }
 

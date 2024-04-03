@@ -113,7 +113,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        drawingTool.commitCommandsInCommandBuffer.send()
+        drawingTool.setNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {

@@ -41,7 +41,7 @@ extension CanvasView {
 
     /// Registers an action to undo the drawing operation.
     func registerDrawingUndoAction(with undoObject: UndoObject) {
-        undoManager.registerUndo(withTarget: self) { [unowned self] _ in
+        undoManager.registerUndo(withTarget: self as CanvasView) { [unowned self] _ in
             guard let viewModel else { return }
             if viewModel.drawingTool.layerManager.layers.count == 0 { return }
 
@@ -57,7 +57,7 @@ extension CanvasView {
                 to: commandBuffer
             )
 
-            viewModel.drawingTool.commitCommandsInCommandBuffer.send()
+            viewModel.drawingTool.setNeedsDisplay()
         }
     }
 }
