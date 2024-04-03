@@ -29,6 +29,9 @@ final class DrawingToolModel {
     var backgroundColorPublisher: AnyPublisher<UIColor, Never> {
         backgroundColorSubject.eraseToAnyPublisher()
     }
+    var mergeAllLayersToRootTexturePublisher: AnyPublisher<Void, Never> {
+        mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
+    }
 
     private let drawingToolSubject = CurrentValueSubject<DrawingToolType, Never>(.brush)
 
@@ -40,7 +43,7 @@ final class DrawingToolModel {
 
     let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
-    let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
         setNeedsDisplaySubject.eraseToAnyPublisher()
@@ -89,8 +92,7 @@ final class DrawingToolModel {
 
         layerManager.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
-                guard let `self` else { return }
-                commitCommandToMergeAllLayersToRootTextureSubject.send()
+                self?.mergeAllLayersToRootTextureSubject.send()
             }
             .store(in: &cancellables)
     }
@@ -163,7 +165,9 @@ extension DrawingToolModel {
 }
 
 extension DrawingToolModel {
-
+    func mergeAllLayersToRootTexture() {
+        mergeAllLayersToRootTextureSubject.send()
+    }
     func setNeedsDisplay() {
         setNeedsDisplaySubject.send()
     }

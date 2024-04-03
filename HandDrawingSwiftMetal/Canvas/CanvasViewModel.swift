@@ -126,7 +126,8 @@ extension CanvasViewModel {
 
         drawingTool.initLayers(textureSize: drawingTool.textureSizeSubject.value)
 
-        drawingTool.commitCommandToMergeAllLayersToRootTextureSubject.send()
+        drawingTool.mergeAllLayersToRootTexture()
+        drawingTool.setNeedsDisplay()
     }
 
 }

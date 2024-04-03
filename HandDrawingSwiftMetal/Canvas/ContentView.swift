@@ -158,14 +158,13 @@ extension ContentView {
             .sink { [weak self] textureSize in
                 guard let `self`, textureSize != .zero else { return }
 
-                drawingTool.initLayers(textureSize: textureSize)
                 canvasView.initRootTexture(textureSize: textureSize)
-
-                drawingTool.commitCommandToMergeAllLayersToRootTextureSubject.send()
+                drawingTool.initLayers(textureSize: textureSize)
+                self.mergeAllLayersToRootTexture(drawingTool.layerManager)
             }
             .store(in: &cancellables)
 
-        drawingTool.commitCommandToMergeAllLayersToRootTextureSubject
+        drawingTool.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTexture(drawingTool.layerManager)
             }
@@ -204,8 +203,6 @@ extension ContentView {
             onto: canvasView.rootTexture,
             to: canvasView.commandBuffer
         )
-
-        canvasView.setNeedsDisplay()
     }
 }
 
