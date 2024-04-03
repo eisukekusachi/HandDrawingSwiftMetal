@@ -88,15 +88,18 @@ class LayerManager: ObservableObject {
         drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
     }
 
-    func addCommandToMergeAllLayers(
-        selectedTextures: [MTLTexture],
-        selectedAlpha: Int,
-        backgroundColor: (Int, Int, Int),
+    func addMergeAllLayersCommands(
+        backgroundColor: UIColor,
         onto dstTexture: MTLTexture,
         to commandBuffer: MTLCommandBuffer
     ) {
+        guard
+            let selectedTexture = selectedTexture,
+            let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
+        else { return }
+
         Command.fill(dstTexture,
-                     withRGB: backgroundColor,
+                     withRGB: backgroundColor.rgb,
                      commandBuffer)
 
         Command.merge(texture: bottomTexture,
@@ -104,11 +107,11 @@ class LayerManager: ObservableObject {
                       commandBuffer)
 
         if layers[index].isVisible {
-            MTKTextureUtils.makeSingleTexture(from: selectedTextures,
+            MTKTextureUtils.makeSingleTexture(from: selectedTextures.compactMap { $0 },
                                               to: currentTexture,
                                               commandBuffer)
             Command.merge(texture: currentTexture,
-                          alpha: selectedAlpha,
+                          alpha: selectedLayerAlpha,
                           into: dstTexture,
                           commandBuffer)
         }

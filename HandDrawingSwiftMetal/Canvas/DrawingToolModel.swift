@@ -173,18 +173,14 @@ extension DrawingToolModel {
     }
 
     func addCommandToMergeAllLayers(
+        backgroundColor: UIColor,
         onto dstTexture: MTLTexture?,
         to commandBuffer: MTLCommandBuffer
     ) {
-        guard   let dstTexture,
-                let selectedTexture = layerManager.selectedTexture,
-                let selectedTextures = layerManager.drawingLayer?.getDrawingTextures(selectedTexture)
-        else { return }
+        guard let dstTexture else { return }
 
-        layerManager.addCommandToMergeAllLayers(
-            selectedTextures: selectedTextures.compactMap { $0 },
-            selectedAlpha: layerManager.selectedLayerAlpha,
-            backgroundColor: backgroundColorSubject.value.rgb,
+        layerManager.addMergeAllLayersCommands(
+            backgroundColor: backgroundColor,
             onto: dstTexture,
             to: commandBuffer
         )

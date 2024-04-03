@@ -205,6 +205,7 @@ extension ViewController {
             )
 
             canvasViewModel.drawingTool.addCommandToMergeAllLayers(
+                backgroundColor: contentView.canvasView.backgroundColor ?? .white,
                 onto: contentView.canvasView.rootTexture,
                 to: contentView.canvasView.commandBuffer
             )

@@ -167,14 +167,7 @@ extension ContentView {
 
         drawingTool.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
-                guard let `self` else { return }
-                
-                drawingTool.addCommandToMergeAllLayers(
-                    onto: canvasView.rootTexture,
-                    to: canvasView.commandBuffer
-                )
-
-                canvasView.setNeedsDisplay()
+                self?.mergeAllLayersToRootTexture(drawingTool.layerManager)
             }
             .store(in: &cancellables)
 
@@ -199,6 +192,21 @@ extension ContentView {
         redoButton.isEnabled = canvasView.canRedo
     }
 
+}
+
+extension ContentView {
+    
+    func mergeAllLayersToRootTexture(_ layerManager: LayerManager) {
+        guard canvasView.rootTexture != nil else { return }
+
+        layerManager.addMergeAllLayersCommands(
+            backgroundColor: canvasView.backgroundColor ?? .white,
+            onto: canvasView.rootTexture,
+            to: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
+    }
 }
 
 extension ContentView {

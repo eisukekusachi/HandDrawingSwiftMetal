@@ -53,11 +53,12 @@ extension CanvasView {
                 to: commandBuffer
             )
             viewModel.drawingTool.addCommandToMergeAllLayers(
+                backgroundColor: self.backgroundColor ?? .white,
                 onto: rootTexture,
                 to: commandBuffer
             )
 
-            viewModel.drawingTool.setNeedsDisplay()
+            self.setNeedsDisplay()
         }
     }
 }
