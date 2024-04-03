@@ -40,8 +40,6 @@ final class DrawingToolModel {
 
     let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
-    let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
-
     let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     let commitCommandsInCommandBuffer = PassthroughSubject<Void, Never>()

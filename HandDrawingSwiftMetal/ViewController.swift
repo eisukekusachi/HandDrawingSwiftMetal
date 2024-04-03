@@ -100,6 +100,12 @@ extension ViewController {
 
     private func bindViewModel() {
 
+        canvasViewModel.pauseDisplayLinkPublisher
+            .sink { [weak self] pause in
+                self?.contentView.pauseDisplayLinkLoop(pause)
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.clearUndoPublisher
             .sink { [weak self] in
                 self?.contentView.canvasView.clearUndo()

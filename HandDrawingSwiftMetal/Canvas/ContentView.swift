@@ -38,6 +38,8 @@ final class ContentView: UIView {
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
 
+    private var displayLink: CADisplayLink?
+
     private var cancellables = Set<AnyCancellable>()
 
     override init(frame: CGRect) {
@@ -57,6 +59,11 @@ final class ContentView: UIView {
         initUndoComponents()
 
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+
+        // Configure the display link for rendering.
+        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
     }
 
 }
@@ -190,6 +197,30 @@ extension ContentView {
     func refreshUndoComponents() {
         undoButton.isEnabled = canvasView.canUndo
         redoButton.isEnabled = canvasView.canRedo
+    }
+
+}
+
+extension ContentView {
+
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        canvasView.setNeedsDisplay()
+    }
+
+    /// Start or stop the display link loop based on the 'play' parameter.
+    func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
+            if displayLink?.isPaused == false {
+                // Pause the display link after updating the display.
+                canvasView.setNeedsDisplay()
+                displayLink?.isPaused = true
+            }
+
+        } else {
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
+            }
+        }
     }
 
 }
