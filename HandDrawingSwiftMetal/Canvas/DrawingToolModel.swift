@@ -10,11 +10,31 @@ import Combine
 
 final class DrawingToolModel {
 
-    let diameterSubject = CurrentValueSubject<Float, Never>(1.0)
+    var drawingTool: DrawingToolType {
+        drawingToolSubject.value
+    }
+    var diameter: Float {
+        diameterSubject.value
+    }
+    var backgroundColor: UIColor {
+        backgroundColorSubject.value
+    }
 
-    let drawingToolSubject = CurrentValueSubject<DrawingToolType, Never>(.brush)
+    var drawingToolPublisher: AnyPublisher<DrawingToolType, Never> {
+        drawingToolSubject.eraseToAnyPublisher()
+    }
+    var diameterPublisher: AnyPublisher<Float, Never> {
+        diameterSubject.eraseToAnyPublisher()
+    }
+    var backgroundColorPublisher: AnyPublisher<UIColor, Never> {
+        backgroundColorSubject.eraseToAnyPublisher()
+    }
 
-    let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
+    private let drawingToolSubject = CurrentValueSubject<DrawingToolType, Never>(.brush)
+
+    private let diameterSubject = CurrentValueSubject<Float, Never>(1.0)
+
+    private let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
     let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 

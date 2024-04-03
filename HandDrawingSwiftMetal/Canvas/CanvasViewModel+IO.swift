@@ -22,7 +22,7 @@ extension CanvasViewModel {
                                  layerIndex: layerIndex,
                                  layers: codableLayers,
                                  thumbnailName: URL.thumbnailPath,
-                                 drawingTool: drawingTool.drawingToolSubject.value.rawValue,
+                                 drawingTool: drawingTool.drawingTool.rawValue,
                                  brushDiameter: drawingTool.brushDiameter,
                                  eraserDiameter: drawingTool.eraserDiameter)
 
@@ -60,9 +60,9 @@ extension CanvasViewModel {
         drawingTool.layerManager.layers = layers
         drawingTool.layerManager.index = layerIndex
 
-        drawingTool.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
         drawingTool.setBrushDiameter(brushDiameter)
         drawingTool.setEraserDiameter(eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: rawValueDrawingTool))
 
         projectName = zipFilePath.fileName
     }
@@ -87,9 +87,9 @@ extension CanvasViewModel {
         drawingTool.layerManager.layers.append(layerData)
         drawingTool.layerManager.index = 0
 
-        drawingTool.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
         drawingTool.setBrushDiameter(brushDiameter)
         drawingTool.setEraserDiameter(eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: rawValueDrawingTool))
 
         projectName = zipFilePath.fileName
     }

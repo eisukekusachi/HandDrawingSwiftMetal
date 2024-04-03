@@ -131,13 +131,13 @@ extension ContentView {
     
     private func bindModels(_ drawingTool: DrawingToolModel) {
 
-        drawingTool.diameterSubject
+        drawingTool.diameterPublisher
             .sink { [weak self] diameter in
                 self?.diameterSlider.value = diameter
             }
             .store(in: &cancellables)
 
-        drawingTool.backgroundColorSubject
+        drawingTool.backgroundColorPublisher
             .sink { [weak self] color in
                 self?.canvasView.backgroundColor = color
             }
