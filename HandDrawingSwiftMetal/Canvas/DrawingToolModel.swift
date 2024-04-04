@@ -19,6 +19,9 @@ final class DrawingToolModel {
     var backgroundColor: UIColor {
         backgroundColorSubject.value
     }
+    var textureSize: CGSize {
+        textureSizeSubject.value
+    }
 
     var drawingToolPublisher: AnyPublisher<DrawingToolType, Never> {
         drawingToolSubject.eraseToAnyPublisher()

@@ -10,6 +10,7 @@ import Combine
 
 class CanvasViewModel {
 
+    let lineDrawing = LineDrawing()
     let drawingTool = DrawingToolModel()
 
     var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
@@ -88,7 +89,12 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            print("drawing")
+            let lineSegment = makeLineSegment(touchManager, with: lineDrawing)
+
+            print("***")
+            lineSegment?.dotPoints.forEach {
+                print($0)
+            }
 
         case .transforming:
             print("transforming")
@@ -128,6 +134,50 @@ extension CanvasViewModel {
 
         drawingTool.mergeAllLayersToRootTexture()
         drawingTool.setNeedsDisplay()
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func makeLineSegment(
+        _ touchManager: TouchManager,
+        with drawing: DrawingLineProtocol
+    ) -> LineSegment? {
+
+        drawing.setHashValueIfNil(touchManager)
+
+        guard
+            let hashValue = drawing.hashValue,
+            let touchPhase = touchManager.getLatestTouchPhase(with: hashValue),
+            let touchPoints = touchManager.getTouchPoints(with: hashValue)
+        else { return nil }
+
+        defer {
+            if touchPhase == .ended {
+                drawing.clear()
+            }
+        }
+
+        let diffCount = touchPoints.count - drawing.iterator.array.count
+        guard diffCount > 0 else { return nil }
+
+        let newTouchPoints = touchPoints.suffix(diffCount)
+
+        let dotPoints = newTouchPoints.map {
+            DotPoint(
+                touchPoint: $0,
+                matrix: .identity,
+                frameSize: frameSize,
+                textureSize: drawingTool.textureSize
+            )
+        }
+        drawing.appendToIterator(dotPoints)
+
+        return drawing.makeLineSegment(
+            with: .init(drawingTool),
+            phase: touchPhase
+        )
     }
 
 }
