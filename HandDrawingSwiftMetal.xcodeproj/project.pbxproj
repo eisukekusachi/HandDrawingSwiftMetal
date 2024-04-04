@@ -272,7 +272,7 @@
 				D43294A12B46E66A006915A0 /* CanvasViewModel+IO.swift */,
 				D4C397192B9C941F0037312F /* DrawingToolModel.swift */,
 				D4AEFE262B09B1E300EE3EEF /* ActionState */,
-				D40D975429DAB03400A82E6A /* Drawing */,
+				D40D975429DAB03400A82E6A /* DrawingLayers */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D422D9C92AF50917004E058B /* FileIO */,
@@ -297,14 +297,14 @@
 			path = TouchPoints;
 			sourceTree = "<group>";
 		};
-		D40D975429DAB03400A82E6A /* Drawing */ = {
+		D40D975429DAB03400A82E6A /* DrawingLayers */ = {
 			isa = PBXGroup;
 			children = (
 				D4C8EE972B25490B005947EC /* DrawingLayer.swift */,
 				D40D976829DAB09C00A82E6A /* DrawingBrushLayer.swift */,
 				D40D976A29DAB09D00A82E6A /* DrawingEraserLayer.swift */,
 			);
-			path = Drawing;
+			path = DrawingLayers;
 			sourceTree = "<group>";
 		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
