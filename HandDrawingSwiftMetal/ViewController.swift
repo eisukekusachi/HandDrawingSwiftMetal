@@ -124,8 +124,8 @@ extension ViewController {
         let fingerInputGestureRecognizer = FingerInputGestureRecognizer()
         let pencilInputGestureRecognizer = PencilInputGestureRecognizer()
 
-        view.addGestureRecognizer(fingerInputGestureRecognizer)
-        view.addGestureRecognizer(pencilInputGestureRecognizer)
+        contentView.canvasView.addGestureRecognizer(fingerInputGestureRecognizer)
+        contentView.canvasView.addGestureRecognizer(pencilInputGestureRecognizer)
 
         fingerInputGestureRecognizer.gestureDelegate = self
         pencilInputGestureRecognizer.gestureDelegate = self
