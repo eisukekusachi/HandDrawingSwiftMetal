@@ -236,10 +236,19 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
+
+    @MainActor
+    func updateCurrentThumbnail() async throws {
+        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
+        if let selectedLayer {
+            updateThumbnail(selectedLayer)
+        }
+    }
     func updateThumbnail(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }
+
     func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].isVisible = isVisible

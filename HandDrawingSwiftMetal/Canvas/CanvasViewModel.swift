@@ -221,6 +221,10 @@ extension CanvasViewModel {
                 into: selectedTexture,
                 commandBuffer
             )
+
+            Task {
+                try? await drawingTool.layerManager.updateCurrentThumbnail()
+            }
         }
 
         drawingTool.layerManager.addMergeAllLayersCommands(
