@@ -18,11 +18,11 @@ protocol DrawingLayer {
     func initTextures(_ textureSize: CGSize)
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with points: [DotPoint],
-                              parameters: DrawingToolModel,
-                              on dstTexture: MTLTexture,
-                              _ touchPhase: UITouch.Phase,
-                              _ commandBuffer: MTLCommandBuffer)
+    func drawOnDrawingTexture(
+        segment: LineSegment,
+        on dstTexture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer
+    )
 
     /// Merges textures
     func merge(_ srcTexture: MTLTexture?,

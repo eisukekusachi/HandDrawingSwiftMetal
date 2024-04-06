@@ -40,18 +40,17 @@ class DrawingEraserLayer: DrawingLayer {
     }
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with points: [DotPoint],
-                              parameters: DrawingToolModel,
-                              on dstTexture: MTLTexture,
-                              _ touchPhase: UITouch.Phase,
-                              _ commandBuffer: MTLCommandBuffer) {
-
-        guard points.count != 0 else { return }
+    func drawOnDrawingTexture(
+        segment: LineSegment,
+        on dstTexture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        guard let dstTexture else { return }
 
         let pointBuffers = Buffers.makePointBuffers(device: device,
-                                                    points: points,
-                                                    blurredDotSize: parameters.eraserDotSize,
-                                                    alpha: parameters.eraserAlpha,
+                                                    points: segment.dotPoints,
+                                                    blurredDotSize: segment.parameters.dotSize,
+                                                    alpha: segment.parameters.alpha,
                                                     textureSize: textureSize)
 
         Command.drawCurve(buffers: pointBuffers,
@@ -74,7 +73,7 @@ class DrawingEraserLayer: DrawingLayer {
 
         isDrawing = true
 
-        if touchPhase == .ended {
+        if segment.touchPhase == .ended {
             merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }

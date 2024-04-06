@@ -8,7 +8,13 @@
 import MetalKit
 import Combine
 
+protocol CanvasViewModelDelegate {
+    func drawSegmentOnTexture(segment: LineSegment)
+}
+
 class CanvasViewModel {
+
+    var delegate: CanvasViewModelDelegate?
 
     let lineDrawing = LineDrawing()
     let drawingTool = DrawingToolModel()
@@ -54,7 +60,7 @@ class CanvasViewModel {
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
 
-    private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(false)
+    private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
@@ -89,11 +95,8 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            let lineSegment = makeLineSegment(touchManager, with: lineDrawing)
-
-            print("***")
-            lineSegment?.dotPoints.forEach {
-                print($0)
+            if let lineSegment: LineSegment = makeLineSegment(touchManager, with: lineDrawing) {
+                delegate?.drawSegmentOnTexture(segment: lineSegment)
             }
 
         case .transforming:
@@ -184,6 +187,29 @@ extension CanvasViewModel {
             parameters: .init(drawingTool),
             touchPhase: touchPhase
         )
+    }
+
+    func drawSegmentOnTexture(
+        _ lineSegment: LineSegment,
+        _ rootTexture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer?
+    ) {
+        guard let rootTexture,
+              let commandBuffer,
+              let drawingLayer = drawingTool.layerManager.drawingLayer
+        else { return }
+
+        drawingLayer.drawOnDrawingTexture(
+            segment: lineSegment,
+            on: drawingTool.layerManager.selectedTexture,
+            commandBuffer)
+
+        drawingTool.layerManager.addMergeAllLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: rootTexture,
+            to: commandBuffer)
+
+        pauseDisplayLinkSubject.send(lineSegment.touchPhase == .ended)
     }
 
 }

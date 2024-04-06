@@ -99,6 +99,7 @@ extension ViewController {
     }
 
     private func bindViewModel() {
+        canvasViewModel.delegate = self
 
         canvasViewModel.pauseDisplayLinkPublisher
             .sink { [weak self] pause in
@@ -254,6 +255,18 @@ extension ViewController: PencilInputGestureSender {
 
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.handlePencilInputGesture(touches, with: event, on: view)
+    }
+
+}
+
+extension ViewController: CanvasViewModelDelegate {
+
+    func drawSegmentOnTexture(segment: LineSegment) {
+        canvasViewModel.drawSegmentOnTexture(
+            segment,
+            contentView.canvasView.rootTexture,
+            contentView.canvasView.commandBuffer
+        )
     }
 
 }

@@ -30,16 +30,17 @@ class DrawingBrushLayer: DrawingLayer {
     }
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with points: [DotPoint],
-                              parameters: DrawingToolModel,
-                              on dstTexture: MTLTexture,
-                              _ touchPhase: UITouch.Phase,
-                              _ commandBuffer: MTLCommandBuffer) {
-        
+    func drawOnDrawingTexture(
+        segment: LineSegment,
+        on dstTexture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        guard let dstTexture else { return }
+
         let pointBuffers = Buffers.makePointBuffers(device: device,
-                                                    points: points,
-                                                    blurredDotSize: parameters.brushDotSize,
-                                                    alpha: parameters.brushColor.alpha,
+                                                    points: segment.dotPoints,
+                                                    blurredDotSize: segment.parameters.dotSize,
+                                                    alpha: segment.parameters.alpha,
                                                     textureSize: textureSize)
 
         Command.drawCurve(buffers: pointBuffers,
@@ -47,11 +48,11 @@ class DrawingBrushLayer: DrawingLayer {
                           commandBuffer)
 
         Command.colorize(grayscaleTexture: grayscaleTexture,
-                         with: parameters.brushColor.rgb,
+                         with: (segment.parameters.brushColor ?? .black).rgb,
                          result: drawingTexture,
                          commandBuffer)
 
-        if touchPhase == .ended {
+        if segment.touchPhase == .ended {
             merge(drawingTexture, into: dstTexture, commandBuffer)
         }
     }
