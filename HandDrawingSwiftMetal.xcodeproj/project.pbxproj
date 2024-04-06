@@ -60,6 +60,7 @@
 		D459415C2B08EDB000A18653 /* CanvasView+Undo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
+		D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */; };
 		D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D472859F2BBEBC350035AFCD /* LineDrawing.swift */; };
 		D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A32BBEBD000035AFCD /* LineParameters.swift */; };
 		D47285A62BBEBD4C0035AFCD /* LineSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A52BBEBD4C0035AFCD /* LineSegment.swift */; };
@@ -179,6 +180,7 @@
 		D459415B2B08EDB000A18653 /* CanvasView+Undo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasView+Undo.swift"; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
+		D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothLineDrawing.swift; sourceTree = "<group>"; };
 		D472859F2BBEBC350035AFCD /* LineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDrawing.swift; sourceTree = "<group>"; };
 		D47285A32BBEBD000035AFCD /* LineParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineParameters.swift; sourceTree = "<group>"; };
 		D47285A52BBEBD4C0035AFCD /* LineSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineSegment.swift; sourceTree = "<group>"; };
@@ -422,6 +424,7 @@
 				D472859F2BBEBC350035AFCD /* LineDrawing.swift */,
 				D47285A52BBEBD4C0035AFCD /* LineSegment.swift */,
 				D47285A32BBEBD000035AFCD /* LineParameters.swift */,
+				D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -765,6 +768,7 @@
 				D40CDF032B411F660059527E /* LayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
+				D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,

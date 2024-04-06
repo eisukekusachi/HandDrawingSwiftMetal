@@ -17,6 +17,8 @@ class CanvasViewModel {
     var delegate: CanvasViewModelDelegate?
 
     let lineDrawing = LineDrawing()
+    let smoothLineDrawing = SmoothLineDrawing()
+
     let drawingTool = DrawingToolModel()
 
     var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
@@ -95,7 +97,7 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            if let lineSegment: LineSegment = makeLineSegment(touchManager, with: lineDrawing) {
+            if let lineSegment: LineSegment = makeLineSegment(touchManager, with: smoothLineDrawing) {
                 delegate?.drawSegmentOnTexture(segment: lineSegment)
             }
 
@@ -176,6 +178,10 @@ extension CanvasViewModel {
             )
         }
         drawing.appendToIterator(dotPoints)
+
+        if touchPhase == .ended, let drawing = drawing as? SmoothLineDrawing {
+            drawing.appendLastTouchToSmoothCurveIterator()
+        }
 
         let curvePoints = Curve.makePoints(
             from: drawing.iterator,
