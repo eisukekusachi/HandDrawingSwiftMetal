@@ -281,7 +281,6 @@
 				D4C397192B9C941F0037312F /* DrawingToolModel.swift */,
 				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D472859E2BBEBC250035AFCD /* Drawing */,
-				D40D975429DAB03400A82E6A /* DrawingLayers */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D422D9C92AF50917004E058B /* FileIO */,
@@ -304,16 +303,6 @@
 				D4541E912BBC160B00C96741 /* DotPoint.swift */,
 			);
 			path = TouchPoints;
-			sourceTree = "<group>";
-		};
-		D40D975429DAB03400A82E6A /* DrawingLayers */ = {
-			isa = PBXGroup;
-			children = (
-				D4C8EE972B25490B005947EC /* DrawingLayer.swift */,
-				D40D976829DAB09C00A82E6A /* DrawingBrushLayer.swift */,
-				D40D976A29DAB09D00A82E6A /* DrawingEraserLayer.swift */,
-			);
-			path = DrawingLayers;
 			sourceTree = "<group>";
 		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
@@ -470,6 +459,9 @@
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
+				D40D976829DAB09C00A82E6A /* DrawingBrushLayer.swift */,
+				D40D976A29DAB09D00A82E6A /* DrawingEraserLayer.swift */,
+				D4C8EE972B25490B005947EC /* DrawingLayer.swift */,
 				D4F1BB3D2B2D436F006EA102 /* LayerManager.swift */,
 				D4B4AAA12B3FF44100298CFB /* LayerModel.swift */,
 				D42F40A02B45052B00B32707 /* LayerModelCodable.swift */,
