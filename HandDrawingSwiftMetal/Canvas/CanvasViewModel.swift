@@ -205,6 +205,10 @@ extension CanvasViewModel {
               let drawingLayer = drawingTool.layerManager.drawingLayer
         else { return }
 
+        if lineSegment.touchPhase == .ended {
+            addUndoObjectToUndoStackSubject.send()
+        }
+
         drawingLayer.drawOnDrawingTexture(
             segment: lineSegment,
             on: drawingTool.layerManager.selectedTexture,
