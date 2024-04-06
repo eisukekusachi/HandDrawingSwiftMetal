@@ -35,8 +35,6 @@ class DrawingBrushLayer: DrawingLayer {
         on dstTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        guard let dstTexture else { return }
-
         let pointBuffers = Buffers.makePointBuffers(device: device,
                                                     points: segment.dotPoints,
                                                     blurredDotSize: segment.parameters.dotSize,
@@ -51,19 +49,19 @@ class DrawingBrushLayer: DrawingLayer {
                          with: (segment.parameters.brushColor ?? .black).rgb,
                          result: drawingTexture,
                          commandBuffer)
-
-        if segment.touchPhase == .ended {
-            merge(drawingTexture, into: dstTexture, commandBuffer)
-        }
     }
 
     /// Merges the drawing texture into the destination texture.
-    func merge(_ srcTexture: MTLTexture?,
-               into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer) {
-        Command.merge(texture: srcTexture,
-                      into: dstTexture,
-                      commandBuffer)
+    func mergeDrawingTexture(
+        into dstTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        Command.merge(
+            texture: drawingTexture,
+            into: dstTexture,
+            commandBuffer
+        )
+
         clearDrawingTextures(commandBuffer)
     }
 

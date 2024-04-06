@@ -214,6 +214,15 @@ extension CanvasViewModel {
             on: drawingTool.layerManager.selectedTexture,
             commandBuffer)
 
+        if lineSegment.touchPhase == .ended,
+           let selectedTexture = drawingTool.layerManager.selectedTexture {
+
+            drawingLayer.mergeDrawingTexture(
+                into: selectedTexture,
+                commandBuffer
+            )
+        }
+
         drawingTool.layerManager.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,

@@ -72,26 +72,30 @@ class DrawingEraserLayer: DrawingLayer {
                                  commandBuffer)
 
         isDrawing = true
-
-        if segment.touchPhase == .ended {
-            merge(drawingTexture, into: dstTexture, commandBuffer)
-        }
     }
 
     /// Merges the drawing texture into the destination texture.
-    func merge(_ srcTexture: MTLTexture?,
-               into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer) {
-        Command.copy(dst: eraserTexture, src: dstTexture, commandBuffer)
+    func mergeDrawingTexture(
+        into dstTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        Command.copy(
+            dst: eraserTexture,
+            src: dstTexture, commandBuffer
+        )
 
-        Command.makeEraseTexture(buffers: flippedTextureBuffers,
-                                 src: srcTexture,
-                                 result: eraserTexture,
-                                 commandBuffer)
+        Command.makeEraseTexture(
+            buffers: flippedTextureBuffers,
+            src: drawingTexture,
+            result: eraserTexture,
+            commandBuffer
+        )
 
-        Command.copy(dst: dstTexture,
-                     src: eraserTexture,
-                     commandBuffer)
+        Command.copy(
+            dst: dstTexture,
+            src: eraserTexture,
+            commandBuffer
+        )
 
         clearDrawingTextures(commandBuffer)
 
