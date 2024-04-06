@@ -96,6 +96,7 @@ final class DrawingToolModel {
         layerManager.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTextureSubject.send()
+                self?.setNeedsDisplaySubject.send()
             }
             .store(in: &cancellables)
     }
