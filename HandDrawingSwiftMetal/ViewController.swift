@@ -47,7 +47,9 @@ extension ViewController {
 
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
+        contentView.applyDrawing(canvasViewModel.drawing)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+
         subscribeEvents()
 
         contentView.tapResetTransformButton = { [weak self] in
@@ -261,12 +263,11 @@ extension ViewController: PencilInputGestureSender {
 
 extension ViewController: CanvasViewModelDelegate {
 
-    func drawSegmentOnTexture(segment: LineSegment) {
-        canvasViewModel.drawSegmentOnTexture(
-            segment,
-            contentView.canvasView.rootTexture,
-            contentView.canvasView.commandBuffer
-        )
+    var commandBuffer: MTLCommandBuffer {
+        contentView.canvasView.commandBuffer
+    }
+    var rootTexture: MTLTexture {
+        contentView.canvasView.rootTexture
     }
 
 }

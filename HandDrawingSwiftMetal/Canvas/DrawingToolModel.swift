@@ -42,8 +42,6 @@ final class DrawingToolModel {
 
     private let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
-    let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
-
     let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
     let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()

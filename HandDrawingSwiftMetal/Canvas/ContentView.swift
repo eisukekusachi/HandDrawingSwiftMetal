@@ -70,6 +70,9 @@ final class ContentView: UIView {
 
 extension ContentView {
 
+    func applyDrawing(_ drawing: Drawing) {
+        bindModels(drawing)
+    }
     func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
         bindInputs(drawingTool)
         bindModels(drawingTool)
@@ -135,7 +138,14 @@ extension ContentView {
             }
             .store(in: &cancellables)
     }
-    
+
+    private func bindModels(_ drawing: Drawing) {
+
+        drawing.matrixPublisher
+            .assign(to: \.matrix, on: canvasView)
+            .store(in: &cancellables)
+    }
+
     private func bindModels(_ drawingTool: DrawingToolModel) {
 
         drawingTool.diameterPublisher
@@ -148,10 +158,6 @@ extension ContentView {
             .sink { [weak self] color in
                 self?.canvasView.backgroundColor = color
             }
-            .store(in: &cancellables)
-
-        drawingTool.matrixSubject
-            .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
 
         drawingTool.textureSizeSubject

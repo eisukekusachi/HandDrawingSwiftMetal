@@ -61,6 +61,7 @@
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
 		D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */; };
 		D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */; };
+		D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA52BC161A100ABDA4E /* Drawing.swift */; };
 		D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D472859F2BBEBC350035AFCD /* LineDrawing.swift */; };
 		D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A32BBEBD000035AFCD /* LineParameters.swift */; };
 		D47285A62BBEBD4C0035AFCD /* LineSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A52BBEBD4C0035AFCD /* LineSegment.swift */; };
@@ -181,6 +182,7 @@
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
 		D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothLineDrawing.swift; sourceTree = "<group>"; };
 		D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
+		D4671FA52BC161A100ABDA4E /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D472859F2BBEBC350035AFCD /* LineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDrawing.swift; sourceTree = "<group>"; };
 		D47285A32BBEBD000035AFCD /* LineParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineParameters.swift; sourceTree = "<group>"; };
 		D47285A52BBEBD4C0035AFCD /* LineSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineSegment.swift; sourceTree = "<group>"; };
@@ -419,6 +421,7 @@
 		D472859E2BBEBC250035AFCD /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
+				D4671FA52BC161A100ABDA4E /* Drawing.swift */,
 				D47285A72BBEBE220035AFCD /* DrawingLineProtocol.swift */,
 				D472859F2BBEBC350035AFCD /* LineDrawing.swift */,
 				D47285A52BBEBD4C0035AFCD /* LineSegment.swift */,
@@ -708,6 +711,7 @@
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
 				D4541E842BBACF1A00C96741 /* TouchManager.swift in Sources */,
+				D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */,
 				D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
 				D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */,
