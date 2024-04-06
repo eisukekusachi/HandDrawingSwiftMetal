@@ -60,6 +60,7 @@
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
 		D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B28729FD3F2A00FA36B1 /* ColorData.swift */; };
 		D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */; };
+		D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */; };
 		D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D472859F2BBEBC350035AFCD /* LineDrawing.swift */; };
 		D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A32BBEBD000035AFCD /* LineParameters.swift */; };
 		D47285A62BBEBD4C0035AFCD /* LineSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A52BBEBD4C0035AFCD /* LineSegment.swift */; };
@@ -179,6 +180,7 @@
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
 		D464B28729FD3F2A00FA36B1 /* ColorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorData.swift; sourceTree = "<group>"; };
 		D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothLineDrawing.swift; sourceTree = "<group>"; };
+		D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
 		D472859F2BBEBC350035AFCD /* LineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDrawing.swift; sourceTree = "<group>"; };
 		D47285A32BBEBD000035AFCD /* LineParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineParameters.swift; sourceTree = "<group>"; };
 		D47285A52BBEBD4C0035AFCD /* LineSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineSegment.swift; sourceTree = "<group>"; };
@@ -452,6 +454,7 @@
 			children = (
 				D4C9791B2ADBAA3700BB666D /* TransformationData.swift */,
 				D4C9791D2ADBAA6400BB666D /* Transforming.swift */,
+				D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */,
 			);
 			path = Transforming;
 			sourceTree = "<group>";
@@ -712,6 +715,7 @@
 				D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */,
 				D40D979F29DAB0DF00A82E6A /* Command.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
+				D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
 				D4BCB3072AF78B0200EA650D /* ActivityIndicatorView.swift in Sources */,
 				D4EC24AB2BB9525E0097A019 /* CGSizeExtensions.swift in Sources */,

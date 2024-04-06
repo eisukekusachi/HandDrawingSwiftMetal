@@ -7,39 +7,72 @@
 
 import UIKit
 
-class Transforming {
-    var storedMatrix: CGAffineTransform = CGAffineTransform.identity
+class Transforming: TransformingProtocol {
 
-    func getMatrix(transformationData: TransformationData,
-                   frameCenterPoint: CGPoint,
-                   touchPhase: UITouch.Phase) -> CGAffineTransform? {
-        guard let matrix = makeMatrix(transformationData: transformationData,
-                                      centerPoint: frameCenterPoint) else { return nil }
-        let newMatrix = storedMatrix.concatenating(matrix)
+    private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-        if touchPhase == .ended {
-            storedMatrix = newMatrix
-        }
+    private var touchesA: TransformingData?
+    private var touchesB: TransformingData?
 
-        return newMatrix
+    var hashValues: [TouchHashValue] {
+        [touchesA?.hashValue,
+         touchesB?.hashValue].compactMap { $0 }
     }
-    func setStoredMatrix(_ matrix: CGAffineTransform) {
+
+    /// When a gesture is determined to be `transforming`, the touchManager manages two fingers
+    func setHashValueIfNil(_ touchManager: TouchManager) {
+        guard
+            touchesA == nil,
+            touchesB == nil,
+            let firstHashValue = touchManager.touchPointsDictionary.keys.sorted().first,
+            let lastHashValue = touchManager.touchPointsDictionary.keys.sorted().last
+        else { return }
+
+        touchesA = TransformingData(hashValue: firstHashValue)
+        touchesB = TransformingData(hashValue: lastHashValue)
+    }
+
+    func getMatrix(_ matrix: CGAffineTransform) -> CGAffineTransform {
+        storedMatrix.concatenating(matrix)
+    }
+
+    func updateTouches(_ touchManager: TouchManager) {
+        guard
+            let touchesA,
+            let touchesB,
+            let touchPointA = touchManager.touchPointsDictionary[touchesA.hashValue]?.last,
+            let touchPointB = touchManager.touchPointsDictionary[touchesB.hashValue]?.last
+        else { return }
+
+        touchesA.updatePoint(touchPointA.location)
+        touchesB.updatePoint(touchPointB.location)
+    }
+
+    func updateMatrix(_ matrix: CGAffineTransform) {
         storedMatrix = matrix
     }
 
-    /// Generate a matrix from touch points and view size
-    private func makeMatrix(transformationData: TransformationData, centerPoint: CGPoint) -> CGAffineTransform? {
-        if let pointsA = transformationData.pointsA,
-           let pointsB = transformationData.pointsB,
-           let newMatrix = CGAffineTransform.makeMatrix(center: centerPoint,
-                                                        pointsA: pointsA,
-                                                        pointsB: pointsB,
-                                                        counterRotate: true,
-                                                        flipY: true) {
-            return newMatrix
+    /// Generate a matrix from touch points and the view center point.
+    func makeMatrix(
+        frameCenter: CGPoint
+    ) -> CGAffineTransform? {
+        guard
+            let touchesAPoints = touchesA?.touches,
+            let touchesBPoints = touchesB?.touches
+        else { return nil }
 
-        } else {
-            return nil
-        }
+        return CGAffineTransform.makeMatrix(
+            center: frameCenter,
+            pointsA: touchesAPoints,
+            pointsB: touchesBPoints,
+            counterRotate: true,
+            flipY: true
+        )
     }
+
+    func clear() {
+        touchesA = nil
+        touchesB = nil
+    }
+
 }

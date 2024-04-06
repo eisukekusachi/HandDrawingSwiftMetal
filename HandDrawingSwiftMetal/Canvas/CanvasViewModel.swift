@@ -102,7 +102,10 @@ extension CanvasViewModel {
             }
 
         case .transforming:
-            print("transforming")
+            transformCanvas(
+                touchPointData: touchManager,
+                transforming: transforming
+            )
 
         default:
             break
@@ -172,7 +175,7 @@ extension CanvasViewModel {
         let dotPoints = newTouchPoints.map {
             DotPoint(
                 touchPoint: $0,
-                matrix: .identity,
+                matrix: drawingTool.matrixSubject.value,
                 frameSize: frameSize,
                 textureSize: drawingTool.textureSize
             )
@@ -235,6 +238,34 @@ extension CanvasViewModel {
         pauseDisplayLinkSubject.send(lineSegment.touchPhase == .ended)
     }
 
+    func transformCanvas(touchPointData: TouchManager, transforming: TransformingProtocol) {
+
+        transforming.setHashValueIfNil(touchPointData)
+
+        transforming.updateTouches(touchPointData)
+
+        let isFingerReleasedFromScreen = touchPointData.getTouchPhases(
+            transforming.hashValues
+        ).contains(.ended)
+
+        if let matrix = transforming.makeMatrix(
+            frameCenter: CGPoint(
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
+            )
+        ) {
+            let newMatrix = transforming.getMatrix(matrix)
+
+            if isFingerReleasedFromScreen {
+                transforming.updateMatrix(newMatrix)
+                transforming.clear()
+            }
+            drawingTool.matrixSubject.send(newMatrix)
+        }
+
+        pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
+    }
+
 }
 
 extension CanvasViewModel {
@@ -247,18 +278,8 @@ extension CanvasViewModel {
     }
 
     func resetMatrix() {
-        transforming.setStoredMatrix(.identity)
+        transforming.updateMatrix(.identity)
         drawingTool.matrixSubject.send(.identity)
-    }
-
-    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
-        transforming.getMatrix(transformationData: transformationData,
-                               frameCenterPoint: Calc.getCenter(frameSize),
-                               touchPhase: touchPhase)
-    }
-
-    func setMatrix(_ matrix: CGAffineTransform) {
-        transforming.setStoredMatrix(matrix)
     }
 
 }

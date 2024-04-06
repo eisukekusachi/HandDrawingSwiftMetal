@@ -7,19 +7,32 @@
 
 import Foundation
 
-struct TransformationData {
-    var pointsA: (CGPoint, CGPoint)?
-    var pointsB: (CGPoint, CGPoint)?
+class TransformingData {
 
-    init(touchPointArrayDictionary: [Int: [TouchPoint]]) {
-        if  touchPointArrayDictionary.count == 2,
-            let pointAFirst = touchPointArrayDictionary.first?.first?.location,
-            let pointALast = touchPointArrayDictionary.first?.last?.location,
-            let pointBFirst = touchPointArrayDictionary.last?.first?.location,
-            let pointBLast = touchPointArrayDictionary.last?.last?.location {
+    var hashValue: TouchHashValue
 
-            pointsA = (pointAFirst, pointALast)
-            pointsB = (pointBFirst, pointBLast)
+    var touches: (CGPoint, CGPoint)? {
+        guard
+            let firstPoint,
+            let lastPoint
+        else { return nil }
+
+        return (firstPoint, lastPoint)
+    }
+
+    private var firstPoint: CGPoint?
+    private var lastPoint: CGPoint?
+
+    init(hashValue: TouchHashValue) {
+        self.hashValue = hashValue
+    }
+
+    func updatePoint(_ point: CGPoint) {
+        if firstPoint == nil {
+            firstPoint = point
+        } else {
+            lastPoint = point
         }
     }
+
 }
