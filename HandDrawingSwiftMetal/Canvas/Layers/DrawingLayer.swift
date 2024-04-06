@@ -18,8 +18,7 @@ protocol DrawingLayer {
     func initTextures(_ textureSize: CGSize)
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
-                              matrix: CGAffineTransform,
+    func drawOnDrawingTexture(with points: [DotPoint],
                               parameters: DrawingToolModel,
                               on dstTexture: MTLTexture,
                               _ touchPhase: UITouch.Phase,

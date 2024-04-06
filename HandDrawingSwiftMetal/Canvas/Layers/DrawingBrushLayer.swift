@@ -30,27 +30,12 @@ class DrawingBrushLayer: DrawingLayer {
     }
 
     /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
-                              matrix: CGAffineTransform,
+    func drawOnDrawingTexture(with points: [DotPoint],
                               parameters: DrawingToolModel,
                               on dstTexture: MTLTexture,
                               _ touchPhase: UITouch.Phase,
                               _ commandBuffer: MTLCommandBuffer) {
-        assert(frameSize != .zero, "Set a value for frameSize once before here.")
-        assert(textureSize != .zero, "Set a value for textureSize once before here.")
-
-        let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
-        var inverseMatrix = matrix.inverted(flipY: true)
-        inverseMatrix.tx *= scale
-        inverseMatrix.ty *= scale
-        let points = Curve.makePoints(iterator: iterator,
-                                      matrix: inverseMatrix,
-                                      srcSize: frameSize,
-                                      dstSize: textureSize,
-                                      endProcessing: touchPhase == .ended)
-
-        guard points.count != 0 else { return }
-
+        
         let pointBuffers = Buffers.makePointBuffers(device: device,
                                                     points: points,
                                                     blurredDotSize: parameters.brushDotSize,

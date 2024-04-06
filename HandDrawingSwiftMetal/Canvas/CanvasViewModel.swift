@@ -174,9 +174,15 @@ extension CanvasViewModel {
         }
         drawing.appendToIterator(dotPoints)
 
-        return drawing.makeLineSegment(
-            with: .init(drawingTool),
-            phase: touchPhase
+        let curvePoints = Curve.makePoints(
+            from: drawing.iterator,
+            isFinishDrawing: touchPhase == .ended
+        )
+
+        return .init(
+            dotPoints: curvePoints,
+            parameters: .init(drawingTool),
+            touchPhase: touchPhase
         )
     }
 
