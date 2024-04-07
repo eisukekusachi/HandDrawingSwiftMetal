@@ -104,9 +104,7 @@ extension ViewController {
         canvasViewModel.delegate = self
 
         canvasViewModel.pauseDisplayLinkPublisher
-            .sink { [weak self] pause in
-                self?.contentView.pauseDisplayLinkLoop(pause)
-            }
+            .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)
 
         canvasViewModel.clearUndoPublisher

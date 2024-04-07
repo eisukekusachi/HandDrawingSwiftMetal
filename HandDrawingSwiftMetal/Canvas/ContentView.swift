@@ -38,6 +38,12 @@ final class ContentView: UIView {
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
 
+    var isDisplayLinkPaused: Bool = false {
+        didSet {
+            displayLink?.isPaused = isDisplayLinkPaused
+        }
+    }
+
     private var displayLink: CADisplayLink?
 
     private var cancellables = Set<AnyCancellable>()
@@ -191,22 +197,6 @@ extension ContentView {
 
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
         canvasView.setNeedsDisplay()
-    }
-
-    /// Start or stop the display link loop based on the 'play' parameter.
-    func pauseDisplayLinkLoop(_ pause: Bool) {
-        if pause {
-            if displayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                canvasView.setNeedsDisplay()
-                displayLink?.isPaused = true
-            }
-
-        } else {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        }
     }
 
 }

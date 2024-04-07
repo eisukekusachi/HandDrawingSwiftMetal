@@ -83,7 +83,9 @@ class CanvasViewModel {
             .store(in: &cancellables)
 
         drawing.pauseDisplayLinkPublisher
-            .subscribe(pauseDisplayLinkSubject)
+            .sink { [weak self] in
+                self?.pauseDisplayLinkLoop($0)
+            }
             .store(in: &cancellables)
 
         drawingTool.layerManager.addUndoObjectToUndoStackPublisher
@@ -205,6 +207,22 @@ extension CanvasViewModel {
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
+    }
+
+    /// Start or stop the display link loop.
+    func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
+            if pauseDisplayLinkSubject.value == false {
+                // Pause the display link after updating the display.
+                delegate?.callSetNeedsDisplayOnCanvasView()
+                pauseDisplayLinkSubject.send(true)
+            }
+
+        } else {
+            if pauseDisplayLinkSubject.value == true {
+                pauseDisplayLinkSubject.send(false)
+            }
+        }
     }
 
 }
