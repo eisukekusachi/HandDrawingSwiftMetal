@@ -79,9 +79,9 @@ final class Drawing {
     }
 
     func makeLineSegment(
-        _ touchManager: TouchManager,
+        from touchManager: TouchManager,
         with drawing: DrawingLineProtocol,
-        drawingTool: DrawingToolModel
+        parameters: LineParameters
     ) -> LineSegment? {
 
         drawing.setHashValueIfNil(touchManager)
@@ -124,16 +124,16 @@ final class Drawing {
 
         return .init(
             dotPoints: curvePoints,
-            parameters: .init(drawingTool),
+            parameters: parameters,
             touchPhase: touchPhase
         )
     }
 
-    func drawSegmentOnTexture(
+    func addDrawSegmentCommands(
         _ lineSegment: LineSegment,
-        _ drawingTool: DrawingToolModel,
-        _ rootTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer?
+        backgroundColor: UIColor,
+        on rootTexture: MTLTexture?,
+        to commandBuffer: MTLCommandBuffer?
     ) {
         guard let rootTexture,
               let commandBuffer,
@@ -163,7 +163,7 @@ final class Drawing {
         }
 
         layerManager.addMergeAllLayersCommands(
-            backgroundColor: drawingTool.backgroundColor,
+            backgroundColor: backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
 
@@ -171,15 +171,14 @@ final class Drawing {
     }
 
     func transformCanvas(
-        touchPointData: TouchManager,
-        transforming: TransformingProtocol,
-        drawingTool: DrawingToolModel
+        _ touchManager: TouchManager,
+        with transforming: TransformingProtocol
     ) {
-        transforming.setHashValueIfNil(touchPointData)
+        transforming.setHashValueIfNil(touchManager)
 
-        transforming.updateTouches(touchPointData)
+        transforming.updateTouches(touchManager)
 
-        let isFingerReleasedFromScreen = touchPointData.getTouchPhases(
+        let isFingerReleasedFromScreen = touchManager.getTouchPhases(
             transforming.hashValues
         ).contains(.ended)
 

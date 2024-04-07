@@ -125,23 +125,22 @@ extension CanvasViewModel {
         switch actionManager.updateState(newState) {
         case .drawing:
             if let lineSegment: LineSegment = drawing.makeLineSegment(
-                touchManager,
+                from: touchManager,
                 with: smoothLineDrawing,
-                drawingTool: drawingTool
+                parameters: .init(drawingTool)
             ) {
-                drawing.drawSegmentOnTexture(
+                drawing.addDrawSegmentCommands(
                     lineSegment,
-                    drawingTool,
-                    delegate?.rootTexture,
-                    delegate?.commandBuffer
+                    backgroundColor: drawingTool.backgroundColor,
+                    on: delegate?.rootTexture,
+                    to: delegate?.commandBuffer
                 )
             }
 
         case .transforming:
             drawing.transformCanvas(
-                touchPointData: touchManager,
-                transforming: transforming,
-                drawingTool: drawingTool
+                touchManager,
+                with: transforming
             )
 
         default:
