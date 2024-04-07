@@ -270,4 +270,8 @@ extension ViewController: CanvasViewModelDelegate {
         contentView.canvasView.rootTexture
     }
 
+    func callSetNeedsDisplayOnCanvasView() {
+        contentView.canvasView.setNeedsDisplay()
+    }
+
 }

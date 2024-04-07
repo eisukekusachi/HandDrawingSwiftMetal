@@ -12,6 +12,7 @@ protocol CanvasViewModelDelegate {
 
     var commandBuffer: MTLCommandBuffer { get }
     var rootTexture: MTLTexture { get }
+    func callSetNeedsDisplayOnCanvasView()
 
 }
 
@@ -92,6 +93,12 @@ class CanvasViewModel {
         drawingTool.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTexture()
+            }
+            .store(in: &cancellables)
+
+        drawingTool.setNeedsDisplayPublisher
+            .sink { [weak self] in
+                self?.delegate?.callSetNeedsDisplayOnCanvasView()
             }
             .store(in: &cancellables)
 

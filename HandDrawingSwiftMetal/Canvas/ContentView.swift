@@ -169,12 +169,6 @@ extension ContentView {
                 drawingTool.mergeAllLayersToRootTexture()
             }
             .store(in: &cancellables)
-
-        drawingTool.setNeedsDisplayPublisher
-            .sink { [weak self] in
-                self?.canvasView.setNeedsDisplay()
-            }
-            .store(in: &cancellables)
     }
 
 }
