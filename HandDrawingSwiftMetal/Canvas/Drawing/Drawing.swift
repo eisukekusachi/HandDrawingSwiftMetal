@@ -208,7 +208,7 @@ final class Drawing {
     }
 
     func initLayers(textureSize: CGSize) {
-        layerManager.reset(textureSize)
+        layerManager.initLayers(textureSize)
     }
 
     func addCommandToMergeAllLayers(
