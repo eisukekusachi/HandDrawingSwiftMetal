@@ -201,11 +201,11 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.drawing.layerManager.addCommandToMergeUnselectedLayers(
+            canvasViewModel.drawing.layerManager.addMergeUnselectedLayersCommands(
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.drawing.addCommandToMergeAllLayers(
+            canvasViewModel.drawing.addMergeAllLayersCommands(
                 backgroundColor: contentView.canvasView.backgroundColor ?? .white,
                 onto: contentView.canvasView.rootTexture,
                 to: contentView.canvasView.commandBuffer

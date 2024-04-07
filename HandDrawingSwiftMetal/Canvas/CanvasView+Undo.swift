@@ -49,10 +49,10 @@ extension CanvasView {
 
             viewModel.drawing.layerManager.update(undoObject: undoObject)
 
-            viewModel.drawing.layerManager.addCommandToMergeUnselectedLayers(
+            viewModel.drawing.layerManager.addMergeUnselectedLayersCommands(
                 to: commandBuffer
             )
-            viewModel.drawing.addCommandToMergeAllLayers(
+            viewModel.drawing.addMergeAllLayersCommands(
                 backgroundColor: self.backgroundColor ?? .white,
                 onto: rootTexture,
                 to: commandBuffer

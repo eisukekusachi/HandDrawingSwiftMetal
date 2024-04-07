@@ -209,7 +209,7 @@ extension CanvasViewModel {
             let commandBuffer = delegate?.commandBuffer
         else { return }
 
-        drawing.layerManager.addMergeAllLayersCommands(
+        drawing.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)

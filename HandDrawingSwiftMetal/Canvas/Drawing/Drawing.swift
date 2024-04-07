@@ -211,7 +211,7 @@ final class Drawing {
         layerManager.initLayers(textureSize)
     }
 
-    func addCommandToMergeAllLayers(
+    func addMergeAllLayersCommands(
         backgroundColor: UIColor,
         onto dstTexture: MTLTexture?,
         to commandBuffer: MTLCommandBuffer

@@ -121,7 +121,7 @@ class LayerManager: ObservableObject {
                       commandBuffer)
     }
 
-    func addCommandToMergeUnselectedLayers(
+    func addMergeUnselectedLayersCommands(
         to commandBuffer: MTLCommandBuffer
     ) {
         let bottomIndex: Int = index - 1
@@ -258,7 +258,7 @@ extension LayerManager {
 
     private func didUpdatedAllLayers() {
         let commandBuffer: MTLCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        addCommandToMergeUnselectedLayers(to: commandBuffer)
+        addMergeUnselectedLayersCommands(to: commandBuffer)
         commandBuffer.commit()
 
         commitCommandToMergeAllLayersToRootTextureSubject.send()
