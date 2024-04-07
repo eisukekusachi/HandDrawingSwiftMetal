@@ -58,8 +58,6 @@ class CanvasViewModel {
     private let touchManager = TouchManager()
     private let actionManager = ActionManager()
 
-    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
     /// A protocol for managing transformations
     private let transforming = Transforming()
 

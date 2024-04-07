@@ -68,14 +68,19 @@ extension CanvasViewModel {
     func applyCanvasDataToCanvas(_ data: CanvasModel?,
                                  folderURL: URL,
                                  zipFilePath: String) throws {
-        guard let textureName = data?.textureName,
-              let textureSize = data?.textureSize,
-              let rawValueDrawingTool = data?.drawingTool,
-              let brushDiameter = data?.brushDiameter,
-              let eraserDiameter = data?.eraserDiameter,
-              let newTexture = try MTKTextureUtils.makeTexture(device,
-                                                               url: folderURL.appendingPathComponent(textureName),
-                                                               textureSize: textureSize) else {
+        guard 
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let textureName = data?.textureName,
+            let textureSize = data?.textureSize,
+            let rawValueDrawingTool = data?.drawingTool,
+            let brushDiameter = data?.brushDiameter,
+            let eraserDiameter = data?.eraserDiameter,
+            let newTexture = try MTKTextureUtils.makeTexture(
+                device,
+                url: folderURL.appendingPathComponent(textureName),
+                textureSize: textureSize
+            ) else {
+
             throw FileInputError.failedToApplyData
         }
 

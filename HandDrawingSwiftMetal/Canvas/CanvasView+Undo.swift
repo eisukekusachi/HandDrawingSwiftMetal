@@ -33,8 +33,9 @@ extension CanvasView {
         registerDrawingUndoAction(with: viewModel.undoObject)
         undoManager.incrementUndoCount()
 
-        if  let selectedTexture = viewModel.drawing.layerManager.selectedTexture,
-            let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, selectedTexture) {
+        if let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+           let selectedTexture = viewModel.drawing.layerManager.selectedTexture,
+           let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture) {
             viewModel.drawing.layerManager.updateSelectedLayerTexture(newTexture)
         }
     }

@@ -183,10 +183,15 @@ extension ViewController {
             guard let self else { return }
 
             if let data = try canvasViewModel.loadCanvasDataV2(from: zipFilePath, into: folderURL) {
-                guard let textureSize = data.textureSize,
-                      let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(device: canvasViewModel.device,
-                                                                                           textureSize: textureSize,
-                                                                                           folderURL: folderURL) else { return }
+                guard
+                    let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+                    let textureSize = data.textureSize,
+                    let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(
+                        device: device,
+                        textureSize: textureSize,
+                        folderURL: folderURL
+                    ) else { return }
+
                 try canvasViewModel.applyCanvasDataToCanvasV2(data,
                                                               layers: layers,
                                                               folderURL: folderURL,
