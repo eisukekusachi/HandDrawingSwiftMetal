@@ -150,6 +150,16 @@ extension ContentView {
         drawing.matrixPublisher
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
+
+        drawing.textureSizePublisher
+            .sink { [weak self] textureSize in
+                guard let `self`, textureSize != .zero else { return }
+
+                canvasView.initRootTexture(textureSize: textureSize)
+                drawing.initLayers(textureSize: textureSize)
+                drawing.mergeAllLayersToRootTexture()
+            }
+            .store(in: &cancellables)
     }
 
     private func bindModels(_ drawingTool: DrawingToolModel) {
@@ -163,16 +173,6 @@ extension ContentView {
         drawingTool.backgroundColorPublisher
             .sink { [weak self] color in
                 self?.canvasView.backgroundColor = color
-            }
-            .store(in: &cancellables)
-
-        drawingTool.textureSizeSubject
-            .sink { [weak self] textureSize in
-                guard let `self`, textureSize != .zero else { return }
-
-                canvasView.initRootTexture(textureSize: textureSize)
-                drawingTool.initLayers(textureSize: textureSize)
-                drawingTool.mergeAllLayersToRootTexture()
             }
             .store(in: &cancellables)
     }

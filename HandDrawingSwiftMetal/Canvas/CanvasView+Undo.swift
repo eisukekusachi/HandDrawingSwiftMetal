@@ -28,14 +28,14 @@ extension CanvasView {
     func registerDrawingUndoAction() {
         guard let viewModel else { return }
         
-        if viewModel.drawingTool.layerManager.layers.count == 0 { return }
+        if viewModel.drawing.layerManager.layers.count == 0 { return }
 
         registerDrawingUndoAction(with: viewModel.undoObject)
         undoManager.incrementUndoCount()
 
-        if  let selectedTexture = viewModel.drawingTool.layerManager.selectedTexture,
+        if  let selectedTexture = viewModel.drawing.layerManager.selectedTexture,
             let newTexture = MTKTextureUtils.duplicateTexture(viewModel.device, selectedTexture) {
-            viewModel.drawingTool.layerManager.updateSelectedLayerTexture(newTexture)
+            viewModel.drawing.layerManager.updateSelectedLayerTexture(newTexture)
         }
     }
 
@@ -43,16 +43,16 @@ extension CanvasView {
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         undoManager.registerUndo(withTarget: self as CanvasView) { [unowned self] _ in
             guard let viewModel else { return }
-            if viewModel.drawingTool.layerManager.layers.count == 0 { return }
+            if viewModel.drawing.layerManager.layers.count == 0 { return }
 
             registerDrawingUndoAction(with: viewModel.undoObject)
 
-            viewModel.drawingTool.layerManager.update(undoObject: undoObject)
+            viewModel.drawing.layerManager.update(undoObject: undoObject)
 
-            viewModel.drawingTool.layerManager.addCommandToMergeUnselectedLayers(
+            viewModel.drawing.layerManager.addCommandToMergeUnselectedLayers(
                 to: commandBuffer
             )
-            viewModel.drawingTool.addCommandToMergeAllLayers(
+            viewModel.drawing.addCommandToMergeAllLayers(
                 backgroundColor: self.backgroundColor ?? .white,
                 onto: rootTexture,
                 to: commandBuffer

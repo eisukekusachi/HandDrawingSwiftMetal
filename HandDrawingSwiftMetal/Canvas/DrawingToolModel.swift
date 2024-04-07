@@ -19,9 +19,6 @@ final class DrawingToolModel {
     var backgroundColor: UIColor {
         backgroundColorSubject.value
     }
-    var textureSize: CGSize {
-        textureSizeSubject.value
-    }
 
     var drawingToolPublisher: AnyPublisher<DrawingToolType, Never> {
         drawingToolSubject.eraseToAnyPublisher()
@@ -32,33 +29,12 @@ final class DrawingToolModel {
     var backgroundColorPublisher: AnyPublisher<UIColor, Never> {
         backgroundColorSubject.eraseToAnyPublisher()
     }
-    var mergeAllLayersToRootTexturePublisher: AnyPublisher<Void, Never> {
-        mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
-    }
 
     private let drawingToolSubject = CurrentValueSubject<DrawingToolType, Never>(.brush)
 
     private let diameterSubject = CurrentValueSubject<Float, Never>(1.0)
 
     private let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
-
-    let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
-
-    private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
-
-    var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
-        setNeedsDisplaySubject.eraseToAnyPublisher()
-    }
-    private let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
-
-    /// An instance for managing texture layers
-    let layerManager = LayerManager()
-
-    var frameSize: CGSize = .zero {
-        didSet {
-            layerManager.frameSize = frameSize
-        }
-    }
 
     private (set) var brushColor: UIColor
     private (set) var eraserAlpha: Int
@@ -84,19 +60,6 @@ final class DrawingToolModel {
         self.eraserAlpha = eraserAlpha
 
         setBackgroundColor(backgroundColor)
-
-        drawingToolSubject
-            .sink { [weak self] tool in
-                self?.layerManager.setDrawingLayer(tool)
-            }
-            .store(in: &cancellables)
-
-        layerManager.commitCommandToMergeAllLayersToRootTextureSubject
-            .sink { [weak self] in
-                self?.mergeAllLayersToRootTextureSubject.send()
-                self?.setNeedsDisplaySubject.send()
-            }
-            .store(in: &cancellables)
     }
 
 }
@@ -164,32 +127,4 @@ extension DrawingToolModel {
         self.backgroundColorSubject.send(color)
     }
     
-}
-
-extension DrawingToolModel {
-    func mergeAllLayersToRootTexture() {
-        mergeAllLayersToRootTextureSubject.send()
-    }
-    func setNeedsDisplay() {
-        setNeedsDisplaySubject.send()
-    }
-
-    func initLayers(textureSize: CGSize) {
-        layerManager.reset(textureSize)
-    }
-
-    func addCommandToMergeAllLayers(
-        backgroundColor: UIColor,
-        onto dstTexture: MTLTexture?,
-        to commandBuffer: MTLCommandBuffer
-    ) {
-        guard let dstTexture else { return }
-
-        layerManager.addMergeAllLayersCommands(
-            backgroundColor: backgroundColor,
-            onto: dstTexture,
-            to: commandBuffer
-        )
-    }
-
 }

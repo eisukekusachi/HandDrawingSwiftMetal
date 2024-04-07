@@ -10,6 +10,15 @@ import Combine
 
 final class Drawing {
 
+    var frameSize: CGSize = .zero {
+        didSet {
+            layerManager.frameSize = frameSize
+        }
+    }
+    var textureSize: CGSize {
+        textureSizeSubject.value
+    }
+
     var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
         matrixSubject.eraseToAnyPublisher()
     }
@@ -22,11 +31,43 @@ final class Drawing {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
 
+    var mergeAllLayersToRootTexturePublisher: AnyPublisher<Void, Never> {
+        mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
+    }
+
+    var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
+        setNeedsDisplaySubject.eraseToAnyPublisher()
+    }
+
+    var textureSizePublisher:  AnyPublisher<CGSize, Never> {
+        textureSizeSubject.eraseToAnyPublisher()
+    }
+
     private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
+
+    private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+
+    private let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+
+    private let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
+
+    /// An instance for managing texture layers
+    let layerManager = LayerManager()
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        layerManager.commitCommandToMergeAllLayersToRootTextureSubject
+            .sink { [weak self] in
+                self?.mergeAllLayersToRootTextureSubject.send()
+                self?.setNeedsDisplaySubject.send()
+            }
+            .store(in: &cancellables)
+    }
 
     func makeLineSegment(
         _ touchManager: TouchManager,
@@ -57,8 +98,8 @@ final class Drawing {
             DotPoint(
                 touchPoint: $0,
                 matrix: matrixSubject.value,
-                frameSize: drawingTool.frameSize,
-                textureSize: drawingTool.textureSize
+                frameSize: frameSize,
+                textureSize: textureSize
             )
         }
         drawing.appendToIterator(dotPoints)
@@ -87,7 +128,7 @@ final class Drawing {
     ) {
         guard let rootTexture,
               let commandBuffer,
-              let drawingLayer = drawingTool.layerManager.drawingLayer
+              let drawingLayer = layerManager.drawingLayer
         else { return }
 
         if lineSegment.touchPhase == .ended {
@@ -96,11 +137,11 @@ final class Drawing {
 
         drawingLayer.drawOnDrawingTexture(
             segment: lineSegment,
-            on: drawingTool.layerManager.selectedTexture,
+            on: layerManager.selectedTexture,
             commandBuffer)
 
         if lineSegment.touchPhase == .ended,
-           let selectedTexture = drawingTool.layerManager.selectedTexture {
+           let selectedTexture = layerManager.selectedTexture {
 
             drawingLayer.mergeDrawingTexture(
                 into: selectedTexture,
@@ -108,11 +149,11 @@ final class Drawing {
             )
 
             Task {
-                try? await drawingTool.layerManager.updateCurrentThumbnail()
+                try? await layerManager.updateCurrentThumbnail()
             }
         }
 
-        drawingTool.layerManager.addMergeAllLayersCommands(
+        layerManager.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
@@ -135,8 +176,8 @@ final class Drawing {
 
         if let matrix = transforming.makeMatrix(
             frameCenter: CGPoint(
-                x: drawingTool.frameSize.width * 0.5,
-                y: drawingTool.frameSize.height * 0.5
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
             )
         ) {
             let newMatrix = transforming.getMatrix(matrix)
@@ -153,6 +194,35 @@ final class Drawing {
 
     func setMatrix(_ matrix: CGAffineTransform) {
         matrixSubject.send(matrix)
+    }
+
+    func mergeAllLayersToRootTexture() {
+        mergeAllLayersToRootTextureSubject.send()
+    }
+    func setNeedsDisplay() {
+        setNeedsDisplaySubject.send()
+    }
+
+    func setTextureSize(_ size: CGSize) {
+        textureSizeSubject.send(size)
+    }
+
+    func initLayers(textureSize: CGSize) {
+        layerManager.reset(textureSize)
+    }
+
+    func addCommandToMergeAllLayers(
+        backgroundColor: UIColor,
+        onto dstTexture: MTLTexture?,
+        to commandBuffer: MTLCommandBuffer
+    ) {
+        guard let dstTexture else { return }
+
+        layerManager.addMergeAllLayersCommands(
+            backgroundColor: backgroundColor,
+            onto: dstTexture,
+            to: commandBuffer
+        )
     }
 
 }

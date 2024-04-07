@@ -32,7 +32,7 @@ class CanvasViewModel {
 
     var frameSize: CGSize = .zero {
         didSet {
-            drawingTool.frameSize = frameSize
+            drawing.frameSize = frameSize
         }
     }
 
@@ -44,8 +44,8 @@ class CanvasViewModel {
     }
 
     var undoObject: UndoObject {
-        return UndoObject(index: drawingTool.layerManager.index,
-                          layers: drawingTool.layerManager.layers)
+        return UndoObject(index: drawing.layerManager.index,
+                          layers: drawing.layerManager.layers)
     }
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
@@ -88,19 +88,25 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingTool.layerManager.addUndoObjectToUndoStackPublisher
+        drawing.layerManager.addUndoObjectToUndoStackPublisher
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
-        drawingTool.mergeAllLayersToRootTexturePublisher
+        drawing.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTexture()
             }
             .store(in: &cancellables)
 
-        drawingTool.setNeedsDisplayPublisher
+        drawing.setNeedsDisplayPublisher
             .sink { [weak self] in
                 self?.delegate?.callSetNeedsDisplayOnCanvasView()
+            }
+            .store(in: &cancellables)
+
+        drawingTool.drawingToolPublisher
+            .sink { [weak self] tool in
+                self?.drawing.layerManager.setDrawingLayer(tool)
             }
             .store(in: &cancellables)
 
@@ -164,7 +170,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        drawingTool.setNeedsDisplay()
+        drawing.setNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {
@@ -175,10 +181,10 @@ extension CanvasViewModel {
 
         resetMatrix()
 
-        drawingTool.initLayers(textureSize: drawingTool.textureSizeSubject.value)
+        drawing.initLayers(textureSize: drawing.textureSize)
 
-        drawingTool.mergeAllLayersToRootTexture()
-        drawingTool.setNeedsDisplay()
+        drawing.mergeAllLayersToRootTexture()
+        drawing.setNeedsDisplay()
     }
 
 }
@@ -186,9 +192,9 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if drawingTool.textureSizeSubject.value == .zero &&
+        if drawing.textureSize == .zero &&
            frameSize.isSameRatio(drawableSize) {
-            drawingTool.textureSizeSubject.send(drawableSize)
+            drawing.setTextureSize(drawableSize)
         }
     }
 
@@ -203,7 +209,7 @@ extension CanvasViewModel {
             let commandBuffer = delegate?.commandBuffer
         else { return }
 
-        drawingTool.layerManager.addMergeAllLayersCommands(
+        drawing.layerManager.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
