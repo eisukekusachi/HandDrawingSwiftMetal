@@ -98,7 +98,7 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawing.setNeedsDisplayPublisher
+        drawing.callSetNeedsDisplayOnCanvasViewPublisher
             .sink { [weak self] in
                 self?.delegate?.callSetNeedsDisplayOnCanvasView()
             }
@@ -170,7 +170,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         resetMatrix()
-        drawing.setNeedsDisplay()
+        drawing.callSetNeedsDisplayOnCanvasView()
     }
 
     func didTapNewCanvasButton() {
@@ -184,7 +184,7 @@ extension CanvasViewModel {
         drawing.initLayers(textureSize: drawing.textureSize)
 
         drawing.mergeAllLayersToRootTexture()
-        drawing.setNeedsDisplay()
+        drawing.callSetNeedsDisplayOnCanvasView()
     }
 
 }

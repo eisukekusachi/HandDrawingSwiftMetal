@@ -35,8 +35,8 @@ final class Drawing {
         mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
     }
 
-    var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
-        setNeedsDisplaySubject.eraseToAnyPublisher()
+    var callSetNeedsDisplayOnCanvasViewPublisher: AnyPublisher<Void, Never> {
+        callSetNeedsDisplayOnCanvasViewSubject.eraseToAnyPublisher()
     }
 
     var textureSizePublisher:  AnyPublisher<CGSize, Never> {
@@ -51,7 +51,7 @@ final class Drawing {
 
     private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
-    private let setNeedsDisplaySubject = PassthroughSubject<Void, Never>()
+    private let callSetNeedsDisplayOnCanvasViewSubject = PassthroughSubject<Void, Never>()
 
     private let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
@@ -64,7 +64,7 @@ final class Drawing {
         layerManager.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTextureSubject.send()
-                self?.setNeedsDisplaySubject.send()
+                self?.callSetNeedsDisplayOnCanvasViewSubject.send()
             }
             .store(in: &cancellables)
     }
@@ -199,8 +199,8 @@ final class Drawing {
     func mergeAllLayersToRootTexture() {
         mergeAllLayersToRootTextureSubject.send()
     }
-    func setNeedsDisplay() {
-        setNeedsDisplaySubject.send()
+    func callSetNeedsDisplayOnCanvasView() {
+        callSetNeedsDisplayOnCanvasViewSubject.send()
     }
 
     func setTextureSize(_ size: CGSize) {
