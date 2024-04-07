@@ -43,6 +43,11 @@ final class Drawing {
         textureSizeSubject.eraseToAnyPublisher()
     }
 
+    var undoObject: UndoObject {
+        return UndoObject(index: layerManager.index,
+                          layers: layerManager.layers)
+    }
+
     private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()

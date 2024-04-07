@@ -44,8 +44,7 @@ class CanvasViewModel {
     }
 
     var undoObject: UndoObject {
-        return UndoObject(index: drawing.layerManager.index,
-                          layers: drawing.layerManager.layers)
+        drawing.undoObject
     }
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
