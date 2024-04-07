@@ -150,16 +150,6 @@ extension ContentView {
         drawing.matrixPublisher
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
-
-        drawing.textureSizePublisher
-            .sink { [weak self] textureSize in
-                guard let `self`, textureSize != .zero else { return }
-
-                canvasView.initRootTexture(textureSize: textureSize)
-                drawing.initLayers(textureSize: textureSize)
-                drawing.mergeAllLayersToRootTexture()
-            }
-            .store(in: &cancellables)
     }
 
     private func bindModels(_ drawingTool: DrawingToolModel) {

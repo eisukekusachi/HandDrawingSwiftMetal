@@ -273,6 +273,10 @@ extension ViewController: CanvasViewModelDelegate {
         contentView.canvasView.rootTexture
     }
 
+    func initRootTexture(textureSize: CGSize) {
+        contentView.canvasView.initRootTexture(textureSize: textureSize)
+    }
+
     func callSetNeedsDisplayOnCanvasView() {
         contentView.canvasView.setNeedsDisplay()
     }

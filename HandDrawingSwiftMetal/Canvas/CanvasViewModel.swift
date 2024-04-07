@@ -12,6 +12,9 @@ protocol CanvasViewModelDelegate {
 
     var commandBuffer: MTLCommandBuffer { get }
     var rootTexture: MTLTexture { get }
+
+    func initRootTexture(textureSize: CGSize)
+
     func callSetNeedsDisplayOnCanvasView()
 
 }
@@ -75,6 +78,19 @@ class CanvasViewModel {
 
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
+
+        drawing.textureSizePublisher
+            .sink { [weak self] textureSize in
+                guard let `self`, textureSize != .zero else { return }
+
+                delegate?.initRootTexture(textureSize: textureSize)
+
+                drawing.initLayers(textureSize: textureSize)
+                drawing.mergeAllLayersToRootTexture()
+
+                delegate?.callSetNeedsDisplayOnCanvasView()
+            }
+            .store(in: &cancellables)
 
         drawing.addUndoObjectToUndoStackPublisher
             .subscribe(addUndoObjectToUndoStackSubject)
