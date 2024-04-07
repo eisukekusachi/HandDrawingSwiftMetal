@@ -21,14 +21,8 @@ class CanvasViewModel {
     var delegate: CanvasViewModelDelegate?
 
     let drawing = Drawing()
-    let lineDrawing = LineDrawing()
-    let smoothLineDrawing = SmoothLineDrawing()
 
     let drawingTool = DrawingToolModel()
-
-    var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
-        pauseDisplayLinkSubject.eraseToAnyPublisher()
-    }
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -47,6 +41,10 @@ class CanvasViewModel {
         drawing.undoObject
     }
 
+    var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
+        pauseDisplayLinkSubject.eraseToAnyPublisher()
+    }
+
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
         addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
     }
@@ -54,6 +52,9 @@ class CanvasViewModel {
     var clearUndoPublisher: AnyPublisher<Void, Never> {
         clearUndoSubject.eraseToAnyPublisher()
     }
+
+    private let lineDrawing = LineDrawing()
+    private let smoothLineDrawing = SmoothLineDrawing()
 
     private let touchManager = TouchManager()
     private let actionManager = ActionManager()

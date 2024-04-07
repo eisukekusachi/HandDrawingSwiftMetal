@@ -173,8 +173,8 @@ final class Drawing {
     func transformCanvas(
         touchPointData: TouchManager,
         transforming: TransformingProtocol,
-        drawingTool: DrawingToolModel) {
-
+        drawingTool: DrawingToolModel
+    ) {
         transforming.setHashValueIfNil(touchPointData)
 
         transforming.updateTouches(touchPointData)
