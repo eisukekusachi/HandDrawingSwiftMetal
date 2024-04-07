@@ -10,17 +10,32 @@ import Combine
 
 final class Drawing {
 
+    /// An instance for managing texture layers
+    let layerManager = LayerManager()
+
+    var undoObject: UndoObject {
+        return UndoObject(
+            index: layerManager.index,
+            layers: layerManager.layers
+        )
+    }
+
     var frameSize: CGSize = .zero {
         didSet {
             layerManager.frameSize = frameSize
         }
     }
+
+    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
+        matrixSubject.eraseToAnyPublisher()
+    }
+
     var textureSize: CGSize {
         textureSizeSubject.value
     }
 
-    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
-        matrixSubject.eraseToAnyPublisher()
+    var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        textureSizeSubject.eraseToAnyPublisher()
     }
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
@@ -39,16 +54,9 @@ final class Drawing {
         callSetNeedsDisplayOnCanvasViewSubject.eraseToAnyPublisher()
     }
 
-    var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        textureSizeSubject.eraseToAnyPublisher()
-    }
-
-    var undoObject: UndoObject {
-        return UndoObject(index: layerManager.index,
-                          layers: layerManager.layers)
-    }
-
     private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+
+    private let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
@@ -57,11 +65,6 @@ final class Drawing {
     private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     private let callSetNeedsDisplayOnCanvasViewSubject = PassthroughSubject<Void, Never>()
-
-    private let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
-
-    /// An instance for managing texture layers
-    let layerManager = LayerManager()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -77,6 +80,24 @@ final class Drawing {
             }
             .store(in: &cancellables)
     }
+
+    func setDrawingTool(_ tool: DrawingToolType) {
+        layerManager.setDrawingLayer(tool)
+    }
+
+    func setTextureSize(_ size: CGSize) {
+        textureSizeSubject.send(size)
+    }
+
+    func callSetNeedsDisplayOnCanvasView() {
+        callSetNeedsDisplayOnCanvasViewSubject.send()
+    }
+
+}
+
+// MARK: - Drawing
+
+extension Drawing {
 
     func makeLineSegment(
         from touchManager: TouchManager,
@@ -170,6 +191,16 @@ final class Drawing {
         pauseDisplayLinkSubject.send(lineSegment.touchPhase == .ended)
     }
 
+}
+
+// MARK: - Transforming
+
+extension Drawing {
+
+    func setMatrix(_ matrix: CGAffineTransform) {
+        matrixSubject.send(matrix)
+    }
+
     func transformCanvas(
         _ touchManager: TouchManager,
         with transforming: TransformingProtocol
@@ -200,23 +231,28 @@ final class Drawing {
         pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
     }
 
-    func setMatrix(_ matrix: CGAffineTransform) {
-        matrixSubject.send(matrix)
-    }
+}
 
-    func mergeAllLayersToRootTexture() {
-        mergeAllLayersToRootTextureSubject.send()
-    }
-    func callSetNeedsDisplayOnCanvasView() {
-        callSetNeedsDisplayOnCanvasViewSubject.send()
-    }
+// MARK: - Layer
 
-    func setTextureSize(_ size: CGSize) {
-        textureSizeSubject.send(size)
-    }
+extension Drawing {
 
     func initLayers(textureSize: CGSize) {
         layerManager.initLayers(textureSize)
+    }
+
+    func resetLayer(with newTexture: MTLTexture) {
+        let layerData = LayerModel.init(texture: newTexture,
+                                        title: "NewLayer")
+
+        layerManager.layers.removeAll()
+        layerManager.layers.append(layerData)
+        layerManager.index = 0
+    }
+
+    func setLayer(index: Int, layers: [LayerModel]) {
+        layerManager.layers = layers
+        layerManager.index = index
     }
 
     func addMergeAllLayersCommands(
@@ -233,21 +269,8 @@ final class Drawing {
         )
     }
 
-    func setDrawingTool(_ tool: DrawingToolType) {
-        layerManager.setDrawingLayer(tool)
-    }
-
-    func initLayer(_ newTexture: MTLTexture) {
-        let layerData = LayerModel.init(texture: newTexture,
-                                        title: "NewLayer")
-
-        layerManager.layers.removeAll()
-        layerManager.layers.append(layerData)
-        layerManager.index = 0
-    }
-    func setLayer(index: Int, layers: [LayerModel]) {
-        layerManager.layers = layers
-        layerManager.index = index
+    func mergeAllLayersToRootTexture() {
+        mergeAllLayersToRootTextureSubject.send()
     }
 
 }
