@@ -41,8 +41,6 @@ final class DrawingToolModel {
     private (set) var brushDiameter: Int
     private (set) var eraserDiameter: Int
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
     private var blurSize: Float = BlurredDotSize.initBlurSize
 
     private var cancellables = Set<AnyCancellable>()

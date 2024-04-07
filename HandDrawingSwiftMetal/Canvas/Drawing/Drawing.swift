@@ -39,7 +39,7 @@ final class Drawing {
         callSetNeedsDisplayOnCanvasViewSubject.eraseToAnyPublisher()
     }
 
-    var textureSizePublisher:  AnyPublisher<CGSize, Never> {
+    var textureSizePublisher: AnyPublisher<CGSize, Never> {
         textureSizeSubject.eraseToAnyPublisher()
     }
 
