@@ -66,6 +66,10 @@ final class Drawing {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
+        layerManager.addUndoObjectToUndoStackPublisher
+            .subscribe(addUndoObjectToUndoStackSubject)
+            .store(in: &cancellables)
+
         layerManager.commitCommandToMergeAllLayersToRootTextureSubject
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTextureSubject.send()
@@ -228,6 +232,23 @@ final class Drawing {
             onto: dstTexture,
             to: commandBuffer
         )
+    }
+
+    func setDrawingTool(_ tool: DrawingToolType) {
+        layerManager.setDrawingLayer(tool)
+    }
+
+    func initLayer(_ newTexture: MTLTexture) {
+        let layerData = LayerModel.init(texture: newTexture,
+                                        title: "NewLayer")
+
+        layerManager.layers.removeAll()
+        layerManager.layers.append(layerData)
+        layerManager.index = 0
+    }
+    func setLayer(index: Int, layers: [LayerModel]) {
+        layerManager.layers = layers
+        layerManager.index = index
     }
 
 }

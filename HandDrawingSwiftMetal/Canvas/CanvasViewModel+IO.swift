@@ -57,8 +57,7 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        drawing.layerManager.layers = layers
-        drawing.layerManager.index = layerIndex
+        drawing.setLayer(index: layerIndex, layers: layers)
 
         drawingTool.setBrushDiameter(brushDiameter)
         drawingTool.setEraserDiameter(eraserDiameter)
@@ -80,12 +79,7 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        let layerData = LayerModel.init(texture: newTexture,
-                                        title: "NewLayer")
-
-        drawing.layerManager.layers.removeAll()
-        drawing.layerManager.layers.append(layerData)
-        drawing.layerManager.index = 0
+        drawing.initLayer(newTexture)
 
         drawingTool.setBrushDiameter(brushDiameter)
         drawingTool.setEraserDiameter(eraserDiameter)

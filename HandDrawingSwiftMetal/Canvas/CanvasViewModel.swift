@@ -87,10 +87,6 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawing.layerManager.addUndoObjectToUndoStackPublisher
-            .subscribe(addUndoObjectToUndoStackSubject)
-            .store(in: &cancellables)
-
         drawing.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTexture()
@@ -105,7 +101,7 @@ class CanvasViewModel {
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
-                self?.drawing.layerManager.setDrawingLayer(tool)
+                self?.drawing.setDrawingTool(tool)
             }
             .store(in: &cancellables)
 
