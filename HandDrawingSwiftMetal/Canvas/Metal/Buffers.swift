@@ -74,6 +74,8 @@ enum Buffers {
         alpha: Int,
         textureSize: CGSize
     ) -> PointBuffers? {
+        guard points.count != .zero else { return nil }
+
         var vertexArray: [Float] = []
         var alphaArray: [Float] = []
         var diameterPlusBlurSizeArray: [Float] = []

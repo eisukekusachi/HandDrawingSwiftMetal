@@ -172,6 +172,19 @@ extension CanvasViewModel {
             }
         }
         touchManager.appendPencilTouches(event, in: view)
+
+        if let lineSegment: LineSegment = drawing.makeLineSegment(
+            from: touchManager,
+            with: lineDrawing,
+            parameters: .init(drawingTool)
+        ) {
+            drawing.addDrawSegmentCommands(
+                lineSegment,
+                backgroundColor: drawingTool.backgroundColor,
+                on: delegate?.rootTexture,
+                to: delegate?.commandBuffer
+            )
+        }
     }
 
 }
