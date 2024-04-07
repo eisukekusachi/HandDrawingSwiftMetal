@@ -70,7 +70,7 @@ final class Drawing {
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
-        layerManager.commitCommandToMergeAllLayersToRootTextureSubject
+        layerManager.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTextureSubject.send()
                 self?.callSetNeedsDisplayOnCanvasViewSubject.send()

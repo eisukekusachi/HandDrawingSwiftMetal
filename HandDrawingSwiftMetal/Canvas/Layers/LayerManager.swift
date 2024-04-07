@@ -17,12 +17,12 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
-
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
         addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
     }
-    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+    var mergeAllLayersToRootTexturePublisher: AnyPublisher<Void, Never> {
+        mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
+    }
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -65,6 +65,10 @@ class LayerManager: ObservableObject {
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
+
+    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+
+    private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -221,7 +225,7 @@ extension LayerManager {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
 
-        commitCommandToMergeAllLayersToRootTextureSubject.send()
+        mergeAllLayersToRootTextureSubject.send()
     }
 
     func updateSelectedLayerTexture(_ texture: MTLTexture) {
@@ -261,7 +265,7 @@ extension LayerManager {
         addMergeUnselectedLayersCommands(to: commandBuffer)
         commandBuffer.commit()
 
-        commitCommandToMergeAllLayersToRootTextureSubject.send()
+        mergeAllLayersToRootTextureSubject.send()
     }
 
 }
