@@ -44,7 +44,7 @@ final class DrawingToolModel {
 
     let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
-    let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     var setNeedsDisplayPublisher: AnyPublisher<Void, Never> {
         setNeedsDisplaySubject.eraseToAnyPublisher()

@@ -89,6 +89,12 @@ class CanvasViewModel {
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
+        drawingTool.mergeAllLayersToRootTexturePublisher
+            .sink { [weak self] in
+                self?.mergeAllLayersToRootTexture()
+            }
+            .store(in: &cancellables)
+
         drawingTool.setDrawingTool(.brush)
     }
 
@@ -180,6 +186,18 @@ extension CanvasViewModel {
     func resetMatrix() {
         transforming.updateMatrix(.identity)
         drawing.setMatrix(.identity)
+    }
+
+    func mergeAllLayersToRootTexture() {
+        guard
+            let rootTexture = delegate?.rootTexture,
+            let commandBuffer = delegate?.commandBuffer
+        else { return }
+
+        drawingTool.layerManager.addMergeAllLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: rootTexture,
+            to: commandBuffer)
     }
 
 }

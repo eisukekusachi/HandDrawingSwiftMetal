@@ -166,13 +166,7 @@ extension ContentView {
 
                 canvasView.initRootTexture(textureSize: textureSize)
                 drawingTool.initLayers(textureSize: textureSize)
-                self.mergeAllLayersToRootTexture(drawingTool.layerManager)
-            }
-            .store(in: &cancellables)
-
-        drawingTool.mergeAllLayersToRootTexturePublisher
-            .sink { [weak self] in
-                self?.mergeAllLayersToRootTexture(drawingTool.layerManager)
+                drawingTool.mergeAllLayersToRootTexture()
             }
             .store(in: &cancellables)
 
@@ -197,19 +191,6 @@ extension ContentView {
         redoButton.isEnabled = canvasView.canRedo
     }
 
-}
-
-extension ContentView {
-    
-    func mergeAllLayersToRootTexture(_ layerManager: LayerManager) {
-        guard canvasView.rootTexture != nil else { return }
-
-        layerManager.addMergeAllLayersCommands(
-            backgroundColor: canvasView.backgroundColor ?? .white,
-            onto: canvasView.rootTexture,
-            to: canvasView.commandBuffer
-        )
-    }
 }
 
 extension ContentView {
