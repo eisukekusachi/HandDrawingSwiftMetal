@@ -65,7 +65,6 @@ final class DrawingToolModel {
 extension DrawingToolModel {
 
     func setDrawingTool(_ tool: DrawingToolType) {
-
         switch tool {
         case .brush:
             diameterSubject.send(DrawingToolBrush.diameterFloatValue(brushDiameter))
@@ -75,6 +74,23 @@ extension DrawingToolModel {
 
         drawingToolSubject.send(tool)
     }
+
+}
+
+extension DrawingToolModel {
+
+    @objc func handleDiameterSlider(_ sender: UISlider) {
+        if drawingToolSubject.value == .brush {
+            setBrushDiameter(sender.value)
+
+        } else if drawingToolSubject.value == .eraser {
+            setEraserDiameter(sender.value)
+        }
+    }
+
+}
+
+extension DrawingToolModel {
 
     func setBrushColor(_ color: UIColor) {
         brushColor = color
@@ -92,15 +108,6 @@ extension DrawingToolModel {
     }
     var eraserDotSize: BlurredDotSize {
         BlurredDotSize(diameter: eraserDiameter, blurSize: blurSize)
-    }
-
-    @objc func handleDiameterSlider(_ sender: UISlider) {
-        if drawingToolSubject.value == .brush {
-            setBrushDiameter(sender.value)
-
-        } else if drawingToolSubject.value == .eraser {
-            setEraserDiameter(sender.value)
-        }
     }
 
     func setBrushDiameter(_ value: Float) {
