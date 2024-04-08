@@ -85,7 +85,7 @@ class CanvasViewModel {
 
                 delegate?.initRootTexture(textureSize: textureSize)
 
-                drawing.initLayers(textureSize: textureSize)
+                drawing.setTextureSizeOfLayer(textureSize)
                 drawing.mergeAllLayersToRootTexture()
 
                 delegate?.callSetNeedsDisplayOnCanvasView()
@@ -203,7 +203,7 @@ extension CanvasViewModel {
 
         resetMatrix()
 
-        drawing.initLayers(textureSize: drawing.textureSize)
+        drawing.setTextureSizeOfLayer(drawing.textureSize)
 
         drawing.mergeAllLayersToRootTexture()
         drawing.callSetNeedsDisplayOnCanvasView()

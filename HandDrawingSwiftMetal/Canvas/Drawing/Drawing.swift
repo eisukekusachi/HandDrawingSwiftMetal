@@ -113,8 +113,10 @@ extension Drawing {
             let touchPoints = touchManager.getTouchPoints(with: hashValue)
         else { return nil }
 
+        let isFingerReleasedFromScreen = touchPhase == .ended
+
         defer {
-            if touchPhase == .ended {
+            if isFingerReleasedFromScreen {
                 drawing.clear()
             }
         }
@@ -134,13 +136,13 @@ extension Drawing {
         }
         drawing.appendToIterator(dotPoints)
 
-        if touchPhase == .ended, let drawing = drawing as? SmoothLineDrawing {
+        if isFingerReleasedFromScreen, let drawing = drawing as? SmoothLineDrawing {
             drawing.appendLastTouchToSmoothCurveIterator()
         }
 
         let curvePoints = Curve.makePoints(
             from: drawing.iterator,
-            isFinishDrawing: touchPhase == .ended
+            isFinishDrawing: isFingerReleasedFromScreen
         )
 
         return .init(
@@ -161,7 +163,9 @@ extension Drawing {
               let drawingLayer = layerManager.drawingLayer
         else { return }
 
-        if lineSegment.touchPhase == .ended {
+        let isFingerReleasedFromScreen = lineSegment.touchPhase == .ended
+
+        if isFingerReleasedFromScreen {
             addUndoObjectToUndoStackSubject.send()
         }
 
@@ -170,7 +174,7 @@ extension Drawing {
             on: layerManager.selectedTexture,
             commandBuffer)
 
-        if lineSegment.touchPhase == .ended,
+        if isFingerReleasedFromScreen,
            let selectedTexture = layerManager.selectedTexture {
 
             drawingLayer.mergeDrawingTexture(
@@ -188,7 +192,7 @@ extension Drawing {
             onto: rootTexture,
             to: commandBuffer)
 
-        pauseDisplayLinkSubject.send(lineSegment.touchPhase == .ended)
+        pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
     }
 
 }
@@ -225,7 +229,7 @@ extension Drawing {
                 transforming.updateMatrix(newMatrix)
                 transforming.clear()
             }
-            matrixSubject.send(newMatrix)
+            setMatrix(newMatrix)
         }
 
         pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
@@ -237,22 +241,24 @@ extension Drawing {
 
 extension Drawing {
 
-    func initLayers(textureSize: CGSize) {
-        layerManager.initLayers(textureSize)
-    }
-
-    func resetLayer(with newTexture: MTLTexture) {
-        let layerData = LayerModel.init(texture: newTexture,
-                                        title: "NewLayer")
-
-        layerManager.layers.removeAll()
-        layerManager.layers.append(layerData)
-        layerManager.index = 0
+    func setTextureSizeOfLayer(_ textureSize: CGSize) {
+        layerManager.changeTextureSize(textureSize)
     }
 
     func setLayer(index: Int, layers: [LayerModel]) {
         layerManager.layers = layers
         layerManager.index = index
+    }
+
+    func resetLayer(with newTexture: MTLTexture) {
+        let layerData = LayerModel.init(
+            texture: newTexture,
+            title: "NewLayer"
+        )
+
+        layerManager.layers.removeAll()
+        layerManager.layers.append(layerData)
+        layerManager.index = 0
     }
 
     func addMergeAllLayersCommands(
