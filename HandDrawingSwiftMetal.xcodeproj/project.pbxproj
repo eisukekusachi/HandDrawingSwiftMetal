@@ -83,7 +83,7 @@
 		D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingLayer.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
 		D4C8EEA02B257331005947EC /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9F2B257330005947EC /* CanvasModel.swift */; };
-		D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformationData.swift */; };
+		D4C9791C2ADBAA3700BB666D /* TransformingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791B2ADBAA3700BB666D /* TransformingPoint.swift */; };
 		D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* Transforming.swift */; };
 		D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */; };
 		D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */; };
@@ -204,7 +204,7 @@
 		D4C8EE972B25490B005947EC /* DrawingLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingLayer.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
 		D4C8EE9F2B257330005947EC /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
-		D4C9791B2ADBAA3700BB666D /* TransformationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationData.swift; sourceTree = "<group>"; };
+		D4C9791B2ADBAA3700BB666D /* TransformingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingPoint.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* Transforming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
 		D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModelTests.swift; sourceTree = "<group>"; };
 		D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
@@ -455,8 +455,8 @@
 		D4AEFE282B09B56900EE3EEF /* Transforming */ = {
 			isa = PBXGroup;
 			children = (
-				D4C9791B2ADBAA3700BB666D /* TransformationData.swift */,
 				D4C9791D2ADBAA6400BB666D /* Transforming.swift */,
+				D4C9791B2ADBAA3700BB666D /* TransformingPoint.swift */,
 				D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */,
 			);
 			path = Transforming;
@@ -781,7 +781,7 @@
 				D47285A82BBEBE220035AFCD /* DrawingLineProtocol.swift in Sources */,
 				D40D975229DAB01900A82E6A /* CanvasView.swift in Sources */,
 				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,
-				D4C9791C2ADBAA3700BB666D /* TransformationData.swift in Sources */,
+				D4C9791C2ADBAA3700BB666D /* TransformingPoint.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
 				D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,

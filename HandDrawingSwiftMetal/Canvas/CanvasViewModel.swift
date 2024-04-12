@@ -25,11 +25,17 @@ class CanvasViewModel {
 
     let drawing = Drawing()
 
+    let transforming = Transforming()
+
     let drawingTool = DrawingToolModel()
 
     var frameSize: CGSize = .zero {
         didSet {
             drawing.frameSize = frameSize
+            transforming.screenCenter = .init(
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
+            )
         }
     }
 
@@ -61,9 +67,6 @@ class CanvasViewModel {
 
     private let touchManager = TouchManager()
     private let actionManager = ActionManager()
-
-    /// A protocol for managing transformations
-    private let transforming = Transforming()
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
@@ -143,6 +146,7 @@ extension CanvasViewModel {
             if let lineSegment: LineSegment = drawing.makeLineSegment(
                 from: touchManager,
                 with: smoothLineDrawing,
+                matrix: transforming.matrix,
                 parameters: .init(drawingTool)
             ) {
                 drawing.addDrawSegmentCommands(
@@ -154,10 +158,22 @@ extension CanvasViewModel {
             }
 
         case .transforming:
-            drawing.transformCanvas(
-                touchManager,
-                with: transforming
-            )
+            guard
+                let hashValues = transforming.getHashValues(from: touchManager),
+                let touchPoints = transforming.getTouchPoints(from: touchManager, using: hashValues)
+            else { return }
+
+            if transforming.isInitializationRequired {
+                transforming.initTransforming(hashValues: hashValues)
+            }
+
+            transforming.transformCanvas(touchPoints: (touchPoints.0, touchPoints.1))
+
+            if transforming.isTouchEnded {
+                transforming.finishTransforming()
+            }
+            
+            pauseDisplayLinkLoop(transforming.isTouchEnded)
 
         default:
             break
@@ -176,6 +192,7 @@ extension CanvasViewModel {
         if let lineSegment: LineSegment = drawing.makeLineSegment(
             from: touchManager,
             with: lineDrawing,
+            matrix: transforming.matrix,
             parameters: .init(drawingTool)
         ) {
             drawing.addDrawSegmentCommands(
@@ -191,7 +208,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func didTapResetTransformButton() {
-        resetMatrix()
+        transforming.resetTransforming(.identity)
         drawing.callSetNeedsDisplayOnCanvasView()
     }
 
@@ -201,7 +218,7 @@ extension CanvasViewModel {
 
         projectName = Calendar.currentDate
 
-        resetMatrix()
+        transforming.resetTransforming(.identity)
 
         drawing.setTextureSizeOfLayer(drawing.textureSize)
 
@@ -218,11 +235,6 @@ extension CanvasViewModel {
            frameSize.isSameRatio(drawableSize) {
             drawing.setTextureSize(drawableSize)
         }
-    }
-
-    func resetMatrix() {
-        transforming.updateMatrix(.identity)
-        drawing.setMatrix(.identity)
     }
 
     func mergeAllLayersToRootTexture() {

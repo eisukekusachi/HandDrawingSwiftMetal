@@ -6,73 +6,77 @@
 //
 
 import UIKit
+import Combine
 
+/// A class for view rotation.
 class Transforming: TransformingProtocol {
 
-    private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
-
-    private var touchesA: TransformingData?
-    private var touchesB: TransformingData?
-
-    var hashValues: [TouchHashValue] {
-        [touchesA?.hashValue,
-         touchesB?.hashValue].compactMap { $0 }
+    var matrix: CGAffineTransform {
+        matrixSubject.value
     }
 
-    /// When a gesture is determined to be `transforming`, the touchManager manages two fingers
-    func setHashValueIfNil(_ touchManager: TouchManager) {
+    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
+        matrixSubject.eraseToAnyPublisher()
+    }
+
+    var storedMatrix: CGAffineTransform = CGAffineTransform.identity
+
+    var touchPointsA: TransformingPoint?
+    var touchPointsB: TransformingPoint?
+    var screenCenter: CGPoint = .zero
+
+    var isInitializationRequired: Bool {
+        touchPointsA == nil ||
+        touchPointsB == nil
+    }
+
+    var isTouchEnded: Bool {
+        let phases = [
+        touchPointsA?.startTouchPoint?.phase,
+        touchPointsA?.lastTouchPoint?.phase,
+        touchPointsB?.startTouchPoint?.phase,
+        touchPointsB?.lastTouchPoint?.phase]
+
+        return phases.contains(.ended) || phases.contains(.cancelled)
+    }
+
+    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+
+    func initTransforming(hashValues: (TouchHashValue, TouchHashValue)) {
+        touchPointsA = TransformingPoint(hashValue: hashValues.0)
+        touchPointsB = TransformingPoint(hashValue: hashValues.1)
+    }
+
+    func transformCanvas(touchPoints: (TouchPoint, TouchPoint)) {
+        touchPointsA?.updateTouchPoints(touchPoints.0)
+        touchPointsB?.updateTouchPoints(touchPoints.1)
+
         guard
-            touchesA == nil,
-            touchesB == nil,
-            let firstHashValue = touchManager.touchPointsDictionary.keys.sorted().first,
-            let lastHashValue = touchManager.touchPointsDictionary.keys.sorted().last
+            let startAndLastLocationA = touchPointsA?.startAndLastLocations,
+            let startAndLastLocationB = touchPointsB?.startAndLastLocations,
+            let newMatrix = CGAffineTransform.makeMatrix(
+                center: screenCenter,
+                pointsA: startAndLastLocationA,
+                pointsB: startAndLastLocationB,
+                counterRotate: true,
+                flipY: true
+            )
         else { return }
 
-        touchesA = TransformingData(hashValue: firstHashValue)
-        touchesB = TransformingData(hashValue: lastHashValue)
+        matrixSubject.send(storedMatrix.concatenating(newMatrix))
     }
 
-    func getMatrix(_ matrix: CGAffineTransform) -> CGAffineTransform {
-        storedMatrix.concatenating(matrix)
+    func finishTransforming() {
+        storedMatrix = matrixSubject.value
+        touchPointsA = nil
+        touchPointsB = nil
     }
 
-    func updateTouches(_ touchManager: TouchManager) {
-        guard
-            let touchesA,
-            let touchesB,
-            let touchPointA = touchManager.touchPointsDictionary[touchesA.hashValue]?.last,
-            let touchPointB = touchManager.touchPointsDictionary[touchesB.hashValue]?.last
-        else { return }
-
-        touchesA.updatePoint(touchPointA.location)
-        touchesB.updatePoint(touchPointB.location)
-    }
-
-    func updateMatrix(_ matrix: CGAffineTransform) {
+    func resetTransforming(_ matrix: CGAffineTransform) {
+        matrixSubject.send(matrix)
         storedMatrix = matrix
-    }
-
-    /// Generate a matrix from touch points and the view center point.
-    func makeMatrix(
-        frameCenter: CGPoint
-    ) -> CGAffineTransform? {
-        guard
-            let touchesAPoints = touchesA?.touches,
-            let touchesBPoints = touchesB?.touches
-        else { return nil }
-
-        return CGAffineTransform.makeMatrix(
-            center: frameCenter,
-            pointsA: touchesAPoints,
-            pointsB: touchesBPoints,
-            counterRotate: true,
-            flipY: true
-        )
-    }
-
-    func clear() {
-        touchesA = nil
-        touchesB = nil
+        touchPointsA = nil
+        touchPointsB = nil
     }
 
 }

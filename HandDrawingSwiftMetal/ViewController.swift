@@ -47,7 +47,7 @@ extension ViewController {
 
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
-        contentView.applyDrawing(canvasViewModel.drawing)
+        contentView.bindTransforming(canvasViewModel.transforming)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
 
         subscribeEvents()

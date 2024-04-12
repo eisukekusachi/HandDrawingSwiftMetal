@@ -26,10 +26,6 @@ final class Drawing {
         }
     }
 
-    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
-        matrixSubject.eraseToAnyPublisher()
-    }
-
     var textureSize: CGSize {
         textureSizeSubject.value
     }
@@ -53,8 +49,6 @@ final class Drawing {
     var callSetNeedsDisplayOnCanvasViewPublisher: AnyPublisher<Void, Never> {
         callSetNeedsDisplayOnCanvasViewSubject.eraseToAnyPublisher()
     }
-
-    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
     private let textureSizeSubject = CurrentValueSubject<CGSize, Never>(.zero)
 
@@ -102,6 +96,7 @@ extension Drawing {
     func makeLineSegment(
         from touchManager: TouchManager,
         with drawing: DrawingLineProtocol,
+        matrix: CGAffineTransform,
         parameters: LineParameters
     ) -> LineSegment? {
 
@@ -129,7 +124,7 @@ extension Drawing {
         let dotPoints = newTouchPoints.map {
             DotPoint(
                 touchPoint: $0,
-                matrix: matrixSubject.value,
+                matrix: matrix,
                 frameSize: frameSize,
                 textureSize: textureSize
             )
@@ -191,46 +186,6 @@ extension Drawing {
             backgroundColor: backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
-
-        pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
-    }
-
-}
-
-// MARK: - Transforming
-
-extension Drawing {
-
-    func setMatrix(_ matrix: CGAffineTransform) {
-        matrixSubject.send(matrix)
-    }
-
-    func transformCanvas(
-        _ touchManager: TouchManager,
-        with transforming: TransformingProtocol
-    ) {
-        transforming.setHashValueIfNil(touchManager)
-
-        transforming.updateTouches(touchManager)
-
-        let isFingerReleasedFromScreen = touchManager.getTouchPhases(
-            transforming.hashValues
-        ).contains(.ended)
-
-        if let matrix = transforming.makeMatrix(
-            frameCenter: CGPoint(
-                x: frameSize.width * 0.5,
-                y: frameSize.height * 0.5
-            )
-        ) {
-            let newMatrix = transforming.getMatrix(matrix)
-
-            if isFingerReleasedFromScreen {
-                transforming.updateMatrix(newMatrix)
-                transforming.clear()
-            }
-            setMatrix(newMatrix)
-        }
 
         pauseDisplayLinkSubject.send(isFingerReleasedFromScreen)
     }
