@@ -10,15 +10,10 @@ import UIKit
 /// A user can use drawing tools to draw lines on the texture and then transform it.
 class CanvasView: MTKTextureDisplayView {
 
-    private (set) var viewModel: CanvasViewModel?
-
-    /// Override UndoManager with ``UndoManagerWithCount``
-    override var undoManager: UndoManagerWithCount {
-        return undoManagerWithCount
-    }
-
     /// An undoManager with undoCount and redoCount
-    private let undoManagerWithCount = UndoManagerWithCount()
+    let undoManagerWithCount = UndoManagerWithCount()
+
+    private (set) var viewModel: CanvasViewModel?
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -30,7 +25,7 @@ class CanvasView: MTKTextureDisplayView {
     }
 
     private func commonInitialization() {
-        undoManager.levelsOfUndo = 8
+        undoManagerWithCount.levelsOfUndo = 8
     }
 
     func setViewModel(_ viewModel: CanvasViewModel) {

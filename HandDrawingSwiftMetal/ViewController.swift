@@ -112,12 +112,6 @@ extension ViewController {
                 self?.contentView.canvasView.clearUndo()
             }
             .store(in: &cancellables)
-
-        canvasViewModel.addUndoObjectToUndoStackPublisher
-            .sink { [weak self] in
-                self?.contentView.canvasView.registerDrawingUndoAction()
-            }
-            .store(in: &cancellables)
     }
 
     private func subscribeEvents() {
@@ -277,6 +271,14 @@ extension ViewController: CanvasViewModelDelegate {
 
     func initRootTexture(textureSize: CGSize) {
         contentView.canvasView.initRootTexture(textureSize: textureSize)
+    }
+
+    func registerDrawingUndoAction(with undoObject: UndoObject) {
+        contentView.canvasView.registerDrawingUndoAction(
+            with: undoObject,
+            target: contentView.canvasView
+        )
+        contentView.canvasView.undoManagerWithCount.incrementUndoCount()
     }
 
     func callSetNeedsDisplayOnCanvasView() {

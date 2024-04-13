@@ -137,10 +137,9 @@ extension ContentView {
             action:#selector(drawingTool.handleDiameterSlider),
             for: .valueChanged)
 
-        canvasView.undoManager.refreshUndoComponentsObjectSubject
+        canvasView.undoManagerWithCount.refreshUndoComponentsObjectSubject
             .sink { [weak self] in
-                guard let `self` else { return }
-                self.refreshUndoComponents()
+                self?.refreshUndoComponents()
             }
             .store(in: &cancellables)
     }

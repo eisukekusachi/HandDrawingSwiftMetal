@@ -9,57 +9,34 @@ import MetalKit
 
 extension CanvasView {
     var canUndo: Bool {
-        undoManager.canUndo
+        undoManagerWithCount.canUndo
     }
     var canRedo: Bool {
-        undoManager.canRedo
+        undoManagerWithCount.canRedo
     }
 
     func clearUndo() {
-        undoManager.clear()
+        undoManagerWithCount.clear()
     }
     func undo() {
-        undoManager.performUndo()
+        undoManagerWithCount.performUndo()
     }
     func redo() {
-        undoManager.performRedo()
-    }
-
-    func registerDrawingUndoAction() {
-        guard let viewModel else { return }
-        
-        if viewModel.layerManager.layers.count == 0 { return }
-
-        registerDrawingUndoAction(with: viewModel.undoObject)
-        undoManager.incrementUndoCount()
-
-        if let device: MTLDevice = MTLCreateSystemDefaultDevice(),
-           let selectedTexture = viewModel.layerManager.selectedTexture,
-           let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture) {
-            viewModel.layerManager.updateSelectedLayerTexture(newTexture)
-        }
+        undoManagerWithCount.performRedo()
     }
 
     /// Registers an action to undo the drawing operation.
-    func registerDrawingUndoAction(with undoObject: UndoObject) {
-        undoManager.registerUndo(withTarget: self as CanvasView) { [unowned self] _ in
-            guard let viewModel else { return }
-            if viewModel.layerManager.layers.count == 0 { return }
+    func registerDrawingUndoAction(with undoObject: UndoObject, target: UIView) {
+        undoManagerWithCount.registerUndo(withTarget: target) { [unowned self] _ in
+            guard
+                let viewModel,
+                viewModel.layerManager.layers.count != 0
+            else { return }
 
-            registerDrawingUndoAction(with: viewModel.undoObject)
+            registerDrawingUndoAction(with: viewModel.undoObject, target: target)
 
-            viewModel.layerManager.update(undoObject: undoObject)
-
-            viewModel.layerManager.addMergeUnselectedLayersCommands(
-                to: commandBuffer
-            )
-            viewModel.layerManager.addMergeAllLayersCommands(
-                backgroundColor: self.backgroundColor ?? .white,
-                onto: rootTexture,
-                to: commandBuffer
-            )
-
-            self.setNeedsDisplay()
+            viewModel.refreshCanvas(using: undoObject)
         }
     }
+
 }

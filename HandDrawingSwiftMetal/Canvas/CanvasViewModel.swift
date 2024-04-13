@@ -15,6 +15,8 @@ protocol CanvasViewModelDelegate {
 
     func initRootTexture(textureSize: CGSize)
 
+    func registerDrawingUndoAction(with undoObject: UndoObject)
+
     func callSetNeedsDisplayOnCanvasView()
 
 }
@@ -80,10 +82,6 @@ class CanvasViewModel {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
 
-    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
-        addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
-    }
-
     var clearUndoPublisher: AnyPublisher<Void, Never> {
         clearUndoSubject.eraseToAnyPublisher()
     }
@@ -99,8 +97,6 @@ class CanvasViewModel {
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
-    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
-
     private let clearUndoSubject = PassthroughSubject<Void, Never>()
 
     private var cancellables = Set<AnyCancellable>()
@@ -109,7 +105,9 @@ class CanvasViewModel {
         self.fileIO = fileIO
 
         undoHistoryManager.addUndoObjectToUndoStackPublisher
-            .subscribe(addUndoObjectToUndoStackSubject)
+            .sink { [weak self] in
+                self?.registerDrawingUndoAction()
+            }
             .store(in: &cancellables)
 
         layerManager.mergeAllLayersToRootTexturePublisher
@@ -154,7 +152,7 @@ extension CanvasViewModel {
             else { return }
 
             if lineSegment.touchPhase == .ended {
-                addUndoObjectToUndoStackSubject.send()
+                registerDrawingUndoAction()
             }
 
             drawing.addDrawSegmentCommands(
@@ -208,7 +206,7 @@ extension CanvasViewModel {
         else { return }
 
         if lineSegment.touchPhase == .ended {
-            addUndoObjectToUndoStackSubject.send()
+            registerDrawingUndoAction()
         }
 
         drawing.addDrawSegmentCommands(
@@ -243,6 +241,40 @@ extension CanvasViewModel {
 
         mergeAllLayersToRootTexture()
         delegate?.callSetNeedsDisplayOnCanvasView()
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func registerDrawingUndoAction() {
+        guard
+            let delegate,
+            layerManager.layers.count != 0
+        else { return }
+
+        delegate.registerDrawingUndoAction(with: undoObject)
+
+        if let newTexture = layerManager.newSelectedTexture {
+            layerManager.updateSelectedLayerTexture(newTexture)
+        }
+    }
+
+    func refreshCanvas(using undoObject: UndoObject) {
+        guard let delegate else { return }
+
+        layerManager.update(undoObject: undoObject)
+
+        layerManager.addMergeUnselectedLayersCommands(
+            to: delegate.commandBuffer
+        )
+        layerManager.addMergeAllLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: delegate.rootTexture,
+            to: delegate.commandBuffer
+        )
+
+        delegate.callSetNeedsDisplayOnCanvasView()
     }
 
 }

@@ -49,6 +49,16 @@ class LayerManager: ObservableObject {
         return layers[index].texture
     }
 
+    var newSelectedTexture: MTLTexture? {
+        guard
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let selectedTexture = selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
+        else { return nil }
+
+        return newTexture
+    }
+
     var arrowPointX: CGFloat = 0.0
 
     /// A protocol for managing current drawing layer
