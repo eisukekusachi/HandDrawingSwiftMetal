@@ -142,7 +142,7 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         layerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.drawing.layerManager,
+            layerManager: canvasViewModel.layerManager,
             targetView: contentView.layerButton,
             on: self)
     }
@@ -168,8 +168,8 @@ extension ViewController {
             guard   let self,
                     let currentTexture = contentView.canvasView.rootTexture else { return }
 
-            let layerIndex = canvasViewModel.drawing.layerManager.index
-            let codableLayers = try await canvasViewModel.drawing.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
+            let layerIndex = canvasViewModel.layerManager.index
+            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
             try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
                                                     layerIndex: layerIndex,
                                                     codableLayers: codableLayers,
@@ -206,11 +206,11 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.drawing.layerManager.addMergeUnselectedLayersCommands(
+            canvasViewModel.layerManager.addMergeUnselectedLayersCommands(
                 to: contentView.canvasView.commandBuffer
             )
 
-            canvasViewModel.drawing.addMergeAllLayersCommands(
+            canvasViewModel.layerManager.addMergeAllLayersCommands(
                 backgroundColor: contentView.canvasView.backgroundColor ?? .white,
                 onto: contentView.canvasView.rootTexture,
                 to: contentView.canvasView.commandBuffer

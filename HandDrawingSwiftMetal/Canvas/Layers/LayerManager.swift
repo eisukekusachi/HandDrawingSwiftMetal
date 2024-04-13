@@ -73,7 +73,7 @@ class LayerManager: ObservableObject {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func changeTextureSize(_ textureSize: CGSize) {
+    func setTextureSize(_ textureSize: CGSize) {
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -210,6 +210,22 @@ extension LayerManager {
         index = curretnIndex
 
         didUpdatedAllLayers()
+    }
+
+    func setLayer(index: Int, layers: [LayerModel]) {
+        self.layers = layers
+        self.index = index
+    }
+
+    func resetLayer(with newTexture: MTLTexture) {
+        let layerData = LayerModel.init(
+            texture: newTexture,
+            title: "NewLayer"
+        )
+
+        layers.removeAll()
+        layers.append(layerData)
+        index = 0
     }
 
     func update(undoObject: UndoObject) {

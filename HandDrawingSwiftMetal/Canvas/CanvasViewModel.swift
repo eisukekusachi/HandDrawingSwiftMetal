@@ -27,15 +27,35 @@ class CanvasViewModel {
 
     let transforming = Transforming()
 
+    let layerManager = LayerManager()
+
     let drawingTool = DrawingToolModel()
 
     var frameSize: CGSize = .zero {
         didSet {
             drawing.frameSize = frameSize
+
+            layerManager.frameSize = frameSize
+
             transforming.screenCenter = .init(
                 x: frameSize.width * 0.5,
                 y: frameSize.height * 0.5
             )
+        }
+    }
+
+    var textureSize: CGSize = .zero {
+        didSet {
+            guard textureSize != .zero else { return }
+
+            delegate?.initRootTexture(textureSize: textureSize)
+
+            drawing.textureSize = textureSize
+
+            layerManager.setTextureSize(textureSize)
+            mergeAllLayersToRootTexture()
+
+            delegate?.callSetNeedsDisplayOnCanvasView()
         }
     }
 
@@ -47,7 +67,10 @@ class CanvasViewModel {
     }
 
     var undoObject: UndoObject {
-        drawing.undoObject
+        return UndoObject(
+            index: layerManager.index,
+            layers: layerManager.layers
+        )
     }
 
     var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
@@ -82,44 +105,20 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        drawing.textureSizePublisher
-            .sink { [weak self] textureSize in
-                guard let `self`, textureSize != .zero else { return }
-
-                delegate?.initRootTexture(textureSize: textureSize)
-
-                drawing.setTextureSizeOfLayer(textureSize)
-                drawing.mergeAllLayersToRootTexture()
-
-                delegate?.callSetNeedsDisplayOnCanvasView()
-            }
-            .store(in: &cancellables)
-
-        drawing.addUndoObjectToUndoStackPublisher
+        layerManager.addUndoObjectToUndoStackPublisher
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
-        drawing.pauseDisplayLinkPublisher
-            .sink { [weak self] in
-                self?.pauseDisplayLinkLoop($0)
-            }
-            .store(in: &cancellables)
-
-        drawing.mergeAllLayersToRootTexturePublisher
+        layerManager.mergeAllLayersToRootTexturePublisher
             .sink { [weak self] in
                 self?.mergeAllLayersToRootTexture()
-            }
-            .store(in: &cancellables)
-
-        drawing.callSetNeedsDisplayOnCanvasViewPublisher
-            .sink { [weak self] in
                 self?.delegate?.callSetNeedsDisplayOnCanvasView()
             }
             .store(in: &cancellables)
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
-                self?.drawing.setDrawingTool(tool)
+                self?.layerManager.setDrawingLayer(tool)
             }
             .store(in: &cancellables)
 
@@ -143,19 +142,27 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            if let lineSegment: LineSegment = drawing.makeLineSegment(
+            guard let lineSegment: LineSegment = drawing.makeLineSegment(
                 from: touchManager,
                 with: smoothLineDrawing,
                 matrix: transforming.matrix,
                 parameters: .init(drawingTool)
-            ) {
-                drawing.addDrawSegmentCommands(
-                    lineSegment,
-                    backgroundColor: drawingTool.backgroundColor,
-                    on: delegate?.rootTexture,
-                    to: delegate?.commandBuffer
-                )
+            ) 
+            else { return }
+
+            if lineSegment.touchPhase == .ended {
+                addUndoObjectToUndoStackSubject.send()
             }
+
+            drawing.addDrawSegmentCommands(
+                lineSegment,
+                on: layerManager,
+                to: delegate?.commandBuffer
+            )
+
+            mergeAllLayersToRootTexture()
+
+            pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
 
         case .transforming:
             guard
@@ -172,7 +179,7 @@ extension CanvasViewModel {
             if transforming.isTouchEnded {
                 transforming.finishTransforming()
             }
-            
+
             pauseDisplayLinkLoop(transforming.isTouchEnded)
 
         default:
@@ -189,27 +196,36 @@ extension CanvasViewModel {
         }
         touchManager.appendPencilTouches(event, in: view)
 
-        if let lineSegment: LineSegment = drawing.makeLineSegment(
+        guard let lineSegment: LineSegment = drawing.makeLineSegment(
             from: touchManager,
             with: lineDrawing,
             matrix: transforming.matrix,
             parameters: .init(drawingTool)
-        ) {
-            drawing.addDrawSegmentCommands(
-                lineSegment,
-                backgroundColor: drawingTool.backgroundColor,
-                on: delegate?.rootTexture,
-                to: delegate?.commandBuffer
-            )
+        ) 
+        else { return }
+
+        if lineSegment.touchPhase == .ended {
+            addUndoObjectToUndoStackSubject.send()
         }
+
+        drawing.addDrawSegmentCommands(
+            lineSegment,
+            on: layerManager,
+            to: delegate?.commandBuffer
+        )
+
+        mergeAllLayersToRootTexture()
+
+        pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
     }
 
 }
+
 extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         transforming.resetTransforming(.identity)
-        drawing.callSetNeedsDisplayOnCanvasView()
+        delegate?.callSetNeedsDisplayOnCanvasView()
     }
 
     func didTapNewCanvasButton() {
@@ -220,10 +236,10 @@ extension CanvasViewModel {
 
         transforming.resetTransforming(.identity)
 
-        drawing.setTextureSizeOfLayer(drawing.textureSize)
+        layerManager.setTextureSize(drawing.textureSize)
 
-        drawing.mergeAllLayersToRootTexture()
-        drawing.callSetNeedsDisplayOnCanvasView()
+        mergeAllLayersToRootTexture()
+        delegate?.callSetNeedsDisplayOnCanvasView()
     }
 
 }
@@ -231,9 +247,9 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if drawing.textureSize == .zero &&
+        if textureSize == .zero &&
            frameSize.isSameRatio(drawableSize) {
-            drawing.setTextureSize(drawableSize)
+            textureSize = drawableSize
         }
     }
 
@@ -243,7 +259,7 @@ extension CanvasViewModel {
             let commandBuffer = delegate?.commandBuffer
         else { return }
 
-        drawing.addMergeAllLayersCommands(
+        layerManager.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
