@@ -68,7 +68,7 @@ class LayerManager: ObservableObject {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func setTextureSize(_ textureSize: CGSize) {
+    func initLayers(with textureSize: CGSize) {
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
