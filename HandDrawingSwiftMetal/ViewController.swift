@@ -143,8 +143,10 @@ extension ViewController {
     func setupLayerViewPresenter() {
         layerViewPresenter.setupLayerViewPresenter(
             layerManager: canvasViewModel.layerManager,
+            undoHistoryManager: canvasViewModel.undoHistoryManager,
             targetView: contentView.layerButton,
-            on: self)
+            on: self
+        )
     }
 
 }

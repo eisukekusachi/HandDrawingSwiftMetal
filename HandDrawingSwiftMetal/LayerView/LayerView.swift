@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
+    @ObservedObject var undoHistoryManager: UndoHistoryManager
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -32,7 +33,10 @@ struct LayerView: View {
 
             VStack {
                 toolbar(layerManager: layerManager)
-                listView(layerManager: layerManager)
+                listView(
+                    layerManager: layerManager, 
+                    undoHistoryManager: undoHistoryManager
+                )
                 selectedTextureAlphaSlider(layerManager: layerManager)
             }
             .padding(edgeInsets)
@@ -46,6 +50,7 @@ extension LayerView {
 
         return HStack {
             Button(action: {
+                undoHistoryManager.addUndoObjectToUndoStack()
                 layerManager.addLayer()
 
             }, label: {
@@ -57,7 +62,10 @@ extension LayerView {
                 .frame(width: 16)
 
             Button(action: {
-                layerManager.removeLayer()
+                if layerManager.layers.count > 1 {
+                    undoHistoryManager.addUndoObjectToUndoStack()
+                    layerManager.removeLayer()
+                }
 
             }, label: {
                 Image(systemName: "minus.circle")
@@ -90,8 +98,15 @@ extension LayerView {
         }
         .padding(8)
     }
-    func listView(layerManager: LayerManager) -> some View {
-        LayerListView(layerManager: layerManager)
+    func listView(
+        layerManager: LayerManager,
+        undoHistoryManager: UndoHistoryManager
+    ) -> some View {
+
+        LayerListView(
+            layerManager: layerManager,
+            undoHistoryManager: undoHistoryManager
+        )
     }
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
         TwoRowsSliderView(
@@ -186,5 +201,8 @@ extension LayerView {
 }
 
 #Preview {
-    LayerView(layerManager: LayerManager())
+    LayerView(
+        layerManager: LayerManager(),
+        undoHistoryManager: UndoHistoryManager()
+    )
 }

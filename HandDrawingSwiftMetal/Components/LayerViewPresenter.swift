@@ -15,10 +15,14 @@ final class LayerViewPresenter {
 
     func setupLayerViewPresenter(
         layerManager: LayerManager,
+        undoHistoryManager: UndoHistoryManager,
         targetView: UIView,
         on viewController: UIViewController
     ) {
-        layerView = LayerView(layerManager: layerManager)
+        layerView = LayerView(
+            layerManager: layerManager,
+            undoHistoryManager: undoHistoryManager
+        )
 
         guard let layerView else { return }
 

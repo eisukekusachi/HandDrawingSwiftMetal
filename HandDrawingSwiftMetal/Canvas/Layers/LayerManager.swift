@@ -18,9 +18,6 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
-        addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
-    }
     var mergeAllLayersToRootTexturePublisher: AnyPublisher<Void, Never> {
         mergeAllLayersToRootTextureSubject.eraseToAnyPublisher()
     }
@@ -67,8 +64,6 @@ class LayerManager: ObservableObject {
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
 
-    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
-
     private let mergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -86,7 +81,7 @@ class LayerManager: ObservableObject {
         layers.removeAll()
         index = 0
         
-        addLayer(isUndo: false)
+        addLayer()
     }
 
     func setDrawingLayer(_ tool: DrawingToolType) {
@@ -160,11 +155,7 @@ class LayerManager: ObservableObject {
 // CRUD
 extension LayerManager {
    
-    func addLayer(isUndo: Bool = true) {
-        if isUndo {
-            addUndoObjectToUndoStackSubject.send()
-        }
-
+    func addLayer() {
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
@@ -180,26 +171,23 @@ extension LayerManager {
         didUpdatedAllLayers()
     }
 
-    func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
-        guard let tmpSelectedLayer = selectedLayer else { return }
-
-        addUndoObjectToUndoStackSubject.send()
-
+    func moveLayer(
+        fromOffsets source: IndexSet,
+        toOffset destination: Int,
+        selectedLayer: LayerModel
+    ) {
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)
         layers = layers.reversed()
 
-        if let layerIndex = layers.firstIndex(of: tmpSelectedLayer) {
+        if let layerIndex = layers.firstIndex(of: selectedLayer) {
             index = layerIndex
 
             didUpdatedAllLayers()
         }
     }
+
     func removeLayer() {
-        if layers.count == 1 { return }
-
-        addUndoObjectToUndoStackSubject.send()
-
         layers.remove(at: index)
 
         // Updates the value for UI update

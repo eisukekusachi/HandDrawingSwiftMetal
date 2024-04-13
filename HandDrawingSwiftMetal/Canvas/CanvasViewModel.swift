@@ -31,6 +31,8 @@ class CanvasViewModel {
 
     let drawingTool = DrawingToolModel()
 
+    let undoHistoryManager = UndoHistoryManager()
+
     var frameSize: CGSize = .zero {
         didSet {
             drawing.frameSize = frameSize
@@ -105,7 +107,7 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        layerManager.addUndoObjectToUndoStackPublisher
+        undoHistoryManager.addUndoObjectToUndoStackPublisher
             .subscribe(addUndoObjectToUndoStackSubject)
             .store(in: &cancellables)
 
