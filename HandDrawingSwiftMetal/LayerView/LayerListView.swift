@@ -20,9 +20,11 @@ struct LayerListView: View {
                          selected: layerManager.selectedLayer == layer,
                          didTapRow: { selectedLayer in
                     layerManager.updateLayer(selectedLayer)
+                    layerManager.refreshCanvasWithMergingAllLayers()
                 },
                          didTapVisibleButton: { layer in
                     layerManager.updateVisibility(layer, !layer.isVisible)
+                    layerManager.refreshCanvasWithMergingAllLayers()
                 })
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
@@ -37,6 +39,7 @@ struct LayerListView: View {
                                 toOffset: destination,
                                 selectedLayer: selectedLayer
                             )
+                            layerManager.refreshCanvasWithMergingAllLayers()
                         }
                     })
                     .listRowSeparator(.hidden)

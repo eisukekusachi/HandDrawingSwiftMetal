@@ -110,10 +110,15 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        layerManager.mergeAllLayersToRootTexturePublisher
+        layerManager.refreshCanvasWithMergingAllLayersPublisher
             .sink { [weak self] in
-                self?.mergeAllLayersToRootTexture()
-                self?.delegate?.callSetNeedsDisplayOnCanvasView()
+                self?.refreshCanvasWithMergingAllLayers()
+            }
+            .store(in: &cancellables)
+
+        layerManager.refreshCanvasWithMergingCurrentLayersPublisher
+            .sink { [weak self] in
+                self?.refreshCanvasWithMergingCurrentLayers()
             }
             .store(in: &cancellables)
 
@@ -255,19 +260,38 @@ extension CanvasViewModel {
 
         delegate.registerDrawingUndoAction(with: undoObject)
 
-        if let newTexture = layerManager.newSelectedTexture {
-            layerManager.updateSelectedLayerTexture(newTexture)
-        }
+        layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
     func refreshCanvas(using undoObject: UndoObject) {
         guard let delegate else { return }
 
-        layerManager.update(undoObject: undoObject)
+        layerManager.initLayers(undoObject: undoObject)
 
         layerManager.addMergeUnselectedLayersCommands(
             to: delegate.commandBuffer
         )
+        layerManager.addMergeAllLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: delegate.rootTexture,
+            to: delegate.commandBuffer
+        )
+
+        delegate.callSetNeedsDisplayOnCanvasView()
+    }
+
+    func refreshCanvasWithMergingAllLayers() {
+        guard let delegate else { return }
+
+        layerManager.addMergeUnselectedLayersCommands(
+            to: delegate.commandBuffer
+        )
+        refreshCanvasWithMergingCurrentLayers()
+    }
+
+    func refreshCanvasWithMergingCurrentLayers() {
+        guard let delegate else { return }
+
         layerManager.addMergeAllLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: delegate.rootTexture,

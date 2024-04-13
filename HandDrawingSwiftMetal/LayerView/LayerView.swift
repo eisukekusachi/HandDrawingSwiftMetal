@@ -52,6 +52,7 @@ extension LayerView {
             Button(action: {
                 undoHistoryManager.addUndoObjectToUndoStack()
                 layerManager.addLayer()
+                layerManager.refreshCanvasWithMergingAllLayers()
 
             }, label: {
                 Image(systemName: "plus.circle")
@@ -65,6 +66,7 @@ extension LayerView {
                 if layerManager.layers.count > 1 {
                     undoHistoryManager.addUndoObjectToUndoStack()
                     layerManager.removeLayer()
+                    layerManager.refreshCanvasWithMergingAllLayers()
                 }
 
             }, label: {
@@ -115,7 +117,8 @@ extension LayerView {
             style: sliderStyle,
             range: range) { value in
                 guard let selectedLayer = layerManager.selectedLayer else { return }
-                layerManager.updateLayerAlpha(selectedLayer, value)
+                layerManager.updateAlpha(selectedLayer, value)
+                layerManager.refreshCanvasWithMergingCurrentLayers()
         }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
