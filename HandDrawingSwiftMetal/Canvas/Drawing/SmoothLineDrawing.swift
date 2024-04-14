@@ -14,9 +14,6 @@ final class SmoothLineDrawing: DrawingLineProtocol {
     let iterator: Iterator<DotPoint> = Iterator()
 
     private var tmpIterator: Iterator<DotPoint> = Iterator()
-}
-
-extension SmoothLineDrawing {
 
     func initDrawing(hashValue: TouchHashValue) {
         self.hashValue = hashValue

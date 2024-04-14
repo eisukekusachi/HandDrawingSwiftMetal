@@ -15,19 +15,19 @@ final class Drawing {
 
     func makeLineSegment(
         from touchManager: TouchManager,
-        with drawing: DrawingLineProtocol,
+        with lineDrawing: DrawingLineProtocol,
         matrix: CGAffineTransform,
         parameters: LineParameters
     ) -> LineSegment? {
 
         // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-        if drawing.hashValue == nil,
+        if lineDrawing.hashValue == nil,
            let hashValue = touchManager.touchPointsDictionary.keys.first {
-            drawing.initDrawing(hashValue: hashValue)
+            lineDrawing.initDrawing(hashValue: hashValue)
         }
 
         guard
-            let hashValue = drawing.hashValue,
+            let hashValue = lineDrawing.hashValue,
             let touchPhase = touchManager.getLatestTouchPhase(with: hashValue),
             let touchPoints = touchManager.getTouchPoints(with: hashValue)
         else { return nil }
@@ -36,11 +36,11 @@ final class Drawing {
 
         defer {
             if isFingerReleasedFromScreen {
-                drawing.finishDrawing()
+                lineDrawing.finishDrawing()
             }
         }
 
-        let diffCount = touchPoints.count - drawing.iterator.array.count
+        let diffCount = touchPoints.count - lineDrawing.iterator.array.count
         guard diffCount > 0 else { return nil }
 
         let newTouchPoints = touchPoints.suffix(diffCount)
@@ -53,16 +53,16 @@ final class Drawing {
                 textureSize: textureSize
             )
         }
-        drawing.appendToIterator(dotPoints)
+        lineDrawing.appendToIterator(dotPoints)
 
         // It will be called when the drawing type is `SmoothLineDrawing`
-        if let drawing = drawing as? SmoothLineDrawing,
+        if let drawingLine = lineDrawing as? SmoothLineDrawing,
            isFingerReleasedFromScreen {
-            drawing.appendLastTouchToSmoothCurveIterator()
+            drawingLine.appendLastTouchToSmoothCurveIterator()
         }
 
         let curvePoints = Curve.makePoints(
-            from: drawing.iterator,
+            from: lineDrawing.iterator,
             isFinishDrawing: isFingerReleasedFromScreen
         )
 
@@ -73,8 +73,8 @@ final class Drawing {
         )
     }
 
-    func addDrawSegmentCommands(
-        _ lineSegment: LineSegment,
+    func addDrawLineSegmentCommands(
+        with lineSegment: LineSegment,
         on layerManager: LayerManager,
         to commandBuffer: MTLCommandBuffer?
     ) {

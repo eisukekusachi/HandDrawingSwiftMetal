@@ -12,9 +12,6 @@ final class LineDrawing: DrawingLineProtocol {
     var hashValue: TouchHashValue?
 
     let iterator: Iterator<DotPoint> = Iterator()
-}
-
-extension LineDrawing {
 
     func initDrawing(hashValue: TouchHashValue) {
         self.hashValue = hashValue

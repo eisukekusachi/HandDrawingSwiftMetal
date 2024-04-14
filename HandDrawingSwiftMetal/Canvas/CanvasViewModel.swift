@@ -131,6 +131,13 @@ class CanvasViewModel {
         drawingTool.setDrawingTool(.brush)
     }
 
+    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
+        if textureSize == .zero &&
+           frameSize.isSameRatio(drawableSize) {
+            textureSize = drawableSize
+        }
+    }
+
 }
 
 extension CanvasViewModel {
@@ -160,8 +167,8 @@ extension CanvasViewModel {
                 registerDrawingUndoAction()
             }
 
-            drawing.addDrawSegmentCommands(
-                lineSegment,
+            drawing.addDrawLineSegmentCommands(
+                with: lineSegment,
                 on: layerManager,
                 to: delegate?.commandBuffer
             )
@@ -214,8 +221,8 @@ extension CanvasViewModel {
             registerDrawingUndoAction()
         }
 
-        drawing.addDrawSegmentCommands(
-            lineSegment,
+        drawing.addDrawLineSegmentCommands(
+            with: lineSegment,
             on: layerManager,
             to: delegate?.commandBuffer
         )
@@ -292,24 +299,9 @@ extension CanvasViewModel {
     func refreshCanvasWithMergingCurrentLayers() {
         guard let delegate else { return }
 
-        layerManager.addMergeAllLayersCommands(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: delegate.rootTexture,
-            to: delegate.commandBuffer
-        )
+        mergeAllLayersToRootTexture()
 
         delegate.callSetNeedsDisplayOnCanvasView()
-    }
-
-}
-
-extension CanvasViewModel {
-
-    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if textureSize == .zero &&
-           frameSize.isSameRatio(drawableSize) {
-            textureSize = drawableSize
-        }
     }
 
     func mergeAllLayersToRootTexture() {
