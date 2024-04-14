@@ -15,6 +15,8 @@ final class TouchManager {
 
     func appendFingerTouches(_ event: UIEvent?, in view: UIView) {
         event?.allTouches?.forEach { touch in
+            guard touch.type != .pencil else { return }
+
             let hashValue: TouchHashValue = touch.hashValue
 
             if touch.phase == .began && touchPointsDictionary[hashValue] == nil {
@@ -30,6 +32,8 @@ final class TouchManager {
 
     func appendPencilTouches(_ event: UIEvent?, in view: UIView) {
         event?.allTouches?.forEach { touch in
+            guard touch.type == .pencil else { return }
+
             let hashValue: TouchHashValue = touch.hashValue
 
             if touch.phase == .began && touchPointsDictionary[hashValue] == nil {

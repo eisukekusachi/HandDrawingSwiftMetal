@@ -13,12 +13,14 @@ struct TouchPoint: Equatable {
     let force: CGFloat
     let maximumPossibleForce: CGFloat
     let phase: UITouch.Phase
+    let type: UITouch.TouchType
 
     init(touch: UITouch, view: UIView) {
         self.location = touch.preciseLocation(in: view)
         self.force = touch.force
         self.maximumPossibleForce = touch.maximumPossibleForce
         self.phase = touch.phase
+        self.type = touch.type
     }
 
 }
