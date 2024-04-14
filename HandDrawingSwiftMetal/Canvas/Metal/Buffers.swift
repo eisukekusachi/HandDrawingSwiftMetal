@@ -7,7 +7,7 @@
 
 import MetalKit
 
-typealias PointBuffers = (
+typealias GrayscalePointBuffers = (
     vertexBuffer: MTLBuffer,
     diameterIncludingBlurBuffer: MTLBuffer,
     alphaBuffer: MTLBuffer,
@@ -67,13 +67,13 @@ let flippedTextureNodes = TextureCoorinateNodes(
 )
 
 enum Buffers {
-    static func makePointBuffers(
+    static func makeGrayscalePointBuffers(
         device: MTLDevice?,
         points: [DotPoint],
         blurredDotSize: BlurredDotSize,
         alpha: Int,
         textureSize: CGSize
-    ) -> PointBuffers? {
+    ) -> GrayscalePointBuffers? {
         guard points.count != .zero else { return nil }
 
         var vertexArray: [Float] = []
@@ -89,25 +89,32 @@ enum Buffers {
             diameterPlusBlurSizeArray.append(blurredDotSize.totalSize)
         }
 
-        let vertexBuffer = device?.makeBuffer(bytes: vertexArray,
-                                              length: vertexArray.count * MemoryLayout<Float>.size)
-        let transparencyBuffer = device?.makeBuffer(bytes: alphaArray,
-                                                    length: alphaArray.count * MemoryLayout<Float>.size)
-        let diameterPlusBlurSizeBuffer = device?.makeBuffer(bytes: diameterPlusBlurSizeArray,
-                                                            length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size)
+        let vertexBuffer = device?.makeBuffer(
+            bytes: vertexArray,
+            length: vertexArray.count * MemoryLayout<Float>.size
+        )
+        let transparencyBuffer = device?.makeBuffer(
+            bytes: alphaArray,
+            length: alphaArray.count * MemoryLayout<Float>.size
+        )
+        let diameterPlusBlurSizeBuffer = device?.makeBuffer(
+            bytes: diameterPlusBlurSizeArray,
+            length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size
+        )
 
-        if let vertexBuffer = vertexBuffer,
-           let transparencyBuffer = transparencyBuffer,
-           let diameterPlusBlurSizeBuffer = diameterPlusBlurSizeBuffer {
+        guard
+            let vertexBuffer,
+            let transparencyBuffer,
+            let diameterPlusBlurSizeBuffer
+        else { return nil }
 
-            return PointBuffers(vertexBuffer: vertexBuffer,
-                                diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
-                                alphaBuffer: transparencyBuffer,
-                                blurSize: blurredDotSize.blurSize,
-                                numberOfPoints: vertexArray.count / 2)
-        }
-
-        return nil
+        return GrayscalePointBuffers(
+            vertexBuffer: vertexBuffer,
+            diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
+            alphaBuffer: transparencyBuffer,
+            blurSize: blurredDotSize.blurSize,
+            numberOfPoints: vertexArray.count / 2
+        )
     }
     
     static func makeTextureBuffers(device: MTLDevice?,

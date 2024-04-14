@@ -12,7 +12,7 @@ protocol DrawingLineProtocol {
     var hashValue: TouchHashValue? { get }
     var iterator: Iterator<DotPoint> { get }
 
-    func setHashValueIfNil(_ touchManager: TouchManager)
+    func initDrawing(hashValue: TouchHashValue)
 
     func appendToIterator(
         _ points: [DotPoint]
@@ -23,6 +23,6 @@ protocol DrawingLineProtocol {
         phase: UITouch.Phase
     ) -> LineSegment
 
-    func clear()
+    func finishDrawing()
 
 }

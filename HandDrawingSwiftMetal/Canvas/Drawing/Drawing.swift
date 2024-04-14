@@ -20,7 +20,11 @@ final class Drawing {
         parameters: LineParameters
     ) -> LineSegment? {
 
-        drawing.setHashValueIfNil(touchManager)
+        // When a gesture is determined to be `drawing`, the touchManager manages only one finger
+        if drawing.hashValue == nil,
+           let hashValue = touchManager.touchPointsDictionary.keys.first {
+            drawing.initDrawing(hashValue: hashValue)
+        }
 
         guard
             let hashValue = drawing.hashValue,
@@ -32,7 +36,7 @@ final class Drawing {
 
         defer {
             if isFingerReleasedFromScreen {
-                drawing.clear()
+                drawing.finishDrawing()
             }
         }
 
@@ -51,7 +55,9 @@ final class Drawing {
         }
         drawing.appendToIterator(dotPoints)
 
-        if isFingerReleasedFromScreen, let drawing = drawing as? SmoothLineDrawing {
+        // It will be called when the drawing type is `SmoothLineDrawing`
+        if let drawing = drawing as? SmoothLineDrawing,
+           isFingerReleasedFromScreen {
             drawing.appendLastTouchToSmoothCurveIterator()
         }
 
@@ -74,16 +80,23 @@ final class Drawing {
     ) {
         guard 
             let commandBuffer,
-            let drawingLayer = layerManager.drawingLayer
+            let drawingLayer = layerManager.drawingLayer,
+            let selectedTexture = layerManager.selectedTexture
         else { return }
 
-        drawingLayer.drawOnDrawingTexture(
-            segment: lineSegment,
-            on: layerManager.selectedTexture,
-            commandBuffer)
+        if let drawingLayer = drawingLayer as? DrawingEraserLayer {
+            drawingLayer.drawOnDrawingTexture(
+                segment: lineSegment,
+                srcTexture: selectedTexture,
+                commandBuffer)
 
-        if lineSegment.touchPhase == .ended,
-           let selectedTexture = layerManager.selectedTexture {
+        } else if let drawingLayer = drawingLayer as? DrawingBrushLayer {
+            drawingLayer.drawOnDrawingTexture(
+                segment: lineSegment,
+                commandBuffer)
+        }
+
+        if lineSegment.touchPhase == .ended {
 
             drawingLayer.mergeDrawingTexture(
                 into: selectedTexture,

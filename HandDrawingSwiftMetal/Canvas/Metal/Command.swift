@@ -11,9 +11,11 @@ import MetalKit
 enum Command {
     static let threadgroupSize: Int = 16
 
-    static func drawCurve(buffers: PointBuffers?,
-                          onGrayscaleTexture texture: MTLTexture?,
-                          _ commandBuffer: MTLCommandBuffer?) {
+    static func drawCurve(
+        buffers: GrayscalePointBuffers?,
+        onGrayscaleTexture texture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer?
+    ) {
         guard let buffers = buffers else { return }
         
         var blurSize: Float = buffers.blurSize
@@ -64,15 +66,18 @@ enum Command {
         encoder?.endEncoding()
     }
     
-    static func makeEraseTexture(buffers: TextureBuffers?,
-                                 src: MTLTexture?,
-                                 result dst: MTLTexture?,
-                                 _ commandBuffer: MTLCommandBuffer?) {
-        guard let buffers = buffers,
-              let src = src,
-              let dst = dst else {
-            return
-        }
+    static func makeEraseTexture(
+        buffers: TextureBuffers?,
+        src: MTLTexture?,
+        result dst: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer?
+    ) {
+        guard 
+            let buffers = buffers,
+            let src = src,
+            let dst = dst
+        else { return }
+
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = dst
         descriptor.colorAttachments[0].loadAction = .load

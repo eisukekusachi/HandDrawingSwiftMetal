@@ -18,11 +18,8 @@ final class SmoothLineDrawing: DrawingLineProtocol {
 
 extension SmoothLineDrawing {
 
-    func setHashValueIfNil(_ touchManager: TouchManager) {
-        if hashValue == nil {
-            // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-            hashValue = touchManager.touchPointsDictionary.keys.first
-        }
+    func initDrawing(hashValue: TouchHashValue) {
+        self.hashValue = hashValue
     }
 
     func appendToIterator(_ points: [DotPoint]) {
@@ -58,7 +55,7 @@ extension SmoothLineDrawing {
         )
     }
 
-    func clear() {
+    func finishDrawing() {
         hashValue = nil
         tmpIterator.clear()
         iterator.clear()

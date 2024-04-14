@@ -17,13 +17,6 @@ protocol DrawingLayer {
     /// Initializes the textures for drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)
 
-    /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(
-        segment: LineSegment,
-        on dstTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
-    )
-
     /// Merges textures
     func mergeDrawingTexture(
         into dstTexture: MTLTexture,

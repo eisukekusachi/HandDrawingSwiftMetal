@@ -9,18 +9,15 @@ import UIKit
 
 final class LineDrawing: DrawingLineProtocol {
 
-    let iterator: Iterator<DotPoint> = Iterator()
-
     var hashValue: TouchHashValue?
+
+    let iterator: Iterator<DotPoint> = Iterator()
 }
 
 extension LineDrawing {
 
-    func setHashValueIfNil(_ touchManager: TouchManager) {
-        if hashValue == nil {
-            // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-            hashValue = touchManager.touchPointsDictionary.keys.first
-        }
+    func initDrawing(hashValue: TouchHashValue) {
+        self.hashValue = hashValue
     }
 
     func appendToIterator(
@@ -40,7 +37,7 @@ extension LineDrawing {
         )
     }
 
-    func clear() {
+    func finishDrawing() {
         hashValue = nil
         iterator.clear()
     }

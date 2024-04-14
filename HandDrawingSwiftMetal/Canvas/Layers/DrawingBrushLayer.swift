@@ -29,26 +29,33 @@ class DrawingBrushLayer: DrawingLayer {
         clearDrawingTextures()
     }
 
-    /// Draws on the drawing texture using the provided touch point iterator and touch state.
+    /// First, draw lines in grayscale on the grayscale texture,
+    /// then apply the intensity as transparency to colorize the grayscale texture,
+    /// and render the colored grayscale texture onto the drawing texture."
     func drawOnDrawingTexture(
         segment: LineSegment,
-        on dstTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        let pointBuffers = Buffers.makePointBuffers(device: device,
-                                                    points: segment.dotPoints,
-                                                    blurredDotSize: segment.parameters.dotSize,
-                                                    alpha: segment.parameters.alpha,
-                                                    textureSize: textureSize)
+        let pointBuffers = Buffers.makeGrayscalePointBuffers(
+            device: device,
+            points: segment.dotPoints,
+            blurredDotSize: segment.parameters.dotSize,
+            alpha: segment.parameters.alpha,
+            textureSize: textureSize
+        )
 
-        Command.drawCurve(buffers: pointBuffers,
-                          onGrayscaleTexture: grayscaleTexture,
-                          commandBuffer)
+        Command.drawCurve(
+            buffers: pointBuffers,
+            onGrayscaleTexture: grayscaleTexture,
+            commandBuffer
+        )
 
-        Command.colorize(grayscaleTexture: grayscaleTexture,
-                         with: (segment.parameters.brushColor ?? .black).rgb,
-                         result: drawingTexture,
-                         commandBuffer)
+        Command.colorize(
+            grayscaleTexture: grayscaleTexture,
+            with: (segment.parameters.brushColor ?? .black).rgb,
+            result: drawingTexture,
+            commandBuffer
+        )
     }
 
     /// Merges the drawing texture into the destination texture.
@@ -80,4 +87,5 @@ class DrawingBrushLayer: DrawingLayer {
     func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {
         [texture, drawingTexture]
     }
+
 }
