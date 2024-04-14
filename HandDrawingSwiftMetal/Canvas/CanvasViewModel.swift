@@ -153,14 +153,23 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            guard 
+
+            // When a gesture is determined to be `drawing`, the touchManager manages only one finger
+            if let hashValue = touchManager.touchPointsDictionary.keys.first {
+                drawing.initDrawingIfHashValueIsNil(
+                    lineDrawing: smoothLineDrawing,
+                    hashValue: hashValue
+                )
+            }
+
+            guard
                 let delegate,
                 let lineSegment: LineSegment = drawing.makeLineSegment(
-                from: touchManager,
-                with: smoothLineDrawing,
-                matrix: transforming.matrix,
-                parameters: .init(drawingTool)
-            ) 
+                    from: touchManager,
+                    with: smoothLineDrawing,
+                    matrix: transforming.matrix,
+                    parameters: .init(drawingTool)
+                )
             else { return }
 
             let isTouchEnded = lineSegment.touchPhase == .ended
@@ -224,14 +233,22 @@ extension CanvasViewModel {
         }
         touchManager.appendPencilTouches(event, in: view)
 
+        // When a gesture is determined to be `drawing`, the touchManager manages only one finger
+        if let hashValue = touchManager.touchPointsDictionary.keys.first {
+            drawing.initDrawingIfHashValueIsNil(
+                lineDrawing: lineDrawing,
+                hashValue: hashValue
+            )
+        }
+
         guard 
             let delegate,
             let lineSegment: LineSegment = drawing.makeLineSegment(
-            from: touchManager,
-            with: lineDrawing,
-            matrix: transforming.matrix,
-            parameters: .init(drawingTool)
-        ) 
+                from: touchManager,
+                with: lineDrawing,
+                matrix: transforming.matrix,
+                parameters: .init(drawingTool)
+            )
         else { return }
 
         let isTouchEnded = lineSegment.touchPhase == .ended

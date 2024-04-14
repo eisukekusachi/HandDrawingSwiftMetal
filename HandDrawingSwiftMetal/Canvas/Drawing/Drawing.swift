@@ -13,19 +13,21 @@ final class Drawing {
     var frameSize: CGSize = .zero
     var textureSize: CGSize = .zero
 
+    func initDrawingIfHashValueIsNil(
+        lineDrawing: DrawingLineProtocol,
+        hashValue: TouchHashValue
+    ) {
+        if lineDrawing.hashValue == nil {
+            lineDrawing.initDrawing(hashValue: hashValue)
+        }
+    }
+
     func makeLineSegment(
         from touchManager: TouchManager,
         with lineDrawing: DrawingLineProtocol,
         matrix: CGAffineTransform,
         parameters: LineParameters
     ) -> LineSegment? {
-
-        // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-        if lineDrawing.hashValue == nil,
-           let hashValue = touchManager.touchPointsDictionary.keys.first {
-            lineDrawing.initDrawing(hashValue: hashValue)
-        }
-
         guard
             let hashValue = lineDrawing.hashValue,
             let touchPhase = touchManager.getLatestTouchPhase(with: hashValue),
