@@ -58,9 +58,7 @@ class CanvasViewModel {
 
             drawing.textureSize = textureSize
 
-            mergeAllLayersToRootTexture()
-
-            delegate?.callSetNeedsDisplayOnCanvasView()
+            refreshCanvasWithMergingAllLayers()
         }
     }
 
@@ -110,15 +108,15 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        layerManager.refreshCanvasWithMergingAllLayersPublisher
+        layerManager.refreshCanvasWithMergingLayersPublisher
             .sink { [weak self] in
-                self?.refreshCanvasWithMergingAllLayers()
+                self?.refreshCanvasWithMergingLayers()
             }
             .store(in: &cancellables)
 
-        layerManager.refreshCanvasWithMergingCurrentLayersPublisher
+        layerManager.refreshCanvasWithMergingAllLayersPublisher
             .sink { [weak self] in
-                self?.refreshCanvasWithMergingCurrentLayers()
+                self?.refreshCanvasWithMergingAllLayers()
             }
             .store(in: &cancellables)
 
@@ -155,7 +153,9 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            guard let lineSegment: LineSegment = drawing.makeLineSegment(
+            guard 
+                let delegate,
+                let lineSegment: LineSegment = drawing.makeLineSegment(
                 from: touchManager,
                 with: smoothLineDrawing,
                 matrix: transforming.matrix,
@@ -170,10 +170,10 @@ extension CanvasViewModel {
             drawing.addDrawLineSegmentCommands(
                 with: lineSegment,
                 on: layerManager,
-                to: delegate?.commandBuffer
+                to: delegate.commandBuffer
             )
 
-            mergeAllLayersToRootTexture()
+            addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
             pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
 
@@ -209,7 +209,9 @@ extension CanvasViewModel {
         }
         touchManager.appendPencilTouches(event, in: view)
 
-        guard let lineSegment: LineSegment = drawing.makeLineSegment(
+        guard 
+            let delegate,
+            let lineSegment: LineSegment = drawing.makeLineSegment(
             from: touchManager,
             with: lineDrawing,
             matrix: transforming.matrix,
@@ -224,10 +226,10 @@ extension CanvasViewModel {
         drawing.addDrawLineSegmentCommands(
             with: lineSegment,
             on: layerManager,
-            to: delegate?.commandBuffer
+            to: delegate.commandBuffer
         )
 
-        mergeAllLayersToRootTexture()
+        addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
         pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
     }
@@ -251,8 +253,7 @@ extension CanvasViewModel {
 
         layerManager.initLayers(with: drawing.textureSize)
 
-        mergeAllLayersToRootTexture()
-        delegate?.callSetNeedsDisplayOnCanvasView()
+        refreshCanvasWithMergingAllLayers()
     }
 
 }
@@ -270,21 +271,22 @@ extension CanvasViewModel {
         layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
-    func refreshCanvas(using undoObject: UndoObject) {
-        guard let delegate else { return }
+    func addMergeLayersToRootTextureCommands(to commandBuffer: MTLCommandBuffer?) {
+        guard
+            let rootTexture = delegate?.rootTexture,
+            let commandBuffer
+        else { return }
 
+        layerManager.addMergeLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: rootTexture,
+            to: commandBuffer)
+    }
+
+    func refreshCanvas(using undoObject: UndoObject) {
         layerManager.initLayers(undoObject: undoObject)
 
-        layerManager.addMergeUnselectedLayersCommands(
-            to: delegate.commandBuffer
-        )
-        layerManager.addMergeAllLayersCommands(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: delegate.rootTexture,
-            to: delegate.commandBuffer
-        )
-
-        delegate.callSetNeedsDisplayOnCanvasView()
+        refreshCanvasWithMergingAllLayers()
     }
 
     func refreshCanvasWithMergingAllLayers() {
@@ -293,27 +295,15 @@ extension CanvasViewModel {
         layerManager.addMergeUnselectedLayersCommands(
             to: delegate.commandBuffer
         )
-        refreshCanvasWithMergingCurrentLayers()
+        refreshCanvasWithMergingLayers()
     }
 
-    func refreshCanvasWithMergingCurrentLayers() {
+    func refreshCanvasWithMergingLayers() {
         guard let delegate else { return }
 
-        mergeAllLayersToRootTexture()
+        addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
         delegate.callSetNeedsDisplayOnCanvasView()
-    }
-
-    func mergeAllLayersToRootTexture() {
-        guard
-            let rootTexture = delegate?.rootTexture,
-            let commandBuffer = delegate?.commandBuffer
-        else { return }
-
-        layerManager.addMergeAllLayersCommands(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: rootTexture,
-            to: commandBuffer)
     }
 
     /// Start or stop the display link loop.

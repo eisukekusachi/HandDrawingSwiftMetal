@@ -202,17 +202,7 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.layerManager.addMergeUnselectedLayersCommands(
-                to: contentView.canvasView.commandBuffer
-            )
-
-            canvasViewModel.layerManager.addMergeAllLayersCommands(
-                backgroundColor: contentView.canvasView.backgroundColor ?? .white,
-                onto: contentView.canvasView.rootTexture,
-                to: contentView.canvasView.commandBuffer
-            )
-
-            contentView.canvasView.setNeedsDisplay()
+            canvasViewModel.refreshCanvasWithMergingAllLayers()
         }
     }
 

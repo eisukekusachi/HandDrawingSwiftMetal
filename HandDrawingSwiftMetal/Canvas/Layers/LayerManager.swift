@@ -18,8 +18,8 @@ class LayerManager: ObservableObject {
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    var refreshCanvasWithMergingCurrentLayersPublisher: AnyPublisher<Void, Never> {
-        refreshCanvasWithMergingCurrentLayersSubject.eraseToAnyPublisher()
+    var refreshCanvasWithMergingLayersPublisher: AnyPublisher<Void, Never> {
+        refreshCanvasWithMergingLayersSubject.eraseToAnyPublisher()
     }
 
     var refreshCanvasWithMergingAllLayersPublisher: AnyPublisher<Void, Never> {
@@ -63,7 +63,7 @@ class LayerManager: ObservableObject {
 
     private var textureSize: CGSize = .zero
 
-    private let refreshCanvasWithMergingCurrentLayersSubject = PassthroughSubject<Void, Never>()
+    private let refreshCanvasWithMergingLayersSubject = PassthroughSubject<Void, Never>()
 
     private let refreshCanvasWithMergingAllLayersSubject = PassthroughSubject<Void, Never>()
 
@@ -114,7 +114,7 @@ class LayerManager: ObservableObject {
 
 extension LayerManager {
 
-    func addMergeAllLayersCommands(
+    func addMergeLayersCommands(
         backgroundColor: UIColor,
         onto dstTexture: MTLTexture,
         to commandBuffer: MTLCommandBuffer
@@ -176,8 +176,8 @@ extension LayerManager {
         }
     }
 
-    func refreshCanvasWithMergingCurrentLayers() {
-        refreshCanvasWithMergingCurrentLayersSubject.send()
+    func refreshCanvasWithMergingLayers() {
+        refreshCanvasWithMergingLayersSubject.send()
     }
 
     func refreshCanvasWithMergingAllLayers() {
