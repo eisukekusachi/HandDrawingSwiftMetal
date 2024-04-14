@@ -155,7 +155,7 @@ extension CanvasViewModel {
         case .drawing:
 
             // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-            if let hashValue = touchManager.touchPointsDictionary.keys.first {
+            if let hashValue = touchManager.hashValueForFingerDrawing {
                 drawing.initDrawingIfHashValueIsNil(
                     lineDrawing: smoothLineDrawing,
                     hashValue: hashValue
@@ -233,8 +233,8 @@ extension CanvasViewModel {
         }
         touchManager.appendPencilTouches(event, in: view)
 
-        // When a gesture is determined to be `drawing`, the touchManager manages only one finger
-        if let hashValue = touchManager.touchPointsDictionary.keys.first {
+        // Set a hash value for the type 'pencil'.
+        if let hashValue = touchManager.hashValueForPencilDrawing {
             drawing.initDrawingIfHashValueIsNil(
                 lineDrawing: lineDrawing,
                 hashValue: hashValue

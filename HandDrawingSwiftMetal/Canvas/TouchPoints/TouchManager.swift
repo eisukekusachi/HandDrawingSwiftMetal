@@ -11,6 +11,16 @@ typealias TouchHashValue = Int
 
 final class TouchManager {
 
+    var hashValueForFingerDrawing: TouchHashValue? {
+        touchPointsDictionary.keys.first
+    }
+    var hashValueForPencilDrawing: TouchHashValue? {
+        for key in touchPointsDictionary.keys where touchPointsDictionary[key]?.first?.type == .pencil {
+            return key
+        }
+        return nil
+    }
+
     private (set) var touchPointsDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
     func appendFingerTouches(_ event: UIEvent?, in view: UIView) {
