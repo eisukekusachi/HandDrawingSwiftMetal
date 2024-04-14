@@ -163,7 +163,9 @@ extension CanvasViewModel {
             ) 
             else { return }
 
-            if lineSegment.touchPhase == .ended {
+            let isTouchEnded = lineSegment.touchPhase == .ended
+
+            if isTouchEnded {
                 registerDrawingUndoAction()
             }
 
@@ -173,9 +175,21 @@ extension CanvasViewModel {
                 to: delegate.commandBuffer
             )
 
+            if isTouchEnded {
+                drawing.addFinishDrawingCommands(
+                    on: layerManager,
+                    to: delegate.commandBuffer
+                )
+                touchManager.clear()
+
+                Task {
+                    try? await layerManager.updateCurrentThumbnail()
+                }
+            }
+
             addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
-            pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
+            pauseDisplayLinkLoop(isTouchEnded)
 
         case .transforming:
             guard
@@ -191,6 +205,7 @@ extension CanvasViewModel {
 
             if transforming.isTouchEnded {
                 transforming.finishTransforming()
+                touchManager.clear()
             }
 
             pauseDisplayLinkLoop(transforming.isTouchEnded)
@@ -219,7 +234,9 @@ extension CanvasViewModel {
         ) 
         else { return }
 
-        if lineSegment.touchPhase == .ended {
+        let isTouchEnded = lineSegment.touchPhase == .ended
+
+        if isTouchEnded {
             registerDrawingUndoAction()
         }
 
@@ -229,9 +246,21 @@ extension CanvasViewModel {
             to: delegate.commandBuffer
         )
 
+        if isTouchEnded {
+            drawing.addFinishDrawingCommands(
+                on: layerManager,
+                to: delegate.commandBuffer
+            )
+            touchManager.clear()
+
+            Task {
+                try? await layerManager.updateCurrentThumbnail()
+            }
+        }
+
         addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
-        pauseDisplayLinkLoop(lineSegment.touchPhase == .ended)
+        pauseDisplayLinkLoop(isTouchEnded)
     }
 
 }

@@ -54,6 +54,10 @@ final class TouchManager {
         }
     }
 
+    func clear() {
+        touchPointsDictionary.removeAll()
+    }
+
 }
 
 extension TouchManager {

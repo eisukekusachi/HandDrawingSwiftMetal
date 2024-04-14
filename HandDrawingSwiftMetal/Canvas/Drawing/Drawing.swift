@@ -109,4 +109,19 @@ final class Drawing {
         }
     }
 
+    func addFinishDrawingCommands(
+        on layerManager: LayerManager,
+        to commandBuffer: MTLCommandBuffer?
+    ) {
+        guard
+            let commandBuffer,
+            let drawingLayer = layerManager.drawingLayer,
+            let selectedTexture = layerManager.selectedTexture
+        else { return }
+
+        drawingLayer.mergeDrawingTexture(
+            into: selectedTexture,
+            commandBuffer
+        )
+    }
 }
