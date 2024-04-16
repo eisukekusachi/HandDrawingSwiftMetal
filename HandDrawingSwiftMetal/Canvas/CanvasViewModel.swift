@@ -154,7 +154,6 @@ extension CanvasViewModel {
         switch actionManager.updateState(newState) {
         case .drawing:
 
-            // When a gesture is determined to be `drawing`, the touchManager manages only one finger
             if let hashValue = touchManager.hashValueForFingerDrawing {
                 drawing.initDrawingIfHashValueIsNil(
                     lineDrawing: smoothLineDrawing,

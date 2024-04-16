@@ -11,12 +11,21 @@ typealias TouchHashValue = Int
 
 final class TouchManager {
 
+    // When a gesture is recognized as 'drawing' during finger input, the touchManager manages only one finger.
+    // So we use the first value in the array.
     var hashValueForFingerDrawing: TouchHashValue? {
         touchPointsDictionary.keys.first
     }
+
+    // During pencil input, the beginning of the array may fail
+    // due to occasional palm contact with the screen.
     var hashValueForPencilDrawing: TouchHashValue? {
-        for key in touchPointsDictionary.keys where touchPointsDictionary[key]?.first?.type == .pencil {
-            return key
+        for key in touchPointsDictionary.keys {
+            if touchPointsDictionary[key]?.map({
+                $0.type
+            }).contains(.pencil) == true {
+                return key
+            }
         }
         return nil
     }
