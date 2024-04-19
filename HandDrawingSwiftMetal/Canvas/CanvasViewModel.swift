@@ -15,6 +15,8 @@ protocol CanvasViewModelDelegate {
 
     func initRootTexture(textureSize: CGSize)
 
+    func setCommandBufferToNil()
+
     func registerDrawingUndoAction(with undoObject: UndoObject)
 
     func callSetNeedsDisplayOnCanvasView()
@@ -34,6 +36,8 @@ class CanvasViewModel {
     let drawingTool = DrawingToolModel()
 
     let undoHistoryManager = UndoHistoryManager()
+
+    let inputManager = InputManager()
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -144,9 +148,12 @@ extension CanvasViewModel {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
             if touchManager.touchPointsDictionary.isEmpty {
-                actionManager.reset()
+                prepareNextDrawing()
             }
         }
+
+        guard inputManager.updateCurrentInput(.finger) != .pencil else { return }
+
         touchManager.appendFingerTouches(event, in: view)
 
         let newState: ActionState = .init(from: touchManager.touchPointsDictionary)
@@ -226,10 +233,17 @@ extension CanvasViewModel {
     func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
-            if touchManager.touchPointsDictionary.isEmpty {
-                actionManager.reset()
+            if touchManager.isEmpty {
+                prepareNextDrawing()
             }
         }
+
+        if inputManager.currentInput == .finger {
+            prepareNextDrawing()
+            resetActions()
+        }
+        inputManager.updateCurrentInput(.pencil)
+
         touchManager.appendPencilTouches(event, in: view)
 
         // Set a hash value for the type 'pencil'.
@@ -277,6 +291,24 @@ extension CanvasViewModel {
         addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
 
         pauseDisplayLinkLoop(isTouchEnded)
+    }
+
+    private func resetActions() {
+        lineDrawing.finishDrawing()
+        smoothLineDrawing.finishDrawing()
+
+        transforming.cancelTransforming()
+
+        layerManager.clearDrawingLayerTextures()
+
+        delegate?.setCommandBufferToNil()
+        delegate?.callSetNeedsDisplayOnCanvasView()
+    }
+
+    private func prepareNextDrawing() {
+        touchManager.clear()
+        inputManager.reset()
+        actionManager.reset()
     }
 
 }

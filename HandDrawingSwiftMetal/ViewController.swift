@@ -263,6 +263,10 @@ extension ViewController: CanvasViewModelDelegate {
         contentView.canvasView.initRootTexture(textureSize: textureSize)
     }
 
+    func setCommandBufferToNil() {
+        contentView.canvasView.setCommandBufferToNil()
+    }
+
     func registerDrawingUndoAction(with undoObject: UndoObject) {
         contentView.canvasView.registerDrawingUndoAction(
             with: undoObject,

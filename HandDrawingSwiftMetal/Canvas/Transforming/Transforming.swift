@@ -72,6 +72,12 @@ class Transforming: TransformingProtocol {
         touchPointsB = nil
     }
 
+    func cancelTransforming() {
+        matrixSubject.value = storedMatrix
+        touchPointsA = nil
+        touchPointsB = nil
+    }
+
     func resetTransforming(_ matrix: CGAffineTransform) {
         matrixSubject.send(matrix)
         storedMatrix = matrix

@@ -30,6 +30,10 @@ final class TouchManager {
         return nil
     }
 
+    var isEmpty: Bool {
+        touchPointsDictionary.isEmpty
+    }
+
     private (set) var touchPointsDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
     func appendFingerTouches(_ event: UIEvent?, in view: UIView) {
