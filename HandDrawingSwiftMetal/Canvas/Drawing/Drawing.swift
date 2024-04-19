@@ -104,10 +104,6 @@ final class Drawing {
                 into: selectedTexture,
                 commandBuffer
             )
-
-            Task {
-                try? await layerManager.updateCurrentThumbnail()
-            }
         }
     }
 

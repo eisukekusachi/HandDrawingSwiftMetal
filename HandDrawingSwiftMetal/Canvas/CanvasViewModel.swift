@@ -196,10 +196,6 @@ extension CanvasViewModel {
                     to: delegate.commandBuffer
                 )
                 touchManager.clear()
-
-                Task {
-                    try? await layerManager.updateCurrentThumbnail()
-                }
             }
 
             addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
@@ -282,10 +278,6 @@ extension CanvasViewModel {
                 to: delegate.commandBuffer
             )
             touchManager.clear()
-
-            Task {
-                try? await layerManager.updateCurrentThumbnail()
-            }
         }
 
         addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
