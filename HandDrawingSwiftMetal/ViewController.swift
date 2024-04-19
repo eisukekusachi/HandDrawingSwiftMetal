@@ -62,7 +62,7 @@ extension ViewController {
                        with: canvasViewModel.zipFileNameName)
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.layerViewPresenter.toggleVisible()
+            self?.canvasViewModel.onLayerButtonTapped()
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
@@ -110,6 +110,12 @@ extension ViewController {
         canvasViewModel.clearUndoPublisher
             .sink { [weak self] in
                 self?.contentView.canvasView.clearUndo()
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingLayerViewPublisher
+            .sink { [weak self] in
+                self?.layerViewPresenter.toggleVisible()
             }
             .store(in: &cancellables)
     }

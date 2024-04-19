@@ -88,6 +88,10 @@ class CanvasViewModel {
         clearUndoSubject.eraseToAnyPublisher()
     }
 
+    var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
+        requestShowingLayerViewSubject.eraseToAnyPublisher()
+    }
+
     private let lineDrawing = LineDrawing()
     private let smoothLineDrawing = SmoothLineDrawing()
 
@@ -100,6 +104,8 @@ class CanvasViewModel {
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
     private let clearUndoSubject = PassthroughSubject<Void, Never>()
+
+    private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -137,6 +143,16 @@ class CanvasViewModel {
         if textureSize == .zero &&
            frameSize.isSameRatio(drawableSize) {
             textureSize = drawableSize
+        }
+    }
+
+    func onLayerButtonTapped() {
+        Task {
+            try? await layerManager.updateCurrentThumbnail()
+
+            DispatchQueue.main.async { [weak self] in
+                self?.requestShowingLayerViewSubject.send()
+            }
         }
     }
 
