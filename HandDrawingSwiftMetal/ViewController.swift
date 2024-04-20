@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 class ViewController: UIViewController {
-    
+
     @IBOutlet private weak var contentView: ContentView!
 
     let canvasViewModel = CanvasViewModel()
@@ -30,7 +30,7 @@ class ViewController: UIViewController {
 
         bindViewModel()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
@@ -40,7 +40,7 @@ class ViewController: UIViewController {
             drawableSize: contentView.canvasView.drawableSize
         )
     }
-    
+
 }
 
 extension ViewController {
@@ -130,6 +130,7 @@ extension ViewController {
         fingerInputGestureRecognizer.gestureDelegate = self
         pencilInputGestureRecognizer.gestureDelegate = self
     }
+
 }
 
 extension ViewController {

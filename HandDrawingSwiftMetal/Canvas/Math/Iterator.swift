@@ -75,7 +75,7 @@ class Iterator<T>: IteratorProtocol {
         array = []
     }
     
-    private func getDifference<T>(array: [T], count: Int) -> [T] {
+    private func getDifference(array: [T], count: Int) -> [T] {
         if count < array.count {
             return Array(array[count ..< array.count])
         }

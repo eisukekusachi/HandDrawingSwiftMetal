@@ -11,7 +11,7 @@ import Combine
 final class ContentView: UIView {
 
     @IBOutlet weak var canvasView: CanvasView!
-    
+
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
@@ -61,7 +61,7 @@ final class ContentView: UIView {
 
     private func commonInit() {
         backgroundColor = .white
-        
+
         initUndoComponents()
 
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))

@@ -118,8 +118,9 @@ extension IntSlider {
 
 #Preview {
     @State var alpha: Int = 125
-    let sliderStyle = SliderStyleImpl(
-        trackLeftColor: UIColor(named: "trackColor")!)
+    let _ = SliderStyleImpl(
+        trackLeftColor: UIColor(named: "trackColor")!
+    )
 
     return IntSlider(value: $alpha, in: 0 ... 255)
 }

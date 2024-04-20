@@ -46,7 +46,7 @@ extension CGPoint {
     }
 
     func scale(srcSize: CGSize, dstSize: CGSize) -> Self {
-        var location = self
+        let location = self
 
         let scaleFrameToTexture = Aspect.getScaleToFit(srcSize, to: dstSize)
 
