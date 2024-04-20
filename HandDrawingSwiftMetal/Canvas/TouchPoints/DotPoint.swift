@@ -27,7 +27,7 @@ struct DotPoint {
         textureSize: CGSize
     ) {
         var location: CGPoint = touchPoint.location
-        let alpha: CGFloat = touchPoint.maximumPossibleForce != 0 ? touchPoint.force / touchPoint.maximumPossibleForce : 1.0
+        let alpha: CGFloat = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
 
         location = location.scale(srcSize: frameSize, dstSize: textureSize)
 
