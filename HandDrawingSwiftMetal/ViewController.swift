@@ -270,7 +270,7 @@ extension ViewController: CanvasViewModelDelegate {
         contentView.canvasView.initRootTexture(textureSize: textureSize)
     }
 
-    func setCommandBufferToNil() {
+    func clearCommandBuffer() {
         contentView.canvasView.setCommandBufferToNil()
     }
 
@@ -282,7 +282,7 @@ extension ViewController: CanvasViewModelDelegate {
         contentView.canvasView.undoManagerWithCount.incrementUndoCount()
     }
 
-    func callSetNeedsDisplayOnCanvasView() {
+    func refreshCanvasByCallingSetNeedsDisplay() {
         contentView.canvasView.setNeedsDisplay()
     }
 

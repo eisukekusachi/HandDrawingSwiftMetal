@@ -23,6 +23,6 @@ protocol DrawingLineProtocol {
         phase: UITouch.Phase
     ) -> LineSegment
 
-    func finishDrawing()
+    func clearIterator()
 
 }

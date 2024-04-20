@@ -38,7 +38,7 @@ final class Drawing {
 
         defer {
             if isFingerReleasedFromScreen {
-                lineDrawing.finishDrawing()
+                lineDrawing.clearIterator()
             }
         }
 

@@ -15,11 +15,11 @@ protocol CanvasViewModelDelegate {
 
     func initRootTexture(textureSize: CGSize)
 
-    func setCommandBufferToNil()
+    func clearCommandBuffer()
 
     func registerDrawingUndoAction(with undoObject: UndoObject)
 
-    func callSetNeedsDisplayOnCanvasView()
+    func refreshCanvasByCallingSetNeedsDisplay()
 
 }
 
@@ -38,6 +38,13 @@ class CanvasViewModel {
     let undoHistoryManager = UndoHistoryManager()
 
     let inputManager = InputManager()
+
+    var undoObject: UndoObject {
+        return UndoObject(
+            index: layerManager.index,
+            layers: layerManager.layers
+        )
+    }
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -71,13 +78,6 @@ class CanvasViewModel {
 
     var zipFileNameName: String {
         projectName + "." + URL.zipSuffix
-    }
-
-    var undoObject: UndoObject {
-        return UndoObject(
-            index: layerManager.index,
-            layers: layerManager.layers
-        )
     }
 
     var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
@@ -160,7 +160,11 @@ class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func handleFingerInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+    func handleFingerInputGesture(
+        _ touches: Set<UITouch>,
+        with event: UIEvent?,
+        on view: UIView
+    ) {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
             if touchManager.touchPointsDictionary.isEmpty {
@@ -176,7 +180,6 @@ extension CanvasViewModel {
 
         switch actionManager.updateState(newState) {
         case .drawing:
-
             if let hashValue = touchManager.hashValueForFingerDrawing {
                 drawing.initDrawingIfHashValueIsNil(
                     lineDrawing: smoothLineDrawing,
@@ -185,7 +188,6 @@ extension CanvasViewModel {
             }
 
             guard
-                let delegate,
                 let lineSegment: LineSegment = drawing.makeLineSegment(
                     from: touchManager,
                     with: smoothLineDrawing,
@@ -200,23 +202,10 @@ extension CanvasViewModel {
                 registerDrawingUndoAction()
             }
 
-            drawing.addDrawLineSegmentCommands(
-                with: lineSegment,
-                on: layerManager,
-                to: delegate.commandBuffer
+            addCommandsDrawingSegmentOnCanvas(
+                lineSegment: lineSegment,
+                isTouchEnded: isTouchEnded
             )
-
-            if isTouchEnded {
-                drawing.addFinishDrawingCommands(
-                    on: layerManager,
-                    to: delegate.commandBuffer
-                )
-                touchManager.clear()
-            }
-
-            addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
-
-            pauseDisplayLinkLoop(isTouchEnded)
 
         case .transforming:
             guard
@@ -232,7 +221,7 @@ extension CanvasViewModel {
 
             if transforming.isTouchEnded {
                 transforming.finishTransforming()
-                touchManager.clear()
+                touchManager.clearTouchPointsDictionary()
             }
 
             pauseDisplayLinkLoop(transforming.isTouchEnded)
@@ -242,7 +231,11 @@ extension CanvasViewModel {
         }
     }
 
-    func handlePencilInputGesture(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+    func handlePencilInputGesture(
+        _ touches: Set<UITouch>,
+        with event: UIEvent?,
+        on view: UIView
+    ) {
         defer {
             touchManager.removeIfTouchPhaseIsEnded(touches: touches)
             if touchManager.isEmpty {
@@ -250,9 +243,9 @@ extension CanvasViewModel {
             }
         }
 
-        if inputManager.currentInput == .finger {
+        if inputManager.state == .finger {
             prepareNextDrawing()
-            resetActions()
+            clearActions()
         }
         inputManager.updateCurrentInput(.pencil)
 
@@ -266,8 +259,7 @@ extension CanvasViewModel {
             )
         }
 
-        guard 
-            let delegate,
+        guard
             let lineSegment: LineSegment = drawing.makeLineSegment(
                 from: touchManager,
                 with: lineDrawing,
@@ -282,6 +274,18 @@ extension CanvasViewModel {
             registerDrawingUndoAction()
         }
 
+        addCommandsDrawingSegmentOnCanvas(
+            lineSegment: lineSegment,
+            isTouchEnded: isTouchEnded
+        )
+    }
+
+    private func addCommandsDrawingSegmentOnCanvas(
+        lineSegment: LineSegment,
+        isTouchEnded: Bool
+    ) {
+        guard let delegate else { return }
+
         drawing.addDrawLineSegmentCommands(
             with: lineSegment,
             on: layerManager,
@@ -293,30 +297,35 @@ extension CanvasViewModel {
                 on: layerManager,
                 to: delegate.commandBuffer
             )
-            touchManager.clear()
+            touchManager.clearTouchPointsDictionary()
         }
 
-        addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
+        layerManager.addMergeDrawingLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: delegate.rootTexture,
+            to: delegate.commandBuffer)
 
         pauseDisplayLinkLoop(isTouchEnded)
     }
 
-    private func resetActions() {
-        lineDrawing.finishDrawing()
-        smoothLineDrawing.finishDrawing()
+}
 
-        transforming.cancelTransforming()
+extension CanvasViewModel {
 
-        layerManager.clearDrawingLayerTextures()
+    private func clearActions() {
+        lineDrawing.clearIterator()
+        smoothLineDrawing.clearIterator()
+        transforming.clearTransforming()
+        layerManager.clearDrawingLayer()
+        delegate?.clearCommandBuffer()
 
-        delegate?.setCommandBufferToNil()
-        delegate?.callSetNeedsDisplayOnCanvasView()
+        delegate?.refreshCanvasByCallingSetNeedsDisplay()
     }
 
     private func prepareNextDrawing() {
-        touchManager.clear()
-        inputManager.reset()
-        actionManager.reset()
+        touchManager.clearTouchPointsDictionary()
+        inputManager.clear()
+        actionManager.clear()
     }
 
 }
@@ -324,19 +333,18 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func didTapResetTransformButton() {
-        transforming.resetTransforming(.identity)
-        delegate?.callSetNeedsDisplayOnCanvasView()
+        transforming.setMatrix(.identity)
+        delegate?.refreshCanvasByCallingSetNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {
 
-        clearUndoSubject.send()
-
         projectName = Calendar.currentDate
 
-        transforming.resetTransforming(.identity)
-
+        transforming.setMatrix(.identity)
         layerManager.initLayers(with: drawing.textureSize)
+
+        clearUndoSubject.send()
 
         refreshCanvasWithMergingAllLayers()
     }
@@ -356,17 +364,9 @@ extension CanvasViewModel {
         layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
-    func addMergeDrawingLayersToRootTextureCommands(to commandBuffer: MTLCommandBuffer?) {
-        guard
-            let rootTexture = delegate?.rootTexture,
-            let commandBuffer
-        else { return }
+}
 
-        layerManager.addMergeDrawingLayersCommands(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: rootTexture,
-            to: commandBuffer)
-    }
+extension CanvasViewModel {
 
     func refreshCanvas(using undoObject: UndoObject) {
         layerManager.initLayers(undoObject: undoObject)
@@ -386,9 +386,12 @@ extension CanvasViewModel {
     func refreshCanvasWithMergingDrawingLayers() {
         guard let delegate else { return }
 
-        addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
+        layerManager.addMergeDrawingLayersCommands(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: delegate.rootTexture,
+            to: delegate.commandBuffer)
 
-        delegate.callSetNeedsDisplayOnCanvasView()
+        delegate.refreshCanvasByCallingSetNeedsDisplay()
     }
 
     /// Start or stop the display link loop.
@@ -396,7 +399,7 @@ extension CanvasViewModel {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
-                delegate?.callSetNeedsDisplayOnCanvasView()
+                delegate?.refreshCanvasByCallingSetNeedsDisplay()
                 pauseDisplayLinkSubject.send(true)
             }
 

@@ -282,7 +282,7 @@ extension LayerManager {
         }
     }
 
-    func clearDrawingLayerTextures() {
+    func clearDrawingLayer() {
         drawingLayer?.clearDrawingTextures()
     }
 

@@ -81,7 +81,7 @@ final class TouchManager {
         }
     }
 
-    func clear() {
+    func clearTouchPointsDictionary() {
         touchPointsDictionary.removeAll()
     }
 

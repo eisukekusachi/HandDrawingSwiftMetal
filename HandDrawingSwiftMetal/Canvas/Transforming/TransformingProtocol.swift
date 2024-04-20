@@ -22,11 +22,11 @@ protocol TransformingProtocol {
 
     func initTransforming(hashValues: (TouchHashValue, TouchHashValue))
 
+    func setMatrix(_ matrix: CGAffineTransform)
+
     func transformCanvas(touchPoints: (TouchPoint, TouchPoint))
 
     func finishTransforming()
-
-    func resetTransforming(_ matrix: CGAffineTransform)
 
 }
 

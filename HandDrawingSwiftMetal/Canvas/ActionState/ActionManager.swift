@@ -18,7 +18,7 @@ final class ActionManager {
         return state
     }
 
-    func reset() {
+    func clear() {
         state = .recognizing
     }
 

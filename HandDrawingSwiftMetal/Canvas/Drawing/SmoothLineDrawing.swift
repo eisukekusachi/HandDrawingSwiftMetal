@@ -52,7 +52,7 @@ final class SmoothLineDrawing: DrawingLineProtocol {
         )
     }
 
-    func finishDrawing() {
+    func clearIterator() {
         hashValue = nil
         tmpIterator.clear()
         iterator.clear()

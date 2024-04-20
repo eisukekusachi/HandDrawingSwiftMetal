@@ -47,6 +47,13 @@ class Transforming: TransformingProtocol {
         touchPointsB = TransformingPoint(hashValue: hashValues.1)
     }
 
+    func setMatrix(_ matrix: CGAffineTransform) {
+        matrixSubject.send(matrix)
+        storedMatrix = matrix
+        touchPointsA = nil
+        touchPointsB = nil
+    }
+
     func transformCanvas(touchPoints: (TouchPoint, TouchPoint)) {
         touchPointsA?.updateTouchPoints(touchPoints.0)
         touchPointsB?.updateTouchPoints(touchPoints.1)
@@ -72,15 +79,8 @@ class Transforming: TransformingProtocol {
         touchPointsB = nil
     }
 
-    func cancelTransforming() {
+    func clearTransforming() {
         matrixSubject.value = storedMatrix
-        touchPointsA = nil
-        touchPointsB = nil
-    }
-
-    func resetTransforming(_ matrix: CGAffineTransform) {
-        matrixSubject.send(matrix)
-        storedMatrix = matrix
         touchPointsA = nil
         touchPointsB = nil
     }

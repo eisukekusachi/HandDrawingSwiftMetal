@@ -34,7 +34,7 @@ final class LineDrawing: DrawingLineProtocol {
         )
     }
 
-    func finishDrawing() {
+    func clearIterator() {
         hashValue = nil
         iterator.clear()
     }

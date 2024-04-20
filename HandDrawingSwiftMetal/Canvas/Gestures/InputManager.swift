@@ -16,25 +16,25 @@ enum InputType {
 /// Manage GestureWithStorage
 class InputManager {
 
-    private (set) var currentInput: InputType = .ready
+    private (set) var state: InputType = .ready
 
     /// Updates the current input.
     /// If the current input is a pencil, just return it.
     @discardableResult
     func updateCurrentInput(_ input: InputType) -> InputType {
         // Check if the current input is a pencil.
-        if currentInput == .pencil {
-            return currentInput
+        if state == .pencil {
+            return state
 
         } else {
             // Set the current input to the new input and return it.
-            currentInput = input
-            return currentInput
+            state = input
+            return state
         }
     }
 
-    func reset() {
-        currentInput = .ready
+    func clear() {
+        state = .ready
     }
 
 }
