@@ -118,9 +118,9 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        layerManager.refreshCanvasWithMergingLayersPublisher
+        layerManager.refreshCanvasWithMergingDrawingLayersPublisher
             .sink { [weak self] in
-                self?.refreshCanvasWithMergingLayers()
+                self?.refreshCanvasWithMergingDrawingLayers()
             }
             .store(in: &cancellables)
 
@@ -214,7 +214,7 @@ extension CanvasViewModel {
                 touchManager.clear()
             }
 
-            addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
+            addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
 
             pauseDisplayLinkLoop(isTouchEnded)
 
@@ -296,7 +296,7 @@ extension CanvasViewModel {
             touchManager.clear()
         }
 
-        addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
+        addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
 
         pauseDisplayLinkLoop(isTouchEnded)
     }
@@ -356,13 +356,13 @@ extension CanvasViewModel {
         layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
-    func addMergeLayersToRootTextureCommands(to commandBuffer: MTLCommandBuffer?) {
+    func addMergeDrawingLayersToRootTextureCommands(to commandBuffer: MTLCommandBuffer?) {
         guard
             let rootTexture = delegate?.rootTexture,
             let commandBuffer
         else { return }
 
-        layerManager.addMergeLayersCommands(
+        layerManager.addMergeDrawingLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
@@ -380,13 +380,13 @@ extension CanvasViewModel {
         layerManager.addMergeUnselectedLayersCommands(
             to: delegate.commandBuffer
         )
-        refreshCanvasWithMergingLayers()
+        refreshCanvasWithMergingDrawingLayers()
     }
 
-    func refreshCanvasWithMergingLayers() {
+    func refreshCanvasWithMergingDrawingLayers() {
         guard let delegate else { return }
 
-        addMergeLayersToRootTextureCommands(to: delegate.commandBuffer)
+        addMergeDrawingLayersToRootTextureCommands(to: delegate.commandBuffer)
 
         delegate.callSetNeedsDisplayOnCanvasView()
     }

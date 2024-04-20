@@ -118,7 +118,7 @@ extension LayerView {
             range: range) { value in
                 guard let selectedLayer = layerManager.selectedLayer else { return }
                 layerManager.updateAlpha(selectedLayer, value)
-                layerManager.refreshCanvasWithMergingLayers()
+                layerManager.refreshCanvasWithMergingDrawingLayers()
         }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
