@@ -22,54 +22,31 @@ final class Drawing {
         }
     }
 
-    func makeLineSegment(
+    func getNewTouchPoints(
         from touchManager: TouchManager,
-        with lineDrawing: DrawingLineProtocol,
-        matrix: CGAffineTransform,
-        parameters: LineParameters
-    ) -> LineSegment? {
+        with lineDrawing: DrawingLineProtocol
+    ) -> [TouchPoint] {
         guard
             let hashValue = lineDrawing.hashValue,
-            let touchPhase = touchManager.getLatestTouchPhase(with: hashValue),
             let touchPoints = touchManager.getTouchPoints(with: hashValue)
-        else { return nil }
-
-        let isFingerReleasedFromScreen = touchPhase == .ended
-
-        defer {
-            if isFingerReleasedFromScreen {
-                lineDrawing.clearIterator()
-            }
-        }
+        else { return [] }
 
         let diffCount = touchPoints.count - lineDrawing.iterator.array.count
-        guard diffCount > 0 else { return nil }
+        guard diffCount > 0 else { return [] }
 
-        let newTouchPoints = touchPoints.suffix(diffCount)
+        return touchPoints.suffix(diffCount)
+    }
 
-        let dotPoints = newTouchPoints.map {
-            DotPoint(
-                touchPoint: $0,
-                matrix: matrix,
-                frameSize: frameSize,
-                textureSize: textureSize
-            )
-        }
-        lineDrawing.appendToIterator(dotPoints)
-
-        // It will be called when the drawing type is `SmoothLineDrawing`
-        if let drawingLine = lineDrawing as? SmoothLineDrawing,
-           isFingerReleasedFromScreen {
-            drawingLine.appendLastTouchToSmoothCurveIterator()
-        }
-
-        let curvePoints = Curve.makePoints(
-            from: lineDrawing.iterator,
-            isFinishDrawing: isFingerReleasedFromScreen
-        )
-
-        return .init(
-            dotPoints: curvePoints,
+    func makeLineSegment(
+        from iterator: Iterator<DotPoint>,
+        with parameters: LineParameters,
+        touchPhase: UITouch.Phase
+    ) -> LineSegment {
+        .init(
+            dotPoints: Curve.makePoints(
+                from: iterator,
+                isFinishDrawing: touchPhase == .ended
+            ),
             parameters: parameters,
             touchPhase: touchPhase
         )
@@ -122,4 +99,5 @@ final class Drawing {
             commandBuffer
         )
     }
+
 }

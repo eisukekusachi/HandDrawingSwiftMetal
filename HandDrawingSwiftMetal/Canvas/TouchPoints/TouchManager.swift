@@ -36,7 +36,7 @@ final class TouchManager {
 
     private (set) var touchPointsDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
-    func appendFingerTouches(_ event: UIEvent?, in view: UIView) {
+    func appendFingerTouchesToTouchPointsDictionary(_ event: UIEvent?, in view: UIView) {
         event?.allTouches?.forEach { touch in
             guard touch.type != .pencil else { return }
 
@@ -53,7 +53,7 @@ final class TouchManager {
         }
     }
 
-    func appendPencilTouches(_ event: UIEvent?, in view: UIView) {
+    func appendPencilTouchesToTouchPointsDictionary(_ event: UIEvent?, in view: UIView) {
         event?.allTouches?.forEach { touch in
             guard touch.type == .pencil else { return }
 
@@ -74,7 +74,7 @@ final class TouchManager {
         }
     }
 
-    func removeIfTouchPhaseIsEnded(touches: Set<UITouch>) {
+    func removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: Set<UITouch>) {
         for touch in touches where touch.phase == .ended {
             let hashValue: TouchHashValue = touch.hashValue
             touchPointsDictionary.removeValue(forKey: hashValue)

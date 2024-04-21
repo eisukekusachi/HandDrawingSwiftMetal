@@ -166,7 +166,7 @@ extension CanvasViewModel {
         on view: UIView
     ) {
         defer {
-            touchManager.removeIfTouchPhaseIsEnded(touches: touches)
+            touchManager.removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: touches)
             if touchManager.touchPointsDictionary.isEmpty {
                 prepareNextDrawing()
             }
@@ -174,38 +174,64 @@ extension CanvasViewModel {
 
         guard inputManager.updateCurrentInput(.finger) != .pencil else { return }
 
-        touchManager.appendFingerTouches(event, in: view)
+        touchManager.appendFingerTouchesToTouchPointsDictionary(event, in: view)
 
         let newState: ActionState = .init(from: touchManager.touchPointsDictionary)
 
         switch actionManager.updateState(newState) {
         case .drawing:
-            if let hashValue = touchManager.hashValueForFingerDrawing {
-                drawing.initDrawingIfHashValueIsNil(
-                    lineDrawing: smoothLineDrawing,
-                    hashValue: hashValue
-                )
-            }
-
             guard
-                let lineSegment: LineSegment = drawing.makeLineSegment(
-                    from: touchManager,
-                    with: smoothLineDrawing,
-                    matrix: transforming.matrix,
-                    parameters: .init(drawingTool)
-                )
+                let hashValue = touchManager.hashValueForFingerDrawing,
+                let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
             else { return }
 
-            let isTouchEnded = lineSegment.touchPhase == .ended
+            let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
                 registerDrawingUndoAction()
             }
 
+            drawing.initDrawingIfHashValueIsNil(
+                lineDrawing: smoothLineDrawing,
+                hashValue: hashValue
+            )
+
+            let touchPoints = drawing.getNewTouchPoints(
+                from: touchManager,
+                with: smoothLineDrawing
+            )
+
+            let dotPoints = touchPoints.map {
+                DotPoint(
+                    touchPoint: $0,
+                    matrix: transforming.matrix,
+                    frameSize: frameSize,
+                    textureSize: textureSize
+                )
+            }
+
+            smoothLineDrawing.appendToIterator(dotPoints)
+
+            if isTouchEnded {
+                smoothLineDrawing.appendLastTouchToSmoothCurveIterator()
+            }
+
+            let lineSegment = drawing.makeLineSegment(
+                from: smoothLineDrawing.iterator,
+                with: .init(drawingTool),
+                touchPhase: touchPhase
+            )
+
             addCommandsDrawingSegmentOnCanvas(
                 lineSegment: lineSegment,
                 isTouchEnded: isTouchEnded
             )
+
+            pauseDisplayLinkLoop(isTouchEnded)
+
+            if isTouchEnded {
+                smoothLineDrawing.clearIterator()
+            }
 
         case .transforming:
             guard
@@ -237,7 +263,7 @@ extension CanvasViewModel {
         on view: UIView
     ) {
         defer {
-            touchManager.removeIfTouchPhaseIsEnded(touches: touches)
+            touchManager.removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: touches)
             if touchManager.isEmpty {
                 prepareNextDrawing()
             }
@@ -249,36 +275,63 @@ extension CanvasViewModel {
         }
         inputManager.updateCurrentInput(.pencil)
 
-        touchManager.appendPencilTouches(event, in: view)
-
-        // Set a hash value for the type 'pencil'.
-        if let hashValue = touchManager.hashValueForPencilDrawing {
-            drawing.initDrawingIfHashValueIsNil(
-                lineDrawing: lineDrawing,
-                hashValue: hashValue
-            )
-        }
+        touchManager.appendPencilTouchesToTouchPointsDictionary(event, in: view)
 
         guard
-            let lineSegment: LineSegment = drawing.makeLineSegment(
-                from: touchManager,
-                with: lineDrawing,
-                matrix: transforming.matrix,
-                parameters: .init(drawingTool)
-            )
-        else { return }
+            let hashValue = touchManager.hashValueForPencilDrawing,
+            let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
+        else {
+            return
+        }
 
-        let isTouchEnded = lineSegment.touchPhase == .ended
+        let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
             registerDrawingUndoAction()
         }
 
+        drawing.initDrawingIfHashValueIsNil(
+            lineDrawing: lineDrawing,
+            hashValue: hashValue
+        )
+
+        let touchPoints = drawing.getNewTouchPoints(
+            from: touchManager,
+            with: lineDrawing
+        )
+
+        let dotPoints = touchPoints.map {
+            DotPoint(
+                touchPoint: $0,
+                matrix: transforming.matrix,
+                frameSize: frameSize,
+                textureSize: textureSize
+            )
+        }
+
+        lineDrawing.appendToIterator(dotPoints)
+
+        let lineSegment = drawing.makeLineSegment(
+            from: lineDrawing.iterator,
+            with: .init(drawingTool),
+            touchPhase: touchPhase
+        )
+
         addCommandsDrawingSegmentOnCanvas(
             lineSegment: lineSegment,
             isTouchEnded: isTouchEnded
         )
+
+        pauseDisplayLinkLoop(isTouchEnded)
+
+        if isTouchEnded {
+            lineDrawing.clearIterator()
+        }
     }
+
+}
+
+extension CanvasViewModel {
 
     private func addCommandsDrawingSegmentOnCanvas(
         lineSegment: LineSegment,
@@ -304,8 +357,6 @@ extension CanvasViewModel {
             backgroundColor: drawingTool.backgroundColor,
             onto: delegate.rootTexture,
             to: delegate.commandBuffer)
-
-        pauseDisplayLinkLoop(isTouchEnded)
     }
 
 }
