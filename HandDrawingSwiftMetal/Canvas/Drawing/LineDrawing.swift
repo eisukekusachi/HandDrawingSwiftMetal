@@ -13,6 +13,9 @@ final class LineDrawing: DrawingLineProtocol {
 
     let iterator: Iterator<DotPoint> = Iterator()
 
+    private var startDrawing: Bool = false
+    private var latestForce: CGFloat?
+
     func initDrawing(hashValue: TouchHashValue) {
         self.hashValue = hashValue
     }
@@ -34,9 +37,46 @@ final class LineDrawing: DrawingLineProtocol {
         )
     }
 
+    func setInaccurateAlphaToZero() {
+        if latestForce == nil {
+            latestForce = iterator.array.first?.alpha
+        }
+
+        if let latestForce {
+
+            var index: Int = 0
+            while index < iterator.array.count - 1 {
+                if iterator.array[index + 1].alpha == latestForce {
+                    iterator.replace(
+                        index: index,
+                        elem: DotPoint(
+                            location: iterator.array[index].location,
+                            alpha: 0.0
+                        )
+                    )
+
+                } else if !startDrawing && iterator.array[index].alpha != iterator.array[index + 1].alpha {
+                    iterator.replace(
+                        index: index,
+                        elem: DotPoint(
+                            location: iterator.array[index].location,
+                            alpha: 0.0
+                        )
+                    )
+                    startDrawing = true
+                }
+
+                index += 1
+            }
+        }
+    }
+
     func clearIterator() {
         hashValue = nil
         iterator.clear()
+
+        latestForce = nil
+        startDrawing = false
     }
 
 }

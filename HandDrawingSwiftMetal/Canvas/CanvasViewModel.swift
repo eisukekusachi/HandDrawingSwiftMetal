@@ -311,6 +311,9 @@ extension CanvasViewModel {
 
         lineDrawing.appendToIterator(dotPoints)
 
+        // TODO: Delete it once actual values are used instead of estimated ones.
+        lineDrawing.setInaccurateAlphaToZero()
+
         let lineSegment = drawing.makeLineSegment(
             from: lineDrawing.iterator,
             with: .init(drawingTool),

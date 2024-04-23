@@ -62,7 +62,11 @@ class Iterator<T>: IteratorProtocol {
     func append(elems: [Element]) {
         array.append(contentsOf: elems)
     }
-    
+
+    func replace(index: Int, elem: Element) {
+        array[index] = elem
+    }
+
     func update(elems: [Element]) {
         let elems = getDifference(array: elems, count: array.count)
         
