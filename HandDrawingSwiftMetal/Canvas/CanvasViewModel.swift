@@ -368,7 +368,6 @@ extension CanvasViewModel {
                 on: layerManager,
                 to: delegate.commandBuffer
             )
-            touchManager.clearTouchPointsDictionary()
         }
 
         layerManager.addMergeDrawingLayersCommands(

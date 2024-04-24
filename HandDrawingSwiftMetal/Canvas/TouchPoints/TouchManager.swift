@@ -30,10 +30,6 @@ final class TouchManager {
         return nil
     }
 
-    var isEmpty: Bool {
-        touchPointsDictionary.isEmpty
-    }
-
     private (set) var touchPointsDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
     func appendFingerTouchesToTouchPointsDictionary(_ event: UIEvent?, in view: UIView) {
@@ -91,24 +87,8 @@ extension TouchManager {
     func getTouchPoints(with hashValue: TouchHashValue) -> [TouchPoint]? {
         touchPointsDictionary[hashValue]
     }
-
-    func getTouchPointsDictionary(_ hashValues: [TouchHashValue]) -> [TouchHashValue: [TouchPoint]] {
-        return Dictionary(uniqueKeysWithValues: hashValues.compactMap { hashValue in
-            touchPointsDictionary[hashValue].map { (hashValue, $0) }
-        })
-    }
-    func getTouchPhases(_ hashValues: [TouchHashValue]) -> [UITouch.Phase?] {
-        hashValues.compactMap {
-            touchPointsDictionary[$0]?.last
-        }
-        .compactMap { $0?.phase }
-    }
-
     func getLatestTouchPhase(with hashValue: TouchHashValue) -> UITouch.Phase? {
         touchPointsDictionary[hashValue]?.last?.phase
-    }
-    func getLatestTouchPoint(with hashValue: TouchHashValue) -> TouchPoint? {
-        touchPointsDictionary[hashValue]?.last
     }
 
 }
