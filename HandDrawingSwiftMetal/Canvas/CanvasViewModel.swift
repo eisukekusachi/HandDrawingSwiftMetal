@@ -231,7 +231,7 @@ extension CanvasViewModel {
             pauseDisplayLinkLoop(isTouchEnded)
 
             if isTouchEnded {
-                smoothLineDrawing.clearIterator()
+                prepareNextDrawing()
             }
 
         case .transforming:
@@ -248,7 +248,7 @@ extension CanvasViewModel {
 
             if transforming.isTouchEnded {
                 transforming.finishTransforming()
-                touchManager.clearTouchPointsDictionary()
+                prepareNextDrawing()
             }
 
             pauseDisplayLinkLoop(transforming.isTouchEnded)
@@ -273,7 +273,11 @@ extension CanvasViewModel {
 
         if inputManager.state == .finger {
             prepareNextDrawing()
-            clearActions()
+
+            layerManager.clearDrawingLayer()
+
+            delegate?.clearCommandBuffer()
+            delegate?.refreshCanvasByCallingSetNeedsDisplay()
         }
         inputManager.updateCurrentInput(.pencil)
 
@@ -330,7 +334,7 @@ extension CanvasViewModel {
         pauseDisplayLinkLoop(isTouchEnded)
 
         if isTouchEnded {
-            lineDrawing.clearIterator()
+            prepareNextDrawing()
         }
     }
 
@@ -377,20 +381,15 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func clearActions() {
+    private func prepareNextDrawing() {
+        touchManager.clearTouchPointsDictionary()
+
+        inputManager.clear()
+        actionManager.clear()
+
         lineDrawing.clearIterator()
         smoothLineDrawing.clearIterator()
         transforming.clearTransforming()
-        layerManager.clearDrawingLayer()
-        delegate?.clearCommandBuffer()
-
-        delegate?.refreshCanvasByCallingSetNeedsDisplay()
-    }
-
-    private func prepareNextDrawing() {
-        touchManager.clearTouchPointsDictionary()
-        inputManager.clear()
-        actionManager.clear()
     }
 
 }
