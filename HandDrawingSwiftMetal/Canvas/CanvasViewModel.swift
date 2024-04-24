@@ -166,7 +166,8 @@ extension CanvasViewModel {
         on view: UIView
     ) {
         defer {
-            touchManager.removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: touches)
+            touchManager.removeValuesOnTouchesEnded(touches: touches)
+
             if touchManager.touchPointsDictionary.isEmpty {
                 prepareNextDrawing()
             }
@@ -263,7 +264,8 @@ extension CanvasViewModel {
         on view: UIView
     ) {
         defer {
-            touchManager.removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: touches)
+            touchManager.removeValuesOnTouchesEnded(touches: touches)
+
             if touchManager.isEmpty {
                 prepareNextDrawing()
             }

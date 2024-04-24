@@ -74,10 +74,9 @@ final class TouchManager {
         }
     }
 
-    func removeTouchPointsFromTouchPointsDictionaryIfTouchPhaseIsEnded(touches: Set<UITouch>) {
-        for touch in touches where touch.phase == .ended {
-            let hashValue: TouchHashValue = touch.hashValue
-            touchPointsDictionary.removeValue(forKey: hashValue)
+    func removeValuesOnTouchesEnded(touches: Set<UITouch>) {
+        for touch in touches where touch.phase == .ended || touch.phase == .cancelled {
+            touchPointsDictionary.removeValue(forKey: touch.hashValue)
         }
     }
 
