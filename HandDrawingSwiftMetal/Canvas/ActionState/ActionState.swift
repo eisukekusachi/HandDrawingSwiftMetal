@@ -30,8 +30,8 @@ enum ActionState: Int {
 
 extension ActionState {
 
-    static let activatingDrawingCount: Int = 5
-    static let activatingTransformingCount: Int = 3
+    static let activatingDrawingCount: Int = 6
+    static let activatingTransformingCount: Int = 2
 
     static func isDrawingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> ActionState? {
         if touchPointsDictionary.count != 1 { return nil }
