@@ -108,7 +108,7 @@ class LayerManager: ObservableObject {
 
 extension LayerManager {
 
-    func addMergeDrawingLayersCommands(
+    func mergeDrawingLayers(
         backgroundColor: UIColor,
         onto dstTexture: MTLTexture,
         to commandBuffer: MTLCommandBuffer
@@ -141,7 +141,7 @@ extension LayerManager {
                       commandBuffer)
     }
 
-    func addMergeUnselectedLayersCommands(
+    func mergeUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
     ) {
         let bottomIndex: Int = index - 1

@@ -372,7 +372,7 @@ extension CanvasViewModel {
             )
         }
 
-        layerManager.addMergeDrawingLayersCommands(
+        layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
@@ -391,7 +391,7 @@ extension CanvasViewModel {
     func refreshCanvasWithMergingAllLayers() {
         guard let delegate else { return }
 
-        layerManager.addMergeUnselectedLayersCommands(
+        layerManager.mergeUnselectedLayers(
             to: delegate.commandBuffer
         )
         refreshCanvasWithMergingDrawingLayers()
@@ -400,7 +400,7 @@ extension CanvasViewModel {
     func refreshCanvasWithMergingDrawingLayers() {
         guard let delegate else { return }
 
-        layerManager.addMergeDrawingLayersCommands(
+        layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: delegate.rootTexture,
             to: delegate.commandBuffer)
