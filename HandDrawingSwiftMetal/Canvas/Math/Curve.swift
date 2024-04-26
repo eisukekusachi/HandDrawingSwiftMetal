@@ -8,120 +8,69 @@
 import Foundation
 
 enum Curve {
-    static func makePoints(iterator: Iterator<TouchPoint>,
-                           matrix: CGAffineTransform? = nil,
-                           srcSize: CGSize,
-                           dstSize: CGSize,
-                           endProcessing: Bool = false) -> [TouchPoint] {
-        var curve: [TouchPoint] = []
-        
-        while let subsequece = iterator.next(range: 4) {
-            
+
+    static func makePoints(
+        from iterator: Iterator<DotPoint>,
+        isFinishDrawing: Bool = false
+    ) -> [DotPoint] {
+
+        var curve: [DotPoint] = []
+
+        while let subsequence = iterator.next(range: 4) {
+
             if iterator.isFirstProcessing {
-                let points = makeFirstPoints(iterator: iterator,
-                                             matrix: matrix,
-                                             srcSize: srcSize,
-                                             dstSize: dstSize)
+                let points = Curve.makeFirstPoints(iterator: iterator)
                 curve.append(contentsOf: points)
             }
-            
-            var previous = subsequece[0].scale(srcSize: srcSize, dstSize: dstSize)
-            var start = subsequece[1].scale(srcSize: srcSize, dstSize: dstSize)
-            var end = subsequece[2].scale(srcSize: srcSize, dstSize: dstSize)
-            var next = subsequece[3].scale(srcSize: srcSize, dstSize: dstSize)
-            
-            previous = previous.center(srcSize: srcSize, dstSize: dstSize)
-            start = start.center(srcSize: srcSize, dstSize: dstSize)
-            end = end.center(srcSize: srcSize, dstSize: dstSize)
-            next = next.center(srcSize: srcSize, dstSize: dstSize)
-            
-            if let matrix = matrix {
-                previous = previous.apply(matrix: matrix, textureSize: dstSize)
-                start = start.apply(matrix: matrix, textureSize: dstSize)
-                end = end.apply(matrix: matrix, textureSize: dstSize)
-                next = next.apply(matrix: matrix, textureSize: dstSize)
-            }
-            curve.append(contentsOf: Interpolator.curve(previousPoint: previous,
-                                                        startPoint: start,
-                                                        endPoint: end,
-                                                        nextPoint: next))
-        }
-        
-        if endProcessing {
-            if iterator.index == 0 {
-                let points = makeFirstPoints(iterator: iterator,
-                                             matrix: matrix,
-                                             srcSize: srcSize,
-                                             dstSize: dstSize)
-                curve.append(contentsOf: points)
-            }
-            
-            let points = makeLastPoints(iterator: iterator,
-                                        matrix: matrix,
-                                        srcSize: srcSize,
-                                        dstSize: dstSize)
+
+            let points = DotPoint.makeCurve(
+                previousPoint: subsequence[0],
+                startPoint: subsequence[1],
+                endPoint: subsequence[2],
+                nextPoint: subsequence[3])
+
             curve.append(contentsOf: points)
         }
-        
+
+        if isFinishDrawing {
+            if iterator.index == 0 {
+                let points = Curve.makeFirstPoints(iterator: iterator)
+                curve.append(contentsOf: points)
+            }
+
+            let points = Curve.makeLastPoints(iterator: iterator)
+            curve.append(contentsOf: points)
+        }
+
         return curve
     }
-    
-    static func makeFirstPoints(iterator: Iterator<TouchPoint>,
-                                matrix: CGAffineTransform? = nil,
-                                srcSize: CGSize,
-                                dstSize: CGSize) -> [TouchPoint] {
-        if iterator.array.count < 3 { return [] }
-        
+
+    static private func makeFirstPoints(iterator: Iterator<DotPoint>) -> [DotPoint] {
+        guard iterator.array.count >= 3 else { return [] }
+
         let index0 = 0
         let index1 = 1
         let index2 = 2
-        
-        var previous = iterator.array[index0].scale(srcSize: srcSize, dstSize: dstSize)
-        var start = iterator.array[index1].scale(srcSize: srcSize, dstSize: dstSize)
-        var end = iterator.array[index2].scale(srcSize: srcSize, dstSize: dstSize)
-        
-        previous = previous.center(srcSize: srcSize, dstSize: dstSize)
-        start = start.center(srcSize: srcSize, dstSize: dstSize)
-        end = end.center(srcSize: srcSize, dstSize: dstSize)
-        
-        if let matrix = matrix {
-            previous = previous.apply(matrix: matrix, textureSize: dstSize)
-            start = start.apply(matrix: matrix, textureSize: dstSize)
-            end = end.apply(matrix: matrix, textureSize: dstSize)
-        }
-        
-        return Interpolator.firstCurve(previousPoint: previous,
-                                       startPoint: start,
-                                       endPoint: end,
-                                       addLastPoint: false)
+
+        return DotPoint.makeFirstCurve(
+            previousPoint: iterator.array[index0],
+            startPoint: iterator.array[index1],
+            endPoint: iterator.array[index2],
+            addLastPoint: false)
     }
-    static func makeLastPoints(iterator: Iterator<TouchPoint>,
-                               matrix: CGAffineTransform? = nil,
-                               srcSize: CGSize,
-                               dstSize: CGSize) -> [TouchPoint] {
-        if iterator.array.count < 3 { return [] }
-        
+
+    static private func makeLastPoints(iterator: Iterator<DotPoint>) -> [DotPoint] {
+        guard iterator.array.count >= 3 else { return [] }
+
         let index0 = iterator.array.count - 3
         let index1 = iterator.array.count - 2
         let index2 = iterator.array.count - 1
-        
-        var start = iterator.array[index0].scale(srcSize: srcSize, dstSize: dstSize)
-        var end = iterator.array[index1].scale(srcSize: srcSize, dstSize: dstSize)
-        var next = iterator.array[index2].scale(srcSize: srcSize, dstSize: dstSize)
-        
-        start = start.center(srcSize: srcSize, dstSize: dstSize)
-        end = end.center(srcSize: srcSize, dstSize: dstSize)
-        next = next.center(srcSize: srcSize, dstSize: dstSize)
-        
-        if let matrix = matrix {
-            start = start.apply(matrix: matrix, textureSize: dstSize)
-            end = end.apply(matrix: matrix, textureSize: dstSize)
-            next = next.apply(matrix: matrix, textureSize: dstSize)
-        }
-        
-        return Interpolator.lastCurve(startPoint: start,
-                                      endPoint: end,
-                                      nextPoint: next,
-                                      addLastPoint: true)
+
+        return DotPoint.makeLastCurve(
+            startPoint: iterator.array[index0],
+            endPoint: iterator.array[index1],
+            nextPoint: iterator.array[index2],
+            addLastPoint: true)
     }
+
 }

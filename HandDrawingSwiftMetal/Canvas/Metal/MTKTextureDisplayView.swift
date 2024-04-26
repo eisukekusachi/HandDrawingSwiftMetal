@@ -58,6 +58,10 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         setNeedsDisplay()
     }
 
+    func setCommandBufferToNil() {
+        commandQueue.setCommandBufferToNil()
+    }
+
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else { return }

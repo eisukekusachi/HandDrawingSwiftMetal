@@ -2,39 +2,102 @@
 //  Drawing.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/12/10.
+//  Created by Eisuke Kusachi on 2024/04/06.
 //
 
-import MetalKit
+import UIKit
+import Combine
 
-/// This protocol encapsulates a series of actions for drawing a single line on a texture.
-protocol Drawing {
+final class Drawing {
 
-    var drawingTexture: MTLTexture? { get }
+    var frameSize: CGSize = .zero
+    var textureSize: CGSize = .zero
 
-    var textureSize: CGSize { get }
+    func initDrawingIfHashValueIsNil(
+        lineDrawing: DrawingLineProtocol,
+        hashValue: TouchHashValue
+    ) {
+        if lineDrawing.hashValue == nil {
+            lineDrawing.initDrawing(hashValue: hashValue)
+        }
+    }
 
-    /// Initializes the textures for drawing with the specified texture size.
-    func initTextures(_ textureSize: CGSize)
+    func getNewTouchPoints(
+        from touchManager: TouchManager,
+        with lineDrawing: DrawingLineProtocol
+    ) -> [TouchPoint] {
+        guard
+            let hashValue = lineDrawing.hashValue,
+            let touchPoints = touchManager.getTouchPoints(with: hashValue)
+        else { return [] }
 
-    /// Draws on the drawing texture using the provided touch point iterator and touch state.
-    func drawOnDrawingTexture(with iterator: Iterator<TouchPoint>,
-                              matrix: CGAffineTransform,
-                              parameters: DrawingParameters,
-                              on dstTexture: MTLTexture,
-                              _ touchPhase: UITouch.Phase,
-                              _ commandBuffer: MTLCommandBuffer)
+        let diffCount = touchPoints.count - lineDrawing.iterator.array.count
+        guard diffCount > 0 else { return [] }
 
-    /// Merges textures
-    func merge(_ srcTexture: MTLTexture?,
-               into dstTexture: MTLTexture,
-               _ commandBuffer: MTLCommandBuffer)
-    
-    /// Clears the drawing textures.
-    func clearDrawingTextures()
+        return touchPoints.suffix(diffCount)
+    }
 
-    /// Clears the drawing textures.
-    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer)
+    func makeLineSegment(
+        from iterator: Iterator<DotPoint>,
+        with parameters: LineParameters,
+        touchPhase: UITouch.Phase
+    ) -> LineSegment {
+        .init(
+            dotPoints: Curve.makePoints(
+                from: iterator,
+                isFinishDrawing: touchPhase == .ended
+            ),
+            parameters: parameters,
+            touchPhase: touchPhase
+        )
+    }
 
-    func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?]
+    func addDrawLineSegmentCommands(
+        with lineSegment: LineSegment,
+        on layerManager: LayerManager,
+        to commandBuffer: MTLCommandBuffer?
+    ) {
+        guard 
+            let commandBuffer,
+            let drawingLayer = layerManager.drawingLayer,
+            let selectedTexture = layerManager.selectedTexture
+        else { return }
+
+        if let drawingLayer = drawingLayer as? DrawingEraserLayer {
+            drawingLayer.drawOnDrawingTexture(
+                segment: lineSegment,
+                srcTexture: selectedTexture,
+                commandBuffer)
+
+        } else if let drawingLayer = drawingLayer as? DrawingBrushLayer {
+            drawingLayer.drawOnDrawingTexture(
+                segment: lineSegment,
+                commandBuffer)
+        }
+
+        if lineSegment.touchPhase == .ended {
+
+            drawingLayer.mergeDrawingTexture(
+                into: selectedTexture,
+                commandBuffer
+            )
+        }
+    }
+
+    func addFinishDrawingCommands(
+        on layerManager: LayerManager,
+        to commandBuffer: MTLCommandBuffer?
+    ) {
+        guard
+            let commandBuffer,
+            let drawingLayer = layerManager.drawingLayer,
+            let selectedTexture = layerManager.selectedTexture
+        else { return }
+
+        drawingLayer.mergeDrawingTexture(
+            into: selectedTexture,
+            commandBuffer
+        )
+    }
+
 }

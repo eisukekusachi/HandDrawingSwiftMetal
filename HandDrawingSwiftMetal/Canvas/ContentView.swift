@@ -11,7 +11,7 @@ import Combine
 final class ContentView: UIView {
 
     @IBOutlet weak var canvasView: CanvasView!
-    
+
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
@@ -38,6 +38,14 @@ final class ContentView: UIView {
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
 
+    var isDisplayLinkPaused: Bool = false {
+        didSet {
+            displayLink?.isPaused = isDisplayLinkPaused
+        }
+    }
+
+    private var displayLink: CADisplayLink?
+
     private var cancellables = Set<AnyCancellable>()
 
     override init(frame: CGRect) {
@@ -53,22 +61,30 @@ final class ContentView: UIView {
 
     private func commonInit() {
         backgroundColor = .white
-        
+
         initUndoComponents()
 
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+
+        // Configure the display link for rendering.
+        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
     }
 
 }
 
 extension ContentView {
 
-    func applyDrawingParameters(_ parameters: DrawingParameters) {
-        bindInputs(parameters)
-        bindModels(parameters)
+    func bindTransforming(_ transforming: TransformingProtocol) {
+        bindModels(transforming)
+    }
+    func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
+        bindInputs(drawingTool)
+        bindModels(drawingTool)
     }
 
-    private func bindInputs(_ parameters: DrawingParameters) {
+    private func bindInputs(_ drawingTool: DrawingToolModel) {
 
         resetTransformButton.addAction(.init { [weak self] _ in
             self?.tapResetTransformButton?()
@@ -95,17 +111,17 @@ extension ContentView {
         }, for: .touchUpInside)
 
         blackColorButton.addAction(.init { _ in
-            parameters.setDrawingTool(.brush)
-            parameters.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+            drawingTool.setDrawingTool(.brush)
+            drawingTool.setBrushColor(UIColor.black.withAlphaComponent(0.75))
         }, for: .touchUpInside)
 
         redColorButton.addAction(.init { _ in
-            parameters.setDrawingTool(.brush)
-            parameters.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+            drawingTool.setDrawingTool(.brush)
+            drawingTool.setBrushColor(UIColor.red.withAlphaComponent(0.75))
         }, for: .touchUpInside)
 
         eraserButton.addAction(.init { _ in
-            parameters.setDrawingTool(.eraser)
+            drawingTool.setDrawingTool(.eraser)
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
@@ -117,76 +133,33 @@ extension ContentView {
         }, for: .touchUpInside)
 
         diameterSlider.addTarget(
-            parameters,
-            action:#selector(parameters.handleDiameterSlider),
+            drawingTool,
+            action:#selector(drawingTool.handleDiameterSlider),
             for: .valueChanged)
 
-        canvasView.undoManager.refreshUndoComponentsObjectSubject
+        canvasView.undoManagerWithCount.refreshUndoComponentsObjectSubject
             .sink { [weak self] in
-                guard let `self` else { return }
-                self.refreshUndoComponents()
+                self?.refreshUndoComponents()
             }
             .store(in: &cancellables)
     }
-    
-    private func bindModels(_ parameters: DrawingParameters) {
 
-        parameters.diameterSubject
-            .sink { [weak self] diameter in
-                self?.diameterSlider.value = diameter
-            }
-            .store(in: &cancellables)
+    private func bindModels(_ transforming: TransformingProtocol) {
 
-        parameters.backgroundColorSubject
-            .sink { [weak self] color in
-                self?.canvasView.backgroundColor = color
-            }
-            .store(in: &cancellables)
-
-        parameters.clearUndoSubject
-            .sink { [weak self] in
-                self?.canvasView.clearUndo()
-            }
-            .store(in: &cancellables)
-
-        parameters.matrixSubject
+        transforming.matrixPublisher
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
+    }
 
-        parameters.textureSizeSubject
-            .sink { [weak self] textureSize in
-                guard let `self`, textureSize != .zero else { return }
+    private func bindModels(_ drawingTool: DrawingToolModel) {
 
-                parameters.initLayers(textureSize: textureSize)
-                canvasView.initRootTexture(textureSize: textureSize)
-
-                parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
-            }
+        drawingTool.diameterPublisher
+            .assign(to: \.value, on: diameterSlider)
             .store(in: &cancellables)
 
-        parameters.commitCommandToMergeAllLayersToRootTextureSubject
-            .sink { [weak self] in
-                guard let `self` else { return }
-                
-                parameters.addCommandToMergeAllLayers(
-                    onto: canvasView.rootTexture,
-                    to: canvasView.commandBuffer
-                )
-
-                canvasView.commitCommandsInCommandBuffer()
-            }
-            .store(in: &cancellables)
-
-        parameters.commitCommandsInCommandBuffer
-            .sink { [weak self] in
-                self?.canvasView.commitCommandsInCommandBuffer()
-            }
-            .store(in: &cancellables)
-
-        parameters.layerManager.addUndoObjectToUndoStackSubject
-            .sink { [weak self] in
-                self?.canvasView.registerDrawingUndoAction()
-            }
+        drawingTool.backgroundColorPublisher
+            .compactMap { $0 }
+            .assign(to: \.backgroundColor, on: canvasView)
             .store(in: &cancellables)
     }
 
@@ -202,6 +175,14 @@ extension ContentView {
     func refreshUndoComponents() {
         undoButton.isEnabled = canvasView.canUndo
         redoButton.isEnabled = canvasView.canRedo
+    }
+
+}
+
+extension ContentView {
+
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        canvasView.setNeedsDisplay()
     }
 
 }

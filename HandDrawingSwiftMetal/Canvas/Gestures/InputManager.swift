@@ -2,31 +2,39 @@
 //  InputManager.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/04/02.
+//  Created by Eisuke Kusachi on 2024/04/19.
 //
 
-import UIKit
+import Foundation
+
+enum InputType {
+    case ready
+    case pencil
+    case finger
+}
 
 /// Manage GestureWithStorage
 class InputManager {
-    private (set) var currentInput: GestureWithStorageProtocol?
+
+    private (set) var state: InputType = .ready
 
     /// Updates the current input.
-    /// If the current input is a Pencil, return it as is without any updates.
+    /// If the current input is a pencil, just return it.
     @discardableResult
-    func updateInput(_ input: GestureWithStorageProtocol) -> GestureWithStorageProtocol? {
-        // Check if the current input is a Pencil.
-        if currentInput is PencilGestureWithStorage {
-            return currentInput
+    func updateCurrentInput(_ input: InputType) -> InputType {
+        // Check if the current input is a pencil.
+        if state == .pencil {
+            return state
 
         } else {
             // Set the current input to the new input and return it.
-            currentInput = input
-            return currentInput
+            state = input
+            return state
         }
     }
 
     func clear() {
-        currentInput = nil
+        state = .ready
     }
+
 }

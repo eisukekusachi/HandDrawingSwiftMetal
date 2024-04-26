@@ -15,10 +15,16 @@ final class LayerViewPresenter {
 
     func setupLayerViewPresenter(
         layerManager: LayerManager,
+        layerViewPresentation: LayerViewPresentation,
+        undoHistoryManager: UndoHistoryManager,
         targetView: UIView,
         on viewController: UIViewController
     ) {
-        layerView = LayerView(layerManager: layerManager)
+        layerView = LayerView(
+            layerManager: layerManager,
+            layerViewPresentation: layerViewPresentation,
+            undoHistoryManager: undoHistoryManager
+        )
 
         guard let layerView else { return }
 
@@ -28,7 +34,10 @@ final class LayerViewPresenter {
         layerViewController?.view.backgroundColor = .clear
         layerViewController?.view.isHidden = true
 
-        addConstraints(targetView: targetView, layerManager: layerManager, on: viewController)
+        addConstraints(
+            targetView: targetView,
+            layerViewPresentation: layerViewPresentation,
+            on: viewController)
     }
     func toggleVisible() {
         if let isHidden = layerViewController?.view.isHidden {
@@ -36,7 +45,11 @@ final class LayerViewPresenter {
         }
     }
 
-    private func addConstraints(targetView: UIView, layerManager: LayerManager, on viewController: UIViewController) {
+    private func addConstraints(
+        targetView: UIView,
+        layerViewPresentation: LayerViewPresentation,
+        on viewController: UIViewController
+    ) {
         let viewWidth: CGFloat = 300.0
         let viewHeight: CGFloat = 300.0
 
@@ -53,6 +66,7 @@ final class LayerViewPresenter {
         let layerViewX = targetViewCenterX - viewWidth * 0.5
         let centerX = targetViewCenterX - layerViewX
 
-        layerManager.arrowPointX = centerX
+        layerViewPresentation.arrowPointX = centerX
     }
+
 }

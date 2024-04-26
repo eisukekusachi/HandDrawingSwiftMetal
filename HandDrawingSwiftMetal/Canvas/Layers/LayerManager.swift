@@ -9,30 +9,25 @@ import MetalKit
 import Accelerate
 import Combine
 
-enum LayerManagerError: Error {
-    case failedToMakeTexture
-}
 class LayerManager: ObservableObject {
 
     @Published var selectedLayer: LayerModel?
     @Published var selectedLayerAlpha: Int = 255
 
-    let commitCommandToMergeAllLayersToRootTextureSubject = PassthroughSubject<Void, Never>()
+    var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
+        refreshCanvasWithMergingDrawingLayersSubject.eraseToAnyPublisher()
+    }
 
-    let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+    var refreshCanvasWithMergingAllLayersPublisher: AnyPublisher<Void, Never> {
+        refreshCanvasWithMergingAllLayersSubject.eraseToAnyPublisher()
+    }
 
     var frameSize: CGSize = .zero {
         didSet {
-            drawingBrush.frameSize = frameSize
-            drawingEraser.frameSize = frameSize
+            drawingBrushLayer.frameSize = frameSize
+            drawingEraserLayer.frameSize = frameSize
         }
     }
-
-    /// Drawing with a brush
-    let drawingBrush = DrawingBrush()
-
-    /// Drawing with an eraser
-    let drawingEraser = DrawingEraser()
 
     var layers: [LayerModel] = [] {
         didSet {
@@ -49,46 +44,82 @@ class LayerManager: ObservableObject {
         }
     }
 
-    var selectedTexture: MTLTexture? {
-        guard index < layers.count else { return nil }
-        return layers[index].texture
-    }
-
-    var arrowPointX: CGFloat = 0.0
-
-    private var textureSize: CGSize = .zero
+    /// A protocol for managing current drawing layer
+    private (set) var drawingLayer: DrawingLayer?
+    /// Drawing with a brush
+    private let drawingBrushLayer = DrawingBrushLayer()
+    /// Drawing with an eraser
+    private let drawingEraserLayer = DrawingEraserLayer()
 
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
 
+    private var textureSize: CGSize = .zero
+
+    private let refreshCanvasWithMergingDrawingLayersSubject = PassthroughSubject<Void, Never>()
+
+    private let refreshCanvasWithMergingAllLayersSubject = PassthroughSubject<Void, Never>()
+
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func reset(_ textureSize: CGSize) {
+    func initLayers(with textureSize: CGSize) {
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        drawingBrush.initTextures(textureSize)
-        drawingEraser.initTextures(textureSize)
-        
-        layers.removeAll()
-        index = 0
-        
-        addLayer(isUndo: false)
+        drawingBrushLayer.initTextures(textureSize)
+        drawingEraserLayer.initTextures(textureSize)
+
+        self.layers.removeAll()
+
+        self.addLayer()
+        self.index = 0
     }
 
-    func addCommandToMergeAllLayers(
-        selectedTextures: [MTLTexture],
-        selectedAlpha: Int,
-        backgroundColor: (Int, Int, Int),
+    func initLayers(with newTexture: MTLTexture) {
+        self.layers.removeAll()
+
+        let layerData = LayerModel.init(
+            texture: newTexture,
+            title: "NewLayer"
+        )
+        self.layers.append(layerData)
+        self.index = 0
+    }
+
+    func initLayers(index: Int, layers: [LayerModel]) {
+        self.layers = layers
+        self.index = index
+    }
+
+    func initLayers(undoObject: UndoObject) {
+        self.index = undoObject.index
+        self.layers = undoObject.layers
+    }
+
+    func setDrawingLayer(_ tool: DrawingToolType) {
+        drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
+    }
+
+}
+
+extension LayerManager {
+
+    func mergeDrawingLayers(
+        backgroundColor: UIColor,
         onto dstTexture: MTLTexture,
         to commandBuffer: MTLCommandBuffer
     ) {
+        guard
+            let selectedTexture = selectedTexture,
+            let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
+        else { return }
+
         Command.fill(dstTexture,
-                     withRGB: backgroundColor,
+                     withRGB: backgroundColor.rgb,
                      commandBuffer)
 
         Command.merge(texture: bottomTexture,
@@ -96,11 +127,11 @@ class LayerManager: ObservableObject {
                       commandBuffer)
 
         if layers[index].isVisible {
-            MTKTextureUtils.makeSingleTexture(from: selectedTextures,
+            MTKTextureUtils.makeSingleTexture(from: selectedTextures.compactMap { $0 },
                                               to: currentTexture,
                                               commandBuffer)
             Command.merge(texture: currentTexture,
-                          alpha: selectedAlpha,
+                          alpha: selectedLayerAlpha,
                           into: dstTexture,
                           commandBuffer)
         }
@@ -110,7 +141,7 @@ class LayerManager: ObservableObject {
                       commandBuffer)
     }
 
-    func addCommandToMergeUnselectedLayers(
+    func mergeUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
     ) {
         let bottomIndex: Int = index - 1
@@ -138,108 +169,115 @@ class LayerManager: ObservableObject {
             }
         }
     }
+
+    func refreshCanvasWithMergingDrawingLayers() {
+        refreshCanvasWithMergingDrawingLayersSubject.send()
+    }
+
+    func refreshCanvasWithMergingAllLayers() {
+        refreshCanvasWithMergingAllLayersSubject.send()
+    }
+
 }
 
 // CRUD
 extension LayerManager {
    
-    func addLayer(isUndo: Bool = true) {
-        if isUndo {
-            addUndoObjectToUndoStackSubject.send()
-        }
-
+    func addLayer() {
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        let layer = LayerModel(texture: texture,
-                               title: title)
+        let layer = LayerModel(
+            texture: texture,
+            title: title
+        )
 
         if index < layers.count - 1 {
             layers.insert(layer, at: index + 1)
         } else {
             layers.append(layer)
         }
-
-        didUpdatedAllLayers()
     }
 
-    func moveLayer(fromOffsets source: IndexSet, toOffset destination: Int) {
-        guard let tmpSelectedLayer = selectedLayer else { return }
-
+    func moveLayer(
+        fromOffsets source: IndexSet,
+        toOffset destination: Int,
+        selectedLayer: LayerModel
+    ) {
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)
         layers = layers.reversed()
 
-        if let layerIndex = layers.firstIndex(of: tmpSelectedLayer) {
+        if let layerIndex = layers.firstIndex(of: selectedLayer) {
             index = layerIndex
-
-            didUpdatedAllLayers()
         }
     }
+
     func removeLayer() {
-        if layers.count == 1 { return }
-
-        addUndoObjectToUndoStackSubject.send()
-
         layers.remove(at: index)
 
         // Updates the value for UI update
-        var curretnIndex = index
-        if curretnIndex > layers.count - 1 {
-            curretnIndex = layers.count - 1
+        var currentIndex = index
+        if currentIndex > layers.count - 1 {
+            currentIndex = layers.count - 1
         }
-        index = curretnIndex
-
-        didUpdatedAllLayers()
-    }
-
-    func update(undoObject: UndoObject) {
-        index = undoObject.index
-        layers = undoObject.layers
+        index = currentIndex
     }
 
     func updateLayer(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
-
-        didUpdatedAllLayers()
-    }
-    func updateLayerAlpha(_ layer: LayerModel, _ alpha: Int) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].alpha = alpha
-
-        commitCommandToMergeAllLayersToRootTextureSubject.send()
     }
 
-    func updateSelectedLayerTexture(_ texture: MTLTexture) {
-        layers[index].texture = texture
-    }
-
-    func updateTexture(_ layer: LayerModel, _ texture: MTLTexture) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].texture = texture
-    }
     func updateTitle(_ layer: LayerModel, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
+
+    func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].isVisible = isVisible
+    }
+
+    func updateAlpha(_ layer: LayerModel, _ alpha: Int) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        layers[layerIndex].alpha = alpha
+    }
+
     func updateThumbnail(_ layer: LayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }
-    func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].isVisible = isVisible
 
-        didUpdatedAllLayers()
+}
+
+extension LayerManager {
+
+    var selectedTexture: MTLTexture? {
+        guard index < layers.count else { return nil }
+        return layers[index].texture
     }
 
-    private func didUpdatedAllLayers() {
-        let commandBuffer: MTLCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        addCommandToMergeUnselectedLayers(to: commandBuffer)
-        commandBuffer.commit()
+    func updateSelectedLayerTextureWithNewAddressTexture() {
+        guard
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let selectedTexture = selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
+        else { return }
 
-        commitCommandToMergeAllLayersToRootTextureSubject.send()
+        layers[index].texture = newTexture
+    }
+
+    @MainActor
+    func updateCurrentThumbnail() async throws {
+        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
+        if let selectedLayer {
+            updateThumbnail(selectedLayer)
+        }
+    }
+
+    func clearDrawingLayer() {
+        drawingLayer?.clearDrawingTextures()
     }
 
 }

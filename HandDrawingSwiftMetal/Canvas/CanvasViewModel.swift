@@ -8,13 +8,62 @@
 import MetalKit
 import Combine
 
+protocol CanvasViewModelDelegate {
+
+    var commandBuffer: MTLCommandBuffer { get }
+    var rootTexture: MTLTexture { get }
+
+    func initRootTexture(textureSize: CGSize)
+
+    func clearCommandBuffer()
+
+    func registerDrawingUndoAction(with undoObject: UndoObject)
+
+    func refreshCanvasByCallingSetNeedsDisplay()
+
+}
+
 class CanvasViewModel {
 
-    let parameters = DrawingParameters()
+    var delegate: CanvasViewModelDelegate?
+
+    let drawing = Drawing()
+
+    let transforming = Transforming()
+
+    let layerManager = LayerManager()
+    let layerViewPresentation = LayerViewPresentation()
+
+    let drawingTool = DrawingToolModel()
+
+    let undoHistoryManager = UndoHistoryManager()
+
+    let inputManager = InputManager()
 
     var frameSize: CGSize = .zero {
         didSet {
-            parameters.frameSize = frameSize
+            drawing.frameSize = frameSize
+
+            layerManager.frameSize = frameSize
+
+            transforming.screenCenter = .init(
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
+            )
+        }
+    }
+
+    var textureSize: CGSize = .zero {
+        didSet {
+            guard textureSize != .zero else { return }
+
+            delegate?.initRootTexture(textureSize: textureSize)
+
+            layerManager.initLayers(with: textureSize)
+
+            drawing.textureSize = textureSize
+
+            refreshCanvasWithMergingAllLayers()
         }
     }
 
@@ -25,105 +74,385 @@ class CanvasViewModel {
         projectName + "." + URL.zipSuffix
     }
 
-    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
+        pauseDisplayLinkSubject.eraseToAnyPublisher()
+    }
 
-    /// A protocol for managing transformations
-    private let transforming = Transforming()
+    var clearUndoPublisher: AnyPublisher<Void, Never> {
+        clearUndoSubject.eraseToAnyPublisher()
+    }
+
+    var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
+        requestShowingLayerViewSubject.eraseToAnyPublisher()
+    }
+
+    private let lineDrawing = LineDrawing()
+    private let smoothLineDrawing = SmoothLineDrawing()
+
+    private let touchManager = TouchManager()
+    private let actionManager = ActionManager()
 
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
 
-    private var displayLink: CADisplayLink?
+    private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
+
+    private let clearUndoSubject = PassthroughSubject<Void, Never>()
+
+    private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        parameters.pauseDisplayLinkSubject
-            .sink { [weak self] pause in
-                self?.pauseDisplayLinkLoop(pause)
+        undoHistoryManager.addUndoObjectToUndoStackPublisher
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.undoHistoryManager.registerDrawingUndoAction(
+                    delegate: self.delegate,
+                    layerManager: self.layerManager
+                )
             }
             .store(in: &cancellables)
 
-        parameters.setDrawingTool(.brush)
+        layerManager.refreshCanvasWithMergingDrawingLayersPublisher
+            .sink { [weak self] in
+                self?.refreshCanvasWithMergingDrawingLayers()
+            }
+            .store(in: &cancellables)
 
-        // Configure the display link for rendering.
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
+        layerManager.refreshCanvasWithMergingAllLayersPublisher
+            .sink { [weak self] in
+                self?.refreshCanvasWithMergingAllLayers()
+            }
+            .store(in: &cancellables)
+
+        drawingTool.drawingToolPublisher
+            .sink { [weak self] tool in
+                self?.layerManager.setDrawingLayer(tool)
+            }
+            .store(in: &cancellables)
+
+        drawingTool.setDrawingTool(.brush)
+    }
+
+    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
+        if textureSize == .zero &&
+           frameSize.isSameRatio(drawableSize) {
+            textureSize = drawableSize
+        }
     }
 
 }
 
 extension CanvasViewModel {
 
+    func handleFingerInputGesture(
+        _ touches: Set<UITouch>,
+        with event: UIEvent?,
+        on view: UIView
+    ) {
+        defer {
+            touchManager.removeValuesOnTouchesEnded(touches: touches)
+
+            if touchManager.isAllFingersReleased(touches: touches, with: event) {
+                initDrawingParameters()
+            }
+        }
+
+        guard inputManager.updateCurrentInput(.finger) != .pencil else { return }
+
+        touchManager.appendFingerTouchesToTouchPointsDictionary(event, in: view)
+
+        let newState: ActionState = .init(from: touchManager.touchPointsDictionary)
+
+        switch actionManager.updateState(newState) {
+        case .drawing:
+            guard
+                let hashValue = touchManager.hashValueForFingerDrawing,
+                let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
+            else { return }
+
+            let isTouchEnded = touchPhase == .ended
+
+            if isTouchEnded {
+                undoHistoryManager.registerDrawingUndoAction(
+                    delegate: delegate,
+                    layerManager: layerManager
+                )
+            }
+
+            drawing.initDrawingIfHashValueIsNil(
+                lineDrawing: smoothLineDrawing,
+                hashValue: hashValue
+            )
+
+            let touchPoints = drawing.getNewTouchPoints(
+                from: touchManager,
+                with: smoothLineDrawing
+            )
+
+            let dotPoints = touchPoints.map {
+                DotPoint(
+                    touchPoint: $0,
+                    matrix: transforming.matrix,
+                    frameSize: frameSize,
+                    textureSize: textureSize
+                )
+            }
+
+            smoothLineDrawing.appendToIterator(dotPoints)
+
+            if isTouchEnded {
+                smoothLineDrawing.appendLastTouchToSmoothCurveIterator()
+            }
+
+            let lineSegment = drawing.makeLineSegment(
+                from: smoothLineDrawing.iterator,
+                with: .init(drawingTool),
+                touchPhase: touchPhase
+            )
+
+            drawSegmentOnCanvas(
+                lineSegment: lineSegment,
+                on: delegate?.rootTexture,
+                to: delegate?.commandBuffer
+            )
+
+            if isTouchEnded {
+                initDrawingParameters()
+            }
+
+            pauseDisplayLinkLoop(isTouchEnded)
+
+        case .transforming:
+            guard
+                let hashValues = transforming.getHashValues(from: touchManager),
+                let touchPoints = transforming.getTouchPoints(from: touchManager, using: hashValues)
+            else { return }
+
+            if transforming.isInitializationRequired {
+                transforming.initTransforming(hashValues: hashValues)
+            }
+
+            transforming.transformCanvas(touchPoints: (touchPoints.0, touchPoints.1))
+
+            if transforming.isTouchEnded {
+                transforming.finishTransforming()
+                initDrawingParameters()
+            }
+
+            pauseDisplayLinkLoop(transforming.isTouchEnded)
+
+        default:
+            break
+        }
+    }
+
+    func handlePencilInputGesture(
+        _ touches: Set<UITouch>,
+        with event: UIEvent?,
+        on view: UIView
+    ) {
+        defer {
+            touchManager.removeValuesOnTouchesEnded(touches: touches)
+
+            if touchManager.isAllFingersReleased(touches: touches, with: event) {
+                initDrawingParameters()
+            }
+        }
+
+        if inputManager.state == .finger {
+            initDrawingParameters()
+
+            layerManager.clearDrawingLayer()
+
+            delegate?.clearCommandBuffer()
+            delegate?.refreshCanvasByCallingSetNeedsDisplay()
+        }
+        inputManager.updateCurrentInput(.pencil)
+
+        touchManager.appendPencilTouchesToTouchPointsDictionary(event, in: view)
+
+        guard
+            let hashValue = touchManager.hashValueForPencilDrawing,
+            let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
+        else {
+            return
+        }
+
+        let isTouchEnded = touchPhase == .ended
+
+        if isTouchEnded {
+            undoHistoryManager.registerDrawingUndoAction(
+                delegate: delegate,
+                layerManager: layerManager
+            )
+        }
+
+        drawing.initDrawingIfHashValueIsNil(
+            lineDrawing: lineDrawing,
+            hashValue: hashValue
+        )
+
+        let touchPoints = drawing.getNewTouchPoints(
+            from: touchManager,
+            with: lineDrawing
+        )
+
+        let dotPoints = touchPoints.map {
+            DotPoint(
+                touchPoint: $0,
+                matrix: transforming.matrix,
+                frameSize: frameSize,
+                textureSize: textureSize
+            )
+        }
+
+        lineDrawing.appendToIterator(dotPoints)
+
+        // TODO: Delete it once actual values are used instead of estimated ones.
+        lineDrawing.setInaccurateAlphaToZero()
+
+        let lineSegment = drawing.makeLineSegment(
+            from: lineDrawing.iterator,
+            with: .init(drawingTool),
+            touchPhase: touchPhase
+        )
+
+        drawSegmentOnCanvas(
+            lineSegment: lineSegment,
+            on: delegate?.rootTexture,
+            to: delegate?.commandBuffer
+        )
+
+        if isTouchEnded {
+            initDrawingParameters()
+        }
+
+        pauseDisplayLinkLoop(isTouchEnded)
+    }
+
+}
+
+extension CanvasViewModel {
+
+    private func initDrawingParameters() {
+        touchManager.clearTouchPointsDictionary()
+
+        inputManager.clear()
+        actionManager.clear()
+
+        lineDrawing.clearIterator()
+        smoothLineDrawing.clearIterator()
+        transforming.clearTransforming()
+    }
+
+    private func drawSegmentOnCanvas(
+        lineSegment: LineSegment,
+        on rootTexture: MTLTexture?,
+        to commandBuffer: MTLCommandBuffer?
+    ) {
+        guard
+            let rootTexture,
+            let commandBuffer
+        else { return }
+
+        drawing.addDrawLineSegmentCommands(
+            with: lineSegment,
+            on: layerManager,
+            to: commandBuffer
+        )
+
+        if lineSegment.touchPhase == .ended {
+            drawing.addFinishDrawingCommands(
+                on: layerManager,
+                to: commandBuffer
+            )
+        }
+
+        layerManager.mergeDrawingLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: rootTexture,
+            to: commandBuffer)
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func refreshCanvas(using undoObject: UndoObject) {
+        layerManager.initLayers(undoObject: undoObject)
+
+        refreshCanvasWithMergingAllLayers()
+    }
+
+    func refreshCanvasWithMergingAllLayers() {
+        guard let delegate else { return }
+
+        layerManager.mergeUnselectedLayers(
+            to: delegate.commandBuffer
+        )
+        refreshCanvasWithMergingDrawingLayers()
+    }
+
+    func refreshCanvasWithMergingDrawingLayers() {
+        guard let delegate else { return }
+
+        layerManager.mergeDrawingLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: delegate.rootTexture,
+            to: delegate.commandBuffer)
+
+        delegate.refreshCanvasByCallingSetNeedsDisplay()
+    }
+
+    /// Start or stop the display link loop.
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
+            if pauseDisplayLinkSubject.value == false {
+                // Pause the display link after updating the display.
+                delegate?.refreshCanvasByCallingSetNeedsDisplay()
+                pauseDisplayLinkSubject.send(true)
+            }
+
+        } else {
+            if pauseDisplayLinkSubject.value == true {
+                pauseDisplayLinkSubject.send(false)
+            }
+        }
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func didTapLayerButton() {
+        Task {
+            try? await layerManager.updateCurrentThumbnail()
+
+            DispatchQueue.main.async { [weak self] in
+                self?.requestShowingLayerViewSubject.send()
+            }
+        }
+    }
+
     func didTapResetTransformButton() {
-        resetMatrix()
-        parameters.commitCommandsInCommandBuffer.send()
+        transforming.setMatrix(.identity)
+        delegate?.refreshCanvasByCallingSetNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {
 
         projectName = Calendar.currentDate
 
-        parameters.clearUndoSubject.send()
+        transforming.setMatrix(.identity)
+        layerManager.initLayers(with: drawing.textureSize)
 
-        resetMatrix()
+        clearUndoSubject.send()
 
-        parameters.initLayers(textureSize: parameters.textureSizeSubject.value)
-
-        parameters.commitCommandToMergeAllLayersToRootTextureSubject.send()
-    }
-
-}
-
-extension CanvasViewModel {
-
-    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if parameters.textureSizeSubject.value == .zero &&
-           frameSize.isSameRatio(drawableSize) {
-            parameters.textureSizeSubject.send(drawableSize)
-        }
-    }
-
-    func resetMatrix() {
-        transforming.setStoredMatrix(.identity)
-        parameters.matrixSubject.send(.identity)
-    }
-
-    func getMatrix(transformationData: TransformationData, touchPhase: UITouch.Phase) -> CGAffineTransform? {
-        transforming.getMatrix(transformationData: transformationData,
-                               frameCenterPoint: Calc.getCenter(frameSize),
-                               touchPhase: touchPhase)
-    }
-
-    func setMatrix(_ matrix: CGAffineTransform) {
-        transforming.setStoredMatrix(matrix)
-    }
-
-}
-
-extension CanvasViewModel {
-
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        parameters.commitCommandsInCommandBuffer.send()
-    }
-
-    /// Start or stop the display link loop based on the 'play' parameter.
-    private func pauseDisplayLinkLoop(_ pause: Bool) {
-        if pause {
-            if displayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                parameters.commitCommandsInCommandBuffer.send()
-                displayLink?.isPaused = true
-            }
-
-        } else {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
-            }
-        }
+        refreshCanvasWithMergingAllLayers()
     }
 
 }

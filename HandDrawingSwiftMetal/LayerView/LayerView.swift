@@ -9,6 +9,8 @@ import SwiftUI
 
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
+    @ObservedObject var layerViewPresentation: LayerViewPresentation
+    @ObservedObject var undoHistoryManager: UndoHistoryManager
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -32,7 +34,10 @@ struct LayerView: View {
 
             VStack {
                 toolbar(layerManager: layerManager)
-                listView(layerManager: layerManager)
+                listView(
+                    layerManager: layerManager, 
+                    undoHistoryManager: undoHistoryManager
+                )
                 selectedTextureAlphaSlider(layerManager: layerManager)
             }
             .padding(edgeInsets)
@@ -46,7 +51,9 @@ extension LayerView {
 
         return HStack {
             Button(action: {
+                undoHistoryManager.addUndoObjectToUndoStack()
                 layerManager.addLayer()
+                layerManager.refreshCanvasWithMergingAllLayers()
 
             }, label: {
                 Image(systemName: "plus.circle")
@@ -57,7 +64,11 @@ extension LayerView {
                 .frame(width: 16)
 
             Button(action: {
-                layerManager.removeLayer()
+                if layerManager.layers.count > 1 {
+                    undoHistoryManager.addUndoObjectToUndoStack()
+                    layerManager.removeLayer()
+                    layerManager.refreshCanvasWithMergingAllLayers()
+                }
 
             }, label: {
                 Image(systemName: "minus.circle")
@@ -90,8 +101,15 @@ extension LayerView {
         }
         .padding(8)
     }
-    func listView(layerManager: LayerManager) -> some View {
-        LayerListView(layerManager: layerManager)
+    func listView(
+        layerManager: LayerManager,
+        undoHistoryManager: UndoHistoryManager
+    ) -> some View {
+
+        LayerListView(
+            layerManager: layerManager,
+            undoHistoryManager: undoHistoryManager
+        )
     }
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
         TwoRowsSliderView(
@@ -100,7 +118,8 @@ extension LayerView {
             style: sliderStyle,
             range: range) { value in
                 guard let selectedLayer = layerManager.selectedLayer else { return }
-                layerManager.updateLayerAlpha(selectedLayer, value)
+                layerManager.updateAlpha(selectedLayer, value)
+                layerManager.refreshCanvasWithMergingDrawingLayers()
         }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
@@ -121,7 +140,7 @@ extension LayerView {
 
             let pointMinX = minX1 + arrowSize.width * 0.5
             let pointMaxX = maxX1 - arrowSize.width * 0.5
-            let pointX = min(max(pointMinX, layerManager.arrowPointX), pointMaxX)
+            let pointX = min(max(pointMinX, layerViewPresentation.arrowPointX), pointMaxX)
 
             let arrowStartX = pointX - arrowSize.width * 0.5
             let arrowEndX = pointX + arrowSize.width * 0.5
@@ -186,5 +205,9 @@ extension LayerView {
 }
 
 #Preview {
-    LayerView(layerManager: LayerManager())
+    LayerView(
+        layerManager: LayerManager(),
+        layerViewPresentation: LayerViewPresentation(),
+        undoHistoryManager: UndoHistoryManager()
+    )
 }

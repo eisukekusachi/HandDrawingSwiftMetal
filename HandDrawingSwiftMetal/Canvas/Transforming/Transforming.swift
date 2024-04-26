@@ -6,40 +6,83 @@
 //
 
 import UIKit
+import Combine
 
-class Transforming {
+/// A class for view rotation.
+class Transforming: TransformingProtocol {
+
+    var matrix: CGAffineTransform {
+        matrixSubject.value
+    }
+
+    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
+        matrixSubject.eraseToAnyPublisher()
+    }
+
     var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    func getMatrix(transformationData: TransformationData,
-                   frameCenterPoint: CGPoint,
-                   touchPhase: UITouch.Phase) -> CGAffineTransform? {
-        guard let matrix = makeMatrix(transformationData: transformationData,
-                                      centerPoint: frameCenterPoint) else { return nil }
-        let newMatrix = storedMatrix.concatenating(matrix)
+    var touchPointsA: TransformingPoint?
+    var touchPointsB: TransformingPoint?
+    var screenCenter: CGPoint = .zero
 
-        if touchPhase == .ended {
-            storedMatrix = newMatrix
-        }
-
-        return newMatrix
+    var isInitializationRequired: Bool {
+        touchPointsA == nil ||
+        touchPointsB == nil
     }
-    func setStoredMatrix(_ matrix: CGAffineTransform) {
+
+    var isTouchEnded: Bool {
+        let phases = [
+        touchPointsA?.startTouchPoint?.phase,
+        touchPointsA?.lastTouchPoint?.phase,
+        touchPointsB?.startTouchPoint?.phase,
+        touchPointsB?.lastTouchPoint?.phase]
+
+        return phases.contains(.ended) || phases.contains(.cancelled)
+    }
+
+    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+
+    func initTransforming(hashValues: (TouchHashValue, TouchHashValue)) {
+        touchPointsA = TransformingPoint(hashValue: hashValues.0)
+        touchPointsB = TransformingPoint(hashValue: hashValues.1)
+    }
+
+    func setMatrix(_ matrix: CGAffineTransform) {
+        matrixSubject.send(matrix)
         storedMatrix = matrix
+        touchPointsA = nil
+        touchPointsB = nil
     }
 
-    /// Generate a matrix from touch points and view size
-    private func makeMatrix(transformationData: TransformationData, centerPoint: CGPoint) -> CGAffineTransform? {
-        if let pointsA = transformationData.pointsA,
-           let pointsB = transformationData.pointsB,
-           let newMatrix = CGAffineTransform.makeMatrix(center: centerPoint,
-                                                        pointsA: pointsA,
-                                                        pointsB: pointsB,
-                                                        counterRotate: true,
-                                                        flipY: true) {
-            return newMatrix
+    func transformCanvas(touchPoints: (TouchPoint, TouchPoint)) {
+        touchPointsA?.updateTouchPoints(touchPoints.0)
+        touchPointsB?.updateTouchPoints(touchPoints.1)
 
-        } else {
-            return nil
-        }
+        guard
+            let startAndLastLocationA = touchPointsA?.startAndLastLocations,
+            let startAndLastLocationB = touchPointsB?.startAndLastLocations,
+            let newMatrix = CGAffineTransform.makeMatrix(
+                center: screenCenter,
+                pointsA: startAndLastLocationA,
+                pointsB: startAndLastLocationB,
+                counterRotate: true,
+                flipY: true
+            )
+        else { return }
+
+        matrixSubject.send(storedMatrix.concatenating(newMatrix))
     }
+
+    func finishTransforming() {
+        storedMatrix = matrixSubject.value
+        touchPointsA = nil
+        touchPointsB = nil
+    }
+
+    func clearTransforming() {
+        matrixSubject.value = storedMatrix
+        touchPointsA = nil
+        touchPointsB = nil
+    }
+
 }

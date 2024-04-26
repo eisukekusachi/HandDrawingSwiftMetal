@@ -22,9 +22,9 @@ extension CanvasViewModel {
                                  layerIndex: layerIndex,
                                  layers: codableLayers,
                                  thumbnailName: URL.thumbnailPath,
-                                 drawingTool: parameters.drawingToolSubject.value.rawValue,
-                                 brushDiameter: parameters.brushDiameter,
-                                 eraserDiameter: parameters.eraserDiameter)
+                                 drawingTool: drawingTool.drawingTool.rawValue,
+                                 brushDiameter: drawingTool.brushDiameter,
+                                 eraserDiameter: drawingTool.eraserDiameter)
 
         try fileIO.saveJson(data,
                             to: tmpFolderURL.appendingPathComponent(URL.jsonFileName))
@@ -57,39 +57,38 @@ extension CanvasViewModel {
             throw FileInputError.failedToApplyData
         }
 
-        parameters.layerManager.layers = layers
-        parameters.layerManager.index = layerIndex
+        layerManager.initLayers(index: layerIndex, layers: layers)
 
-        parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
-        parameters.setBrushDiameter(brushDiameter)
-        parameters.setEraserDiameter(eraserDiameter)
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: rawValueDrawingTool))
 
         projectName = zipFilePath.fileName
     }
     func applyCanvasDataToCanvas(_ data: CanvasModel?,
                                  folderURL: URL,
                                  zipFilePath: String) throws {
-        guard let textureName = data?.textureName,
-              let textureSize = data?.textureSize,
-              let rawValueDrawingTool = data?.drawingTool,
-              let brushDiameter = data?.brushDiameter,
-              let eraserDiameter = data?.eraserDiameter,
-              let newTexture = try MTKTextureUtils.makeTexture(device,
-                                                               url: folderURL.appendingPathComponent(textureName),
-                                                               textureSize: textureSize) else {
+        guard 
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let textureName = data?.textureName,
+            let textureSize = data?.textureSize,
+            let rawValueDrawingTool = data?.drawingTool,
+            let brushDiameter = data?.brushDiameter,
+            let eraserDiameter = data?.eraserDiameter,
+            let newTexture = try MTKTextureUtils.makeTexture(
+                device,
+                url: folderURL.appendingPathComponent(textureName),
+                textureSize: textureSize
+            ) else {
+
             throw FileInputError.failedToApplyData
         }
 
-        let layerData = LayerModel.init(texture: newTexture,
-                                        title: "NewLayer")
+        layerManager.initLayers(with: newTexture)
 
-        parameters.layerManager.layers.removeAll()
-        parameters.layerManager.layers.append(layerData)
-        parameters.layerManager.index = 0
-
-        parameters.drawingToolSubject.send(.init(rawValue: rawValueDrawingTool))
-        parameters.setBrushDiameter(brushDiameter)
-        parameters.setEraserDiameter(eraserDiameter)
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: rawValueDrawingTool))
 
         projectName = zipFilePath.fileName
     }

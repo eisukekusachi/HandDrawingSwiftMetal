@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 class ViewController: UIViewController {
-    
+
     @IBOutlet private weak var contentView: ContentView!
 
     let canvasViewModel = CanvasViewModel()
@@ -27,8 +27,10 @@ class ViewController: UIViewController {
         setupContentView()
         setupNewCanvasDialogPresenter()
         setupLayerViewPresenter()
+
+        bindViewModel()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
@@ -38,14 +40,17 @@ class ViewController: UIViewController {
             drawableSize: contentView.canvasView.drawableSize
         )
     }
-    
+
 }
 
 extension ViewController {
 
     private func setupContentView() {
         contentView.canvasView.setViewModel(canvasViewModel)
-        contentView.applyDrawingParameters(canvasViewModel.parameters)
+        contentView.bindTransforming(canvasViewModel.transforming)
+        contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+
+        subscribeEvents()
 
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
@@ -57,7 +62,7 @@ extension ViewController {
                        with: canvasViewModel.zipFileNameName)
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.layerViewPresenter.toggleVisible()
+            self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
@@ -95,6 +100,37 @@ extension ViewController {
         }
     }
 
+    private func bindViewModel() {
+        canvasViewModel.delegate = self
+
+        canvasViewModel.pauseDisplayLinkPublisher
+            .assign(to: \.isDisplayLinkPaused, on: contentView)
+            .store(in: &cancellables)
+
+        canvasViewModel.clearUndoPublisher
+            .sink { [weak self] in
+                self?.contentView.canvasView.clearUndo()
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingLayerViewPublisher
+            .sink { [weak self] in
+                self?.layerViewPresenter.toggleVisible()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func subscribeEvents() {
+        let fingerInputGestureRecognizer = FingerInputGestureRecognizer()
+        let pencilInputGestureRecognizer = PencilInputGestureRecognizer()
+
+        contentView.canvasView.addGestureRecognizer(fingerInputGestureRecognizer)
+        contentView.canvasView.addGestureRecognizer(pencilInputGestureRecognizer)
+
+        fingerInputGestureRecognizer.gestureDelegate = self
+        pencilInputGestureRecognizer.gestureDelegate = self
+    }
+
 }
 
 extension ViewController {
@@ -107,9 +143,12 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         layerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.parameters.layerManager,
+            layerManager: canvasViewModel.layerManager,
+            layerViewPresentation: canvasViewModel.layerViewPresentation,
+            undoHistoryManager: canvasViewModel.undoHistoryManager,
             targetView: contentView.layerButton,
-            on: self)
+            on: self
+        )
     }
 
 }
@@ -133,8 +172,8 @@ extension ViewController {
             guard   let self,
                     let currentTexture = contentView.canvasView.rootTexture else { return }
 
-            let layerIndex = canvasViewModel.parameters.layerManager.index
-            let codableLayers = try await canvasViewModel.parameters.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
+            let layerIndex = canvasViewModel.layerManager.index
+            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
             try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
                                                     layerIndex: layerIndex,
                                                     codableLayers: codableLayers,
@@ -148,10 +187,15 @@ extension ViewController {
             guard let self else { return }
 
             if let data = try canvasViewModel.loadCanvasDataV2(from: zipFilePath, into: folderURL) {
-                guard let textureSize = data.textureSize,
-                      let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(device: canvasViewModel.device,
-                                                                                           textureSize: textureSize,
-                                                                                           folderURL: folderURL) else { return }
+                guard
+                    let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+                    let textureSize = data.textureSize,
+                    let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(
+                        device: device,
+                        textureSize: textureSize,
+                        folderURL: folderURL
+                    ) else { return }
+
                 try canvasViewModel.applyCanvasDataToCanvasV2(data,
                                                               layers: layers,
                                                               folderURL: folderURL,
@@ -166,16 +210,7 @@ extension ViewController {
 
             contentView.initUndoComponents()
 
-            canvasViewModel.parameters.layerManager.addCommandToMergeUnselectedLayers(
-                to: contentView.canvasView.commandBuffer
-            )
-
-            canvasViewModel.parameters.addCommandToMergeAllLayers(
-                onto: contentView.canvasView.rootTexture,
-                to: contentView.canvasView.commandBuffer
-            )
-
-            canvasViewModel.parameters.commitCommandsInCommandBuffer.send()
+            canvasViewModel.refreshCanvasWithMergingAllLayers()
         }
     }
 
@@ -203,6 +238,53 @@ extension ViewController {
                 view.addSubview(Toast(text: error.localizedDescription))
             }
         }
+    }
+
+}
+
+extension ViewController: FingerInputGestureSender {
+
+    func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+        canvasViewModel.handleFingerInputGesture(touches, with: event, on: view)
+    }
+
+}
+
+extension ViewController: PencilInputGestureSender {
+
+    func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
+        canvasViewModel.handlePencilInputGesture(touches, with: event, on: view)
+    }
+
+}
+
+extension ViewController: CanvasViewModelDelegate {
+
+    var commandBuffer: MTLCommandBuffer {
+        contentView.canvasView.commandBuffer
+    }
+    var rootTexture: MTLTexture {
+        contentView.canvasView.rootTexture
+    }
+
+    func initRootTexture(textureSize: CGSize) {
+        contentView.canvasView.initRootTexture(textureSize: textureSize)
+    }
+
+    func clearCommandBuffer() {
+        contentView.canvasView.setCommandBufferToNil()
+    }
+
+    func registerDrawingUndoAction(with undoObject: UndoObject) {
+        contentView.canvasView.registerDrawingUndoAction(
+            with: undoObject,
+            target: contentView.canvasView
+        )
+        contentView.canvasView.undoManagerWithCount.incrementUndoCount()
+    }
+
+    func refreshCanvasByCallingSetNeedsDisplay() {
+        contentView.canvasView.setNeedsDisplay()
     }
 
 }

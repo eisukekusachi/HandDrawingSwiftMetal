@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LayerListView: View {
     @ObservedObject var layerManager: LayerManager
+    @ObservedObject var undoHistoryManager: UndoHistoryManager
 
     var body: some View {
         List {
@@ -19,17 +20,27 @@ struct LayerListView: View {
                          selected: layerManager.selectedLayer == layer,
                          didTapRow: { selectedLayer in
                     layerManager.updateLayer(selectedLayer)
+                    layerManager.refreshCanvasWithMergingAllLayers()
                 },
                          didTapVisibleButton: { layer in
                     layerManager.updateVisibility(layer, !layer.isVisible)
+                    layerManager.refreshCanvasWithMergingAllLayers()
                 })
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
                     .onMove(perform: { source, destination in
-                        layerManager.addUndoObjectToUndoStackSubject.send()
+                        if let selectedLayer = layerManager.selectedLayer {
 
-                        layerManager.moveLayer(fromOffsets: source, toOffset: destination)
+                            undoHistoryManager.addUndoObjectToUndoStack()
+
+                            layerManager.moveLayer(
+                                fromOffsets: source,
+                                toOffset: destination,
+                                selectedLayer: selectedLayer
+                            )
+                            layerManager.refreshCanvasWithMergingAllLayers()
+                        }
                     })
                     .listRowSeparator(.hidden)
         }
@@ -123,5 +134,8 @@ extension LayerListView {
 }
 
 #Preview {
-    LayerListView(layerManager: LayerManager())
+    LayerListView(
+        layerManager: LayerManager(),
+        undoHistoryManager: UndoHistoryManager()
+    )
 }
