@@ -408,7 +408,7 @@ extension CanvasViewModel {
     }
 
     /// Start or stop the display link loop.
-    func pauseDisplayLinkLoop(_ pause: Bool) {
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
