@@ -70,6 +70,15 @@ final class TouchManager {
         }
     }
 
+    func isAllFingersReleased(
+        touches: Set<UITouch>,
+        with event: UIEvent?
+    ) -> Bool {
+        event?.allTouches?.count == touches.count &&
+        event?.allTouches?.allSatisfy{ $0.phase == .ended || $0.phase == .cancelled } ?? false &&
+        touches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
+    }
+
     func removeValuesOnTouchesEnded(touches: Set<UITouch>) {
         for touch in touches where touch.phase == .ended || touch.phase == .cancelled {
             touchPointsDictionary.removeValue(forKey: touch.hashValue)

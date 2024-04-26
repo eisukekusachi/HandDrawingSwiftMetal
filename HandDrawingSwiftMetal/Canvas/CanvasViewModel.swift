@@ -155,7 +155,7 @@ extension CanvasViewModel {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
 
-            if isAllFingersReleased(touches: touches, with: event) {
+            if touchManager.isAllFingersReleased(touches: touches, with: event) {
                 prepareNextDrawing()
             }
         }
@@ -257,7 +257,7 @@ extension CanvasViewModel {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
 
-            if isAllFingersReleased(touches: touches, with: event) {
+            if touchManager.isAllFingersReleased(touches: touches, with: event) {
                 prepareNextDrawing()
             }
         }
@@ -336,15 +336,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    private func isAllFingersReleased(
-        touches: Set<UITouch>,
-        with event: UIEvent?
-    ) -> Bool {
-        event?.allTouches?.count == touches.count &&
-        event?.allTouches?.allSatisfy{ $0.phase == .ended || $0.phase == .cancelled } ?? false &&
-        touches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
-    }
 
     private func drawSegmentOnCanvas(
         lineSegment: LineSegment,
