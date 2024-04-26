@@ -9,10 +9,6 @@ import MetalKit
 import Accelerate
 import Combine
 
-enum LayerManagerError: Error {
-    case failedToMakeTexture
-}
-
 class LayerManager: ObservableObject {
 
     @Published var selectedLayer: LayerModel?
