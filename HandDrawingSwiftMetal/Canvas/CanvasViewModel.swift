@@ -156,7 +156,7 @@ extension CanvasViewModel {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
 
             if touchManager.isAllFingersReleased(touches: touches, with: event) {
-                prepareNextDrawing()
+                initDrawingParameters()
             }
         }
 
@@ -222,7 +222,7 @@ extension CanvasViewModel {
             pauseDisplayLinkLoop(isTouchEnded)
 
             if isTouchEnded {
-                prepareNextDrawing()
+                initDrawingParameters()
             }
 
         case .transforming:
@@ -239,7 +239,7 @@ extension CanvasViewModel {
 
             if transforming.isTouchEnded {
                 transforming.finishTransforming()
-                prepareNextDrawing()
+                initDrawingParameters()
             }
 
             pauseDisplayLinkLoop(transforming.isTouchEnded)
@@ -258,12 +258,12 @@ extension CanvasViewModel {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
 
             if touchManager.isAllFingersReleased(touches: touches, with: event) {
-                prepareNextDrawing()
+                initDrawingParameters()
             }
         }
 
         if inputManager.state == .finger {
-            prepareNextDrawing()
+            initDrawingParameters()
 
             layerManager.clearDrawingLayer()
 
@@ -329,13 +329,24 @@ extension CanvasViewModel {
         pauseDisplayLinkLoop(isTouchEnded)
 
         if isTouchEnded {
-            prepareNextDrawing()
+            initDrawingParameters()
         }
     }
 
 }
 
 extension CanvasViewModel {
+
+    private func initDrawingParameters() {
+        touchManager.clearTouchPointsDictionary()
+
+        inputManager.clear()
+        actionManager.clear()
+
+        lineDrawing.clearIterator()
+        smoothLineDrawing.clearIterator()
+        transforming.clearTransforming()
+    }
 
     private func drawSegmentOnCanvas(
         lineSegment: LineSegment,
@@ -364,21 +375,6 @@ extension CanvasViewModel {
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
             to: commandBuffer)
-    }
-
-}
-
-extension CanvasViewModel {
-
-    private func prepareNextDrawing() {
-        touchManager.clearTouchPointsDictionary()
-
-        inputManager.clear()
-        actionManager.clear()
-
-        lineDrawing.clearIterator()
-        smoothLineDrawing.clearIterator()
-        transforming.clearTransforming()
     }
 
 }
