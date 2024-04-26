@@ -39,13 +39,6 @@ class CanvasViewModel {
 
     let inputManager = InputManager()
 
-    var undoObject: UndoObject {
-        return UndoObject(
-            index: layerManager.index,
-            layers: layerManager.layers
-        )
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             drawing.frameSize = frameSize
@@ -422,7 +415,12 @@ extension CanvasViewModel {
             layerManager.layers.count != 0
         else { return }
 
-        delegate.registerDrawingUndoAction(with: undoObject)
+        delegate.registerDrawingUndoAction(
+            with: UndoObject(
+                index: layerManager.index,
+                layers: layerManager.layers
+            )
+        )
 
         layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }

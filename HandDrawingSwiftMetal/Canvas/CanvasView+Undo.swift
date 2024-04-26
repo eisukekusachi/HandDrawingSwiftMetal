@@ -33,7 +33,12 @@ extension CanvasView {
                 viewModel.layerManager.layers.count != 0
             else { return }
 
-            registerDrawingUndoAction(with: viewModel.undoObject, target: target)
+            registerDrawingUndoAction(
+                with: UndoObject(
+                    index: viewModel.layerManager.index,
+                    layers: viewModel.layerManager.layers
+                ),
+                target: target)
 
             viewModel.refreshCanvas(using: undoObject)
         }
