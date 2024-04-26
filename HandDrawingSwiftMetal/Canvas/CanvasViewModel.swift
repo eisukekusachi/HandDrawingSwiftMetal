@@ -216,9 +216,10 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            addCommandsDrawingSegmentOnCanvas(
+            drawSegmentOnCanvas(
                 lineSegment: lineSegment,
-                isTouchEnded: isTouchEnded
+                on: delegate?.rootTexture,
+                to: delegate?.commandBuffer
             )
 
             pauseDisplayLinkLoop(isTouchEnded)
@@ -319,9 +320,10 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        addCommandsDrawingSegmentOnCanvas(
+        drawSegmentOnCanvas(
             lineSegment: lineSegment,
-            isTouchEnded: isTouchEnded
+            on: delegate?.rootTexture,
+            to: delegate?.commandBuffer
         )
 
         pauseDisplayLinkLoop(isTouchEnded)
@@ -344,29 +346,33 @@ extension CanvasViewModel {
         touches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
     }
 
-    private func addCommandsDrawingSegmentOnCanvas(
+    private func drawSegmentOnCanvas(
         lineSegment: LineSegment,
-        isTouchEnded: Bool
+        on rootTexture: MTLTexture?,
+        to commandBuffer: MTLCommandBuffer?
     ) {
-        guard let delegate else { return }
+        guard
+            let rootTexture,
+            let commandBuffer
+        else { return }
 
         drawing.addDrawLineSegmentCommands(
             with: lineSegment,
             on: layerManager,
-            to: delegate.commandBuffer
+            to: commandBuffer
         )
 
-        if isTouchEnded {
+        if lineSegment.touchPhase == .ended {
             drawing.addFinishDrawingCommands(
                 on: layerManager,
-                to: delegate.commandBuffer
+                to: commandBuffer
             )
         }
 
         layerManager.addMergeDrawingLayersCommands(
             backgroundColor: drawingTool.backgroundColor,
-            onto: delegate.rootTexture,
-            to: delegate.commandBuffer)
+            onto: rootTexture,
+            to: commandBuffer)
     }
 
 }
