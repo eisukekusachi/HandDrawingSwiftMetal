@@ -219,11 +219,11 @@ extension CanvasViewModel {
                 to: delegate?.commandBuffer
             )
 
-            pauseDisplayLinkLoop(isTouchEnded)
-
             if isTouchEnded {
                 initDrawingParameters()
             }
+
+            pauseDisplayLinkLoop(isTouchEnded)
 
         case .transforming:
             guard
@@ -326,11 +326,11 @@ extension CanvasViewModel {
             to: delegate?.commandBuffer
         )
 
-        pauseDisplayLinkLoop(isTouchEnded)
-
         if isTouchEnded {
             initDrawingParameters()
         }
+
+        pauseDisplayLinkLoop(isTouchEnded)
     }
 
 }
