@@ -139,16 +139,6 @@ class CanvasViewModel {
         }
     }
 
-    func onLayerButtonTapped() {
-        Task {
-            try? await layerManager.updateCurrentThumbnail()
-
-            DispatchQueue.main.async { [weak self] in
-                self?.requestShowingLayerViewSubject.send()
-            }
-        }
-    }
-
 }
 
 extension CanvasViewModel {
@@ -393,6 +383,16 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    func didTapLayerButton() {
+        Task {
+            try? await layerManager.updateCurrentThumbnail()
+
+            DispatchQueue.main.async { [weak self] in
+                self?.requestShowingLayerViewSubject.send()
+            }
+        }
+    }
 
     func didTapResetTransformButton() {
         transforming.setMatrix(.identity)

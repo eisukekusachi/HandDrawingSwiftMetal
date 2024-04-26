@@ -62,7 +62,7 @@ extension ViewController {
                        with: canvasViewModel.zipFileNameName)
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.canvasViewModel.onLayerButtonTapped()
+            self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
