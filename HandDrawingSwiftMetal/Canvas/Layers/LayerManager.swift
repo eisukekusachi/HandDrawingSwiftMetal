@@ -48,8 +48,6 @@ class LayerManager: ObservableObject {
         }
     }
 
-    var arrowPointX: CGFloat = 0.0
-
     /// A protocol for managing current drawing layer
     private (set) var drawingLayer: DrawingLayer?
     /// Drawing with a brush

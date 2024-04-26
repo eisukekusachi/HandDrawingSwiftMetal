@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
+    @ObservedObject var layerViewPresentation: LayerViewPresentation
     @ObservedObject var undoHistoryManager: UndoHistoryManager
 
     @State var isTextFieldPresented: Bool = false
@@ -139,7 +140,7 @@ extension LayerView {
 
             let pointMinX = minX1 + arrowSize.width * 0.5
             let pointMaxX = maxX1 - arrowSize.width * 0.5
-            let pointX = min(max(pointMinX, layerManager.arrowPointX), pointMaxX)
+            let pointX = min(max(pointMinX, layerViewPresentation.arrowPointX), pointMaxX)
 
             let arrowStartX = pointX - arrowSize.width * 0.5
             let arrowEndX = pointX + arrowSize.width * 0.5
@@ -206,6 +207,7 @@ extension LayerView {
 #Preview {
     LayerView(
         layerManager: LayerManager(),
+        layerViewPresentation: LayerViewPresentation(),
         undoHistoryManager: UndoHistoryManager()
     )
 }

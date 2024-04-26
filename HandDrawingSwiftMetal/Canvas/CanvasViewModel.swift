@@ -32,6 +32,7 @@ class CanvasViewModel {
     let transforming = Transforming()
 
     let layerManager = LayerManager()
+    let layerViewPresentation = LayerViewPresentation()
 
     let drawingTool = DrawingToolModel()
 
