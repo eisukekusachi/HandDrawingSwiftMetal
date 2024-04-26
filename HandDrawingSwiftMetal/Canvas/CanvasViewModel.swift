@@ -381,37 +381,6 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func didTapLayerButton() {
-        Task {
-            try? await layerManager.updateCurrentThumbnail()
-
-            DispatchQueue.main.async { [weak self] in
-                self?.requestShowingLayerViewSubject.send()
-            }
-        }
-    }
-
-    func didTapResetTransformButton() {
-        transforming.setMatrix(.identity)
-        delegate?.refreshCanvasByCallingSetNeedsDisplay()
-    }
-
-    func didTapNewCanvasButton() {
-
-        projectName = Calendar.currentDate
-
-        transforming.setMatrix(.identity)
-        layerManager.initLayers(with: drawing.textureSize)
-
-        clearUndoSubject.send()
-
-        refreshCanvasWithMergingAllLayers()
-    }
-
-}
-
-extension CanvasViewModel {
-
     func refreshCanvas(using undoObject: UndoObject) {
         layerManager.initLayers(undoObject: undoObject)
 
@@ -452,6 +421,37 @@ extension CanvasViewModel {
                 pauseDisplayLinkSubject.send(false)
             }
         }
+    }
+
+}
+
+extension CanvasViewModel {
+
+    func didTapLayerButton() {
+        Task {
+            try? await layerManager.updateCurrentThumbnail()
+
+            DispatchQueue.main.async { [weak self] in
+                self?.requestShowingLayerViewSubject.send()
+            }
+        }
+    }
+
+    func didTapResetTransformButton() {
+        transforming.setMatrix(.identity)
+        delegate?.refreshCanvasByCallingSetNeedsDisplay()
+    }
+
+    func didTapNewCanvasButton() {
+
+        projectName = Calendar.currentDate
+
+        transforming.setMatrix(.identity)
+        layerManager.initLayers(with: drawing.textureSize)
+
+        clearUndoSubject.send()
+
+        refreshCanvasWithMergingAllLayers()
     }
 
 }
