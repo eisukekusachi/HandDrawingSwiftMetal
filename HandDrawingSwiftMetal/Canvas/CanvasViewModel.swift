@@ -107,7 +107,11 @@ class CanvasViewModel {
 
         undoHistoryManager.addUndoObjectToUndoStackPublisher
             .sink { [weak self] in
-                self?.registerDrawingUndoAction()
+                guard let `self` else { return }
+                self.undoHistoryManager.registerDrawingUndoAction(
+                    delegate: self.delegate,
+                    layerManager: self.layerManager
+                )
             }
             .store(in: &cancellables)
 
@@ -172,7 +176,10 @@ extension CanvasViewModel {
             let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
-                registerDrawingUndoAction()
+                undoHistoryManager.registerDrawingUndoAction(
+                    delegate: delegate,
+                    layerManager: layerManager
+                )
             }
 
             drawing.initDrawingIfHashValueIsNil(
@@ -277,7 +284,10 @@ extension CanvasViewModel {
         let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
-            registerDrawingUndoAction()
+            undoHistoryManager.registerDrawingUndoAction(
+                delegate: delegate,
+                layerManager: layerManager
+            )
         }
 
         drawing.initDrawingIfHashValueIsNil(
@@ -409,26 +419,6 @@ extension CanvasViewModel {
         clearUndoSubject.send()
 
         refreshCanvasWithMergingAllLayers()
-    }
-
-}
-
-extension CanvasViewModel {
-
-    func registerDrawingUndoAction() {
-        guard
-            let delegate,
-            layerManager.layers.count != 0
-        else { return }
-
-        delegate.registerDrawingUndoAction(
-            with: UndoObject(
-                index: layerManager.index,
-                layers: layerManager.layers
-            )
-        )
-
-        layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
 }
