@@ -62,12 +62,13 @@
 		D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */; };
 		D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA52BC161A100ABDA4E /* Drawing.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* LayerViewPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */; };
+		D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */; };
 		D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D472859F2BBEBC350035AFCD /* LineDrawing.swift */; };
 		D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A32BBEBD000035AFCD /* LineParameters.swift */; };
 		D47285A62BBEBD4C0035AFCD /* LineSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A52BBEBD4C0035AFCD /* LineSegment.swift */; };
 		D47285A82BBEBE220035AFCD /* DrawingLineProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A72BBEBE220035AFCD /* DrawingLineProtocol.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
-		D48AC4202BCA963D00608E42 /* UndoHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48AC41F2BCA963D00608E42 /* UndoHistoryManager.swift */; };
+		D48AC4202BCA963D00608E42 /* LayerUndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */; };
 		D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingToolType.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
@@ -184,12 +185,13 @@
 		D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
 		D4671FA52BC161A100ABDA4E /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerViewPresentation.swift; sourceTree = "<group>"; };
+		D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerProtocol.swift; sourceTree = "<group>"; };
 		D472859F2BBEBC350035AFCD /* LineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDrawing.swift; sourceTree = "<group>"; };
 		D47285A32BBEBD000035AFCD /* LineParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineParameters.swift; sourceTree = "<group>"; };
 		D47285A52BBEBD4C0035AFCD /* LineSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineSegment.swift; sourceTree = "<group>"; };
 		D47285A72BBEBE220035AFCD /* DrawingLineProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingLineProtocol.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
-		D48AC41F2BCA963D00608E42 /* UndoHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoHistoryManager.swift; sourceTree = "<group>"; };
+		D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerUndoManager.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
@@ -372,9 +374,10 @@
 		D422D9C42AF4DCEF004E058B /* Undo */ = {
 			isa = PBXGroup;
 			children = (
+				D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */,
+				D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */,
 				D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */,
 				D422D9C72AF4DD18004E058B /* UndoObject.swift */,
-				D48AC41F2BCA963D00608E42 /* UndoHistoryManager.swift */,
 			);
 			path = Undo;
 			sourceTree = "<group>";
@@ -717,6 +720,7 @@
 				D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */,
 				D4F1BB422B2D46F6006EA102 /* FileIOImpl.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
+				D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */,
 				D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */,
@@ -728,7 +732,7 @@
 				D4EC24AB2BB9525E0097A019 /* CGSizeExtensions.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */,
-				D48AC4202BCA963D00608E42 /* UndoHistoryManager.swift in Sources */,
+				D48AC4202BCA963D00608E42 /* LayerUndoManager.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D428FDAA2BD282B400BFE4C9 /* InputManager.swift in Sources */,
 				D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */,

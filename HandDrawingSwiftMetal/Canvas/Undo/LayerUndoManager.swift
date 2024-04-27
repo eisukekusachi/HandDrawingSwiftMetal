@@ -1,5 +1,5 @@
 //
-//  UndoHistoryManager.swift
+//  LayerUndoManager.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/04/13.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-final class UndoHistoryManager: ObservableObject {
+final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
         addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
@@ -26,7 +26,7 @@ final class UndoHistoryManager: ObservableObject {
     }
 
     /// An undoManager with undoCount and redoCount
-    private let undoManager = UndoManagerWithCount()
+    var undoManager: UndoManager = UndoManagerWithCount()
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
@@ -44,15 +44,15 @@ final class UndoHistoryManager: ObservableObject {
     }
 
     func undo() {
-        undoManager.performUndo()
+        (undoManager as? UndoManagerWithCount)?.performUndo()
         updateUndoActivity()
     }
     func redo() {
-        undoManager.performRedo()
+        (undoManager as? UndoManagerWithCount)?.performRedo()
         updateUndoActivity()
     }
     func clear() {
-        undoManager.clear()
+        (undoManager as? UndoManagerWithCount)?.clear()
         updateUndoActivity()
     }
 

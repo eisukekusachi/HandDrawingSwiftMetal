@@ -48,7 +48,7 @@ extension ViewController {
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.transforming)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
-        contentView.bindUndoModels(canvasViewModel.undoHistoryManager)
+        contentView.bindUndoModels(canvasViewModel.layerUndoManager)
 
         subscribeEvents()
 
@@ -139,7 +139,7 @@ extension ViewController {
         layerViewPresenter.setupLayerViewPresenter(
             layerManager: canvasViewModel.layerManager,
             layerViewPresentation: canvasViewModel.layerViewPresentation,
-            undoHistoryManager: canvasViewModel.undoHistoryManager,
+            layerUndoManager: canvasViewModel.layerUndoManager,
             targetView: contentView.layerButton,
             on: self
         )
@@ -202,7 +202,7 @@ extension ViewController {
                                                             zipFilePath: zipFilePath)
             }
 
-            canvasViewModel.undoHistoryManager.clear()
+            canvasViewModel.layerUndoManager.clear()
 
             canvasViewModel.refreshCanvasWithMergingAllLayers()
         }

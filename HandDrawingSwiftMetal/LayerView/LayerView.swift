@@ -10,7 +10,7 @@ import SwiftUI
 struct LayerView: View {
     @ObservedObject var layerManager: LayerManager
     @ObservedObject var layerViewPresentation: LayerViewPresentation
-    @ObservedObject var undoHistoryManager: UndoHistoryManager
+    @ObservedObject var layerUndoManager: LayerUndoManager
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -36,7 +36,7 @@ struct LayerView: View {
                 toolbar(layerManager: layerManager)
                 listView(
                     layerManager: layerManager, 
-                    undoHistoryManager: undoHistoryManager
+                    layerUndoManager: layerUndoManager
                 )
                 selectedTextureAlphaSlider(layerManager: layerManager)
             }
@@ -51,7 +51,7 @@ extension LayerView {
 
         return HStack {
             Button(action: {
-                undoHistoryManager.addUndoObjectToUndoStack()
+                layerUndoManager.addUndoObjectToUndoStack()
                 layerManager.addLayer()
                 layerManager.refreshCanvasWithMergingAllLayers()
 
@@ -65,7 +65,7 @@ extension LayerView {
 
             Button(action: {
                 if layerManager.layers.count > 1 {
-                    undoHistoryManager.addUndoObjectToUndoStack()
+                    layerUndoManager.addUndoObjectToUndoStack()
                     layerManager.removeLayer()
                     layerManager.refreshCanvasWithMergingAllLayers()
                 }
@@ -103,12 +103,12 @@ extension LayerView {
     }
     func listView(
         layerManager: LayerManager,
-        undoHistoryManager: UndoHistoryManager
+        layerUndoManager: LayerUndoManager
     ) -> some View {
 
         LayerListView(
             layerManager: layerManager,
-            undoHistoryManager: undoHistoryManager
+            layerUndoManager: layerUndoManager
         )
     }
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
@@ -208,6 +208,6 @@ extension LayerView {
     LayerView(
         layerManager: LayerManager(),
         layerViewPresentation: LayerViewPresentation(),
-        undoHistoryManager: UndoHistoryManager()
+        layerUndoManager: LayerUndoManager()
     )
 }

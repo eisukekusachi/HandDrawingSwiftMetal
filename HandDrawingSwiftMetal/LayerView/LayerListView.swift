@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LayerListView: View {
     @ObservedObject var layerManager: LayerManager
-    @ObservedObject var undoHistoryManager: UndoHistoryManager
+    @ObservedObject var layerUndoManager: LayerUndoManager
 
     var body: some View {
         List {
@@ -32,7 +32,7 @@ struct LayerListView: View {
                     .onMove(perform: { source, destination in
                         if let selectedLayer = layerManager.selectedLayer {
 
-                            undoHistoryManager.addUndoObjectToUndoStack()
+                            layerUndoManager.addUndoObjectToUndoStack()
 
                             layerManager.moveLayer(
                                 fromOffsets: source,
@@ -136,6 +136,6 @@ extension LayerListView {
 #Preview {
     LayerListView(
         layerManager: LayerManager(),
-        undoHistoryManager: UndoHistoryManager()
+        layerUndoManager: LayerUndoManager()
     )
 }

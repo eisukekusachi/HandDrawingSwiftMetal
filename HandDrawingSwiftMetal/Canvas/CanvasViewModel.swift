@@ -32,9 +32,9 @@ class CanvasViewModel {
     let layerManager = LayerManager()
     let layerViewPresentation = LayerViewPresentation()
 
-    let drawingTool = DrawingToolModel()
+    let layerUndoManager = LayerUndoManager()
 
-    let undoHistoryManager = UndoHistoryManager()
+    let drawingTool = DrawingToolModel()
 
     let inputManager = InputManager()
 
@@ -98,10 +98,10 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        undoHistoryManager.addUndoObjectToUndoStackPublisher
+        layerUndoManager.addUndoObjectToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.undoHistoryManager.addUndoObject(
+                self.layerUndoManager.addUndoObject(
                     undoObject: UndoObject(
                         index: layerManager.index,
                         layers: layerManager.layers
@@ -111,13 +111,13 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        undoHistoryManager.refreshCanvasPublisher
+        layerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
                 self?.refreshCanvas(using: undoObject)
             }
             .store(in: &cancellables)
 
-        undoHistoryManager.updateUndoActivity()
+        layerUndoManager.updateUndoActivity()
 
         layerManager.refreshCanvasWithMergingDrawingLayersPublisher
             .sink { [weak self] in
@@ -180,7 +180,7 @@ extension CanvasViewModel {
             let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
-                undoHistoryManager.addUndoObject(
+                layerUndoManager.addUndoObject(
                     undoObject: UndoObject(
                         index: layerManager.index,
                         layers: layerManager.layers
@@ -291,7 +291,7 @@ extension CanvasViewModel {
         let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
-            undoHistoryManager.addUndoObject(
+            layerUndoManager.addUndoObject(
                 undoObject: UndoObject(
                     index: layerManager.index,
                     layers: layerManager.layers
@@ -438,10 +438,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func didTapUndoButton() {
-        undoHistoryManager.undo()
+        layerUndoManager.undo()
     }
     func didTapRedoButton() {
-        undoHistoryManager.redo()
+        layerUndoManager.redo()
     }
 
     func didTapLayerButton() {
@@ -466,7 +466,7 @@ extension CanvasViewModel {
         transforming.setMatrix(.identity)
         layerManager.initLayers(with: drawing.textureSize)
 
-        undoHistoryManager.clear()
+        layerUndoManager.clear()
 
         refreshCanvasWithMergingAllLayers()
     }

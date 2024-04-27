@@ -82,7 +82,7 @@ extension ContentView {
         bindModels(drawingTool)
     }
 
-    func bindUndoModels(_ undoManager: UndoHistoryManager) {
+    func bindUndoModels(_ undoManager: UndoManagerProtocol) {
         undoManager.canUndoPublisher
             .assign(to: \.isEnabled, on: undoButton)
             .store(in: &cancellables)
