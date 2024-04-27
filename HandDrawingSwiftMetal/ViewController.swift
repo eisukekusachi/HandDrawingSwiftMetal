@@ -49,6 +49,7 @@ extension ViewController {
         contentView.canvasView.setViewModel(canvasViewModel)
         contentView.bindTransforming(canvasViewModel.transforming)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+        contentView.bindUndoModels(canvasViewModel.undoHistoryManager)
 
         subscribeEvents()
 
