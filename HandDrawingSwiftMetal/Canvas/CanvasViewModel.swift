@@ -116,6 +116,8 @@ class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        undoHistoryManager.updateUndoActivity()
+
         layerManager.refreshCanvasWithMergingDrawingLayersPublisher
             .sink { [weak self] in
                 self?.refreshCanvasWithMergingDrawingLayers()
