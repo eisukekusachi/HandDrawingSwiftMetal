@@ -10,7 +10,7 @@ import Combine
 
 protocol UndoManagerProtocol {
 
-    var undoManager: UndoManager { get set }
+    var undoManager: UndoManager { get }
 
     var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> { get }
     var canUndoPublisher: AnyPublisher<Bool, Never> { get }

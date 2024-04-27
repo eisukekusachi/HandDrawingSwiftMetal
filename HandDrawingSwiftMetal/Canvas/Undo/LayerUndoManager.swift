@@ -26,7 +26,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
     }
 
     /// An undoManager with undoCount and redoCount
-    var undoManager: UndoManager = UndoManagerWithCount()
+    let undoManager: UndoManager = UndoManagerWithCount()
 
     private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
 
