@@ -10,7 +10,7 @@ import Combine
 
 final class ContentView: UIView {
 
-    @IBOutlet weak var canvasView: CanvasView!
+    @IBOutlet weak var canvasView: MTKTextureDisplayView!
 
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
