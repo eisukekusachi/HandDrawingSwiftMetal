@@ -110,8 +110,8 @@ class CanvasViewModel {
             .sink { [weak self] in
                 guard let `self` else { return }
                 self.undoHistoryManager.registerDrawingUndoAction(
-                    delegate: self.delegate,
-                    layerManager: self.layerManager
+                    layerManager: self.layerManager,
+                    viewModel: self
                 )
             }
             .store(in: &cancellables)
@@ -178,8 +178,8 @@ extension CanvasViewModel {
 
             if isTouchEnded {
                 undoHistoryManager.registerDrawingUndoAction(
-                    delegate: delegate,
-                    layerManager: layerManager
+                    layerManager: layerManager,
+                    viewModel: self
                 )
             }
 
@@ -286,8 +286,8 @@ extension CanvasViewModel {
 
         if isTouchEnded {
             undoHistoryManager.registerDrawingUndoAction(
-                delegate: delegate,
-                layerManager: layerManager
+                layerManager: layerManager,
+                viewModel: self
             )
         }
 
