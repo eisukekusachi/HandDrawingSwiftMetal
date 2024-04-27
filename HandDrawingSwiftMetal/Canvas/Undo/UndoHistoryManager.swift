@@ -21,6 +21,10 @@ final class UndoHistoryManager: ObservableObject {
         canRedoSubject.eraseToAnyPublisher()
     }
 
+    var refreshCanvasPublisher: AnyPublisher<UndoObject, Never> {
+        refreshCanvasSubject.eraseToAnyPublisher()
+    }
+
     /// An undoManager with undoCount and redoCount
     private let undoManager = UndoManagerWithCount()
 
@@ -28,6 +32,8 @@ final class UndoHistoryManager: ObservableObject {
 
     private let canUndoSubject = CurrentValueSubject<Bool, Never>(true)
     private let canRedoSubject = CurrentValueSubject<Bool, Never>(true)
+
+    private let refreshCanvasSubject = PassthroughSubject<UndoObject, Never>()
 
     init() {
         undoManager.levelsOfUndo = 8
@@ -93,7 +99,7 @@ final class UndoHistoryManager: ObservableObject {
 
             updateUndoActivity()
 
-            viewModel.refreshCanvas(using: undoObject)
+            refreshCanvasSubject.send(undoObject)
         }
     }
 
