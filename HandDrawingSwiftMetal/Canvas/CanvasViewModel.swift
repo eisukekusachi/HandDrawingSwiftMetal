@@ -17,8 +17,6 @@ protocol CanvasViewModelDelegate {
 
     func clearCommandBuffer()
 
-    func registerDrawingUndoAction(with undoObject: UndoObject)
-
     func refreshCanvasByCallingSetNeedsDisplay()
 
 }
@@ -78,10 +76,6 @@ class CanvasViewModel {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
 
-    var clearUndoPublisher: AnyPublisher<Void, Never> {
-        clearUndoSubject.eraseToAnyPublisher()
-    }
-
     var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
@@ -96,8 +90,6 @@ class CanvasViewModel {
     private (set) var fileIO: FileIO!
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
-
-    private let clearUndoSubject = PassthroughSubject<Void, Never>()
 
     private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
@@ -459,7 +451,7 @@ extension CanvasViewModel {
         transforming.setMatrix(.identity)
         layerManager.initLayers(with: drawing.textureSize)
 
-        clearUndoSubject.send()
+        undoHistoryManager.clear()
 
         refreshCanvasWithMergingAllLayers()
     }

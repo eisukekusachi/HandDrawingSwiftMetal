@@ -46,7 +46,6 @@ class ViewController: UIViewController {
 extension ViewController {
 
     private func setupContentView() {
-        contentView.canvasView.setViewModel(canvasViewModel)
         contentView.bindTransforming(canvasViewModel.transforming)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
         contentView.bindUndoModels(canvasViewModel.undoHistoryManager)
@@ -106,12 +105,6 @@ extension ViewController {
 
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
-            .store(in: &cancellables)
-
-        canvasViewModel.clearUndoPublisher
-            .sink { [weak self] in
-                self?.contentView.canvasView.clearUndo()
-            }
             .store(in: &cancellables)
 
         canvasViewModel.requestShowingLayerViewPublisher
@@ -209,7 +202,7 @@ extension ViewController {
                                                             zipFilePath: zipFilePath)
             }
 
-            contentView.initUndoComponents()
+            canvasViewModel.undoHistoryManager.clear()
 
             canvasViewModel.refreshCanvasWithMergingAllLayers()
         }
@@ -274,14 +267,6 @@ extension ViewController: CanvasViewModelDelegate {
 
     func clearCommandBuffer() {
         contentView.canvasView.setCommandBufferToNil()
-    }
-
-    func registerDrawingUndoAction(with undoObject: UndoObject) {
-        contentView.canvasView.registerDrawingUndoAction(
-            with: undoObject,
-            target: contentView.canvasView
-        )
-        contentView.canvasView.undoManagerWithCount.incrementUndoCount()
     }
 
     func refreshCanvasByCallingSetNeedsDisplay() {
