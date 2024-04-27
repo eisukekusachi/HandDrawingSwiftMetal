@@ -71,8 +71,6 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
         )
 
         updateUndoActivity()
-
-        layerManager.updateSelectedLayerTextureWithNewAddressTexture()
     }
 
     /// Registers an action to undo the drawing operation.

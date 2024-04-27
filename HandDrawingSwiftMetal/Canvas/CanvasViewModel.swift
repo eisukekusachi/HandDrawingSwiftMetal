@@ -108,6 +108,7 @@ class CanvasViewModel {
                     ),
                     layerManager: self.layerManager
                 )
+                self.layerManager.updateSelectedLayerTextureWithNewAddressTexture()
             }
             .store(in: &cancellables)
 
@@ -180,13 +181,7 @@ extension CanvasViewModel {
             let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
-                layerUndoManager.addUndoObject(
-                    undoObject: UndoObject(
-                        index: layerManager.index,
-                        layers: layerManager.layers
-                    ),
-                    layerManager: layerManager
-                )
+                layerUndoManager.addUndoObjectToUndoStack()
             }
 
             drawing.initDrawingIfHashValueIsNil(
@@ -291,13 +286,7 @@ extension CanvasViewModel {
         let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
-            layerUndoManager.addUndoObject(
-                undoObject: UndoObject(
-                    index: layerManager.index,
-                    layers: layerManager.layers
-                ),
-                layerManager: layerManager
-            )
+            layerUndoManager.addUndoObjectToUndoStack()
         }
 
         drawing.initDrawingIfHashValueIsNil(
