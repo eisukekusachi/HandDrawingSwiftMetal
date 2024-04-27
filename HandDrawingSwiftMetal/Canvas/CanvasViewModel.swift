@@ -103,8 +103,8 @@ class CanvasViewModel {
                 guard let `self` else { return }
                 self.layerUndoManager.addUndoObject(
                     undoObject: UndoObject(
-                        index: layerManager.index,
-                        layers: layerManager.layers
+                        index: self.layerManager.index,
+                        layers: self.layerManager.layers
                     ),
                     layerManager: self.layerManager
                 )
