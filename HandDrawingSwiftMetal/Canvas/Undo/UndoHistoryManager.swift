@@ -61,16 +61,13 @@ final class UndoHistoryManager: ObservableObject {
         canRedoSubject.send(undoManager.canRedo)
     }
 
-    func registerDrawingUndoAction(
-        layerManager: LayerManager,
-        viewModel: CanvasViewModel
+    func addUndoObject(
+        undoObject: UndoObject,
+        layerManager: LayerManager
     ) {
         registerDrawingUndoAction(
-            with: UndoObject(
-                index: layerManager.index,
-                layers: layerManager.layers
-            ),
-            viewModel: viewModel
+            with: undoObject,
+            layerManager: layerManager
         )
 
         updateUndoActivity()
@@ -81,20 +78,20 @@ final class UndoHistoryManager: ObservableObject {
     /// Registers an action to undo the drawing operation.
     private func registerDrawingUndoAction(
         with undoObject: UndoObject,
-        viewModel: CanvasViewModel
+        layerManager: LayerManager
     ) {
-        undoManager.registerUndo(withTarget: viewModel) { [weak self] _ in
+        undoManager.registerUndo(withTarget: self) { [weak self] _ in
             guard
                 let `self`,
-                viewModel.layerManager.layers.count != 0
+                layerManager.layers.count != 0
             else { return }
 
             self.registerDrawingUndoAction(
                 with: UndoObject(
-                    index: viewModel.layerManager.index,
-                    layers: viewModel.layerManager.layers
+                    index: layerManager.index,
+                    layers: layerManager.layers
                 ),
-                viewModel: viewModel
+                layerManager: layerManager
             )
 
             updateUndoActivity()

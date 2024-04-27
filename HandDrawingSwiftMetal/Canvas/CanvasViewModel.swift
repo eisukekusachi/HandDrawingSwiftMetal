@@ -101,9 +101,12 @@ class CanvasViewModel {
         undoHistoryManager.addUndoObjectToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.undoHistoryManager.registerDrawingUndoAction(
-                    layerManager: self.layerManager,
-                    viewModel: self
+                self.undoHistoryManager.addUndoObject(
+                    undoObject: UndoObject(
+                        index: layerManager.index,
+                        layers: layerManager.layers
+                    ),
+                    layerManager: self.layerManager
                 )
             }
             .store(in: &cancellables)
@@ -177,9 +180,12 @@ extension CanvasViewModel {
             let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
-                undoHistoryManager.registerDrawingUndoAction(
-                    layerManager: layerManager,
-                    viewModel: self
+                undoHistoryManager.addUndoObject(
+                    undoObject: UndoObject(
+                        index: layerManager.index,
+                        layers: layerManager.layers
+                    ),
+                    layerManager: layerManager
                 )
             }
 
@@ -285,9 +291,12 @@ extension CanvasViewModel {
         let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
-            undoHistoryManager.registerDrawingUndoAction(
-                layerManager: layerManager,
-                viewModel: self
+            undoHistoryManager.addUndoObject(
+                undoObject: UndoObject(
+                    index: layerManager.index,
+                    layers: layerManager.layers
+                ),
+                layerManager: layerManager
             )
         }
 
