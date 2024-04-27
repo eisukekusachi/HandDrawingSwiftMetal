@@ -428,6 +428,13 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    func didTapUndoButton() {
+        undoHistoryManager.undo()
+    }
+    func didTapRedoButton() {
+        undoHistoryManager.redo()
+    }
+
     func didTapLayerButton() {
         Task {
             try? await layerManager.updateCurrentThumbnail()

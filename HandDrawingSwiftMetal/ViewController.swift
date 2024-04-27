@@ -94,10 +94,10 @@ extension ViewController {
         }
 
         contentView.tapUndoButton = { [weak self] in
-            self?.contentView.canvasView.undo()
+            self?.canvasViewModel.didTapUndoButton()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.contentView.canvasView.redo()
+            self?.canvasViewModel.didTapRedoButton()
         }
     }
 
