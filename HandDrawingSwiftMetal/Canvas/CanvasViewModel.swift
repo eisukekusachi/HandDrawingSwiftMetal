@@ -17,8 +17,6 @@ protocol CanvasViewModelDelegate {
 
     func clearCommandBuffer()
 
-    func registerDrawingUndoAction(with undoObject: UndoObject)
-
     func refreshCanvasByCallingSetNeedsDisplay()
 
 }
@@ -34,9 +32,9 @@ class CanvasViewModel {
     let layerManager = LayerManager()
     let layerViewPresentation = LayerViewPresentation()
 
-    let drawingTool = DrawingToolModel()
+    let layerUndoManager = LayerUndoManager()
 
-    let undoHistoryManager = UndoHistoryManager()
+    let drawingTool = DrawingToolModel()
 
     let inputManager = InputManager()
 
@@ -78,10 +76,6 @@ class CanvasViewModel {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
 
-    var clearUndoPublisher: AnyPublisher<Void, Never> {
-        clearUndoSubject.eraseToAnyPublisher()
-    }
-
     var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
@@ -97,8 +91,6 @@ class CanvasViewModel {
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
-    private let clearUndoSubject = PassthroughSubject<Void, Never>()
-
     private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
     private var cancellables = Set<AnyCancellable>()
@@ -106,15 +98,27 @@ class CanvasViewModel {
     init(fileIO: FileIO = FileIOImpl()) {
         self.fileIO = fileIO
 
-        undoHistoryManager.addUndoObjectToUndoStackPublisher
+        layerUndoManager.addUndoObjectToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.undoHistoryManager.registerDrawingUndoAction(
-                    delegate: self.delegate,
+                self.layerUndoManager.addUndoObject(
+                    undoObject: UndoObject(
+                        index: self.layerManager.index,
+                        layers: self.layerManager.layers
+                    ),
                     layerManager: self.layerManager
                 )
+                self.layerManager.updateSelectedLayerTextureWithNewAddressTexture()
             }
             .store(in: &cancellables)
+
+        layerUndoManager.refreshCanvasPublisher
+            .sink { [weak self] undoObject in
+                self?.refreshCanvas(using: undoObject)
+            }
+            .store(in: &cancellables)
+
+        layerUndoManager.updateUndoActivity()
 
         layerManager.refreshCanvasWithMergingDrawingLayersPublisher
             .sink { [weak self] in
@@ -177,10 +181,7 @@ extension CanvasViewModel {
             let isTouchEnded = touchPhase == .ended
 
             if isTouchEnded {
-                undoHistoryManager.registerDrawingUndoAction(
-                    delegate: delegate,
-                    layerManager: layerManager
-                )
+                layerUndoManager.addUndoObjectToUndoStack()
             }
 
             drawing.initDrawingIfHashValueIsNil(
@@ -285,10 +286,7 @@ extension CanvasViewModel {
         let isTouchEnded = touchPhase == .ended
 
         if isTouchEnded {
-            undoHistoryManager.registerDrawingUndoAction(
-                delegate: delegate,
-                layerManager: layerManager
-            )
+            layerUndoManager.addUndoObjectToUndoStack()
         }
 
         drawing.initDrawingIfHashValueIsNil(
@@ -428,6 +426,13 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    func didTapUndoButton() {
+        layerUndoManager.undo()
+    }
+    func didTapRedoButton() {
+        layerUndoManager.redo()
+    }
+
     func didTapLayerButton() {
         Task {
             try? await layerManager.updateCurrentThumbnail()
@@ -450,7 +455,7 @@ extension CanvasViewModel {
         transforming.setMatrix(.identity)
         layerManager.initLayers(with: drawing.textureSize)
 
-        clearUndoSubject.send()
+        layerUndoManager.clear()
 
         refreshCanvasWithMergingAllLayers()
     }

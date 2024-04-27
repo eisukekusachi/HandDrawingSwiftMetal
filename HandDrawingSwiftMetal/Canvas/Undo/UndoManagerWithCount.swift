@@ -11,8 +11,6 @@ import Combine
 /// An undoManager with undoCount and redoCount
 class UndoManagerWithCount: UndoManager {
 
-    let refreshUndoComponentsObjectSubject = PassthroughSubject<Void, Never>()
-
     private (set) var undoNumber: Int = 0
     private (set) var redoNumber: Int = 0
 
@@ -25,7 +23,6 @@ class UndoManagerWithCount: UndoManager {
         if undoNumber < levelsOfUndo {
             undoNumber += 1
             redoNumber = 0
-            refreshUndoComponentsObjectSubject.send()
         }
     }
 
@@ -36,7 +33,6 @@ class UndoManagerWithCount: UndoManager {
 
             undoNumber -= 1
             redoNumber += 1
-            refreshUndoComponentsObjectSubject.send()
 
             return true
         }
@@ -49,7 +45,6 @@ class UndoManagerWithCount: UndoManager {
 
             undoNumber += 1
             redoNumber -= 1
-            refreshUndoComponentsObjectSubject.send()
 
             return true
         }
@@ -61,7 +56,6 @@ class UndoManagerWithCount: UndoManager {
 
         undoNumber = 0
         redoNumber = 0
-        refreshUndoComponentsObjectSubject.send()
     }
 
 }

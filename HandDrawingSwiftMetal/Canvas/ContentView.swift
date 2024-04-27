@@ -10,7 +10,7 @@ import Combine
 
 final class ContentView: UIView {
 
-    @IBOutlet weak var canvasView: CanvasView!
+    @IBOutlet weak var canvasView: MTKTextureDisplayView!
 
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
@@ -62,8 +62,6 @@ final class ContentView: UIView {
     private func commonInit() {
         backgroundColor = .white
 
-        initUndoComponents()
-
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
 
         // Configure the display link for rendering.
@@ -82,6 +80,16 @@ extension ContentView {
     func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
         bindInputs(drawingTool)
         bindModels(drawingTool)
+    }
+
+    func bindUndoModels(_ undoManager: UndoManagerProtocol) {
+        undoManager.canUndoPublisher
+            .assign(to: \.isEnabled, on: undoButton)
+            .store(in: &cancellables)
+
+        undoManager.canRedoPublisher
+            .assign(to: \.isEnabled, on: redoButton)
+            .store(in: &cancellables)
     }
 
     private func bindInputs(_ drawingTool: DrawingToolModel) {
@@ -136,12 +144,6 @@ extension ContentView {
             drawingTool,
             action:#selector(drawingTool.handleDiameterSlider),
             for: .valueChanged)
-
-        canvasView.undoManagerWithCount.refreshUndoComponentsObjectSubject
-            .sink { [weak self] in
-                self?.refreshUndoComponents()
-            }
-            .store(in: &cancellables)
     }
 
     private func bindModels(_ transforming: TransformingProtocol) {
@@ -161,20 +163,6 @@ extension ContentView {
             .compactMap { $0 }
             .assign(to: \.backgroundColor, on: canvasView)
             .store(in: &cancellables)
-    }
-
-}
-
-extension ContentView {
-
-    func initUndoComponents() {
-        canvasView.clearUndo()
-        refreshUndoComponents()
-    }
-
-    func refreshUndoComponents() {
-        undoButton.isEnabled = canvasView.canUndo
-        redoButton.isEnabled = canvasView.canRedo
     }
 
 }

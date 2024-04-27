@@ -46,9 +46,9 @@ class ViewController: UIViewController {
 extension ViewController {
 
     private func setupContentView() {
-        contentView.canvasView.setViewModel(canvasViewModel)
         contentView.bindTransforming(canvasViewModel.transforming)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+        contentView.bindUndoModels(canvasViewModel.layerUndoManager)
 
         subscribeEvents()
 
@@ -93,10 +93,10 @@ extension ViewController {
         }
 
         contentView.tapUndoButton = { [weak self] in
-            self?.contentView.canvasView.undo()
+            self?.canvasViewModel.didTapUndoButton()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.contentView.canvasView.redo()
+            self?.canvasViewModel.didTapRedoButton()
         }
     }
 
@@ -105,12 +105,6 @@ extension ViewController {
 
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
-            .store(in: &cancellables)
-
-        canvasViewModel.clearUndoPublisher
-            .sink { [weak self] in
-                self?.contentView.canvasView.clearUndo()
-            }
             .store(in: &cancellables)
 
         canvasViewModel.requestShowingLayerViewPublisher
@@ -145,7 +139,7 @@ extension ViewController {
         layerViewPresenter.setupLayerViewPresenter(
             layerManager: canvasViewModel.layerManager,
             layerViewPresentation: canvasViewModel.layerViewPresentation,
-            undoHistoryManager: canvasViewModel.undoHistoryManager,
+            layerUndoManager: canvasViewModel.layerUndoManager,
             targetView: contentView.layerButton,
             on: self
         )
@@ -208,7 +202,7 @@ extension ViewController {
                                                             zipFilePath: zipFilePath)
             }
 
-            contentView.initUndoComponents()
+            canvasViewModel.layerUndoManager.clear()
 
             canvasViewModel.refreshCanvasWithMergingAllLayers()
         }
@@ -273,14 +267,6 @@ extension ViewController: CanvasViewModelDelegate {
 
     func clearCommandBuffer() {
         contentView.canvasView.setCommandBufferToNil()
-    }
-
-    func registerDrawingUndoAction(with undoObject: UndoObject) {
-        contentView.canvasView.registerDrawingUndoAction(
-            with: undoObject,
-            target: contentView.canvasView
-        )
-        contentView.canvasView.undoManagerWithCount.incrementUndoCount()
     }
 
     func refreshCanvasByCallingSetNeedsDisplay() {
