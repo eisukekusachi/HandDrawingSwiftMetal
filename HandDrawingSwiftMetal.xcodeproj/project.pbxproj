@@ -54,6 +54,7 @@
 		D44D19692BE5DA4D0069D4A9 /* FileOutputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19682BE5DA4D0069D4A9 /* FileOutputManager.swift */; };
 		D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */; };
 		D44D19702BE5DB530069D4A9 /* ExportCanvasData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */; };
+		D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
@@ -182,6 +183,7 @@
 		D44D19682BE5DA4D0069D4A9 /* FileOutputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutputManager.swift; sourceTree = "<group>"; };
 		D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRepository.swift; sourceTree = "<group>"; };
 		D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCanvasData.swift; sourceTree = "<group>"; };
+		D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsLocalRepository.swift; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -438,6 +440,7 @@
 		D44D196A2BE5DAEB0069D4A9 /* LocalRepository */ = {
 			isa = PBXGroup;
 			children = (
+				D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */,
 				D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */,
 				D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */,
 			);
@@ -786,6 +789,7 @@
 				D464B28829FD3F2A00FA36B1 /* ColorData.swift in Sources */,
 				D4F1BB402B2D46D8006EA102 /* FileIO.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
+				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,

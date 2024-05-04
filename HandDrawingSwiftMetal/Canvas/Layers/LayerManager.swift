@@ -55,7 +55,7 @@ class LayerManager: ObservableObject {
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
 
-    private var textureSize: CGSize = .zero
+    private (set) var textureSize: CGSize = .zero
 
     private let refreshCanvasWithMergingDrawingLayersSubject = PassthroughSubject<Void, Never>()
 

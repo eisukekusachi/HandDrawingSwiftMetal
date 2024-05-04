@@ -21,6 +21,10 @@ protocol CanvasViewModelDelegate {
 
 }
 
+enum CanvasViewModelError: Error {
+    case failedToApplyData
+}
+
 class CanvasViewModel {
 
     var delegate: CanvasViewModelDelegate?
@@ -146,6 +150,36 @@ class CanvasViewModel {
            frameSize.isSameRatio(drawableSize) {
             textureSize = drawableSize
         }
+    }
+
+    func applyCanvasDataToCanvas(
+        data: CanvasEntity?,
+        fileName: String,
+        folderURL: URL
+    ) throws {
+        guard
+            let data,
+            let device: MTLDevice = MTLCreateSystemDefaultDevice()
+        else {
+            throw CanvasViewModelError.failedToApplyData
+        }
+
+        let layers: [LayerModel] = try data.layers.map({ $0 }).convertToLayerModel(
+            device: device,
+            textureSize: data.textureSize,
+            folderURL: folderURL
+        )
+
+        layerManager.initLayers(
+            index: data.layerIndex,
+            layers: layers
+        )
+
+        drawingTool.setBrushDiameter(data.brushDiameter)
+        drawingTool.setEraserDiameter(data.eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: data.drawingTool))
+
+        projectName = fileName
     }
 
 }
