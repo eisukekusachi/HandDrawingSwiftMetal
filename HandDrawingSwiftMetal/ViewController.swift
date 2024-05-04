@@ -108,6 +108,12 @@ extension ViewController {
             .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)
 
+        canvasViewModel.requestShowingActivityIndicatorPublisher
+            .map { !$0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isHiddenActivityIndicator, on: contentView)
+            .store(in: &cancellables)
+
         canvasViewModel.requestShowingAlertPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in

@@ -12,6 +12,9 @@ final class ContentView: UIView {
 
     @IBOutlet weak var canvasView: MTKTextureDisplayView!
 
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var activityIndicatorView: UIView!
+
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
@@ -41,6 +44,12 @@ final class ContentView: UIView {
     var isDisplayLinkPaused: Bool = false {
         didSet {
             displayLink?.isPaused = isDisplayLinkPaused
+        }
+    }
+    var isHiddenActivityIndicator: Bool = false {
+        didSet {
+            isHiddenActivityIndicator ? activityIndicator.stopAnimating() : activityIndicator.startAnimating()
+            activityIndicatorView.isHidden = isHiddenActivityIndicator
         }
     }
 
