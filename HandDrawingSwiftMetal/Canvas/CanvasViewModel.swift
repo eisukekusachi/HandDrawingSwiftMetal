@@ -80,6 +80,10 @@ class CanvasViewModel {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
 
+    var requestShowingAlertPublisher: AnyPublisher<String, Never> {
+        requestShowingAlertSubject.eraseToAnyPublisher()
+    }
+
     var requestShowingToastPublisher: AnyPublisher<ToastModel, Never> {
         requestShowingToastSubject.eraseToAnyPublisher()
     }
@@ -98,6 +102,8 @@ class CanvasViewModel {
     private (set) var fileIO: FileIO!
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
+
+    private let requestShowingAlertSubject = PassthroughSubject<String, Never>()
 
     private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 

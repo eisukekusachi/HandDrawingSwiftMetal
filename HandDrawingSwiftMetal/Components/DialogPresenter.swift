@@ -10,10 +10,10 @@ import UIKit
 class DialogPresenter {
 
     struct Configuration {
-        var title: String
-        var message: String
-        var buttonTitles: [String]
-        var buttonActions: [Int: (() -> Void)]
+        var title: String = ""
+        var message: String = ""
+        var buttonTitles: [String] = ["Cancel", "OK"]
+        var buttonActions: [Int: (() -> Void)] = [0: {}]
     }
 
     var configuration: Configuration?

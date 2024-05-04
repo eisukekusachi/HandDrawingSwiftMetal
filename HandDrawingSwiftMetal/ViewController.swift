@@ -15,6 +15,7 @@ class ViewController: UIViewController {
 
     let canvasViewModel = CanvasViewModel()
 
+    private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
     private let layerViewPresenter = LayerViewPresenter()
@@ -107,6 +108,16 @@ extension ViewController {
             .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)
 
+        canvasViewModel.requestShowingAlertPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.showAlert(
+                    title: "Alert",
+                    message: message
+                )
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.requestShowingToastPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
@@ -150,6 +161,14 @@ extension ViewController {
             targetView: contentView.layerButton,
             on: self
         )
+    }
+
+    func showAlert(title: String, message: String) {
+        dialogPresenter.configuration = .init(
+            title: title,
+            message: message
+        )
+        dialogPresenter.presentAlert(on: self)
     }
 
     func showToast(_ model: ToastModel) {
