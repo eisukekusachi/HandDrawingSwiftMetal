@@ -103,6 +103,7 @@ final class DocumentsLocalRepository: LocalRepository {
                             folderURL: URL.tmpFolderURL
                         )
 
+                        canvasViewModel.layerUndoManager.clear()
                         canvasViewModel.refreshCanvasWithMergingAllLayers()
                         promise(.success(()))
 
