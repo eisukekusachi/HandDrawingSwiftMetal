@@ -144,10 +144,10 @@ extension DocumentsLocalRepository {
     static func exportLayerData(
         layers: [LayerModel],
         to url: URL
-    ) -> AnyPublisher<[LayerEntity], DocumentsLocalRepositoryError> {
-        let publisher = Future<[LayerEntity], DocumentsLocalRepositoryError> { promise in
+    ) -> AnyPublisher<[LayerEntityForExporting], DocumentsLocalRepositoryError> {
+        let publisher = Future<[LayerEntityForExporting], DocumentsLocalRepositoryError> { promise in
             do {
-                var processedLayers: [LayerEntity] = []
+                var processedLayers: [LayerEntityForExporting] = []
 
                 for layer in layers {
                     guard let texture = layer.texture else { return }

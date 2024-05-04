@@ -42,7 +42,7 @@
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
 		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
 		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
-		D42F40A12B45052B00B32707 /* LayerModelCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F40A02B45052B00B32707 /* LayerModelCodable.swift */; };
+		D42F40A12B45052B00B32707 /* LayerEntityForExporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F40A02B45052B00B32707 /* LayerEntityForExporting.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
@@ -168,7 +168,7 @@
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
 		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
 		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
-		D42F40A02B45052B00B32707 /* LayerModelCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerModelCodable.swift; sourceTree = "<group>"; };
+		D42F40A02B45052B00B32707 /* LayerEntityForExporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerEntityForExporting.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKTextureDisplayView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
@@ -404,7 +404,7 @@
 			isa = PBXGroup;
 			children = (
 				D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */,
-				D42F40A02B45052B00B32707 /* LayerModelCodable.swift */,
+				D42F40A02B45052B00B32707 /* LayerEntityForExporting.swift */,
 				D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */,
 			);
 			path = Entities;
@@ -776,7 +776,7 @@
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */,
-				D42F40A12B45052B00B32707 /* LayerModelCodable.swift in Sources */,
+				D42F40A12B45052B00B32707 /* LayerEntityForExporting.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* LayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,

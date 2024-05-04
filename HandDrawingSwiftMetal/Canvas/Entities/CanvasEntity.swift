@@ -10,7 +10,7 @@ import Foundation
 struct CanvasEntity: Codable, Equatable {
     let textureSize: CGSize
     let layerIndex: Int
-    let layers: [LayerEntity]
+    let layers: [LayerEntityForExporting]
 
     let thumbnailName: String
 
@@ -23,7 +23,7 @@ struct CanvasEntity: Codable, Equatable {
         thumbnailName: String,
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [LayerEntity],
+        layers: [LayerEntityForExporting],
         drawingTool: DrawingToolModel
     ) {
         self.thumbnailName = thumbnailName

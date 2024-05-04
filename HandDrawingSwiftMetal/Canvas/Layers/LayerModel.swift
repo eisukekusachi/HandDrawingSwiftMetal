@@ -37,7 +37,7 @@ struct LayerModel: Identifiable, Equatable {
     }
 }
 
-extension Array where Element == LayerEntity {
+extension Array where Element == LayerEntityForExporting {
     func convertToLayerModel(device: MTLDevice, textureSize: CGSize, folderURL: URL) throws -> [LayerModel] {
         var layers: [LayerModel] = []
 
