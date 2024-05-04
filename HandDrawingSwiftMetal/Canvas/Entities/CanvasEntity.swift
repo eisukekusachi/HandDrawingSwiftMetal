@@ -18,4 +18,42 @@ struct CanvasEntity: Codable, Equatable {
 
     let brushDiameter: Int
     let eraserDiameter: Int
+
+    init(
+        thumbnailName: String,
+        textureSize: CGSize,
+        layerIndex: Int,
+        layers: [LayerEntity],
+        drawingTool: DrawingToolModel
+    ) {
+        self.thumbnailName = thumbnailName
+
+        self.textureSize = textureSize
+
+        self.layerIndex = layerIndex
+        self.layers = layers
+
+        self.drawingTool = drawingTool.drawingTool.rawValue
+        self.brushDiameter = drawingTool.brushDiameter
+        self.eraserDiameter = drawingTool.eraserDiameter
+    }
+
+    init(entity: OldCanvasEntity) {
+        self.thumbnailName = entity.thumbnailName ?? ""
+
+        self.textureSize = entity.textureSize ?? CGSize(width: 1, height: 1)
+
+        self.layerIndex = 0
+        self.layers = [.init(
+            textureName: entity.textureName ?? "",
+            title: "NewLayer",
+            isVisible: true,
+            alpha: 255)
+        ]
+
+        self.drawingTool = entity.drawingTool ?? 0
+        self.brushDiameter = entity.brushDiameter ?? 8
+        self.eraserDiameter = entity.eraserDiameter ?? 8
+    }
+
 }

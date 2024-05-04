@@ -18,13 +18,11 @@ extension CanvasViewModel {
         try FileIOUtils.saveImage(image: thumbnail,
                                   to: tmpFolderURL.appendingPathComponent(URL.thumbnailPath))
 
-        let data = CanvasEntity(textureSize: rootTexture.size,
+        let data = CanvasEntity(thumbnailName: URL.thumbnailPath,
+                                textureSize: rootTexture.size,
                                 layerIndex: layerIndex,
                                 layers: codableLayers,
-                                thumbnailName: URL.thumbnailPath,
-                                drawingTool: drawingTool.drawingTool.rawValue,
-                                brushDiameter: drawingTool.brushDiameter,
-                                eraserDiameter: drawingTool.eraserDiameter)
+                                drawingTool: drawingTool)
 
         try fileIO.saveJson(data,
                             to: tmpFolderURL.appendingPathComponent(URL.jsonFileName))
