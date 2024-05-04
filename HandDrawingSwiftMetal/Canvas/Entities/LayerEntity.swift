@@ -42,31 +42,3 @@ extension LayerEntity {
     }
 
 }
-
-extension Array where Element == LayerEntityForExporting {
-    func convertToLayerModel(device: MTLDevice, textureSize: CGSize, folderURL: URL) throws -> [LayerEntity] {
-        var layers: [LayerEntity] = []
-
-        try self.forEach { layer in
-            if  let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals {
-                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData)
-                let layerData: LayerEntity = .init(
-                    texture: newTexture,
-                    title: layer.title,
-                    isVisible: layer.isVisible,
-                    alpha: layer.alpha
-                )
-                layers.append(layerData)
-            }
-        }
-
-        if layers.count == 0 {
-            layers.append(.init(
-                texture: MTKTextureUtils.makeTexture(device, textureSize),
-                title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-            ))
-        }
-
-        return layers
-    }
-}
