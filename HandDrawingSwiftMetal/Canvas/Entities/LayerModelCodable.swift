@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LayerModelCodable: Codable, Equatable {
+struct LayerEntity: Codable, Equatable {
     let textureName: String
     let title: String
     let isVisible: Bool

@@ -36,7 +36,8 @@ struct LayerModel: Identifiable, Equatable {
         lhs.id == rhs.id
     }
 }
-extension Array where Element == LayerModelCodable {
+
+extension Array where Element == LayerEntity {
     func convertToLayerModel(device: MTLDevice, textureSize: CGSize, folderURL: URL) throws -> [LayerModel] {
         var layers: [LayerModel] = []
 
@@ -61,12 +62,12 @@ extension Array where Element == LayerModelCodable {
 }
 
 extension Array where Element == LayerModel {
-    func convertToLayerModelCodable(imageFolderURL: URL) async throws -> [LayerModelCodable] {
+    func convertToLayerModelCodable(imageFolderURL: URL) async throws -> [LayerEntity] {
 
-        var resultLayers: [LayerModelCodable] = []
+        var resultLayers: [LayerEntity] = []
 
         let tasks = self.map { layer in
-            Task<LayerModelCodable?, Error> {
+            Task<LayerEntity?, Error> {
                 do {
                     if let texture = layer.texture {
                         let textureName = UUID().uuidString
@@ -74,10 +75,10 @@ extension Array where Element == LayerModel {
                         try FileIOUtils.saveImage(bytes: texture.bytes,
                                                   to: imageFolderURL.appendingPathComponent(textureName))
 
-                        return LayerModelCodable.init(textureName: textureName,
-                                                      title: layer.title,
-                                                      isVisible: layer.isVisible,
-                                                      alpha: layer.alpha)
+                        return LayerEntity.init(textureName: textureName,
+                                                title: layer.title,
+                                                isVisible: layer.isVisible,
+                                                alpha: layer.alpha)
                     } else {
                         return nil
                     }

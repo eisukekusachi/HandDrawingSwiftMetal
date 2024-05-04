@@ -11,20 +11,20 @@ extension CanvasViewModel {
     func saveCanvasAsZipFile(rootTexture: MTLTexture,
                              thumbnailHeight: CGFloat = 512,
                              layerIndex: Int,
-                             codableLayers: [LayerModelCodable],
+                             codableLayers: [LayerEntity],
                              tmpFolderURL: URL,
                              with zipFileName: String) throws {
         let thumbnail = rootTexture.uiImage?.resize(height: thumbnailHeight, scale: 1.0)
         try FileIOUtils.saveImage(image: thumbnail,
                                   to: tmpFolderURL.appendingPathComponent(URL.thumbnailPath))
 
-        let data = CanvasModelV2(textureSize: rootTexture.size,
-                                 layerIndex: layerIndex,
-                                 layers: codableLayers,
-                                 thumbnailName: URL.thumbnailPath,
-                                 drawingTool: drawingTool.drawingTool.rawValue,
-                                 brushDiameter: drawingTool.brushDiameter,
-                                 eraserDiameter: drawingTool.eraserDiameter)
+        let data = CanvasEntity(textureSize: rootTexture.size,
+                                layerIndex: layerIndex,
+                                layers: codableLayers,
+                                thumbnailName: URL.thumbnailPath,
+                                drawingTool: drawingTool.drawingTool.rawValue,
+                                brushDiameter: drawingTool.brushDiameter,
+                                eraserDiameter: drawingTool.eraserDiameter)
 
         try fileIO.saveJson(data,
                             to: tmpFolderURL.appendingPathComponent(URL.jsonFileName))
@@ -32,20 +32,20 @@ extension CanvasViewModel {
         try fileIO.zip(tmpFolderURL,
                        to: URL.documents.appendingPathComponent(zipFileName))
     }
-    func loadCanvasDataV2(from zipFilePath: String, into folderURL: URL) throws -> CanvasModelV2? {
+    func loadCanvasDataV2(from zipFilePath: String, into folderURL: URL) throws -> CanvasEntity? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
         return try? fileIO.loadJson(folderURL.appendingPathComponent(URL.jsonFileName))
     }
-    func loadCanvasData(from zipFilePath: String, into folderURL: URL) throws -> CanvasModel? {
+    func loadCanvasData(from zipFilePath: String, into folderURL: URL) throws -> OldCanvasEntity? {
         try fileIO.unzip(URL.documents.appendingPathComponent(zipFilePath),
                          to: folderURL)
 
         return try? fileIO.loadJson(folderURL.appendingPathComponent(URL.jsonFileName))
     }
 
-    func applyCanvasDataToCanvasV2(_ data: CanvasModelV2?,
+    func applyCanvasDataToCanvasV2(_ data: CanvasEntity?,
                                    layers: [LayerModel],
                                    folderURL: URL,
                                    zipFilePath: String) throws {
@@ -65,7 +65,7 @@ extension CanvasViewModel {
 
         projectName = zipFilePath.fileName
     }
-    func applyCanvasDataToCanvas(_ data: CanvasModel?,
+    func applyCanvasDataToCanvas(_ data: OldCanvasEntity?,
                                  folderURL: URL,
                                  zipFilePath: String) throws {
         guard 
