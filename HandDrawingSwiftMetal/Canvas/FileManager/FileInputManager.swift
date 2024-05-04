@@ -29,15 +29,6 @@ enum FileInputManager {
         throw FileInputError.cannotFindFile
     }
 
-    static func unzip(_ sourceZipURL: URL, to destinationFolderURL: URL) async throws {
-        if !SSZipArchive.unzipFile(
-            atPath: sourceZipURL.path,
-            toDestination: destinationFolderURL.path
-        ) {
-            throw FileInputError.failedToUnzip
-        }
-    }
-
     static func loadJson<T: Codable>(_ url: URL) throws -> T? {
         let jsonString: String = try String(contentsOf: url, encoding: .utf8)
         let dataJson: Data? = jsonString.data(using: .utf8)
@@ -47,6 +38,15 @@ enum FileInputManager {
         }
 
         return try JSONDecoder().decode(T.self, from: dataJson)
+    }
+
+    static func unzip(_ sourceZipURL: URL, to destinationFolderURL: URL) async throws {
+        if !SSZipArchive.unzipFile(
+            atPath: sourceZipURL.path,
+            toDestination: destinationFolderURL.path
+        ) {
+            throw FileInputError.failedToUnzip
+        }
     }
 
 }

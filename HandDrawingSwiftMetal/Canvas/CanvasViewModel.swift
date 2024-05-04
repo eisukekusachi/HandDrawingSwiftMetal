@@ -549,7 +549,7 @@ extension CanvasViewModel {
         else { return }
 
         localRepository?.saveDataToDocuments(
-            data: ExportCanvasData.init(
+            data: .init(
                 canvasTexture: canvasTexture,
                 layerManager: layerManager,
                 drawingTool: drawingTool

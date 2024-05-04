@@ -9,10 +9,8 @@ import MetalKit
 import Combine
 
 enum DocumentsLocalRepositoryError: Error {
-    case exportError
-    case failedToApplyData
-    case nilSelf
-    case unwrapError
+    case exportThumbnailError
+    case exportLayerDataError
 }
 
 final class DocumentsLocalRepository: LocalRepository {
@@ -135,7 +133,7 @@ extension DocumentsLocalRepository {
                 )
                 promise(.success(fileName))
             } catch {
-                promise(.failure(.exportError))
+                promise(.failure(.exportThumbnailError))
             }
         }
         return publisher.eraseToAnyPublisher()
@@ -167,7 +165,7 @@ extension DocumentsLocalRepository {
                 }
                 promise(.success(processedLayers))
             } catch {
-                promise(.failure(.exportError))
+                promise(.failure(.exportLayerDataError))
             }
         }
         return publisher.eraseToAnyPublisher()
