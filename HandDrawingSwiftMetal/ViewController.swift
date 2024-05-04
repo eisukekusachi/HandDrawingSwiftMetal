@@ -57,25 +57,23 @@ extension ViewController {
             self?.canvasViewModel.didTapResetTransformButton()
         }
 
-        contentView.tapSaveButton = { [weak self] in
-            guard let `self` else { return }
-            saveCanvas(into: URL.tmpFolderURL,
-                       with: canvasViewModel.zipFileNameName)
-        }
         contentView.tapLayerButton = { [weak self] in
             self?.canvasViewModel.didTapLayerButton()
         }
+        contentView.tapSaveButton = { [weak self] in
+            self?.canvasViewModel.didTapSaveButton()
+        }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
-            let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
+            
+            let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
                 $0.lastPathComponent
             }
-            let fileView = FileView(zipFileList: zipFileList,
-                                    didTapItem: { [weak self] zipFilePath in
-
-                self?.loadCanvas(from: zipFilePath,
-                                 into: URL.tmpFolderURL)
-                self?.presentedViewController?.dismiss(animated: true)
+            let fileView = FileView(
+                zipFileList: zipFilePashArray,
+                didTapItem: { selectedZipFilePath in
+                    self.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
+                    self.presentedViewController?.dismiss(animated: true)
             })
             let vc = UIHostingController(rootView: fileView)
             present(vc, animated: true)

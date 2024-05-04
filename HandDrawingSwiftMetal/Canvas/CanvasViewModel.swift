@@ -102,6 +102,8 @@ class CanvasViewModel {
     private let touchManager = TouchManager()
     private let actionManager = ActionManager()
 
+    private var localRepository: LocalRepository?
+
     /// A protocol for managing file input and output
     private (set) var fileIO: FileIO!
 
@@ -117,8 +119,10 @@ class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(fileIO: FileIO = FileIOImpl()) {
-        self.fileIO = fileIO
+    init(
+        localRepository: LocalRepository = DocumentsLocalRepository()
+    ) {
+        self.localRepository = localRepository
 
         layerUndoManager.addUndoObjectToUndoStackPublisher
             .sink { [weak self] in
@@ -510,6 +514,59 @@ extension CanvasViewModel {
         layerUndoManager.clear()
 
         refreshCanvasWithMergingAllLayers()
+    }
+
+    func didTapLoadButton(filePath: String) {
+        loadFile(from: filePath)
+    }
+    func didTapSaveButton() {
+        saveFile()
+    }
+
+}
+
+extension CanvasViewModel {
+
+    private func loadFile(from filePath: String) {
+        localRepository?.loadDataFromDocuments(
+            sourceURL: URL.documents.appendingPathComponent(filePath),
+            canvasViewModel: self
+        )
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+        }, receiveValue: {})
+        .store(in: &cancellables)
+    }
+
+    private func saveFile() {
+        guard
+            let canvasTexture = delegate?.rootTexture
+        else { return }
+
+        localRepository?.saveDataToDocuments(
+            data: ExportCanvasData.init(
+                canvasTexture: canvasTexture,
+                layerManager: layerManager,
+                drawingTool: drawingTool
+            ),
+            to: URL.documents.appendingPathComponent(zipFileNameName)
+        )
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+        }, receiveValue: {})
+        .store(in: &cancellables)
     }
 
 }
