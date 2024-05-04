@@ -13,7 +13,7 @@ class ViewController: UIViewController {
 
     @IBOutlet private weak var contentView: ContentView!
 
-    let canvasViewModel = CanvasViewModel()
+    private let canvasViewModel = CanvasViewModel()
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
