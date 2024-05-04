@@ -8,10 +8,6 @@
 import UIKit
 import ZipArchive
 
-enum FileOutputError: Error {
-    case failedToZip
-}
-
 class FileIOImpl: FileIO {
     func zip(_ srcFolderURL: URL, to dstZipURL: URL) throws {
         let success = SSZipArchive.createZipFile(atPath: dstZipURL.path,

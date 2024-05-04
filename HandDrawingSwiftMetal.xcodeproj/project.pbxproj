@@ -51,6 +51,7 @@
 		D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */; };
 		D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */; };
 		D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19662BE5D8AB0069D4A9 /* FileInputManager.swift */; };
+		D44D19692BE5DA4D0069D4A9 /* FileOutputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19682BE5DA4D0069D4A9 /* FileOutputManager.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
@@ -176,6 +177,7 @@
 		D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasEntity.swift; sourceTree = "<group>"; };
 		D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldCanvasEntity.swift; sourceTree = "<group>"; };
 		D44D19662BE5D8AB0069D4A9 /* FileInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInputManager.swift; sourceTree = "<group>"; };
+		D44D19682BE5DA4D0069D4A9 /* FileOutputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutputManager.swift; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -424,6 +426,7 @@
 			isa = PBXGroup;
 			children = (
 				D44D19662BE5D8AB0069D4A9 /* FileInputManager.swift */,
+				D44D19682BE5DA4D0069D4A9 /* FileOutputManager.swift */,
 			);
 			path = FileManager;
 			sourceTree = "<group>";
@@ -735,6 +738,7 @@
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
+				D44D19692BE5DA4D0069D4A9 /* FileOutputManager.swift in Sources */,
 				D40D976F29DAB09D00A82E6A /* DrawingEraserLayer.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
