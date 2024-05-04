@@ -11,11 +11,6 @@ import ZipArchive
 enum FileOutputError: Error {
     case failedToZip
 }
-enum FileInputError: Error {
-    case failedToUnzip
-    case failedToLoadJson
-    case failedToApplyData
-}
 
 class FileIOImpl: FileIO {
     func zip(_ srcFolderURL: URL, to dstZipURL: URL) throws {
