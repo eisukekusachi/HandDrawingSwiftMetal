@@ -47,8 +47,8 @@ struct CanvasEntity: Codable, Equatable {
         self.layers = [.init(
             textureName: entity.textureName ?? "",
             title: "NewLayer",
-            isVisible: true,
-            alpha: 255)
+            alpha: 255,
+            isVisible: true)
         ]
 
         self.drawingTool = entity.drawingTool ?? 0

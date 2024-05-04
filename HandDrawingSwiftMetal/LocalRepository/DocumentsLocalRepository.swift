@@ -160,8 +160,8 @@ extension DocumentsLocalRepository {
                         .init(
                             textureName: textureName,
                             title: layer.title,
-                            isVisible: layer.isVisible,
-                            alpha: layer.alpha
+                            alpha: layer.alpha,
+                            isVisible: layer.isVisible
                         )
                     )
                 }
