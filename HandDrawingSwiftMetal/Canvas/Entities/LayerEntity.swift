@@ -10,13 +10,13 @@ import MetalKit
 struct LayerEntity: Identifiable, Equatable {
 
     let id: UUID
-    var texture: MTLTexture?
+    var texture: MTLTexture
     var title: String
     var thumbnail: UIImage?
     var isVisible: Bool
     var alpha: Int
 
-    init(texture: MTLTexture?,
+    init(texture: MTLTexture,
          title: String,
          isVisible: Bool = true,
          alpha: Int = 255) {
@@ -34,7 +34,7 @@ struct LayerEntity: Identifiable, Equatable {
 extension LayerEntity {
 
     mutating func updateThumbnail() {
-        thumbnail = texture?.upsideDownUIImage?.resize(width: 64)
+        thumbnail = texture.upsideDownUIImage?.resize(width: 64)
     }
 
     static func == (lhs: LayerEntity, rhs: LayerEntity) -> Bool {

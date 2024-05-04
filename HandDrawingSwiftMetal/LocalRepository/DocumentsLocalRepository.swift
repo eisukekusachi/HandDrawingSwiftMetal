@@ -150,12 +150,10 @@ extension DocumentsLocalRepository {
                 var processedLayers: [LayerEntityForExporting] = []
 
                 for layer in layers {
-                    guard let texture = layer.texture else { return }
-
                     let textureName = UUID().uuidString
 
                     try FileOutputManager.saveImage(
-                        bytes: texture.bytes,
+                        bytes: layer.texture.bytes,
                         to: url.appendingPathComponent(textureName)
                     )
                     processedLayers.append(

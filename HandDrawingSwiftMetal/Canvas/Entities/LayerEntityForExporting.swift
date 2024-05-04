@@ -25,8 +25,9 @@ extension Array where Element == LayerEntityForExporting {
         var layers: [LayerEntity] = []
 
         try self.forEach { layer in
-            if  let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals {
-                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData)
+            if let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals,
+               let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData) {
+
                 let layerData: LayerEntity = .init(
                     texture: newTexture,
                     title: layer.title,
@@ -37,10 +38,11 @@ extension Array where Element == LayerEntityForExporting {
             }
         }
 
-        if layers.count == 0 {
+        if layers.count == 0,
+           let newTexture = MTKTextureUtils.makeTexture(device, textureSize) {
             layers.append(
                 .init(
-                    texture: MTKTextureUtils.makeTexture(device, textureSize),
+                    texture: newTexture,
                     title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
                 )
             )
