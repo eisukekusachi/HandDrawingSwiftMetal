@@ -16,7 +16,7 @@ struct LayerEntityForExporting: Codable, Equatable {
 
 extension Array where Element == LayerEntityForExporting {
 
-    func convertToLayerModel(
+    func convertToLayerEntity(
         device: MTLDevice,
         textureSize: CGSize,
         folderURL: URL

@@ -183,7 +183,9 @@ class CanvasViewModel {
             throw CanvasViewModelError.failedToApplyData
         }
 
-        let layers: [LayerEntity] = try data.layers.map({ $0 }).convertToLayerModel(
+        let layerEntityForExportingArray: [LayerEntityForExporting] = data.layers
+
+        let layers: [LayerEntity] = try layerEntityForExportingArray.map({ $0 }).convertToLayerEntity(
             device: device,
             textureSize: data.textureSize,
             folderURL: folderURL
