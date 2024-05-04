@@ -104,9 +104,6 @@ class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
-    /// A protocol for managing file input and output
-    private (set) var fileIO: FileIO!
-
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
