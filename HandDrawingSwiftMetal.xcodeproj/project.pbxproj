@@ -55,6 +55,7 @@
 		D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */; };
 		D44D19702BE5DB530069D4A9 /* ExportCanvasData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */; };
 		D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */; };
+		D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19732BE5DFE80069D4A9 /* ToastModel.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
@@ -184,6 +185,7 @@
 		D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRepository.swift; sourceTree = "<group>"; };
 		D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCanvasData.swift; sourceTree = "<group>"; };
 		D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsLocalRepository.swift; sourceTree = "<group>"; };
+		D44D19732BE5DFE80069D4A9 /* ToastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastModel.swift; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -461,6 +463,7 @@
 				D4BCB3062AF78B0200EA650D /* ActivityIndicatorView.swift */,
 				D464B28729FD3F2A00FA36B1 /* ColorData.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
+				D44D19732BE5DFE80069D4A9 /* ToastModel.swift */,
 				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
 			);
 			path = Utils;
@@ -829,6 +832,7 @@
 				D40CDF032B411F660059527E /* LayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calc.swift in Sources */,
+				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,
 				D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,

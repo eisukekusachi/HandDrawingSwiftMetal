@@ -107,6 +107,13 @@ extension ViewController {
             .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)
 
+        canvasViewModel.requestShowingToastPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.showToast(model)
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.requestShowingLayerViewPublisher
             .sink { [weak self] in
                 self?.layerViewPresenter.toggleVisible()
@@ -145,15 +152,21 @@ extension ViewController {
         )
     }
 
+    func showToast(_ model: ToastModel) {
+        let toast = Toast()
+        toast.setupView(model)
+        view.addSubview(toast)
+    }
+
 }
 
 extension ViewController {
 
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
-            view.addSubview(Toast(text: "Failed"))
+            showToast(.init(title: "Failed", systemName: "exclamationmark.circle"))
         } else {
-            view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+            showToast(.init(title: "Success", systemName: "hand.thumbsup.fill"))
         }
     }
 
@@ -228,10 +241,10 @@ extension ViewController {
 
                 try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
 
-                view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
+                showToast(.init(title: "Success", systemName: "hand.thumbsup.fill"))
 
             } catch {
-                view.addSubview(Toast(text: error.localizedDescription))
+                showToast(.init(title: "Failed", systemName: "exclamationmark.circle"))
             }
         }
     }
