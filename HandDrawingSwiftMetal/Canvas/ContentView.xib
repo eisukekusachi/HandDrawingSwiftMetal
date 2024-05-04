@@ -125,23 +125,23 @@
                         </button>
                     </subviews>
                 </stackView>
-                <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PR8-io-HFj" userLabel="ActivityIndicatorView">
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PR8-io-HFj" userLabel="ActivityIndicatorView">
                     <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                     <subviews>
-                        <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lK1-5R-4hs">
-                            <rect key="frame" x="132.66666666666666" y="362" width="127.99999999999997" height="128"/>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lK1-5R-4hs">
+                            <rect key="frame" x="160.66666666666666" y="390" width="72" height="72"/>
                             <subviews>
-                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="wiS-KU-cTk">
-                                    <rect key="frame" x="45.333333333333343" y="45.666666666666686" width="37" height="37"/>
+                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="wiS-KU-cTk">
+                                    <rect key="frame" x="26" y="26" width="20" height="20"/>
                                     <color key="color" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </activityIndicatorView>
                             </subviews>
-                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <color key="backgroundColor" white="1" alpha="0.74845875850340138" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstItem="wiS-KU-cTk" firstAttribute="centerY" secondItem="lK1-5R-4hs" secondAttribute="centerY" id="1d8-7Q-OBz"/>
                                 <constraint firstItem="wiS-KU-cTk" firstAttribute="centerX" secondItem="lK1-5R-4hs" secondAttribute="centerX" id="lWZ-U5-ATw"/>
                                 <constraint firstAttribute="width" secondItem="lK1-5R-4hs" secondAttribute="height" multiplier="1:1" id="tSo-ED-KlL"/>
-                                <constraint firstAttribute="width" constant="128" id="xnC-HE-S41"/>
+                                <constraint firstAttribute="width" constant="72" id="xnC-HE-S41"/>
                             </constraints>
                             <userDefinedRuntimeAttributes>
                                 <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
@@ -150,7 +150,7 @@
                             </userDefinedRuntimeAttributes>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="backgroundColor" white="1" alpha="0.14997874149659865" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstItem="lK1-5R-4hs" firstAttribute="centerX" secondItem="PR8-io-HFj" secondAttribute="centerX" id="exU-GG-Wc1"/>
                         <constraint firstItem="lK1-5R-4hs" firstAttribute="centerY" secondItem="PR8-io-HFj" secondAttribute="centerY" id="jKd-WF-BOi"/>
