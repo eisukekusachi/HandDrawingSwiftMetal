@@ -8,14 +8,14 @@
 import Foundation
 
 struct CanvasEntity: Codable, Equatable {
-    let textureSize: CGSize?
+    let textureSize: CGSize
     let layerIndex: Int
-    let layers: [LayerEntity?]?
+    let layers: [LayerEntity]
 
-    let thumbnailName: String?
+    let thumbnailName: String
 
-    let drawingTool: Int?
+    let drawingTool: Int
 
-    let brushDiameter: Int?
-    let eraserDiameter: Int?
+    let brushDiameter: Int
+    let eraserDiameter: Int
 }
