@@ -160,7 +160,7 @@ enum Command {
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
-    static func merge(layers: [LayerModel], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
+    static func merge(layers: [LayerEntity], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         layers.forEach {
             merge(texture: $0.texture, alpha: $0.alpha, into: dstTexture, commandBuffer)
         }

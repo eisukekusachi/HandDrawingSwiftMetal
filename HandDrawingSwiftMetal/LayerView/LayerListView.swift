@@ -49,10 +49,10 @@ struct LayerListView: View {
 }
 
 extension LayerListView {
-    func layerRow(layer: LayerModel, 
+    func layerRow(layer: LayerEntity,
                   selected: Bool,
-                  didTapRow: @escaping ((LayerModel) -> Void),
-                  didTapVisibleButton: @escaping ((LayerModel) -> Void)) -> some View {
+                  didTapRow: @escaping ((LayerEntity) -> Void),
+                  didTapVisibleButton: @escaping ((LayerEntity) -> Void)) -> some View {
         return ZStack {
             Color(backgroundColor(selected))
 
@@ -116,7 +116,7 @@ extension LayerListView {
             return UIColor(named: "component") ?? .clear
         }
     }
-    private func iconColor(layer: LayerModel, _ selected: Bool) -> UIColor {
+    private func iconColor(layer: LayerEntity, _ selected: Bool) -> UIColor {
         if selected {
             if layer.isVisible {
                 return .white
