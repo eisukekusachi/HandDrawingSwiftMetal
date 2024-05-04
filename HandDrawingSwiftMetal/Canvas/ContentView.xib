@@ -12,6 +12,8 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
+                <outlet property="activityIndicator" destination="wiS-KU-cTk" id="YKI-Y9-bPv"/>
+                <outlet property="activityIndicatorView" destination="PR8-io-HFj" id="ram-pN-xVq"/>
                 <outlet property="blackColorButton" destination="dMS-qm-Xjc" id="I8s-nR-HYr"/>
                 <outlet property="canvasView" destination="Rri-Cz-Fww" id="HNq-DK-U0r"/>
                 <outlet property="diameterSlider" destination="s4f-db-5LA" id="Lec-ZW-hmI"/>
@@ -123,6 +125,37 @@
                         </button>
                     </subviews>
                 </stackView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PR8-io-HFj" userLabel="ActivityIndicatorView">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lK1-5R-4hs">
+                            <rect key="frame" x="160.66666666666666" y="390" width="72" height="72"/>
+                            <subviews>
+                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="wiS-KU-cTk">
+                                    <rect key="frame" x="26" y="26" width="20" height="20"/>
+                                    <color key="color" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </activityIndicatorView>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="0.74845875850340138" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstItem="wiS-KU-cTk" firstAttribute="centerY" secondItem="lK1-5R-4hs" secondAttribute="centerY" id="1d8-7Q-OBz"/>
+                                <constraint firstItem="wiS-KU-cTk" firstAttribute="centerX" secondItem="lK1-5R-4hs" secondAttribute="centerX" id="lWZ-U5-ATw"/>
+                                <constraint firstAttribute="width" secondItem="lK1-5R-4hs" secondAttribute="height" multiplier="1:1" id="tSo-ED-KlL"/>
+                                <constraint firstAttribute="width" constant="72" id="xnC-HE-S41"/>
+                            </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                    <integer key="value" value="8"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="0.14997874149659865" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="lK1-5R-4hs" firstAttribute="centerX" secondItem="PR8-io-HFj" secondAttribute="centerX" id="exU-GG-Wc1"/>
+                        <constraint firstItem="lK1-5R-4hs" firstAttribute="centerY" secondItem="PR8-io-HFj" secondAttribute="centerY" id="jKd-WF-BOi"/>
+                    </constraints>
+                </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -133,11 +166,15 @@
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GzD-nN-Z2I"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="centerY" secondItem="P50-DK-emi" secondAttribute="centerY" id="IJP-iX-eIY"/>
+                <constraint firstItem="PR8-io-HFj" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="R9e-oB-haj"/>
+                <constraint firstAttribute="bottom" secondItem="PR8-io-HFj" secondAttribute="bottom" id="WMe-BJ-eF1"/>
+                <constraint firstAttribute="trailing" secondItem="PR8-io-HFj" secondAttribute="trailing" id="XKg-DO-D9V"/>
                 <constraint firstItem="P50-DK-emi" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="ZLC-p5-E1x"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="16" id="fM0-qC-Agx"/>
                 <constraint firstItem="qtN-lB-os6" firstAttribute="centerX" secondItem="vUN-kp-3ea" secondAttribute="centerX" id="fO0-py-vJO"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="P50-DK-emi" secondAttribute="trailing" constant="16" id="gUB-QZ-nmC"/>
                 <constraint firstAttribute="bottom" secondItem="Rri-Cz-Fww" secondAttribute="bottom" id="npb-fh-cuo"/>
+                <constraint firstItem="PR8-io-HFj" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="s5A-rC-J5c"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="uNl-Qs-2Na"/>
             </constraints>
             <point key="canvasLocation" x="91" y="21"/>

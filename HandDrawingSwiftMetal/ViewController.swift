@@ -13,8 +13,9 @@ class ViewController: UIViewController {
 
     @IBOutlet private weak var contentView: ContentView!
 
-    let canvasViewModel = CanvasViewModel()
+    private let canvasViewModel = CanvasViewModel()
 
+    private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
     private let layerViewPresenter = LayerViewPresenter()
@@ -56,25 +57,23 @@ extension ViewController {
             self?.canvasViewModel.didTapResetTransformButton()
         }
 
-        contentView.tapSaveButton = { [weak self] in
-            guard let `self` else { return }
-            saveCanvas(into: URL.tmpFolderURL,
-                       with: canvasViewModel.zipFileNameName)
-        }
         contentView.tapLayerButton = { [weak self] in
             self?.canvasViewModel.didTapLayerButton()
         }
+        contentView.tapSaveButton = { [weak self] in
+            self?.canvasViewModel.didTapSaveButton()
+        }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
-            let zipFileList = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
+            
+            let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
                 $0.lastPathComponent
             }
-            let fileView = FileView(zipFileList: zipFileList,
-                                    didTapItem: { [weak self] zipFilePath in
-
-                self?.loadCanvas(from: zipFilePath,
-                                 into: URL.tmpFolderURL)
-                self?.presentedViewController?.dismiss(animated: true)
+            let fileView = FileView(
+                zipFileList: zipFilePashArray,
+                didTapItem: { selectedZipFilePath in
+                    self.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
+                    self.presentedViewController?.dismiss(animated: true)
             })
             let vc = UIHostingController(rootView: fileView)
             present(vc, animated: true)
@@ -105,6 +104,29 @@ extension ViewController {
 
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingActivityIndicatorPublisher
+            .map { !$0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isHiddenActivityIndicator, on: contentView)
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingAlertPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.showAlert(
+                    title: "Alert",
+                    message: message
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingToastPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.showToast(model)
+            }
             .store(in: &cancellables)
 
         canvasViewModel.requestShowingLayerViewPublisher
@@ -145,92 +167,29 @@ extension ViewController {
         )
     }
 
+    func showAlert(title: String, message: String) {
+        dialogPresenter.configuration = .init(
+            title: title,
+            message: message
+        )
+        dialogPresenter.presentAlert(on: self)
+    }
+
+    func showToast(_ model: ToastModel) {
+        let toast = Toast()
+        toast.setupView(model)
+        view.addSubview(toast)
+    }
+
 }
 
 extension ViewController {
 
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
-            view.addSubview(Toast(text: "Failed"))
+            showToast(.init(title: "Failed", systemName: "exclamationmark.circle"))
         } else {
-            view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
-        }
-    }
-
-}
-
-extension ViewController {
-
-    func saveCanvas(into tmpFolderURL: URL, with zipFileName: String) {
-        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] tmpFolderURL in
-            guard   let self,
-                    let currentTexture = contentView.canvasView.rootTexture else { return }
-
-            let layerIndex = canvasViewModel.layerManager.index
-            let codableLayers = try await canvasViewModel.layerManager.layers.convertToLayerModelCodable(imageFolderURL: tmpFolderURL)
-            try canvasViewModel.saveCanvasAsZipFile(rootTexture: currentTexture,
-                                                    layerIndex: layerIndex,
-                                                    codableLayers: codableLayers,
-                                                    tmpFolderURL: tmpFolderURL,
-                                                    with: zipFileName)
-        }
-    }
-
-    func loadCanvas(from zipFilePath: String, into tmpFolderURL: URL) {
-        createTemporaryFolderWithErrorHandling(tmpFolderURL: tmpFolderURL) { [weak self] folderURL in
-            guard let self else { return }
-
-            if let data = try canvasViewModel.loadCanvasDataV2(from: zipFilePath, into: folderURL) {
-                guard
-                    let device: MTLDevice = MTLCreateSystemDefaultDevice(),
-                    let textureSize = data.textureSize,
-                    let layers = try data.layers?.compactMap({ $0 }).convertToLayerModel(
-                        device: device,
-                        textureSize: textureSize,
-                        folderURL: folderURL
-                    ) else { return }
-
-                try canvasViewModel.applyCanvasDataToCanvasV2(data,
-                                                              layers: layers,
-                                                              folderURL: folderURL,
-                                                              zipFilePath: zipFilePath)
-
-            } else if let data = try canvasViewModel.loadCanvasData(from: zipFilePath,
-                                                                    into: folderURL) {
-                try canvasViewModel.applyCanvasDataToCanvas(data,
-                                                            folderURL: folderURL,
-                                                            zipFilePath: zipFilePath)
-            }
-
-            canvasViewModel.layerUndoManager.clear()
-
-            canvasViewModel.refreshCanvasWithMergingAllLayers()
-        }
-    }
-
-    private func createTemporaryFolderWithErrorHandling(tmpFolderURL: URL,
-                                                        _ tasks: @escaping (URL) async throws -> Void) {
-        Task {
-            let activityIndicatorView = ActivityIndicatorView(frame: view.frame)
-            defer {
-                try? FileManager.default.removeItem(atPath: tmpFolderURL.path)
-                activityIndicatorView.removeFromSuperview()
-            }
-            view.addSubview(activityIndicatorView)
-
-            do {
-                // Clean up the temporary folder when done
-                try FileManager.createNewDirectory(url: tmpFolderURL)
-
-                try await tasks(tmpFolderURL)
-
-                try await Task.sleep(nanoseconds: UInt64(1_000_000_000))
-
-                view.addSubview(Toast(text: "Success", systemName: "hand.thumbsup.fill"))
-
-            } catch {
-                view.addSubview(Toast(text: error.localizedDescription))
-            }
+            showToast(.init(title: "Success", systemName: "hand.thumbsup.fill"))
         }
     }
 

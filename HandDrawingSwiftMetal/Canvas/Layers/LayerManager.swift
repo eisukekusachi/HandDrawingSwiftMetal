@@ -11,7 +11,7 @@ import Combine
 
 class LayerManager: ObservableObject {
 
-    @Published var selectedLayer: LayerModel?
+    @Published var selectedLayer: LayerEntity?
     @Published var selectedLayerAlpha: Int = 255
 
     var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
@@ -29,7 +29,7 @@ class LayerManager: ObservableObject {
         }
     }
 
-    var layers: [LayerModel] = [] {
+    var layers: [LayerEntity] = [] {
         didSet {
             guard index < layers.count else { return }
             selectedLayer = layers[index]
@@ -55,7 +55,7 @@ class LayerManager: ObservableObject {
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
 
-    private var textureSize: CGSize = .zero
+    private (set) var textureSize: CGSize = .zero
 
     private let refreshCanvasWithMergingDrawingLayersSubject = PassthroughSubject<Void, Never>()
 
@@ -82,7 +82,7 @@ class LayerManager: ObservableObject {
     func initLayers(with newTexture: MTLTexture) {
         self.layers.removeAll()
 
-        let layerData = LayerModel.init(
+        let layerData: LayerEntity = .init(
             texture: newTexture,
             title: "NewLayer"
         )
@@ -90,7 +90,10 @@ class LayerManager: ObservableObject {
         self.index = 0
     }
 
-    func initLayers(index: Int, layers: [LayerModel]) {
+    func initLayers(
+        index: Int,
+        layers: [LayerEntity]
+    ) {
         self.layers = layers
         self.index = index
     }
@@ -187,7 +190,7 @@ extension LayerManager {
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        let layer = LayerModel(
+        let layer: LayerEntity = .init(
             texture: texture,
             title: title
         )
@@ -202,7 +205,7 @@ extension LayerManager {
     func moveLayer(
         fromOffsets source: IndexSet,
         toOffset destination: Int,
-        selectedLayer: LayerModel
+        selectedLayer: LayerEntity
     ) {
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)
@@ -224,27 +227,27 @@ extension LayerManager {
         index = currentIndex
     }
 
-    func updateLayer(_ layer: LayerModel) {
+    func updateLayer(_ layer: LayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
     }
 
-    func updateTitle(_ layer: LayerModel, _ title: String) {
+    func updateTitle(_ layer: LayerEntity, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
 
-    func updateVisibility(_ layer: LayerModel, _ isVisible: Bool) {
+    func updateVisibility(_ layer: LayerEntity, _ isVisible: Bool) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].isVisible = isVisible
     }
 
-    func updateAlpha(_ layer: LayerModel, _ alpha: Int) {
+    func updateAlpha(_ layer: LayerEntity, _ alpha: Int) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].alpha = alpha
     }
 
-    func updateThumbnail(_ layer: LayerModel) {
+    func updateThumbnail(_ layer: LayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }
