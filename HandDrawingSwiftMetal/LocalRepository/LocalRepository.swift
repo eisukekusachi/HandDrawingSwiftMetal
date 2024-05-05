@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2024/05/04.
 //
 
-import MetalKit
+import Foundation
 import Combine
 
 protocol LocalRepository {
