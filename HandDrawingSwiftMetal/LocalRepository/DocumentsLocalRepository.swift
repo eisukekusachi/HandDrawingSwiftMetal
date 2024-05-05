@@ -94,7 +94,7 @@ final class DocumentsLocalRepository: LocalRepository {
                     }
 
                     do {
-                        let data = try FileInputManager.getCanvasEntity(
+                        let data = try CanvasEntity.getCanvasEntity(
                             fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
                         )
                         try canvasViewModel.applyCanvasDataToCanvas(

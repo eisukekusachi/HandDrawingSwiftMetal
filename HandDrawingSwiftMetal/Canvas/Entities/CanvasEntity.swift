@@ -56,4 +56,16 @@ struct CanvasEntity: Codable, Equatable {
         self.eraserDiameter = entity.eraserDiameter ?? 8
     }
 
+    @Sendable
+    static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
+        if let jsonData: CanvasEntity = try FileInputManager.loadJson(fileURL) {
+            return jsonData
+
+        } else if let jsonData: OldCanvasEntity = try FileInputManager.loadJson(fileURL) {
+            return CanvasEntity.init(entity: jsonData)
+        }
+
+        throw FileInputError.cannotFindFile
+    }
+
 }

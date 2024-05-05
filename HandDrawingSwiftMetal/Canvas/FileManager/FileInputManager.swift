@@ -17,18 +17,6 @@ enum FileInputError: Error {
 }
 
 enum FileInputManager {
-    @Sendable
-    static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
-        if let jsonData: CanvasEntity = try FileInputManager.loadJson(fileURL) {
-            return jsonData
-
-        } else if let jsonData: OldCanvasEntity = try FileInputManager.loadJson(fileURL) {
-            return CanvasEntity.init(entity: jsonData)
-        }
-
-        throw FileInputError.cannotFindFile
-    }
-
     static func loadJson<T: Codable>(_ url: URL) throws -> T? {
         let jsonString: String = try String(contentsOf: url, encoding: .utf8)
         let dataJson: Data? = jsonString.data(using: .utf8)
