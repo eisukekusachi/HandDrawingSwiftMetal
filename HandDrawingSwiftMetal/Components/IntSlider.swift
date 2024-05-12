@@ -13,12 +13,16 @@ struct IntSlider: View {
 
     private var value: Int
     private let closedRange: ClosedRange<Int>
-    private let completion: ((Int) -> Void)?
+    private let didChange: ((Int) -> Void)?
 
-    init(value: Int, in range: ClosedRange<Int>, completion: ((Int) -> Void)? = nil) {
+    init(
+        value: Int,
+        in range: ClosedRange<Int>,
+        didChange: ((Int) -> Void)? = nil
+    ) {
         self.value = value
         self.closedRange = range
-        self.completion = completion
+        self.didChange = didChange
     }
 
     var body: some View {
@@ -70,8 +74,8 @@ struct IntSlider: View {
                                     geometry: geometry,
                                     dragGestureValue: dragGestureValue,
                                     sliderValue: value,
-                                    didChanged: { value in
-                                        completion?(Int(value))
+                                    didChange: { value in
+                                        didChange?(Int(value))
                                     }
                                 )
                             }
@@ -90,7 +94,7 @@ extension IntSlider {
         geometry: GeometryProxy, 
         dragGestureValue: DragGesture.Value,
         sliderValue: Int,
-        didChanged: (Int) -> Void
+        didChange: (Int) -> Void
     ) {
         if knobOffsetX == nil {
             let positionX = convertToPositionX(sliderValue: sliderValue,
@@ -102,7 +106,7 @@ extension IntSlider {
         let relativeValue: CGFloat = (dragGestureValue.location.x - (knobOffsetX ?? 0)) / (geometry.size.width - style.thumbThickness)
         let newValue = Int(CGFloat(closedRange.lowerBound) + (relativeValue * CGFloat(closedRange.upperBound - closedRange.lowerBound)))
 
-        didChanged(min(closedRange.upperBound, max(closedRange.lowerBound, newValue)))
+        didChange(min(closedRange.upperBound, max(closedRange.lowerBound, newValue)))
     }
 
     private func getTrackLeftWidth(sliderValue: Int, trackWidth: CGFloat, range: ClosedRange<Int>) -> CGFloat {

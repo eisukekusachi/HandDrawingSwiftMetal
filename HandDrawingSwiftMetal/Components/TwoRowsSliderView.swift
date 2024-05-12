@@ -13,7 +13,7 @@ struct TwoRowsSliderView: View {
     var value: Int
     let style: SliderStyle
     var range = 0 ... 255
-    var completion: ((Int) -> Void)?
+    var didChange: ((Int) -> Void)?
 
     var buttonSize: CGFloat = 20
     var valueLabelWidth: CGFloat = 64
@@ -21,8 +21,12 @@ struct TwoRowsSliderView: View {
     var body: some View {
         VStack(spacing: 4) {
             buttons
-            IntSlider(value: value, in: range, completion: completion)
-                .environment(\.sliderStyle, style)
+            IntSlider(
+                value: value,
+                in: range,
+                didChange: didChange
+            )
+            .environment(\.sliderStyle, style)
         }
     }
 
@@ -38,7 +42,7 @@ struct TwoRowsSliderView: View {
 
     private var minusButton: some View {
         Button(action: {
-            completion?(max(value - 1, range.lowerBound))
+            didChange?(max(value - 1, range.lowerBound))
         },
                label: {
             Image(systemName: "minus")
@@ -49,7 +53,7 @@ struct TwoRowsSliderView: View {
 
     private var plusButton: some View {
         Button(action: {
-            completion?(min(value + 1, range.upperBound))
+            didChange?(min(value + 1, range.upperBound))
         },
                label: {
             Image(systemName: "plus")
