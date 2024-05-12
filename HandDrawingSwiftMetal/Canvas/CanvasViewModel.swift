@@ -25,7 +25,7 @@ enum CanvasViewModelError: Error {
     case failedToApplyData
 }
 
-class CanvasViewModel {
+final class CanvasViewModel {
 
     var delegate: CanvasViewModelDelegate?
 

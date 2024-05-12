@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-class LayerManager: ObservableObject {
+final class LayerManager: ObservableObject {
 
     var layers: [LayerEntity] = [] {
         didSet {
