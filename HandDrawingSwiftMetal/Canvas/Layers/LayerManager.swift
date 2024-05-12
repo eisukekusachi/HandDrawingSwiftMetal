@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-class LayerManager: ObservableObject {
+final class LayerManager: ObservableObject {
 
     @Published var selectedLayer: LayerEntity?
     @Published var selectedLayerAlpha: Int = 255
@@ -227,24 +227,29 @@ extension LayerManager {
         index = currentIndex
     }
 
-    func updateLayer(_ layer: LayerEntity) {
+    func updateSelectedLayer(_ layer: LayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
+    }
+
+    func update(
+        _ layer: LayerEntity,
+        isVisible: Bool? = nil,
+        alpha: Int? = nil
+    ) {
+        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        if let isVisible {
+            layers[layerIndex].isVisible = isVisible
+        }
+
+        if let alpha {
+            layers[layerIndex].alpha = alpha
+        }
     }
 
     func updateTitle(_ layer: LayerEntity, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
-    }
-
-    func updateVisibility(_ layer: LayerEntity, _ isVisible: Bool) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].isVisible = isVisible
-    }
-
-    func updateAlpha(_ layer: LayerEntity, _ alpha: Int) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].alpha = alpha
     }
 
     func updateThumbnail(_ layer: LayerEntity) {

@@ -25,7 +25,7 @@ enum CanvasViewModelError: Error {
     case failedToApplyData
 }
 
-class CanvasViewModel {
+final class CanvasViewModel {
 
     var delegate: CanvasViewModelDelegate?
 
@@ -480,7 +480,7 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
+    // MARK: Toolbar
     func didTapUndoButton() {
         layerUndoManager.undo()
     }
@@ -520,6 +520,46 @@ extension CanvasViewModel {
     }
     func didTapSaveButton() {
         saveFile()
+    }
+
+    // MARK: Layers
+    func didTapLayer(layer: LayerEntity) {
+        layerManager.updateSelectedLayer(layer)
+        layerManager.refreshCanvasWithMergingAllLayers()
+    }
+    func didTapAddLayerButton() {
+        layerUndoManager.addUndoObjectToUndoStack()
+
+        layerManager.addLayer()
+        layerManager.refreshCanvasWithMergingAllLayers()
+    }
+    func didTapRemoveLayerButton() {
+        guard layerManager.layers.count > 1 else { return }
+        layerUndoManager.addUndoObjectToUndoStack()
+
+        layerManager.removeLayer()
+        layerManager.refreshCanvasWithMergingAllLayers()
+    }
+    func didTapLayerVisibility(layer: LayerEntity, isVisible: Bool) {
+        layerManager.update(layer, isVisible: isVisible)
+        layerManager.refreshCanvasWithMergingAllLayers()
+    }
+    func didChangeLayerAlpha(layer: LayerEntity, value: Int) {
+        layerManager.update(layer, alpha: value)
+        layerManager.refreshCanvasWithMergingDrawingLayers()
+    }
+    func didEditLayerTitle(layer: LayerEntity, title: String) {
+        layerManager.updateTitle(layer, title)
+    }
+    func didMoveLayers(layer: LayerEntity, source: IndexSet, destination: Int) {
+        layerUndoManager.addUndoObjectToUndoStack()
+
+        layerManager.moveLayer(
+            fromOffsets: source,
+            toOffset: destination,
+            selectedLayer: layer
+        )
+        layerManager.refreshCanvasWithMergingAllLayers()
     }
 
 }

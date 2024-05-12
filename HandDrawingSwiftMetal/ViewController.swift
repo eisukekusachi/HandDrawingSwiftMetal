@@ -161,8 +161,28 @@ extension ViewController {
         layerViewPresenter.setupLayerViewPresenter(
             layerManager: canvasViewModel.layerManager,
             layerViewPresentation: canvasViewModel.layerViewPresentation,
-            layerUndoManager: canvasViewModel.layerUndoManager,
             targetView: contentView.layerButton,
+            didTapLayer: { [weak self] layer in
+                self?.canvasViewModel.didTapLayer(layer: layer)
+            },
+            didTapAddButton: { [weak self] in
+                self?.canvasViewModel.didTapAddLayerButton()
+            },
+            didTapRemoveButton: { [weak self] in
+                self?.canvasViewModel.didTapRemoveLayerButton()
+            },
+            didTapVisibility: { [weak self] layer, value in
+                self?.canvasViewModel.didTapLayerVisibility(layer: layer, isVisible: value)
+            },
+            didChangeAlpha: { [weak self] layer, value in
+                self?.canvasViewModel.didChangeLayerAlpha(layer: layer, value: value)
+            },
+            didEditTitle: { [weak self] layer, value in
+                self?.canvasViewModel.didEditLayerTitle(layer: layer, title: value)
+            },
+            didMove: { [weak self] layer, source, destination in
+                self?.canvasViewModel.didMoveLayers(layer: layer, source: source, destination: destination)
+            },
             on: self
         )
     }

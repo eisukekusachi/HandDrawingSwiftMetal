@@ -11,14 +11,18 @@ struct IntSlider: View {
     @Environment(\.sliderStyle) var style
     @State private var knobOffsetX: CGFloat?
 
-    @Binding private var value: Int
+    private var value: Int
     private let closedRange: ClosedRange<Int>
-    private let completion: ((Int) -> Void)?
+    private let didChange: ((Int) -> Void)?
 
-    init(value: Binding<Int>, in range: ClosedRange<Int>, completion: ((Int) -> Void)? = nil) {
-        self._value = value
+    init(
+        value: Int,
+        in range: ClosedRange<Int>,
+        didChange: ((Int) -> Void)? = nil
+    ) {
+        self.value = value
         self.closedRange = range
-        self.completion = completion
+        self.didChange = didChange
     }
 
     var body: some View {
@@ -66,11 +70,14 @@ struct IntSlider: View {
                     .gesture(
                         DragGesture()
                             .onChanged { dragGestureValue in
-                                dragging(geometry: geometry,
-                                         dragGestureValue: dragGestureValue,
-                                         sliderValue: $value)
-
-                                completion?(Int($value.wrappedValue))
+                                dragging(
+                                    geometry: geometry,
+                                    dragGestureValue: dragGestureValue,
+                                    sliderValue: value,
+                                    didChange: { value in
+                                        didChange?(Int(value))
+                                    }
+                                )
                             }
                             .onEnded { _ in
                                 knobOffsetX = nil
@@ -83,9 +90,14 @@ struct IntSlider: View {
 }
 
 extension IntSlider {
-    private func dragging(geometry: GeometryProxy, dragGestureValue: DragGesture.Value, sliderValue: Binding<Int>) {
+    private func dragging(
+        geometry: GeometryProxy, 
+        dragGestureValue: DragGesture.Value,
+        sliderValue: Int,
+        didChange: (Int) -> Void
+    ) {
         if knobOffsetX == nil {
-            let positionX = convertToPositionX(sliderValue: sliderValue.wrappedValue,
+            let positionX = convertToPositionX(sliderValue: sliderValue,
                                                width: geometry.size.width,
                                                range: closedRange)
             knobOffsetX = dragGestureValue.startLocation.x - positionX
@@ -94,7 +106,7 @@ extension IntSlider {
         let relativeValue: CGFloat = (dragGestureValue.location.x - (knobOffsetX ?? 0)) / (geometry.size.width - style.thumbThickness)
         let newValue = Int(CGFloat(closedRange.lowerBound) + (relativeValue * CGFloat(closedRange.upperBound - closedRange.lowerBound)))
 
-        sliderValue.wrappedValue = min(closedRange.upperBound, max(closedRange.lowerBound, newValue))
+        didChange(min(closedRange.upperBound, max(closedRange.lowerBound, newValue)))
     }
 
     private func getTrackLeftWidth(sliderValue: Int, trackWidth: CGFloat, range: ClosedRange<Int>) -> CGFloat {
@@ -117,10 +129,8 @@ extension IntSlider {
 }
 
 #Preview {
-    @State var alpha: Int = 125
-    let _ = SliderStyleImpl(
-        trackLeftColor: UIColor(named: "trackColor")!
-    )
 
-    return IntSlider(value: $alpha, in: 0 ... 255)
+    var alpha: Int = 125
+    return IntSlider(value: alpha, in: 0 ... 255)
+
 }
