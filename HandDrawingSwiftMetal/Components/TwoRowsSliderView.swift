@@ -10,7 +10,7 @@ import SwiftUI
 struct TwoRowsSliderView: View {
 
     let title: String
-    @Binding var value: Int
+    var value: Int
     let style: SliderStyle
     var range = 0 ... 255
     var completion: ((Int) -> Void)?
@@ -21,7 +21,7 @@ struct TwoRowsSliderView: View {
     var body: some View {
         VStack(spacing: 4) {
             buttons
-            IntSlider(value: $value, in: range, completion: completion)
+            IntSlider(value: value, in: range, completion: completion)
                 .environment(\.sliderStyle, style)
         }
     }
@@ -38,8 +38,7 @@ struct TwoRowsSliderView: View {
 
     private var minusButton: some View {
         Button(action: {
-            value = max(value - 1, range.lowerBound)
-            completion?(value)
+            completion?(max(value - 1, range.lowerBound))
         },
                label: {
             Image(systemName: "minus")
@@ -50,8 +49,7 @@ struct TwoRowsSliderView: View {
 
     private var plusButton: some View {
         Button(action: {
-            value = min(value + 1, range.upperBound)
-            completion?(value)
+            completion?(min(value + 1, range.upperBound))
         },
                label: {
             Image(systemName: "plus")
@@ -81,11 +79,15 @@ struct TwoRowsSliderView: View {
 }
 
 #Preview {
-    @State var alpha: Int = 125
+
+    var alpha: Int = 125
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
 
-    return TwoRowsSliderView(title: "Alpha",
-                             value: $alpha,
-                             style: sliderStyle)
+    return TwoRowsSliderView(
+        title: "Alpha",
+        value: alpha,
+        style: sliderStyle
+    )
+
 }
