@@ -11,6 +11,21 @@ import Combine
 
 class LayerManager: ObservableObject {
 
+    var layers: [LayerEntity] = [] {
+        didSet {
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
+            selectedLayerAlpha = layers[index].alpha
+        }
+    }
+    var index: Int = 0 {
+        didSet {
+            guard index < layers.count else { return }
+            selectedLayer = layers[index]
+            selectedLayerAlpha = layers[index].alpha
+        }
+    }
+
     @Published var selectedLayer: LayerEntity?
     @Published var selectedLayerAlpha: Int = 255
 
@@ -26,21 +41,6 @@ class LayerManager: ObservableObject {
         didSet {
             drawingBrushLayer.frameSize = frameSize
             drawingEraserLayer.frameSize = frameSize
-        }
-    }
-
-    var layers: [LayerEntity] = [] {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-            selectedLayerAlpha = layers[index].alpha
-        }
-    }
-    var index: Int = 0 {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-            selectedLayerAlpha = layers[index].alpha
         }
     }
 

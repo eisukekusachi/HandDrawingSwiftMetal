@@ -42,7 +42,7 @@ struct LayerListView: View {
 }
 
 extension LayerListView {
-    func layerRow(
+    private func layerRow(
         layer: LayerEntity,
         selected: Bool,
         didTapRow: @escaping ((LayerEntity) -> Void),
