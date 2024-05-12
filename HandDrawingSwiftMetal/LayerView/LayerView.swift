@@ -8,12 +8,20 @@
 import SwiftUI
 
 struct LayerView: View {
+
     @ObservedObject var layerManager: LayerManager
     @ObservedObject var layerViewPresentation: LayerViewPresentation
-    @ObservedObject var layerUndoManager: LayerUndoManager
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
+
+    var didTapLayer: (LayerEntity) -> Void
+    var didTapAddButton: () -> Void
+    var didTapRemoveButton: () -> Void
+    var didTapVisibility: (LayerEntity, Bool) -> Void
+    var didChangeAlpha: (LayerEntity, Int) -> Void
+    var didEditTitle: (LayerEntity, String) -> Void
+    var didMove: (LayerEntity, IndexSet, Int) -> Void
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -27,12 +35,38 @@ struct LayerView: View {
             )
 
             VStack {
-                toolbar(layerManager: layerManager)
-                listView(
-                    layerManager: layerManager, 
-                    layerUndoManager: layerUndoManager
+                toolbar(
+                    layerManager: layerManager,
+                    didTapAddButton: didTapAddButton,
+                    didTapRemoveButton: didTapRemoveButton,
+                    didEditTitle: didEditTitle
                 )
-                selectedTextureAlphaSlider(layerManager: layerManager)
+
+                LayerListView(
+                    layerManager: layerManager,
+                    didTapLayer: { layer in
+                        didTapLayer(layer)
+                    },
+                    didTapVisibility: { layer, isVisibility in
+                        didTapVisibility(layer, isVisibility)
+                    },
+                    didMove: { layer, source, destination in
+                        didMove(layer, source, destination)
+                    }
+                )
+
+                TwoRowsSliderView(
+                    title: "Alpha",
+                    value: layerManager.selectedLayerAlpha,
+                    style: sliderStyle,
+                    range: range,
+                    didChange: { value in
+                        guard let selectedLayer = layerManager.selectedLayer else { return }
+                        didChangeAlpha(selectedLayer, value)
+                    }
+                )
+                .padding(.top, 4)
+                .padding([.leading, .trailing, .bottom], 8)
             }
             .padding(layerViewPresentation.edgeInsets)
         }
@@ -41,47 +75,47 @@ struct LayerView: View {
 }
 
 extension LayerView {
-    func toolbar(layerManager: LayerManager) -> some View {
+
+    func toolbar(
+        layerManager: LayerManager,
+        didTapAddButton: @escaping () -> Void,
+        didTapRemoveButton: @escaping () -> Void,
+        didEditTitle: @escaping (LayerEntity, String) -> Void
+    ) -> some View {
         let buttonSize: CGFloat = 20
 
         return HStack {
-            Button(action: {
-                layerUndoManager.addUndoObjectToUndoStack()
-                layerManager.addLayer()
-                layerManager.refreshCanvasWithMergingAllLayers()
-
-            }, label: {
-                Image(systemName: "plus.circle")
-                    .buttonModifier(diameter: buttonSize)
-            })
-
-            Spacer()
-                .frame(width: 16)
-
-            Button(action: {
-                if layerManager.layers.count > 1 {
-                    layerUndoManager.addUndoObjectToUndoStack()
-                    layerManager.removeLayer()
-                    layerManager.refreshCanvasWithMergingAllLayers()
+            Button(
+                action: {
+                    didTapAddButton()
+                },
+                label: {
+                    Image(systemName: "plus.circle").buttonModifier(diameter: buttonSize)
                 }
+            )
 
-            }, label: {
-                Image(systemName: "minus.circle")
-                    .buttonModifier(diameter: buttonSize)
-            })
+            Spacer().frame(width: 16)
 
-            Spacer()
-                .frame(width: 16)
+            Button(
+                action: {
+                    didTapRemoveButton()
+                },
+                label: {
+                    Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
+                }
+            )
 
-            Button(action: {
-                guard let selectedLayer = layerManager.selectedLayer else { return }
-                textFieldTitle = selectedLayer.title
-                isTextFieldPresented = true
+            Spacer().frame(width: 16)
 
-            }, label: {
-                Image(systemName: "pencil")
-                    .buttonModifier(diameter: buttonSize)
-            })
+            Button(
+                action: {
+                    textFieldTitle = layerManager.selectedLayer?.title ?? ""
+                    isTextFieldPresented = true
+                },
+                label: {
+                    Image(systemName: "pencil").buttonModifier(diameter: buttonSize)
+                }
+            )
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
@@ -91,21 +125,11 @@ extension LayerView {
                 })
                 Button("Cancel", action: {})
             }
-
             Spacer()
         }
         .padding(8)
     }
-    func listView(
-        layerManager: LayerManager,
-        layerUndoManager: LayerUndoManager
-    ) -> some View {
 
-        LayerListView(
-            layerManager: layerManager,
-            layerUndoManager: layerUndoManager
-        )
-    }
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
         TwoRowsSliderView(
             title: "Alpha",
@@ -113,18 +137,41 @@ extension LayerView {
             style: sliderStyle,
             range: range) { value in
                 guard let selectedLayer = layerManager.selectedLayer else { return }
-                layerManager.updateAlpha(selectedLayer, value)
+                layerManager.update(selectedLayer, alpha: value)
                 layerManager.refreshCanvasWithMergingDrawingLayers()
-        }
+            }
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
     }
+
 }
 
 #Preview {
+
     LayerView(
         layerManager: LayerManager(),
         layerViewPresentation: LayerViewPresentation(),
-        layerUndoManager: LayerUndoManager()
+        didTapLayer: { layer in
+            print("Tap layer")
+        },
+        didTapAddButton: {
+            print("Add")
+        },
+        didTapRemoveButton: {
+            print("Remove")
+        },
+        didTapVisibility: { layer, value in
+            print("Change visibility")
+        },
+        didChangeAlpha: { layer, value in
+            print("Change alpha")
+        },
+        didEditTitle: { layer, value in
+            print("Change title")
+        },
+        didMove: { layer, source, destination in
+            print("Moved")
+        }
     )
+
 }
