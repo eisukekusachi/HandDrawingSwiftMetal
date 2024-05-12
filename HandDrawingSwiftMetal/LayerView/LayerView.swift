@@ -114,7 +114,7 @@ extension LayerView {
     func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
         TwoRowsSliderView(
             title: "Alpha",
-            value: $layerManager.selectedLayerAlpha,
+            value: layerManager.selectedLayerAlpha,
             style: sliderStyle,
             range: range) { value in
                 guard let selectedLayer = layerManager.selectedLayer else { return }
