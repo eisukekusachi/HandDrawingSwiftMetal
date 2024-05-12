@@ -16,14 +16,40 @@ final class LayerViewPresenter {
     func setupLayerViewPresenter(
         layerManager: LayerManager,
         layerViewPresentation: LayerViewPresentation,
-        layerUndoManager: LayerUndoManager,
         targetView: UIView,
+        didTapLayer: @escaping (LayerEntity) -> Void,
+        didTapAddButton: @escaping () -> Void,
+        didTapRemoveButton: @escaping () -> Void,
+        didTapVisibility: @escaping (LayerEntity, Bool) -> Void,
+        didChangeAlpha: @escaping (LayerEntity, Int) -> Void,
+        didEditTitle: @escaping (LayerEntity, String) -> Void,
+        didMove: @escaping (LayerEntity, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
         layerView = LayerView(
             layerManager: layerManager,
             layerViewPresentation: layerViewPresentation,
-            layerUndoManager: layerUndoManager
+            didTapLayer: { layer in
+                didTapLayer(layer)
+            },
+            didTapAddButton: {
+                didTapAddButton()
+            },
+            didTapRemoveButton: {
+                didTapRemoveButton()
+            },
+            didTapVisibility: { entity, value in
+                didTapVisibility(entity, value)
+            },
+            didChangeAlpha: { entity, value in
+                didChangeAlpha(entity, value)
+            },
+            didEditTitle: { entity, value in
+                didEditTitle(entity, value)
+            },
+            didMove: { layer, source, destination in
+                didMove(layer, source, destination)
+            }
         )
 
         guard let layerView else { return }

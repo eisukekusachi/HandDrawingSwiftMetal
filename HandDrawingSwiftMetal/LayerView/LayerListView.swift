@@ -9,51 +9,46 @@ import SwiftUI
 
 struct LayerListView: View {
     @ObservedObject var layerManager: LayerManager
-    @ObservedObject var layerUndoManager: LayerUndoManager
+
+    var didTapLayer: (LayerEntity) -> Void
+    var didTapVisibility: (LayerEntity, Bool) -> Void
+    var didMove: (LayerEntity, IndexSet, Int) -> Void
 
     var body: some View {
         List {
-            ForEach(Array(layerManager.layers.reversed()),
-                    id: \.id) { layer in
-
-                layerRow(layer: layer,
-                         selected: layerManager.selectedLayer == layer,
-                         didTapRow: { selectedLayer in
-                    layerManager.updateLayer(selectedLayer)
-                    layerManager.refreshCanvasWithMergingAllLayers()
-                },
-                         didTapVisibleButton: { layer in
-                    layerManager.updateVisibility(layer, !layer.isVisible)
-                    layerManager.refreshCanvasWithMergingAllLayers()
-                })
+            ForEach(Array(layerManager.layers.reversed()), id: \.id) { layer in
+                layerRow(
+                    layer: layer,
+                    selected: layerManager.selectedLayer == layer,
+                    didTapRow: { targetLayer in
+                        didTapLayer(targetLayer)
+                    },
+                    didTapVisibleButton: { targetLayer in
+                        didTapVisibility(targetLayer, !targetLayer.isVisible)
+                    }
+                )
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
-                    .onMove(perform: { source, destination in
-                        if let selectedLayer = layerManager.selectedLayer {
-
-                            layerUndoManager.addUndoObjectToUndoStack()
-
-                            layerManager.moveLayer(
-                                fromOffsets: source,
-                                toOffset: destination,
-                                selectedLayer: selectedLayer
-                            )
-                            layerManager.refreshCanvasWithMergingAllLayers()
-                        }
-                    })
-                    .listRowSeparator(.hidden)
+            .onMove(perform: { source, destination in
+                guard let targetLayer = layerManager.selectedLayer else { return }
+                didMove(targetLayer, source, destination)
+            })
+            .listRowSeparator(.hidden)
         }
         .listStyle(PlainListStyle())
     }
+
 }
 
 extension LayerListView {
-    func layerRow(layer: LayerEntity,
-                  selected: Bool,
-                  didTapRow: @escaping ((LayerEntity) -> Void),
-                  didTapVisibleButton: @escaping ((LayerEntity) -> Void)) -> some View {
-        return ZStack {
+    func layerRow(
+        layer: LayerEntity,
+        selected: Bool,
+        didTapRow: @escaping ((LayerEntity) -> Void),
+        didTapVisibleButton: @escaping ((LayerEntity) -> Void)
+    ) -> some View {
+        ZStack {
             Color(backgroundColor(selected))
 
             HStack {
@@ -134,8 +129,18 @@ extension LayerListView {
 }
 
 #Preview {
+
     LayerListView(
         layerManager: LayerManager(),
-        layerUndoManager: LayerUndoManager()
+        didTapLayer: { layer in
+            print("Tap layer")
+        },
+        didTapVisibility: { layer, isVisible in
+            print("Tap visibility")
+        },
+        didMove: { layer, source, destination in
+            print("Moved")
+        }
     )
+
 }
