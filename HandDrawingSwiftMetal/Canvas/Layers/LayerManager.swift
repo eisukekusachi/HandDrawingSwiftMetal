@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-class LayerManager: ObservableObject {
+final class LayerManager: ObservableObject {
 
     @Published var selectedLayer: LayerEntity?
     @Published var selectedLayerAlpha: Int = 255
