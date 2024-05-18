@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LayerView: View {
 
-    @ObservedObject var layerManager: LayerManager
+    @ObservedObject var layerManager: ImageLayerManager
     @ObservedObject var layerViewPresentation: LayerViewPresentation
 
     @State var isTextFieldPresented: Bool = false
@@ -77,7 +77,7 @@ struct LayerView: View {
 extension LayerView {
 
     func toolbar(
-        layerManager: LayerManager,
+        layerManager: ImageLayerManager,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
         didEditTitle: @escaping (LayerEntity, String) -> Void
@@ -130,7 +130,7 @@ extension LayerView {
         .padding(8)
     }
 
-    func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
+    func selectedTextureAlphaSlider(layerManager: ImageLayerManager) -> some View {
         TwoRowsSliderView(
             title: "Alpha",
             value: layerManager.selectedLayerAlpha,
@@ -149,7 +149,7 @@ extension LayerView {
 #Preview {
 
     LayerView(
-        layerManager: LayerManager(),
+        layerManager: ImageLayerManager(),
         layerViewPresentation: LayerViewPresentation(),
         didTapLayer: { layer in
             print("Tap layer")

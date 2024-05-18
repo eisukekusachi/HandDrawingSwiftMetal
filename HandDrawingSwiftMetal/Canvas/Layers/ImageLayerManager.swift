@@ -1,5 +1,5 @@
 //
-//  LayerManager.swift
+//  ImageLayerManager.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/16.
@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-final class LayerManager: ObservableObject {
+final class ImageLayerManager: ObservableObject {
 
     @Published var selectedLayer: LayerEntity?
     @Published var selectedLayerAlpha: Int = 255
@@ -109,7 +109,7 @@ final class LayerManager: ObservableObject {
 
 }
 
-extension LayerManager {
+extension ImageLayerManager {
 
     func mergeDrawingLayers(
         backgroundColor: UIColor,
@@ -184,8 +184,8 @@ extension LayerManager {
 }
 
 // CRUD
-extension LayerManager {
-   
+extension ImageLayerManager {
+
     func addLayer() {
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -259,7 +259,7 @@ extension LayerManager {
 
 }
 
-extension LayerManager {
+extension ImageLayerManager {
 
     var selectedTexture: MTLTexture? {
         guard index < layers.count else { return nil }

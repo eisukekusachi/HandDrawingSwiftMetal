@@ -14,7 +14,7 @@ final class LayerViewPresenter {
     private var layerView: LayerView?
 
     func setupLayerViewPresenter(
-        layerManager: LayerManager,
+        layerManager: ImageLayerManager,
         layerViewPresentation: LayerViewPresentation,
         targetView: UIView,
         didTapLayer: @escaping (LayerEntity) -> Void,

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LayerListView: View {
-    @ObservedObject var layerManager: LayerManager
+    @ObservedObject var layerManager: ImageLayerManager
 
     var didTapLayer: (LayerEntity) -> Void
     var didTapVisibility: (LayerEntity, Bool) -> Void
@@ -131,7 +131,7 @@ extension LayerListView {
 #Preview {
 
     LayerListView(
-        layerManager: LayerManager(),
+        layerManager: ImageLayerManager(),
         didTapLayer: { layer in
             print("Tap layer")
         },

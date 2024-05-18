@@ -54,7 +54,7 @@ final class Drawing {
 
     func addDrawLineSegmentCommands(
         with lineSegment: LineSegment,
-        on layerManager: LayerManager,
+        on layerManager: ImageLayerManager,
         to commandBuffer: MTLCommandBuffer?
     ) {
         guard 
@@ -85,7 +85,7 @@ final class Drawing {
     }
 
     func addFinishDrawingCommands(
-        on layerManager: LayerManager,
+        on layerManager: ImageLayerManager,
         to commandBuffer: MTLCommandBuffer?
     ) {
         guard
