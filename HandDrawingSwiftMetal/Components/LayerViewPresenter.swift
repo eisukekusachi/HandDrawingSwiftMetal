@@ -13,9 +13,10 @@ final class LayerViewPresenter {
     private var layerViewController: UIHostingController<ImageLayerView>?
     private var layerView: ImageLayerView?
 
+    private let layerViewPresentation = LayerViewPresentationModel()
+
     func setupLayerViewPresenter(
         layerManager: ImageLayerManager,
-        layerViewPresentation: LayerViewPresentation,
         targetView: UIView,
         didTapLayer: @escaping (ImageLayerEntity) -> Void,
         didTapAddButton: @escaping () -> Void,
@@ -73,7 +74,7 @@ final class LayerViewPresenter {
 
     private func addConstraints(
         targetView: UIView,
-        layerViewPresentation: LayerViewPresentation,
+        layerViewPresentation: LayerViewPresentationModel,
         on viewController: UIViewController
     ) {
         let viewWidth: CGFloat = 300.0

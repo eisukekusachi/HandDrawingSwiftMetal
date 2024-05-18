@@ -34,7 +34,6 @@ final class CanvasViewModel {
     let transforming = Transforming()
 
     let layerManager = ImageLayerManager()
-    let layerViewPresentation = LayerViewPresentation()
 
     let layerUndoManager = LayerUndoManager()
 

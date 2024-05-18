@@ -69,7 +69,7 @@
 		D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA52BC161A100ABDA4E /* Drawing.swift */; };
 		D46A30412BF841270057DB69 /* ImageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* ImageLayer.swift */; };
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
-		D46B8F702BDBDFBC00EF3AC2 /* LayerViewPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */; };
+		D46B8F702BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift */; };
 		D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */; };
 		D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D472859F2BBEBC350035AFCD /* LineDrawing.swift */; };
 		D47285A42BBEBD000035AFCD /* LineParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47285A32BBEBD000035AFCD /* LineParameters.swift */; };
@@ -195,7 +195,7 @@
 		D4671FA52BC161A100ABDA4E /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D46A30402BF841270057DB69 /* ImageLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayer.swift; sourceTree = "<group>"; };
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
-		D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerViewPresentation.swift; sourceTree = "<group>"; };
+		D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerViewPresentationModel.swift; sourceTree = "<group>"; };
 		D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerProtocol.swift; sourceTree = "<group>"; };
 		D472859F2BBEBC350035AFCD /* LineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDrawing.swift; sourceTree = "<group>"; };
 		D47285A32BBEBD000035AFCD /* LineParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineParameters.swift; sourceTree = "<group>"; };
@@ -275,7 +275,7 @@
 		D40CDEFD2B411B3F0059527E /* LayerView */ = {
 			isa = PBXGroup;
 			children = (
-				D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */,
+				D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift */,
 				D40CDEFE2B411F450059527E /* ImageLayerView.swift */,
 				D40CDF022B411F660059527E /* ImageLayerListView.swift */,
 			);
@@ -765,7 +765,7 @@
 				D428FDAA2BD282B400BFE4C9 /* InputManager.swift in Sources */,
 				D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */,
 				D40D979429DAB0D700A82E6A /* Aspect.swift in Sources */,
-				D46B8F702BDBDFBC00EF3AC2 /* LayerViewPresentation.swift in Sources */,
+				D46B8F702BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,

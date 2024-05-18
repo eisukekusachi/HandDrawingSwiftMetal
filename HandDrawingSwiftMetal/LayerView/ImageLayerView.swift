@@ -10,7 +10,7 @@ import SwiftUI
 struct ImageLayerView: View {
 
     @ObservedObject var layerManager: ImageLayerManager
-    @ObservedObject var layerViewPresentation: LayerViewPresentation
+    @ObservedObject var layerViewPresentation: LayerViewPresentationModel
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -136,7 +136,7 @@ extension ImageLayerView {
 
     ImageLayerView(
         layerManager: ImageLayerManager(),
-        layerViewPresentation: LayerViewPresentation(),
+        layerViewPresentation: LayerViewPresentationModel(),
         didTapLayer: { layer in
             print("Tap layer")
         },
