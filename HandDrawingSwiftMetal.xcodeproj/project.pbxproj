@@ -272,23 +272,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D40CDEFD2B411B3F0059527E /* LayerView */ = {
-			isa = PBXGroup;
-			children = (
-				D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift */,
-				D40CDEFE2B411F450059527E /* ImageLayerView.swift */,
-				D40CDF022B411F660059527E /* ImageLayerListView.swift */,
-			);
-			path = LayerView;
-			sourceTree = "<group>";
-		};
 		D40D975029DAB00100A82E6A /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
+				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D41CACE12B9C01F100B8C7C5 /* ContentView.swift */,
 				D41CACE02B9C01F100B8C7C5 /* ContentView.xib */,
-				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
-				D4C397192B9C941F0037312F /* DrawingToolModel.swift */,
 				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D472859E2BBEBC250035AFCD /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
@@ -302,6 +291,7 @@
 				D40D975329DAB02000A82E6A /* TouchPoints */,
 				D4AEFE282B09B56900EE3EEF /* Transforming */,
 				D422D9C42AF4DCEF004E058B /* Undo */,
+				D46A30482BF858760057DB69 /* Views */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -438,6 +428,42 @@
 			path = FileView;
 			sourceTree = "<group>";
 		};
+		D46A30442BF857E30057DB69 /* DrawingLayer */ = {
+			isa = PBXGroup;
+			children = (
+				D40D976829DAB09C00A82E6A /* DrawingBrushLayer.swift */,
+				D40D976A29DAB09D00A82E6A /* DrawingEraserLayer.swift */,
+				D4C8EE972B25490B005947EC /* DrawingLayer.swift */,
+			);
+			path = DrawingLayer;
+			sourceTree = "<group>";
+		};
+		D46A30452BF857EC0057DB69 /* ImageLayers */ = {
+			isa = PBXGroup;
+			children = (
+				D46A30402BF841270057DB69 /* ImageLayer.swift */,
+				D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */,
+			);
+			path = ImageLayers;
+			sourceTree = "<group>";
+		};
+		D46A30482BF858760057DB69 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D46A30492BF858AD0057DB69 /* Layers */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D46A30492BF858AD0057DB69 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				D40CDF022B411F660059527E /* ImageLayerListView.swift */,
+				D40CDEFE2B411F450059527E /* ImageLayerView.swift */,
+			);
+			path = Layers;
+			sourceTree = "<group>";
+		};
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -477,6 +503,7 @@
 				D45941572B08B5CF00A18653 /* DrawingTool.swift */,
 				D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */,
 				D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */,
+				D4C397192B9C941F0037312F /* DrawingToolModel.swift */,
 				D4934F412ADA36C500C52B76 /* DrawingToolType.swift */,
 			);
 			path = DrawingTool;
@@ -495,12 +522,10 @@
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
 			isa = PBXGroup;
 			children = (
-				D40D976829DAB09C00A82E6A /* DrawingBrushLayer.swift */,
-				D40D976A29DAB09D00A82E6A /* DrawingEraserLayer.swift */,
-				D4C8EE972B25490B005947EC /* DrawingLayer.swift */,
-				D46A30402BF841270057DB69 /* ImageLayer.swift */,
-				D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */,
+				D46A30442BF857E30057DB69 /* DrawingLayer */,
+				D46A30452BF857EC0057DB69 /* ImageLayers */,
 				D46A30422BF842570057DB69 /* LayerManager.swift */,
+				D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentationModel.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -535,7 +560,6 @@
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D4513AAF2AF63A3C00CA4438 /* FileView */,
-				D40CDEFD2B411B3F0059527E /* LayerView */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
