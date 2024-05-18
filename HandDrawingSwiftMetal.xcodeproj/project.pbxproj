@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D40CDEFF2B411F450059527E /* LayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* LayerView.swift */; };
+		D40CDEFF2B411F450059527E /* ImageLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* ImageLayerView.swift */; };
 		D40CDF032B411F660059527E /* ImageLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* ImageLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
 		D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */; };
@@ -134,7 +134,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D40CDEFE2B411F450059527E /* LayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerView.swift; sourceTree = "<group>"; };
+		D40CDEFE2B411F450059527E /* ImageLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* ImageLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
 		D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStampFormatter.swift; sourceTree = "<group>"; };
@@ -276,7 +276,7 @@
 			isa = PBXGroup;
 			children = (
 				D46B8F6F2BDBDFBC00EF3AC2 /* LayerViewPresentation.swift */,
-				D40CDEFE2B411F450059527E /* LayerView.swift */,
+				D40CDEFE2B411F450059527E /* ImageLayerView.swift */,
 				D40CDF022B411F660059527E /* ImageLayerListView.swift */,
 			);
 			path = LayerView;
@@ -792,7 +792,7 @@
 				D4F1BB3E2B2D436F006EA102 /* ImageLayerManager.swift in Sources */,
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
-				D40CDEFF2B411F450059527E /* LayerView.swift in Sources */,
+				D40CDEFF2B411F450059527E /* ImageLayerView.swift in Sources */,
 				D4541E922BBC160B00C96741 /* DotPoint.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,

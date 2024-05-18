@@ -10,8 +10,8 @@ import SwiftUI
 
 final class LayerViewPresenter {
 
-    private var layerViewController: UIHostingController<LayerView>?
-    private var layerView: LayerView?
+    private var layerViewController: UIHostingController<ImageLayerView>?
+    private var layerView: ImageLayerView?
 
     func setupLayerViewPresenter(
         layerManager: ImageLayerManager,
@@ -26,7 +26,7 @@ final class LayerViewPresenter {
         didMove: @escaping (ImageLayerEntity, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
-        layerView = LayerView(
+        layerView = ImageLayerView(
             layerManager: layerManager,
             layerViewPresentation: layerViewPresentation,
             didTapLayer: { layer in
@@ -54,7 +54,7 @@ final class LayerViewPresenter {
 
         guard let layerView else { return }
 
-        layerViewController = UIHostingController<LayerView>(rootView: layerView)
+        layerViewController = UIHostingController<ImageLayerView>(rootView: layerView)
         viewController.view.addSubview(layerViewController!.view)
 
         layerViewController?.view.backgroundColor = .clear

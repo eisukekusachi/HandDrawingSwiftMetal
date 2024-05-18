@@ -1,5 +1,5 @@
 //
-//  LayerView.swift
+//  ImageLayerView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct LayerView: View {
+struct ImageLayerView: View {
 
     @ObservedObject var layerManager: ImageLayerManager
     @ObservedObject var layerViewPresentation: LayerViewPresentation
@@ -74,7 +74,7 @@ struct LayerView: View {
 
 }
 
-extension LayerView {
+extension ImageLayerView {
 
     func toolbar(
         layerManager: ImageLayerManager,
@@ -134,7 +134,7 @@ extension LayerView {
 
 #Preview {
 
-    LayerView(
+    ImageLayerView(
         layerManager: ImageLayerManager(),
         layerViewPresentation: LayerViewPresentation(),
         didTapLayer: { layer in
