@@ -26,15 +26,15 @@ extension Array where Element == LayerEntityForExporting {
         device: MTLDevice,
         textureSize: CGSize,
         folderURL: URL
-    ) throws -> [LayerEntity] {
+    ) throws -> [ImageLayerEntity] {
 
-        var layers: [LayerEntity] = []
+        var layers: [ImageLayerEntity] = []
 
         try self.forEach { layer in
             if let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals,
                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData) {
 
-                let layerEntity: LayerEntity = .init(
+                let layerEntity: ImageLayerEntity = .init(
                     texture: newTexture,
                     title: layer.title,
                     isVisible: layer.isVisible,

@@ -11,7 +11,7 @@ import Combine
 
 final class ImageLayerManager: ObservableObject {
 
-    @Published var selectedLayer: LayerEntity?
+    @Published var selectedLayer: ImageLayerEntity?
     @Published var selectedLayerAlpha: Int = 255
 
     var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
@@ -29,7 +29,7 @@ final class ImageLayerManager: ObservableObject {
         }
     }
 
-    var layers: [LayerEntity] = [] {
+    var layers: [ImageLayerEntity] = [] {
         didSet {
             guard index < layers.count else { return }
             selectedLayer = layers[index]
@@ -82,7 +82,7 @@ final class ImageLayerManager: ObservableObject {
     func initLayers(with newTexture: MTLTexture) {
         self.layers.removeAll()
 
-        let layerData: LayerEntity = .init(
+        let layerData: ImageLayerEntity = .init(
             texture: newTexture,
             title: "NewLayer"
         )
@@ -92,7 +92,7 @@ final class ImageLayerManager: ObservableObject {
 
     func initLayers(
         index: Int,
-        layers: [LayerEntity]
+        layers: [ImageLayerEntity]
     ) {
         self.layers = layers
         self.index = index
@@ -190,7 +190,7 @@ extension ImageLayerManager {
         let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
         let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        let layer: LayerEntity = .init(
+        let layer: ImageLayerEntity = .init(
             texture: texture,
             title: title
         )
@@ -205,7 +205,7 @@ extension ImageLayerManager {
     func moveLayer(
         fromOffsets source: IndexSet,
         toOffset destination: Int,
-        selectedLayer: LayerEntity
+        selectedLayer: ImageLayerEntity
     ) {
         layers = layers.reversed()
         layers.move(fromOffsets: source, toOffset: destination)
@@ -227,13 +227,13 @@ extension ImageLayerManager {
         index = currentIndex
     }
 
-    func updateSelectedLayer(_ layer: LayerEntity) {
+    func updateSelectedLayer(_ layer: ImageLayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         index = layerIndex
     }
 
     func update(
-        _ layer: LayerEntity,
+        _ layer: ImageLayerEntity,
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
@@ -247,12 +247,12 @@ extension ImageLayerManager {
         }
     }
 
-    func updateTitle(_ layer: LayerEntity, _ title: String) {
+    func updateTitle(_ layer: ImageLayerEntity, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
 
-    func updateThumbnail(_ layer: LayerEntity) {
+    func updateThumbnail(_ layer: ImageLayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }

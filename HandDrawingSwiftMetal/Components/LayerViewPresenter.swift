@@ -17,13 +17,13 @@ final class LayerViewPresenter {
         layerManager: ImageLayerManager,
         layerViewPresentation: LayerViewPresentation,
         targetView: UIView,
-        didTapLayer: @escaping (LayerEntity) -> Void,
+        didTapLayer: @escaping (ImageLayerEntity) -> Void,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didTapVisibility: @escaping (LayerEntity, Bool) -> Void,
-        didChangeAlpha: @escaping (LayerEntity, Int) -> Void,
-        didEditTitle: @escaping (LayerEntity, String) -> Void,
-        didMove: @escaping (LayerEntity, IndexSet, Int) -> Void,
+        didTapVisibility: @escaping (ImageLayerEntity, Bool) -> Void,
+        didChangeAlpha: @escaping (ImageLayerEntity, Int) -> Void,
+        didEditTitle: @escaping (ImageLayerEntity, String) -> Void,
+        didMove: @escaping (ImageLayerEntity, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
         layerView = LayerView(

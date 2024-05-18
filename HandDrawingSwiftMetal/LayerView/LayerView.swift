@@ -15,13 +15,13 @@ struct LayerView: View {
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
 
-    var didTapLayer: (LayerEntity) -> Void
+    var didTapLayer: (ImageLayerEntity) -> Void
     var didTapAddButton: () -> Void
     var didTapRemoveButton: () -> Void
-    var didTapVisibility: (LayerEntity, Bool) -> Void
-    var didChangeAlpha: (LayerEntity, Int) -> Void
-    var didEditTitle: (LayerEntity, String) -> Void
-    var didMove: (LayerEntity, IndexSet, Int) -> Void
+    var didTapVisibility: (ImageLayerEntity, Bool) -> Void
+    var didChangeAlpha: (ImageLayerEntity, Int) -> Void
+    var didEditTitle: (ImageLayerEntity, String) -> Void
+    var didMove: (ImageLayerEntity, IndexSet, Int) -> Void
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -80,7 +80,7 @@ extension LayerView {
         layerManager: ImageLayerManager,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didEditTitle: @escaping (LayerEntity, String) -> Void
+        didEditTitle: @escaping (ImageLayerEntity, String) -> Void
     ) -> some View {
         let buttonSize: CGFloat = 20
 

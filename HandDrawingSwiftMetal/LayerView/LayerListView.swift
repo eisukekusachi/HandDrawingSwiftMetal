@@ -10,9 +10,9 @@ import SwiftUI
 struct LayerListView: View {
     @ObservedObject var layerManager: ImageLayerManager
 
-    var didTapLayer: (LayerEntity) -> Void
-    var didTapVisibility: (LayerEntity, Bool) -> Void
-    var didMove: (LayerEntity, IndexSet, Int) -> Void
+    var didTapLayer: (ImageLayerEntity) -> Void
+    var didTapVisibility: (ImageLayerEntity, Bool) -> Void
+    var didMove: (ImageLayerEntity, IndexSet, Int) -> Void
 
     var body: some View {
         List {
@@ -43,10 +43,10 @@ struct LayerListView: View {
 
 extension LayerListView {
     func layerRow(
-        layer: LayerEntity,
+        layer: ImageLayerEntity,
         selected: Bool,
-        didTapRow: @escaping ((LayerEntity) -> Void),
-        didTapVisibleButton: @escaping ((LayerEntity) -> Void)
+        didTapRow: @escaping ((ImageLayerEntity) -> Void),
+        didTapVisibleButton: @escaping ((ImageLayerEntity) -> Void)
     ) -> some View {
         ZStack {
             Color(backgroundColor(selected))
@@ -111,7 +111,7 @@ extension LayerListView {
             return UIColor(named: "component") ?? .clear
         }
     }
-    private func iconColor(layer: LayerEntity, _ selected: Bool) -> UIColor {
+    private func iconColor(layer: ImageLayerEntity, _ selected: Bool) -> UIColor {
         if selected {
             if layer.isVisible {
                 return .white
