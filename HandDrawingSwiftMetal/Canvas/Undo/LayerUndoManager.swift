@@ -63,7 +63,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     func addUndoObject(
         undoObject: UndoObject,
-        layerManager: LayerManager
+        layerManager: ImageLayerManager
     ) {
         registerDrawingUndoAction(
             with: undoObject,
@@ -76,7 +76,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
     /// Registers an action to undo the drawing operation.
     private func registerDrawingUndoAction(
         with undoObject: UndoObject,
-        layerManager: LayerManager
+        layerManager: ImageLayerManager
     ) {
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
             guard

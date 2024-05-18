@@ -10,25 +10,26 @@ import SwiftUI
 
 final class LayerViewPresenter {
 
-    private var layerViewController: UIHostingController<LayerView>?
-    private var layerView: LayerView?
+    private var layerViewController: UIHostingController<ImageLayerView<ImageLayerEntity>>?
+    private var layerView: ImageLayerView<ImageLayerEntity>?
+
+    private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
-        layerManager: LayerManager,
-        layerViewPresentation: LayerViewPresentation,
+        layerManager: ImageLayerManager,
         targetView: UIView,
-        didTapLayer: @escaping (LayerEntity) -> Void,
+        didTapLayer: @escaping (ImageLayerEntity) -> Void,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didTapVisibility: @escaping (LayerEntity, Bool) -> Void,
-        didChangeAlpha: @escaping (LayerEntity, Int) -> Void,
-        didEditTitle: @escaping (LayerEntity, String) -> Void,
-        didMove: @escaping (LayerEntity, IndexSet, Int) -> Void,
+        didTapVisibility: @escaping (ImageLayerEntity, Bool) -> Void,
+        didChangeAlpha: @escaping (ImageLayerEntity, Int) -> Void,
+        didEditTitle: @escaping (ImageLayerEntity, String) -> Void,
+        didMove: @escaping (ImageLayerEntity, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
-        layerView = LayerView(
+        layerView = ImageLayerView(
             layerManager: layerManager,
-            layerViewPresentation: layerViewPresentation,
+            roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in
                 didTapLayer(layer)
             },
@@ -54,7 +55,7 @@ final class LayerViewPresenter {
 
         guard let layerView else { return }
 
-        layerViewController = UIHostingController<LayerView>(rootView: layerView)
+        layerViewController = UIHostingController<ImageLayerView>(rootView: layerView)
         viewController.view.addSubview(layerViewController!.view)
 
         layerViewController?.view.backgroundColor = .clear
@@ -62,8 +63,9 @@ final class LayerViewPresenter {
 
         addConstraints(
             targetView: targetView,
-            layerViewPresentation: layerViewPresentation,
-            on: viewController)
+            roundedRectangleWithArrow: roundedRectangleWithArrow,
+            on: viewController
+        )
     }
     func toggleVisible() {
         if let isHidden = layerViewController?.view.isHidden {
@@ -73,7 +75,7 @@ final class LayerViewPresenter {
 
     private func addConstraints(
         targetView: UIView,
-        layerViewPresentation: LayerViewPresentation,
+        roundedRectangleWithArrow: RoundedRectangleWithArrow,
         on viewController: UIViewController
     ) {
         let viewWidth: CGFloat = 300.0
@@ -92,7 +94,7 @@ final class LayerViewPresenter {
         let layerViewX = targetViewCenterX - viewWidth * 0.5
         let centerX = targetViewCenterX - layerViewX
 
-        layerViewPresentation.arrowPointX = centerX
+        roundedRectangleWithArrow.arrowPointX = centerX
     }
 
 }

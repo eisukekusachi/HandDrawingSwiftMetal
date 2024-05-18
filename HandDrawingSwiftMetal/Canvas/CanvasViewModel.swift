@@ -33,8 +33,7 @@ final class CanvasViewModel {
 
     let transforming = Transforming()
 
-    let layerManager = LayerManager()
-    let layerViewPresentation = LayerViewPresentation()
+    let layerManager = ImageLayerManager()
 
     let layerUndoManager = LayerUndoManager()
 
@@ -61,7 +60,7 @@ final class CanvasViewModel {
 
             delegate?.initRootTexture(textureSize: textureSize)
 
-            layerManager.initLayers(with: textureSize)
+            layerManager.initAllLayers(with: textureSize)
 
             drawing.textureSize = textureSize
 
@@ -183,9 +182,9 @@ final class CanvasViewModel {
             throw CanvasViewModelError.failedToApplyData
         }
 
-        let layerEntityForExportingArray: [LayerEntityForExporting] = data.layers
+        let layerEntityForExportingArray: [ImageLayerEntityForExporting] = data.layers
 
-        let layers: [LayerEntity] = try layerEntityForExportingArray.map({ $0 }).convertToLayerEntity(
+        let layers: [ImageLayerEntity] = try layerEntityForExportingArray.map({ $0 }).convertToImageLayerEntity(
             device: device,
             textureSize: data.textureSize,
             folderURL: folderURL
@@ -508,7 +507,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initLayers(with: drawing.textureSize)
+        layerManager.initAllLayers(with: drawing.textureSize)
 
         layerUndoManager.clear()
 
@@ -523,41 +522,44 @@ extension CanvasViewModel {
     }
 
     // MARK: Layers
-    func didTapLayer(layer: LayerEntity) {
-        layerManager.updateSelectedLayer(layer)
+    func didTapLayer(layer: ImageLayerEntity) {
+        layerManager.updateIndex(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapAddLayerButton() {
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.addLayer()
+        layerManager.addLayer(layerManager.newLayer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapRemoveLayerButton() {
-        guard layerManager.layers.count > 1 else { return }
+        guard
+            layerManager.layers.count > 1,
+            let layer = layerManager.selectedLayer
+        else { return }
+
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.removeLayer()
+        layerManager.removeLayer(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
-    func didTapLayerVisibility(layer: LayerEntity, isVisible: Bool) {
+    func didTapLayerVisibility(layer: ImageLayerEntity, isVisible: Bool) {
         layerManager.update(layer, isVisible: isVisible)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
-    func didChangeLayerAlpha(layer: LayerEntity, value: Int) {
+    func didChangeLayerAlpha(layer: ImageLayerEntity, value: Int) {
         layerManager.update(layer, alpha: value)
         layerManager.refreshCanvasWithMergingDrawingLayers()
     }
-    func didEditLayerTitle(layer: LayerEntity, title: String) {
+    func didEditLayerTitle(layer: ImageLayerEntity, title: String) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: LayerEntity, source: IndexSet, destination: Int) {
+    func didMoveLayers(layer: ImageLayerEntity, source: IndexSet, destination: Int) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.moveLayer(
             fromOffsets: source,
-            toOffset: destination,
-            selectedLayer: layer
+            toOffset: destination
         )
         layerManager.refreshCanvasWithMergingAllLayers()
     }

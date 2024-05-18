@@ -9,6 +9,6 @@ import MetalKit
 
 struct ExportCanvasData {
     let canvasTexture: MTLTexture
-    let layerManager: LayerManager
+    let layerManager: ImageLayerManager
     let drawingTool: DrawingToolModel
 }

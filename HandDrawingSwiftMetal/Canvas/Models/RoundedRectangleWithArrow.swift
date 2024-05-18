@@ -1,13 +1,13 @@
 //
-//  LayerViewPresentation.swift
+//  RoundedRectangleWithArrow.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/04/26.
 //
 
 import SwiftUI
-
-class LayerViewPresentation: ObservableObject {
+/// A rounded rectangle model with an arrow at the top
+class RoundedRectangleWithArrow: ObservableObject {
 
     let arrowSize: CGSize = .init(width: 18, height: 14)
     let roundedCorner: CGFloat = 12
@@ -22,6 +22,10 @@ class LayerViewPresentation: ObservableObject {
             trailing: roundedCorner
         )
     }
+
+}
+
+extension RoundedRectangleWithArrow {
 
     func viewWithTopArrow(
         arrowSize: CGSize,

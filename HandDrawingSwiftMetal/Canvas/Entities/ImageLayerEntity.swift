@@ -1,5 +1,5 @@
 //
-//  LayerEntity.swift
+//  ImageLayerEntity.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/30.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct LayerEntity: Identifiable, Equatable {
+struct ImageLayerEntity: ImageLayer {
     /// The unique identifier for the layer
     let id: UUID
     /// The texture of the layer
@@ -21,10 +21,11 @@ struct LayerEntity: Identifiable, Equatable {
     /// Whether the layer is visible or not
     var isVisible: Bool
 
-    init(texture: MTLTexture,
-         title: String,
-         isVisible: Bool = true,
-         alpha: Int = 255
+    init(
+        texture: MTLTexture,
+        title: String,
+        isVisible: Bool = true,
+        alpha: Int = 255
     ) {
         self.id = UUID()
         self.texture = texture
@@ -37,13 +38,13 @@ struct LayerEntity: Identifiable, Equatable {
 
 }
 
-extension LayerEntity {
+extension ImageLayerEntity {
 
     mutating func updateThumbnail() {
         thumbnail = texture.upsideDownUIImage?.resize(width: 64)
     }
 
-    static func == (lhs: LayerEntity, rhs: LayerEntity) -> Bool {
+    static func == (lhs: ImageLayerEntity, rhs: ImageLayerEntity) -> Bool {
         lhs.id == rhs.id
     }
 

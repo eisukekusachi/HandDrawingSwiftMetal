@@ -1,5 +1,5 @@
 //
-//  LayerListView.swift
+//  ImageLayerListView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,16 +7,20 @@
 
 import SwiftUI
 
-struct LayerListView: View {
-    @ObservedObject var layerManager: LayerManager
+struct ImageLayerListView<T: ImageLayer>: View {
 
-    var didTapLayer: (LayerEntity) -> Void
-    var didTapVisibility: (LayerEntity, Bool) -> Void
-    var didMove: (LayerEntity, IndexSet, Int) -> Void
+    @ObservedObject var layerManager: LayerManager<T>
+
+    var didTapLayer: (T) -> Void
+    var didTapVisibility: (T, Bool) -> Void
+    var didMove: (T, IndexSet, Int) -> Void
 
     var body: some View {
         List {
-            ForEach(Array(layerManager.layers.reversed()), id: \.id) { layer in
+            ForEach(
+                Array(layerManager.layers.reversed()),
+                id: \.id
+            ) { layer in
                 layerRow(
                     layer: layer,
                     selected: layerManager.selectedLayer == layer,
@@ -41,12 +45,13 @@ struct LayerListView: View {
 
 }
 
-extension LayerListView {
-    func layerRow(
-        layer: LayerEntity,
+extension ImageLayerListView {
+
+    private func layerRow(
+        layer: T,
         selected: Bool,
-        didTapRow: @escaping ((LayerEntity) -> Void),
-        didTapVisibleButton: @escaping ((LayerEntity) -> Void)
+        didTapRow: @escaping ((T) -> Void),
+        didTapVisibleButton: @escaping ((T) -> Void)
     ) -> some View {
         ZStack {
             Color(backgroundColor(selected))
@@ -73,7 +78,7 @@ extension LayerListView {
                     .foregroundColor(Color(textColor(selected)))
 
                 Spacer()
-                
+
                 Text("A: \(layer.alpha)")
                     .font(.caption2)
                     .foregroundColor(Color(uiColor: .gray))
@@ -93,10 +98,12 @@ extension LayerListView {
             didTapRow(layer)
         }
     }
+
 }
 
 // Colors
-extension LayerListView {
+extension ImageLayerListView {
+
     private func backgroundColor(_ selected: Bool) -> UIColor {
         if selected {
             return UIColor(named: "component") ?? .clear
@@ -111,7 +118,7 @@ extension LayerListView {
             return UIColor(named: "component") ?? .clear
         }
     }
-    private func iconColor(layer: LayerEntity, _ selected: Bool) -> UIColor {
+    private func iconColor(layer: T, _ selected: Bool) -> UIColor {
         if selected {
             if layer.isVisible {
                 return .white
@@ -130,8 +137,8 @@ extension LayerListView {
 
 #Preview {
 
-    LayerListView(
-        layerManager: LayerManager(),
+    ImageLayerListView<ImageLayerEntity>(
+        layerManager: ImageLayerManager(),
         didTapLayer: { layer in
             print("Tap layer")
         },

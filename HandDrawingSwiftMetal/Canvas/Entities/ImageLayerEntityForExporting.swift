@@ -1,15 +1,15 @@
 //
-//  LayerEntityForExporting.swift
+//  ImageLayerEntityForExporting.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/01/03.
 //
 
 import MetalKit
-/// LayerEntity for exporting.
+/// `ImageLayerEntity` for exporting.
 /// Since MTLTexture cannot be encoded into JSON,
-/// the texture is saved as a file, and this struct holds the filename of the texture.
-struct LayerEntityForExporting: Codable, Equatable {
+/// the texture is saved as a file, and this struct holds the `textureName` of the texture.
+struct ImageLayerEntityForExporting: Codable, Equatable {
     /// The filename of the texture
     let textureName: String
     /// The name of the layer
@@ -20,21 +20,21 @@ struct LayerEntityForExporting: Codable, Equatable {
     let isVisible: Bool
 }
 
-extension Array where Element == LayerEntityForExporting {
+extension Array where Element == ImageLayerEntityForExporting {
 
-    func convertToLayerEntity(
+    func convertToImageLayerEntity(
         device: MTLDevice,
         textureSize: CGSize,
         folderURL: URL
-    ) throws -> [LayerEntity] {
+    ) throws -> [ImageLayerEntity] {
 
-        var layers: [LayerEntity] = []
+        var layers: [ImageLayerEntity] = []
 
         try self.forEach { layer in
             if let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName)).encodedHexadecimals,
                let newTexture = MTKTextureUtils.makeTexture(device, textureSize, textureData) {
 
-                let layerEntity: LayerEntity = .init(
+                let layerEntity: ImageLayerEntity = .init(
                     texture: newTexture,
                     title: layer.title,
                     isVisible: layer.isVisible,

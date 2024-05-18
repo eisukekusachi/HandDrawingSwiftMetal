@@ -160,7 +160,6 @@ extension ViewController {
     func setupLayerViewPresenter() {
         layerViewPresenter.setupLayerViewPresenter(
             layerManager: canvasViewModel.layerManager,
-            layerViewPresentation: canvasViewModel.layerViewPresentation,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
                 self?.canvasViewModel.didTapLayer(layer: layer)

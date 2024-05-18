@@ -1,5 +1,5 @@
 //
-//  LayerView.swift
+//  ImageLayerView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,21 +7,21 @@
 
 import SwiftUI
 
-struct LayerView: View {
+struct ImageLayerView<T: ImageLayer>: View {
 
-    @ObservedObject var layerManager: LayerManager
-    @ObservedObject var layerViewPresentation: LayerViewPresentation
+    @ObservedObject var layerManager: LayerManager<T>
+    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
 
-    var didTapLayer: (LayerEntity) -> Void
+    var didTapLayer: (T) -> Void
     var didTapAddButton: () -> Void
     var didTapRemoveButton: () -> Void
-    var didTapVisibility: (LayerEntity, Bool) -> Void
-    var didChangeAlpha: (LayerEntity, Int) -> Void
-    var didEditTitle: (LayerEntity, String) -> Void
-    var didMove: (LayerEntity, IndexSet, Int) -> Void
+    var didTapVisibility: (T, Bool) -> Void
+    var didChangeAlpha: (T, Int) -> Void
+    var didEditTitle: (T, String) -> Void
+    var didMove: (T, IndexSet, Int) -> Void
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -29,9 +29,9 @@ struct LayerView: View {
 
     var body: some View {
         ZStack {
-            layerViewPresentation.viewWithTopArrow(
-                arrowSize: layerViewPresentation.arrowSize,
-                roundedCorner: layerViewPresentation.roundedCorner
+            roundedRectangleWithArrow.viewWithTopArrow(
+                arrowSize: roundedRectangleWithArrow.arrowSize,
+                roundedCorner: roundedRectangleWithArrow.roundedCorner
             )
 
             VStack {
@@ -42,7 +42,7 @@ struct LayerView: View {
                     didEditTitle: didEditTitle
                 )
 
-                LayerListView(
+                ImageLayerListView<T>(
                     layerManager: layerManager,
                     didTapLayer: { layer in
                         didTapLayer(layer)
@@ -57,7 +57,7 @@ struct LayerView: View {
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: layerManager.selectedLayerAlpha,
+                    value: layerManager.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didChange: { value in
@@ -68,19 +68,19 @@ struct LayerView: View {
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)
             }
-            .padding(layerViewPresentation.edgeInsets)
+            .padding(roundedRectangleWithArrow.edgeInsets)
         }
     }
 
 }
 
-extension LayerView {
+extension ImageLayerView {
 
     func toolbar(
-        layerManager: LayerManager,
+        layerManager: LayerManager<T>,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didEditTitle: @escaping (LayerEntity, String) -> Void
+        didEditTitle: @escaping (T, String) -> Void
     ) -> some View {
         let buttonSize: CGFloat = 20
 
@@ -120,8 +120,7 @@ extension LayerView {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = layerManager.selectedLayer else { return }
-                    layerManager.updateTitle(selectedLayer,
-                                             $textFieldTitle.wrappedValue)
+                    didEditTitle(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }
@@ -130,27 +129,13 @@ extension LayerView {
         .padding(8)
     }
 
-    func selectedTextureAlphaSlider(layerManager: LayerManager) -> some View {
-        TwoRowsSliderView(
-            title: "Alpha",
-            value: layerManager.selectedLayerAlpha,
-            style: sliderStyle,
-            range: range) { value in
-                guard let selectedLayer = layerManager.selectedLayer else { return }
-                layerManager.update(selectedLayer, alpha: value)
-                layerManager.refreshCanvasWithMergingDrawingLayers()
-            }
-            .padding(.top, 4)
-            .padding([.leading, .trailing, .bottom], 8)
-    }
-
 }
 
 #Preview {
 
-    LayerView(
-        layerManager: LayerManager(),
-        layerViewPresentation: LayerViewPresentation(),
+    ImageLayerView(
+        layerManager: ImageLayerManager(),
+        roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in
             print("Tap layer")
         },
