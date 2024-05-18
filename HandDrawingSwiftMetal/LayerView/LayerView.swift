@@ -42,7 +42,7 @@ struct LayerView: View {
                     didEditTitle: didEditTitle
                 )
 
-                LayerListView(
+                ImageLayerListView(
                     layerManager: layerManager,
                     didTapLayer: { layer in
                         didTapLayer(layer)

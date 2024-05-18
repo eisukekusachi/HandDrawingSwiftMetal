@@ -1,5 +1,5 @@
 //
-//  LayerListView.swift
+//  ImageLayerListView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct LayerListView<T: ImageLayer>: View {
+struct ImageLayerListView<T: ImageLayer>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
 
@@ -45,7 +45,7 @@ struct LayerListView<T: ImageLayer>: View {
 
 }
 
-extension LayerListView {
+extension ImageLayerListView {
 
     private func layerRow(
         layer: T,
@@ -102,7 +102,7 @@ extension LayerListView {
 }
 
 // Colors
-extension LayerListView {
+extension ImageLayerListView {
 
     private func backgroundColor(_ selected: Bool) -> UIColor {
         if selected {
@@ -137,7 +137,7 @@ extension LayerListView {
 
 #Preview {
 
-    LayerListView<ImageLayerEntity>(
+    ImageLayerListView<ImageLayerEntity>(
         layerManager: ImageLayerManager(),
         didTapLayer: { layer in
             print("Tap layer")
