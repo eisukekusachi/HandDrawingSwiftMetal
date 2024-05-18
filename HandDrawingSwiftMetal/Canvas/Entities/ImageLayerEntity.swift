@@ -21,10 +21,11 @@ struct ImageLayerEntity: Identifiable, Equatable {
     /// Whether the layer is visible or not
     var isVisible: Bool
 
-    init(texture: MTLTexture,
-         title: String,
-         isVisible: Bool = true,
-         alpha: Int = 255
+    init(
+        texture: MTLTexture,
+        title: String,
+        isVisible: Bool = true,
+        alpha: Int = 255
     ) {
         self.id = UUID()
         self.texture = texture
