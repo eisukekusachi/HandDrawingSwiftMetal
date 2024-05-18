@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct ImageLayerEntity: Identifiable, Equatable {
+struct ImageLayerEntity: ImageLayer {
     /// The unique identifier for the layer
     let id: UUID
     /// The texture of the layer
