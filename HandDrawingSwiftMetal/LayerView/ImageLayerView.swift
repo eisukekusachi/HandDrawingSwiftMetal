@@ -7,21 +7,21 @@
 
 import SwiftUI
 
-struct ImageLayerView: View {
+struct ImageLayerView<T: ImageLayer>: View {
 
-    @ObservedObject var layerManager: ImageLayerManager
+    @ObservedObject var layerManager: LayerManager<T>
     @ObservedObject var layerViewPresentation: LayerViewPresentationModel
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
 
-    var didTapLayer: (ImageLayerEntity) -> Void
+    var didTapLayer: (T) -> Void
     var didTapAddButton: () -> Void
     var didTapRemoveButton: () -> Void
-    var didTapVisibility: (ImageLayerEntity, Bool) -> Void
-    var didChangeAlpha: (ImageLayerEntity, Int) -> Void
-    var didEditTitle: (ImageLayerEntity, String) -> Void
-    var didMove: (ImageLayerEntity, IndexSet, Int) -> Void
+    var didTapVisibility: (T, Bool) -> Void
+    var didChangeAlpha: (T, Int) -> Void
+    var didEditTitle: (T, String) -> Void
+    var didMove: (T, IndexSet, Int) -> Void
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -42,7 +42,7 @@ struct ImageLayerView: View {
                     didEditTitle: didEditTitle
                 )
 
-                ImageLayerListView(
+                ImageLayerListView<T>(
                     layerManager: layerManager,
                     didTapLayer: { layer in
                         didTapLayer(layer)
@@ -77,10 +77,10 @@ struct ImageLayerView: View {
 extension ImageLayerView {
 
     func toolbar(
-        layerManager: ImageLayerManager,
+        layerManager: LayerManager<T>,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didEditTitle: @escaping (ImageLayerEntity, String) -> Void
+        didEditTitle: @escaping (T, String) -> Void
     ) -> some View {
         let buttonSize: CGFloat = 20
 
@@ -120,8 +120,7 @@ extension ImageLayerView {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = layerManager.selectedLayer else { return }
-                    layerManager.updateTitle(selectedLayer,
-                                             $textFieldTitle.wrappedValue)
+                    didEditTitle(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }

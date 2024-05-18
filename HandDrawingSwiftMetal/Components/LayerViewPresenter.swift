@@ -10,8 +10,8 @@ import SwiftUI
 
 final class LayerViewPresenter {
 
-    private var layerViewController: UIHostingController<ImageLayerView>?
-    private var layerView: ImageLayerView?
+    private var layerViewController: UIHostingController<ImageLayerView<ImageLayerEntity>>?
+    private var layerView: ImageLayerView<ImageLayerEntity>?
 
     private let layerViewPresentation = LayerViewPresentationModel()
 
