@@ -57,7 +57,7 @@ struct LayerView: View {
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: layerManager.selectedLayerAlpha,
+                    value: layerManager.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didChange: { value in
@@ -128,20 +128,6 @@ extension LayerView {
             Spacer()
         }
         .padding(8)
-    }
-
-    func selectedTextureAlphaSlider(layerManager: ImageLayerManager) -> some View {
-        TwoRowsSliderView(
-            title: "Alpha",
-            value: layerManager.selectedLayerAlpha,
-            style: sliderStyle,
-            range: range) { value in
-                guard let selectedLayer = layerManager.selectedLayer else { return }
-                layerManager.update(selectedLayer, alpha: value)
-                layerManager.refreshCanvasWithMergingDrawingLayers()
-            }
-            .padding(.top, 4)
-            .padding([.leading, .trailing, .bottom], 8)
     }
 
 }

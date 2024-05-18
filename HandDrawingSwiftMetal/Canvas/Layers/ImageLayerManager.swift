@@ -9,10 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-final class ImageLayerManager: ObservableObject {
-
-    @Published var selectedLayer: ImageLayerEntity?
-    @Published var selectedLayerAlpha: Int = 255
+final class ImageLayerManager: LayerManager<ImageLayerEntity> {
 
     var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
         refreshCanvasWithMergingDrawingLayersSubject.eraseToAnyPublisher()
@@ -22,25 +19,17 @@ final class ImageLayerManager: ObservableObject {
         refreshCanvasWithMergingAllLayersSubject.eraseToAnyPublisher()
     }
 
+    var newLayer: ImageLayerEntity {
+        .init(
+            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        )
+    }
+
     var frameSize: CGSize = .zero {
         didSet {
             drawingBrushLayer.frameSize = frameSize
             drawingEraserLayer.frameSize = frameSize
-        }
-    }
-
-    var layers: [ImageLayerEntity] = [] {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-            selectedLayerAlpha = layers[index].alpha
-        }
-    }
-    var index: Int = 0 {
-        didSet {
-            guard index < layers.count else { return }
-            selectedLayer = layers[index]
-            selectedLayerAlpha = layers[index].alpha
         }
     }
 
@@ -63,7 +52,7 @@ final class ImageLayerManager: ObservableObject {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func initLayers(with textureSize: CGSize) {
+    func initAllLayers(with textureSize: CGSize) {
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -73,38 +62,19 @@ final class ImageLayerManager: ObservableObject {
         drawingBrushLayer.initTextures(textureSize)
         drawingEraserLayer.initTextures(textureSize)
 
-        self.layers.removeAll()
+        layers.removeAll()
 
-        self.addLayer()
-        self.index = 0
-    }
-
-    func initLayers(with newTexture: MTLTexture) {
-        self.layers.removeAll()
-
-        let layerData: ImageLayerEntity = .init(
-            texture: newTexture,
-            title: "NewLayer"
+        super.initLayers(
+            index: 0,
+            layers: [newLayer]
         )
-        self.layers.append(layerData)
-        self.index = 0
-    }
-
-    func initLayers(
-        index: Int,
-        layers: [ImageLayerEntity]
-    ) {
-        self.layers = layers
-        self.index = index
     }
 
     func initLayers(undoObject: UndoObject) {
-        self.index = undoObject.index
-        self.layers = undoObject.layers
-    }
-
-    func setDrawingLayer(_ tool: DrawingToolType) {
-        drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
+        super.initLayers(
+            index: undoObject.index,
+            layers: undoObject.layers
+        )
     }
 
 }
@@ -134,7 +104,7 @@ extension ImageLayerManager {
                                               to: currentTexture,
                                               commandBuffer)
             Command.merge(texture: currentTexture,
-                          alpha: selectedLayerAlpha,
+                          alpha: selectedLayer?.alpha ?? 0,
                           into: dstTexture,
                           commandBuffer)
         }
@@ -183,53 +153,37 @@ extension ImageLayerManager {
 
 }
 
-// CRUD
 extension ImageLayerManager {
 
-    func addLayer() {
-        let title = TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        let texture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-
-        let layer: ImageLayerEntity = .init(
-            texture: texture,
-            title: title
-        )
-
-        if index < layers.count - 1 {
-            layers.insert(layer, at: index + 1)
-        } else {
-            layers.append(layer)
-        }
+    var selectedTexture: MTLTexture? {
+        guard index < layers.count else { return nil }
+        return layers[index].texture
     }
 
-    func moveLayer(
-        fromOffsets source: IndexSet,
-        toOffset destination: Int,
-        selectedLayer: ImageLayerEntity
-    ) {
-        layers = layers.reversed()
-        layers.move(fromOffsets: source, toOffset: destination)
-        layers = layers.reversed()
-
-        if let layerIndex = layers.firstIndex(of: selectedLayer) {
-            index = layerIndex
-        }
+    func setDrawingLayer(_ tool: DrawingToolType) {
+        drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
     }
 
-    func removeLayer() {
-        layers.remove(at: index)
-
-        // Updates the value for UI update
-        var currentIndex = index
-        if currentIndex > layers.count - 1 {
-            currentIndex = layers.count - 1
-        }
-        index = currentIndex
+    func clearDrawingLayer() {
+        drawingLayer?.clearDrawingTextures()
     }
 
-    func updateSelectedLayer(_ layer: ImageLayerEntity) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        index = layerIndex
+    func updateSelectedLayerTextureWithNewAddressTexture() {
+        guard
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let selectedTexture = selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
+        else { return }
+
+        layers[index].texture = newTexture
+    }
+
+    @MainActor
+    func updateCurrentThumbnail() async throws {
+        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
+        if let selectedLayer {
+            updateThumbnail(selectedLayer)
+        }
     }
 
     func update(
@@ -255,37 +209,6 @@ extension ImageLayerManager {
     func updateThumbnail(_ layer: ImageLayerEntity) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
-    }
-
-}
-
-extension ImageLayerManager {
-
-    var selectedTexture: MTLTexture? {
-        guard index < layers.count else { return nil }
-        return layers[index].texture
-    }
-
-    func updateSelectedLayerTextureWithNewAddressTexture() {
-        guard
-            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
-            let selectedTexture = selectedTexture,
-            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
-        else { return }
-
-        layers[index].texture = newTexture
-    }
-
-    @MainActor
-    func updateCurrentThumbnail() async throws {
-        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-        if let selectedLayer {
-            updateThumbnail(selectedLayer)
-        }
-    }
-
-    func clearDrawingLayer() {
-        drawingLayer?.clearDrawingTextures()
     }
 
 }

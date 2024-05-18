@@ -61,7 +61,7 @@ final class CanvasViewModel {
 
             delegate?.initRootTexture(textureSize: textureSize)
 
-            layerManager.initLayers(with: textureSize)
+            layerManager.initAllLayers(with: textureSize)
 
             drawing.textureSize = textureSize
 
@@ -508,7 +508,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initLayers(with: drawing.textureSize)
+        layerManager.initAllLayers(with: drawing.textureSize)
 
         layerUndoManager.clear()
 
@@ -524,20 +524,24 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(layer: ImageLayerEntity) {
-        layerManager.updateSelectedLayer(layer)
+        layerManager.updateIndex(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapAddLayerButton() {
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.addLayer()
+        layerManager.addLayer(layerManager.newLayer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapRemoveLayerButton() {
-        guard layerManager.layers.count > 1 else { return }
+        guard
+            layerManager.layers.count > 1,
+            let layer = layerManager.selectedLayer
+        else { return }
+
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.removeLayer()
+        layerManager.removeLayer(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapLayerVisibility(layer: ImageLayerEntity, isVisible: Bool) {
@@ -556,8 +560,7 @@ extension CanvasViewModel {
 
         layerManager.moveLayer(
             fromOffsets: source,
-            toOffset: destination,
-            selectedLayer: layer
+            toOffset: destination
         )
         layerManager.refreshCanvasWithMergingAllLayers()
     }
