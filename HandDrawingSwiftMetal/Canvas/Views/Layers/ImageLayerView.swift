@@ -10,7 +10,7 @@ import SwiftUI
 struct ImageLayerView<T: ImageLayer>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
-    @ObservedObject var layerViewPresentation: LayerViewPresentationModel
+    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -29,9 +29,9 @@ struct ImageLayerView<T: ImageLayer>: View {
 
     var body: some View {
         ZStack {
-            layerViewPresentation.viewWithTopArrow(
-                arrowSize: layerViewPresentation.arrowSize,
-                roundedCorner: layerViewPresentation.roundedCorner
+            roundedRectangleWithArrow.viewWithTopArrow(
+                arrowSize: roundedRectangleWithArrow.arrowSize,
+                roundedCorner: roundedRectangleWithArrow.roundedCorner
             )
 
             VStack {
@@ -68,7 +68,7 @@ struct ImageLayerView<T: ImageLayer>: View {
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)
             }
-            .padding(layerViewPresentation.edgeInsets)
+            .padding(roundedRectangleWithArrow.edgeInsets)
         }
     }
 
@@ -135,7 +135,7 @@ extension ImageLayerView {
 
     ImageLayerView(
         layerManager: ImageLayerManager(),
-        layerViewPresentation: LayerViewPresentationModel(),
+        roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in
             print("Tap layer")
         },

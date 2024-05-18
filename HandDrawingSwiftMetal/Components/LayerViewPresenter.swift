@@ -13,7 +13,7 @@ final class LayerViewPresenter {
     private var layerViewController: UIHostingController<ImageLayerView<ImageLayerEntity>>?
     private var layerView: ImageLayerView<ImageLayerEntity>?
 
-    private let layerViewPresentation = LayerViewPresentationModel()
+    private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
         layerManager: ImageLayerManager,
@@ -29,7 +29,7 @@ final class LayerViewPresenter {
     ) {
         layerView = ImageLayerView(
             layerManager: layerManager,
-            layerViewPresentation: layerViewPresentation,
+            roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in
                 didTapLayer(layer)
             },
@@ -63,8 +63,9 @@ final class LayerViewPresenter {
 
         addConstraints(
             targetView: targetView,
-            layerViewPresentation: layerViewPresentation,
-            on: viewController)
+            roundedRectangleWithArrow: roundedRectangleWithArrow,
+            on: viewController
+        )
     }
     func toggleVisible() {
         if let isHidden = layerViewController?.view.isHidden {
@@ -74,7 +75,7 @@ final class LayerViewPresenter {
 
     private func addConstraints(
         targetView: UIView,
-        layerViewPresentation: LayerViewPresentationModel,
+        roundedRectangleWithArrow: RoundedRectangleWithArrow,
         on viewController: UIViewController
     ) {
         let viewWidth: CGFloat = 300.0
@@ -93,7 +94,7 @@ final class LayerViewPresenter {
         let layerViewX = targetViewCenterX - viewWidth * 0.5
         let centerX = targetViewCenterX - layerViewX
 
-        layerViewPresentation.arrowPointX = centerX
+        roundedRectangleWithArrow.arrowPointX = centerX
     }
 
 }
