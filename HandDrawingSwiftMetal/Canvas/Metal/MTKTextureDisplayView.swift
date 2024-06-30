@@ -89,11 +89,13 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
 
-        let textureBuffers = Buffers.makeTextureBuffers(device: device!,
-                                                        textureSize: renderTexture.size,
-                                                        drawableSize: drawable.texture.size,
-                                                        matrix: canvasMatrix,
-                                                        nodes: textureNodes)
+        let textureBuffers = Buffers.makeAspectFitTextureBuffers(
+            device: device,
+            matrix: canvasMatrix,
+            sourceSize: renderTexture.size,
+            destinationSize: drawable.texture.size,
+            nodes: textureNodes
+        )
 
         let commandBuffer = commandQueue.getOrCreateCommandBuffer()
 
@@ -110,6 +112,8 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         commandQueue.setCommandBufferToNil()
     }
 
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        setNeedsDisplay()
+    }
     
 }
