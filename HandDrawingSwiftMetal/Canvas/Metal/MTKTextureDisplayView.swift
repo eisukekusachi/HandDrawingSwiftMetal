@@ -34,7 +34,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         currentDrawable
     }
 
-    private var _renderTexture: MTLTexture!
+    private var _renderTexture: MTLTexture?
 
     private var commandQueue: CommandQueueProtocol!
 
@@ -80,14 +80,17 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
-        guard let drawable = view.currentDrawable else { return }
+        guard
+            let renderTexture,
+            let drawable = view.currentDrawable
+        else { return }
 
         var canvasMatrix = matrix
         canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
 
         let textureBuffers = Buffers.makeTextureBuffers(device: device!,
-                                                        textureSize: _renderTexture.size,
+                                                        textureSize: renderTexture.size,
                                                         drawableSize: drawable.texture.size,
                                                         matrix: canvasMatrix,
                                                         nodes: textureNodes)
