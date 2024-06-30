@@ -210,7 +210,8 @@ extension CanvasViewModel {
     func handleFingerInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        on view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -251,7 +252,10 @@ extension CanvasViewModel {
 
             let dotPoints = touchPoints.map {
                 DotPoint(
-                    touchPoint: $0,
+                    touchPoint: $0.getScaledTouchPoint(
+                        renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
+                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+                    ),
                     matrix: transforming.matrix,
                     frameSize: frameSize,
                     textureSize: textureSize
@@ -309,7 +313,8 @@ extension CanvasViewModel {
     func handlePencilInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        on view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -356,7 +361,10 @@ extension CanvasViewModel {
 
         let dotPoints = touchPoints.map {
             DotPoint(
-                touchPoint: $0,
+                touchPoint: $0.getScaledTouchPoint(
+                    renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+                ),
                 matrix: transforming.matrix,
                 frameSize: frameSize,
                 textureSize: textureSize
