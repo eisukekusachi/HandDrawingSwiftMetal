@@ -29,8 +29,6 @@ struct DotPoint {
         var location: CGPoint = touchPoint.location
         let alpha: CGFloat = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
 
-        location = location.scale(srcSize: frameSize, dstSize: textureSize)
-
         if let matrix {
             let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
             var inverseMatrix = matrix.inverted(flipY: true)

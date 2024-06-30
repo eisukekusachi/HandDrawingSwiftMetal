@@ -45,13 +45,13 @@ extension CGPoint {
                        y: self.y + offset.y)
     }
 
-    func scale(srcSize: CGSize, dstSize: CGSize) -> Self {
-        let location = self
+    func scale(_ sourceSize: CGSize, to destinationSize: CGSize) -> Self {
+        let scaleFrameToTexture = ViewSize.getScaleToFit(sourceSize, to: destinationSize)
 
-        let scaleFrameToTexture = Aspect.getScaleToFit(srcSize, to: dstSize)
-
-        return CGPoint(x: (location.x * scaleFrameToTexture),
-                       y: (location.y * scaleFrameToTexture))
+        return .init(
+            x: self.x * scaleFrameToTexture,
+            y: self.y * scaleFrameToTexture
+        )
     }
 
 }
