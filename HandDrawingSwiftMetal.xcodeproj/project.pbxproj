@@ -58,6 +58,7 @@
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
+		D45156FB2C31343F009C7BFC /* ViewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45156FA2C31343F009C7BFC /* ViewSize.swift */; };
 		D4541E842BBACF1A00C96741 /* TouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E832BBACF1A00C96741 /* TouchManager.swift */; };
 		D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E872BBAE43F00C96741 /* ActionManager.swift */; };
 		D4541E922BBC160B00C96741 /* DotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E912BBC160B00C96741 /* DotPoint.swift */; };
@@ -184,6 +185,7 @@
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
+		D45156FA2C31343F009C7BFC /* ViewSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSize.swift; sourceTree = "<group>"; };
 		D4541E832BBACF1A00C96741 /* TouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchManager.swift; sourceTree = "<group>"; };
 		D4541E872BBAE43F00C96741 /* ActionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionManager.swift; sourceTree = "<group>"; };
 		D4541E912BBC160B00C96741 /* DotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotPoint.swift; sourceTree = "<group>"; };
@@ -479,6 +481,7 @@
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D44D19732BE5DFE80069D4A9 /* ToastModel.swift */,
 				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
+				D45156FA2C31343F009C7BFC /* ViewSize.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -851,6 +854,7 @@
 				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,
 				D4C9791C2ADBAA3700BB666D /* TransformingPoint.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
+				D45156FB2C31343F009C7BFC /* ViewSize.swift in Sources */,
 				D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 				D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */,
