@@ -82,7 +82,7 @@ extension ViewController {
             guard let `self` else { return }
             contentView.exportImageButton.debounce()
 
-            if let image = contentView.canvasView.rootTexture?.uiImage {
+            if let image = contentView.canvasView.renderTexture?.uiImage {
                 UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
             }
         }
@@ -235,8 +235,8 @@ extension ViewController: CanvasViewModelDelegate {
     var commandBuffer: MTLCommandBuffer {
         contentView.canvasView.commandBuffer
     }
-    var rootTexture: MTLTexture {
-        contentView.canvasView.rootTexture
+    var rootTexture: MTLTexture? {
+        contentView.canvasView.renderTexture
     }
 
     func initRootTexture(textureSize: CGSize) {

@@ -8,10 +8,11 @@
 import MetalKit
 import Combine
 
+// TODO: Remove the protocol and use `MTKRenderTextureProtocol` instead
 protocol CanvasViewModelDelegate {
 
     var commandBuffer: MTLCommandBuffer { get }
-    var rootTexture: MTLTexture { get }
+    var rootTexture: MTLTexture? { get }
 
     func initRootTexture(textureSize: CGSize)
 
@@ -450,11 +451,14 @@ extension CanvasViewModel {
     }
 
     func refreshCanvasWithMergingDrawingLayers() {
-        guard let delegate else { return }
+        guard 
+            let delegate,
+            let rootTexture = delegate.rootTexture
+        else { return }
 
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: delegate.rootTexture,
+            onto: rootTexture,
             to: delegate.commandBuffer)
 
         delegate.refreshCanvasByCallingSetNeedsDisplay()

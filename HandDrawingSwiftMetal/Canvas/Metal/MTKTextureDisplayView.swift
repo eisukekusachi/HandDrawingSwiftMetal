@@ -7,8 +7,17 @@
 
 import MetalKit
 
+protocol MTKRenderTextureProtocol {
+    var commandBuffer: MTLCommandBuffer { get }
+
+    var renderTexture: MTLTexture? { get }
+    var viewDrawable: CAMetalDrawable? { get }
+
+    func setNeedsDisplay()
+}
+
 /// A custom view for displaying textures with Metal support.
-class MTKTextureDisplayView: MTKView, MTKViewDelegate {
+class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
 
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
@@ -18,7 +27,14 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         return commandQueue.getOrCreateCommandBuffer()
     }
 
-    private(set) var rootTexture: MTLTexture!
+    var renderTexture: MTLTexture? {
+        _renderTexture
+    }
+    var viewDrawable: (any CAMetalDrawable)? {
+        currentDrawable
+    }
+
+    private var _renderTexture: MTLTexture!
 
     private var commandQueue: CommandQueueProtocol!
 
@@ -51,7 +67,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
-        self.rootTexture = MTKTextureUtils.makeTexture(device!, textureSize)
+        _renderTexture = MTKTextureUtils.makeTexture(device!, textureSize)
     }
 
     func commitCommandsInCommandBuffer() {
@@ -71,14 +87,14 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate {
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
 
         let textureBuffers = Buffers.makeTextureBuffers(device: device!,
-                                                        textureSize: rootTexture.size,
+                                                        textureSize: _renderTexture.size,
                                                         drawableSize: drawable.texture.size,
                                                         matrix: canvasMatrix,
                                                         nodes: textureNodes)
 
         let commandBuffer = commandQueue.getOrCreateCommandBuffer()
 
-        Command.draw(texture: rootTexture,
+        Command.draw(texture: _renderTexture,
                      buffers: textureBuffers,
                      on: drawable.texture,
                      clearColor: (230, 230, 230),
