@@ -24,13 +24,24 @@ struct DotPoint {
         touchPoint: TouchPoint,
         matrix: CGAffineTransform? = nil,
         frameSize: CGSize,
-        textureSize: CGSize
+        textureSize: CGSize,
+        drawableSize: CGSize
     ) {
         var location: CGPoint = touchPoint.location
         let alpha: CGFloat = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
 
         if let matrix {
-            let scale = Aspect.getScaleToFit(frameSize, to: textureSize)
+            let scaleToFitDrawable = ViewSize.getScaleToFit(textureSize, to: drawableSize)
+            let textureSizeScaledToFitDrawable = CGSize(
+                width: textureSize.width * scaleToFitDrawable,
+                height: textureSize.height * scaleToFitDrawable
+            )
+            let resultScale = max(
+                drawableSize.width / textureSizeScaledToFitDrawable.width,
+                drawableSize.height / textureSizeScaledToFitDrawable.height
+            )
+            let scale = Aspect.getScaleToFit(frameSize, to: textureSize) * resultScale
+
             var inverseMatrix = matrix.inverted(flipY: true)
             inverseMatrix.tx *= scale
             inverseMatrix.ty *= scale

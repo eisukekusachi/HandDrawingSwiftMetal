@@ -258,7 +258,9 @@ extension CanvasViewModel {
                     ),
                     matrix: transforming.matrix,
                     frameSize: frameSize,
-                    textureSize: textureSize
+                    textureSize: textureSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+
                 )
             }
 
@@ -367,7 +369,8 @@ extension CanvasViewModel {
                 ),
                 matrix: transforming.matrix,
                 frameSize: frameSize,
-                textureSize: textureSize
+                textureSize: textureSize,
+                drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
             )
         }
 
