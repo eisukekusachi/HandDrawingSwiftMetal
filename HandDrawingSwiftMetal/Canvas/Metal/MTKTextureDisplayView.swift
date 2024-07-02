@@ -89,10 +89,17 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
 
-        let textureBuffers = Buffers.makeAspectFitTextureBuffers(
+        // Calculate the scale to fit the source size within the destination size
+        let scale = ViewSize.getScaleToFit(renderTexture.size, to: drawable.texture.size)
+        let resizedRenderTextureSize = CGSize(
+            width: renderTexture.size.width * scale,
+            height: renderTexture.size.height * scale
+        )
+
+        let textureBuffers = Buffers.makeTextureRenderingBuffers(
             device: device,
             matrix: canvasMatrix,
-            sourceSize: renderTexture.size,
+            sourceSize: resizedRenderTextureSize,
             destinationSize: drawable.texture.size,
             nodes: textureNodes
         )

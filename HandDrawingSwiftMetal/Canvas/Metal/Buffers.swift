@@ -219,7 +219,7 @@ enum Buffers {
         }
     }
 
-    static func makeAspectFitTextureBuffers(
+    static func makeTextureRenderingBuffers(
         device: MTLDevice?,
         matrix: CGAffineTransform?,
         sourceSize: CGSize,
@@ -231,17 +231,10 @@ enum Buffers {
         let texCoords = nodes.texCoords
         let indices = nodes.indices
 
-        // Calculate the scale to fit the source size within the destination size
-        let scale = ViewSize.getScaleToFit(sourceSize, to: destinationSize)
-        let resizedSourceSize = CGSize(
-            width: sourceSize.width * scale,
-            height: sourceSize.height * scale
-        )
-
         // Helper function to calculate vertex coordinates
         func calculateVertexPosition(xOffset: CGFloat, yOffset: CGFloat) -> CGPoint {
-            let x = destinationSize.width * 0.5 + xOffset * resizedSourceSize.width * 0.5
-            let y = destinationSize.height * 0.5 + yOffset * resizedSourceSize.height * 0.5
+            let x = destinationSize.width * 0.5 + xOffset * sourceSize.width * 0.5
+            let y = destinationSize.height * 0.5 + yOffset * sourceSize.height * 0.5
             return CGPoint(x: x, y: y)
         }
 
@@ -252,6 +245,7 @@ enum Buffers {
         var topLeft = calculateVertexPosition(xOffset: -1, yOffset: -1)
 
         if let matrix = matrix {
+            // Translate origin to the top left corner
             bottomLeft = CGPoint(
                 x: bottomLeft.x - destinationSize.width * 0.5,
                 y: bottomLeft.y - destinationSize.height * 0.5
@@ -269,6 +263,7 @@ enum Buffers {
                 y: topLeft.y - destinationSize.height * 0.5
             )
 
+            // Coordinate transformation
             bottomLeft = CGPoint(
                 x: (bottomLeft.x * matrix.a + bottomLeft.y * matrix.c + matrix.tx),
                 y: (bottomLeft.x * matrix.b + bottomLeft.y * matrix.d + matrix.ty)
@@ -286,6 +281,7 @@ enum Buffers {
                 y: (topLeft.x * matrix.b + topLeft.y * matrix.d + matrix.ty)
             )
 
+            // Translate origin back to the center
             bottomLeft = CGPoint(
                 x: bottomLeft.x + destinationSize.width * 0.5,
                 y: bottomLeft.y + destinationSize.height * 0.5
