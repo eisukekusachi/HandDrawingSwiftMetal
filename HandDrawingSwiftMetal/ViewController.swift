@@ -82,7 +82,7 @@ extension ViewController {
             guard let `self` else { return }
             contentView.exportImageButton.debounce()
 
-            if let image = contentView.canvasView.rootTexture?.uiImage {
+            if let image = contentView.canvasView.renderTexture?.uiImage {
                 UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
             }
         }
@@ -217,7 +217,12 @@ extension ViewController {
 extension ViewController: FingerInputGestureSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handleFingerInputGesture(touches, with: event, on: view)
+        canvasViewModel.handleFingerInputGesture(
+            touches,
+            with: event,
+            on: view,
+            renderTarget: contentView.canvasView
+        )
     }
 
 }
@@ -225,7 +230,12 @@ extension ViewController: FingerInputGestureSender {
 extension ViewController: PencilInputGestureSender {
 
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handlePencilInputGesture(touches, with: event, on: view)
+        canvasViewModel.handlePencilInputGesture(
+            touches,
+            with: event,
+            on: view,
+            renderTarget: contentView.canvasView
+        )
     }
 
 }
@@ -235,8 +245,8 @@ extension ViewController: CanvasViewModelDelegate {
     var commandBuffer: MTLCommandBuffer {
         contentView.canvasView.commandBuffer
     }
-    var rootTexture: MTLTexture {
-        contentView.canvasView.rootTexture
+    var rootTexture: MTLTexture? {
+        contentView.canvasView.renderTexture
     }
 
     func initRootTexture(textureSize: CGSize) {

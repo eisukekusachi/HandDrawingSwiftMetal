@@ -8,10 +8,11 @@
 import MetalKit
 import Combine
 
+// TODO: Remove the protocol and use `MTKRenderTextureProtocol` instead
 protocol CanvasViewModelDelegate {
 
     var commandBuffer: MTLCommandBuffer { get }
-    var rootTexture: MTLTexture { get }
+    var rootTexture: MTLTexture? { get }
 
     func initRootTexture(textureSize: CGSize)
 
@@ -209,7 +210,8 @@ extension CanvasViewModel {
     func handleFingerInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        on view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -250,10 +252,15 @@ extension CanvasViewModel {
 
             let dotPoints = touchPoints.map {
                 DotPoint(
-                    touchPoint: $0,
+                    touchPoint: $0.getScaledTouchPoint(
+                        renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
+                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+                    ),
                     matrix: transforming.matrix,
                     frameSize: frameSize,
-                    textureSize: textureSize
+                    textureSize: textureSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+
                 )
             }
 
@@ -308,7 +315,8 @@ extension CanvasViewModel {
     func handlePencilInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        on view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -355,10 +363,14 @@ extension CanvasViewModel {
 
         let dotPoints = touchPoints.map {
             DotPoint(
-                touchPoint: $0,
+                touchPoint: $0.getScaledTouchPoint(
+                    renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+                ),
                 matrix: transforming.matrix,
                 frameSize: frameSize,
-                textureSize: textureSize
+                textureSize: textureSize,
+                drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
             )
         }
 
@@ -450,11 +462,14 @@ extension CanvasViewModel {
     }
 
     func refreshCanvasWithMergingDrawingLayers() {
-        guard let delegate else { return }
+        guard 
+            let delegate,
+            let rootTexture = delegate.rootTexture
+        else { return }
 
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: delegate.rootTexture,
+            onto: rootTexture,
             to: delegate.commandBuffer)
 
         delegate.refreshCanvasByCallingSetNeedsDisplay()
