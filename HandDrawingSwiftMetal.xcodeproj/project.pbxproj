@@ -65,6 +65,7 @@
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
 		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
+		D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */; };
 		D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */; };
 		D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */; };
 		D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA52BC161A100ABDA4E /* Drawing.swift */; };
@@ -192,6 +193,7 @@
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
+		D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKRenderTextureProtocol.swift; sourceTree = "<group>"; };
 		D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothLineDrawing.swift; sourceTree = "<group>"; };
 		D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
 		D4671FA52BC161A100ABDA4E /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
@@ -361,9 +363,10 @@
 				D40D979B29DAB0DF00A82E6A /* CommandQueue.swift */,
 				D440DF752ADA9EB900A4E425 /* CommandQueueProtocol.swift */,
 				D40D979729DAB0DE00A82E6A /* Drawing.metal */,
+				D40D979929DAB0DE00A82E6A /* Pipeline.swift */,
+				D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */,
 				D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */,
 				D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */,
-				D40D979929DAB0DE00A82E6A /* Pipeline.swift */,
 				D40D979629DAB0DE00A82E6A /* Texture.metal */,
 			);
 			path = Metal;
@@ -830,6 +833,7 @@
 				D40CDEFF2B411F450059527E /* ImageLayerView.swift in Sources */,
 				D4541E922BBC160B00C96741 /* DotPoint.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
+				D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */,
 				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,

@@ -7,15 +7,6 @@
 
 import MetalKit
 
-protocol MTKRenderTextureProtocol {
-    var commandBuffer: MTLCommandBuffer { get }
-
-    var renderTexture: MTLTexture? { get }
-    var viewDrawable: CAMetalDrawable? { get }
-
-    func setNeedsDisplay()
-}
-
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
 

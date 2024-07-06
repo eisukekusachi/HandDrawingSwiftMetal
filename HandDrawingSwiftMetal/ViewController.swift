@@ -100,7 +100,7 @@ extension ViewController {
     }
 
     private func bindViewModel() {
-        canvasViewModel.delegate = self
+        canvasViewModel.renderTarget = contentView.canvasView
 
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
@@ -220,8 +220,7 @@ extension ViewController: FingerInputGestureSender {
         canvasViewModel.handleFingerInputGesture(
             touches,
             with: event,
-            on: view,
-            renderTarget: contentView.canvasView
+            on: view
         )
     }
 
@@ -233,32 +232,8 @@ extension ViewController: PencilInputGestureSender {
         canvasViewModel.handlePencilInputGesture(
             touches,
             with: event,
-            on: view,
-            renderTarget: contentView.canvasView
+            on: view
         )
-    }
-
-}
-
-extension ViewController: CanvasViewModelDelegate {
-
-    var commandBuffer: MTLCommandBuffer {
-        contentView.canvasView.commandBuffer
-    }
-    var rootTexture: MTLTexture? {
-        contentView.canvasView.renderTexture
-    }
-
-    func initRootTexture(textureSize: CGSize) {
-        contentView.canvasView.initRootTexture(textureSize: textureSize)
-    }
-
-    func clearCommandBuffer() {
-        contentView.canvasView.setCommandBufferToNil()
-    }
-
-    func refreshCanvasByCallingSetNeedsDisplay() {
-        contentView.canvasView.setNeedsDisplay()
     }
 
 }

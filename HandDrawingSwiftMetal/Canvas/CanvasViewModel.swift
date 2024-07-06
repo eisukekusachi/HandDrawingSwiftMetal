@@ -8,27 +8,13 @@
 import MetalKit
 import Combine
 
-// TODO: Remove the protocol and use `MTKRenderTextureProtocol` instead
-protocol CanvasViewModelDelegate {
-
-    var commandBuffer: MTLCommandBuffer { get }
-    var rootTexture: MTLTexture? { get }
-
-    func initRootTexture(textureSize: CGSize)
-
-    func clearCommandBuffer()
-
-    func refreshCanvasByCallingSetNeedsDisplay()
-
-}
-
 enum CanvasViewModelError: Error {
     case failedToApplyData
 }
 
 final class CanvasViewModel {
 
-    var delegate: CanvasViewModelDelegate?
+    var renderTarget: MTKRenderTextureProtocol?
 
     let drawing = Drawing()
 
@@ -57,13 +43,16 @@ final class CanvasViewModel {
 
     var textureSize: CGSize = .zero {
         didSet {
-            guard textureSize != .zero else { return }
-
-            delegate?.initRootTexture(textureSize: textureSize)
+            guard
+                textureSize != .zero,
+                let renderTarget
+            else { return }
 
             layerManager.initAllLayers(with: textureSize)
 
             drawing.textureSize = textureSize
+
+            renderTarget.initRootTexture(textureSize: textureSize)
 
             refreshCanvasWithMergingAllLayers()
         }
@@ -210,8 +199,7 @@ extension CanvasViewModel {
     func handleFingerInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView,
-        renderTarget: MTKRenderTextureProtocol
+        on view: UIView
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -230,6 +218,7 @@ extension CanvasViewModel {
         switch actionManager.updateState(newState) {
         case .drawing:
             guard
+                let renderTarget,
                 let hashValue = touchManager.hashValueForFingerDrawing,
                 let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
             else { return }
@@ -278,8 +267,8 @@ extension CanvasViewModel {
 
             drawSegmentOnCanvas(
                 lineSegment: lineSegment,
-                on: delegate?.rootTexture,
-                to: delegate?.commandBuffer
+                on: renderTarget.renderTexture,
+                to: renderTarget.commandBuffer
             )
 
             if isTouchEnded {
@@ -315,8 +304,7 @@ extension CanvasViewModel {
     func handlePencilInputGesture(
         _ touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView,
-        renderTarget: MTKRenderTextureProtocol
+        on view: UIView
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -326,13 +314,17 @@ extension CanvasViewModel {
             }
         }
 
+        guard
+            let renderTarget
+        else { return }
+
         if inputManager.state == .finger {
             initDrawingParameters()
 
             layerManager.clearDrawingLayer()
 
-            delegate?.clearCommandBuffer()
-            delegate?.refreshCanvasByCallingSetNeedsDisplay()
+            renderTarget.setCommandBufferToNil()
+            renderTarget.setNeedsDisplay()
         }
         inputManager.updateCurrentInput(.pencil)
 
@@ -387,8 +379,8 @@ extension CanvasViewModel {
 
         drawSegmentOnCanvas(
             lineSegment: lineSegment,
-            on: delegate?.rootTexture,
-            to: delegate?.commandBuffer
+            on: renderTarget.renderTexture,
+            to: renderTarget.commandBuffer
         )
 
         if isTouchEnded {
@@ -453,26 +445,29 @@ extension CanvasViewModel {
     }
 
     func refreshCanvasWithMergingAllLayers() {
-        guard let delegate else { return }
+        guard 
+            let renderTarget
+        else { return }
 
         layerManager.mergeUnselectedLayers(
-            to: delegate.commandBuffer
+            to: renderTarget.commandBuffer
         )
         refreshCanvasWithMergingDrawingLayers()
     }
 
     func refreshCanvasWithMergingDrawingLayers() {
         guard 
-            let delegate,
-            let rootTexture = delegate.rootTexture
+            let renderTarget,
+            let rootTexture = renderTarget.renderTexture
         else { return }
 
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: rootTexture,
-            to: delegate.commandBuffer)
+            to: renderTarget.commandBuffer
+        )
 
-        delegate.refreshCanvasByCallingSetNeedsDisplay()
+        renderTarget.setNeedsDisplay()
     }
 
     /// Start or stop the display link loop.
@@ -480,7 +475,7 @@ extension CanvasViewModel {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
-                delegate?.refreshCanvasByCallingSetNeedsDisplay()
+                renderTarget?.setNeedsDisplay()
                 pauseDisplayLinkSubject.send(true)
             }
 
@@ -514,7 +509,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         transforming.setMatrix(.identity)
-        delegate?.refreshCanvasByCallingSetNeedsDisplay()
+        renderTarget?.setNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {
@@ -602,7 +597,7 @@ extension CanvasViewModel {
 
     private func saveFile() {
         guard
-            let canvasTexture = delegate?.rootTexture
+            let canvasTexture = renderTarget?.renderTexture
         else { return }
 
         localRepository?.saveDataToDocuments(
