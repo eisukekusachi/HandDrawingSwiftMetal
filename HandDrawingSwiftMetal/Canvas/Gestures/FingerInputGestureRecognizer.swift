@@ -7,13 +7,13 @@
 
 import UIKit
 
-protocol FingerInputGestureSender {
+protocol FingerInputGestureSender: AnyObject {
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
 }
 
 final class FingerInputGestureRecognizer: UIGestureRecognizer {
 
-    var gestureDelegate: FingerInputGestureSender?
+    weak var gestureDelegate: FingerInputGestureSender?
 
     init() {
         super.init(target: nil, action: nil)
