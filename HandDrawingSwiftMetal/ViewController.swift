@@ -24,27 +24,38 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupContentView()
+        setupCanvasViewModel()
+
         setupNewCanvasDialogPresenter()
         setupLayerViewPresenter()
 
         bindViewModel()
+        bindCanvasView()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
-
-        canvasViewModel.initTextureSizeIfSizeIsZero(
-            frameSize: view.frame.size,
-            drawableSize: contentView.canvasView.drawableSize
-        )
     }
 
 }
 
 extension ViewController {
+    private func setupCanvasViewModel() {
+        canvasViewModel.renderTarget = contentView.canvasView
+
+        // Initialize the canvas with `CGSize`,
+        // if not initialized here, it will be initialized with the screen size
+        // when `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
+        /*
+        canvasViewModel.initCanvas(
+            textureSize: .init(width: 768, height: 1024),
+            renderTarget: contentView.canvasView
+        )
+        */
+    }
 
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.transforming)
@@ -100,8 +111,6 @@ extension ViewController {
     }
 
     private func bindViewModel() {
-        canvasViewModel.delegate = self
-
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)
@@ -132,6 +141,19 @@ extension ViewController {
         canvasViewModel.requestShowingLayerViewPublisher
             .sink { [weak self] in
                 self?.layerViewPresenter.toggleVisible()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindCanvasView() {
+        contentView.canvasView.changedDrawableSizePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] drawableSize in
+                guard let `self` else { return }
+                self.canvasViewModel.onDrawableSizeChanged(
+                    drawableSize,
+                    renderTarget: self.contentView.canvasView
+                )
             }
             .store(in: &cancellables)
     }
@@ -220,8 +242,7 @@ extension ViewController: FingerInputGestureSender {
         canvasViewModel.handleFingerInputGesture(
             touches,
             with: event,
-            on: view,
-            renderTarget: contentView.canvasView
+            on: view
         )
     }
 
@@ -233,32 +254,8 @@ extension ViewController: PencilInputGestureSender {
         canvasViewModel.handlePencilInputGesture(
             touches,
             with: event,
-            on: view,
-            renderTarget: contentView.canvasView
+            on: view
         )
-    }
-
-}
-
-extension ViewController: CanvasViewModelDelegate {
-
-    var commandBuffer: MTLCommandBuffer {
-        contentView.canvasView.commandBuffer
-    }
-    var rootTexture: MTLTexture? {
-        contentView.canvasView.renderTexture
-    }
-
-    func initRootTexture(textureSize: CGSize) {
-        contentView.canvasView.initRootTexture(textureSize: textureSize)
-    }
-
-    func clearCommandBuffer() {
-        contentView.canvasView.setCommandBufferToNil()
-    }
-
-    func refreshCanvasByCallingSetNeedsDisplay() {
-        contentView.canvasView.setNeedsDisplay()
     }
 
 }

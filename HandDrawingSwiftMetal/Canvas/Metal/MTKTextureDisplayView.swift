@@ -6,15 +6,7 @@
 //
 
 import MetalKit
-
-protocol MTKRenderTextureProtocol {
-    var commandBuffer: MTLCommandBuffer { get }
-
-    var renderTexture: MTLTexture? { get }
-    var viewDrawable: CAMetalDrawable? { get }
-
-    func setNeedsDisplay()
-}
+import Combine
 
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
@@ -33,6 +25,12 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     var viewDrawable: (any CAMetalDrawable)? {
         currentDrawable
     }
+
+    var changedDrawableSizePublisher: AnyPublisher<CGSize, Never> {
+        changedDrawableSizeSubject.eraseToAnyPublisher()
+    }
+
+    private let changedDrawableSizeSubject = PassthroughSubject<CGSize, Never>()
 
     private var _renderTexture: MTLTexture?
 
@@ -63,7 +61,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         self.backgroundColor = .white
     }
 
-    func initRootTexture(textureSize: CGSize) {
+    func initRenderTexture(textureSize: CGSize) {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
@@ -74,8 +72,8 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         setNeedsDisplay()
     }
 
-    func setCommandBufferToNil() {
-        commandQueue.setCommandBufferToNil()
+    func clearCommandBuffer() {
+        commandQueue.clearCommandBuffer()
     }
 
     // MARK: - DrawTexture
@@ -116,11 +114,12 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.setCommandBufferToNil()
+        commandQueue.clearCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        changedDrawableSizeSubject.send(size)
         setNeedsDisplay()
     }
-    
+
 }
