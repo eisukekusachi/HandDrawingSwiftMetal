@@ -339,7 +339,7 @@ extension CanvasViewModel {
 
             layerManager.clearDrawingLayer()
 
-            renderTarget.setCommandBufferToNil()
+            renderTarget.clearCommandBuffer()
             renderTarget.setNeedsDisplay()
         }
         inputManager.updateCurrentInput(.pencil)

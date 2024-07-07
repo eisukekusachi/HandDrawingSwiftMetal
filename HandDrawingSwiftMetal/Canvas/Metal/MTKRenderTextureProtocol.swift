@@ -16,7 +16,7 @@ protocol MTKRenderTextureProtocol {
 
     func initRenderTexture(textureSize: CGSize)
 
-    func setCommandBufferToNil()
+    func clearCommandBuffer()
 
     func setNeedsDisplay()
 }

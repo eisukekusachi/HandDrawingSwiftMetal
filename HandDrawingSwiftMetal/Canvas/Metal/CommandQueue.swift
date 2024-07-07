@@ -27,7 +27,7 @@ class CommandQueue: CommandQueueProtocol {
         queue.makeCommandBuffer()!
     }
 
-    func setCommandBufferToNil() {
+    func clearCommandBuffer() {
         self.buffer = nil
     }
 }

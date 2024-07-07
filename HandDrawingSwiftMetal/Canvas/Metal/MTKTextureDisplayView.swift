@@ -72,8 +72,8 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         setNeedsDisplay()
     }
 
-    func setCommandBufferToNil() {
-        commandQueue.setCommandBufferToNil()
+    func clearCommandBuffer() {
+        commandQueue.clearCommandBuffer()
     }
 
     // MARK: - DrawTexture
@@ -114,7 +114,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.setCommandBufferToNil()
+        commandQueue.clearCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
