@@ -142,7 +142,7 @@ final class CanvasViewModel {
     ) {
         layerManager.initAllLayers(with: textureSize)
 
-        renderTarget.initRootTexture(textureSize: textureSize)
+        renderTarget.initRenderTexture(textureSize: textureSize)
 
         guard
             let renderTexture = renderTarget.renderTexture
@@ -423,11 +423,11 @@ extension CanvasViewModel {
 
     private func drawSegmentOnCanvas(
         lineSegment: LineSegment,
-        on rootTexture: MTLTexture?,
+        on renderTexture: MTLTexture?,
         to commandBuffer: MTLCommandBuffer?
     ) {
         guard
-            let rootTexture,
+            let renderTexture,
             let commandBuffer
         else { return }
 
@@ -446,7 +446,7 @@ extension CanvasViewModel {
 
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: rootTexture,
+            onto: renderTexture,
             to: commandBuffer)
     }
 
@@ -474,12 +474,12 @@ extension CanvasViewModel {
     func refreshCanvasWithMergingDrawingLayers() {
         guard 
             let renderTarget,
-            let rootTexture = renderTarget.renderTexture
+            let renderTexture = renderTarget.renderTexture
         else { return }
 
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: rootTexture,
+            onto: renderTexture,
             to: renderTarget.commandBuffer
         )
 

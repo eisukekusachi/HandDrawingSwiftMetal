@@ -14,7 +14,7 @@ protocol MTKRenderTextureProtocol {
 
     var viewDrawable: CAMetalDrawable? { get }
 
-    func initRootTexture(textureSize: CGSize)
+    func initRenderTexture(textureSize: CGSize)
 
     func setCommandBufferToNil()
 

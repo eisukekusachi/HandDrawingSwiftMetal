@@ -61,7 +61,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         self.backgroundColor = .white
     }
 
-    func initRootTexture(textureSize: CGSize) {
+    func initRenderTexture(textureSize: CGSize) {
         let minSize: CGFloat = CGFloat(Command.threadgroupSize)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
