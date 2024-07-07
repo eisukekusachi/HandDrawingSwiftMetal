@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import Combine
 
 /// A custom view for displaying textures with Metal support.
 class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
@@ -24,6 +25,12 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     var viewDrawable: (any CAMetalDrawable)? {
         currentDrawable
     }
+
+    var changedDrawableSizePublisher: AnyPublisher<CGSize, Never> {
+        changedDrawableSizeSubject.eraseToAnyPublisher()
+    }
+
+    private let changedDrawableSizeSubject = PassthroughSubject<CGSize, Never>()
 
     private var _renderTexture: MTLTexture?
 
@@ -111,7 +118,8 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        changedDrawableSizeSubject.send(size)
         setNeedsDisplay()
     }
-    
+
 }

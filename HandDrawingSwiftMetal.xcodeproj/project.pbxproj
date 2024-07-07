@@ -114,7 +114,6 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
-		D4EC24AB2BB9525E0097A019 /* CGSizeExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EC24AA2BB9525E0097A019 /* CGSizeExtensions.swift */; };
 		D4F1BB3E2B2D436F006EA102 /* ImageLayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -246,7 +245,6 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		D4EC24AA2BB9525E0097A019 /* CGSizeExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSizeExtensions.swift; sourceTree = "<group>"; };
 		D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayerManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -328,7 +326,6 @@
 				D4BCB3002AF7339200EA650D /* StringExtensions.swift */,
 				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
 				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
-				D4EC24AA2BB9525E0097A019 /* CGSizeExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -795,7 +792,6 @@
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D44D19702BE5DB530069D4A9 /* ExportCanvasData.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
-				D4EC24AB2BB9525E0097A019 /* CGSizeExtensions.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */,
 				D48AC4202BCA963D00608E42 /* LayerUndoManager.swift in Sources */,

@@ -30,16 +30,12 @@ class ViewController: UIViewController {
         setupLayerViewPresenter()
 
         bindViewModel()
+        bindCanvasView()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         canvasViewModel.frameSize = view.frame.size
-
-        canvasViewModel.initTextureSizeIfSizeIsZero(
-            frameSize: view.frame.size,
-            drawableSize: contentView.canvasView.drawableSize
-        )
     }
 
 }
@@ -132,6 +128,19 @@ extension ViewController {
         canvasViewModel.requestShowingLayerViewPublisher
             .sink { [weak self] in
                 self?.layerViewPresenter.toggleVisible()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindCanvasView() {
+        contentView.canvasView.changedDrawableSizePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] drawableSize in
+                guard let `self` else { return }
+                self.canvasViewModel.onDrawableSizeChanged(
+                    drawableSize,
+                    renderTarget: self.contentView.canvasView
+                )
             }
             .store(in: &cancellables)
     }

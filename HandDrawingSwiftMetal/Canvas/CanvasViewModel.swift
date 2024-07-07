@@ -41,23 +41,6 @@ final class CanvasViewModel {
         }
     }
 
-    var textureSize: CGSize = .zero {
-        didSet {
-            guard
-                textureSize != .zero,
-                let renderTarget
-            else { return }
-
-            layerManager.initAllLayers(with: textureSize)
-
-            drawing.textureSize = textureSize
-
-            renderTarget.initRootTexture(textureSize: textureSize)
-
-            refreshCanvasWithMergingAllLayers()
-        }
-    }
-
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
 
@@ -153,11 +136,20 @@ final class CanvasViewModel {
         drawingTool.setDrawingTool(.brush)
     }
 
-    func initTextureSizeIfSizeIsZero(frameSize: CGSize, drawableSize: CGSize) {
-        if textureSize == .zero &&
-           frameSize.isSameRatio(drawableSize) {
-            textureSize = drawableSize
-        }
+    func initTexture(
+        textureSize: CGSize,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
+        renderTarget.initRootTexture(textureSize: textureSize)
+
+        layerManager.initAllLayers(with: textureSize)
+
+        drawing.textureSize = textureSize
+
+        layerManager.mergeUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        refreshCanvasWithMergingDrawingLayers()
     }
 
     func applyCanvasDataToCanvas(
@@ -195,6 +187,22 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    func onDrawableSizeChanged(
+        _ drawableTextureSize: CGSize,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
+        // Initialize the texture here using the size,
+        // if the texture size has not been determined
+        // by the time `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
+        guard
+            drawing.textureSize == .zero
+        else { return }
+
+        initTexture(
+            textureSize: drawableTextureSize,
+            renderTarget: renderTarget
+        )
+    }
 
     func handleFingerInputGesture(
         _ touches: Set<UITouch>,
@@ -247,7 +255,7 @@ extension CanvasViewModel {
                     ),
                     matrix: transforming.matrix,
                     frameSize: frameSize,
-                    textureSize: textureSize,
+                    textureSize: renderTarget.renderTexture?.size ?? .zero,
                     drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
 
                 )
@@ -361,7 +369,7 @@ extension CanvasViewModel {
                 ),
                 matrix: transforming.matrix,
                 frameSize: frameSize,
-                textureSize: textureSize,
+                textureSize: renderTarget.renderTexture?.size ?? .zero,
                 drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
             )
         }
