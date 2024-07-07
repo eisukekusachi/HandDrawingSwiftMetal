@@ -136,12 +136,10 @@ final class CanvasViewModel {
         drawingTool.setDrawingTool(.brush)
     }
 
-    func initTexture(
+    func initCanvas(
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        drawing.textureSize = textureSize
-
         layerManager.initAllLayers(with: textureSize)
 
         renderTarget.initRootTexture(textureSize: textureSize)
@@ -201,14 +199,14 @@ extension CanvasViewModel {
         _ drawableTextureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        // Initialize the texture here using the size,
-        // if the texture size has not been determined
+        // Initialize the canvas here using the drawableTextureSize
+        // if the renderTexture's texture is nil
         // by the time `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
         guard
-            drawing.textureSize == .zero
+            renderTarget.renderTexture == nil
         else { return }
 
-        initTexture(
+        initCanvas(
             textureSize: drawableTextureSize,
             renderTarget: renderTarget
         )

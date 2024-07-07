@@ -46,11 +46,11 @@ extension ViewController {
     private func setupCanvasViewModel() {
         canvasViewModel.renderTarget = contentView.canvasView
 
-        // Initialize the texture with `CGSize`,
+        // Initialize the canvas with `CGSize`,
         // if not initialized here, it will be initialized with the screen size
         // when `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
         /*
-        canvasViewModel.initTexture(
+        canvasViewModel.initCanvas(
             textureSize: .init(width: 768, height: 1024),
             renderTarget: contentView.canvasView
         )
