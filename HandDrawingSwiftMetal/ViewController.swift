@@ -24,8 +24,10 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupContentView()
+        setupCanvasViewModel()
+
         setupNewCanvasDialogPresenter()
         setupLayerViewPresenter()
 
@@ -41,6 +43,19 @@ class ViewController: UIViewController {
 }
 
 extension ViewController {
+    private func setupCanvasViewModel() {
+        canvasViewModel.renderTarget = contentView.canvasView
+
+        // Initialize the texture with `CGSize`,
+        // if not initialized here, it will be initialized with the screen size
+        // when `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
+        /*
+        canvasViewModel.initTexture(
+            textureSize: .init(width: 768, height: 1024),
+            renderTarget: contentView.canvasView
+        )
+        */
+    }
 
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.transforming)
@@ -96,8 +111,6 @@ extension ViewController {
     }
 
     private func bindViewModel() {
-        canvasViewModel.renderTarget = contentView.canvasView
-
         canvasViewModel.pauseDisplayLinkPublisher
             .assign(to: \.isDisplayLinkPaused, on: contentView)
             .store(in: &cancellables)

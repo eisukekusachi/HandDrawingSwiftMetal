@@ -140,16 +140,26 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        renderTarget.initRootTexture(textureSize: textureSize)
+        drawing.textureSize = textureSize
 
         layerManager.initAllLayers(with: textureSize)
 
-        drawing.textureSize = textureSize
+        renderTarget.initRootTexture(textureSize: textureSize)
+
+        guard
+            let renderTexture = renderTarget.renderTexture
+        else { return }
 
         layerManager.mergeUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        layerManager.mergeDrawingLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTexture,
+            to: renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
     func applyCanvasDataToCanvas(
