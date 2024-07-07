@@ -7,13 +7,13 @@
 
 import UIKit
 
-protocol PencilInputGestureSender {
+protocol PencilInputGestureSender: AnyObject {
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
 }
 
 final class PencilInputGestureRecognizer: UIGestureRecognizer {
 
-    var gestureDelegate: PencilInputGestureSender?
+    weak var gestureDelegate: PencilInputGestureSender?
 
     init() {
         super.init(target: nil, action: nil)
