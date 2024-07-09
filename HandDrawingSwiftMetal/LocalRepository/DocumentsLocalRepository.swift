@@ -94,11 +94,11 @@ final class DocumentsLocalRepository: LocalRepository {
                     }
 
                     do {
-                        let data = try FileInputManager.getCanvasEntity(
+                        let entity = try FileInputManager.getCanvasEntity(
                             fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
                         )
                         try canvasViewModel.applyCanvasDataToCanvas(
-                            data: data,
+                            entity: entity,
                             fileName: sourceURL.fileName,
                             folderURL: URL.tmpFolderURL
                         )
@@ -143,10 +143,10 @@ extension DocumentsLocalRepository {
     static func exportLayerData(
         layers: [ImageLayerModel],
         to url: URL
-    ) -> AnyPublisher<[ImageLayerEntityForExporting], DocumentsLocalRepositoryError> {
-        let publisher = Future<[ImageLayerEntityForExporting], DocumentsLocalRepositoryError> { promise in
+    ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
+        let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
             do {
-                var processedLayers: [ImageLayerEntityForExporting] = []
+                var processedLayers: [ImageLayerEntity] = []
 
                 for layer in layers {
                     let textureName = UUID().uuidString

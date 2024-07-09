@@ -161,33 +161,35 @@ final class CanvasViewModel {
     }
 
     func applyCanvasDataToCanvas(
-        data: CanvasEntity?,
+        entity: CanvasEntity?,
         fileName: String,
         folderURL: URL
     ) throws {
         guard
-            let data,
+            let entity,
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else {
             throw CanvasViewModelError.failedToApplyData
         }
 
-        let layerEntityForExportingArray: [ImageLayerEntityForExporting] = data.layers
+        let layerEntities: [ImageLayerEntity] = entity.layers
 
-        let layers: [ImageLayerModel] = try layerEntityForExportingArray.map({ $0 }).convertToImageLayerEntity(
+        let layers: [ImageLayerModel] = try layerEntities.map {
+            $0
+        }.convertToImageLayerModel(
             device: device,
-            textureSize: data.textureSize,
+            textureSize: entity.textureSize,
             folderURL: folderURL
         )
 
         layerManager.initLayers(
-            index: data.layerIndex,
+            index: entity.layerIndex,
             layers: layers
         )
 
-        drawingTool.setBrushDiameter(data.brushDiameter)
-        drawingTool.setEraserDiameter(data.eraserDiameter)
-        drawingTool.setDrawingTool(.init(rawValue: data.drawingTool))
+        drawingTool.setBrushDiameter(entity.brushDiameter)
+        drawingTool.setEraserDiameter(entity.eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: entity.drawingTool))
 
         projectName = fileName
     }
