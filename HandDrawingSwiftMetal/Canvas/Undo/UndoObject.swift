@@ -9,5 +9,5 @@ import Foundation
 
 struct UndoObject {
     let index: Int
-    let layers: [ImageLayerEntity]
+    let layers: [ImageLayerModel]
 }

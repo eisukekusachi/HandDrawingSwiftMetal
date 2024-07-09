@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-final class ImageLayerManager: LayerManager<ImageLayerEntity> {
+final class ImageLayerManager: LayerManager<ImageLayerModel> {
 
     var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
         refreshCanvasWithMergingDrawingLayersSubject.eraseToAnyPublisher()
@@ -19,7 +19,7 @@ final class ImageLayerManager: LayerManager<ImageLayerEntity> {
         refreshCanvasWithMergingAllLayersSubject.eraseToAnyPublisher()
     }
 
-    var newLayer: ImageLayerEntity {
+    var newLayer: ImageLayerModel {
         .init(
             texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
             title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
@@ -187,7 +187,7 @@ extension ImageLayerManager {
     }
 
     func update(
-        _ layer: ImageLayerEntity,
+        _ layer: ImageLayerModel,
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
@@ -201,12 +201,12 @@ extension ImageLayerManager {
         }
     }
 
-    func updateTitle(_ layer: ImageLayerEntity, _ title: String) {
+    func updateTitle(_ layer: ImageLayerModel, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
 
-    func updateThumbnail(_ layer: ImageLayerEntity) {
+    func updateThumbnail(_ layer: ImageLayerModel) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }

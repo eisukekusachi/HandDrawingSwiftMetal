@@ -137,7 +137,7 @@ extension ImageLayerListView {
 
 #Preview {
 
-    ImageLayerListView<ImageLayerEntity>(
+    ImageLayerListView<ImageLayerModel>(
         layerManager: ImageLayerManager(),
         didTapLayer: { layer in
             print("Tap layer")

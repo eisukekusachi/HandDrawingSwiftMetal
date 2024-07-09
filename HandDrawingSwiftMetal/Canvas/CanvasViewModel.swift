@@ -174,7 +174,7 @@ final class CanvasViewModel {
 
         let layerEntityForExportingArray: [ImageLayerEntityForExporting] = data.layers
 
-        let layers: [ImageLayerEntity] = try layerEntityForExportingArray.map({ $0 }).convertToImageLayerEntity(
+        let layers: [ImageLayerModel] = try layerEntityForExportingArray.map({ $0 }).convertToImageLayerEntity(
             device: device,
             textureSize: data.textureSize,
             folderURL: folderURL
@@ -548,7 +548,7 @@ extension CanvasViewModel {
     }
 
     // MARK: Layers
-    func didTapLayer(layer: ImageLayerEntity) {
+    func didTapLayer(layer: ImageLayerModel) {
         layerManager.updateIndex(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
@@ -569,18 +569,18 @@ extension CanvasViewModel {
         layerManager.removeLayer(layer)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
-    func didTapLayerVisibility(layer: ImageLayerEntity, isVisible: Bool) {
+    func didTapLayerVisibility(layer: ImageLayerModel, isVisible: Bool) {
         layerManager.update(layer, isVisible: isVisible)
         layerManager.refreshCanvasWithMergingAllLayers()
     }
-    func didChangeLayerAlpha(layer: ImageLayerEntity, value: Int) {
+    func didChangeLayerAlpha(layer: ImageLayerModel, value: Int) {
         layerManager.update(layer, alpha: value)
         layerManager.refreshCanvasWithMergingDrawingLayers()
     }
-    func didEditLayerTitle(layer: ImageLayerEntity, title: String) {
+    func didEditLayerTitle(layer: ImageLayerModel, title: String) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: ImageLayerEntity, source: IndexSet, destination: Int) {
+    func didMoveLayers(layer: ImageLayerModel, source: IndexSet, destination: Int) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.moveLayer(

@@ -1,5 +1,5 @@
 //
-//  ImageLayerEntity.swift
+//  ImageLayerModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/30.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct ImageLayerEntity: ImageLayer {
+struct ImageLayerModel: ImageLayer {
     /// The unique identifier for the layer
     let id: UUID
     /// The texture of the layer
@@ -38,13 +38,13 @@ struct ImageLayerEntity: ImageLayer {
 
 }
 
-extension ImageLayerEntity {
+extension ImageLayerModel {
 
     mutating func updateThumbnail() {
         thumbnail = texture.upsideDownUIImage?.resize(width: 64)
     }
 
-    static func == (lhs: ImageLayerEntity, rhs: ImageLayerEntity) -> Bool {
+    static func == (lhs: ImageLayerModel, rhs: ImageLayerModel) -> Bool {
         lhs.id == rhs.id
     }
 
