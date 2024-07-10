@@ -162,6 +162,8 @@ final class CanvasViewModel {
     ) {
         projectName = model.projectName
 
+        layerUndoManager.clear()
+
         layerManager.initialize(
             textureSize: model.textureSize,
             layerIndex: model.layerIndex,
