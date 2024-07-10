@@ -55,6 +55,7 @@
 		D44D19702BE5DB530069D4A9 /* ExportCanvasData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */; };
 		D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */; };
 		D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19732BE5DFE80069D4A9 /* ToastModel.swift */; };
+		D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4507C152C3E2C1300CA3974 /* CanvasModel.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
@@ -182,6 +183,7 @@
 		D44D196F2BE5DB530069D4A9 /* ExportCanvasData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCanvasData.swift; sourceTree = "<group>"; };
 		D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsLocalRepository.swift; sourceTree = "<group>"; };
 		D44D19732BE5DFE80069D4A9 /* ToastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastModel.swift; sourceTree = "<group>"; };
+		D4507C152C3E2C1300CA3974 /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -469,6 +471,7 @@
 		D46A304A2BF88E540057DB69 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
 				D4B4AAA12B3FF44100298CFB /* ImageLayerModel.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
 			);
@@ -791,6 +794,7 @@
 				D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D44D19702BE5DB530069D4A9 /* ExportCanvasData.swift in Sources */,
+				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
 				D440DF762ADA9EB900A4E425 /* CommandQueueProtocol.swift in Sources */,
 				D47285A02BBEBC350035AFCD /* LineDrawing.swift in Sources */,
