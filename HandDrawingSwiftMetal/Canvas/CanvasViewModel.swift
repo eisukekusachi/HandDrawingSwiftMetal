@@ -532,7 +532,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initialize(textureSize: drawing.textureSize)
+        layerManager.initialize(textureSize: layerManager.textureSize)
 
         layerUndoManager.clear()
 

@@ -11,6 +11,8 @@ import Combine
 final class Drawing {
 
     var frameSize: CGSize = .zero
+
+    // TODO: Remove this property
     var textureSize: CGSize = .zero
 
     func initDrawingIfHashValueIsNil(
@@ -57,7 +59,7 @@ final class Drawing {
         on layerManager: ImageLayerManager,
         to commandBuffer: MTLCommandBuffer?
     ) {
-        guard 
+        guard
             let commandBuffer,
             let drawingLayer = layerManager.drawingLayer,
             let selectedTexture = layerManager.selectedTexture
