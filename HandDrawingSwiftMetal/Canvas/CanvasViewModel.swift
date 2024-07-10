@@ -115,23 +115,15 @@ final class CanvasViewModel {
 
         layerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
-                self?.refreshCanvas(using: undoObject)
+                self?.layerManager.initLayers(
+                    index: undoObject.index,
+                    layers: undoObject.layers
+                )
+                self?.refreshCanvasWithMergingAllLayers()
             }
             .store(in: &cancellables)
 
         layerUndoManager.updateUndoActivity()
-
-        layerManager.refreshCanvasWithMergingDrawingLayersPublisher
-            .sink { [weak self] in
-                self?.refreshCanvasWithMergingDrawingLayers()
-            }
-            .store(in: &cancellables)
-
-        layerManager.refreshCanvasWithMergingAllLayersPublisher
-            .sink { [weak self] in
-                self?.refreshCanvasWithMergingAllLayers()
-            }
-            .store(in: &cancellables)
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -454,14 +446,6 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func refreshCanvas(using undoObject: UndoObject) {
-        layerManager.initLayers(
-            index: undoObject.index,
-            layers: undoObject.layers
-        )
-        refreshCanvasWithMergingAllLayers()
-    }
-
     func refreshCanvasWithMergingAllLayers() {
         guard 
             let renderTarget
@@ -552,13 +536,13 @@ extension CanvasViewModel {
     // MARK: Layers
     func didTapLayer(layer: ImageLayerModel) {
         layerManager.updateIndex(layer)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
     func didTapAddLayerButton() {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.addNewLayer()
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
     func didTapRemoveLayerButton() {
         guard
@@ -569,15 +553,15 @@ extension CanvasViewModel {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.removeLayer(layer)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
     func didTapLayerVisibility(layer: ImageLayerModel, isVisible: Bool) {
         layerManager.update(layer, isVisible: isVisible)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
     func didChangeLayerAlpha(layer: ImageLayerModel, value: Int) {
         layerManager.update(layer, alpha: value)
-        layerManager.refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers()
     }
     func didEditLayerTitle(layer: ImageLayerModel, title: String) {
         layerManager.updateTitle(layer, title)
@@ -589,7 +573,7 @@ extension CanvasViewModel {
             fromOffsets: source,
             toOffset: destination
         )
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
 
 }

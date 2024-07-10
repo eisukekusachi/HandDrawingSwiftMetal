@@ -11,14 +11,6 @@ import Combine
 
 final class ImageLayerManager: LayerManager<ImageLayerModel> {
 
-    var refreshCanvasWithMergingDrawingLayersPublisher: AnyPublisher<Void, Never> {
-        refreshCanvasWithMergingDrawingLayersSubject.eraseToAnyPublisher()
-    }
-
-    var refreshCanvasWithMergingAllLayersPublisher: AnyPublisher<Void, Never> {
-        refreshCanvasWithMergingAllLayersSubject.eraseToAnyPublisher()
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             drawingBrushLayer.frameSize = frameSize
@@ -38,10 +30,6 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
     private var currentTexture: MTLTexture!
 
     private (set) var textureSize: CGSize = .zero
-
-    private let refreshCanvasWithMergingDrawingLayersSubject = PassthroughSubject<Void, Never>()
-
-    private let refreshCanvasWithMergingAllLayersSubject = PassthroughSubject<Void, Never>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -165,14 +153,6 @@ extension ImageLayerManager {
                     commandBuffer)
             }
         }
-    }
-
-    func refreshCanvasWithMergingDrawingLayers() {
-        refreshCanvasWithMergingDrawingLayersSubject.send()
-    }
-
-    func refreshCanvasWithMergingAllLayers() {
-        refreshCanvasWithMergingAllLayersSubject.send()
     }
 
 }
