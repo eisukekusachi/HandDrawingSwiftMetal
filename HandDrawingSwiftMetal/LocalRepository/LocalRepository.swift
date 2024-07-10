@@ -11,9 +11,8 @@ import Combine
 protocol LocalRepository {
 
     func loadDataFromDocuments(
-        sourceURL: URL,
-        canvasViewModel: CanvasViewModel
-    ) -> AnyPublisher<Void, Error>
+        sourceURL: URL
+    ) -> AnyPublisher<CanvasModel, Error>
 
     func saveDataToDocuments(
         data: ExportCanvasData,

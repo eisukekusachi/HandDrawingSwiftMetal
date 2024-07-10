@@ -76,10 +76,9 @@ final class DocumentsLocalRepository: LocalRepository {
     }
 
     func loadDataFromDocuments(
-        sourceURL: URL,
-        canvasViewModel: CanvasViewModel
-    ) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { promise in
+        sourceURL: URL
+    ) -> AnyPublisher<CanvasModel, Error> {
+        Future<CanvasModel, Error> { promise in
             Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
@@ -88,29 +87,22 @@ final class DocumentsLocalRepository: LocalRepository {
                     promise(.failure(error))
                 }
 
-                DispatchQueue.main.async {
-                    defer {
-                        try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
-                    }
-
-                    do {
-                        let entity = try FileInputManager.getCanvasEntity(
-                            fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
-                        )
-                        try canvasViewModel.applyCanvasDataToCanvas(
-                            entity: entity,
-                            fileName: sourceURL.fileName,
-                            folderURL: URL.tmpFolderURL
-                        )
-
-                        canvasViewModel.layerUndoManager.clear()
-                        canvasViewModel.refreshCanvasWithMergingAllLayers()
-                        promise(.success(()))
-
-                    } catch {
-                        promise(.failure(error))
-                    }
+                defer {
+                    try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
                 }
+
+                let entity = try FileInputManager.getCanvasEntity(
+                    fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                )
+
+                promise(.success(
+                    .init(
+                        projectName: sourceURL.fileName,
+                        device: MTLCreateSystemDefaultDevice()!,
+                        entity: entity,
+                        folderURL: URL.tmpFolderURL
+                    )
+                ))
             }
         }
         .eraseToAnyPublisher()

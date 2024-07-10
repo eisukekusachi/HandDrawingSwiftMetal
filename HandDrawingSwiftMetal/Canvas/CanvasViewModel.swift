@@ -68,6 +68,10 @@ final class CanvasViewModel {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
+    var refreshCanvasPublisher: AnyPublisher<CanvasModel, Never> {
+        refreshCanvasSubject.eraseToAnyPublisher()
+    }
+
     private let lineDrawing = LineDrawing()
     private let smoothLineDrawing = SmoothLineDrawing()
 
@@ -85,6 +89,8 @@ final class CanvasViewModel {
     private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
+
+    private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -189,6 +195,34 @@ final class CanvasViewModel {
         drawingTool.setDrawingTool(.init(rawValue: entity.drawingTool))
 
         projectName = fileName
+    }
+
+    func apply(
+        model: CanvasModel,
+        to renderTarget: MTKRenderTextureProtocol
+    ) {
+        projectName = model.projectName
+
+        layerManager.initialize(
+            model: model
+        )
+
+        drawingTool.setBrushDiameter(model.brushDiameter)
+        drawingTool.setEraserDiameter(model.eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
+
+        renderTarget.initRenderTexture(textureSize: model.textureSize)
+
+        layerManager.mergeUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.mergeDrawingLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture!,
+            to: renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
 }
@@ -597,8 +631,7 @@ extension CanvasViewModel {
 
     private func loadFile(from filePath: String) {
         localRepository?.loadDataFromDocuments(
-            sourceURL: URL.documents.appendingPathComponent(filePath),
-            canvasViewModel: self
+            sourceURL: URL.documents.appendingPathComponent(filePath)
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
@@ -608,7 +641,9 @@ extension CanvasViewModel {
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
-        }, receiveValue: {})
+        }, receiveValue: { [weak self] response in
+            self?.refreshCanvasSubject.send(response)
+        })
         .store(in: &cancellables)
     }
 

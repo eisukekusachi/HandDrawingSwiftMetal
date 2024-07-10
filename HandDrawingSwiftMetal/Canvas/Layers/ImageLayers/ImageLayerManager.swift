@@ -58,6 +58,17 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
         )
     }
 
+    func initialize(
+        model: CanvasModel
+    ) {
+        initializeProperties(textureSize: model.textureSize)
+
+        super.initLayers(
+            index: model.layerIndex,
+            layers: model.layers
+        )
+    }
+
     private func initializeProperties(textureSize: CGSize) {
 
         self.textureSize = textureSize
