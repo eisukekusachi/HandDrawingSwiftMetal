@@ -125,7 +125,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        layerUndoManager.updateUndoActivity()
+        layerUndoManager.updateUndoComponents()
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in

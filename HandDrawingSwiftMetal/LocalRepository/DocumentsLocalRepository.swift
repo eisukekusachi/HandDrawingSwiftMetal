@@ -140,7 +140,7 @@ extension DocumentsLocalRepository {
     ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
         let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
             do {
-                var processedLayers: [ImageLayerEntity] = []
+                var layerEntities: [ImageLayerEntity] = []
 
                 for layer in layers {
                     let textureName = UUID().uuidString
@@ -149,7 +149,7 @@ extension DocumentsLocalRepository {
                         bytes: layer.texture.bytes,
                         to: url.appendingPathComponent(textureName)
                     )
-                    processedLayers.append(
+                    layerEntities.append(
                         .init(
                             textureName: textureName,
                             title: layer.title,
@@ -158,7 +158,7 @@ extension DocumentsLocalRepository {
                         )
                     )
                 }
-                promise(.success(processedLayers))
+                promise(.success(layerEntities))
             } catch {
                 promise(.failure(.exportLayerDataError))
             }
