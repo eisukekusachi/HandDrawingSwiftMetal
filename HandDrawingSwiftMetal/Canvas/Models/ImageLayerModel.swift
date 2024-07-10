@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct ImageLayerModel: ImageLayer {
+final class ImageLayerModel: ImageLayer {
     /// The unique identifier for the layer
     let id: UUID
     /// The texture of the layer
@@ -40,7 +40,7 @@ struct ImageLayerModel: ImageLayer {
 
 extension ImageLayerModel {
 
-    mutating func updateThumbnail() {
+    func updateThumbnail() {
         thumbnail = texture.upsideDownUIImage?.resize(width: 64)
     }
 
