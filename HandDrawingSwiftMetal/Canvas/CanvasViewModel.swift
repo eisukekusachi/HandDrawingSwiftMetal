@@ -72,6 +72,10 @@ final class CanvasViewModel {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
+    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<UndoObject, Never> {
+        refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
+    }
+
     private let lineDrawing = LineDrawing()
     private let smoothLineDrawing = SmoothLineDrawing()
 
@@ -91,6 +95,8 @@ final class CanvasViewModel {
     private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<UndoObject, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -115,11 +121,7 @@ final class CanvasViewModel {
 
         layerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
-                self?.layerManager.initLayers(
-                    index: undoObject.index,
-                    layers: undoObject.layers
-                )
-                self?.refreshCanvasWithMergingAllLayers()
+                self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
             }
             .store(in: &cancellables)
 
@@ -182,6 +184,21 @@ final class CanvasViewModel {
         )
 
         renderTarget.setNeedsDisplay()
+    }
+
+    func apply(
+        undoObject: UndoObject,
+        to renderTarget: MTKRenderTextureProtocol
+    ) {
+        layerManager.initLayers(
+            index: undoObject.index,
+            layers: undoObject.layers
+        )
+
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        refreshCanvasWithMergingDrawingLayers()
     }
 
 }
