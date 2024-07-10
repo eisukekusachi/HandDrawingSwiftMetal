@@ -65,7 +65,27 @@ enum Command {
                                        indexBufferOffset: 0)
         encoder?.endEncoding()
     }
-    
+
+    static func drawTexture(
+        from drawingTextures: [MTLTexture],
+        into targetTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        if drawingTextures.count == 0 { return }
+
+        for i in 0 ..< drawingTextures.count {
+            if i == 0 {
+                Command.copy(dst: targetTexture,
+                             src: drawingTextures.first!,
+                             commandBuffer)
+            } else {
+                Command.merge(texture: drawingTextures[i],
+                              into: targetTexture,
+                              commandBuffer)
+            }
+        }
+    }
+
     static func makeEraseTexture(
         buffers: TextureBuffers?,
         src: MTLTexture?,
@@ -160,7 +180,7 @@ enum Command {
         encoder?.dispatchThreadgroups(threadgroupSize, threadsPerThreadgroup: threadgroupCount)
         encoder?.endEncoding()
     }
-    static func merge(layers: [ImageLayerEntity], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
+    static func merge(layers: [ImageLayerCellItem], into dstTexture: MTLTexture?, _ commandBuffer: MTLCommandBuffer?) {
         layers.forEach {
             merge(texture: $0.texture, alpha: $0.alpha, into: dstTexture, commandBuffer)
         }

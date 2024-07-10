@@ -68,6 +68,14 @@ final class CanvasViewModel {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
+    var refreshCanvasPublisher: AnyPublisher<CanvasModel, Never> {
+        refreshCanvasSubject.eraseToAnyPublisher()
+    }
+
+    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<UndoObject, Never> {
+        refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
+    }
+
     private let lineDrawing = LineDrawing()
     private let smoothLineDrawing = SmoothLineDrawing()
 
@@ -86,6 +94,10 @@ final class CanvasViewModel {
 
     private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
 
+    private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<UndoObject, Never>()
+
     private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -103,29 +115,17 @@ final class CanvasViewModel {
                     ),
                     layerManager: self.layerManager
                 )
-                self.layerManager.updateSelectedLayerTextureWithNewAddressTexture()
+                self.layerManager.updateTextureAddress()
             }
             .store(in: &cancellables)
 
         layerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
-                self?.refreshCanvas(using: undoObject)
+                self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
             }
             .store(in: &cancellables)
 
-        layerUndoManager.updateUndoActivity()
-
-        layerManager.refreshCanvasWithMergingDrawingLayersPublisher
-            .sink { [weak self] in
-                self?.refreshCanvasWithMergingDrawingLayers()
-            }
-            .store(in: &cancellables)
-
-        layerManager.refreshCanvasWithMergingAllLayersPublisher
-            .sink { [weak self] in
-                self?.refreshCanvasWithMergingAllLayers()
-            }
-            .store(in: &cancellables)
+        layerUndoManager.updateUndoComponents()
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -140,56 +140,61 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initAllLayers(with: textureSize)
+        layerManager.initialize(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
-        guard
-            let renderTexture = renderTarget.renderTexture
-        else { return }
-
-        layerManager.mergeUnselectedLayers(
+        layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
-            to: renderTarget.commandBuffer
+            onto: renderTarget.renderTexture!,
+            renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
     }
 
-    func applyCanvasDataToCanvas(
-        data: CanvasEntity?,
-        fileName: String,
-        folderURL: URL
-    ) throws {
-        guard
-            let data,
-            let device: MTLDevice = MTLCreateSystemDefaultDevice()
-        else {
-            throw CanvasViewModelError.failedToApplyData
-        }
+    func apply(
+        model: CanvasModel,
+        to renderTarget: MTKRenderTextureProtocol
+    ) {
+        projectName = model.projectName
 
-        let layerEntityForExportingArray: [ImageLayerEntityForExporting] = data.layers
+        layerUndoManager.clear()
 
-        let layers: [ImageLayerEntity] = try layerEntityForExportingArray.map({ $0 }).convertToImageLayerEntity(
-            device: device,
-            textureSize: data.textureSize,
-            folderURL: folderURL
+        layerManager.initialize(
+            textureSize: model.textureSize,
+            layerIndex: model.layerIndex,
+            layers: model.layers
         )
 
+        drawingTool.setBrushDiameter(model.brushDiameter)
+        drawingTool.setEraserDiameter(model.eraserDiameter)
+        drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
+
+        renderTarget.initRenderTexture(textureSize: model.textureSize)
+
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        refreshCanvasWithMergingDrawingLayers()
+    }
+
+    func apply(
+        undoObject: UndoObject,
+        to renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.initLayers(
-            index: data.layerIndex,
-            layers: layers
+            index: undoObject.index,
+            layers: undoObject.layers
         )
 
-        drawingTool.setBrushDiameter(data.brushDiameter)
-        drawingTool.setEraserDiameter(data.eraserDiameter)
-        drawingTool.setDrawingTool(.init(rawValue: data.drawingTool))
-
-        projectName = fileName
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        refreshCanvasWithMergingDrawingLayers()
     }
 
 }
@@ -444,28 +449,22 @@ extension CanvasViewModel {
             )
         }
 
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTexture,
-            to: commandBuffer)
+            commandBuffer)
     }
 
 }
 
 extension CanvasViewModel {
 
-    func refreshCanvas(using undoObject: UndoObject) {
-        layerManager.initLayers(undoObject: undoObject)
-
-        refreshCanvasWithMergingAllLayers()
-    }
-
     func refreshCanvasWithMergingAllLayers() {
         guard 
             let renderTarget
         else { return }
 
-        layerManager.mergeUnselectedLayers(
+        layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
         refreshCanvasWithMergingDrawingLayers()
@@ -477,10 +476,10 @@ extension CanvasViewModel {
             let renderTexture = renderTarget.renderTexture
         else { return }
 
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTexture,
-            to: renderTarget.commandBuffer
+            renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -533,7 +532,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initAllLayers(with: drawing.textureSize)
+        layerManager.initialize(textureSize: drawing.textureSize)
 
         layerUndoManager.clear()
 
@@ -548,15 +547,15 @@ extension CanvasViewModel {
     }
 
     // MARK: Layers
-    func didTapLayer(layer: ImageLayerEntity) {
+    func didTapLayer(layer: ImageLayerCellItem) {
         layerManager.updateIndex(layer)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
     func didTapAddLayerButton() {
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.addLayer(layerManager.newLayer)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        layerManager.addNewLayer()
+        refreshCanvasWithMergingAllLayers()
     }
     func didTapRemoveLayerButton() {
         guard
@@ -567,27 +566,27 @@ extension CanvasViewModel {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.removeLayer(layer)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
-    func didTapLayerVisibility(layer: ImageLayerEntity, isVisible: Bool) {
+    func didTapLayerVisibility(layer: ImageLayerCellItem, isVisible: Bool) {
         layerManager.update(layer, isVisible: isVisible)
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
-    func didChangeLayerAlpha(layer: ImageLayerEntity, value: Int) {
+    func didChangeLayerAlpha(layer: ImageLayerCellItem, value: Int) {
         layerManager.update(layer, alpha: value)
-        layerManager.refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers()
     }
-    func didEditLayerTitle(layer: ImageLayerEntity, title: String) {
+    func didEditLayerTitle(layer: ImageLayerCellItem, title: String) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: ImageLayerEntity, source: IndexSet, destination: Int) {
+    func didMoveLayers(layer: ImageLayerCellItem, source: IndexSet, destination: Int) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.moveLayer(
             fromOffsets: source,
             toOffset: destination
         )
-        layerManager.refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers()
     }
 
 }
@@ -596,8 +595,7 @@ extension CanvasViewModel {
 
     private func loadFile(from filePath: String) {
         localRepository?.loadDataFromDocuments(
-            sourceURL: URL.documents.appendingPathComponent(filePath),
-            canvasViewModel: self
+            sourceURL: URL.documents.appendingPathComponent(filePath)
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
@@ -607,21 +605,21 @@ extension CanvasViewModel {
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
-        }, receiveValue: {})
+        }, receiveValue: { [weak self] response in
+            self?.refreshCanvasSubject.send(response)
+        })
         .store(in: &cancellables)
     }
 
     private func saveFile() {
         guard
-            let canvasTexture = renderTarget?.renderTexture
+            let renderTexture = renderTarget?.renderTexture
         else { return }
 
         localRepository?.saveDataToDocuments(
-            data: .init(
-                canvasTexture: canvasTexture,
-                layerManager: layerManager,
-                drawingTool: drawingTool
-            ),
+            renderTexture: renderTexture,
+            layerManager: layerManager,
+            drawingTool: drawingTool,
             to: URL.documents.appendingPathComponent(zipFileNameName)
         )
         .handleEvents(

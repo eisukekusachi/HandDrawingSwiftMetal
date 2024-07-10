@@ -10,21 +10,21 @@ import SwiftUI
 
 final class LayerViewPresenter {
 
-    private var layerViewController: UIHostingController<ImageLayerView<ImageLayerEntity>>?
-    private var layerView: ImageLayerView<ImageLayerEntity>?
+    private var layerViewController: UIHostingController<ImageLayerView<ImageLayerCellItem>>?
+    private var layerView: ImageLayerView<ImageLayerCellItem>?
 
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
         layerManager: ImageLayerManager,
         targetView: UIView,
-        didTapLayer: @escaping (ImageLayerEntity) -> Void,
+        didTapLayer: @escaping (ImageLayerCellItem) -> Void,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didTapVisibility: @escaping (ImageLayerEntity, Bool) -> Void,
-        didChangeAlpha: @escaping (ImageLayerEntity, Int) -> Void,
-        didEditTitle: @escaping (ImageLayerEntity, String) -> Void,
-        didMove: @escaping (ImageLayerEntity, IndexSet, Int) -> Void,
+        didTapVisibility: @escaping (ImageLayerCellItem, Bool) -> Void,
+        didChangeAlpha: @escaping (ImageLayerCellItem, Int) -> Void,
+        didEditTitle: @escaping (ImageLayerCellItem, String) -> Void,
+        didMove: @escaping (ImageLayerCellItem, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
         layerView = ImageLayerView(

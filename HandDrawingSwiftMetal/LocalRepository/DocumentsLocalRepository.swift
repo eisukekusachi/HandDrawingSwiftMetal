@@ -18,7 +18,9 @@ final class DocumentsLocalRepository: LocalRepository {
     private var cancellables = Set<AnyCancellable>()
 
     func saveDataToDocuments(
-        data: ExportCanvasData,
+        renderTexture: MTLTexture,
+        layerManager: ImageLayerManager,
+        drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { promise in
@@ -29,23 +31,23 @@ final class DocumentsLocalRepository: LocalRepository {
 
                 Publishers.CombineLatest(
                     DocumentsLocalRepository.exportThumbnail(
-                        texture: data.canvasTexture,
+                        texture: renderTexture,
                         fileName: URL.thumbnailPath,
                         height: 500,
                         to: URL.tmpFolderURL
                     ),
                     DocumentsLocalRepository.exportLayerData(
-                        layers: data.layerManager.layers,
+                        layers: layerManager.layers,
                         to: URL.tmpFolderURL
                     )
                 )
                 .compactMap { thumbnailName, layers -> CanvasEntity? in
                     return .init(
                         thumbnailName: thumbnailName,
-                        textureSize: data.layerManager.textureSize,
-                        layerIndex: data.layerManager.index,
+                        textureSize: layerManager.textureSize,
+                        layerIndex: layerManager.index,
                         layers: layers,
-                        drawingTool: data.drawingTool
+                        drawingTool: drawingTool
                     )
                 }
                 .tryMap { result -> Void in
@@ -76,10 +78,9 @@ final class DocumentsLocalRepository: LocalRepository {
     }
 
     func loadDataFromDocuments(
-        sourceURL: URL,
-        canvasViewModel: CanvasViewModel
-    ) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { promise in
+        sourceURL: URL
+    ) -> AnyPublisher<CanvasModel, Error> {
+        Future<CanvasModel, Error> { promise in
             Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
@@ -88,29 +89,22 @@ final class DocumentsLocalRepository: LocalRepository {
                     promise(.failure(error))
                 }
 
-                DispatchQueue.main.async {
-                    defer {
-                        try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
-                    }
-
-                    do {
-                        let data = try FileInputManager.getCanvasEntity(
-                            fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
-                        )
-                        try canvasViewModel.applyCanvasDataToCanvas(
-                            data: data,
-                            fileName: sourceURL.fileName,
-                            folderURL: URL.tmpFolderURL
-                        )
-
-                        canvasViewModel.layerUndoManager.clear()
-                        canvasViewModel.refreshCanvasWithMergingAllLayers()
-                        promise(.success(()))
-
-                    } catch {
-                        promise(.failure(error))
-                    }
+                defer {
+                    try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
                 }
+
+                let entity = try FileInputManager.getCanvasEntity(
+                    fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                )
+
+                promise(.success(
+                    .init(
+                        projectName: sourceURL.fileName,
+                        device: MTLCreateSystemDefaultDevice()!,
+                        entity: entity,
+                        folderURL: URL.tmpFolderURL
+                    )
+                ))
             }
         }
         .eraseToAnyPublisher()
@@ -141,12 +135,12 @@ extension DocumentsLocalRepository {
     }
 
     static func exportLayerData(
-        layers: [ImageLayerEntity],
+        layers: [ImageLayerCellItem],
         to url: URL
-    ) -> AnyPublisher<[ImageLayerEntityForExporting], DocumentsLocalRepositoryError> {
-        let publisher = Future<[ImageLayerEntityForExporting], DocumentsLocalRepositoryError> { promise in
+    ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
+        let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
             do {
-                var processedLayers: [ImageLayerEntityForExporting] = []
+                var layerEntities: [ImageLayerEntity] = []
 
                 for layer in layers {
                     let textureName = UUID().uuidString
@@ -155,7 +149,7 @@ extension DocumentsLocalRepository {
                         bytes: layer.texture.bytes,
                         to: url.appendingPathComponent(textureName)
                     )
-                    processedLayers.append(
+                    layerEntities.append(
                         .init(
                             textureName: textureName,
                             title: layer.title,
@@ -164,7 +158,7 @@ extension DocumentsLocalRepository {
                         )
                     )
                 }
-                promise(.success(processedLayers))
+                promise(.success(layerEntities))
             } catch {
                 promise(.failure(.exportLayerDataError))
             }

@@ -87,23 +87,7 @@ enum MTKTextureUtils {
         guard let textureData = try Data(contentsOf: url).encodedHexadecimals else { return nil }
         return MTKTextureUtils.makeTexture(device, textureSize, textureData)
     }
-    static func makeSingleTexture(from drawingTextures: [MTLTexture],
-                                  to targetTexture: MTLTexture,
-                                  _ commandBuffer: MTLCommandBuffer) {
-        if drawingTextures.count == 0 { return }
 
-        for i in 0 ..< drawingTextures.count {
-            if i == 0 {
-                Command.copy(dst: targetTexture,
-                             src: drawingTextures.first!,
-                             commandBuffer)
-            } else {
-                Command.merge(texture: drawingTextures[i],
-                              into: targetTexture,
-                              commandBuffer)
-            }
-        }
-    }
     static func makeBlankTexture(_ device: MTLDevice, _ textureSize: CGSize) -> MTLTexture {
         let texture = MTKTextureUtils.makeTexture(device, textureSize)!
 

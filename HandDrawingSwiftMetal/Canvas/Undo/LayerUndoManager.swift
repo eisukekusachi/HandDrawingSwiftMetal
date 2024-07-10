@@ -45,18 +45,18 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     func undo() {
         (undoManager as? UndoManagerWithCount)?.performUndo()
-        updateUndoActivity()
+        updateUndoComponents()
     }
     func redo() {
         (undoManager as? UndoManagerWithCount)?.performRedo()
-        updateUndoActivity()
+        updateUndoComponents()
     }
     func clear() {
         (undoManager as? UndoManagerWithCount)?.clear()
-        updateUndoActivity()
+        updateUndoComponents()
     }
 
-    func updateUndoActivity() {
+    func updateUndoComponents() {
         canUndoSubject.send(undoManager.canUndo)
         canRedoSubject.send(undoManager.canRedo)
     }
@@ -70,7 +70,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
             layerManager: layerManager
         )
 
-        updateUndoActivity()
+        updateUndoComponents()
     }
 
     /// Registers an action to undo the drawing operation.
@@ -92,7 +92,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
                 layerManager: layerManager
             )
 
-            updateUndoActivity()
+            updateUndoComponents()
 
             refreshCanvasSubject.send(undoObject)
         }

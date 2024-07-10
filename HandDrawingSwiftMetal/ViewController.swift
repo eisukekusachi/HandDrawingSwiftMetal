@@ -143,6 +143,28 @@ extension ViewController {
                 self?.layerViewPresenter.toggleVisible()
             }
             .store(in: &cancellables)
+
+        canvasViewModel.refreshCanvasPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                guard let `self` else { return }
+                self.canvasViewModel.apply(
+                    model: model,
+                    to: self.contentView.canvasView
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.refreshCanvasWithUndoObjectPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] undoObject in
+                guard let `self` else { return }
+                self.canvasViewModel.apply(
+                    undoObject: undoObject,
+                    to: self.contentView.canvasView
+                )
+            }
+            .store(in: &cancellables)
     }
 
     private func bindCanvasView() {

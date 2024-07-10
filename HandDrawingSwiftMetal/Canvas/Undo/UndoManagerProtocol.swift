@@ -19,5 +19,5 @@ protocol UndoManagerProtocol {
     func undo()
     func redo()
     func clear()
-    func updateUndoActivity()
+    func updateUndoComponents()
 }
