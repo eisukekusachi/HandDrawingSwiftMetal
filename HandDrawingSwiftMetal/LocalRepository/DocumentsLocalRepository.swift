@@ -133,7 +133,7 @@ extension DocumentsLocalRepository {
     }
 
     static func exportLayerData(
-        layers: [ImageLayerModel],
+        layers: [ImageLayerCellItem],
         to url: URL
     ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
         let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in

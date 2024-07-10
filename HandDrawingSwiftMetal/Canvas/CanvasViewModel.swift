@@ -534,7 +534,7 @@ extension CanvasViewModel {
     }
 
     // MARK: Layers
-    func didTapLayer(layer: ImageLayerModel) {
+    func didTapLayer(layer: ImageLayerCellItem) {
         layerManager.updateIndex(layer)
         refreshCanvasWithMergingAllLayers()
     }
@@ -555,18 +555,18 @@ extension CanvasViewModel {
         layerManager.removeLayer(layer)
         refreshCanvasWithMergingAllLayers()
     }
-    func didTapLayerVisibility(layer: ImageLayerModel, isVisible: Bool) {
+    func didTapLayerVisibility(layer: ImageLayerCellItem, isVisible: Bool) {
         layerManager.update(layer, isVisible: isVisible)
         refreshCanvasWithMergingAllLayers()
     }
-    func didChangeLayerAlpha(layer: ImageLayerModel, value: Int) {
+    func didChangeLayerAlpha(layer: ImageLayerCellItem, value: Int) {
         layerManager.update(layer, alpha: value)
         refreshCanvasWithMergingDrawingLayers()
     }
-    func didEditLayerTitle(layer: ImageLayerModel, title: String) {
+    func didEditLayerTitle(layer: ImageLayerCellItem, title: String) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: ImageLayerModel, source: IndexSet, destination: Int) {
+    func didMoveLayers(layer: ImageLayerCellItem, source: IndexSet, destination: Int) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.moveLayer(

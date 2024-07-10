@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-final class ImageLayerManager: LayerManager<ImageLayerModel> {
+final class ImageLayerManager: LayerManager<ImageLayerCellItem> {
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -36,7 +36,7 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
     func initialize(
         textureSize: CGSize,
         layerIndex: Int = 0,
-        layers: [ImageLayerModel] = []
+        layers: [ImageLayerCellItem] = []
     ) {
         initializeProperties(textureSize: textureSize)
 
@@ -67,7 +67,7 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
         layers.removeAll()
     }
 
-    private func makeNewLayer(textureSize: CGSize) -> ImageLayerModel {
+    private func makeNewLayer(textureSize: CGSize) -> ImageLayerCellItem {
         .init(
             texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
             title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
@@ -193,7 +193,7 @@ extension ImageLayerManager {
     }
 
     func update(
-        _ layer: ImageLayerModel,
+        _ layer: ImageLayerCellItem,
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
@@ -207,12 +207,12 @@ extension ImageLayerManager {
         }
     }
 
-    func updateTitle(_ layer: ImageLayerModel, _ title: String) {
+    func updateTitle(_ layer: ImageLayerCellItem, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
 
-    func updateThumbnail(_ layer: ImageLayerModel) {
+    func updateThumbnail(_ layer: ImageLayerCellItem) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
     }
