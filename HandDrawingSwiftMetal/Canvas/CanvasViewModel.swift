@@ -162,37 +162,6 @@ final class CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
 
-    func applyCanvasDataToCanvas(
-        entity: CanvasEntity?,
-        fileName: String,
-        folderURL: URL
-    ) throws {
-        guard
-            let entity,
-            let device: MTLDevice = MTLCreateSystemDefaultDevice()
-        else {
-            throw CanvasViewModelError.failedToApplyData
-        }
-
-        let layers: [ImageLayerModel] = CanvasModel.makeLayers(
-            from: entity.layers,
-            device: device,
-            textureSize: entity.textureSize,
-            folderURL: folderURL
-        )
-
-        layerManager.initLayers(
-            index: entity.layerIndex,
-            layers: layers
-        )
-
-        drawingTool.setBrushDiameter(entity.brushDiameter)
-        drawingTool.setEraserDiameter(entity.eraserDiameter)
-        drawingTool.setDrawingTool(.init(rawValue: entity.drawingTool))
-
-        projectName = fileName
-    }
-
     func apply(
         model: CanvasModel,
         to renderTarget: MTKRenderTextureProtocol
