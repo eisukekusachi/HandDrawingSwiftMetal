@@ -46,26 +46,22 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     func initialize(
-        with textureSize: CGSize
+        textureSize: CGSize,
+        layerIndex: Int = 0,
+        layers: [ImageLayerModel] = []
     ) {
         initializeProperties(textureSize: textureSize)
 
-        super.initLayers(
-            index: 0,
-            layers: [
+        var layers = layers
+        if layers.isEmpty {
+            layers.append(
                 makeNewLayer(textureSize: textureSize)
-            ]
-        )
-    }
-
-    func initialize(
-        model: CanvasModel
-    ) {
-        initializeProperties(textureSize: model.textureSize)
+            )
+        }
 
         super.initLayers(
-            index: model.layerIndex,
-            layers: model.layers
+            index: layerIndex,
+            layers: layers
         )
     }
 

@@ -146,20 +146,16 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initialize(with: textureSize)
+        layerManager.initialize(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
-
-        guard
-            let renderTexture = renderTarget.renderTexture
-        else { return }
 
         layerManager.mergeUnselectedLayers(
             to: renderTarget.commandBuffer
         )
         layerManager.mergeDrawingLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
+            onto: renderTarget.renderTexture!,
             to: renderTarget.commandBuffer
         )
 
@@ -204,7 +200,9 @@ final class CanvasViewModel {
         projectName = model.projectName
 
         layerManager.initialize(
-            model: model
+            textureSize: model.textureSize,
+            layerIndex: model.layerIndex,
+            layers: model.layers
         )
 
         drawingTool.setBrushDiameter(model.brushDiameter)
@@ -568,7 +566,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initialize(with: drawing.textureSize)
+        layerManager.initialize(textureSize: drawing.textureSize)
 
         layerUndoManager.clear()
 
