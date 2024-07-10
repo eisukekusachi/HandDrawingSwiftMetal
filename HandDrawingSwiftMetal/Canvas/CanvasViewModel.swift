@@ -172,11 +172,8 @@ final class CanvasViewModel {
             throw CanvasViewModelError.failedToApplyData
         }
 
-        let layerEntities: [ImageLayerEntity] = entity.layers
-
-        let layers: [ImageLayerModel] = try layerEntities.map {
-            $0
-        }.convertToImageLayerModel(
+        let layers: [ImageLayerModel] = CanvasModel.makeLayers(
+            from: entity.layers,
             device: device,
             textureSize: entity.textureSize,
             folderURL: folderURL

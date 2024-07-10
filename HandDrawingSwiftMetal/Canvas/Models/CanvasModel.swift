@@ -31,7 +31,8 @@ final class CanvasModel {
         self.textureSize = entity.textureSize
 
         self.layerIndex = entity.layerIndex
-        self.layers = try! entity.layers.convertToImageLayerModel(
+        self.layers = CanvasModel.makeLayers(
+            from: entity.layers,
             device: device,
             textureSize: entity.textureSize,
             folderURL: folderURL
@@ -41,6 +42,45 @@ final class CanvasModel {
 
         self.brushDiameter = entity.brushDiameter
         self.eraserDiameter = entity.eraserDiameter
+    }
+
+    static func makeLayers(
+        from sourceLayers: [ImageLayerEntity],
+        device: MTLDevice,
+        textureSize: CGSize,
+        folderURL: URL
+    ) -> [ImageLayerModel] {
+
+        var layers: [ImageLayerModel] = []
+
+        try? sourceLayers.forEach { layer in
+
+            let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName))
+
+            if let hexadecimalData = textureData.encodedHexadecimals,
+               let texture = MTKTextureUtils.makeTexture(device, textureSize, hexadecimalData) {
+                layers.append(
+                    .init(
+                        texture: texture,
+                        title: layer.title,
+                        isVisible: layer.isVisible,
+                        alpha: layer.alpha
+                    )
+                )
+            }
+        }
+
+        if layers.count == 0,
+           let newTexture = MTKTextureUtils.makeTexture(device, textureSize) {
+            layers.append(
+                .init(
+                    texture: newTexture,
+                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+                )
+            )
+        }
+
+        return layers
     }
 
 }
