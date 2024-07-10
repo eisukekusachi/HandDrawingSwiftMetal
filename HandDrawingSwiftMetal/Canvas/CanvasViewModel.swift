@@ -109,7 +109,7 @@ final class CanvasViewModel {
                     ),
                     layerManager: self.layerManager
                 )
-                self.layerManager.updateSelectedLayerTextureWithNewAddressTexture()
+                self.layerManager.updateTextureAddress()
             }
             .store(in: &cancellables)
 
@@ -142,13 +142,13 @@ final class CanvasViewModel {
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
-        layerManager.mergeUnselectedLayers(
+        layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture!,
-            to: renderTarget.commandBuffer
+            renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -172,13 +172,13 @@ final class CanvasViewModel {
 
         renderTarget.initRenderTexture(textureSize: model.textureSize)
 
-        layerManager.mergeUnselectedLayers(
+        layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture!,
-            to: renderTarget.commandBuffer
+            renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -436,10 +436,10 @@ extension CanvasViewModel {
             )
         }
 
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTexture,
-            to: commandBuffer)
+            commandBuffer)
     }
 
 }
@@ -451,7 +451,7 @@ extension CanvasViewModel {
             let renderTarget
         else { return }
 
-        layerManager.mergeUnselectedLayers(
+        layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
         refreshCanvasWithMergingDrawingLayers()
@@ -463,10 +463,10 @@ extension CanvasViewModel {
             let renderTexture = renderTarget.renderTexture
         else { return }
 
-        layerManager.mergeDrawingLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTexture,
-            to: renderTarget.commandBuffer
+            renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()

@@ -83,10 +83,10 @@ extension ImageLayerManager {
         addLayer(newLayer)
     }
 
-    func mergeDrawingLayers(
+    func mergeAllLayers(
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture,
-        to commandBuffer: MTLCommandBuffer
+        _ commandBuffer: MTLCommandBuffer
     ) {
         guard
             let selectedTexture = selectedTexture,
@@ -126,7 +126,7 @@ extension ImageLayerManager {
         )
     }
 
-    func mergeUnselectedLayers(
+    func updateUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
     ) {
         let bottomIndex: Int = index - 1
@@ -141,7 +141,8 @@ extension ImageLayerManager {
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: bottomTexture,
-                    commandBuffer)
+                    commandBuffer
+                )
             }
         }
         if topIndex < layers.count {
@@ -150,7 +151,8 @@ extension ImageLayerManager {
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: topTexture,
-                    commandBuffer)
+                    commandBuffer
+                )
             }
         }
     }
@@ -172,7 +174,7 @@ extension ImageLayerManager {
         drawingLayer?.clearDrawingTextures()
     }
 
-    func updateSelectedLayerTextureWithNewAddressTexture() {
+    func updateTextureAddress() {
         guard
             let device: MTLDevice = MTLCreateSystemDefaultDevice(),
             let selectedTexture = selectedTexture,
