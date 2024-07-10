@@ -617,15 +617,13 @@ extension CanvasViewModel {
 
     private func saveFile() {
         guard
-            let canvasTexture = renderTarget?.renderTexture
+            let renderTexture = renderTarget?.renderTexture
         else { return }
 
         localRepository?.saveDataToDocuments(
-            data: .init(
-                canvasTexture: canvasTexture,
-                layerManager: layerManager,
-                drawingTool: drawingTool
-            ),
+            renderTexture: renderTexture,
+            layerManager: layerManager,
+            drawingTool: drawingTool,
             to: URL.documents.appendingPathComponent(zipFileNameName)
         )
         .handleEvents(

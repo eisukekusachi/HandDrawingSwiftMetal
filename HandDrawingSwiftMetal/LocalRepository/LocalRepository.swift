@@ -15,7 +15,9 @@ protocol LocalRepository {
     ) -> AnyPublisher<CanvasModel, Error>
 
     func saveDataToDocuments(
-        data: ExportCanvasData,
+        renderTexture: MTLTexture,
+        layerManager: ImageLayerManager,
+        drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error>
 

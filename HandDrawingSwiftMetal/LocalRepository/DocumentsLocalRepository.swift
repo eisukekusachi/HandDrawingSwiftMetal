@@ -18,7 +18,9 @@ final class DocumentsLocalRepository: LocalRepository {
     private var cancellables = Set<AnyCancellable>()
 
     func saveDataToDocuments(
-        data: ExportCanvasData,
+        renderTexture: MTLTexture,
+        layerManager: ImageLayerManager,
+        drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { promise in
@@ -29,23 +31,23 @@ final class DocumentsLocalRepository: LocalRepository {
 
                 Publishers.CombineLatest(
                     DocumentsLocalRepository.exportThumbnail(
-                        texture: data.canvasTexture,
+                        texture: renderTexture,
                         fileName: URL.thumbnailPath,
                         height: 500,
                         to: URL.tmpFolderURL
                     ),
                     DocumentsLocalRepository.exportLayerData(
-                        layers: data.layerManager.layers,
+                        layers: layerManager.layers,
                         to: URL.tmpFolderURL
                     )
                 )
                 .compactMap { thumbnailName, layers -> CanvasEntity? in
                     return .init(
                         thumbnailName: thumbnailName,
-                        textureSize: data.layerManager.textureSize,
-                        layerIndex: data.layerManager.index,
+                        textureSize: layerManager.textureSize,
+                        layerIndex: layerManager.index,
                         layers: layers,
-                        drawingTool: data.drawingTool
+                        drawingTool: drawingTool
                     )
                 }
                 .tryMap { result -> Void in
