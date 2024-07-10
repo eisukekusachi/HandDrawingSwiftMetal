@@ -140,7 +140,7 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initAllLayers(with: textureSize)
+        layerManager.initialize(with: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
@@ -457,8 +457,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func refreshCanvas(using undoObject: UndoObject) {
-        layerManager.initLayers(undoObject: undoObject)
-
+        layerManager.initLayers(
+            index: undoObject.index,
+            layers: undoObject.layers
+        )
         refreshCanvasWithMergingAllLayers()
     }
 
@@ -535,7 +537,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transforming.setMatrix(.identity)
-        layerManager.initAllLayers(with: drawing.textureSize)
+        layerManager.initialize(with: drawing.textureSize)
 
         layerUndoManager.clear()
 
@@ -557,7 +559,7 @@ extension CanvasViewModel {
     func didTapAddLayerButton() {
         layerUndoManager.addUndoObjectToUndoStack()
 
-        layerManager.addLayer(layerManager.newLayer)
+        layerManager.addNewLayer()
         layerManager.refreshCanvasWithMergingAllLayers()
     }
     func didTapRemoveLayerButton() {

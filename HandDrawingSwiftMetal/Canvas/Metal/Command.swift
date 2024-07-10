@@ -65,7 +65,27 @@ enum Command {
                                        indexBufferOffset: 0)
         encoder?.endEncoding()
     }
-    
+
+    static func drawTexture(
+        from drawingTextures: [MTLTexture],
+        into targetTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        if drawingTextures.count == 0 { return }
+
+        for i in 0 ..< drawingTextures.count {
+            if i == 0 {
+                Command.copy(dst: targetTexture,
+                             src: drawingTextures.first!,
+                             commandBuffer)
+            } else {
+                Command.merge(texture: drawingTextures[i],
+                              into: targetTexture,
+                              commandBuffer)
+            }
+        }
+    }
+
     static func makeEraseTexture(
         buffers: TextureBuffers?,
         src: MTLTexture?,

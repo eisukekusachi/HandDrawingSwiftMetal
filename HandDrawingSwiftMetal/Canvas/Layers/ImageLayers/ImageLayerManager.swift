@@ -19,13 +19,6 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
         refreshCanvasWithMergingAllLayersSubject.eraseToAnyPublisher()
     }
 
-    var newLayer: ImageLayerModel {
-        .init(
-            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        )
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             drawingBrushLayer.frameSize = frameSize
@@ -52,7 +45,21 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func initAllLayers(with textureSize: CGSize) {
+    func initialize(
+        with textureSize: CGSize
+    ) {
+        initializeProperties(textureSize: textureSize)
+
+        super.initLayers(
+            index: 0,
+            layers: [
+                makeNewLayer(textureSize: textureSize)
+            ]
+        )
+    }
+
+    private func initializeProperties(textureSize: CGSize) {
+
         self.textureSize = textureSize
 
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -63,17 +70,12 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
         drawingEraserLayer.initTextures(textureSize)
 
         layers.removeAll()
-
-        super.initLayers(
-            index: 0,
-            layers: [newLayer]
-        )
     }
 
-    func initLayers(undoObject: UndoObject) {
-        super.initLayers(
-            index: undoObject.index,
-            layers: undoObject.layers
+    private func makeNewLayer(textureSize: CGSize) -> ImageLayerModel {
+        .init(
+            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
         )
     }
 
@@ -81,9 +83,14 @@ final class ImageLayerManager: LayerManager<ImageLayerModel> {
 
 extension ImageLayerManager {
 
+    func addNewLayer() {
+        let newLayer = makeNewLayer(textureSize: textureSize)
+        addLayer(newLayer)
+    }
+
     func mergeDrawingLayers(
         backgroundColor: UIColor,
-        onto dstTexture: MTLTexture,
+        onto destinationTexture: MTLTexture,
         to commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -91,27 +98,37 @@ extension ImageLayerManager {
             let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
         else { return }
 
-        Command.fill(dstTexture,
-                     withRGB: backgroundColor.rgb,
-                     commandBuffer)
+        Command.fill(
+            destinationTexture,
+            withRGB: backgroundColor.rgb,
+            commandBuffer
+        )
 
-        Command.merge(texture: bottomTexture,
-                      into: dstTexture,
-                      commandBuffer)
+        Command.merge(
+            texture: bottomTexture,
+            into: destinationTexture,
+            commandBuffer
+        )
 
         if layers[index].isVisible {
-            MTKTextureUtils.makeSingleTexture(from: selectedTextures.compactMap { $0 },
-                                              to: currentTexture,
-                                              commandBuffer)
-            Command.merge(texture: currentTexture,
-                          alpha: selectedLayer?.alpha ?? 0,
-                          into: dstTexture,
-                          commandBuffer)
+            Command.drawTexture(
+                from: selectedTextures.compactMap { $0 },
+                into: currentTexture,
+                commandBuffer
+            )
+            Command.merge(
+                texture: currentTexture,
+                alpha: selectedLayer?.alpha ?? 0,
+                into: destinationTexture,
+                commandBuffer
+            )
         }
 
-        Command.merge(texture: topTexture,
-                      into: dstTexture,
-                      commandBuffer)
+        Command.merge(
+            texture: topTexture,
+            into: destinationTexture,
+            commandBuffer
+        )
     }
 
     func mergeUnselectedLayers(
