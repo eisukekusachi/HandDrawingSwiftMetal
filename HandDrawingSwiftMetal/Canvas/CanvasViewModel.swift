@@ -177,13 +177,7 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.mergeAllLayers(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture!,
-            renderTarget.commandBuffer
-        )
-
-        renderTarget.setNeedsDisplay()
+        refreshCanvasWithMergingDrawingLayers()
     }
 
     func apply(
