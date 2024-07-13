@@ -280,7 +280,7 @@ extension ViewController {
 extension ViewController: FingerInputGestureSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handleFingerInputGesture(
+        canvasViewModel.onFingerGestureDetected(
             with: touches,
             with: event,
             view: view,
@@ -293,7 +293,7 @@ extension ViewController: FingerInputGestureSender {
 extension ViewController: PencilInputGestureSender {
 
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handlePencilInputGesture(
+        canvasViewModel.onPencilGestureDetected(
             with: touches,
             with: event,
             view: view,

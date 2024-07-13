@@ -215,7 +215,7 @@ extension CanvasViewModel {
         )
     }
 
-    func handleFingerInputGesture(
+    func onFingerGestureDetected(
         with touches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView,
@@ -320,7 +320,7 @@ extension CanvasViewModel {
         }
     }
 
-    func handlePencilInputGesture(
+    func onPencilGestureDetected(
         with touches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView,
