@@ -14,8 +14,6 @@ enum CanvasViewModelError: Error {
 
 final class CanvasViewModel {
 
-    var renderTarget: MTKRenderTextureProtocol?
-
     let drawing = Drawing()
 
     let transforming = Transforming()
@@ -179,7 +177,7 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers(renderTarget: renderTarget)
     }
 
     func apply(
@@ -194,7 +192,7 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers(renderTarget: renderTarget)
     }
 
 }
@@ -218,9 +216,10 @@ extension CanvasViewModel {
     }
 
     func handleFingerInputGesture(
-        _ touches: Set<UITouch>,
+        with touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -239,7 +238,6 @@ extension CanvasViewModel {
         switch actionManager.updateState(newState) {
         case .drawing:
             guard
-                let renderTarget,
                 let hashValue = touchManager.hashValueForFingerDrawing,
                 let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
             else { return }
@@ -296,7 +294,7 @@ extension CanvasViewModel {
                 initDrawingParameters()
             }
 
-            pauseDisplayLinkLoop(isTouchEnded)
+            pauseDisplayLinkLoop(isTouchEnded, renderTarget: renderTarget)
 
         case .transforming:
             guard
@@ -315,7 +313,7 @@ extension CanvasViewModel {
                 initDrawingParameters()
             }
 
-            pauseDisplayLinkLoop(transforming.isTouchEnded)
+            pauseDisplayLinkLoop(transforming.isTouchEnded, renderTarget: renderTarget)
 
         default:
             break
@@ -323,9 +321,10 @@ extension CanvasViewModel {
     }
 
     func handlePencilInputGesture(
-        _ touches: Set<UITouch>,
+        with touches: Set<UITouch>,
         with event: UIEvent?,
-        on view: UIView
+        view: UIView,
+        renderTarget: MTKRenderTextureProtocol
     ) {
         defer {
             touchManager.removeValuesOnTouchesEnded(touches: touches)
@@ -334,10 +333,6 @@ extension CanvasViewModel {
                 initDrawingParameters()
             }
         }
-
-        guard
-            let renderTarget
-        else { return }
 
         if inputManager.state == .finger {
             initDrawingParameters()
@@ -408,7 +403,7 @@ extension CanvasViewModel {
             initDrawingParameters()
         }
 
-        pauseDisplayLinkLoop(isTouchEnded)
+        pauseDisplayLinkLoop(isTouchEnded, renderTarget: renderTarget)
     }
 
 }
@@ -459,20 +454,15 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func refreshCanvasWithMergingAllLayers() {
-        guard 
-            let renderTarget
-        else { return }
-
+    func refreshCanvasWithMergingAllLayers(renderTarget: MTKRenderTextureProtocol) {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers(renderTarget: renderTarget)
     }
 
-    func refreshCanvasWithMergingDrawingLayers() {
-        guard 
-            let renderTarget,
+    func refreshCanvasWithMergingDrawingLayers(renderTarget: MTKRenderTextureProtocol) {
+        guard
             let renderTexture = renderTarget.renderTexture
         else { return }
 
@@ -486,11 +476,11 @@ extension CanvasViewModel {
     }
 
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool) {
+    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: MTKRenderTextureProtocol) {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
-                renderTarget?.setNeedsDisplay()
+                renderTarget.setNeedsDisplay()
                 pauseDisplayLinkSubject.send(true)
             }
 
@@ -522,12 +512,12 @@ extension CanvasViewModel {
         }
     }
 
-    func didTapResetTransformButton() {
+    func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {
         transforming.setMatrix(.identity)
-        renderTarget?.setNeedsDisplay()
+        renderTarget.setNeedsDisplay()
     }
 
-    func didTapNewCanvasButton() {
+    func didTapNewCanvasButton(renderTarget: MTKRenderTextureProtocol) {
 
         projectName = Calendar.currentDate
 
@@ -536,28 +526,35 @@ extension CanvasViewModel {
 
         layerUndoManager.clear()
 
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
 
     func didTapLoadButton(filePath: String) {
         loadFile(from: filePath)
     }
-    func didTapSaveButton() {
-        saveFile()
+    func didTapSaveButton(renderTarget: MTKRenderTextureProtocol) {
+        saveFile(renderTexture: renderTarget.renderTexture!)
     }
 
     // MARK: Layers
-    func didTapLayer(layer: ImageLayerCellItem) {
+    func didTapLayer(
+        layer: ImageLayerCellItem,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.updateIndex(layer)
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
-    func didTapAddLayerButton() {
+    func didTapAddLayerButton(
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.addNewLayer()
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
-    func didTapRemoveLayerButton() {
+    func didTapRemoveLayerButton(
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         guard
             layerManager.layers.count > 1,
             let layer = layerManager.selectedLayer
@@ -566,27 +563,43 @@ extension CanvasViewModel {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.removeLayer(layer)
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
-    func didTapLayerVisibility(layer: ImageLayerCellItem, isVisible: Bool) {
+    func didTapLayerVisibility(
+        layer: ImageLayerCellItem,
+        isVisible: Bool,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.update(layer, isVisible: isVisible)
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
-    func didChangeLayerAlpha(layer: ImageLayerCellItem, value: Int) {
+    func didChangeLayerAlpha(
+        layer: ImageLayerCellItem,
+        value: Int,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.update(layer, alpha: value)
-        refreshCanvasWithMergingDrawingLayers()
+        refreshCanvasWithMergingDrawingLayers(renderTarget: renderTarget)
     }
-    func didEditLayerTitle(layer: ImageLayerCellItem, title: String) {
+    func didEditLayerTitle(
+        layer: ImageLayerCellItem,
+        title: String
+    ) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: ImageLayerCellItem, source: IndexSet, destination: Int) {
+    func didMoveLayers(
+        layer: ImageLayerCellItem,
+        source: IndexSet,
+        destination: Int,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerUndoManager.addUndoObjectToUndoStack()
 
         layerManager.moveLayer(
             fromOffsets: source,
             toOffset: destination
         )
-        refreshCanvasWithMergingAllLayers()
+        refreshCanvasWithMergingAllLayers(renderTarget: renderTarget)
     }
 
 }
@@ -611,11 +624,7 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-    private func saveFile() {
-        guard
-            let renderTexture = renderTarget?.renderTexture
-        else { return }
-
+    private func saveFile(renderTexture: MTLTexture) {
         localRepository?.saveDataToDocuments(
             renderTexture: renderTexture,
             layerManager: layerManager,
