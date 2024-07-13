@@ -11,7 +11,7 @@ typealias GrayscalePointBuffers = (
     vertexBuffer: MTLBuffer,
     diameterIncludingBlurBuffer: MTLBuffer,
     alphaBuffer: MTLBuffer,
-    blurSize: Float,
+    blurSizeBuffer: MTLBuffer,
     numberOfPoints: Int
 )
 
@@ -78,6 +78,7 @@ enum Buffers {
 
         var vertexArray: [Float] = []
         var alphaArray: [Float] = []
+        var blurSizeArray: [Float] = []
         var diameterPlusBlurSizeArray: [Float] = []
 
         points.forEach {
@@ -87,6 +88,7 @@ enum Buffers {
             vertexArray.append(contentsOf: [vertexX, vertexY])
             alphaArray.append(Float($0.alpha) * Float(alpha) / 255.0)
             diameterPlusBlurSizeArray.append(blurredDotSize.totalSize)
+            blurSizeArray.append(blurredDotSize.blurSize)
         }
 
         let vertexBuffer = device?.makeBuffer(
@@ -97,6 +99,10 @@ enum Buffers {
             bytes: alphaArray,
             length: alphaArray.count * MemoryLayout<Float>.size
         )
+        let blurSizeBuffer = device?.makeBuffer(
+            bytes: blurSizeArray,
+            length: blurSizeArray.count * MemoryLayout<Float>.size
+        )
         let diameterPlusBlurSizeBuffer = device?.makeBuffer(
             bytes: diameterPlusBlurSizeArray,
             length: diameterPlusBlurSizeArray.count * MemoryLayout<Float>.size
@@ -105,14 +111,15 @@ enum Buffers {
         guard
             let vertexBuffer,
             let transparencyBuffer,
-            let diameterPlusBlurSizeBuffer
+            let diameterPlusBlurSizeBuffer,
+            let blurSizeBuffer
         else { return nil }
 
         return GrayscalePointBuffers(
             vertexBuffer: vertexBuffer,
             diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
             alphaBuffer: transparencyBuffer,
-            blurSize: blurredDotSize.blurSize,
+            blurSizeBuffer: blurSizeBuffer,
             numberOfPoints: vertexArray.count / 2
         )
     }

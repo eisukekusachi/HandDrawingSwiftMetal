@@ -17,18 +17,17 @@ enum Command {
         _ commandBuffer: MTLCommandBuffer?
     ) {
         guard let buffers = buffers else { return }
-        
-        var blurSize: Float = buffers.blurSize
+
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = texture
         descriptor.colorAttachments[0].loadAction = .load
-        
+
         let encoder = commandBuffer?.makeRenderCommandEncoder(descriptor: descriptor)
         encoder?.setRenderPipelineState(Pipeline.shared.drawGrayPoints)
         encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
         encoder?.setVertexBuffer(buffers.diameterIncludingBlurBuffer, offset: 0, index: 1)
         encoder?.setVertexBuffer(buffers.alphaBuffer, offset: 0, index: 2)
-        encoder?.setFragmentBytes(&blurSize, length: MemoryLayout<Float>.size, index: 0)
+        encoder?.setVertexBuffer(buffers.blurSizeBuffer, offset: 0, index: 3)
         encoder?.drawPrimitives(type: .point, vertexStart: 0, vertexCount: buffers.numberOfPoints)
         encoder?.endEncoding()
     }
