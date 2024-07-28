@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct DotPoint {
+struct DotPoint: Equatable {
 
     let location: CGPoint
     let alpha: CGFloat

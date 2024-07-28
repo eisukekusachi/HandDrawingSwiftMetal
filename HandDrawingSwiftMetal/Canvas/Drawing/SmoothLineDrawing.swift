@@ -20,24 +20,24 @@ final class SmoothLineDrawing: DrawingLineProtocol {
     }
 
     func appendToIterator(_ points: [DotPoint]) {
-        tmpIterator.append(elems: points)
+        tmpIterator.append(points)
 
         // Add the first point.
         if (tmpIterator.array.count != 0 && iterator.array.count == 0),
            let firstElement = tmpIterator.array.first {
-            iterator.append(elem: firstElement)
+            iterator.append(firstElement)
         }
 
         while let subsequence = tmpIterator.next(range: 2) {
             let dotPoint = DotPoint.average(lhs: subsequence[0],
                                             rhs: subsequence[1])
-            iterator.append(elem: dotPoint)
+            iterator.append(dotPoint)
         }
     }
 
     func appendLastTouchToSmoothCurveIterator() {
         if let lastElement = tmpIterator.array.last {
-            iterator.append(elem: lastElement)
+            iterator.append(lastElement)
         }
     }
 

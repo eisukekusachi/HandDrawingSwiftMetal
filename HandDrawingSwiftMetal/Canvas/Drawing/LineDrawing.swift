@@ -23,7 +23,7 @@ final class LineDrawing: DrawingLineProtocol {
     func appendToIterator(
         _ points: [DotPoint]
     ) {
-        iterator.append(elems: points)
+        iterator.append(points)
     }
 
     func makeLineSegment(
@@ -49,7 +49,7 @@ final class LineDrawing: DrawingLineProtocol {
                 if iterator.array[index + 1].alpha == latestForce {
                     iterator.replace(
                         index: index,
-                        elem: DotPoint(
+                        element: DotPoint(
                             location: iterator.array[index].location,
                             alpha: 0.0
                         )
@@ -58,7 +58,7 @@ final class LineDrawing: DrawingLineProtocol {
                 } else if !startDrawing && iterator.array[index].alpha != iterator.array[index + 1].alpha {
                     iterator.replace(
                         index: index,
-                        elem: DotPoint(
+                        element: DotPoint(
                             location: iterator.array[index].location,
                             alpha: 0.0
                         )
