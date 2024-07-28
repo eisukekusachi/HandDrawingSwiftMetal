@@ -16,23 +16,14 @@ struct TouchPoint: Equatable {
     let type: UITouch.TouchType
     let frameSize: CGSize
 
-    init(
-        location: CGPoint,
-        force: CGFloat,
-        maximumPossibleForce: CGFloat,
-        phase: UITouch.Phase,
-        type: UITouch.TouchType,
-        frameSize: CGSize
-    ) {
-        self.location = location
-        self.force = force
-        self.maximumPossibleForce = maximumPossibleForce
-        self.phase = phase
-        self.type = type
-        self.frameSize = frameSize
-    }
+}
 
-    init(touch: UITouch, view: UIView) {
+extension TouchPoint {
+
+    init(
+        touch: UITouch,
+        view: UIView
+    ) {
         self.location = touch.preciseLocation(in: view)
         self.force = touch.force
         self.maximumPossibleForce = touch.maximumPossibleForce
@@ -40,6 +31,10 @@ struct TouchPoint: Equatable {
         self.type = touch.type
         self.frameSize = view.frame.size
     }
+
+}
+
+extension TouchPoint {
 
     func getScaledTouchPoint(
         renderTextureSize: CGSize,
