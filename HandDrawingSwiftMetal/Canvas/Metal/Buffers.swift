@@ -7,63 +7,12 @@
 
 import MetalKit
 
-typealias GrayscalePointBuffers = (
+typealias GrayscalePointBuffers2 = (
     vertexBuffer: MTLBuffer,
     diameterIncludingBlurBuffer: MTLBuffer,
     alphaBuffer: MTLBuffer,
     blurSize: Float,
     numberOfPoints: Int
-)
-
-typealias TextureBuffers = (
-    vertexBuffer: MTLBuffer,
-    texCoordsBuffer: MTLBuffer,
-    indexBuffer: MTLBuffer,
-    indicesCount: Int
-)
-
-typealias TextureCoorinateNodes = (
-    vertices: [Float],
-    texCoords: [Float],
-    indices: [UInt16]
-)
-
-let textureNodes = TextureCoorinateNodes(
-    vertices: [
-        Float(-1.0), Float( 1.0), // LB
-        Float( 1.0), Float( 1.0), // RB
-        Float( 1.0), Float(-1.0), // RT
-        Float(-1.0), Float(-1.0)  // LT
-    ],
-    texCoords: [
-        0.0, 1.0, // LB *
-        1.0, 1.0, // RB *
-        1.0, 0.0, // RT
-        0.0, 0.0  // LT
-    ],
-    indices: [
-        0, 1, 2,
-        0, 2, 3
-    ]
-)
-
-let flippedTextureNodes = TextureCoorinateNodes(
-    vertices: [
-        Float(-1.0), Float( 1.0), // LB
-        Float( 1.0), Float( 1.0), // RB
-        Float( 1.0), Float(-1.0), // RT
-        Float(-1.0), Float(-1.0)  // LT
-    ],
-    texCoords: [
-        0.0, 0.0, // LB *
-        1.0, 0.0, // RB *
-        1.0, 1.0, // RT
-        0.0, 1.0  // LT
-    ],
-    indices: [
-        0, 1, 2,
-        0, 2, 3
-    ]
 )
 
 enum Buffers {
@@ -73,7 +22,7 @@ enum Buffers {
         blurredDotSize: BlurredDotSize,
         alpha: Int,
         textureSize: CGSize
-    ) -> GrayscalePointBuffers? {
+    ) -> GrayscalePointBuffers2? {
         guard points.count != .zero else { return nil }
 
         var vertexArray: [Float] = []
@@ -108,7 +57,7 @@ enum Buffers {
             let diameterPlusBlurSizeBuffer
         else { return nil }
 
-        return GrayscalePointBuffers(
+        return GrayscalePointBuffers2(
             vertexBuffer: vertexBuffer,
             diameterIncludingBlurBuffer: diameterPlusBlurSizeBuffer,
             alphaBuffer: transparencyBuffer,
@@ -118,7 +67,7 @@ enum Buffers {
     }
     
     static func makeTextureBuffers(device: MTLDevice?,
-                                   nodes: TextureCoorinateNodes) -> TextureBuffers? {
+                                   nodes: TextureNodes) -> TextureBuffers? {
         let vertices = nodes.vertices
         let texCoords = nodes.texCoords
         let indices = nodes.indices
@@ -140,7 +89,7 @@ enum Buffers {
                                    textureSize: CGSize,
                                    drawableSize: CGSize,
                                    matrix: CGAffineTransform?,
-                                   nodes: TextureCoorinateNodes) -> TextureBuffers? {
+                                   nodes: TextureNodes) -> TextureBuffers? {
         let texCoords = nodes.texCoords
         let indices = nodes.indices
         
@@ -224,7 +173,7 @@ enum Buffers {
         matrix: CGAffineTransform?,
         sourceSize: CGSize,
         destinationSize: CGSize,
-        nodes: TextureCoorinateNodes
+        nodes: TextureNodes
     ) -> TextureBuffers? {
         guard let device = device else { return nil }
 

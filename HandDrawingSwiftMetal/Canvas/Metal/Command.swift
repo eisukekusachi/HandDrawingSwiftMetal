@@ -12,7 +12,7 @@ enum Command {
     static let threadgroupSize: Int = 16
 
     static func drawCurve(
-        buffers: GrayscalePointBuffers?,
+        buffers: GrayscalePointBuffers2?,
         onGrayscaleTexture texture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer?
     ) {
