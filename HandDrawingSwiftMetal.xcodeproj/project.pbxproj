@@ -76,6 +76,9 @@
 		D469A8712C56340B00D10575 /* SmoothGrayscaleCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */; };
 		D469A8732C56342700D10575 /* GrayscaleCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8722C56342700D10575 /* GrayscaleCurve.swift */; };
 		D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8802C563FA100D10575 /* MTLBuffers.swift */; };
+		D469A8832C56422D00D10575 /* MTLPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8822C56422D00D10575 /* MTLPipelineManager.swift */; };
+		D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */; };
+		D469A8872C56430D00D10575 /* MTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8862C56430D00D10575 /* MTLRenderer.swift */; };
 		D46A30412BF841270057DB69 /* ImageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* ImageLayer.swift */; };
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
@@ -210,6 +213,9 @@
 		D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothGrayscaleCurve.swift; sourceTree = "<group>"; };
 		D469A8722C56342700D10575 /* GrayscaleCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleCurve.swift; sourceTree = "<group>"; };
 		D469A8802C563FA100D10575 /* MTLBuffers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLBuffers.swift; sourceTree = "<group>"; };
+		D469A8822C56422D00D10575 /* MTLPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLPipelineManager.swift; sourceTree = "<group>"; };
+		D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandBufferManager.swift; sourceTree = "<group>"; };
+		D469A8862C56430D00D10575 /* MTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLRenderer.swift; sourceTree = "<group>"; };
 		D46A30402BF841270057DB69 /* ImageLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayer.swift; sourceTree = "<group>"; };
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
@@ -377,6 +383,9 @@
 				D40D979729DAB0DE00A82E6A /* Drawing.metal */,
 				D40D979929DAB0DE00A82E6A /* Pipeline.swift */,
 				D469A8802C563FA100D10575 /* MTLBuffers.swift */,
+				D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */,
+				D469A8822C56422D00D10575 /* MTLPipelineManager.swift */,
+				D469A8862C56430D00D10575 /* MTLRenderer.swift */,
 				D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */,
 				D440DF702ADA9E5100A4E425 /* MTKTextureDisplayView.swift */,
 				D4B4AA9F2B3FBEA700298CFB /* MTKTextureUtils.swift */,
@@ -791,6 +800,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
+				D469A8832C56422D00D10575 /* MTLPipelineManager.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D46A30412BF841270057DB69 /* ImageLayer.swift in Sources */,
@@ -826,6 +836,7 @@
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D40D976429DAB09400A82E6A /* Curve.swift in Sources */,
+				D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */,
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* DefaultGrayscaleCurve.swift in Sources */,
@@ -884,6 +895,7 @@
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,
 				D45156FB2C31343F009C7BFC /* ViewSize.swift in Sources */,
 				D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */,
+				D469A8872C56430D00D10575 /* MTLRenderer.swift in Sources */,
 				D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */,
 				D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */,
 				D440DF712ADA9E5100A4E425 /* MTKTextureDisplayView.swift in Sources */,

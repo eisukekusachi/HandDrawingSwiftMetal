@@ -1,16 +1,17 @@
 //
-//  Pipeline.swift
+//  MTLPipelineManager.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/03/30.
+//  Created by Eisuke Kusachi on 2024/07/28.
 //
 
 import MetalKit
 
-class Pipeline {
-    static let shared = Pipeline()
+class MTLPipelineManager {
 
-    private (set) var drawGrayPoints: MTLRenderPipelineState!
+    static let shared = MTLPipelineManager()
+
+    private (set) var drawPointsWithMaxBlendMode: MTLRenderPipelineState!
     private (set) var drawTexture: MTLRenderPipelineState!
     private (set) var erase: MTLRenderPipelineState!
     private (set) var colorize: MTLComputePipelineState!
@@ -23,10 +24,10 @@ class Pipeline {
               let library = device.makeDefaultLibrary() else {
             fatalError("Failed to create default library with device.")
         }
-        
-        self.drawGrayPoints = makeRenderPipelineState(device: device, library: library, label: "Draw Gray Points") { descriptor in
-            descriptor.vertexFunction = library.makeFunction(name: "draw_gray_points_vertex2")
-            descriptor.fragmentFunction = library.makeFunction(name: "draw_gray_points_fragment2")
+
+        self.drawPointsWithMaxBlendMode = makeRenderPipelineState(device: device, library: library, label: "Draw Gray Points") { descriptor in
+            descriptor.vertexFunction = library.makeFunction(name: "draw_gray_points_vertex")
+            descriptor.fragmentFunction = library.makeFunction(name: "draw_gray_points_fragment")
             descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
             descriptor.colorAttachments[0].isBlendingEnabled = true
             descriptor.colorAttachments[0].rgbBlendOperation = .max
@@ -36,7 +37,7 @@ class Pipeline {
             descriptor.colorAttachments[0].destinationRGBBlendFactor = .one
             descriptor.colorAttachments[0].destinationAlphaBlendFactor = .one
         }
-        
+
         self.drawTexture = makeRenderPipelineState(device: device, library: library, label: "Draw Gray Points") { descriptor in
             descriptor.vertexFunction = library.makeFunction(name: "draw_texture_vertex")
             descriptor.fragmentFunction = library.makeFunction(name: "draw_texture_fragment")
@@ -49,7 +50,7 @@ class Pipeline {
             descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
             descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
         }
-        
+
         self.erase = makeRenderPipelineState(device: device, library: library, label: "Draw Eraser Points") { descriptor in
             descriptor.vertexFunction = library.makeFunction(name: "draw_texture_vertex")
             descriptor.fragmentFunction = library.makeFunction(name: "draw_texture_fragment")
@@ -63,30 +64,42 @@ class Pipeline {
             descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
         }
 
-        self.colorize = makeComputePipieline(device: device,
-                                             library: library,
-                                             label: "Colorize", 
-                                             shaderName: "colorize_grayscale_texture")
-        self.merge = makeComputePipieline(device: device,
-                                          library: library,
-                                          label: "Marge textures", 
-                                          shaderName: "merge_textures")
-        self.fillColor = makeComputePipieline(device: device,
-                                              library: library,
-                                              label: "Add color to a texture", 
-                                              shaderName: "add_color_to_texture")
-        self.copy = makeComputePipieline(device: device,
-                                         library: library,
-                                         label: "Copy a texture", 
-                                         shaderName: "copy_texture")
+        self.colorize = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Colorize",
+            shaderName: "colorize_grayscale_texture"
+        )
+        self.merge = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Marge textures",
+            shaderName: "merge_textures"
+        )
+        self.fillColor = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Add color to a texture",
+            shaderName: "add_color_to_texture"
+        )
+        self.copy = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Copy a texture",
+            shaderName: "copy_texture"
+        )
     }
+
 }
 
-extension Pipeline {
-    private func makeComputePipieline(device: MTLDevice,
-                                      library: MTLLibrary,
-                                      label: String,
-                                      shaderName: String) -> MTLComputePipelineState {
+extension MTLPipelineManager {
+
+    private func makeComputePipeline(
+        device: MTLDevice,
+        library: MTLLibrary,
+        label: String,
+        shaderName: String
+    ) -> MTLComputePipelineState {
         guard let function = library.makeFunction(name: shaderName) else {
             fatalError("The function is not found in the library.")
         }
@@ -96,10 +109,12 @@ extension Pipeline {
             fatalError(error.localizedDescription)
         }
     }
-    private func makeRenderPipelineState(device: MTLDevice,
-                                         library: MTLLibrary,
-                                         label: String,
-                                         block: (MTLRenderPipelineDescriptor) -> Void) -> MTLRenderPipelineState {
+    private func makeRenderPipelineState(
+        device: MTLDevice,
+        library: MTLLibrary,
+        label: String,
+        block: (MTLRenderPipelineDescriptor) -> Void
+    ) -> MTLRenderPipelineState {
         let descriptor = MTLRenderPipelineDescriptor()
         block(descriptor)
         descriptor.label = label
@@ -109,4 +124,5 @@ extension Pipeline {
             fatalError(error.localizedDescription)
         }
     }
+
 }

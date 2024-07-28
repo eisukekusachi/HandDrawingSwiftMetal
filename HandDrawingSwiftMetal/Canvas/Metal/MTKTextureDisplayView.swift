@@ -98,11 +98,13 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
         let commandBuffer = commandQueue.getOrCreateCommandBuffer()
 
-        Command.draw(texture: _renderTexture,
-                     buffers: textureBuffers,
-                     on: drawable.texture,
-                     clearColor: (230, 230, 230),
-                     commandBuffer)
+        Command.draw(
+            texture: _renderTexture,
+            buffers: textureBuffers,
+            on: drawable.texture,
+            clearColor: (230, 230, 230),
+            commandBuffer
+        )
 
         commandBuffer.present(drawable)
         commandBuffer.commit()

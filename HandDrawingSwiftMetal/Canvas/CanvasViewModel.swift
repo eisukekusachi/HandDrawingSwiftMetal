@@ -450,6 +450,92 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    private func makeGrayscaleTextureCurvePoints(
+        screenTouchPoints: [TouchPoint],
+        grayscaleCurve: GrayscaleCurve?,
+        renderTarget: MTKRenderTextureProtocol
+    ) -> [GrayscaleTexturePoint] {
+        let touchPhase = screenTouchPoints.last?.phase ?? .cancelled
+
+        let grayscaleTexturePoints: [GrayscaleTexturePoint] = screenTouchPoints.map {
+            .init(
+                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                    matrix: transforming.matrix,
+                    frameSize: frameSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                    textureSize: renderTarget.renderTexture?.size ?? .zero
+                ),
+                diameter: CGFloat(drawingTool.diameter)
+            )
+        }
+
+        grayscaleCurve?.appendToIterator(
+            points: grayscaleTexturePoints,
+            touchPhase: touchPhase
+        )
+
+        return grayscaleCurve?.makeCurvePointsFromIterator(
+            touchPhase: touchPhase
+        ) ?? []
+    }
+
+    private func drawCurve(
+        grayScaleTextureCurvePoints: [GrayscaleTexturePoint],
+        drawingTool: DrawingToolModel,
+        touchPhase: UITouch.Phase,
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
+        if let drawingLayer = layerManager.drawingLayer as? DrawingEraserLayer {
+            drawingLayer.drawOnEraserDrawingTexture(
+                points: grayScaleTextureCurvePoints,
+                alpha: drawingTool.eraserAlpha,
+                srcTexture: layerManager.selectedTexture!,
+                renderTarget.commandBuffer
+            )
+        } else if let drawingLayer = layerManager.drawingLayer as? DrawingBrushLayer {
+            drawingLayer.drawOnBrushDrawingTexture(
+                points: grayScaleTextureCurvePoints,
+                color: drawingTool.brushColor,
+                alpha: drawingTool.brushColor.alpha,
+                renderTarget.commandBuffer
+            )
+        }
+
+        if touchPhase == .ended {
+            layerManager.drawingLayer?.mergeDrawingTexture(
+                into: layerManager.selectedTexture!,
+                renderTarget.commandBuffer
+            )
+        }
+
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        pauseDisplayLinkLoop(
+            touchPhase == .ended || touchPhase == .cancelled,
+            renderTarget: renderTarget
+        )
+    }
+
+    /// Start or stop the display link loop.
+    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: MTKRenderTextureProtocol) {
+        if pause {
+            if pauseDisplayLinkSubject.value == false {
+                // Pause the display link after updating the display.
+                renderTarget.setNeedsDisplay()
+                pauseDisplayLinkSubject.send(true)
+            }
+
+        } else {
+            if pauseDisplayLinkSubject.value == true {
+                pauseDisplayLinkSubject.send(false)
+            }
+        }
+    }
+
     func refreshCanvasWithMergingAllLayers() {
         guard 
             let renderTarget
