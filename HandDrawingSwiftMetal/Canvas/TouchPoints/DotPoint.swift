@@ -45,7 +45,7 @@ struct DotPoint {
             var inverseMatrix = matrix.inverted(flipY: true)
             inverseMatrix.tx *= scale
             inverseMatrix.ty *= scale
-            location = location.apply(matrix: inverseMatrix, textureSize: textureSize)
+            location = location.apply(with: inverseMatrix, textureSize: textureSize)
         }
 
         self.location = location

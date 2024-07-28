@@ -9,19 +9,27 @@ import UIKit
 
 extension CGPoint {
 
-    func apply(matrix: CGAffineTransform, textureSize: CGSize) -> Self {
-        var location = self
+    func apply(
+        with matrix: CGAffineTransform,
+        textureSize: CGSize
+    ) -> Self {
 
-        location = CGPoint(x: location.x - textureSize.width * 0.5,
-                           y: location.y - textureSize.height * 0.5)
+        var point = self
 
-        location = CGPoint(x: (location.x * matrix.a + location.y * matrix.c + matrix.tx),
-                           y: (location.x * matrix.b + location.y * matrix.d + matrix.ty))
+        point = .init(
+            x: point.x - textureSize.width * 0.5,
+            y: point.y - textureSize.height * 0.5
+        )
+        point = .init(
+            x: (point.x * matrix.a + point.y * matrix.c + matrix.tx),
+            y: (point.x * matrix.b + point.y * matrix.d + matrix.ty)
+        )
+        point = .init(
+            x: point.x + textureSize.width * 0.5,
+            y: point.y + textureSize.height * 0.5
+        )
 
-        location = CGPoint(x: location.x + textureSize.width * 0.5,
-                           y: location.y + textureSize.height * 0.5)
-
-        return location
+        return point
     }
 
     func center(srcSize: CGSize, dstSize: CGSize) -> Self {
