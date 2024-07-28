@@ -26,12 +26,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         currentDrawable
     }
 
-    var changedDrawableSizePublisher: AnyPublisher<CGSize, Never> {
-        changedDrawableSizeSubject.eraseToAnyPublisher()
-    }
-
-    private let changedDrawableSizeSubject = PassthroughSubject<CGSize, Never>()
-
     private var _renderTexture: MTLTexture?
 
     private var commandQueue: CommandQueueProtocol!
@@ -118,7 +112,6 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        changedDrawableSizeSubject.send(size)
         setNeedsDisplay()
     }
 

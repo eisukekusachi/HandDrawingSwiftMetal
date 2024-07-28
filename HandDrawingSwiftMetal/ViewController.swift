@@ -32,7 +32,14 @@ class ViewController: UIViewController {
         setupLayerViewPresenter()
 
         bindViewModel()
-        bindCanvasView()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        canvasViewModel.onViewDidAppear(
+            contentView.canvasView.drawableSize,
+            renderTarget: contentView.canvasView
+        )
     }
 
     override func viewDidLayoutSubviews() {
@@ -162,19 +169,6 @@ extension ViewController {
                 self.canvasViewModel.apply(
                     undoObject: undoObject,
                     to: self.contentView.canvasView
-                )
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindCanvasView() {
-        contentView.canvasView.changedDrawableSizePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] drawableSize in
-                guard let `self` else { return }
-                self.canvasViewModel.onDrawableSizeChanged(
-                    drawableSize,
-                    renderTarget: self.contentView.canvasView
                 )
             }
             .store(in: &cancellables)
