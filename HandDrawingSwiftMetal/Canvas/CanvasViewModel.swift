@@ -198,21 +198,17 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    func onDrawableSizeChanged(
+    func onViewDidAppear(
         _ drawableTextureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        // Initialize the canvas here using the drawableTextureSize
-        // if the renderTexture's texture is nil
-        // by the time `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
-        guard
-            renderTarget.renderTexture == nil
-        else { return }
-
-        initCanvas(
-            textureSize: drawableTextureSize,
-            renderTarget: renderTarget
-        )
+        // Initialize the canvas here if the renderTexture's texture is nil
+        if renderTarget.renderTexture == nil {
+            initCanvas(
+                textureSize: drawableTextureSize,
+                renderTarget: renderTarget
+            )
+        }
     }
 
     func onFingerGestureDetected(
