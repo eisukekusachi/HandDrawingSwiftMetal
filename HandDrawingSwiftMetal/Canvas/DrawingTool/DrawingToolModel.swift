@@ -104,10 +104,10 @@ extension DrawingToolModel {
 extension DrawingToolModel {
 
     var brushDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: brushDiameter, blurSize: blurSize)
+        BlurredDotSize(diameter: Float(brushDiameter), blurSize: blurSize)
     }
     var eraserDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: eraserDiameter, blurSize: blurSize)
+        BlurredDotSize(diameter: Float(eraserDiameter), blurSize: blurSize)
     }
 
     func setBrushDiameter(_ value: Float) {

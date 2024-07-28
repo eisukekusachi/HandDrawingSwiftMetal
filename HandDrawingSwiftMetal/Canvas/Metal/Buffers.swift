@@ -86,7 +86,7 @@ enum Buffers {
 
             vertexArray.append(contentsOf: [vertexX, vertexY])
             alphaArray.append(Float($0.alpha) * Float(alpha) / 255.0)
-            diameterPlusBlurSizeArray.append(blurredDotSize.totalSize)
+            diameterPlusBlurSizeArray.append(blurredDotSize.diameterIncludingBlurSize)
         }
 
         let vertexBuffer = device?.makeBuffer(

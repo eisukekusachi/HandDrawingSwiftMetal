@@ -8,11 +8,16 @@
 import Foundation
 
 struct BlurredDotSize {
-    var diameter: Int
-    var blurSize: Float
-    var totalSize: Float {
-        return Float(diameter) + blurSize * 2
-    }
+    var diameter: Float
+    var blurSize: Float = BlurredDotSize.initBlurSize
+}
+
+extension BlurredDotSize {
 
     static let initBlurSize: Float = 4.0
+
+    var diameterIncludingBlurSize: Float {
+        return diameter + blurSize * 2
+    }
+
 }
