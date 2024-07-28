@@ -71,6 +71,7 @@
 		D4671FA62BC161A100ABDA4E /* Drawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA52BC161A100ABDA4E /* Drawing.swift */; };
 		D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85C2C56206800D10575 /* ScaleManager.swift */; };
 		D469A85F2C5620FB00D10575 /* GrayscaleTexturePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */; };
+		D469A86D2C56334100D10575 /* GrayscaleTexturePointIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */; };
 		D46A30412BF841270057DB69 /* ImageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* ImageLayer.swift */; };
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
@@ -200,6 +201,7 @@
 		D4671FA52BC161A100ABDA4E /* Drawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawing.swift; sourceTree = "<group>"; };
 		D469A85C2C56206800D10575 /* ScaleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleManager.swift; sourceTree = "<group>"; };
 		D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleTexturePoint.swift; sourceTree = "<group>"; };
+		D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleTexturePointIterator.swift; sourceTree = "<group>"; };
 		D46A30402BF841270057DB69 /* ImageLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayer.swift; sourceTree = "<group>"; };
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
@@ -497,6 +499,7 @@
 			children = (
 				D4671FA52BC161A100ABDA4E /* Drawing.swift */,
 				D47285A72BBEBE220035AFCD /* DrawingLineProtocol.swift */,
+				D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */,
 				D472859F2BBEBC350035AFCD /* LineDrawing.swift */,
 				D47285A52BBEBD4C0035AFCD /* LineSegment.swift */,
 				D47285A32BBEBD000035AFCD /* LineParameters.swift */,
@@ -814,6 +817,7 @@
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D40D97A329DAB0DF00A82E6A /* Buffers.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
+				D469A86D2C56334100D10575 /* GrayscaleTexturePointIterator.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D40D97A229DAB0DF00A82E6A /* CommandQueue.swift in Sources */,
 				D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */,
