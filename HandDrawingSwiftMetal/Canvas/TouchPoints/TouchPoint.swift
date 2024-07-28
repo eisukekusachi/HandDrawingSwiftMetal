@@ -14,7 +14,6 @@ struct TouchPoint: Equatable {
     let maximumPossibleForce: CGFloat
     let phase: UITouch.Phase
     let type: UITouch.TouchType
-    let frameSize: CGSize
 
 }
 
@@ -29,47 +28,64 @@ extension TouchPoint {
         self.maximumPossibleForce = touch.maximumPossibleForce
         self.phase = touch.phase
         self.type = touch.type
-        self.frameSize = view.frame.size
     }
 
 }
 
 extension TouchPoint {
 
-    func getScaledTouchPoint(
-        renderTextureSize: CGSize,
-        drawableSize: CGSize
+    func convertLocationToTextureScaleAndApplyMatrix(
+        matrix: CGAffineTransform,
+        frameSize: CGSize,
+        drawableSize: CGSize,
+        textureSize: CGSize
     ) -> Self {
+        // Calculate the matrix.
+        let drawableScale = ScaleManager.getAspectFitFactor(
+            sourceSize: textureSize,
+            destinationSize: drawableSize
+        )
+        let adjustmentScaleFactor = max(
+            drawableSize.width / (textureSize.width * drawableScale),
+            drawableSize.height / (textureSize.height * drawableScale)
+        )
+        let offsetScale = ScaleManager.getAspectFitFactor(
+            sourceSize: frameSize,
+            destinationSize: textureSize
+        )
+        var inverseMatrix = matrix.inverted(flipY: true)
+        inverseMatrix.tx *= (offsetScale * adjustmentScaleFactor)
+        inverseMatrix.ty *= (offsetScale * adjustmentScaleFactor)
 
-        var locationOnDrawable: CGPoint = self.location
-        locationOnDrawable = location.scale(frameSize, to: drawableSize)
-
-        var locationOnTexture = locationOnDrawable
-
-        if renderTextureSize != drawableSize {
-            let widthRatio = renderTextureSize.width / drawableSize.width
-            let heightRatio = renderTextureSize.height / drawableSize.height
-
-            if widthRatio > heightRatio {
-                locationOnTexture = .init(
-                    x: locationOnDrawable.x * widthRatio + (renderTextureSize.width - drawableSize.width * widthRatio) * 0.5,
-                    y: locationOnDrawable.y * widthRatio + (renderTextureSize.height - drawableSize.height * widthRatio) * 0.5
-                )
-            } else {
-                locationOnTexture = .init(
-                    x: locationOnDrawable.x * heightRatio + (renderTextureSize.width - drawableSize.width * heightRatio) * 0.5,
-                    y: locationOnDrawable.y * heightRatio + (renderTextureSize.height - drawableSize.height * heightRatio) * 0.5
-                )
-            }
+        // Calculate the location.
+        let aspectFitFactor = ScaleManager.getAspectFitFactor(
+            sourceSize: frameSize,
+            destinationSize: drawableSize
+        )
+        var locationOnTexture: CGPoint = .init(
+            x: location.x * aspectFitFactor,
+            y: location.y * aspectFitFactor
+        )
+        if textureSize != drawableSize {
+            let aspectFillFactor = ScaleManager.getAspectFillFactor(
+                sourceSize: drawableSize,
+                destinationSize: textureSize
+            )
+            locationOnTexture = .init(
+                x: locationOnTexture.x * aspectFillFactor + (textureSize.width - drawableSize.width * aspectFillFactor) * 0.5,
+                y: locationOnTexture.y * aspectFillFactor + (textureSize.height - drawableSize.height * aspectFillFactor) * 0.5
+            )
         }
 
         return .init(
-            location: locationOnTexture,
+            location: locationOnTexture.apply(
+                with: inverseMatrix,
+                textureSize: textureSize
+            ),
             force: force,
             maximumPossibleForce: maximumPossibleForce,
             phase: phase,
-            type: type,
-            frameSize: frameSize
+            type: type
         )
     }
 

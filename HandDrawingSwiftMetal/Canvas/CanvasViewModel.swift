@@ -258,15 +258,12 @@ extension CanvasViewModel {
 
             let dotPoints = touchPoints.map {
                 DotPoint(
-                    touchPoint: $0.getScaledTouchPoint(
-                        renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
-                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
-                    ),
-                    matrix: transforming.matrix,
-                    frameSize: frameSize,
-                    textureSize: renderTarget.renderTexture?.size ?? .zero,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
-
+                    touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                        matrix: transforming.matrix,
+                        frameSize: frameSize,
+                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                        textureSize: renderTarget.renderTexture?.size ?? .zero
+                    )
                 )
             }
 
@@ -372,14 +369,12 @@ extension CanvasViewModel {
 
         let dotPoints = touchPoints.map {
             DotPoint(
-                touchPoint: $0.getScaledTouchPoint(
-                    renderTextureSize: renderTarget.renderTexture?.size ?? .zero,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
-                ),
-                matrix: transforming.matrix,
-                frameSize: frameSize,
-                textureSize: renderTarget.renderTexture?.size ?? .zero,
-                drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero
+                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                    matrix: transforming.matrix,
+                    frameSize: frameSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                    textureSize: renderTarget.renderTexture?.size ?? .zero
+                )
             )
         }
 
