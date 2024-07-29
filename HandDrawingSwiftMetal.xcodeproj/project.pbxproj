@@ -65,6 +65,7 @@
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
 		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
+		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */; };
 		D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */; };
 		D4671FA42BC15CB700ABDA4E /* TransformingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */; };
@@ -202,6 +203,7 @@
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
+		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKRenderTextureProtocol.swift; sourceTree = "<group>"; };
 		D4671FA12BC0E48500ABDA4E /* SmoothLineDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothLineDrawing.swift; sourceTree = "<group>"; };
 		D4671FA32BC15CB700ABDA4E /* TransformingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingProtocol.swift; sourceTree = "<group>"; };
@@ -332,6 +334,7 @@
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */,
 				D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */,
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
 				D4541E932BBC167200C96741 /* CGPointExtensions.swift */,
@@ -887,6 +890,7 @@
 				D4671FA22BC0E48500ABDA4E /* SmoothLineDrawing.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
+				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D47285A82BBEBE220035AFCD /* DrawingLineProtocol.swift in Sources */,
