@@ -17,12 +17,12 @@ struct LineParameters {
 
     init(_ drawingTool: DrawingToolModel) {
         if drawingTool.drawingTool == .eraser {
-            self.dotSize = drawingTool.eraserDotSize
+            self.dotSize = BlurredDotSize.init(diameter: Float(drawingTool.eraserDiameter))
             self.alpha = drawingTool.eraserAlpha
             self.brushColor = nil
 
         } else {
-            self.dotSize = drawingTool.brushDotSize
+            self.dotSize = BlurredDotSize.init(diameter: Float(drawingTool.brushDiameter))
             self.alpha = drawingTool.brushColor.alpha
             self.brushColor = drawingTool.brushColor
         }
