@@ -39,6 +39,10 @@ extension FingerScreenTouchManager {
         }
     }
 
+    func getTouchPoints(for key: TouchHashValue) -> [TouchPoint] {
+        touchArrayDictionary[key] ?? []
+    }
+
     func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
         touchArrayDictionary.keys.forEach { key in
             if let touches = touchArrayDictionary[key] {
