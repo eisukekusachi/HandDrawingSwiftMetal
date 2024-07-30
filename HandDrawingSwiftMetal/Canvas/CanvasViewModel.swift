@@ -76,6 +76,12 @@ final class CanvasViewModel {
         refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
     }
 
+    private var grayscaleCurve: GrayscaleCurve?
+
+    private let fingerScreenTouchManager = FingerScreenTouchManager()
+
+    private let pencilScreenTouchManager = PencilScreenTouchManager()
+
     private let lineDrawing = LineDrawing()
     private let smoothLineDrawing = SmoothLineDrawing()
 
@@ -211,6 +217,108 @@ extension CanvasViewModel {
                 renderTarget: renderTarget
             )
         }
+    }
+
+    func onFingerGestureDetected(
+        touches: Set<UITouch>,
+        with event: UIEvent?,
+        view: UIView,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
+        defer {
+            fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+            if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+                initDrawingParameters()
+            }
+        }
+
+        guard
+            inputManager.updateCurrentInput(.finger) != .pencil
+        else { return }
+
+        fingerScreenTouchManager.append(
+            event: event,
+            in: view
+        )
+
+        switch actionManager.updateState(
+            .init(from: fingerScreenTouchManager.touchArrayDictionary)
+        ) {
+        case .drawing:
+            if !(grayscaleCurve is SmoothGrayscaleCurve) {
+                grayscaleCurve = SmoothGrayscaleCurve()
+            }
+            if grayscaleCurve?.currentDictionaryKey == nil {
+                grayscaleCurve?.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
+            }
+            guard let key = grayscaleCurve?.currentDictionaryKey else { return }
+
+            let touchPoints = fingerScreenTouchManager.getTouchPoints(for: key)
+            let latestTouchPoints = touchPoints.elements(after: grayscaleCurve?.startAfterPoint) ?? touchPoints
+            grayscaleCurve?.startAfterPoint = touchPoints.last
+
+            // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
+            if touchPoints.last?.phase == .ended {
+                layerUndoManager.addUndoObjectToUndoStack()
+            }
+
+            drawCurveOnCanvas(
+                latestTouchPoints,
+                with: grayscaleCurve,
+                on: renderTarget
+            )
+
+        case .transforming:
+            transformCanvas(
+                fingerScreenTouchManager.touchArrayDictionary,
+                on: renderTarget
+            )
+
+        default:
+            break
+        }
+    }
+
+    func onPencilGestureDetected(
+        touches: Set<UITouch>,
+        with event: UIEvent?,
+        view: UIView,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
+        defer {
+            pencilScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+            if pencilScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+                initDrawingParameters()
+            }
+        }
+
+        if inputManager.state == .finger {
+            cancelFingerInput(renderTarget)
+        }
+        inputManager.updateCurrentInput(.pencil)
+
+        pencilScreenTouchManager.append(
+            event: event,
+            in: view
+        )
+        if !(grayscaleCurve is DefaultGrayscaleCurve) {
+            grayscaleCurve = DefaultGrayscaleCurve()
+        }
+
+        let touchPoints = pencilScreenTouchManager.touchArray
+        let latestTouchPoints = touchPoints.elements(after: grayscaleCurve?.startAfterPoint) ?? touchPoints
+        grayscaleCurve?.startAfterPoint = touchPoints.last
+
+        // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
+        if touchPoints.last?.phase == .ended {
+            layerUndoManager.addUndoObjectToUndoStack()
+        }
+
+        drawCurveOnCanvas(
+            latestTouchPoints,
+            with: grayscaleCurve,
+            on: renderTarget
+        )
     }
 
     func handleFingerInputGesture(
@@ -415,6 +523,18 @@ extension CanvasViewModel {
         lineDrawing.clearIterator()
         smoothLineDrawing.clearIterator()
         transforming.clearTransforming()
+
+        fingerScreenTouchManager.reset()
+        pencilScreenTouchManager.reset()
+        grayscaleCurve = nil
+    }
+
+    private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
+        fingerScreenTouchManager.reset()
+        transforming.reset()
+        layerManager.clearDrawingLayer()
+        renderTarget.clearCommandBuffer()
+        renderTarget.setNeedsDisplay()
     }
 
     private func drawSegmentOnCanvas(
@@ -449,6 +569,31 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    private func drawCurveOnCanvas(
+        _ screenTouchPoints: [TouchPoint],
+        with grayscaleCurve: GrayscaleCurve?,
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
+        let touchPhase = screenTouchPoints.last?.phase ?? .cancelled
+
+        let grayscaleCurveTexturePoints = makeGrayscaleTextureCurvePoints(
+            screenTouchPoints: screenTouchPoints,
+            grayscaleCurve: grayscaleCurve,
+            renderTarget: renderTarget
+        )
+
+        drawCurve(
+            grayScaleTextureCurvePoints: grayscaleCurveTexturePoints,
+            drawingTool: drawingTool,
+            touchPhase: touchPhase,
+            on: renderTarget
+        )
+
+        if touchPhase == .ended || touchPhase == .cancelled {
+            initDrawingParameters()
+        }
+    }
 
     private func makeGrayscaleTextureCurvePoints(
         screenTouchPoints: [TouchPoint],
@@ -520,6 +665,28 @@ extension CanvasViewModel {
         )
     }
 
+    private func transformCanvas(
+        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
+        if transforming.isCurrentKeysNil {
+            transforming.initTransforming(touchPointsDictionary)
+        }
+
+        transforming.transformCanvas(touchPointsDictionary)
+
+        if touchPointsDictionary.containsPhases([.ended]) {
+            transforming.finishTransforming()
+        }
+
+        pauseDisplayLinkLoop(
+            touchPointsDictionary.containsPhases(
+                [.ended, .cancelled]
+            ),
+            renderTarget: renderTarget
+        )
+    }
+
     /// Start or stop the display link loop.
     private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: MTKRenderTextureProtocol) {
         if pause {
@@ -560,6 +727,14 @@ extension CanvasViewModel {
         )
 
         renderTarget.setNeedsDisplay()
+    }
+
+    private func isAllFingersReleasedFromScreen(
+        touches: Set<UITouch>,
+        with event: UIEvent?
+    ) -> Bool {
+        touches.count == event?.allTouches?.count &&
+        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
     }
 
     /// Start or stop the display link loop.
