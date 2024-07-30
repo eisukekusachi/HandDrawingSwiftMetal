@@ -15,7 +15,7 @@ extension Array where Element: Equatable {
     func elements(after element: Element?) -> [Element]? {
         guard
             let element,
-            let index = self.firstIndex(of: element)
+            let index = self.lastIndex(of: element)
         else { return nil }
 
         // Ensure index + 1 does not exceed the array bounds
