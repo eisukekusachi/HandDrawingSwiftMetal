@@ -9,7 +9,7 @@ import UIKit
 
 final class PencilScreenTouchManager {
 
-    private var touchArray: [TouchPoint] = []
+    private (set) var touchArray: [TouchPoint] = []
 
 }
 
