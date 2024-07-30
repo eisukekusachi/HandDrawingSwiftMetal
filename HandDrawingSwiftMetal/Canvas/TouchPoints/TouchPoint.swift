@@ -90,3 +90,23 @@ extension TouchPoint {
     }
 
 }
+
+extension Dictionary where Key: Hashable, Value == [TouchPoint] {
+
+    func containsPhases(
+        _ phases: [UITouch.Phase]
+    ) -> Bool {
+        for key in self.keys {
+            guard let points = self[key] else {
+                continue
+            }
+            for point in points {
+                if phases.contains(point.phase) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+}
