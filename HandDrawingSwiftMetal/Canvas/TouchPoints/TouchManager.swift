@@ -7,8 +7,6 @@
 
 import UIKit
 
-typealias TouchHashValue = Int
-
 final class TouchManager {
 
     // When a gesture is recognized as 'drawing' during finger input, the touchManager manages only one finger.
