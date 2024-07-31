@@ -56,7 +56,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func initRenderTexture(textureSize: CGSize) {
-        let minSize: CGFloat = CGFloat(Command.threadgroupSize)
+        let minSize: CGFloat = CGFloat(MTLRenderer.threadGroupLength)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
         _renderTexture = MTKTextureUtils.makeTexture(device!, textureSize)
