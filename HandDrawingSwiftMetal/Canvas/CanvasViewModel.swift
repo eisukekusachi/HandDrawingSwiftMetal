@@ -16,8 +16,6 @@ final class CanvasViewModel {
 
     var renderTarget: MTKRenderTextureProtocol?
 
-    let drawing = Drawing()
-
     let transforming = Transforming()
 
     let layerManager = ImageLayerManager()
@@ -30,7 +28,6 @@ final class CanvasViewModel {
 
     var frameSize: CGSize = .zero {
         didSet {
-            drawing.frameSize = frameSize
 
             layerManager.frameSize = frameSize
 
@@ -82,10 +79,6 @@ final class CanvasViewModel {
 
     private let pencilScreenTouchManager = PencilScreenTouchManager()
 
-    private let lineDrawing = LineDrawing()
-    private let smoothLineDrawing = SmoothLineDrawing()
-
-    private let touchManager = TouchManager()
     private let actionManager = ActionManager()
 
     private var localRepository: LocalRepository?
@@ -321,208 +314,15 @@ extension CanvasViewModel {
         )
     }
 
-    func handleFingerInputGesture(
-        _ touches: Set<UITouch>,
-        with event: UIEvent?,
-        on view: UIView
-    ) {
-        defer {
-            touchManager.removeValuesOnTouchesEnded(touches: touches)
-
-            if touchManager.isAllFingersReleased(touches: touches, with: event) {
-                initDrawingParameters()
-            }
-        }
-
-        guard inputManager.updateCurrentInput(.finger) != .pencil else { return }
-
-        touchManager.appendFingerTouchesToTouchPointsDictionary(event, in: view)
-
-        let newState: ActionState = .init(from: touchManager.touchPointsDictionary)
-
-        switch actionManager.updateState(newState) {
-        case .drawing:
-            guard
-                let renderTarget,
-                let hashValue = touchManager.hashValueForFingerDrawing,
-                let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
-            else { return }
-
-            let isTouchEnded = touchPhase == .ended
-
-            if isTouchEnded {
-                layerUndoManager.addUndoObjectToUndoStack()
-            }
-
-            drawing.initDrawingIfHashValueIsNil(
-                lineDrawing: smoothLineDrawing,
-                hashValue: hashValue
-            )
-
-            let touchPoints = drawing.getNewTouchPoints(
-                from: touchManager,
-                with: smoothLineDrawing
-            )
-
-            let dotPoints = touchPoints.map {
-                DotPoint(
-                    touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
-                        matrix: transforming.matrix,
-                        frameSize: frameSize,
-                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                        textureSize: renderTarget.renderTexture?.size ?? .zero
-                    )
-                )
-            }
-
-            smoothLineDrawing.appendToIterator(dotPoints)
-
-            if isTouchEnded {
-                smoothLineDrawing.appendLastTouchToSmoothCurveIterator()
-            }
-
-            let lineSegment = drawing.makeLineSegment(
-                from: smoothLineDrawing.iterator,
-                with: .init(drawingTool),
-                touchPhase: touchPhase
-            )
-
-            drawSegmentOnCanvas(
-                lineSegment: lineSegment,
-                on: renderTarget.renderTexture,
-                to: renderTarget.commandBuffer
-            )
-
-            if isTouchEnded {
-                initDrawingParameters()
-            }
-
-            pauseDisplayLinkLoop(isTouchEnded)
-
-        case .transforming:
-            guard
-                let hashValues = transforming.getHashValues(from: touchManager),
-                let touchPoints = transforming.getTouchPoints(from: touchManager, using: hashValues)
-            else { return }
-
-            if transforming.isInitializationRequired {
-                transforming.initTransforming(hashValues: hashValues)
-            }
-
-            transforming.transformCanvas(touchPoints: (touchPoints.0, touchPoints.1))
-
-            if transforming.isTouchEnded {
-                transforming.finishTransforming()
-                initDrawingParameters()
-            }
-
-            pauseDisplayLinkLoop(transforming.isTouchEnded)
-
-        default:
-            break
-        }
-    }
-
-    func handlePencilInputGesture(
-        _ touches: Set<UITouch>,
-        with event: UIEvent?,
-        on view: UIView
-    ) {
-        defer {
-            touchManager.removeValuesOnTouchesEnded(touches: touches)
-
-            if touchManager.isAllFingersReleased(touches: touches, with: event) {
-                initDrawingParameters()
-            }
-        }
-
-        guard
-            let renderTarget
-        else { return }
-
-        if inputManager.state == .finger {
-            initDrawingParameters()
-
-            layerManager.clearDrawingLayer()
-
-            renderTarget.clearCommandBuffer()
-            renderTarget.setNeedsDisplay()
-        }
-        inputManager.updateCurrentInput(.pencil)
-
-        touchManager.appendPencilTouchesToTouchPointsDictionary(event, in: view)
-
-        guard
-            let hashValue = touchManager.hashValueForPencilDrawing,
-            let touchPhase = touchManager.getLatestTouchPhase(with: hashValue)
-        else {
-            return
-        }
-
-        let isTouchEnded = touchPhase == .ended
-
-        if isTouchEnded {
-            layerUndoManager.addUndoObjectToUndoStack()
-        }
-
-        drawing.initDrawingIfHashValueIsNil(
-            lineDrawing: lineDrawing,
-            hashValue: hashValue
-        )
-
-        let touchPoints = drawing.getNewTouchPoints(
-            from: touchManager,
-            with: lineDrawing
-        )
-
-        let dotPoints = touchPoints.map {
-            DotPoint(
-                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
-                    matrix: transforming.matrix,
-                    frameSize: frameSize,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                    textureSize: renderTarget.renderTexture?.size ?? .zero
-                )
-            )
-        }
-
-        lineDrawing.appendToIterator(dotPoints)
-
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        lineDrawing.setInaccurateAlphaToZero()
-
-        let lineSegment = drawing.makeLineSegment(
-            from: lineDrawing.iterator,
-            with: .init(drawingTool),
-            touchPhase: touchPhase
-        )
-
-        drawSegmentOnCanvas(
-            lineSegment: lineSegment,
-            on: renderTarget.renderTexture,
-            to: renderTarget.commandBuffer
-        )
-
-        if isTouchEnded {
-            initDrawingParameters()
-        }
-
-        pauseDisplayLinkLoop(isTouchEnded)
-    }
-
 }
 
 extension CanvasViewModel {
 
     private func initDrawingParameters() {
-        touchManager.clearTouchPointsDictionary()
-
         inputManager.clear()
         actionManager.clear()
 
-        lineDrawing.clearIterator()
-        smoothLineDrawing.clearIterator()
-        transforming.clearTransforming()
+        transforming.reset()
 
         fingerScreenTouchManager.reset()
         pencilScreenTouchManager.reset()
@@ -535,35 +335,6 @@ extension CanvasViewModel {
         layerManager.clearDrawingLayer()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
-    }
-
-    private func drawSegmentOnCanvas(
-        lineSegment: LineSegment,
-        on renderTexture: MTLTexture?,
-        to commandBuffer: MTLCommandBuffer?
-    ) {
-        guard
-            let renderTexture,
-            let commandBuffer
-        else { return }
-
-        drawing.addDrawLineSegmentCommands(
-            with: lineSegment,
-            on: layerManager,
-            to: commandBuffer
-        )
-
-        if lineSegment.touchPhase == .ended {
-            drawing.addFinishDrawingCommands(
-                on: layerManager,
-                to: commandBuffer
-            )
-        }
-
-        layerManager.mergeAllLayers(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
-            commandBuffer)
     }
 
 }

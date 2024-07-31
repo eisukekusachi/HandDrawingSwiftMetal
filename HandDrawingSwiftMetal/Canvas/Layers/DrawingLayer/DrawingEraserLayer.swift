@@ -87,52 +87,6 @@ class DrawingEraserLayer: DrawingLayer {
         isDrawing = true
     }
 
-    /// First, draw lines in grayscale on a grayscale texture,
-    /// then apply the intensity as transparency to add black color to the grayscale texture,
-    /// and render the grayscale texture onto the drawing texture.
-    /// After that, blend the drawing texture and the source texture using a blend factor for the eraser to create the eraser texture.
-    func drawOnDrawingTexture(
-        segment: LineSegment,
-        srcTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        let pointBuffers = Buffers.makeGrayscalePointBuffers(
-            device: device,
-            points: segment.dotPoints,
-            blurredDotSize: segment.parameters.dotSize,
-            alpha: segment.parameters.alpha,
-            textureSize: textureSize
-        )
-
-        Command.drawCurve(
-            buffers: pointBuffers,
-            onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
-        )
-
-        Command.colorize(
-            grayscaleTexture: grayscaleTexture,
-            with: (0, 0, 0),
-            result: drawingTexture,
-            commandBuffer
-        )
-
-        Command.copy(
-            dst: eraserTexture,
-            src: srcTexture,
-            commandBuffer
-        )
-
-        Command.makeEraseTexture(
-            buffers: flippedTextureBuffers,
-            src: drawingTexture,
-            result: eraserTexture,
-            commandBuffer
-        )
-
-        isDrawing = true
-    }
-
     /// Merges the eraser texture into the destination texture.
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture,

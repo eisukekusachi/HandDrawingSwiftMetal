@@ -61,35 +61,6 @@ class DrawingBrushLayer: DrawingLayer {
         )
     }
 
-    /// First, draw lines in grayscale on the grayscale texture,
-    /// then apply the intensity as transparency to colorize the grayscale texture,
-    /// and render the colored grayscale texture onto the drawing texture."
-    func drawOnDrawingTexture(
-        segment: LineSegment,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        let pointBuffers = Buffers.makeGrayscalePointBuffers(
-            device: device,
-            points: segment.dotPoints,
-            blurredDotSize: segment.parameters.dotSize,
-            alpha: segment.parameters.alpha,
-            textureSize: textureSize
-        )
-
-        Command.drawCurve(
-            buffers: pointBuffers,
-            onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
-        )
-
-        Command.colorize(
-            grayscaleTexture: grayscaleTexture,
-            with: (segment.parameters.brushColor ?? .black).rgb,
-            result: drawingTexture,
-            commandBuffer
-        )
-    }
-
     /// Merges the drawing texture into the destination texture.
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture,
