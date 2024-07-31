@@ -12,7 +12,6 @@ class DrawingBrushLayer: DrawingLayer {
 
     var drawingTexture: MTLTexture?
 
-    var frameSize: CGSize = .zero
     var textureSize: CGSize = .zero
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
