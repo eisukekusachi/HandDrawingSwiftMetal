@@ -12,7 +12,7 @@ protocol UndoManagerProtocol {
 
     var undoManager: UndoManager { get }
 
-    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> { get }
+    var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> { get }
     var canUndoPublisher: AnyPublisher<Bool, Never> { get }
     var canRedoPublisher: AnyPublisher<Bool, Never> { get }
 

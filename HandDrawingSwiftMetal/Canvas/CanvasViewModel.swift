@@ -104,11 +104,11 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
-        layerUndoManager.addUndoObjectToUndoStackPublisher
+        layerUndoManager.addCurrentLayersToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
                 self.layerUndoManager.addUndoObject(
-                    undoObject: UndoObject(
+                    undoObject: .init(
                         index: self.layerManager.index,
                         layers: self.layerManager.layers
                     ),
@@ -252,7 +252,7 @@ extension CanvasViewModel {
 
             // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
             if touchPoints.last?.phase == .ended {
-                layerUndoManager.addUndoObjectToUndoStack()
+                layerUndoManager.addCurrentLayersToUndoStack()
             }
 
             drawCurveOnCanvas(
@@ -304,7 +304,7 @@ extension CanvasViewModel {
 
         // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
         if touchPoints.last?.phase == .ended {
-            layerUndoManager.addUndoObjectToUndoStack()
+            layerUndoManager.addCurrentLayersToUndoStack()
         }
 
         drawCurveOnCanvas(
@@ -575,7 +575,7 @@ extension CanvasViewModel {
         refreshCanvasWithMergingAllLayers()
     }
     func didTapAddLayerButton() {
-        layerUndoManager.addUndoObjectToUndoStack()
+        layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.addNewLayer()
         refreshCanvasWithMergingAllLayers()
@@ -586,7 +586,7 @@ extension CanvasViewModel {
             let layer = layerManager.selectedLayer
         else { return }
 
-        layerUndoManager.addUndoObjectToUndoStack()
+        layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.removeLayer(layer)
         refreshCanvasWithMergingAllLayers()
@@ -603,7 +603,7 @@ extension CanvasViewModel {
         layerManager.updateTitle(layer, title)
     }
     func didMoveLayers(layer: ImageLayerCellItem, source: IndexSet, destination: Int) {
-        layerUndoManager.addUndoObjectToUndoStack()
+        layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.moveLayer(
             fromOffsets: source,

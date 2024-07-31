@@ -10,8 +10,8 @@ import Combine
 
 final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
 
-    var addUndoObjectToUndoStackPublisher: AnyPublisher<Void, Never> {
-        addUndoObjectToUndoStackSubject.eraseToAnyPublisher()
+    var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
+        addCurrentLayersToUndoStackSubject.eraseToAnyPublisher()
     }
 
     var canUndoPublisher: AnyPublisher<Bool, Never> {
@@ -28,7 +28,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
     /// An undoManager with undoCount and redoCount
     let undoManager: UndoManager = UndoManagerWithCount()
 
-    private let addUndoObjectToUndoStackSubject = PassthroughSubject<Void, Never>()
+    private let addCurrentLayersToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     private let canUndoSubject = CurrentValueSubject<Bool, Never>(true)
     private let canRedoSubject = CurrentValueSubject<Bool, Never>(true)
@@ -39,8 +39,8 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
         undoManager.levelsOfUndo = 8
     }
 
-    func addUndoObjectToUndoStack() {
-        addUndoObjectToUndoStackSubject.send()
+    func addCurrentLayersToUndoStack() {
+        addCurrentLayersToUndoStackSubject.send()
     }
 
     func undo() {
