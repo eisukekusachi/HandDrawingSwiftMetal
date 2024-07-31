@@ -16,7 +16,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
     /// Accessor for the Metal command buffer.
     var commandBuffer: MTLCommandBuffer {
-        return commandQueue.getOrCreateCommandBuffer()
+        commandBufferManager.currentCommandBuffer
     }
 
     var renderTexture: MTLTexture? {
@@ -28,7 +28,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
     private var _renderTexture: MTLTexture?
 
-    private var commandQueue: CommandQueueProtocol!
+    private var commandBufferManager: MTLCommandBufferManager!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -46,7 +46,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         assert(self.device != nil, "Device is nil.")
         assert(commandQueue != nil, "CommandQueue is nil.")
 
-        self.commandQueue = CommandQueue(queue: commandQueue!)
+        self.commandBufferManager = MTLCommandBufferManager(device: self.device!)
 
         self.delegate = self
         self.enableSetNeedsDisplay = true
@@ -67,7 +67,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func clearCommandBuffer() {
-        commandQueue.clearCommandBuffer()
+        commandBufferManager.clearCurrentCommandBuffer()
     }
 
     // MARK: - DrawTexture
@@ -88,21 +88,24 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
             height: renderTexture.size.height * scale
         )
 
-        let textureBuffers = MTLBuffers.makeAspectFitTextureBuffers(
-            device: device,
-            matrix: canvasMatrix,
-            sourceSize: resizedRenderTextureSize,
-            destinationSize: drawable.texture.size,
-            nodes: textureNodes
-        )
+        guard
+            let _renderTexture,
+            let textureBuffers = MTLBuffers.makeAspectFitTextureBuffers(
+                device: device,
+                matrix: canvasMatrix,
+                sourceSize: resizedRenderTextureSize,
+                destinationSize: drawable.texture.size,
+                nodes: textureNodes
+            )
+        else { return }
 
-        let commandBuffer = commandQueue.getOrCreateCommandBuffer()
+        let commandBuffer = commandBufferManager.currentCommandBuffer
 
-        Command.draw(
+        MTLRenderer.draw(
             texture: _renderTexture,
             buffers: textureBuffers,
+            backgroundColor: (230, 230, 230),
             on: drawable.texture,
-            clearColor: (230, 230, 230),
             commandBuffer
         )
 
@@ -110,7 +113,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.clearCommandBuffer()
+        commandBufferManager.clearCurrentCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
