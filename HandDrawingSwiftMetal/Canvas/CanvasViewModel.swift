@@ -16,7 +16,7 @@ final class CanvasViewModel {
 
     var renderTarget: MTKRenderTextureProtocol?
 
-    let transforming = Transforming()
+    let canvasTransformer = CanvasTransformer()
 
     let layerManager = ImageLayerManager()
 
@@ -31,7 +31,7 @@ final class CanvasViewModel {
 
             layerManager.frameSize = frameSize
 
-            transforming.screenCenter = .init(
+            canvasTransformer.screenCenter = .init(
                 x: frameSize.width * 0.5,
                 y: frameSize.height * 0.5
             )
@@ -322,7 +322,7 @@ extension CanvasViewModel {
         inputManager.clear()
         actionManager.clear()
 
-        transforming.reset()
+        canvasTransformer.reset()
 
         fingerScreenTouchManager.reset()
         pencilScreenTouchManager.reset()
@@ -331,7 +331,7 @@ extension CanvasViewModel {
 
     private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
         fingerScreenTouchManager.reset()
-        transforming.reset()
+        canvasTransformer.reset()
         layerManager.clearDrawingLayer()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
@@ -376,7 +376,7 @@ extension CanvasViewModel {
         let grayscaleTexturePoints: [GrayscaleTexturePoint] = screenTouchPoints.map {
             .init(
                 touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
-                    matrix: transforming.matrix,
+                    matrix: canvasTransformer.matrix,
                     frameSize: frameSize,
                     drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
                     textureSize: renderTarget.renderTexture?.size ?? .zero
@@ -440,14 +440,14 @@ extension CanvasViewModel {
         _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        if transforming.isCurrentKeysNil {
-            transforming.initTransforming(touchPointsDictionary)
+        if canvasTransformer.isCurrentKeysNil {
+            canvasTransformer.initTransforming(touchPointsDictionary)
         }
 
-        transforming.transformCanvas(touchPointsDictionary)
+        canvasTransformer.transformCanvas(touchPointsDictionary)
 
         if touchPointsDictionary.containsPhases([.ended]) {
-            transforming.finishTransforming()
+            canvasTransformer.finishTransforming()
         }
 
         pauseDisplayLinkLoop(
@@ -546,7 +546,7 @@ extension CanvasViewModel {
     }
 
     func didTapResetTransformButton() {
-        transforming.setMatrix(.identity)
+        canvasTransformer.setMatrix(.identity)
         renderTarget?.setNeedsDisplay()
     }
 
@@ -554,7 +554,7 @@ extension CanvasViewModel {
 
         projectName = Calendar.currentDate
 
-        transforming.setMatrix(.identity)
+        canvasTransformer.setMatrix(.identity)
         layerManager.initialize(textureSize: layerManager.textureSize)
 
         layerUndoManager.clear()

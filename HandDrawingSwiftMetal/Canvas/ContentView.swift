@@ -83,8 +83,8 @@ final class ContentView: UIView {
 
 extension ContentView {
 
-    func bindTransforming(_ transforming: Transforming) {
-        bindModels(transforming)
+    func bindTransforming(_ transformer: CanvasTransformer) {
+        bindModels(transformer)
     }
     func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
         bindInputs(drawingTool)
@@ -155,9 +155,9 @@ extension ContentView {
             for: .valueChanged)
     }
 
-    private func bindModels(_ transforming: Transforming) {
+    private func bindModels(_ transformer: CanvasTransformer) {
 
-        transforming.matrixPublisher
+        transformer.matrixPublisher
             .assign(to: \.matrix, on: canvasView)
             .store(in: &cancellables)
     }

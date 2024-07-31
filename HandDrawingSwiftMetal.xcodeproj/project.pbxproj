@@ -88,7 +88,7 @@
 		D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C397192B9C941F0037312F /* DrawingToolModel.swift */; };
 		D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingLayer.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
-		D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* Transforming.swift */; };
+		D4C9791E2ADBAA6400BB666D /* CanvasTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */; };
 		D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */; };
 		D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */; };
 		D4CB0D362B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */; };
@@ -211,7 +211,7 @@
 		D4C397192B9C941F0037312F /* DrawingToolModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolModel.swift; sourceTree = "<group>"; };
 		D4C8EE972B25490B005947EC /* DrawingLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingLayer.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
-		D4C9791D2ADBAA6400BB666D /* Transforming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transforming.swift; sourceTree = "<group>"; };
+		D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTransformer.swift; sourceTree = "<group>"; };
 		D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModelTests.swift; sourceTree = "<group>"; };
 		D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
 		D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
@@ -284,7 +284,7 @@
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D46A304A2BF88E540057DB69 /* Models */,
 				D40D975329DAB02000A82E6A /* TouchPoints */,
-				D4AEFE282B09B56900EE3EEF /* Transforming */,
+				D4AEFE282B09B56900EE3EEF /* CanvasTransformer */,
 				D422D9C42AF4DCEF004E058B /* Undo */,
 				D46A30482BF858760057DB69 /* Views */,
 			);
@@ -511,12 +511,12 @@
 			path = DrawingTool;
 			sourceTree = "<group>";
 		};
-		D4AEFE282B09B56900EE3EEF /* Transforming */ = {
+		D4AEFE282B09B56900EE3EEF /* CanvasTransformer */ = {
 			isa = PBXGroup;
 			children = (
-				D4C9791D2ADBAA6400BB666D /* Transforming.swift */,
+				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 			);
-			path = Transforming;
+			path = CanvasTransformer;
 			sourceTree = "<group>";
 		};
 		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
@@ -800,7 +800,7 @@
 				D4CBCE452BAA936E0053F198 /* LayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D469A8732C56342700D10575 /* GrayscaleCurve.swift in Sources */,
-				D4C9791E2ADBAA6400BB666D /* Transforming.swift in Sources */,
+				D4C9791E2ADBAA6400BB666D /* CanvasTransformer.swift in Sources */,
 				D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,

@@ -1,5 +1,5 @@
 //
-//  Transforming.swift
+//  CanvasTransformer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 /// A class for view rotation.
-class Transforming {
+class CanvasTransformer {
 
     var matrix: CGAffineTransform {
         matrixSubject.value
@@ -19,27 +19,20 @@ class Transforming {
         matrixSubject.eraseToAnyPublisher()
     }
 
+    var screenCenter: CGPoint = .zero
+
     private var keyA: TouchHashValue?
     private var keyB: TouchHashValue?
     private var touchPointA: CGPoint?
     private var touchPointB: CGPoint?
 
-    var storedMatrix: CGAffineTransform = CGAffineTransform.identity
-
-    var screenCenter: CGPoint = .zero
+    private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
     private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
-    func setMatrix(_ matrix: CGAffineTransform) {
-        matrixSubject.send(matrix)
-        storedMatrix = matrix
-        touchPointA = nil
-        touchPointB = nil
-    }
-
 }
 
-extension Transforming {
+extension CanvasTransformer {
 
     var isCurrentKeysNil: Bool {
         keyA == nil || keyB == nil
@@ -81,6 +74,13 @@ extension Transforming {
         )
     }
 
+    func setMatrix(_ matrix: CGAffineTransform) {
+        matrixSubject.send(matrix)
+        storedMatrix = matrix
+        touchPointA = nil
+        touchPointB = nil
+    }
+
     func finishTransforming() {
         storedMatrix = matrixSubject.value
         keyA = nil
@@ -99,7 +99,7 @@ extension Transforming {
 
 }
 
-extension Transforming {
+extension CanvasTransformer {
 
     private func updateCurrentKeys(
         from dictionary: [TouchHashValue: [TouchPoint]]
