@@ -79,7 +79,10 @@ extension ViewController {
             self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.canvasViewModel.didTapSaveButton()
+            guard let `self` else { return }
+            self.canvasViewModel.didTapSaveButton(
+                renderTarget: self.contentView.canvasView
+            )
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }

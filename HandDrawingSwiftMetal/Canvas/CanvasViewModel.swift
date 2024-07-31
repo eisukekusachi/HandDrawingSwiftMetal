@@ -41,10 +41,6 @@ final class CanvasViewModel {
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
 
-    var zipFileNameName: String {
-        projectName + "." + URL.zipSuffix
-    }
-
     var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
         pauseDisplayLinkSubject.eraseToAnyPublisher()
     }
@@ -565,8 +561,8 @@ extension CanvasViewModel {
     func didTapLoadButton(filePath: String) {
         loadFile(from: filePath)
     }
-    func didTapSaveButton() {
-        saveFile()
+    func didTapSaveButton(renderTarget: MTKRenderTextureProtocol) {
+        saveFile(renderTexture: renderTarget.renderTexture!)
     }
 
     // MARK: Layers
@@ -634,16 +630,14 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-    private func saveFile() {
-        guard
-            let renderTexture = renderTarget?.renderTexture
-        else { return }
-
+    private func saveFile(renderTexture: MTLTexture) {
         localRepository?.saveDataToDocuments(
             renderTexture: renderTexture,
             layerManager: layerManager,
             drawingTool: drawingTool,
-            to: URL.documents.appendingPathComponent(zipFileNameName)
+            to: URL.documents.appendingPathComponent(
+                CanvasModel.getZipFileName(projectName: projectName)
+            )
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
