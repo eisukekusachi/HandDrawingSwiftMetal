@@ -92,12 +92,12 @@ class DrawingBrushLayer: DrawingLayer {
 
     /// Merges the drawing texture into the destination texture.
     func mergeDrawingTexture(
-        into dstTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        Command.merge(
+        MTLRenderer.merge(
             texture: drawingTexture,
-            into: dstTexture,
+            into: destinationTexture,
             commandBuffer
         )
 
@@ -112,8 +112,8 @@ class DrawingBrushLayer: DrawingLayer {
 
     /// Clears the drawing textures.
     func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: drawingTexture, commandBuffer)
-        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
+        MTLRenderer.clear(texture: drawingTexture, commandBuffer)
+        MTLRenderer.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
     }
 
     func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {

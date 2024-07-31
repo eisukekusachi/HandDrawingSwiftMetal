@@ -135,24 +135,30 @@ class DrawingEraserLayer: DrawingLayer {
 
     /// Merges the eraser texture into the destination texture.
     func mergeDrawingTexture(
-        into dstTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        Command.copy(
-            dst: eraserTexture,
-            src: dstTexture, commandBuffer
-        )
+        guard 
+            let drawingTexture,
+            let flippedTextureBuffers
+        else { return }
 
-        Command.makeEraseTexture(
-            buffers: flippedTextureBuffers,
-            src: drawingTexture,
-            result: eraserTexture,
+        MTLRenderer.copy(
+            sourceTexture: destinationTexture,
+            destinationTexture: eraserTexture,
             commandBuffer
         )
 
-        Command.copy(
-            dst: dstTexture,
-            src: eraserTexture,
+        MTLRenderer.makeEraseTexture(
+            sourceTexture: drawingTexture,
+            buffers: flippedTextureBuffers,
+            into: eraserTexture,
+            commandBuffer
+        )
+
+        MTLRenderer.copy(
+            sourceTexture: eraserTexture,
+            destinationTexture: destinationTexture,
             commandBuffer
         )
 
@@ -169,12 +175,18 @@ class DrawingEraserLayer: DrawingLayer {
 
     /// Clears the drawing textures.
     func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(textures: [eraserTexture,
-                                 drawingTexture],
-                      commandBuffer)
-        Command.fill(grayscaleTexture,
-                     withRGB: (0, 0, 0),
-                     commandBuffer)
+        MTLRenderer.clear(
+            textures: [
+                eraserTexture,
+                drawingTexture
+            ],
+            commandBuffer
+        )
+        MTLRenderer.fill(
+            grayscaleTexture,
+            withRGB: (0, 0, 0),
+            commandBuffer
+        )
     }
 
     func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {

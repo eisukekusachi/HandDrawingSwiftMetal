@@ -137,25 +137,25 @@ extension ImageLayerManager {
             let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
         else { return }
 
-        Command.fill(
+        MTLRenderer.fill(
             destinationTexture,
             withRGB: backgroundColor.rgb,
             commandBuffer
         )
 
-        Command.merge(
+        MTLRenderer.merge(
             texture: bottomTexture,
             into: destinationTexture,
             commandBuffer
         )
 
         if layers[index].isVisible {
-            Command.drawTexture(
-                from: selectedTextures.compactMap { $0 },
-                into: currentTexture,
+            MTLRenderer.draw(
+                textures: selectedTextures.compactMap { $0 },
+                on: currentTexture,
                 commandBuffer
             )
-            Command.merge(
+            MTLRenderer.merge(
                 texture: currentTexture,
                 alpha: selectedLayer?.alpha ?? 0,
                 into: destinationTexture,
@@ -163,7 +163,7 @@ extension ImageLayerManager {
             )
         }
 
-        Command.merge(
+        MTLRenderer.merge(
             texture: topTexture,
             into: destinationTexture,
             commandBuffer
@@ -176,12 +176,12 @@ extension ImageLayerManager {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
-        Command.clear(texture: bottomTexture, commandBuffer)
-        Command.clear(texture: topTexture, commandBuffer)
+        MTLRenderer.clear(texture: bottomTexture, commandBuffer)
+        MTLRenderer.clear(texture: topTexture, commandBuffer)
 
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
-                Command.merge(
+                MTLRenderer.merge(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: bottomTexture,
@@ -191,7 +191,7 @@ extension ImageLayerManager {
         }
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
-                Command.merge(
+                MTLRenderer.merge(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: topTexture,
