@@ -88,7 +88,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
             height: renderTexture.size.height * scale
         )
 
-        let textureBuffers = Buffers.makeTextureRenderingBuffers(
+        let textureBuffers = MTLBuffers.makeAspectFitTextureBuffers(
             device: device,
             matrix: canvasMatrix,
             sourceSize: resizedRenderTextureSize,

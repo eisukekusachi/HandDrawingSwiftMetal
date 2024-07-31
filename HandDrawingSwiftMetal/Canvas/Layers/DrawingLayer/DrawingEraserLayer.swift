@@ -25,7 +25,7 @@ class DrawingEraserLayer: DrawingLayer {
     private var isDrawing: Bool = false
 
     required init() {
-        self.flippedTextureBuffers = Buffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
     }
 
     /// Initializes the textures for drawing with the specified texture size.
