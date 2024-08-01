@@ -14,8 +14,6 @@ enum CanvasViewModelError: Error {
 
 final class CanvasViewModel {
 
-    var renderTarget: MTKRenderTextureProtocol?
-
     let canvasTransformer = CanvasTransformer()
 
     let layerManager = ImageLayerManager()
@@ -488,22 +486,6 @@ extension CanvasViewModel {
     ) -> Bool {
         touches.count == event?.allTouches?.count &&
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
-    }
-
-    /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool) {
-        if pause {
-            if pauseDisplayLinkSubject.value == false {
-                // Pause the display link after updating the display.
-                renderTarget?.setNeedsDisplay()
-                pauseDisplayLinkSubject.send(true)
-            }
-
-        } else {
-            if pauseDisplayLinkSubject.value == true {
-                pauseDisplayLinkSubject.send(false)
-            }
-        }
     }
 
 }
