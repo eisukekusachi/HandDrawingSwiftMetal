@@ -11,8 +11,6 @@ import Combine
 
 final class ImageLayerManager: LayerManager<ImageLayerCellItem> {
 
-    var frameSize: CGSize = .zero
-
     /// A protocol for managing current drawing layer
     private (set) var drawingLayer: DrawingLayer?
     /// Drawing with a brush

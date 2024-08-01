@@ -28,9 +28,6 @@ final class CanvasViewModel {
 
     var frameSize: CGSize = .zero {
         didSet {
-
-            layerManager.frameSize = frameSize
-
             canvasTransformer.screenCenter = .init(
                 x: frameSize.width * 0.5,
                 y: frameSize.height * 0.5
