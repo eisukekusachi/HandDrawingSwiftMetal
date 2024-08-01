@@ -362,6 +362,32 @@ extension CanvasViewModel {
         }
     }
 
+    private func transformCanvas(
+        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
+        if canvasTransformer.isCurrentKeysNil {
+            canvasTransformer.initTransforming(touchPointsDictionary)
+        }
+
+        canvasTransformer.transformCanvas(touchPointsDictionary)
+
+        if touchPointsDictionary.containsPhases([.ended]) {
+            canvasTransformer.finishTransforming()
+        }
+
+        pauseDisplayLinkLoop(
+            touchPointsDictionary.containsPhases(
+                [.ended, .cancelled]
+            ),
+            renderTarget: renderTarget
+        )
+    }
+
+}
+
+extension CanvasViewModel {
+
     private func makeGrayscaleTextureCurvePoints(
         screenTouchPoints: [TouchPoint],
         grayscaleCurve: GrayscaleCurve?,
@@ -428,28 +454,6 @@ extension CanvasViewModel {
 
         pauseDisplayLinkLoop(
             touchPhase == .ended || touchPhase == .cancelled,
-            renderTarget: renderTarget
-        )
-    }
-
-    private func transformCanvas(
-        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
-        on renderTarget: MTKRenderTextureProtocol
-    ) {
-        if canvasTransformer.isCurrentKeysNil {
-            canvasTransformer.initTransforming(touchPointsDictionary)
-        }
-
-        canvasTransformer.transformCanvas(touchPointsDictionary)
-
-        if touchPointsDictionary.containsPhases([.ended]) {
-            canvasTransformer.finishTransforming()
-        }
-
-        pauseDisplayLinkLoop(
-            touchPointsDictionary.containsPhases(
-                [.ended, .cancelled]
-            ),
             renderTarget: renderTarget
         )
     }
