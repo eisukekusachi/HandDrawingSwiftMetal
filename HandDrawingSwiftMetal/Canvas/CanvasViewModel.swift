@@ -174,7 +174,13 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
     func apply(
@@ -189,7 +195,13 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        refreshCanvasWithMergingDrawingLayers()
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
 }
@@ -474,32 +486,6 @@ extension CanvasViewModel {
         }
     }
 
-    func refreshCanvasWithMergingAllLayers() {
-        guard 
-            let renderTarget
-        else { return }
-
-        layerManager.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        refreshCanvasWithMergingDrawingLayers()
-    }
-
-    func refreshCanvasWithMergingDrawingLayers() {
-        guard 
-            let renderTarget,
-            let renderTexture = renderTarget.renderTexture
-        else { return }
-
-        layerManager.mergeAllLayers(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
-            renderTarget.commandBuffer
-        )
-
-        renderTarget.setNeedsDisplay()
-    }
-
     private func isAllFingersReleasedFromScreen(
         touches: Set<UITouch>,
         with event: UIEvent?
@@ -538,19 +524,16 @@ extension CanvasViewModel {
     func didTapLayerButton() {
         Task {
             try? await layerManager.updateCurrentThumbnail()
-
-            DispatchQueue.main.async { [weak self] in
-                self?.requestShowingLayerViewSubject.send()
-            }
+            requestShowingLayerViewSubject.send()
         }
     }
 
-    func didTapResetTransformButton() {
+    func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {
         canvasTransformer.setMatrix(.identity)
-        renderTarget?.setNeedsDisplay()
+        renderTarget.setNeedsDisplay()
     }
 
-    func didTapNewCanvasButton() {
+    func didTapNewCanvasButton(renderTarget: MTKRenderTextureProtocol) {
 
         projectName = Calendar.currentDate
 
@@ -559,7 +542,16 @@ extension CanvasViewModel {
 
         layerUndoManager.clear()
 
-        refreshCanvasWithMergingAllLayers()
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
     func didTapLoadButton(filePath: String) {
@@ -570,17 +562,43 @@ extension CanvasViewModel {
     }
 
     // MARK: Layers
-    func didTapLayer(layer: ImageLayerCellItem) {
+    func didTapLayer(
+        layer: ImageLayerCellItem,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.updateIndex(layer)
-        refreshCanvasWithMergingAllLayers()
+
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
-    func didTapAddLayerButton() {
+    func didTapAddLayerButton(
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.addNewLayer()
-        refreshCanvasWithMergingAllLayers()
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
-    func didTapRemoveLayerButton() {
+    func didTapRemoveLayerButton(
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         guard
             layerManager.layers.count > 1,
             let layer = layerManager.selectedLayer
@@ -589,27 +607,78 @@ extension CanvasViewModel {
         layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.removeLayer(layer)
-        refreshCanvasWithMergingAllLayers()
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
-    func didTapLayerVisibility(layer: ImageLayerCellItem, isVisible: Bool) {
+    func didTapLayerVisibility(
+        layer: ImageLayerCellItem,
+        isVisible: Bool,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.update(layer, isVisible: isVisible)
-        refreshCanvasWithMergingAllLayers()
+
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
-    func didChangeLayerAlpha(layer: ImageLayerCellItem, value: Int) {
+    func didChangeLayerAlpha(
+        layer: ImageLayerCellItem,
+        value: Int,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerManager.update(layer, alpha: value)
-        refreshCanvasWithMergingDrawingLayers()
+
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
-    func didEditLayerTitle(layer: ImageLayerCellItem, title: String) {
+    func didEditLayerTitle(
+        layer: ImageLayerCellItem,
+        title: String
+    ) {
         layerManager.updateTitle(layer, title)
     }
-    func didMoveLayers(layer: ImageLayerCellItem, source: IndexSet, destination: Int) {
+    func didMoveLayers(
+        layer: ImageLayerCellItem,
+        source: IndexSet,
+        destination: Int,
+        renderTarget: MTKRenderTextureProtocol
+    ) {
         layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.moveLayer(
             fromOffsets: source,
             toOffset: destination
         )
-        refreshCanvasWithMergingAllLayers()
+        layerManager.updateUnselectedLayers(
+            to: renderTarget.commandBuffer
+        )
+        layerManager.drawAllLayers(
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
+        )
+
+        renderTarget.setNeedsDisplay()
     }
 
 }
