@@ -26,14 +26,7 @@ final class CanvasViewModel {
 
     let inputManager = InputManager()
 
-    var frameSize: CGSize = .zero {
-        didSet {
-            canvasTransformer.screenCenter = .init(
-                x: frameSize.width * 0.5,
-                y: frameSize.height * 0.5
-            )
-        }
-    }
+    var frameSize: CGSize = .zero
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
@@ -379,7 +372,13 @@ extension CanvasViewModel {
             canvasTransformer.initTransforming(touchPointsDictionary)
         }
 
-        canvasTransformer.transformCanvas(touchPointsDictionary)
+        canvasTransformer.transformCanvas(
+            screenCenter: .init(
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
+            ),
+            touchPointsDictionary
+        )
 
         if touchPointsDictionary.containsPhases([.ended]) {
             canvasTransformer.finishTransforming()

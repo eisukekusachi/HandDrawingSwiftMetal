@@ -19,8 +19,6 @@ class CanvasTransformer {
         matrixSubject.eraseToAnyPublisher()
     }
 
-    var screenCenter: CGPoint = .zero
-
     private var keyA: TouchHashValue?
     private var keyB: TouchHashValue?
     private var touchPointA: CGPoint?
@@ -52,7 +50,7 @@ extension CanvasTransformer {
         touchPointB = pointB
     }
 
-    func transformCanvas(_ dictionary: [TouchHashValue: [TouchPoint]]) {
+    func transformCanvas(screenCenter: CGPoint, _ dictionary: [TouchHashValue: [TouchPoint]]) {
         guard
             let keyA,
             let keyB,
