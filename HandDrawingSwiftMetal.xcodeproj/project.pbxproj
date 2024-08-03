@@ -28,7 +28,7 @@
 		D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41CACE02B9C01F100B8C7C5 /* ContentView.xib */; };
 		D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE12B9C01F100B8C7C5 /* ContentView.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
-		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
+		D422D9C82AF4DD18004E058B /* ImageLayerUndoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* ImageLayerUndoModel.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
 		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
@@ -152,7 +152,7 @@
 		D41CACE02B9C01F100B8C7C5 /* ContentView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContentView.xib; sourceTree = "<group>"; };
 		D41CACE12B9C01F100B8C7C5 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
-		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
+		D422D9C72AF4DD18004E058B /* ImageLayerUndoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayerUndoModel.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
 		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
@@ -441,7 +441,6 @@
 				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
 				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */,
-				D422D9C72AF4DD18004E058B /* UndoObject.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 			);
 			path = Models;
@@ -501,6 +500,7 @@
 			children = (
 				D4B4AAA12B3FF44100298CFB /* ImageLayerCellItem.swift */,
 				D46A30402BF841270057DB69 /* ImageLayer.swift */,
+				D422D9C72AF4DD18004E058B /* ImageLayerUndoModel.swift */,
 			);
 			path = ImageLayer;
 			sourceTree = "<group>";
@@ -839,7 +839,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calculate.swift in Sources */,
 				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,
-				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
+				D422D9C82AF4DD18004E058B /* ImageLayerUndoModel.swift in Sources */,
 				D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,

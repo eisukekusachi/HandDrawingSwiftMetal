@@ -51,7 +51,7 @@ final class CanvasViewModel {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
-    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<UndoObject, Never> {
+    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<ImageLayerUndoModel, Never> {
         refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
     }
 
@@ -79,7 +79,7 @@ final class CanvasViewModel {
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<UndoObject, Never>()
+    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<ImageLayerUndoModel, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -172,7 +172,7 @@ final class CanvasViewModel {
     }
 
     func apply(
-        undoObject: UndoObject,
+        undoObject: ImageLayerUndoModel,
         to renderTarget: MTKRenderTextureProtocol
     ) {
         layerManager.initLayers(
