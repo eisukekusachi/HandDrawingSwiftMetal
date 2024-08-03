@@ -22,8 +22,6 @@ final class CanvasViewModel {
 
     let drawingTool = DrawingToolModel()
 
-    let inputManager = InputManager()
-
     var frameSize: CGSize = .zero
 
     /// A name of the file to be saved
@@ -63,7 +61,9 @@ final class CanvasViewModel {
 
     private let pencilScreenTouchManager = PencilScreenTouchManager()
 
-    private let actionManager = ActionManager()
+    private let inputDevice = InputDevice()
+
+    private let screenTouchGesture = ScreenTouchGesture()
 
     private var localRepository: LocalRepository?
 
@@ -222,7 +222,7 @@ extension CanvasViewModel {
         }
 
         guard
-            inputManager.updateCurrentInput(.finger) != .pencil
+            inputDevice.update(.finger) != .pencil
         else { return }
 
         fingerScreenTouchManager.append(
@@ -230,7 +230,7 @@ extension CanvasViewModel {
             in: view
         )
 
-        switch actionManager.updateState(
+        switch screenTouchGesture.update(
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
         ) {
         case .drawing:
@@ -281,10 +281,10 @@ extension CanvasViewModel {
             }
         }
 
-        if inputManager.state == .finger {
+        if inputDevice.status == .finger {
             cancelFingerInput(renderTarget)
         }
-        inputManager.updateCurrentInput(.pencil)
+        let _ = inputDevice.update(.pencil)
 
         pencilScreenTouchManager.append(
             event: event,
@@ -315,8 +315,8 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func initDrawingParameters() {
-        inputManager.clear()
-        actionManager.clear()
+        inputDevice.reset()
+        screenTouchGesture.reset()
 
         canvasTransformer.reset()
 

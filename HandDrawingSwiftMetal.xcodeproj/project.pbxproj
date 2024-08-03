@@ -25,14 +25,12 @@
 		D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979229DAB0D700A82E6A /* Interpolator.swift */; };
 		D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979629DAB0DE00A82E6A /* Texture.metal */; };
 		D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979729DAB0DE00A82E6A /* Drawing.metal */; };
-		D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D97A529DAB0E800A82E6A /* ActionState.swift */; };
 		D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41CACE02B9C01F100B8C7C5 /* ContentView.xib */; };
 		D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE12B9C01F100B8C7C5 /* ContentView.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
 		D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* UndoObject.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
 		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
-		D428FDAA2BD282B400BFE4C9 /* InputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D428FDA92BD282B400BFE4C9 /* InputManager.swift */; };
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
 		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
 		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
@@ -51,7 +49,6 @@
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
-		D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E872BBAE43F00C96741 /* ActionManager.swift */; };
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
 		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
@@ -73,6 +70,10 @@
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
 		D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */; };
+		D481A42F2C5E1D6600279C91 /* InputDeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */; };
+		D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* InputDevice.swift */; };
+		D481A4332C5E1E5B00279C91 /* ScreenTouchGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */; };
+		D481A4352C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48AC4202BCA963D00608E42 /* LayerUndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */; };
 		D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* DrawingToolType.swift */; };
@@ -149,13 +150,11 @@
 		D40D979229DAB0D700A82E6A /* Interpolator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Interpolator.swift; sourceTree = "<group>"; };
 		D40D979629DAB0DE00A82E6A /* Texture.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Texture.metal; sourceTree = "<group>"; };
 		D40D979729DAB0DE00A82E6A /* Drawing.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Drawing.metal; sourceTree = "<group>"; };
-		D40D97A529DAB0E800A82E6A /* ActionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionState.swift; sourceTree = "<group>"; };
 		D41CACE02B9C01F100B8C7C5 /* ContentView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContentView.xib; sourceTree = "<group>"; };
 		D41CACE12B9C01F100B8C7C5 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
-		D428FDA92BD282B400BFE4C9 /* InputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputManager.swift; sourceTree = "<group>"; };
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
 		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
 		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
@@ -174,7 +173,6 @@
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
-		D4541E872BBAE43F00C96741 /* ActionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionManager.swift; sourceTree = "<group>"; };
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
 		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
@@ -196,6 +194,10 @@
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
 		D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerProtocol.swift; sourceTree = "<group>"; };
+		D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDeviceStatus.swift; sourceTree = "<group>"; };
+		D481A4302C5E1D7300279C91 /* InputDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDevice.swift; sourceTree = "<group>"; };
+		D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGesture.swift; sourceTree = "<group>"; };
+		D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGestureStatus.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerUndoManager.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
@@ -272,7 +274,6 @@
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D41CACE12B9C01F100B8C7C5 /* ContentView.swift */,
 				D41CACE02B9C01F100B8C7C5 /* ContentView.xib */,
-				D4AEFE262B09B1E300EE3EEF /* ActionState */,
 				D472859E2BBEBC250035AFCD /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
 				D44D195E2BE5D1390069D4A9 /* Entities */,
@@ -315,7 +316,6 @@
 			isa = PBXGroup;
 			children = (
 				D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */,
-				D428FDA92BD282B400BFE4C9 /* InputManager.swift */,
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
 			);
 			path = Gestures;
@@ -448,6 +448,8 @@
 		D46A304A2BF88E540057DB69 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D481A42C2C5E1D2F00279C91 /* InputDevice */,
+				D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */,
 				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
 				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */,
@@ -480,6 +482,24 @@
 			path = Drawing;
 			sourceTree = "<group>";
 		};
+		D481A42C2C5E1D2F00279C91 /* InputDevice */ = {
+			isa = PBXGroup;
+			children = (
+				D481A4302C5E1D7300279C91 /* InputDevice.swift */,
+				D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */,
+			);
+			path = InputDevice;
+			sourceTree = "<group>";
+		};
+		D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */ = {
+			isa = PBXGroup;
+			children = (
+				D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */,
+				D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */,
+			);
+			path = ScreenTouchGesture;
+			sourceTree = "<group>";
+		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -487,15 +507,6 @@
 				D40D979629DAB0DE00A82E6A /* Texture.metal */,
 			);
 			path = Shaders;
-			sourceTree = "<group>";
-		};
-		D4AEFE262B09B1E300EE3EEF /* ActionState */ = {
-			isa = PBXGroup;
-			children = (
-				D40D97A529DAB0E800A82E6A /* ActionState.swift */,
-				D4541E872BBAE43F00C96741 /* ActionManager.swift */,
-			);
-			path = ActionState;
 			sourceTree = "<group>";
 		};
 		D4AEFE272B09B26500EE3EEF /* DrawingTool */ = {
@@ -766,14 +777,12 @@
 				D469A85F2C5620FB00D10575 /* GrayscaleTexturePoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */,
-				D4541E882BBAE43F00C96741 /* ActionManager.swift in Sources */,
 				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
 				D48AC4202BCA963D00608E42 /* LayerUndoManager.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
-				D428FDAA2BD282B400BFE4C9 /* InputManager.swift in Sources */,
 				D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */,
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
@@ -785,6 +794,7 @@
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D469A86D2C56334100D10575 /* GrayscaleTexturePointIterator.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilScreenTouchManager.swift in Sources */,
+				D481A42F2C5E1D6600279C91 /* InputDeviceStatus.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerScreenTouchManager.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */,
@@ -805,18 +815,19 @@
 				D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D40CDEFF2B411F450059527E /* ImageLayerView.swift in Sources */,
+				D481A4332C5E1E5B00279C91 /* ScreenTouchGesture.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D469A8712C56340B00D10575 /* SmoothGrayscaleCurve.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */,
-				D40D97A729DAB0E800A82E6A /* ActionState.swift in Sources */,
 				D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */,
 				D4B4AAA22B3FF44100298CFB /* ImageLayerCellItem.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* DrawingBrushLayer.swift in Sources */,
+				D481A4352C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift in Sources */,
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */,
 				D40CDF032B411F660059527E /* ImageLayerListView.swift in Sources */,
@@ -824,6 +835,7 @@
 				D40D979329DAB0D700A82E6A /* Calculate.swift in Sources */,
 				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* UndoObject.swift in Sources */,
+				D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
 				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,

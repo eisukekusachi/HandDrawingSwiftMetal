@@ -1,25 +1,27 @@
 //
-//  ActionStateManager.swift
+//  ScreenTouchGestureStatus.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2023/03/30.
+//  Created by Eisuke Kusachi on 2024/08/03.
 //
 
 import Foundation
 
-enum ActionState: Int {
+enum ScreenTouchGestureStatus: Int {
+    /// The status is still undetermined
+    case undetermined
 
-    case recognizing
     case drawing
+
     case transforming
 
     init(from touchPointsDictionary: [TouchHashValue: [TouchPoint]]) {
-        var result: ActionState = .recognizing
+        var result: ScreenTouchGestureStatus = .undetermined
 
-        if let actionState = ActionState.isDrawingGesture(touchPointsDictionary) {
+        if let actionState = ScreenTouchGestureStatus.isDrawingGesture(touchPointsDictionary) {
             result = actionState
 
-        } else if let actionState = ActionState.isTransformingGesture(touchPointsDictionary) {
+        } else if let actionState = ScreenTouchGestureStatus.isTransformingGesture(touchPointsDictionary) {
             result = actionState
         }
 
@@ -28,12 +30,12 @@ enum ActionState: Int {
 
 }
 
-extension ActionState {
+extension ScreenTouchGestureStatus {
 
     static let activatingDrawingCount: Int = 6
     static let activatingTransformingCount: Int = 2
 
-    static func isDrawingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> ActionState? {
+    static func isDrawingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
         if touchPointsDictionary.count != 1 { return nil }
 
         if let count = touchPointsDictionary.first?.count, count > activatingDrawingCount {
@@ -41,7 +43,7 @@ extension ActionState {
         }
         return nil
     }
-    static func isTransformingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> ActionState? {
+    static func isTransformingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
         if touchPointsDictionary.count != 2 { return nil }
 
         if let countA = touchPointsDictionary.first?.count, countA > activatingTransformingCount,
