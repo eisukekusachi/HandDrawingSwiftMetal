@@ -8,10 +8,6 @@
 import MetalKit
 import Combine
 
-enum CanvasViewModelError: Error {
-    case failedToApplyData
-}
-
 final class CanvasViewModel {
 
     let canvasTransformer = CanvasTransformer()
