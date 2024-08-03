@@ -8,6 +8,8 @@
 import Foundation
 
 struct UndoObject {
+
     let index: Int
     let layers: [ImageLayerCellItem]
+
 }

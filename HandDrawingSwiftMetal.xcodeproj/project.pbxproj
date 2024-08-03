@@ -84,7 +84,6 @@
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
 		D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */; };
 		D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */; };
-		D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3002AF7339200EA650D /* StringExtensions.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
 		D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C397192B9C941F0037312F /* DrawingToolModel.swift */; };
 		D4C8EE982B25490B005947EC /* DrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingLayer.swift */; };
@@ -208,7 +207,6 @@
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerInputGestureRecognizer.swift; sourceTree = "<group>"; };
 		D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilInputGestureRecognizer.swift; sourceTree = "<group>"; };
-		D4BCB3002AF7339200EA650D /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D4C397192B9C941F0037312F /* DrawingToolModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolModel.swift; sourceTree = "<group>"; };
 		D4C8EE972B25490B005947EC /* DrawingLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingLayer.swift; sourceTree = "<group>"; };
@@ -284,6 +282,7 @@
 				D40D975729DAB05400A82E6A /* Math */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D46A304A2BF88E540057DB69 /* Models */,
+				D481A4362C5E374200279C91 /* TouchManagers */,
 				D422D9C42AF4DCEF004E058B /* Undo */,
 				D46A30482BF858760057DB69 /* Views */,
 			);
@@ -305,7 +304,6 @@
 				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
 				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
 				D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */,
-				D4BCB3002AF7339200EA650D /* StringExtensions.swift */,
 				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
 				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
 			);
@@ -353,7 +351,6 @@
 				D48AC41F2BCA963D00608E42 /* LayerUndoManager.swift */,
 				D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */,
 				D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */,
-				D422D9C72AF4DD18004E058B /* UndoObject.swift */,
 			);
 			path = Undo;
 			sourceTree = "<group>";
@@ -417,16 +414,6 @@
 			path = DrawingLayer;
 			sourceTree = "<group>";
 		};
-		D46A30452BF857EC0057DB69 /* ImageLayers */ = {
-			isa = PBXGroup;
-			children = (
-				D4B4AAA12B3FF44100298CFB /* ImageLayerCellItem.swift */,
-				D46A30402BF841270057DB69 /* ImageLayer.swift */,
-				D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */,
-			);
-			path = ImageLayers;
-			sourceTree = "<group>";
-		};
 		D46A30482BF858760057DB69 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -449,10 +436,12 @@
 			isa = PBXGroup;
 			children = (
 				D481A42C2C5E1D2F00279C91 /* InputDevice */,
+				D481A4382C5E387600279C91 /* ImageLayer */,
 				D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */,
 				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
 				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */,
+				D422D9C72AF4DD18004E058B /* UndoObject.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 			);
 			path = Models;
@@ -472,12 +461,9 @@
 			isa = PBXGroup;
 			children = (
 				D469A86E2C5633FC00D10575 /* DefaultGrayscaleCurve.swift */,
-				D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */,
 				D469A8722C56342700D10575 /* GrayscaleCurve.swift */,
 				D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */,
-				D45ACBE32C57C2D9000002BE /* PencilScreenTouchManager.swift */,
 				D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */,
-				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -498,6 +484,25 @@
 				D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */,
 			);
 			path = ScreenTouchGesture;
+			sourceTree = "<group>";
+		};
+		D481A4362C5E374200279C91 /* TouchManagers */ = {
+			isa = PBXGroup;
+			children = (
+				D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */,
+				D45ACBE32C57C2D9000002BE /* PencilScreenTouchManager.swift */,
+				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
+			);
+			path = TouchManagers;
+			sourceTree = "<group>";
+		};
+		D481A4382C5E387600279C91 /* ImageLayer */ = {
+			isa = PBXGroup;
+			children = (
+				D4B4AAA12B3FF44100298CFB /* ImageLayerCellItem.swift */,
+				D46A30402BF841270057DB69 /* ImageLayer.swift */,
+			);
+			path = ImageLayer;
 			sourceTree = "<group>";
 		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
@@ -526,8 +531,8 @@
 			isa = PBXGroup;
 			children = (
 				D46A30442BF857E30057DB69 /* DrawingLayer */,
-				D46A30452BF857EC0057DB69 /* ImageLayers */,
 				D46A30422BF842570057DB69 /* LayerManager.swift */,
+				D4F1BB3D2B2D436F006EA102 /* ImageLayerManager.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -838,7 +843,6 @@
 				D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
-				D4BCB3012AF7339200EA650D /* StringExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,
 				D4934F422ADA36C500C52B76 /* DrawingToolType.swift in Sources */,

@@ -8,6 +8,7 @@
 import Foundation
 
 extension FileManager {
+
     static func createNewDirectory(url: URL) throws {
         if FileManager.default.fileExists(atPath: url.path) {
             do {
@@ -23,4 +24,5 @@ extension FileManager {
             throw error
         }
     }
+
 }
