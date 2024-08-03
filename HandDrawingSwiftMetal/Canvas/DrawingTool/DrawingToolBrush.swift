@@ -17,7 +17,7 @@ class DrawingToolBrush: DrawingTool {
     var diameter: Int = initBrushSize
 
     var blurredDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: diameter, blurSize: blurSize)
+        BlurredDotSize(diameter: Float(diameter), blurSize: blurSize)
     }
 
     private (set) var rgb: (Int, Int, Int) = (0, 0, 0)

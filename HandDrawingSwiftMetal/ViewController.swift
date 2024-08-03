@@ -51,8 +51,6 @@ class ViewController: UIViewController {
 
 extension ViewController {
     private func setupCanvasViewModel() {
-        canvasViewModel.renderTarget = contentView.canvasView
-
         // Initialize the canvas with `CGSize`,
         // if not initialized here, it will be initialized with the screen size
         // when `func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)` is called.
@@ -65,21 +63,27 @@ extension ViewController {
     }
 
     private func setupContentView() {
-        contentView.bindTransforming(canvasViewModel.transforming)
+        contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
         contentView.bindUndoModels(canvasViewModel.layerUndoManager)
 
         subscribeEvents()
 
         contentView.tapResetTransformButton = { [weak self] in
-            self?.canvasViewModel.didTapResetTransformButton()
+            guard let `self` else { return }
+            self.canvasViewModel.didTapResetTransformButton(
+                renderTarget: self.contentView.canvasView
+            )
         }
 
         contentView.tapLayerButton = { [weak self] in
             self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.canvasViewModel.didTapSaveButton()
+            guard let `self` else { return }
+            self.canvasViewModel.didTapSaveButton(
+                renderTarget: self.contentView.canvasView
+            )
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
@@ -146,6 +150,7 @@ extension ViewController {
             .store(in: &cancellables)
 
         canvasViewModel.requestShowingLayerViewPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.layerViewPresenter.toggleVisible()
             }
@@ -191,7 +196,10 @@ extension ViewController {
 
     func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            self?.canvasViewModel.didTapNewCanvasButton()
+            guard let `self` else { return }
+            self.canvasViewModel.didTapNewCanvasButton(
+                renderTarget: self.contentView.canvasView
+            )
         }
     }
 
@@ -200,25 +208,53 @@ extension ViewController {
             layerManager: canvasViewModel.layerManager,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
-                self?.canvasViewModel.didTapLayer(layer: layer)
+                guard let `self` else { return }
+                self.canvasViewModel.didTapLayer(
+                    layer: layer,
+                    renderTarget: self.contentView.canvasView
+                )
             },
             didTapAddButton: { [weak self] in
-                self?.canvasViewModel.didTapAddLayerButton()
+                guard let `self` else { return }
+                self.canvasViewModel.didTapAddLayerButton(
+                    renderTarget: self.contentView.canvasView
+                )
             },
             didTapRemoveButton: { [weak self] in
-                self?.canvasViewModel.didTapRemoveLayerButton()
+                guard let `self` else { return }
+                self.canvasViewModel.didTapRemoveLayerButton(
+                    renderTarget: self.contentView.canvasView
+                )
             },
             didTapVisibility: { [weak self] layer, value in
-                self?.canvasViewModel.didTapLayerVisibility(layer: layer, isVisible: value)
+                guard let `self` else { return }
+                self.canvasViewModel.didTapLayerVisibility(
+                    layer: layer,
+                    isVisible: value,
+                    renderTarget: self.contentView.canvasView
+                )
             },
             didChangeAlpha: { [weak self] layer, value in
-                self?.canvasViewModel.didChangeLayerAlpha(layer: layer, value: value)
+                guard let `self` else { return }
+                self.canvasViewModel.didChangeLayerAlpha(
+                    layer: layer,
+                    value: value,
+                    renderTarget: self.contentView.canvasView
+                )
             },
             didEditTitle: { [weak self] layer, value in
-                self?.canvasViewModel.didEditLayerTitle(layer: layer, title: value)
+                self?.canvasViewModel.didEditLayerTitle(
+                    layer: layer,
+                    title: value
+                )
             },
             didMove: { [weak self] layer, source, destination in
-                self?.canvasViewModel.didMoveLayers(layer: layer, source: source, destination: destination)
+                guard let `self` else { return }
+                self.canvasViewModel.didMoveLayers(
+                    layer: layer, 
+                    source: source,
+                    destination: destination,
+                    renderTarget: self.contentView.canvasView)
             },
             on: self
         )
@@ -255,10 +291,11 @@ extension ViewController {
 extension ViewController: FingerInputGestureSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handleFingerInputGesture(
-            touches,
+        canvasViewModel.onFingerGestureDetected(
+            touches: touches,
             with: event,
-            on: view
+            view: view,
+            renderTarget: contentView.canvasView
         )
     }
 
@@ -267,10 +304,11 @@ extension ViewController: FingerInputGestureSender {
 extension ViewController: PencilInputGestureSender {
 
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.handlePencilInputGesture(
-            touches,
+        canvasViewModel.onPencilGestureDetected(
+            touches: touches,
             with: event,
-            on: view
+            view: view,
+            renderTarget: contentView.canvasView
         )
     }
 

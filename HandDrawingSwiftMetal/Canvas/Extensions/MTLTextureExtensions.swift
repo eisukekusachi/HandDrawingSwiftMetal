@@ -9,6 +9,7 @@ import MetalKit
 import Accelerate
 
 extension MTLTexture {
+
     var size: CGSize {
         return CGSize(width: self.width, height: self.height)
     }
@@ -72,4 +73,5 @@ extension MTLTexture {
         guard let cgImage = cgImage else { return nil }
         return UIImage(cgImage: cgImage)
     }
+
 }

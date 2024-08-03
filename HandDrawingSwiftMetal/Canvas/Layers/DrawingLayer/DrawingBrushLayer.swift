@@ -12,7 +12,6 @@ class DrawingBrushLayer: DrawingLayer {
 
     var drawingTexture: MTLTexture?
 
-    var frameSize: CGSize = .zero
     var textureSize: CGSize = .zero
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -32,40 +31,43 @@ class DrawingBrushLayer: DrawingLayer {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
     /// and render the colored grayscale texture onto the drawing texture."
-    func drawOnDrawingTexture(
-        segment: LineSegment,
+    func drawOnBrushDrawingTexture(
+        points: [GrayscaleTexturePoint],
+        color: UIColor,
+        alpha: Int,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        let pointBuffers = Buffers.makeGrayscalePointBuffers(
-            device: device,
-            points: segment.dotPoints,
-            blurredDotSize: segment.parameters.dotSize,
-            alpha: segment.parameters.alpha,
-            textureSize: textureSize
-        )
+        guard
+            let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
+                device: device,
+                points: points,
+                alpha: alpha,
+                textureSize: textureSize
+            )
+        else { return }
 
-        Command.drawCurve(
+        MTLRenderer.drawCurve(
             buffers: pointBuffers,
             onGrayscaleTexture: grayscaleTexture,
             commandBuffer
         )
 
-        Command.colorize(
+        MTLRenderer.colorize(
             grayscaleTexture: grayscaleTexture,
-            with: (segment.parameters.brushColor ?? .black).rgb,
-            result: drawingTexture,
+            with: color.rgb,
+            result: drawingTexture!,
             commandBuffer
         )
     }
 
     /// Merges the drawing texture into the destination texture.
     func mergeDrawingTexture(
-        into dstTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        Command.merge(
+        MTLRenderer.merge(
             texture: drawingTexture,
-            into: dstTexture,
+            into: destinationTexture,
             commandBuffer
         )
 
@@ -80,8 +82,8 @@ class DrawingBrushLayer: DrawingLayer {
 
     /// Clears the drawing textures.
     func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
-        Command.clear(texture: drawingTexture, commandBuffer)
-        Command.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
+        MTLRenderer.clear(texture: drawingTexture, commandBuffer)
+        MTLRenderer.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
     }
 
     func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {

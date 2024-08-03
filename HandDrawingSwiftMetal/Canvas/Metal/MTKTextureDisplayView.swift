@@ -16,7 +16,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
     /// Accessor for the Metal command buffer.
     var commandBuffer: MTLCommandBuffer {
-        return commandQueue.getOrCreateCommandBuffer()
+        commandBufferManager.currentCommandBuffer
     }
 
     var renderTexture: MTLTexture? {
@@ -28,7 +28,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
 
     private var _renderTexture: MTLTexture?
 
-    private var commandQueue: CommandQueueProtocol!
+    private var commandBufferManager: MTLCommandBufferManager!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -46,7 +46,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         assert(self.device != nil, "Device is nil.")
         assert(commandQueue != nil, "CommandQueue is nil.")
 
-        self.commandQueue = CommandQueue(queue: commandQueue!)
+        self.commandBufferManager = MTLCommandBufferManager(device: self.device!)
 
         self.delegate = self
         self.enableSetNeedsDisplay = true
@@ -56,7 +56,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func initRenderTexture(textureSize: CGSize) {
-        let minSize: CGFloat = CGFloat(Command.threadgroupSize)
+        let minSize: CGFloat = CGFloat(MTLRenderer.threadGroupLength)
         assert(textureSize.width >= minSize && textureSize.height >= minSize, "The textureSize is not appropriate")
 
         _renderTexture = MTKTextureUtils.makeTexture(device!, textureSize)
@@ -67,7 +67,7 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
     }
 
     func clearCommandBuffer() {
-        commandQueue.clearCommandBuffer()
+        commandBufferManager.clearCurrentCommandBuffer()
     }
 
     // MARK: - DrawTexture
@@ -82,33 +82,41 @@ class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol 
         canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
 
         // Calculate the scale to fit the source size within the destination size
-        let scale = ViewSize.getScaleToFit(renderTexture.size, to: drawable.texture.size)
+        let scale = ScaleManager.getAspectFitFactor(
+            sourceSize: renderTexture.size,
+            destinationSize: drawable.texture.size
+        )
         let resizedRenderTextureSize = CGSize(
             width: renderTexture.size.width * scale,
             height: renderTexture.size.height * scale
         )
 
-        let textureBuffers = Buffers.makeTextureRenderingBuffers(
-            device: device,
-            matrix: canvasMatrix,
-            sourceSize: resizedRenderTextureSize,
-            destinationSize: drawable.texture.size,
-            nodes: textureNodes
+        guard
+            let _renderTexture,
+            let textureBuffers = MTLBuffers.makeAspectFitTextureBuffers(
+                device: device,
+                matrix: canvasMatrix,
+                sourceSize: resizedRenderTextureSize,
+                destinationSize: drawable.texture.size,
+                nodes: textureNodes
+            )
+        else { return }
+
+        let commandBuffer = commandBufferManager.currentCommandBuffer
+
+        MTLRenderer.draw(
+            texture: _renderTexture,
+            buffers: textureBuffers,
+            backgroundColor: (230, 230, 230),
+            on: drawable.texture,
+            commandBuffer
         )
-
-        let commandBuffer = commandQueue.getOrCreateCommandBuffer()
-
-        Command.draw(texture: _renderTexture,
-                     buffers: textureBuffers,
-                     on: drawable.texture,
-                     clearColor: (230, 230, 230),
-                     commandBuffer)
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandQueue.clearCommandBuffer()
+        commandBufferManager.clearCurrentCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {

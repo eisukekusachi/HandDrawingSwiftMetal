@@ -8,6 +8,7 @@
 import Foundation
 
 extension URL {
+
     static var documents: URL {
         URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
     }
@@ -51,4 +52,5 @@ extension URL {
         }
         return []
     }
+
 }

@@ -84,3 +84,11 @@ final class CanvasModel {
     }
 
 }
+
+extension CanvasModel {
+
+    static func getZipFileName(projectName: String) -> String {
+        projectName + "." + URL.zipSuffix
+    }
+
+}

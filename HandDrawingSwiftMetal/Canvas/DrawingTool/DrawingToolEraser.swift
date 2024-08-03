@@ -15,7 +15,7 @@ class DrawingToolEraser: DrawingTool {
     private var blurSize: Float = BlurredDotSize.initBlurSize
 
     var blurredDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: diameter, blurSize: blurSize)
+        BlurredDotSize(diameter: Float(diameter), blurSize: blurSize)
     }
 
     func setValue(alpha: Int? = nil, diameter: Int? = nil) {

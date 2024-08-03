@@ -19,7 +19,7 @@ protocol DrawingLayer {
 
     /// Merges textures
     func mergeDrawingTexture(
-        into dstTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     )
 

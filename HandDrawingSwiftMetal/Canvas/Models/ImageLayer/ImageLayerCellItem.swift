@@ -21,6 +21,10 @@ struct ImageLayerCellItem: ImageLayer {
     /// Whether the layer is visible or not
     var isVisible: Bool
 
+}
+
+extension ImageLayerCellItem {
+
     init(
         texture: MTLTexture,
         title: String,
@@ -35,10 +39,6 @@ struct ImageLayerCellItem: ImageLayer {
         
         updateThumbnail()
     }
-
-}
-
-extension ImageLayerCellItem {
 
     mutating func updateThumbnail() {
         thumbnail = texture.upsideDownUIImage?.resize(width: 64)

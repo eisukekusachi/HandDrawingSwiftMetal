@@ -9,15 +9,19 @@ import Foundation
 
 extension CGAffineTransform {
     // Generate a matrix from a center point and two points
-    static func makeMatrix(center: CGPoint,
-                           pointsA: (CGPoint?, CGPoint?),
-                           pointsB: (CGPoint?, CGPoint?),
-                           counterRotate: Bool = false,
-                           flipY: Bool = false) -> Self? {
-        guard   let pt1: CGPoint = pointsA.0,
-                let pt2: CGPoint = pointsB.0,
-                let pt3: CGPoint = pointsA.1,
-                let pt4: CGPoint = pointsB.1 else { return nil }
+    static func makeMatrix(
+        center: CGPoint,
+        pointsA: (CGPoint?, CGPoint?),
+        pointsB: (CGPoint?, CGPoint?),
+        counterRotate: Bool = false,
+        flipY: Bool = false
+    ) -> Self? {
+        guard
+            let pt1: CGPoint = pointsA.0,
+            let pt2: CGPoint = pointsB.0,
+            let pt3: CGPoint = pointsA.1,
+            let pt4: CGPoint = pointsB.1
+        else { return nil }
 
         let layerX = center.x
         let layerY = center.y
@@ -48,16 +52,27 @@ extension CGAffineTransform {
         if flipY {
             ty *= -1.0
         }
-        return CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty)
+        return .init(
+            a: a, b: b,
+            c: c, d: d,
+            tx: tx, ty: ty
+        )
     }
 
-    static func getInitialMatrix(scale: CGFloat, position: CGPoint) -> Self {
-        CGAffineTransform(a: scale, b: 0.0,
-                          c: 0.0, d: scale,
-                          tx: position.x, ty: position.y)
+    static func getInitialMatrix(
+        scale: CGFloat,
+        position: CGPoint
+    ) -> Self {
+        .init(
+            a: scale, b: 0.0,
+            c: 0.0, d: scale,
+            tx: position.x, ty: position.y
+        )
     }
 
-    func inverted(flipY: Bool = false) -> Self {
+    func inverted(
+        flipY: Bool = false
+    ) -> Self {
         let currentScale = sqrt(a * a + c * c)
         let angle = atan2(b, a)
         let inverseScale = 1.0 / currentScale
@@ -73,9 +88,11 @@ extension CGAffineTransform {
         let newTx = (translationX * newA + translationY * newC)
         let newTy = (translationX * newB + translationY * newD)
 
-        return CGAffineTransform(a: newA, b: newB,
-                                 c: newC, d: newD,
-                                 tx: newTx, ty: newTy)
+        return .init(
+            a: newA, b: newB,
+            c: newC, d: newD,
+            tx: newTx, ty: newTy
+        )
     }
 
 }

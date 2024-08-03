@@ -13,9 +13,7 @@ final class DrawingToolModel {
     var drawingTool: DrawingToolType {
         drawingToolSubject.value
     }
-    var diameter: Float {
-        diameterSubject.value
-    }
+
     var backgroundColor: UIColor {
         backgroundColorSubject.value
     }
@@ -41,8 +39,6 @@ final class DrawingToolModel {
     private (set) var brushDiameter: Int
     private (set) var eraserDiameter: Int
 
-    private var blurSize: Float = BlurredDotSize.initBlurSize
-
     private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -65,11 +61,10 @@ final class DrawingToolModel {
 extension DrawingToolModel {
 
     func setDrawingTool(_ tool: DrawingToolType) {
-        switch tool {
-        case .brush:
-            diameterSubject.send(DrawingToolBrush.diameterFloatValue(brushDiameter))
-        case .eraser:
-            diameterSubject.send(DrawingToolEraser.diameterFloatValue(eraserDiameter))
+
+        switch drawingTool {
+        case .brush: diameterSubject.send(DrawingToolBrush.diameterFloatValue(brushDiameter))
+        case .eraser: diameterSubject.send(DrawingToolEraser.diameterFloatValue(eraserDiameter))
         }
 
         drawingToolSubject.send(tool)
@@ -80,11 +75,9 @@ extension DrawingToolModel {
 extension DrawingToolModel {
 
     @objc func handleDiameterSlider(_ sender: UISlider) {
-        if drawingToolSubject.value == .brush {
-            setBrushDiameter(sender.value)
-
-        } else if drawingToolSubject.value == .eraser {
-            setEraserDiameter(sender.value)
+        switch drawingTool {
+        case .brush: setBrushDiameter(sender.value)
+        case .eraser: setEraserDiameter(sender.value)
         }
     }
 
@@ -102,14 +95,12 @@ extension DrawingToolModel {
 }
 
 extension DrawingToolModel {
-
-    var brushDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: brushDiameter, blurSize: blurSize)
+    var diameter: Int {
+        switch drawingTool {
+        case .brush: brushDiameter
+        case .eraser: eraserDiameter
+        }
     }
-    var eraserDotSize: BlurredDotSize {
-        BlurredDotSize(diameter: eraserDiameter, blurSize: blurSize)
-    }
-
     func setBrushDiameter(_ value: Float) {
         brushDiameter = DrawingToolBrush.diameterIntValue(value)
     }
@@ -131,5 +122,5 @@ extension DrawingToolModel {
     func setBackgroundColor(_ color: UIColor) {
         self.backgroundColorSubject.send(color)
     }
-    
+
 }
