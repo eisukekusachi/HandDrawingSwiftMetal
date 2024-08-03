@@ -17,12 +17,8 @@ protocol GrayscaleCurve {
     /// The key currently used in the Dictionary
     var currentDictionaryKey: TouchHashValue? { get set }
 
-    func appendToIterator(
+    func updateIterator(
         points: [GrayscaleTexturePoint],
-        touchPhase: UITouch.Phase
-    )
-
-    func makeCurvePointsFromIterator(
         touchPhase: UITouch.Phase
     ) -> [GrayscaleTexturePoint]
 

@@ -20,22 +20,19 @@ final class DefaultGrayscaleCurve: GrayscaleCurve {
     private var startDrawing: Bool = false
     private var stopProcessing: Bool = false
 
-    func appendToIterator(
+    func updateIterator(
         points: [GrayscaleTexturePoint],
         touchPhase: UITouch.Phase
-    ) {
-        iterator.append(points)
-
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        if !stopProcessing {
-            setInaccurateAlphaToZero()
-        }
-    }
-
-    func makeCurvePointsFromIterator(
-        touchPhase: UITouch.Phase
     ) -> [GrayscaleTexturePoint] {
-        iterator.makeCurvePoints(atEnd: touchPhase == .ended)
+
+        appendToIterator(
+            points: points,
+            touchPhase: touchPhase
+        )
+
+        return makeCurvePointsFromIterator(
+            touchPhase: touchPhase
+        )
     }
 
     func reset() {
@@ -48,6 +45,28 @@ final class DefaultGrayscaleCurve: GrayscaleCurve {
         tmpBrightness = nil
         startDrawing = false
         stopProcessing = false
+    }
+
+}
+
+extension DefaultGrayscaleCurve {
+
+    private func appendToIterator(
+        points: [GrayscaleTexturePoint],
+        touchPhase: UITouch.Phase
+    ) {
+        iterator.append(points)
+
+        // TODO: Delete it once actual values are used instead of estimated ones.
+        if !stopProcessing {
+            setInaccurateAlphaToZero()
+        }
+    }
+
+    private func makeCurvePointsFromIterator(
+        touchPhase: UITouch.Phase
+    ) -> [GrayscaleTexturePoint] {
+        iterator.makeCurvePoints(atEnd: touchPhase == .ended)
     }
 
 }

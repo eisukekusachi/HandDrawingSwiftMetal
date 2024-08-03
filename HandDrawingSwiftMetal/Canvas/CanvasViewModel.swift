@@ -344,11 +344,22 @@ extension CanvasViewModel {
     ) {
         let touchPhase = screenTouchPoints.last?.phase ?? .cancelled
 
-        let grayscaleCurveTexturePoints = makeGrayscaleTextureCurvePoints(
-            screenTouchPoints: screenTouchPoints,
-            grayscaleCurve: grayscaleCurve,
-            renderTarget: renderTarget
-        )
+        let grayscaleTexturePoints: [GrayscaleTexturePoint] = screenTouchPoints.map {
+            .init(
+                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                    matrix: canvasTransformer.matrix,
+                    frameSize: frameSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                    textureSize: renderTarget.renderTexture?.size ?? .zero
+                ),
+                diameter: CGFloat(drawingTool.diameter)
+            )
+        }
+
+        let grayscaleCurveTexturePoints = grayscaleCurve?.updateIterator(
+            points: grayscaleTexturePoints,
+            touchPhase: touchPhase
+        ) ?? []
 
         drawCurve(
             grayScaleTextureCurvePoints: grayscaleCurveTexturePoints,
@@ -393,35 +404,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    private func makeGrayscaleTextureCurvePoints(
-        screenTouchPoints: [TouchPoint],
-        grayscaleCurve: GrayscaleCurve?,
-        renderTarget: MTKRenderTextureProtocol
-    ) -> [GrayscaleTexturePoint] {
-        let touchPhase = screenTouchPoints.last?.phase ?? .cancelled
-
-        let grayscaleTexturePoints: [GrayscaleTexturePoint] = screenTouchPoints.map {
-            .init(
-                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
-                    matrix: canvasTransformer.matrix,
-                    frameSize: frameSize,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                    textureSize: renderTarget.renderTexture?.size ?? .zero
-                ),
-                diameter: CGFloat(drawingTool.diameter)
-            )
-        }
-
-        grayscaleCurve?.appendToIterator(
-            points: grayscaleTexturePoints,
-            touchPhase: touchPhase
-        )
-
-        return grayscaleCurve?.makeCurvePointsFromIterator(
-            touchPhase: touchPhase
-        ) ?? []
-    }
 
     private func drawCurve(
         grayScaleTextureCurvePoints: [GrayscaleTexturePoint],

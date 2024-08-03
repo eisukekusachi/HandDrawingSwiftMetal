@@ -17,7 +17,34 @@ final class SmoothGrayscaleCurve: GrayscaleCurve {
 
     private var tmpIterator = GrayscaleTexturePointIterator()
 
-    func appendToIterator(
+    func updateIterator(
+        points: [GrayscaleTexturePoint],
+        touchPhase: UITouch.Phase
+    ) -> [GrayscaleTexturePoint] {
+
+        appendToIterator(
+            points: points,
+            touchPhase: touchPhase
+        )
+
+        return makeCurvePointsFromIterator(
+            touchPhase: touchPhase
+        )
+    }
+
+    func reset() {
+        tmpIterator.clear()
+        iterator.clear()
+
+        startAfterPoint = nil
+        currentDictionaryKey = nil
+    }
+
+}
+
+extension SmoothGrayscaleCurve {
+
+    private func appendToIterator(
         points: [GrayscaleTexturePoint],
         touchPhase: UITouch.Phase
     ) {
@@ -43,18 +70,10 @@ final class SmoothGrayscaleCurve: GrayscaleCurve {
         }
     }
 
-    func makeCurvePointsFromIterator(
+    private func makeCurvePointsFromIterator(
         touchPhase: UITouch.Phase
     ) -> [GrayscaleTexturePoint] {
         iterator.makeCurvePoints(atEnd: touchPhase == .ended)
-    }
-
-    func reset() {
-        tmpIterator.clear()
-        iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
     }
 
 }
