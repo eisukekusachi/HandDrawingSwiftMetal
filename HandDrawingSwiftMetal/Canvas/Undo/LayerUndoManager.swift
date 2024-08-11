@@ -21,7 +21,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
         canRedoSubject.eraseToAnyPublisher()
     }
 
-    var refreshCanvasPublisher: AnyPublisher<ImageLayerUndoModel, Never> {
+    var refreshCanvasPublisher: AnyPublisher<TextureLayerUndoObject, Never> {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
@@ -33,7 +33,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
     private let canUndoSubject = CurrentValueSubject<Bool, Never>(true)
     private let canRedoSubject = CurrentValueSubject<Bool, Never>(true)
 
-    private let refreshCanvasSubject = PassthroughSubject<ImageLayerUndoModel, Never>()
+    private let refreshCanvasSubject = PassthroughSubject<TextureLayerUndoObject, Never>()
 
     init() {
         undoManager.levelsOfUndo = 8
@@ -62,7 +62,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
     }
 
     func addUndoObject(
-        undoObject: ImageLayerUndoModel,
+        undoObject: TextureLayerUndoObject,
         layerManager: ImageLayerManager
     ) {
         registerDrawingUndoAction(
@@ -75,7 +75,7 @@ final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     /// Registers an action to undo the drawing operation.
     private func registerDrawingUndoAction(
-        with undoObject: ImageLayerUndoModel,
+        with undoObject: TextureLayerUndoObject,
         layerManager: ImageLayerManager
     ) {
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
