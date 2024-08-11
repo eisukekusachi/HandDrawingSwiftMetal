@@ -64,8 +64,10 @@ extension TextureLayerManager {
         )
     }
 
-    func addNewLayer(textureSize: CGSize) {
-        let newLayer = makeNewLayer(textureSize: textureSize)
+    func addNewLayer() {
+        guard let currentTexture else { return }
+
+        let newLayer = makeNewLayer(textureSize: currentTexture.size)
         addLayer(newLayer)
     }
 

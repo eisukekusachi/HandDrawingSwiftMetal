@@ -541,13 +541,9 @@ extension CanvasViewModel {
     func didTapAddLayerButton(
         renderTarget: MTKRenderTextureProtocol
     ) {
-        guard 
-            let renderTexture = renderTarget.renderTexture
-        else { return }
-
         layerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.addNewLayer(textureSize: renderTexture.size)
+        layerManager.addNewLayer()
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
