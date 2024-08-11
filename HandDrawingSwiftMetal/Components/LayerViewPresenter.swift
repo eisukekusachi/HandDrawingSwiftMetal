@@ -16,7 +16,7 @@ final class LayerViewPresenter {
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
-        layerManager: ImageLayerManager,
+        layerManager: TextureLayerManager,
         targetView: UIView,
         didTapLayer: @escaping (TextureLayer) -> Void,
         didTapAddButton: @escaping () -> Void,

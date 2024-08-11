@@ -134,7 +134,7 @@ extension ImageLayerView {
 #Preview {
 
     ImageLayerView(
-        layerManager: ImageLayerManager(),
+        layerManager: TextureLayerManager(),
         roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in
             print("Tap layer")

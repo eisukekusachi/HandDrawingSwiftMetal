@@ -1,5 +1,5 @@
 //
-//  ImageLayerManager.swift
+//  TextureLayerManager.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/16.
@@ -9,7 +9,7 @@ import MetalKit
 import Accelerate
 import Combine
 
-final class ImageLayerManager: LayerManager<TextureLayer> {
+final class TextureLayerManager: LayerManager<TextureLayer> {
 
     /// A protocol for managing current drawing layer
     private (set) var drawingLayer: DrawingLayer?
@@ -69,7 +69,7 @@ final class ImageLayerManager: LayerManager<TextureLayer> {
 
 }
 
-extension ImageLayerManager {
+extension TextureLayerManager {
 
     func addNewLayer() {
         let newLayer = makeNewLayer(textureSize: textureSize)
@@ -196,7 +196,7 @@ extension ImageLayerManager {
 
 }
 
-extension ImageLayerManager {
+extension TextureLayerManager {
 
     var selectedTexture: MTLTexture? {
         guard index < layers.count else { return nil }
