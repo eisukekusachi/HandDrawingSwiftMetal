@@ -33,38 +33,8 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 extension TextureLayerManager {
 
-    func setDrawingLayer(_ tool: DrawingToolType) {
+    func setDrawingTextureLayer(_ tool: DrawingToolType) {
         drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
-    }
-
-    func resetLayers(
-        newLayers: [TextureLayer] = [],
-        layerIndex: Int = 0,
-        textureSize: CGSize
-    ) {
-        bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-
-        brushDrawingTextureLayer.initTexture(textureSize)
-        eraserDrawingTextureLayer.initTexture(textureSize)
-
-        layers.removeAll()
-
-        var newLayers = newLayers
-        if newLayers.isEmpty {
-            newLayers.append(
-                .init(
-                    texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
-                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-                )
-            )
-        }
-
-        super.initLayers(
-            index: layerIndex,
-            layers: newLayers
-        )
     }
 
     func addNewLayer() {
@@ -118,6 +88,36 @@ extension TextureLayerManager {
             texture: topTexture,
             into: destinationTexture,
             commandBuffer
+        )
+    }
+
+    func resetLayers(
+        newLayers: [TextureLayer] = [],
+        layerIndex: Int = 0,
+        textureSize: CGSize
+    ) {
+        bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+
+        brushDrawingTextureLayer.initTexture(textureSize)
+        eraserDrawingTextureLayer.initTexture(textureSize)
+
+        layers.removeAll()
+
+        var newLayers = newLayers
+        if newLayers.isEmpty {
+            newLayers.append(
+                .init(
+                    texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+                )
+            )
+        }
+
+        super.initLayers(
+            index: layerIndex,
+            layers: newLayers
         )
     }
 

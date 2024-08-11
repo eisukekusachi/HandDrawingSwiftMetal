@@ -108,7 +108,7 @@ final class CanvasViewModel {
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
-                self?.layerManager.setDrawingLayer(tool)
+                self?.layerManager.setDrawingTextureLayer(tool)
             }
             .store(in: &cancellables)
 
