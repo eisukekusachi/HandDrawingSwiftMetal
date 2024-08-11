@@ -6,7 +6,7 @@
 //
 
 import MetalKit
-
+/// A layer with a texture
 struct TextureLayer: TextureLayerProtocol {
     /// The unique identifier for the layer
     let id: UUID = UUID()
