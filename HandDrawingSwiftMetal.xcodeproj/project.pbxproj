@@ -436,7 +436,7 @@
 			isa = PBXGroup;
 			children = (
 				D481A42C2C5E1D2F00279C91 /* InputDevice */,
-				D481A4382C5E387600279C91 /* ImageLayer */,
+				D481A4382C5E387600279C91 /* TextureLayer */,
 				D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */,
 				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
 				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
@@ -495,14 +495,14 @@
 			path = TouchManagers;
 			sourceTree = "<group>";
 		};
-		D481A4382C5E387600279C91 /* ImageLayer */ = {
+		D481A4382C5E387600279C91 /* TextureLayer */ = {
 			isa = PBXGroup;
 			children = (
 				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
 				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
 				D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */,
 			);
-			path = ImageLayer;
+			path = TextureLayer;
 			sourceTree = "<group>";
 		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
