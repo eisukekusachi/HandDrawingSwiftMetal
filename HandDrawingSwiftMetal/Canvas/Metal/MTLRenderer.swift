@@ -196,7 +196,7 @@ enum MTLRenderer {
     }
 
     static func merge(
-        layers: [ImageLayerCellItem],
+        layers: [TextureLayer],
         into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {

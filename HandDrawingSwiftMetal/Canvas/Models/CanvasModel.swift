@@ -13,7 +13,7 @@ final class CanvasModel {
     let textureSize: CGSize
 
     let layerIndex: Int
-    let layers: [ImageLayerCellItem]
+    let layers: [TextureLayer]
 
     let drawingTool: Int
 
@@ -49,9 +49,9 @@ final class CanvasModel {
         device: MTLDevice,
         textureSize: CGSize,
         folderURL: URL
-    ) -> [ImageLayerCellItem] {
+    ) -> [TextureLayer] {
 
-        var layers: [ImageLayerCellItem] = []
+        var layers: [TextureLayer] = []
 
         try? sourceLayers.forEach { layer in
 
@@ -63,8 +63,8 @@ final class CanvasModel {
                     .init(
                         texture: texture,
                         title: layer.title,
-                        isVisible: layer.isVisible,
-                        alpha: layer.alpha
+                        alpha: layer.alpha,
+                        isVisible: layer.isVisible
                     )
                 )
             }

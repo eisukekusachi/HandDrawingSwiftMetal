@@ -10,6 +10,6 @@ import Foundation
 struct ImageLayerUndoModel {
 
     let index: Int
-    let layers: [ImageLayerCellItem]
+    let layers: [TextureLayer]
 
 }

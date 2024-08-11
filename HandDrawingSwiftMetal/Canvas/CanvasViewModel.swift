@@ -519,7 +519,7 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         renderTarget: MTKRenderTextureProtocol
     ) {
         layerManager.updateIndex(layer)
@@ -575,7 +575,7 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didTapLayerVisibility(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         isVisible: Bool,
         renderTarget: MTKRenderTextureProtocol
     ) {
@@ -593,7 +593,7 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didChangeLayerAlpha(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         value: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
@@ -608,13 +608,13 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didEditLayerTitle(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         title: String
     ) {
         layerManager.updateTitle(layer, title)
     }
     func didMoveLayers(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         source: IndexSet,
         destination: Int,
         renderTarget: MTKRenderTextureProtocol
