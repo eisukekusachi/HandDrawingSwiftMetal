@@ -27,28 +27,12 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 }
 
 extension TextureLayerManager {
-    func initialize(
-        textureSize: CGSize,
+
+    func reset(
+        newLayers: [TextureLayer] = [],
         layerIndex: Int = 0,
-        layers: [TextureLayer] = []
+        textureSize: CGSize
     ) {
-        initializeProperties(textureSize: textureSize)
-
-        var layers = layers
-        if layers.isEmpty {
-            layers.append(
-                makeNewLayer(textureSize: textureSize)
-            )
-        }
-
-        super.initLayers(
-            index: layerIndex,
-            layers: layers
-        )
-    }
-
-    private func initializeProperties(textureSize: CGSize) {
-
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -57,6 +41,18 @@ extension TextureLayerManager {
         eraserDrawingTextureLayer.initTexture(textureSize)
 
         layers.removeAll()
+
+        var newLayers = newLayers
+        if newLayers.isEmpty {
+            newLayers.append(
+                makeNewLayer(textureSize: textureSize)
+            )
+        }
+
+        super.initLayers(
+            index: layerIndex,
+            layers: newLayers
+        )
     }
 
     private func makeNewLayer(textureSize: CGSize) -> TextureLayer {

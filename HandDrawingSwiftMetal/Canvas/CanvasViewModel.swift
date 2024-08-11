@@ -119,7 +119,7 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initialize(textureSize: textureSize)
+        layerManager.reset(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
@@ -143,10 +143,10 @@ final class CanvasViewModel {
 
         layerUndoManager.clear()
 
-        layerManager.initialize(
-            textureSize: model.textureSize,
+        layerManager.reset(
+            newLayers: model.layers,
             layerIndex: model.layerIndex,
-            layers: model.layers
+            textureSize: model.textureSize
         )
 
         drawingTool.setBrushDiameter(model.brushDiameter)
@@ -497,7 +497,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         canvasTransformer.setMatrix(.identity)
-        layerManager.initialize(textureSize: renderTexture.size)
+        layerManager.reset(textureSize: renderTexture.size)
 
         layerUndoManager.clear()
 
