@@ -407,14 +407,14 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        if let drawingLayer = layerManager.drawingLayer as? DrawingEraserLayer {
+        if let drawingLayer = layerManager.drawingTextureLayer as? EraserDrawingTextureLayer {
             drawingLayer.drawOnEraserDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )
-        } else if let drawingLayer = layerManager.drawingLayer as? DrawingBrushLayer {
+        } else if let drawingLayer = layerManager.drawingTextureLayer as? BrushDrawingTextureLayer {
             drawingLayer.drawOnBrushDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 color: drawingTool.brushColor,
@@ -424,7 +424,7 @@ extension CanvasViewModel {
         }
 
         if touchPhase == .ended {
-            layerManager.drawingLayer?.mergeDrawingTexture(
+            layerManager.drawingTextureLayer?.mergeDrawingTexture(
                 into: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )

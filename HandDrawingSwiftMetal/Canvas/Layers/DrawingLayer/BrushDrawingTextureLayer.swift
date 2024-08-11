@@ -1,33 +1,57 @@
 //
-//  DrawingBrushLayer.swift
+//  BrushDrawingTextureLayer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
 import MetalKit
-
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class DrawingBrushLayer: DrawingLayer {
+class BrushDrawingTextureLayer: DrawingTextureLayer {
 
     var drawingTexture: MTLTexture?
 
-    var textureSize: CGSize = .zero
+    private var grayscaleTexture: MTLTexture!
+
+    private var textureSize: CGSize = .zero
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    private var grayscaleTexture: MTLTexture!
-
-    /// Initializes the textures for drawing with the specified texture size.
-    func initTextures(_ textureSize: CGSize) {
+    func initTexture(_ textureSize: CGSize) {
         self.textureSize = textureSize
 
         self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
         self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
-        clearDrawingTextures()
+        clearDrawingTexture()
     }
 
+    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?] {
+        [texture, drawingTexture]
+    }
+
+    func mergeDrawingTexture(
+        into destinationTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        MTLRenderer.merge(
+            texture: drawingTexture,
+            into: destinationTexture,
+            commandBuffer
+        )
+
+        clearDrawingTexture(commandBuffer)
+    }
+
+    func clearDrawingTexture() {
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTexture(commandBuffer)
+        commandBuffer.commit()
+    }
+
+}
+
+extension BrushDrawingTextureLayer {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
     /// and render the colored grayscale texture onto the drawing texture."
@@ -60,34 +84,13 @@ class DrawingBrushLayer: DrawingLayer {
         )
     }
 
-    /// Merges the drawing texture into the destination texture.
-    func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        MTLRenderer.merge(
-            texture: drawingTexture,
-            into: destinationTexture,
-            commandBuffer
-        )
+}
 
-        clearDrawingTextures(commandBuffer)
-    }
+extension BrushDrawingTextureLayer {
 
-    func clearDrawingTextures() {
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(commandBuffer)
-        commandBuffer.commit()
-    }
-
-    /// Clears the drawing textures.
-    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
+    private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clear(texture: drawingTexture, commandBuffer)
         MTLRenderer.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
-    }
-
-    func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {
-        [texture, drawingTexture]
     }
 
 }

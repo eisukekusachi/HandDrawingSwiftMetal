@@ -1,43 +1,87 @@
 //
-//  DrawingEraserLayer.swift
+//  EraserDrawingTextureLayer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
 import MetalKit
-
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class DrawingEraserLayer: DrawingLayer {
+class EraserDrawingTextureLayer: DrawingTextureLayer {
 
     var drawingTexture: MTLTexture?
 
-    var textureSize: CGSize = .zero
-
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
+
+    private var textureSize: CGSize = .zero
 
     private var flippedTextureBuffers: TextureBuffers?
 
     private var isDrawing: Bool = false
 
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
     required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
     }
 
-    /// Initializes the textures for drawing with the specified texture size.
-    func initTextures(_ textureSize: CGSize) {
+    func initTexture(_ textureSize: CGSize) {
         self.textureSize = textureSize
 
         self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
         self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
         self.eraserTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
-        clearDrawingTextures()
+        clearDrawingTexture()
     }
 
+    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?] {
+        isDrawing ? [eraserTexture] : [texture]
+    }
+
+    func mergeDrawingTexture(
+        into destinationTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        guard 
+            let drawingTexture,
+            let flippedTextureBuffers
+        else { return }
+
+        MTLRenderer.copy(
+            sourceTexture: destinationTexture,
+            destinationTexture: eraserTexture,
+            commandBuffer
+        )
+
+        MTLRenderer.makeEraseTexture(
+            sourceTexture: drawingTexture,
+            buffers: flippedTextureBuffers,
+            into: eraserTexture,
+            commandBuffer
+        )
+
+        MTLRenderer.copy(
+            sourceTexture: eraserTexture,
+            destinationTexture: destinationTexture,
+            commandBuffer
+        )
+
+        clearDrawingTexture(commandBuffer)
+
+        isDrawing = false
+    }
+
+    func clearDrawingTexture() {
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTexture(commandBuffer)
+        commandBuffer.commit()
+    }
+
+}
+
+extension EraserDrawingTextureLayer {
     /// First, draw lines in grayscale on a grayscale texture,
     /// then apply the intensity as transparency to add black color to the grayscale texture,
     /// and render the grayscale texture onto the drawing texture.
@@ -86,48 +130,11 @@ class DrawingEraserLayer: DrawingLayer {
         isDrawing = true
     }
 
-    /// Merges the eraser texture into the destination texture.
-    func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        guard 
-            let drawingTexture,
-            let flippedTextureBuffers
-        else { return }
+}
 
-        MTLRenderer.copy(
-            sourceTexture: destinationTexture,
-            destinationTexture: eraserTexture,
-            commandBuffer
-        )
+extension EraserDrawingTextureLayer {
 
-        MTLRenderer.makeEraseTexture(
-            sourceTexture: drawingTexture,
-            buffers: flippedTextureBuffers,
-            into: eraserTexture,
-            commandBuffer
-        )
-
-        MTLRenderer.copy(
-            sourceTexture: eraserTexture,
-            destinationTexture: destinationTexture,
-            commandBuffer
-        )
-
-        clearDrawingTextures(commandBuffer)
-
-        isDrawing = false
-    }
-
-    func clearDrawingTextures() {
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(commandBuffer)
-        commandBuffer.commit()
-    }
-
-    /// Clears the drawing textures.
-    func clearDrawingTextures(_ commandBuffer: MTLCommandBuffer) {
+    private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clear(
             textures: [
                 eraserTexture,
@@ -140,10 +147,6 @@ class DrawingEraserLayer: DrawingLayer {
             withRGB: (0, 0, 0),
             commandBuffer
         )
-    }
-
-    func getDrawingTextures(_ texture: MTLTexture) -> [MTLTexture?] {
-        isDrawing ? [eraserTexture] : [texture]
     }
 
 }

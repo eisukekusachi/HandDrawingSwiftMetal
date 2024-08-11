@@ -11,12 +11,12 @@ import Combine
 
 final class TextureLayerManager: LayerManager<TextureLayer> {
 
-    /// A protocol for managing current drawing layer
-    private (set) var drawingLayer: DrawingLayer?
-    /// Drawing with a brush
-    private let drawingBrushLayer = DrawingBrushLayer()
-    /// Drawing with an eraser
-    private let drawingEraserLayer = DrawingEraserLayer()
+    /// A protocol for managing current drawing texture layer
+    private (set) var drawingTextureLayer: DrawingTextureLayer?
+    /// A drawing texture layer with a brush
+    private let brushDrawingTextureLayer = BrushDrawingTextureLayer()
+    /// A drawing texture layer with an eraser
+    private let eraserDrawingTextureLayer = EraserDrawingTextureLayer()
 
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
@@ -54,8 +54,8 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        drawingBrushLayer.initTextures(textureSize)
-        drawingEraserLayer.initTextures(textureSize)
+        brushDrawingTextureLayer.initTexture(textureSize)
+        eraserDrawingTextureLayer.initTexture(textureSize)
 
         layers.removeAll()
     }
@@ -84,7 +84,7 @@ extension TextureLayerManager {
         guard
             let destinationTexture,
             let selectedTexture = selectedTexture,
-            let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
+            let selectedTextures = drawingTextureLayer?.getDrawingTexture(includingSelectedTexture: selectedTexture)
         else { return }
 
         MTLRenderer.fill(
@@ -127,7 +127,7 @@ extension TextureLayerManager {
     ) {
         guard
             let selectedTexture = selectedTexture,
-            let selectedTextures = drawingLayer?.getDrawingTextures(selectedTexture)
+            let selectedTextures = drawingTextureLayer?.getDrawingTexture(includingSelectedTexture: selectedTexture)
         else { return }
 
         MTLRenderer.fill(
@@ -204,11 +204,11 @@ extension TextureLayerManager {
     }
 
     func setDrawingLayer(_ tool: DrawingToolType) {
-        drawingLayer = tool == .eraser ? drawingEraserLayer : drawingBrushLayer
+        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
     }
 
     func clearDrawingLayer() {
-        drawingLayer?.clearDrawingTextures()
+        drawingTextureLayer?.clearDrawingTexture()
     }
 
     func updateTextureAddress() {
