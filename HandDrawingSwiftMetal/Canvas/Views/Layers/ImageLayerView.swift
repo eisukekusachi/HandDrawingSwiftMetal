@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ImageLayerView<T: ImageLayer>: View {
+struct ImageLayerView<T: TextureLayerProtocol>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow

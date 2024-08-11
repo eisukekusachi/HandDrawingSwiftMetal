@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct ImageLayerCellItem: ImageLayer {
+struct ImageLayerCellItem: TextureLayerProtocol {
     /// The unique identifier for the layer
     let id: UUID
     /// The texture of the layer

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ImageLayerListView<T: ImageLayer>: View {
+struct ImageLayerListView<T: TextureLayerProtocol>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
 
