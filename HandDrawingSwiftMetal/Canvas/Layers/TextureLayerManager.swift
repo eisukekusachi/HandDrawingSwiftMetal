@@ -156,7 +156,7 @@ extension TextureLayerManager {
         }
     }
 
-    func update(
+    func updateLayer(
         _ layer: TextureLayer,
         isVisible: Bool? = nil,
         alpha: Int? = nil

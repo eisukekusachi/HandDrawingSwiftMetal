@@ -582,7 +582,7 @@ extension CanvasViewModel {
         isVisible: Bool,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.update(layer, isVisible: isVisible)
+        layerManager.updateLayer(layer, isVisible: isVisible)
 
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
@@ -600,7 +600,7 @@ extension CanvasViewModel {
         value: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.update(layer, alpha: value)
+        layerManager.updateLayer(layer, alpha: value)
 
         layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
