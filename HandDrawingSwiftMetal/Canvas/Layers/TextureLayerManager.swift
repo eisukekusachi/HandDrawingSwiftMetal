@@ -172,7 +172,7 @@ extension TextureLayerManager {
     }
 
     @MainActor
-    func updateCurrentThumbnail() async throws {
+    func updateThumbnail() async throws {
         try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
         if let selectedLayer {
             updateThumbnail(selectedLayer)

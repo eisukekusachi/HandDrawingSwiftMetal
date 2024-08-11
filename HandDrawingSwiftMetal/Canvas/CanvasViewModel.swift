@@ -479,7 +479,7 @@ extension CanvasViewModel {
 
     func didTapLayerButton() {
         Task {
-            try? await layerManager.updateCurrentThumbnail()
+            try? await layerManager.updateThumbnail()
             requestShowingLayerViewSubject.send()
         }
     }
