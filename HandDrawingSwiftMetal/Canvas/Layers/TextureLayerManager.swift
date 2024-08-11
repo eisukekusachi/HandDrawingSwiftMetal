@@ -11,6 +11,11 @@ import Combine
 
 final class TextureLayerManager: LayerManager<TextureLayer> {
 
+    var selectedTexture: MTLTexture? {
+        guard index < layers.count else { return nil }
+        return layers[index].texture
+    }
+
     /// A protocol for managing current drawing texture layer
     private (set) var drawingTextureLayer: DrawingTextureLayer?
     /// A drawing texture layer with a brush
@@ -28,7 +33,11 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 extension TextureLayerManager {
 
-    func reset(
+    func setDrawingLayer(_ tool: DrawingToolType) {
+        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
+    }
+
+    func resetLayers(
         newLayers: [TextureLayer] = [],
         layerIndex: Int = 0,
         textureSize: CGSize
@@ -102,19 +111,6 @@ extension TextureLayerManager {
             into: destinationTexture,
             commandBuffer
         )
-    }
-
-}
-
-extension TextureLayerManager {
-
-    var selectedTexture: MTLTexture? {
-        guard index < layers.count else { return nil }
-        return layers[index].texture
-    }
-
-    func setDrawingLayer(_ tool: DrawingToolType) {
-        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
     }
 
 }

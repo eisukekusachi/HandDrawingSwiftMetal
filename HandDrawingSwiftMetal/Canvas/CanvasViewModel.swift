@@ -119,7 +119,7 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.reset(textureSize: textureSize)
+        layerManager.resetLayers(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
@@ -143,7 +143,7 @@ final class CanvasViewModel {
 
         layerUndoManager.clear()
 
-        layerManager.reset(
+        layerManager.resetLayers(
             newLayers: model.layers,
             layerIndex: model.layerIndex,
             textureSize: model.textureSize
@@ -497,7 +497,7 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         canvasTransformer.setMatrix(.identity)
-        layerManager.reset(textureSize: renderTexture.size)
+        layerManager.resetLayers(textureSize: renderTexture.size)
 
         layerUndoManager.clear()
 
