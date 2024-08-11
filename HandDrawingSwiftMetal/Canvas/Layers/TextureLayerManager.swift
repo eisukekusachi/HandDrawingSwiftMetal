@@ -54,7 +54,10 @@ extension TextureLayerManager {
         var newLayers = newLayers
         if newLayers.isEmpty {
             newLayers.append(
-                makeNewLayer(textureSize: textureSize)
+                .init(
+                    texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+                )
             )
         }
 
@@ -67,7 +70,10 @@ extension TextureLayerManager {
     func addNewLayer() {
         guard let currentTexture else { return }
 
-        let newLayer = makeNewLayer(textureSize: currentTexture.size)
+        let newLayer: TextureLayer = .init(
+            texture: MTKTextureUtils.makeBlankTexture(device, currentTexture.size),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        )
         addLayer(newLayer)
     }
 
@@ -191,17 +197,6 @@ extension TextureLayerManager {
         else { return }
 
         layers[index].texture = newTexture
-    }
-
-}
-
-extension TextureLayerManager {
-
-    private func makeNewLayer(textureSize: CGSize) -> TextureLayer {
-        .init(
-            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        )
     }
 
 }
