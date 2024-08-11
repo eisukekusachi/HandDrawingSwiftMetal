@@ -44,7 +44,7 @@ final class DocumentsLocalRepository: LocalRepository {
                 .compactMap { thumbnailName, layers -> CanvasEntity? in
                     return .init(
                         thumbnailName: thumbnailName,
-                        textureSize: layerManager.textureSize,
+                        textureSize: renderTexture.size,
                         layerIndex: layerManager.index,
                         layers: layers,
                         drawingTool: drawingTool

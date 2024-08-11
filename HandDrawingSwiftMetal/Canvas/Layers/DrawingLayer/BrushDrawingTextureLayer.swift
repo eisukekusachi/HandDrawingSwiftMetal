@@ -13,13 +13,13 @@ class BrushDrawingTextureLayer: DrawingTextureLayer {
 
     private var grayscaleTexture: MTLTexture!
 
-    private var textureSize: CGSize = .zero
-
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    func initTexture(_ textureSize: CGSize) {
-        self.textureSize = textureSize
+}
 
+extension BrushDrawingTextureLayer {
+
+    func initTexture(_ textureSize: CGSize) {
         self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
         self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
@@ -62,6 +62,7 @@ extension BrushDrawingTextureLayer {
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let textureSize = drawingTexture?.size,
             let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
                 device: device,
                 points: points,

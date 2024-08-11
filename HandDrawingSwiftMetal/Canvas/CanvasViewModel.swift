@@ -490,11 +490,14 @@ extension CanvasViewModel {
     }
 
     func didTapNewCanvasButton(renderTarget: MTKRenderTextureProtocol) {
+        guard 
+            let renderTexture = renderTarget.renderTexture
+        else { return }
 
         projectName = Calendar.currentDate
 
         canvasTransformer.setMatrix(.identity)
-        layerManager.initialize(textureSize: layerManager.textureSize)
+        layerManager.initialize(textureSize: renderTexture.size)
 
         layerUndoManager.clear()
 
@@ -503,7 +506,7 @@ extension CanvasViewModel {
         )
         layerManager.drawAllLayers(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: renderTexture,
             renderTarget.commandBuffer
         )
 
@@ -538,9 +541,13 @@ extension CanvasViewModel {
     func didTapAddLayerButton(
         renderTarget: MTKRenderTextureProtocol
     ) {
+        guard 
+            let renderTexture = renderTarget.renderTexture
+        else { return }
+
         layerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.addNewLayer()
+        layerManager.addNewLayer(textureSize: renderTexture.size)
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )

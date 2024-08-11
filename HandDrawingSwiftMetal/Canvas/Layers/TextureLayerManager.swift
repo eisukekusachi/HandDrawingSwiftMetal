@@ -22,10 +22,11 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
 
-    private (set) var textureSize: CGSize = .zero
-
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
+}
+
+extension TextureLayerManager {
     func initialize(
         textureSize: CGSize,
         layerIndex: Int = 0,
@@ -48,8 +49,6 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
     private func initializeProperties(textureSize: CGSize) {
 
-        self.textureSize = textureSize
-
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
@@ -71,7 +70,7 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 extension TextureLayerManager {
 
-    func addNewLayer() {
+    func addNewLayer(textureSize: CGSize) {
         let newLayer = makeNewLayer(textureSize: textureSize)
         addLayer(newLayer)
     }

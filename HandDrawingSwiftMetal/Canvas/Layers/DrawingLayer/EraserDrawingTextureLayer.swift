@@ -14,8 +14,6 @@ class EraserDrawingTextureLayer: DrawingTextureLayer {
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
 
-    private var textureSize: CGSize = .zero
-
     private var flippedTextureBuffers: TextureBuffers?
 
     private var isDrawing: Bool = false
@@ -26,8 +24,11 @@ class EraserDrawingTextureLayer: DrawingTextureLayer {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
     }
 
+}
+
+extension EraserDrawingTextureLayer {
+
     func initTexture(_ textureSize: CGSize) {
-        self.textureSize = textureSize
 
         self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
         self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
@@ -93,6 +94,7 @@ extension EraserDrawingTextureLayer {
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let textureSize = drawingTexture?.size,
             let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
                 device: device,
                 points: points,
