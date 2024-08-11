@@ -324,7 +324,7 @@ extension CanvasViewModel {
     private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
-        layerManager.clearDrawingTexture()
+        layerManager.drawingTextureLayer?.clearDrawingTexture()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
     }

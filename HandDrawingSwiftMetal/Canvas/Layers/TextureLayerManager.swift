@@ -117,10 +117,6 @@ extension TextureLayerManager {
         drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
     }
 
-    func clearDrawingTexture() {
-        drawingTextureLayer?.clearDrawingTexture()
-    }
-
 }
 
 extension TextureLayerManager {
