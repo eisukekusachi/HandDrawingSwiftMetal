@@ -55,17 +55,6 @@ extension TextureLayerManager {
         )
     }
 
-    private func makeNewLayer(textureSize: CGSize) -> TextureLayer {
-        .init(
-            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        )
-    }
-
-}
-
-extension TextureLayerManager {
-
     func addNewLayer(textureSize: CGSize) {
         let newLayer = makeNewLayer(textureSize: textureSize)
         addLayer(newLayer)
@@ -158,6 +147,27 @@ extension TextureLayerManager {
         )
     }
 
+}
+
+extension TextureLayerManager {
+
+    var selectedTexture: MTLTexture? {
+        guard index < layers.count else { return nil }
+        return layers[index].texture
+    }
+
+    func setDrawingLayer(_ tool: DrawingToolType) {
+        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
+    }
+
+    func clearDrawingTexture() {
+        drawingTextureLayer?.clearDrawingTexture()
+    }
+
+}
+
+extension TextureLayerManager {
+
     func updateUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
     ) {
@@ -189,41 +199,6 @@ extension TextureLayerManager {
         }
     }
 
-}
-
-extension TextureLayerManager {
-
-    var selectedTexture: MTLTexture? {
-        guard index < layers.count else { return nil }
-        return layers[index].texture
-    }
-
-    func setDrawingLayer(_ tool: DrawingToolType) {
-        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
-    }
-
-    func clearDrawingTexture() {
-        drawingTextureLayer?.clearDrawingTexture()
-    }
-
-    func updateTextureAddress() {
-        guard
-            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
-            let selectedTexture = selectedTexture,
-            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
-        else { return }
-
-        layers[index].texture = newTexture
-    }
-
-    @MainActor
-    func updateCurrentThumbnail() async throws {
-        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-        if let selectedLayer {
-            updateThumbnail(selectedLayer)
-        }
-    }
-
     func update(
         _ layer: TextureLayer,
         isVisible: Bool? = nil,
@@ -239,6 +214,14 @@ extension TextureLayerManager {
         }
     }
 
+    @MainActor
+    func updateCurrentThumbnail() async throws {
+        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
+        if let selectedLayer {
+            updateThumbnail(selectedLayer)
+        }
+    }
+
     func updateTitle(_ layer: TextureLayer, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
@@ -247,6 +230,27 @@ extension TextureLayerManager {
     func updateThumbnail(_ layer: TextureLayer) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].updateThumbnail()
+    }
+
+    func updateTextureAddress() {
+        guard
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let selectedTexture = selectedTexture,
+            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
+        else { return }
+
+        layers[index].texture = newTexture
+    }
+
+}
+
+extension TextureLayerManager {
+
+    private func makeNewLayer(textureSize: CGSize) -> TextureLayer {
+        .init(
+            texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        )
     }
 
 }
