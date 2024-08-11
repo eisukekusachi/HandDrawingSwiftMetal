@@ -60,56 +60,13 @@ extension TextureLayerManager {
         addLayer(newLayer)
     }
 
-    func drawAllLayers(
+    func mergeAllLayers(
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
             let destinationTexture,
-            let selectedTexture = selectedTexture,
-            let selectedTextures = drawingTextureLayer?.getDrawingTexture(includingSelectedTexture: selectedTexture)
-        else { return }
-
-        MTLRenderer.fill(
-            destinationTexture,
-            withRGB: backgroundColor.rgb,
-            commandBuffer
-        )
-
-        MTLRenderer.merge(
-            texture: bottomTexture,
-            into: destinationTexture,
-            commandBuffer
-        )
-
-        if layers[index].isVisible {
-            MTLRenderer.draw(
-                textures: selectedTextures.compactMap { $0 },
-                on: currentTexture,
-                commandBuffer
-            )
-            MTLRenderer.merge(
-                texture: currentTexture,
-                alpha: selectedLayer?.alpha ?? 0,
-                into: destinationTexture,
-                commandBuffer
-            )
-        }
-
-        MTLRenderer.merge(
-            texture: topTexture,
-            into: destinationTexture,
-            commandBuffer
-        )
-    }
-
-    func mergeAllLayers(
-        backgroundColor: UIColor,
-        onto destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        guard
             let selectedTexture = selectedTexture,
             let selectedTextures = drawingTextureLayer?.getDrawingTexture(includingSelectedTexture: selectedTexture)
         else { return }

@@ -158,7 +158,7 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -179,7 +179,7 @@ final class CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -430,7 +430,7 @@ extension CanvasViewModel {
             )
         }
 
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -504,7 +504,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTexture,
             renderTarget.commandBuffer
@@ -530,7 +530,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -551,7 +551,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -573,7 +573,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -591,7 +591,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -606,7 +606,7 @@ extension CanvasViewModel {
     ) {
         layerManager.update(layer, alpha: value)
 
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -635,7 +635,7 @@ extension CanvasViewModel {
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        layerManager.mergeAllLayers(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
