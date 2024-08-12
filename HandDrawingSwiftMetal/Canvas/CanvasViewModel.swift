@@ -135,7 +135,7 @@ final class CanvasViewModel {
         brushDrawingTextureLayer.initTexture(textureSize)
         eraserDrawingTextureLayer.initTexture(textureSize)
 
-        layerManager.resetLayers(textureSize: textureSize)
+        layerManager.initLayers(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
@@ -162,7 +162,7 @@ final class CanvasViewModel {
         brushDrawingTextureLayer.initTexture(model.textureSize)
         eraserDrawingTextureLayer.initTexture(model.textureSize)
 
-        layerManager.resetLayers(
+        layerManager.initLayers(
             newLayers: model.layers,
             layerIndex: model.layerIndex,
             textureSize: model.textureSize
@@ -521,7 +521,7 @@ extension CanvasViewModel {
         brushDrawingTextureLayer.initTexture(renderTexture.size)
         eraserDrawingTextureLayer.initTexture(renderTexture.size)
 
-        layerManager.resetLayers(textureSize: renderTexture.size)
+        layerManager.initLayers(textureSize: renderTexture.size)
 
         layerUndoManager.clear()
 

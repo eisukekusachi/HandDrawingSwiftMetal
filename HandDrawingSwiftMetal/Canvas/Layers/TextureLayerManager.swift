@@ -73,7 +73,7 @@ extension TextureLayerManager {
         )
     }
 
-    func resetLayers(
+    func initLayers(
         newLayers: [TextureLayer] = [],
         layerIndex: Int = 0,
         textureSize: CGSize
