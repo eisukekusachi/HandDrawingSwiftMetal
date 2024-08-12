@@ -565,9 +565,22 @@ extension CanvasViewModel {
     func didTapAddLayerButton(
         renderTarget: MTKRenderTextureProtocol
     ) {
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let renderTexture = renderTarget.renderTexture
+        else { return }
+
         layerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.addNewLayer()
+        layerManager.addLayer(
+            .init(
+                texture: MTKTextureUtils.makeBlankTexture(
+                    device,
+                    renderTexture.size
+                ),
+                title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+            )
+        )
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )

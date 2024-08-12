@@ -26,16 +26,6 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 extension TextureLayerManager {
 
-    func addNewLayer() {
-        guard let currentTexture else { return }
-
-        let newLayer: TextureLayer = .init(
-            texture: MTKTextureUtils.makeBlankTexture(device, currentTexture.size),
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        )
-        addLayer(newLayer)
-    }
-
     func drawAllTextures(
         drawingTextureLayer: DrawingTextureLayer? = nil,
         backgroundColor: UIColor,
