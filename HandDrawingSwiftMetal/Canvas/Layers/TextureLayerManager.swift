@@ -16,13 +16,6 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
         return layers[index].texture
     }
 
-    /// A protocol for managing current drawing texture layer
-    private (set) var drawingTextureLayer: DrawingTextureLayer?
-    /// A drawing texture layer with a brush
-    private let brushDrawingTextureLayer = BrushDrawingTextureLayer()
-    /// A drawing texture layer with an eraser
-    private let eraserDrawingTextureLayer = EraserDrawingTextureLayer()
-
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
@@ -32,10 +25,6 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 }
 
 extension TextureLayerManager {
-
-    func setDrawingTextureLayer(_ tool: DrawingToolType) {
-        drawingTextureLayer = tool == .eraser ? eraserDrawingTextureLayer : brushDrawingTextureLayer
-    }
 
     func addNewLayer() {
         guard let currentTexture else { return }
@@ -48,14 +37,14 @@ extension TextureLayerManager {
     }
 
     func mergeAllLayers(
+        drawingTextureLayer: DrawingTextureLayer? = nil,
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let destinationTexture,
-            let selectedTexture = selectedTexture,
-            let selectedTextures = drawingTextureLayer?.getDrawingTexture(includingSelectedTexture: selectedTexture)
+            let selectedTexture,
+            let destinationTexture
         else { return }
 
         MTLRenderer.fill(
@@ -71,11 +60,14 @@ extension TextureLayerManager {
         )
 
         if layers[index].isVisible {
-            MTLRenderer.draw(
-                textures: selectedTextures.compactMap { $0 },
+            // Merge the `selectedTexture` into the `currentTexture` if there is something currently being drawn, including it in the process
+            let selectedTextures = drawingTextureLayer?.getDrawingTexture( includingSelectedTexture: selectedTexture) ?? [selectedTexture]
+            MTLRenderer.drawTextures(
+                selectedTextures.compactMap { $0 },
                 on: currentTexture,
                 commandBuffer
             )
+
             MTLRenderer.merge(
                 texture: currentTexture,
                 alpha: selectedLayer?.alpha ?? 0,
@@ -99,9 +91,6 @@ extension TextureLayerManager {
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-
-        brushDrawingTextureLayer.initTexture(textureSize)
-        eraserDrawingTextureLayer.initTexture(textureSize)
 
         layers.removeAll()
 

@@ -63,6 +63,13 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
+    /// A protocol for managing current drawing texture layer
+    private (set) var drawingTextureLayer: DrawingTextureLayer?
+    /// A drawing texture layer with a brush
+    private let brushDrawingTextureLayer = BrushDrawingTextureLayer()
+    /// A drawing texture layer with an eraser
+    private let eraserDrawingTextureLayer = EraserDrawingTextureLayer()
+
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
@@ -108,7 +115,13 @@ final class CanvasViewModel {
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
-                self?.layerManager.setDrawingTextureLayer(tool)
+                guard let `self` else { return }
+                switch tool {
+                case .brush:
+                    self.drawingTextureLayer = self.brushDrawingTextureLayer
+                case .eraser:
+                    self.drawingTextureLayer = self.eraserDrawingTextureLayer
+                }
             }
             .store(in: &cancellables)
 
@@ -119,6 +132,9 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
+        brushDrawingTextureLayer.initTexture(textureSize)
+        eraserDrawingTextureLayer.initTexture(textureSize)
+
         layerManager.resetLayers(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
@@ -142,6 +158,9 @@ final class CanvasViewModel {
         projectName = model.projectName
 
         layerUndoManager.clear()
+
+        brushDrawingTextureLayer.initTexture(model.textureSize)
+        eraserDrawingTextureLayer.initTexture(model.textureSize)
 
         layerManager.resetLayers(
             newLayers: model.layers,
@@ -324,7 +343,7 @@ extension CanvasViewModel {
     private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
-        layerManager.drawingTextureLayer?.clearDrawingTexture()
+        drawingTextureLayer?.clearDrawingTexture()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
     }
@@ -407,14 +426,14 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        if let drawingLayer = layerManager.drawingTextureLayer as? EraserDrawingTextureLayer {
+        if let drawingLayer = drawingTextureLayer as? EraserDrawingTextureLayer {
             drawingLayer.drawOnEraserDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )
-        } else if let drawingLayer = layerManager.drawingTextureLayer as? BrushDrawingTextureLayer {
+        } else if let drawingLayer = drawingTextureLayer as? BrushDrawingTextureLayer {
             drawingLayer.drawOnBrushDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 color: drawingTool.brushColor,
@@ -424,13 +443,14 @@ extension CanvasViewModel {
         }
 
         if touchPhase == .ended {
-            layerManager.drawingTextureLayer?.mergeDrawingTexture(
+            drawingTextureLayer?.mergeDrawingTexture(
                 into: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )
         }
 
         layerManager.mergeAllLayers(
+            drawingTextureLayer: drawingTextureLayer,
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -497,6 +517,10 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         canvasTransformer.setMatrix(.identity)
+
+        brushDrawingTextureLayer.initTexture(renderTexture.size)
+        eraserDrawingTextureLayer.initTexture(renderTexture.size)
+
         layerManager.resetLayers(textureSize: renderTexture.size)
 
         layerUndoManager.clear()
