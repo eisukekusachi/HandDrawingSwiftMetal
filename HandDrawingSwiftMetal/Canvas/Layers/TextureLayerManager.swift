@@ -36,7 +36,7 @@ extension TextureLayerManager {
         addLayer(newLayer)
     }
 
-    func mergeAllLayers(
+    func drawAllTextures(
         drawingTextureLayer: DrawingTextureLayer? = nil,
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
