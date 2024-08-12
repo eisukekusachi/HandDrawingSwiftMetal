@@ -82,8 +82,6 @@ extension TextureLayerManager {
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
-        layers.removeAll()
-
         var newLayers = newLayers
         if newLayers.isEmpty {
             newLayers.append(
