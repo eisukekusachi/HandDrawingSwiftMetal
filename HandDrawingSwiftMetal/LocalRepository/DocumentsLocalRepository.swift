@@ -119,7 +119,7 @@ extension DocumentsLocalRepository {
         height: CGFloat,
         to url: URL
     ) -> AnyPublisher<String, DocumentsLocalRepositoryError> {
-        let thumbnail = texture.uiImage?.resize(height: height, scale: 1.0)
+        let thumbnail = texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0)
         let publisher = Future<String, DocumentsLocalRepositoryError> { promise in
             do {
                 try FileOutputManager.saveImage(

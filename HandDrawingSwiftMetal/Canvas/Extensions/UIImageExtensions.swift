@@ -104,7 +104,7 @@ extension UIImage {
         return nil
     }
 
-    func resize(width: CGFloat, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
+    func resizeWithAspectRatio(width: CGFloat, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
         let newSize = CGSize(width: width, height: width * self.size.height / self.size.width)
 
         UIGraphicsBeginImageContextWithOptions(newSize, false, scale)
@@ -113,7 +113,7 @@ extension UIImage {
         draw(in: CGRect(origin: .zero, size: newSize))
         return UIGraphicsGetImageFromCurrentImageContext()
     }
-    func resize(height: CGFloat, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
+    func resizeWithAspectRatio(height: CGFloat, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
         let newSize = CGSize(width: height * self.size.width / self.size.height, height: height)
 
         UIGraphicsBeginImageContextWithOptions(newSize, false, scale)

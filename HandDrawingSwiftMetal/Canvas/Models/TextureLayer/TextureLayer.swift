@@ -26,7 +26,7 @@ struct TextureLayer: TextureLayerProtocol {
 extension TextureLayer {
 
     mutating func updateThumbnail() {
-        thumbnail = texture.upsideDownUIImage?.resize(width: 64)
+        thumbnail = texture.upsideDownUIImage?.resizeWithAspectRatio(width: 64)
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
