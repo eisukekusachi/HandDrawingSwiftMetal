@@ -208,9 +208,12 @@ extension ViewController {
             layerManager: canvasViewModel.layerManager,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
-                guard let `self` else { return }
+                guard 
+                    let `self`,
+                    let index = canvasViewModel.layerManager.getIndex(layer: layer)
+                else { return }
                 self.canvasViewModel.didTapLayer(
-                    layer: layer,
+                    index: index,
                     renderTarget: self.contentView.canvasView
                 )
             },

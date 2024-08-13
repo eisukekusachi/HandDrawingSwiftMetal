@@ -544,10 +544,10 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(
-        layer: TextureLayer,
+        index: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.updateIndex(layer)
+        layerManager.index = index
 
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
