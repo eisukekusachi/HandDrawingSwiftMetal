@@ -498,10 +498,8 @@ extension CanvasViewModel {
     }
 
     func didTapLayerButton() {
-        Task {
-            try? await layerManager.updateThumbnail()
-            requestShowingLayerViewSubject.send()
-        }
+        layerManager.updateThumbnail(index: layerManager.index)
+        requestShowingLayerViewSubject.send()
     }
 
     func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {

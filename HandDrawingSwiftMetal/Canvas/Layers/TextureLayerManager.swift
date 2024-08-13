@@ -148,22 +148,14 @@ extension TextureLayerManager {
         }
     }
 
-    @MainActor
-    func updateThumbnail() async throws {
-        try await Task.sleep(nanoseconds: 1 * 1000 * 1000)
-        if let selectedLayer {
-            updateThumbnail(selectedLayer)
-        }
-    }
-
     func updateTitle(_ layer: TextureLayer, _ title: String) {
         guard let layerIndex = layers.firstIndex(of: layer) else { return }
         layers[layerIndex].title = title
     }
 
-    func updateThumbnail(_ layer: TextureLayer) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].updateThumbnail()
+    func updateThumbnail(index: Int) {
+        guard index < layers.count else { return }
+        layers[index].updateThumbnail()
     }
 
     func updateTextureAddress() {
