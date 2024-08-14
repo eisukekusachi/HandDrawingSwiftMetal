@@ -67,10 +67,8 @@ final class LayerViewPresenter {
             on: viewController
         )
     }
-    func toggleVisible() {
-        if let isHidden = layerViewController?.view.isHidden {
-            layerViewController?.view.isHidden = !isHidden
-        }
+    func showView(_ isShown: Bool) {
+        layerViewController?.view.isHidden = !isShown
     }
 
     private func addConstraints(

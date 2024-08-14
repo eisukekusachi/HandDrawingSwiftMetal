@@ -39,7 +39,7 @@ final class CanvasViewModel {
         requestShowingToastSubject.eraseToAnyPublisher()
     }
 
-    var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
+    var requestShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
@@ -78,7 +78,7 @@ final class CanvasViewModel {
 
     private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
+    private let requestShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
@@ -499,7 +499,7 @@ extension CanvasViewModel {
 
     func didTapLayerButton() {
         layerManager.updateThumbnail(index: layerManager.index)
-        requestShowingLayerViewSubject.send()
+        requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
     func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {

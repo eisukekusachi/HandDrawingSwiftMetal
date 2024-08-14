@@ -151,8 +151,8 @@ extension ViewController {
 
         canvasViewModel.requestShowingLayerViewPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.layerViewPresenter.toggleVisible()
+            .sink { [weak self] isShown in
+                self?.layerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
