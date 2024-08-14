@@ -1,5 +1,5 @@
 //
-//  LayerViewPresenter.swift
+//  TextureLayerViewPresenter.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/20.
@@ -8,7 +8,7 @@
 import UIKit
 import SwiftUI
 
-final class LayerViewPresenter {
+final class TextureLayerViewPresenter {
 
     private var layerViewController: UIHostingController<TextureLayerView<TextureLayer>>?
     private var layerView: TextureLayerView<TextureLayer>?
