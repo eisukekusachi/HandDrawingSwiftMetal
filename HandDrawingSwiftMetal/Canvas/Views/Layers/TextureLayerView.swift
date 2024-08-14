@@ -1,5 +1,5 @@
 //
-//  ImageLayerView.swift
+//  TextureLayerView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ImageLayerView<T: TextureLayerProtocol>: View {
+struct TextureLayerView<T: TextureLayerProtocol>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
@@ -74,7 +74,7 @@ struct ImageLayerView<T: TextureLayerProtocol>: View {
 
 }
 
-extension ImageLayerView {
+extension TextureLayerView {
 
     func toolbar(
         layerManager: LayerManager<T>,
@@ -133,7 +133,7 @@ extension ImageLayerView {
 
 #Preview {
 
-    ImageLayerView(
+    TextureLayerView(
         layerManager: TextureLayerManager(),
         roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in

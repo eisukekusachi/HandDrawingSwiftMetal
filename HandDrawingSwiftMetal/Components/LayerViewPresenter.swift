@@ -10,8 +10,8 @@ import SwiftUI
 
 final class LayerViewPresenter {
 
-    private var layerViewController: UIHostingController<ImageLayerView<TextureLayer>>?
-    private var layerView: ImageLayerView<TextureLayer>?
+    private var layerViewController: UIHostingController<TextureLayerView<TextureLayer>>?
+    private var layerView: TextureLayerView<TextureLayer>?
 
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
@@ -27,7 +27,7 @@ final class LayerViewPresenter {
         didMove: @escaping (TextureLayer, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
-        layerView = ImageLayerView(
+        layerView = TextureLayerView(
             layerManager: layerManager,
             roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in
@@ -55,7 +55,7 @@ final class LayerViewPresenter {
 
         guard let layerView else { return }
 
-        layerViewController = UIHostingController<ImageLayerView>(rootView: layerView)
+        layerViewController = UIHostingController<TextureLayerView>(rootView: layerView)
         viewController.view.addSubview(layerViewController!.view)
 
         layerViewController?.view.backgroundColor = .clear
