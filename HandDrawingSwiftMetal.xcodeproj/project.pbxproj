@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
-		D40CDF032B411F660059527E /* ImageLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* ImageLayerListView.swift */; };
+		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
 		D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */; };
 		D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF0C2B4137080059527E /* ImageExtensions.swift */; };
@@ -132,7 +132,7 @@
 
 /* Begin PBXFileReference section */
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
-		D40CDF022B411F660059527E /* ImageLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLayerListView.swift; sourceTree = "<group>"; };
+		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
 		D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStampFormatter.swift; sourceTree = "<group>"; };
 		D40CDF0C2B4137080059527E /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
@@ -417,19 +417,19 @@
 		D46A30482BF858760057DB69 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				D46A30492BF858AD0057DB69 /* Layers */,
+				D46A30492BF858AD0057DB69 /* TextureLayerView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		D46A30492BF858AD0057DB69 /* Layers */ = {
+		D46A30492BF858AD0057DB69 /* TextureLayerView */ = {
 			isa = PBXGroup;
 			children = (
-				D40CDF022B411F660059527E /* ImageLayerListView.swift */,
+				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
 			);
-			path = Layers;
+			path = TextureLayerView;
 			sourceTree = "<group>";
 		};
 		D46A304A2BF88E540057DB69 /* Models */ = {
@@ -835,7 +835,7 @@
 				D481A4352C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift in Sources */,
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */,
-				D40CDF032B411F660059527E /* ImageLayerListView.swift in Sources */,
+				D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calculate.swift in Sources */,
 				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,

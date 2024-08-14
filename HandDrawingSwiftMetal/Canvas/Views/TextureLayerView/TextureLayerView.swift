@@ -42,7 +42,7 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
                     didEditTitle: didEditTitle
                 )
 
-                ImageLayerListView<T>(
+                TextureLayerListView<T>(
                     layerManager: layerManager,
                     didTapLayer: { layer in
                         didTapLayer(layer)

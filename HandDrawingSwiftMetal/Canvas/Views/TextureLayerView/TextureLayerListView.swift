@@ -1,5 +1,5 @@
 //
-//  ImageLayerListView.swift
+//  TextureLayerListView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ImageLayerListView<T: TextureLayerProtocol>: View {
+struct TextureLayerListView<T: TextureLayerProtocol>: View {
 
     @ObservedObject var layerManager: LayerManager<T>
 
@@ -45,7 +45,7 @@ struct ImageLayerListView<T: TextureLayerProtocol>: View {
 
 }
 
-extension ImageLayerListView {
+extension TextureLayerListView {
 
     private func layerRow(
         layer: T,
@@ -102,7 +102,7 @@ extension ImageLayerListView {
 }
 
 // Colors
-extension ImageLayerListView {
+extension TextureLayerListView {
 
     private func backgroundColor(_ selected: Bool) -> UIColor {
         if selected {
@@ -137,7 +137,7 @@ extension ImageLayerListView {
 
 #Preview {
 
-    ImageLayerListView<TextureLayer>(
+    TextureLayerListView<TextureLayer>(
         layerManager: TextureLayerManager(),
         didTapLayer: { layer in
             print("Tap layer")
