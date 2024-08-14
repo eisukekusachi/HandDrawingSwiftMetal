@@ -570,15 +570,20 @@ extension CanvasViewModel {
 
         layerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.addLayer(
-            .init(
-                texture: MTKTextureUtils.makeBlankTexture(
-                    device,
-                    renderTexture.size
-                ),
-                title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-            )
+        let layer: TextureLayer = .init(
+            texture: MTKTextureUtils.makeBlankTexture(
+                device,
+                renderTexture.size
+            ),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
         )
+        layerManager.addLayer(layer)
+
+        // Makes a thumbnail
+        if let index = layerManager.getIndex(layer: layer) {
+            layerManager.updateThumbnail(index: index)
+        }
+
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
