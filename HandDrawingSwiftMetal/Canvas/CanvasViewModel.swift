@@ -622,6 +622,7 @@ extension CanvasViewModel {
         layerUndoManager.addCurrentLayersToUndoStack()
 
         layerManager.removeLayer(layer)
+
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
@@ -638,7 +639,14 @@ extension CanvasViewModel {
         isVisible: Bool,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.updateLayer(layer, isVisible: isVisible)
+        guard 
+            let index = layerManager.getIndex(layer: layer)
+        else { return }
+
+        layerManager.updateLayer(
+            index: index,
+            isVisible: isVisible
+        )
 
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
@@ -656,7 +664,14 @@ extension CanvasViewModel {
         value: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.updateLayer(layer, alpha: value)
+        guard
+            let index = layerManager.getIndex(layer: layer)
+        else { return }
+
+        layerManager.updateLayer(
+            index: index,
+            alpha: value
+        )
 
         layerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
@@ -670,7 +685,14 @@ extension CanvasViewModel {
         layer: TextureLayer,
         title: String
     ) {
-        layerManager.updateTitle(layer, title)
+        guard
+            let index = layerManager.getIndex(layer: layer)
+        else { return }
+
+        layerManager.updateLayer(
+            index: index,
+            title: title
+        )
     }
     func didMoveLayers(
         layer: TextureLayer,
@@ -684,6 +706,7 @@ extension CanvasViewModel {
             fromOffsets: source,
             toOffset: destination
         )
+
         layerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )

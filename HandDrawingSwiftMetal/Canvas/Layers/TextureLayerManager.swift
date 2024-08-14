@@ -138,23 +138,22 @@ extension TextureLayerManager {
     }
 
     func updateLayer(
-        _ layer: TextureLayer,
+        index: Int,
+        title: String? = nil,
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
+        guard index < layers.count else { return }
+        if let title {
+            layers[index].title = title
+        }
         if let isVisible {
-            layers[layerIndex].isVisible = isVisible
+            layers[index].isVisible = isVisible
         }
 
         if let alpha {
-            layers[layerIndex].alpha = alpha
+            layers[index].alpha = alpha
         }
-    }
-
-    func updateTitle(_ layer: TextureLayer, _ title: String) {
-        guard let layerIndex = layers.firstIndex(of: layer) else { return }
-        layers[layerIndex].title = title
     }
 
     func updateThumbnail(index: Int) {
@@ -164,7 +163,6 @@ extension TextureLayerManager {
 
     func updateTextureAddress() {
         guard
-            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
             let selectedTexture = selectedTexture,
             let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
         else { return }
