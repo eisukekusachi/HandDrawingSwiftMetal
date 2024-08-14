@@ -460,6 +460,11 @@ extension CanvasViewModel {
             touchPhase == .ended || touchPhase == .cancelled,
             renderTarget: renderTarget
         )
+
+        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
     }
 
     /// Start or stop the display link loop.
@@ -484,6 +489,17 @@ extension CanvasViewModel {
     ) -> Bool {
         touches.count == event?.allTouches?.count &&
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
+    }
+
+    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
+        Task {
+            try await Task.sleep(nanoseconds: nanosecondsDuration)
+
+            DispatchQueue.main.async { [weak self] in
+                guard let `self` else { return }
+                self.layerManager.updateThumbnail(index: self.layerManager.index)
+            }
+        }
     }
 
 }
