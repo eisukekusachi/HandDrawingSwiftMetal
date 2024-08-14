@@ -1,5 +1,5 @@
 //
-//  LayerUndoManager.swift
+//  TextureLayerUndoManager.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/04/13.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-final class LayerUndoManager: ObservableObject, UndoManagerProtocol {
+final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
         addCurrentLayersToUndoStackSubject.eraseToAnyPublisher()

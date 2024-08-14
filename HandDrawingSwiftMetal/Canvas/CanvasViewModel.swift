@@ -14,7 +14,7 @@ final class CanvasViewModel {
 
     let layerManager = TextureLayerManager()
 
-    let layerUndoManager = LayerUndoManager()
+    let layerUndoManager = TextureLayerUndoManager()
 
     let drawingTool = DrawingToolModel()
 
