@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
-    private let layerViewPresenter = LayerViewPresenter()
+    private let textureLayerViewPresenter = TextureLayerViewPresenter()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -65,7 +65,7 @@ extension ViewController {
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
-        contentView.bindUndoModels(canvasViewModel.layerUndoManager)
+        contentView.bindUndoModels(canvasViewModel.textureLayerUndoManager)
 
         subscribeEvents()
 
@@ -151,8 +151,8 @@ extension ViewController {
 
         canvasViewModel.requestShowingLayerViewPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.layerViewPresenter.toggleVisible()
+            .sink { [weak self] isShown in
+                self?.textureLayerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
@@ -204,8 +204,8 @@ extension ViewController {
     }
 
     func setupLayerViewPresenter() {
-        layerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.layerManager,
+        textureLayerViewPresenter.setupLayerViewPresenter(
+            layerManager: canvasViewModel.textureLayerManager,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
                 guard let `self` else { return }

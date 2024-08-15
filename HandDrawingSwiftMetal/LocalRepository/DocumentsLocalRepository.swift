@@ -19,7 +19,7 @@ final class DocumentsLocalRepository: LocalRepository {
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,
-        layerManager: ImageLayerManager,
+        layerManager: TextureLayerManager,
         drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
@@ -44,7 +44,7 @@ final class DocumentsLocalRepository: LocalRepository {
                 .compactMap { thumbnailName, layers -> CanvasEntity? in
                     return .init(
                         thumbnailName: thumbnailName,
-                        textureSize: layerManager.textureSize,
+                        textureSize: renderTexture.size,
                         layerIndex: layerManager.index,
                         layers: layers,
                         drawingTool: drawingTool
@@ -119,7 +119,7 @@ extension DocumentsLocalRepository {
         height: CGFloat,
         to url: URL
     ) -> AnyPublisher<String, DocumentsLocalRepositoryError> {
-        let thumbnail = texture.uiImage?.resize(height: height, scale: 1.0)
+        let thumbnail = texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0)
         let publisher = Future<String, DocumentsLocalRepositoryError> { promise in
             do {
                 try FileOutputManager.saveImage(
@@ -135,7 +135,7 @@ extension DocumentsLocalRepository {
     }
 
     static func exportLayerData(
-        layers: [ImageLayerCellItem],
+        layers: [TextureLayer],
         to url: URL
     ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
         let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in

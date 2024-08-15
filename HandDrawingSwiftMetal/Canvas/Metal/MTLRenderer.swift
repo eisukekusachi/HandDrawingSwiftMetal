@@ -64,8 +64,8 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func draw(
-        textures: [MTLTexture],
+    static func drawTextures(
+        _ textures: [MTLTexture],
         on targetTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {
@@ -196,7 +196,7 @@ enum MTLRenderer {
     }
 
     static func merge(
-        layers: [ImageLayerCellItem],
+        layers: [TextureLayer],
         into destinationTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer
     ) {

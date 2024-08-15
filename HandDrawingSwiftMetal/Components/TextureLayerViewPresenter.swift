@@ -1,5 +1,5 @@
 //
-//  LayerViewPresenter.swift
+//  TextureLayerViewPresenter.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/20.
@@ -8,26 +8,26 @@
 import UIKit
 import SwiftUI
 
-final class LayerViewPresenter {
+final class TextureLayerViewPresenter {
 
-    private var layerViewController: UIHostingController<ImageLayerView<ImageLayerCellItem>>?
-    private var layerView: ImageLayerView<ImageLayerCellItem>?
+    private var layerViewController: UIHostingController<TextureLayerView<TextureLayer>>?
+    private var layerView: TextureLayerView<TextureLayer>?
 
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
-        layerManager: ImageLayerManager,
+        layerManager: TextureLayerManager,
         targetView: UIView,
-        didTapLayer: @escaping (ImageLayerCellItem) -> Void,
+        didTapLayer: @escaping (TextureLayer) -> Void,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didTapVisibility: @escaping (ImageLayerCellItem, Bool) -> Void,
-        didChangeAlpha: @escaping (ImageLayerCellItem, Int) -> Void,
-        didEditTitle: @escaping (ImageLayerCellItem, String) -> Void,
-        didMove: @escaping (ImageLayerCellItem, IndexSet, Int) -> Void,
+        didTapVisibility: @escaping (TextureLayer, Bool) -> Void,
+        didChangeAlpha: @escaping (TextureLayer, Int) -> Void,
+        didEditTitle: @escaping (TextureLayer, String) -> Void,
+        didMove: @escaping (TextureLayer, IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
-        layerView = ImageLayerView(
+        layerView = TextureLayerView(
             layerManager: layerManager,
             roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in
@@ -55,7 +55,7 @@ final class LayerViewPresenter {
 
         guard let layerView else { return }
 
-        layerViewController = UIHostingController<ImageLayerView>(rootView: layerView)
+        layerViewController = UIHostingController<TextureLayerView>(rootView: layerView)
         viewController.view.addSubview(layerViewController!.view)
 
         layerViewController?.view.backgroundColor = .clear
@@ -67,10 +67,8 @@ final class LayerViewPresenter {
             on: viewController
         )
     }
-    func toggleVisible() {
-        if let isHidden = layerViewController?.view.isHidden {
-            layerViewController?.view.isHidden = !isHidden
-        }
+    func showView(_ isShown: Bool) {
+        layerViewController?.view.isHidden = !isShown
     }
 
     private func addConstraints(

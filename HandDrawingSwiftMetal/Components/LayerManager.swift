@@ -32,6 +32,10 @@ class LayerManager<T: Equatable>: ObservableObject {
         self.index = index
     }
 
+    func getIndex(layer: T) -> Int? {
+        layers.firstIndex(of: layer)
+    }
+
     func addLayer(_ layer: T) {
         if index < layers.count - 1 {
             layers.insert(layer, at: index + 1)

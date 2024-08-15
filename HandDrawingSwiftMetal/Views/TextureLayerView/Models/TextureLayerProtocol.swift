@@ -1,5 +1,5 @@
 //
-//  ImageLayer.swift
+//  TextureLayerProtocol.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/18.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol ImageLayer: Identifiable, Equatable {
+protocol TextureLayerProtocol: Identifiable, Equatable {
     /// The unique identifier for the layer
     var id: UUID { get }
     /// The name of the layer

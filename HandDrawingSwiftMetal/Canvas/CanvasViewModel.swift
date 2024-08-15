@@ -12,9 +12,9 @@ final class CanvasViewModel {
 
     let canvasTransformer = CanvasTransformer()
 
-    let layerManager = ImageLayerManager()
+    let textureLayerManager = TextureLayerManager()
 
-    let layerUndoManager = LayerUndoManager()
+    let textureLayerUndoManager = TextureLayerUndoManager()
 
     let drawingTool = DrawingToolModel()
 
@@ -39,7 +39,7 @@ final class CanvasViewModel {
         requestShowingToastSubject.eraseToAnyPublisher()
     }
 
-    var requestShowingLayerViewPublisher: AnyPublisher<Void, Never> {
+    var requestShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
@@ -47,7 +47,7 @@ final class CanvasViewModel {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
-    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<ImageLayerUndoModel, Never> {
+    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<TextureLayerUndoObject, Never> {
         refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
     }
 
@@ -63,6 +63,13 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
+    /// A protocol for managing current drawing texture
+    private (set) var drawingTexture: DrawingTextureProtocol?
+    /// A drawing texture with a brush
+    private let brushDrawingTexture = BrushDrawingTexture()
+    /// A drawing texture with an eraser
+    private let eraserDrawingTexture = EraserDrawingTexture()
+
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
@@ -71,11 +78,11 @@ final class CanvasViewModel {
 
     private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let requestShowingLayerViewSubject = PassthroughSubject<Void, Never>()
+    private let requestShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<ImageLayerUndoModel, Never>()
+    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<TextureLayerUndoObject, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -84,31 +91,37 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
-        layerUndoManager.addCurrentLayersToUndoStackPublisher
+        textureLayerUndoManager.addCurrentLayersToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.layerUndoManager.addUndoObject(
+                self.textureLayerUndoManager.addUndoObject(
                     undoObject: .init(
-                        index: self.layerManager.index,
-                        layers: self.layerManager.layers
+                        index: self.textureLayerManager.index,
+                        layers: self.textureLayerManager.layers
                     ),
-                    layerManager: self.layerManager
+                    layerManager: self.textureLayerManager
                 )
-                self.layerManager.updateTextureAddress()
+                self.textureLayerManager.updateTextureAddress()
             }
             .store(in: &cancellables)
 
-        layerUndoManager.refreshCanvasPublisher
+        textureLayerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
                 self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
             }
             .store(in: &cancellables)
 
-        layerUndoManager.updateUndoComponents()
+        textureLayerUndoManager.updateUndoComponents()
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
-                self?.layerManager.setDrawingLayer(tool)
+                guard let `self` else { return }
+                switch tool {
+                case .brush:
+                    self.drawingTexture = self.brushDrawingTexture
+                case .eraser:
+                    self.drawingTexture = self.eraserDrawingTexture
+                }
             }
             .store(in: &cancellables)
 
@@ -119,14 +132,17 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initialize(textureSize: textureSize)
+        brushDrawingTexture.initTexture(textureSize)
+        eraserDrawingTexture.initTexture(textureSize)
+
+        textureLayerManager.initLayers(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.mergeAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture!,
             renderTarget.commandBuffer
@@ -141,12 +157,15 @@ final class CanvasViewModel {
     ) {
         projectName = model.projectName
 
-        layerUndoManager.clear()
+        textureLayerUndoManager.clear()
 
-        layerManager.initialize(
-            textureSize: model.textureSize,
+        brushDrawingTexture.initTexture(model.textureSize)
+        eraserDrawingTexture.initTexture(model.textureSize)
+
+        textureLayerManager.initLayers(
+            newLayers: model.layers,
             layerIndex: model.layerIndex,
-            layers: model.layers
+            textureSize: model.textureSize
         )
 
         drawingTool.setBrushDiameter(model.brushDiameter)
@@ -155,10 +174,10 @@ final class CanvasViewModel {
 
         renderTarget.initRenderTexture(textureSize: model.textureSize)
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -168,18 +187,18 @@ final class CanvasViewModel {
     }
 
     func apply(
-        undoObject: ImageLayerUndoModel,
+        undoObject: TextureLayerUndoObject,
         to renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.initLayers(
+        textureLayerManager.initLayers(
             index: undoObject.index,
             layers: undoObject.layers
         )
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -244,7 +263,7 @@ extension CanvasViewModel {
 
             // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
             if touchPoints.last?.phase == .ended {
-                layerUndoManager.addCurrentLayersToUndoStack()
+                textureLayerUndoManager.addCurrentLayersToUndoStack()
             }
 
             drawCurveOnCanvas(
@@ -296,7 +315,7 @@ extension CanvasViewModel {
 
         // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
         if touchPoints.last?.phase == .ended {
-            layerUndoManager.addCurrentLayersToUndoStack()
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
         }
 
         drawCurveOnCanvas(
@@ -324,7 +343,7 @@ extension CanvasViewModel {
     private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
-        layerManager.clearDrawingLayer()
+        drawingTexture?.clearDrawingTexture()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
     }
@@ -407,15 +426,16 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        if let drawingLayer = layerManager.drawingLayer as? DrawingEraserLayer {
-            drawingLayer.drawOnEraserDrawingTexture(
+        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
+           let selectedLayerTexture = textureLayerManager.selectedLayer?.texture {
+            drawingTexture.drawOnEraserDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 alpha: drawingTool.eraserAlpha,
-                srcTexture: layerManager.selectedTexture!,
+                srcTexture: selectedLayerTexture,
                 renderTarget.commandBuffer
             )
-        } else if let drawingLayer = layerManager.drawingLayer as? DrawingBrushLayer {
-            drawingLayer.drawOnBrushDrawingTexture(
+        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
+            drawingTexture.drawOnBrushDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 color: drawingTool.brushColor,
                 alpha: drawingTool.brushColor.alpha,
@@ -423,14 +443,16 @@ extension CanvasViewModel {
             )
         }
 
-        if touchPhase == .ended {
-            layerManager.drawingLayer?.mergeDrawingTexture(
-                into: layerManager.selectedTexture!,
+        if  touchPhase == .ended,
+            let selectedLayer = textureLayerManager.selectedLayer {
+            drawingTexture?.mergeDrawingTexture(
+                into: selectedLayer.texture,
                 renderTarget.commandBuffer
             )
         }
 
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
+            drawingTexture: drawingTexture,
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -440,6 +462,11 @@ extension CanvasViewModel {
             touchPhase == .ended || touchPhase == .cancelled,
             renderTarget: renderTarget
         )
+
+        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
     }
 
     /// Start or stop the display link loop.
@@ -466,22 +493,31 @@ extension CanvasViewModel {
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
     }
 
+    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
+        Task {
+            try await Task.sleep(nanoseconds: nanosecondsDuration)
+
+            DispatchQueue.main.async { [weak self] in
+                guard let `self` else { return }
+                self.textureLayerManager.updateThumbnail(index: self.textureLayerManager.index)
+            }
+        }
+    }
+
 }
 
 extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
-        layerUndoManager.undo()
+        textureLayerUndoManager.undo()
     }
     func didTapRedoButton() {
-        layerUndoManager.redo()
+        textureLayerUndoManager.redo()
     }
 
     func didTapLayerButton() {
-        Task {
-            try? await layerManager.updateCurrentThumbnail()
-            requestShowingLayerViewSubject.send()
-        }
+        textureLayerManager.updateThumbnail(index: textureLayerManager.index)
+        requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
     func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {
@@ -490,20 +526,27 @@ extension CanvasViewModel {
     }
 
     func didTapNewCanvasButton(renderTarget: MTKRenderTextureProtocol) {
+        guard 
+            let renderTexture = renderTarget.renderTexture
+        else { return }
 
         projectName = Calendar.currentDate
 
         canvasTransformer.setMatrix(.identity)
-        layerManager.initialize(textureSize: layerManager.textureSize)
 
-        layerUndoManager.clear()
+        brushDrawingTexture.initTexture(renderTexture.size)
+        eraserDrawingTexture.initTexture(renderTexture.size)
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.initLayers(textureSize: renderTexture.size)
+
+        textureLayerUndoManager.clear()
+
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: renderTexture,
             renderTarget.commandBuffer
         )
 
@@ -519,15 +562,16 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.updateIndex(layer)
+        guard let index = textureLayerManager.getIndex(layer: layer) else { return }
+        textureLayerManager.index = index
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -538,13 +582,31 @@ extension CanvasViewModel {
     func didTapAddLayerButton(
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerUndoManager.addCurrentLayersToUndoStack()
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let renderTexture = renderTarget.renderTexture
+        else { return }
 
-        layerManager.addNewLayer()
-        layerManager.updateUnselectedLayers(
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
+
+        let layer: TextureLayer = .init(
+            texture: MTKTextureUtils.makeBlankTexture(
+                device,
+                renderTexture.size
+            ),
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        )
+        textureLayerManager.addLayer(layer)
+
+        // Makes a thumbnail
+        if let index = textureLayerManager.getIndex(layer: layer) {
+            textureLayerManager.updateThumbnail(index: index)
+        }
+
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -556,17 +618,18 @@ extension CanvasViewModel {
         renderTarget: MTKRenderTextureProtocol
     ) {
         guard
-            layerManager.layers.count > 1,
-            let layer = layerManager.selectedLayer
+            textureLayerManager.layers.count > 1,
+            let layer = textureLayerManager.selectedLayer
         else { return }
 
-        layerUndoManager.addCurrentLayersToUndoStack()
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.removeLayer(layer)
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.removeLayer(layer)
+
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -575,16 +638,23 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didTapLayerVisibility(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         isVisible: Bool,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.update(layer, isVisible: isVisible)
+        guard 
+            let index = textureLayerManager.getIndex(layer: layer)
+        else { return }
 
-        layerManager.updateUnselectedLayers(
+        textureLayerManager.updateLayer(
+            index: index,
+            isVisible: isVisible
+        )
+
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -593,13 +663,20 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didChangeLayerAlpha(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         value: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerManager.update(layer, alpha: value)
+        guard
+            let index = textureLayerManager.getIndex(layer: layer)
+        else { return }
 
-        layerManager.drawAllLayers(
+        textureLayerManager.updateLayer(
+            index: index,
+            alpha: value
+        )
+
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -608,27 +685,35 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didEditLayerTitle(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         title: String
     ) {
-        layerManager.updateTitle(layer, title)
+        guard
+            let index = textureLayerManager.getIndex(layer: layer)
+        else { return }
+
+        textureLayerManager.updateLayer(
+            index: index,
+            title: title
+        )
     }
     func didMoveLayers(
-        layer: ImageLayerCellItem,
+        layer: TextureLayer,
         source: IndexSet,
         destination: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerUndoManager.addCurrentLayersToUndoStack()
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
-        layerManager.moveLayer(
+        textureLayerManager.moveLayer(
             fromOffsets: source,
             toOffset: destination
         )
-        layerManager.updateUnselectedLayers(
+
+        textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
         )
-        layerManager.drawAllLayers(
+        textureLayerManager.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -662,7 +747,7 @@ extension CanvasViewModel {
     private func saveFile(renderTexture: MTLTexture) {
         localRepository?.saveDataToDocuments(
             renderTexture: renderTexture,
-            layerManager: layerManager,
+            layerManager: textureLayerManager,
             drawingTool: drawingTool,
             to: URL.documents.appendingPathComponent(
                 CanvasModel.getZipFileName(projectName: projectName)
