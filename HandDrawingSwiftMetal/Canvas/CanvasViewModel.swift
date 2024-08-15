@@ -14,7 +14,7 @@ final class CanvasViewModel {
 
     let textureLayerManager = TextureLayerManager()
 
-    let layerUndoManager = TextureLayerUndoManager()
+    let textureLayerUndoManager = TextureLayerUndoManager()
 
     let drawingTool = DrawingToolModel()
 
@@ -91,10 +91,10 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
-        layerUndoManager.addCurrentLayersToUndoStackPublisher
+        textureLayerUndoManager.addCurrentLayersToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.layerUndoManager.addUndoObject(
+                self.textureLayerUndoManager.addUndoObject(
                     undoObject: .init(
                         index: self.textureLayerManager.index,
                         layers: self.textureLayerManager.layers
@@ -105,13 +105,13 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        layerUndoManager.refreshCanvasPublisher
+        textureLayerUndoManager.refreshCanvasPublisher
             .sink { [weak self] undoObject in
                 self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
             }
             .store(in: &cancellables)
 
-        layerUndoManager.updateUndoComponents()
+        textureLayerUndoManager.updateUndoComponents()
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -157,7 +157,7 @@ final class CanvasViewModel {
     ) {
         projectName = model.projectName
 
-        layerUndoManager.clear()
+        textureLayerUndoManager.clear()
 
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
@@ -263,7 +263,7 @@ extension CanvasViewModel {
 
             // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
             if touchPoints.last?.phase == .ended {
-                layerUndoManager.addCurrentLayersToUndoStack()
+                textureLayerUndoManager.addCurrentLayersToUndoStack()
             }
 
             drawCurveOnCanvas(
@@ -315,7 +315,7 @@ extension CanvasViewModel {
 
         // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
         if touchPoints.last?.phase == .ended {
-            layerUndoManager.addCurrentLayersToUndoStack()
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
         }
 
         drawCurveOnCanvas(
@@ -509,10 +509,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
-        layerUndoManager.undo()
+        textureLayerUndoManager.undo()
     }
     func didTapRedoButton() {
-        layerUndoManager.redo()
+        textureLayerUndoManager.redo()
     }
 
     func didTapLayerButton() {
@@ -539,7 +539,7 @@ extension CanvasViewModel {
 
         textureLayerManager.initLayers(textureSize: renderTexture.size)
 
-        layerUndoManager.clear()
+        textureLayerUndoManager.clear()
 
         textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
@@ -587,7 +587,7 @@ extension CanvasViewModel {
             let renderTexture = renderTarget.renderTexture
         else { return }
 
-        layerUndoManager.addCurrentLayersToUndoStack()
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         let layer: TextureLayer = .init(
             texture: MTKTextureUtils.makeBlankTexture(
@@ -622,7 +622,7 @@ extension CanvasViewModel {
             let layer = textureLayerManager.selectedLayer
         else { return }
 
-        layerUndoManager.addCurrentLayersToUndoStack()
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayerManager.removeLayer(layer)
 
@@ -703,7 +703,7 @@ extension CanvasViewModel {
         destination: Int,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        layerUndoManager.addCurrentLayersToUndoStack()
+        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayerManager.moveLayer(
             fromOffsets: source,

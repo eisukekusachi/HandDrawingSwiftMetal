@@ -65,7 +65,7 @@ extension ViewController {
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
-        contentView.bindUndoModels(canvasViewModel.layerUndoManager)
+        contentView.bindUndoModels(canvasViewModel.textureLayerUndoManager)
 
         subscribeEvents()
 
