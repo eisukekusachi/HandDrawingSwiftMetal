@@ -1,5 +1,5 @@
 //
-//  EraserDrawingTextureLayer.swift
+//  EraserDrawingTexture.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -7,7 +7,7 @@
 
 import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class EraserDrawingTextureLayer: DrawingTextureLayer {
+class EraserDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
@@ -26,7 +26,7 @@ class EraserDrawingTextureLayer: DrawingTextureLayer {
 
 }
 
-extension EraserDrawingTextureLayer {
+extension EraserDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
 
@@ -82,7 +82,7 @@ extension EraserDrawingTextureLayer {
 
 }
 
-extension EraserDrawingTextureLayer {
+extension EraserDrawingTexture {
     /// First, draw lines in grayscale on a grayscale texture,
     /// then apply the intensity as transparency to add black color to the grayscale texture,
     /// and render the grayscale texture onto the drawing texture.
@@ -134,7 +134,7 @@ extension EraserDrawingTextureLayer {
 
 }
 
-extension EraserDrawingTextureLayer {
+extension EraserDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clear(

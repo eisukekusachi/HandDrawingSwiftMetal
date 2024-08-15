@@ -1,5 +1,5 @@
 //
-//  DrawingTextureLayer.swift
+//  DrawingTextureProtocol.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/10.
@@ -7,7 +7,7 @@
 
 import MetalKit
 /// A layer protocol with the currently drawing texture
-protocol DrawingTextureLayer {
+protocol DrawingTextureProtocol {
     /// Currently drawing texture
     var drawingTexture: MTLTexture? { get }
 

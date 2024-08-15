@@ -27,7 +27,7 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 extension TextureLayerManager {
 
     func drawAllTextures(
-        drawingTextureLayer: DrawingTextureLayer? = nil,
+        drawingTexture: DrawingTextureProtocol? = nil,
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
@@ -51,7 +51,7 @@ extension TextureLayerManager {
 
         if layers[index].isVisible {
             // Merge the `selectedTexture` into the `currentTexture` if there is something currently being drawn, including it in the process
-            let selectedTextures = drawingTextureLayer?.getDrawingTexture( includingSelectedTexture: selectedTexture) ?? [selectedTexture]
+            let selectedTextures = drawingTexture?.getDrawingTexture( includingSelectedTexture: selectedTexture) ?? [selectedTexture]
             MTLRenderer.drawTextures(
                 selectedTextures.compactMap { $0 },
                 on: currentTexture,

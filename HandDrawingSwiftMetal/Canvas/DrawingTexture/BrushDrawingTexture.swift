@@ -1,5 +1,5 @@
 //
-//  BrushDrawingTextureLayer.swift
+//  BrushDrawingTexture.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -7,7 +7,7 @@
 
 import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class BrushDrawingTextureLayer: DrawingTextureLayer {
+class BrushDrawingTexture: DrawingTextureProtocol {
 
     var drawingTexture: MTLTexture?
 
@@ -17,7 +17,7 @@ class BrushDrawingTextureLayer: DrawingTextureLayer {
 
 }
 
-extension BrushDrawingTextureLayer {
+extension BrushDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
         self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
@@ -51,7 +51,7 @@ extension BrushDrawingTextureLayer {
 
 }
 
-extension BrushDrawingTextureLayer {
+extension BrushDrawingTexture {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
     /// and render the colored grayscale texture onto the drawing texture."
@@ -87,7 +87,7 @@ extension BrushDrawingTextureLayer {
 
 }
 
-extension BrushDrawingTextureLayer {
+extension BrushDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clear(texture: drawingTexture, commandBuffer)

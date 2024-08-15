@@ -63,12 +63,12 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
-    /// A protocol for managing current drawing texture layer
-    private (set) var drawingTextureLayer: DrawingTextureLayer?
-    /// A drawing texture layer with a brush
-    private let brushDrawingTextureLayer = BrushDrawingTextureLayer()
-    /// A drawing texture layer with an eraser
-    private let eraserDrawingTextureLayer = EraserDrawingTextureLayer()
+    /// A protocol for managing current drawing texture
+    private (set) var drawingTexture: DrawingTextureProtocol?
+    /// A drawing texture with a brush
+    private let brushDrawingTexture = BrushDrawingTexture()
+    /// A drawing texture with an eraser
+    private let eraserDrawingTexture = EraserDrawingTexture()
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
@@ -118,9 +118,9 @@ final class CanvasViewModel {
                 guard let `self` else { return }
                 switch tool {
                 case .brush:
-                    self.drawingTextureLayer = self.brushDrawingTextureLayer
+                    self.drawingTexture = self.brushDrawingTexture
                 case .eraser:
-                    self.drawingTextureLayer = self.eraserDrawingTextureLayer
+                    self.drawingTexture = self.eraserDrawingTexture
                 }
             }
             .store(in: &cancellables)
@@ -132,8 +132,8 @@ final class CanvasViewModel {
         textureSize: CGSize,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        brushDrawingTextureLayer.initTexture(textureSize)
-        eraserDrawingTextureLayer.initTexture(textureSize)
+        brushDrawingTexture.initTexture(textureSize)
+        eraserDrawingTexture.initTexture(textureSize)
 
         layerManager.initLayers(textureSize: textureSize)
 
@@ -159,8 +159,8 @@ final class CanvasViewModel {
 
         layerUndoManager.clear()
 
-        brushDrawingTextureLayer.initTexture(model.textureSize)
-        eraserDrawingTextureLayer.initTexture(model.textureSize)
+        brushDrawingTexture.initTexture(model.textureSize)
+        eraserDrawingTexture.initTexture(model.textureSize)
 
         layerManager.initLayers(
             newLayers: model.layers,
@@ -343,7 +343,7 @@ extension CanvasViewModel {
     private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
-        drawingTextureLayer?.clearDrawingTexture()
+        drawingTexture?.clearDrawingTexture()
         renderTarget.clearCommandBuffer()
         renderTarget.setNeedsDisplay()
     }
@@ -426,15 +426,15 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        if let drawingLayer = drawingTextureLayer as? EraserDrawingTextureLayer {
-            drawingLayer.drawOnEraserDrawingTexture(
+        if let drawingTexture = drawingTexture as? EraserDrawingTexture {
+            drawingTexture.drawOnEraserDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )
-        } else if let drawingLayer = drawingTextureLayer as? BrushDrawingTextureLayer {
-            drawingLayer.drawOnBrushDrawingTexture(
+        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
+            drawingTexture.drawOnBrushDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 color: drawingTool.brushColor,
                 alpha: drawingTool.brushColor.alpha,
@@ -443,14 +443,14 @@ extension CanvasViewModel {
         }
 
         if touchPhase == .ended {
-            drawingTextureLayer?.mergeDrawingTexture(
+            drawingTexture?.mergeDrawingTexture(
                 into: layerManager.selectedTexture!,
                 renderTarget.commandBuffer
             )
         }
 
         layerManager.drawAllTextures(
-            drawingTextureLayer: drawingTextureLayer,
+            drawingTexture: drawingTexture,
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -532,8 +532,8 @@ extension CanvasViewModel {
 
         canvasTransformer.setMatrix(.identity)
 
-        brushDrawingTextureLayer.initTexture(renderTexture.size)
-        eraserDrawingTextureLayer.initTexture(renderTexture.size)
+        brushDrawingTexture.initTexture(renderTexture.size)
+        eraserDrawingTexture.initTexture(renderTexture.size)
 
         layerManager.initLayers(textureSize: renderTexture.size)
 
