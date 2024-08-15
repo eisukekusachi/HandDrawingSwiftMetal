@@ -6,8 +6,6 @@
 //
 
 import MetalKit
-import Accelerate
-import Combine
 
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayerManager: LayerManager<TextureLayer> {
