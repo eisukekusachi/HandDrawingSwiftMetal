@@ -9,18 +9,21 @@ import MetalKit
 import Accelerate
 import Combine
 
+/// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayerManager: LayerManager<TextureLayer> {
-
-    private var bottomTexture: MTLTexture!
-    private var topTexture: MTLTexture!
+    /// The texture of the selected layer
     private var currentTexture: MTLTexture!
+    /// A texture that combines the textures of all layers below the selected layer
+    private var bottomTexture: MTLTexture!
+    /// A texture that combines the textures of all layers above the selected layer
+    private var topTexture: MTLTexture!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
 }
 
 extension TextureLayerManager {
-
+    /// Render the images of layers onto a single texture
     func drawAllTextures(
         drawingTexture: DrawingTextureProtocol? = nil,
         backgroundColor: UIColor,
@@ -45,7 +48,7 @@ extension TextureLayerManager {
         )
 
         if layers[index].isVisible {
-            // Merge the `selectedTexture` into the `currentTexture` if there is something currently being drawn, including it in the process
+            // Merges the `selectedTexture` into the `currentTexture` if there is something currently being drawn, including it in the process
             let selectedTextures = drawingTexture?.getDrawingTexture( includingSelectedTexture: selectedLayer.texture) ?? [selectedLayer.texture]
             MTLRenderer.drawTextures(
                 selectedTextures.compactMap { $0 },
@@ -100,7 +103,7 @@ extension TextureLayerManager {
 }
 
 extension TextureLayerManager {
-
+    /// Combine the textures of unselected layers into `topTexture` and `bottomTexture`
     func updateUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
     ) {
