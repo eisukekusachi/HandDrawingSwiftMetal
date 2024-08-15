@@ -45,8 +45,8 @@ extension TextureLayerManager {
         )
 
         if layers[index].isVisible {
-            // Renders `selectedLayer.texture` onto `currentTexture` 
-            // If drawing is in progress, renders both `drawingTexture` and `selectedLayer.texture` onto `currentTexture`.
+            // Render `selectedLayer.texture` onto `currentTexture`
+            // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `currentTexture`.
             let selectedTextures = drawingTexture?.getDrawingTexture(includingSelectedTexture: selectedLayer.texture) ?? [selectedLayer.texture]
             MTLRenderer.drawTextures(
                 selectedTextures.compactMap { $0 },
