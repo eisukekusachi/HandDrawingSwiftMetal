@@ -274,17 +274,16 @@
 				D41CACE02B9C01F100B8C7C5 /* ContentView.xib */,
 				D472859E2BBEBC250035AFCD /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
+				D46A30442BF857E30057DB69 /* DrawingLayer */,
 				D44D195E2BE5D1390069D4A9 /* Entities */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D44D19652BE5D8970069D4A9 /* FileManager */,
 				D40D975629DAB04700A82E6A /* Gestures */,
-				D4B65E1F29DCFC9C00A0542F /* Layers */,
 				D40D975729DAB05400A82E6A /* Math */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D46A304A2BF88E540057DB69 /* Models */,
 				D481A4362C5E374200279C91 /* TouchManagers */,
 				D422D9C42AF4DCEF004E058B /* Undo */,
-				D46A30482BF858760057DB69 /* Views */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -348,6 +347,7 @@
 		D422D9C42AF4DCEF004E058B /* Undo */ = {
 			isa = PBXGroup;
 			children = (
+				D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */,
 				D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */,
 				D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */,
 				D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */,
@@ -362,7 +362,9 @@
 				D42F409C2B44033300B32707 /* SliderStyle.swift */,
 				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
+				D46A30422BF842570057DB69 /* LayerManager.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
+				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 			);
 			path = Components;
@@ -404,6 +406,15 @@
 			path = FileView;
 			sourceTree = "<group>";
 		};
+		D463A5F02C6E346500D102AD /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
+				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		D46A30442BF857E30057DB69 /* DrawingLayer */ = {
 			isa = PBXGroup;
 			children = (
@@ -425,9 +436,10 @@
 		D46A30492BF858AD0057DB69 /* TextureLayerView */ = {
 			isa = PBXGroup;
 			children = (
+				D463A5F02C6E346500D102AD /* Models */,
+				D4F1BB3D2B2D436F006EA102 /* TextureLayerManager.swift */,
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
-				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
 			);
 			path = TextureLayerView;
 			sourceTree = "<group>";
@@ -498,9 +510,6 @@
 		D481A4382C5E387600279C91 /* TextureLayer */ = {
 			isa = PBXGroup;
 			children = (
-				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
-				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
-				D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */,
 			);
 			path = TextureLayer;
 			sourceTree = "<group>";
@@ -525,16 +534,6 @@
 				D4934F412ADA36C500C52B76 /* DrawingToolType.swift */,
 			);
 			path = DrawingTool;
-			sourceTree = "<group>";
-		};
-		D4B65E1F29DCFC9C00A0542F /* Layers */ = {
-			isa = PBXGroup;
-			children = (
-				D46A30442BF857E30057DB69 /* DrawingLayer */,
-				D46A30422BF842570057DB69 /* LayerManager.swift */,
-				D4F1BB3D2B2D436F006EA102 /* TextureLayerManager.swift */,
-			);
-			path = Layers;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -565,6 +564,7 @@
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D44D196A2BE5DAEB0069D4A9 /* LocalRepository */,
 				D40D975029DAB00100A82E6A /* Canvas */,
+				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D46D07D92ADBEB160093D861 /* Utils */,
