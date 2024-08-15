@@ -205,15 +205,12 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.layerManager,
+            layerManager: canvasViewModel.textureLayerManager,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
-                guard 
-                    let `self`,
-                    let index = canvasViewModel.layerManager.getIndex(layer: layer)
-                else { return }
+                guard let `self` else { return }
                 self.canvasViewModel.didTapLayer(
-                    index: index,
+                    layer: layer,
                     renderTarget: self.contentView.canvasView
                 )
             },

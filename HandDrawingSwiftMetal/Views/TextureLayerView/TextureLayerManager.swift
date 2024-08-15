@@ -6,7 +6,6 @@
 //
 
 import MetalKit
-
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayerManager: LayerManager<TextureLayer> {
     /// The texture of the selected layer
