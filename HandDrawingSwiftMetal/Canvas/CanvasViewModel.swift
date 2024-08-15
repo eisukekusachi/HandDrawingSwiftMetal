@@ -168,6 +168,10 @@ final class CanvasViewModel {
             textureSize: model.textureSize
         )
 
+        for i in 0 ..< textureLayerManager.layers.count {
+            textureLayerManager.layers[i].updateThumbnail()
+        }
+
         drawingTool.setBrushDiameter(model.brushDiameter)
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
@@ -194,6 +198,10 @@ final class CanvasViewModel {
             index: undoObject.index,
             layers: undoObject.layers
         )
+
+        for i in 0 ..< textureLayerManager.layers.count {
+            textureLayerManager.layers[i].updateThumbnail()
+        }
 
         textureLayerManager.updateUnselectedLayers(
             to: renderTarget.commandBuffer
