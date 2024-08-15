@@ -96,10 +96,6 @@ extension TextureLayerManager {
         )
     }
 
-    func getIndex(layer: TextureLayer) -> Int? {
-        layers.firstIndex(of: layer)
-    }
-
 }
 
 extension TextureLayerManager {
