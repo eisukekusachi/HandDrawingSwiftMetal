@@ -11,11 +11,6 @@ import Combine
 
 final class TextureLayerManager: LayerManager<TextureLayer> {
 
-    var selectedTexture: MTLTexture? {
-        guard index < layers.count else { return nil }
-        return layers[index].texture
-    }
-
     private var bottomTexture: MTLTexture!
     private var topTexture: MTLTexture!
     private var currentTexture: MTLTexture!
@@ -33,7 +28,7 @@ extension TextureLayerManager {
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let selectedTexture,
+            let selectedLayer,
             let destinationTexture
         else { return }
 
@@ -51,7 +46,7 @@ extension TextureLayerManager {
 
         if layers[index].isVisible {
             // Merge the `selectedTexture` into the `currentTexture` if there is something currently being drawn, including it in the process
-            let selectedTextures = drawingTexture?.getDrawingTexture( includingSelectedTexture: selectedTexture) ?? [selectedTexture]
+            let selectedTextures = drawingTexture?.getDrawingTexture( includingSelectedTexture: selectedLayer.texture) ?? [selectedLayer.texture]
             MTLRenderer.drawTextures(
                 selectedTextures.compactMap { $0 },
                 on: currentTexture,
@@ -60,7 +55,7 @@ extension TextureLayerManager {
 
             MTLRenderer.merge(
                 texture: currentTexture,
-                alpha: selectedLayer?.alpha ?? 0,
+                alpha: selectedLayer.alpha,
                 into: destinationTexture,
                 commandBuffer
             )
@@ -163,8 +158,8 @@ extension TextureLayerManager {
 
     func updateTextureAddress() {
         guard
-            let selectedTexture = selectedTexture,
-            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedTexture)
+            let selectedLayer,
+            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedLayer.texture)
         else { return }
 
         layers[index].texture = newTexture
