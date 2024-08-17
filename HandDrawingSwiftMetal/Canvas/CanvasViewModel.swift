@@ -384,12 +384,47 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         ) ?? []
 
-        drawCurve(
-            grayScaleTextureCurvePoints: grayscaleCurveTexturePoints,
-            drawingTool: drawingTool,
-            touchPhase: touchPhase,
-            on: renderTarget
+        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
+           let selectedLayerTexture = textureLayerManager.selectedLayer?.texture {
+            drawingTexture.drawOnEraserDrawingTexture(
+                points: grayscaleCurveTexturePoints,
+                alpha: drawingTool.eraserAlpha,
+                srcTexture: selectedLayerTexture,
+                renderTarget.commandBuffer
+            )
+        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
+            drawingTexture.drawOnBrushDrawingTexture(
+                points: grayscaleCurveTexturePoints,
+                color: drawingTool.brushColor,
+                alpha: drawingTool.brushColor.alpha,
+                renderTarget.commandBuffer
+            )
+        }
+
+        if touchPhase == .ended,
+           let selectedLayer = textureLayerManager.selectedLayer {
+            drawingTexture?.mergeDrawingTexture(
+                into: selectedLayer.texture,
+                renderTarget.commandBuffer
+            )
+        }
+
+        textureLayerManager.drawAllTextures(
+            drawingTexture: drawingTexture,
+            backgroundColor: drawingTool.backgroundColor,
+            onto: renderTarget.renderTexture,
+            renderTarget.commandBuffer
         )
+
+        pauseDisplayLinkLoop(
+            touchPhase == .ended || touchPhase == .cancelled,
+            renderTarget: renderTarget
+        )
+
+        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
 
         if touchPhase == .ended || touchPhase == .cancelled {
             initDrawingParameters()
@@ -422,59 +457,6 @@ extension CanvasViewModel {
             ),
             renderTarget: renderTarget
         )
-    }
-
-}
-
-extension CanvasViewModel {
-
-    private func drawCurve(
-        grayScaleTextureCurvePoints: [GrayscaleTexturePoint],
-        drawingTool: DrawingToolModel,
-        touchPhase: UITouch.Phase,
-        on renderTarget: MTKRenderTextureProtocol
-    ) {
-        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
-           let selectedLayerTexture = textureLayerManager.selectedLayer?.texture {
-            drawingTexture.drawOnEraserDrawingTexture(
-                points: grayScaleTextureCurvePoints,
-                alpha: drawingTool.eraserAlpha,
-                srcTexture: selectedLayerTexture,
-                renderTarget.commandBuffer
-            )
-        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
-            drawingTexture.drawOnBrushDrawingTexture(
-                points: grayScaleTextureCurvePoints,
-                color: drawingTool.brushColor,
-                alpha: drawingTool.brushColor.alpha,
-                renderTarget.commandBuffer
-            )
-        }
-
-        if  touchPhase == .ended,
-            let selectedLayer = textureLayerManager.selectedLayer {
-            drawingTexture?.mergeDrawingTexture(
-                into: selectedLayer.texture,
-                renderTarget.commandBuffer
-            )
-        }
-
-        textureLayerManager.drawAllTextures(
-            drawingTexture: drawingTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
-        )
-
-        pauseDisplayLinkLoop(
-            touchPhase == .ended || touchPhase == .cancelled,
-            renderTarget: renderTarget
-        )
-
-        if requestShowingLayerViewSubject.value && touchPhase == .ended {
-            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
     }
 
     /// Start or stop the display link loop.
