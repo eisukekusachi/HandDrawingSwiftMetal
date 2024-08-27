@@ -89,15 +89,6 @@
 		D4C8EE982B25490B005947EC /* DrawingTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE972B25490B005947EC /* DrawingTextureProtocol.swift */; };
 		D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */; };
 		D4C9791E2ADBAA6400BB666D /* CanvasTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */; };
-		D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */; };
-		D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */; };
-		D4CB0D362B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */; };
-		D4CB0D382B2E9B2F00A4DCC1 /* DrawingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D372B2E9B2F00A4DCC1 /* DrawingActionStateTest.swift */; };
-		D4CB0D3A2B2E9BB500A4DCC1 /* DrawingIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D392B2E9BB500A4DCC1 /* DrawingIteratorTest.swift */; };
-		D4CB0D3C2B2E9BF900A4DCC1 /* InputManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D3B2B2E9BF900A4DCC1 /* InputManagerTest.swift */; };
-		D4CB0D3E2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D3D2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift */; };
-		D4CB0D402B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D3F2B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift */; };
-		D4CB0D422B2EB19F00A4DCC1 /* TransformingActionStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0D412B2EB19F00A4DCC1 /* TransformingActionStateTest.swift */; };
 		D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
@@ -212,15 +203,6 @@
 		D4C8EE972B25490B005947EC /* DrawingTextureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTextureProtocol.swift; sourceTree = "<group>"; };
 		D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
 		D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTransformer.swift; sourceTree = "<group>"; };
-		D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModelTests.swift; sourceTree = "<group>"; };
-		D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionStateTest.swift; sourceTree = "<group>"; };
-		D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultIteratorTest.swift; sourceTree = "<group>"; };
-		D4CB0D372B2E9B2F00A4DCC1 /* DrawingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingActionStateTest.swift; sourceTree = "<group>"; };
-		D4CB0D392B2E9BB500A4DCC1 /* DrawingIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingIteratorTest.swift; sourceTree = "<group>"; };
-		D4CB0D3B2B2E9BF900A4DCC1 /* InputManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputManagerTest.swift; sourceTree = "<group>"; };
-		D4CB0D3D2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorNonNormalTest.swift; sourceTree = "<group>"; };
-		D4CB0D3F2B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothPointIteratorTest.swift; sourceTree = "<group>"; };
-		D4CB0D412B2EB19F00A4DCC1 /* TransformingActionStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingActionStateTest.swift; sourceTree = "<group>"; };
 		D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -572,16 +554,7 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
-				D4CB0D332B2E991A00A4DCC1 /* ActionStateTest.swift */,
-				D4CB0D312B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift */,
-				D4CB0D352B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift */,
-				D4CB0D372B2E9B2F00A4DCC1 /* DrawingActionStateTest.swift */,
-				D4CB0D392B2E9BB500A4DCC1 /* DrawingIteratorTest.swift */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
-				D4CB0D3B2B2E9BF900A4DCC1 /* InputManagerTest.swift */,
-				D4CB0D3D2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift */,
-				D4CB0D3F2B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift */,
-				D4CB0D412B2EB19F00A4DCC1 /* TransformingActionStateTest.swift */,
 			);
 			path = HandDrawingSwiftMetalTests;
 			sourceTree = "<group>";
@@ -850,16 +823,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4CB0D382B2E9B2F00A4DCC1 /* DrawingActionStateTest.swift in Sources */,
-				D4CB0D402B2EB14300A4DCC1 /* SmoothPointIteratorTest.swift in Sources */,
-				D4CB0D322B2E8BAA00A4DCC1 /* CanvasViewModelTests.swift in Sources */,
-				D4CB0D3C2B2E9BF900A4DCC1 /* InputManagerTest.swift in Sources */,
-				D4CB0D342B2E991A00A4DCC1 /* ActionStateTest.swift in Sources */,
-				D4CB0D422B2EB19F00A4DCC1 /* TransformingActionStateTest.swift in Sources */,
-				D4CB0D3E2B2EB10A00A4DCC1 /* IteratorNonNormalTest.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
-				D4CB0D3A2B2E9BB500A4DCC1 /* DrawingIteratorTest.swift in Sources */,
-				D4CB0D362B2E9A5F00A4DCC1 /* DefaultIteratorTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
