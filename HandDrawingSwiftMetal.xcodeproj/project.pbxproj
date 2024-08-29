@@ -263,7 +263,6 @@
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D46A304A2BF88E540057DB69 /* Models */,
 				D481A4362C5E374200279C91 /* TouchManagers */,
-				D422D9C42AF4DCEF004E058B /* Undo */,
 			);
 			name = CanvasView;
 			path = ../CanvasView;
@@ -389,6 +388,7 @@
 		D463A5F02C6E346500D102AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D422D9C42AF4DCEF004E058B /* Undo */,
 				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
 				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
 			);
