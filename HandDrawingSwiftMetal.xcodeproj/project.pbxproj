@@ -69,7 +69,6 @@
 		D46A30412BF841270057DB69 /* TextureLayerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */; };
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
-		D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */; };
 		D481A42F2C5E1D6600279C91 /* InputDeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */; };
 		D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* InputDevice.swift */; };
 		D481A4332C5E1E5B00279C91 /* ScreenTouchGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */; };
@@ -183,7 +182,6 @@
 		D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerProtocol.swift; sourceTree = "<group>"; };
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
-		D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerProtocol.swift; sourceTree = "<group>"; };
 		D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDeviceStatus.swift; sourceTree = "<group>"; };
 		D481A4302C5E1D7300279C91 /* InputDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDevice.swift; sourceTree = "<group>"; };
 		D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGesture.swift; sourceTree = "<group>"; };
@@ -332,7 +330,6 @@
 			children = (
 				D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */,
 				D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */,
-				D46B8F712BDCF88200EF3AC2 /* UndoManagerProtocol.swift */,
 				D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */,
 			);
 			path = Undo;
@@ -743,7 +740,6 @@
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
 				D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
-				D46B8F722BDCF88200EF3AC2 /* UndoManagerProtocol.swift in Sources */,
 				D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */,
 				D469A85F2C5620FB00D10575 /* GrayscaleTexturePoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,

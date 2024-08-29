@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
+final class TextureLayerUndoManager: ObservableObject {
 
     var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
         addCurrentLayersToUndoStackSubject.eraseToAnyPublisher()
