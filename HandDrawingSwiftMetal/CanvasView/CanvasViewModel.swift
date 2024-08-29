@@ -102,7 +102,7 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
-        textureLayerUndoManager.addCurrentLayersToUndoStackPublisher
+        textureLayerUndoManager.addTextureLayersToUndoStackPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
                 self.textureLayerUndoManager.addUndoObject(

@@ -10,8 +10,8 @@ import Combine
 
 final class TextureLayerUndoManager: ObservableObject {
 
-    var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
-        addCurrentLayersToUndoStackSubject.eraseToAnyPublisher()
+    var addTextureLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
+        addTextureLayersToUndoStackSubject.eraseToAnyPublisher()
     }
 
     var canUndoPublisher: AnyPublisher<Bool, Never> {
@@ -28,7 +28,7 @@ final class TextureLayerUndoManager: ObservableObject {
     /// An undoManager with undoCount and redoCount
     let undoManager: UndoManager = UndoManagerWithCount()
 
-    private let addCurrentLayersToUndoStackSubject = PassthroughSubject<Void, Never>()
+    private let addTextureLayersToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     private let canUndoSubject = CurrentValueSubject<Bool, Never>(true)
     private let canRedoSubject = CurrentValueSubject<Bool, Never>(true)
@@ -40,7 +40,7 @@ final class TextureLayerUndoManager: ObservableObject {
     }
 
     func addCurrentLayersToUndoStack() {
-        addCurrentLayersToUndoStackSubject.send()
+        addTextureLayersToUndoStackSubject.send()
     }
 
     func undo() {
