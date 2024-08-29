@@ -51,6 +51,13 @@ final class CanvasViewModel {
         refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
     }
 
+    var refreshCanUndoPublisher: AnyPublisher<Bool, Never> {
+        refreshCanUndoSubject.eraseToAnyPublisher()
+    }
+    var refreshCanRedoPublisher: AnyPublisher<Bool, Never> {
+        refreshCanRedoSubject.eraseToAnyPublisher()
+    }
+
     private var grayscaleCurve: GrayscaleCurve?
 
     private let fingerScreenTouchManager = FingerScreenTouchManager()
@@ -84,6 +91,10 @@ final class CanvasViewModel {
 
     private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<TextureLayerUndoObject, Never>()
 
+    private let refreshCanUndoSubject = PassthroughSubject<Bool, Never>()
+
+    private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
+
     private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -111,7 +122,17 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        textureLayerUndoManager.updateUndoComponents()
+        textureLayerUndoManager.canUndoPublisher
+            .sink { [weak self] value in
+                self?.refreshCanUndoSubject.send(value)
+            }
+            .store(in: &cancellables)
+
+        textureLayerUndoManager.canRedoPublisher
+            .sink { [weak self] value in
+                self?.refreshCanRedoSubject.send(value)
+            }
+            .store(in: &cancellables)
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -229,6 +250,9 @@ extension CanvasViewModel {
                 renderTarget: renderTarget
             )
         }
+
+        // Update the display of the Undo and Redo buttons
+        textureLayerUndoManager.updateUndoComponents()
     }
 
     func onFingerGestureDetected(
