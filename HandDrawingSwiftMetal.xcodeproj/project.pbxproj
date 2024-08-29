@@ -390,6 +390,7 @@
 			children = (
 				D422D9C42AF4DCEF004E058B /* Undo */,
 				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
+				D4F1BB3D2B2D436F006EA102 /* TextureLayerManager.swift */,
 				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
 			);
 			path = Models;
@@ -419,7 +420,6 @@
 			isa = PBXGroup;
 			children = (
 				D463A5F02C6E346500D102AD /* Models */,
-				D4F1BB3D2B2D436F006EA102 /* TextureLayerManager.swift */,
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 			);
