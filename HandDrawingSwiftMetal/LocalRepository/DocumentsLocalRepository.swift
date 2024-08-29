@@ -19,7 +19,7 @@ final class DocumentsLocalRepository: LocalRepository {
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,
-        layerManager: TextureLayerManager,
+        layerManager: TextureLayers,
         drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {

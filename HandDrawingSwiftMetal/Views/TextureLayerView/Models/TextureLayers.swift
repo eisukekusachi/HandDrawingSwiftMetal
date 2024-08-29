@@ -1,5 +1,5 @@
 //
-//  TextureLayerManager.swift
+//  TextureLayers.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/16.
@@ -7,7 +7,7 @@
 
 import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
-final class TextureLayerManager: LayerManager<TextureLayer> {
+final class TextureLayers: LayerManager<TextureLayer> {
     /// The texture of the selected layer
     private var currentTexture: MTLTexture!
     /// A texture that combines the textures of all layers below the selected layer
@@ -19,7 +19,7 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 }
 
-extension TextureLayerManager {
+extension TextureLayers {
     /// Render the images of layers onto a single texture
     func drawAllTextures(
         drawingTexture: DrawingTextureProtocol? = nil,
@@ -96,7 +96,7 @@ extension TextureLayerManager {
 
 }
 
-extension TextureLayerManager {
+extension TextureLayers {
     /// Combine the textures of unselected layers into `topTexture` and `bottomTexture`
     func updateUnselectedLayers(
         to commandBuffer: MTLCommandBuffer

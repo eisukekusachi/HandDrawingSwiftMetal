@@ -138,7 +138,7 @@ extension TextureLayerListView {
 #Preview {
 
     TextureLayerListView<TextureLayer>(
-        layerManager: TextureLayerManager(),
+        layerManager: TextureLayers(),
         didTapLayer: { layer in
             print("Tap layer")
         },

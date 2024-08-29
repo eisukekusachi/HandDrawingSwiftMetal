@@ -12,7 +12,7 @@ final class CanvasViewModel {
 
     let canvasTransformer = CanvasTransformer()
 
-    let textureLayerManager = TextureLayerManager()
+    let textureLayerManager = TextureLayers()
 
     let textureLayerUndoManager = TextureLayerUndoManager()
 

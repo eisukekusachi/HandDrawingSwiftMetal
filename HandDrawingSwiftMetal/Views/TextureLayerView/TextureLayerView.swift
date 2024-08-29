@@ -134,7 +134,7 @@ extension TextureLayerView {
 #Preview {
 
     TextureLayerView(
-        layerManager: TextureLayerManager(),
+        layerManager: TextureLayers(),
         roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in
             print("Tap layer")
