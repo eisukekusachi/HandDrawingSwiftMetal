@@ -248,7 +248,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D40D975029DAB00100A82E6A /* Canvas */ = {
+		D40D975029DAB00100A82E6A /* CanvasView */ = {
 			isa = PBXGroup;
 			children = (
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
@@ -267,7 +267,8 @@
 				D481A4362C5E374200279C91 /* TouchManagers */,
 				D422D9C42AF4DCEF004E058B /* Undo */,
 			);
-			path = Canvas;
+			name = CanvasView;
+			path = ../CanvasView;
 			sourceTree = "<group>";
 		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
@@ -410,6 +411,7 @@
 		D46A30482BF858760057DB69 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D40D975029DAB00100A82E6A /* CanvasView */,
 				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D46A30492BF858AD0057DB69 /* TextureLayerView */,
 			);
@@ -538,7 +540,6 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D44D196A2BE5DAEB0069D4A9 /* LocalRepository */,
-				D40D975029DAB00100A82E6A /* Canvas */,
 				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D46D07D92ADBEB160093D861 /* Utils */,
