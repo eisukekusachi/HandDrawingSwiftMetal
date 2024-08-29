@@ -69,6 +69,7 @@
 		D46A30412BF841270057DB69 /* TextureLayerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */; };
 		D46A30432BF842570057DB69 /* LayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30422BF842570057DB69 /* LayerManager.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
+		D470D8512C80A5B900EE4262 /* CanvasCurrentTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */; };
 		D481A42F2C5E1D6600279C91 /* InputDeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */; };
 		D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* InputDevice.swift */; };
 		D481A4332C5E1E5B00279C91 /* ScreenTouchGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */; };
@@ -182,6 +183,7 @@
 		D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerProtocol.swift; sourceTree = "<group>"; };
 		D46A30422BF842570057DB69 /* LayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerManager.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
+		D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasCurrentTexture.swift; sourceTree = "<group>"; };
 		D481A42E2C5E1D6600279C91 /* InputDeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDeviceStatus.swift; sourceTree = "<group>"; };
 		D481A4302C5E1D7300279C91 /* InputDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDevice.swift; sourceTree = "<group>"; };
 		D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGesture.swift; sourceTree = "<group>"; };
@@ -452,6 +454,7 @@
 		D472859E2BBEBC250035AFCD /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
+				D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */,
 				D469A86E2C5633FC00D10575 /* DefaultGrayscaleCurve.swift */,
 				D469A8722C56342700D10575 /* GrayscaleCurve.swift */,
 				D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */,
@@ -755,6 +758,7 @@
 				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */,
+				D470D8512C80A5B900EE4262 /* CanvasCurrentTexture.swift in Sources */,
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* DefaultGrayscaleCurve.swift in Sources */,
