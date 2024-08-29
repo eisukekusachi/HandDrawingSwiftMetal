@@ -212,7 +212,7 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.textureLayerManager,
+            textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
                 guard let `self` else { return }

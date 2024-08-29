@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerListView<T: TextureLayerProtocol>: View {
 
-    @ObservedObject var layerManager: LayerManager<T>
+    @ObservedObject var textureLayers: LayerManager<T>
 
     var didTapLayer: (T) -> Void
     var didTapVisibility: (T, Bool) -> Void
@@ -18,12 +18,12 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
     var body: some View {
         List {
             ForEach(
-                Array(layerManager.layers.reversed()),
+                Array(textureLayers.layers.reversed()),
                 id: \.id
             ) { layer in
                 layerRow(
                     layer: layer,
-                    selected: layerManager.selectedLayer == layer,
+                    selected: textureLayers.selectedLayer == layer,
                     didTapRow: { targetLayer in
                         didTapLayer(targetLayer)
                     },
@@ -35,7 +35,7 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                guard let targetLayer = layerManager.selectedLayer else { return }
+                guard let targetLayer = textureLayers.selectedLayer else { return }
                 didMove(targetLayer, source, destination)
             })
             .listRowSeparator(.hidden)
@@ -138,7 +138,7 @@ extension TextureLayerListView {
 #Preview {
 
     TextureLayerListView<TextureLayer>(
-        layerManager: TextureLayers(),
+        textureLayers: TextureLayers(),
         didTapLayer: { layer in
             print("Tap layer")
         },

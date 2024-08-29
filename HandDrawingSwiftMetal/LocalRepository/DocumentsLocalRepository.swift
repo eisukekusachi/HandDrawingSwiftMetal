@@ -19,7 +19,7 @@ final class DocumentsLocalRepository: LocalRepository {
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,
-        layerManager: TextureLayers,
+        textureLayers: TextureLayers,
         drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
@@ -37,7 +37,7 @@ final class DocumentsLocalRepository: LocalRepository {
                         to: URL.tmpFolderURL
                     ),
                     DocumentsLocalRepository.exportLayerData(
-                        layers: layerManager.layers,
+                        layers: textureLayers.layers,
                         to: URL.tmpFolderURL
                     )
                 )
@@ -45,7 +45,7 @@ final class DocumentsLocalRepository: LocalRepository {
                     return .init(
                         thumbnailName: thumbnailName,
                         textureSize: renderTexture.size,
-                        layerIndex: layerManager.index,
+                        layerIndex: textureLayers.index,
                         layers: layers,
                         drawingTool: drawingTool
                     )

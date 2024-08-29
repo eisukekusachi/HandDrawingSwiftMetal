@@ -63,11 +63,11 @@ final class TextureLayerUndoManager: ObservableObject {
 
     func addUndoObject(
         undoObject: TextureLayerUndoObject,
-        layerManager: TextureLayers
+        textureLayers: TextureLayers
     ) {
         registerUndoAction(
             with: undoObject,
-            layerManager: layerManager
+            textureLayers: textureLayers
         )
 
         updateUndoComponents()
@@ -75,20 +75,20 @@ final class TextureLayerUndoManager: ObservableObject {
 
     private func registerUndoAction(
         with undoObject: TextureLayerUndoObject,
-        layerManager: TextureLayers
+        textureLayers: TextureLayers
     ) {
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
             guard
                 let `self`,
-                layerManager.layers.count != 0
+                textureLayers.layers.count != 0
             else { return }
 
             self.registerUndoAction(
                 with: .init(
-                    index: layerManager.index,
-                    layers: layerManager.layers
+                    index: textureLayers.index,
+                    layers: textureLayers.layers
                 ),
-                layerManager: layerManager
+                textureLayers: textureLayers
             )
 
             updateUndoComponents()

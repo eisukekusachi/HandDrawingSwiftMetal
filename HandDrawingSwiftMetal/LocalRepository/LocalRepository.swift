@@ -16,7 +16,7 @@ protocol LocalRepository {
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,
-        layerManager: TextureLayers,
+        textureLayers: TextureLayers,
         drawingTool: DrawingToolModel,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error>

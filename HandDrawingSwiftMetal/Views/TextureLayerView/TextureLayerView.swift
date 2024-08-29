@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerView<T: TextureLayerProtocol>: View {
 
-    @ObservedObject var layerManager: LayerManager<T>
+    @ObservedObject var textureLayers: LayerManager<T>
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State var isTextFieldPresented: Bool = false
@@ -36,14 +36,14 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 
             VStack {
                 toolbar(
-                    layerManager: layerManager,
+                    textureLayers: textureLayers,
                     didTapAddButton: didTapAddButton,
                     didTapRemoveButton: didTapRemoveButton,
                     didEditTitle: didEditTitle
                 )
 
                 TextureLayerListView<T>(
-                    layerManager: layerManager,
+                    textureLayers: textureLayers,
                     didTapLayer: { layer in
                         didTapLayer(layer)
                     },
@@ -57,11 +57,11 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: layerManager.selectedLayer?.alpha ?? 0,
+                    value: textureLayers.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didChange: { value in
-                        guard let selectedLayer = layerManager.selectedLayer else { return }
+                        guard let selectedLayer = textureLayers.selectedLayer else { return }
                         didChangeAlpha(selectedLayer, value)
                     }
                 )
@@ -77,7 +77,7 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 extension TextureLayerView {
 
     func toolbar(
-        layerManager: LayerManager<T>,
+        textureLayers: LayerManager<T>,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
         didEditTitle: @escaping (T, String) -> Void
@@ -109,7 +109,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textFieldTitle = layerManager.selectedLayer?.title ?? ""
+                    textFieldTitle = textureLayers.selectedLayer?.title ?? ""
                     isTextFieldPresented = true
                 },
                 label: {
@@ -119,7 +119,7 @@ extension TextureLayerView {
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let selectedLayer = layerManager.selectedLayer else { return }
+                    guard let selectedLayer = textureLayers.selectedLayer else { return }
                     didEditTitle(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
@@ -134,7 +134,7 @@ extension TextureLayerView {
 #Preview {
 
     TextureLayerView(
-        layerManager: TextureLayers(),
+        textureLayers: TextureLayers(),
         roundedRectangleWithArrow: RoundedRectangleWithArrow(),
         didTapLayer: { layer in
             print("Tap layer")
