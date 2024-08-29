@@ -410,6 +410,7 @@
 		D46A30482BF858760057DB69 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D46A30492BF858AD0057DB69 /* TextureLayerView */,
 			);
 			path = Views;
@@ -540,7 +541,6 @@
 				D40D975029DAB00100A82E6A /* Canvas */,
 				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
-				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
