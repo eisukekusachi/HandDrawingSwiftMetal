@@ -65,7 +65,7 @@ final class TextureLayerUndoManager: ObservableObject {
         undoObject: TextureLayerUndoObject,
         layerManager: TextureLayerManager
     ) {
-        registerDrawingUndoAction(
+        registerUndoAction(
             with: undoObject,
             layerManager: layerManager
         )
@@ -73,8 +73,7 @@ final class TextureLayerUndoManager: ObservableObject {
         updateUndoComponents()
     }
 
-    /// Registers an action to undo the drawing operation.
-    private func registerDrawingUndoAction(
+    private func registerUndoAction(
         with undoObject: TextureLayerUndoObject,
         layerManager: TextureLayerManager
     ) {
@@ -84,7 +83,7 @@ final class TextureLayerUndoManager: ObservableObject {
                 layerManager.layers.count != 0
             else { return }
 
-            self.registerDrawingUndoAction(
+            self.registerUndoAction(
                 with: .init(
                     index: layerManager.index,
                     layers: layerManager.layers
