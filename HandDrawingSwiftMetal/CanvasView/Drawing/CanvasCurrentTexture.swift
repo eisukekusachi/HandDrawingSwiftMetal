@@ -10,7 +10,7 @@ import MetalKit
 
 final class CanvasCurrentTexture {
 
-    /// The texture of the selected layer
+    /// A texture on which the texture of the currently selected layer and the texture currently being drawn are rendered
     private (set) var currentTexture: MTLTexture!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
