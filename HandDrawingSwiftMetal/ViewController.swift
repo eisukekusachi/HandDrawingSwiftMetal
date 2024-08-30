@@ -65,7 +65,6 @@ extension ViewController {
     private func setupContentView() {
         contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
-        contentView.bindUndoModels(canvasViewModel.textureLayerUndoManager)
 
         subscribeEvents()
 
@@ -177,6 +176,14 @@ extension ViewController {
                 )
             }
             .store(in: &cancellables)
+
+        canvasViewModel.refreshCanUndoPublisher
+            .assign(to: \.isEnabled, on: contentView.undoButton)
+            .store(in: &cancellables)
+
+        canvasViewModel.refreshCanRedoPublisher
+            .assign(to: \.isEnabled, on: contentView.redoButton)
+            .store(in: &cancellables)
     }
 
     private func subscribeEvents() {
@@ -205,7 +212,7 @@ extension ViewController {
 
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
-            layerManager: canvasViewModel.textureLayerManager,
+            textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
                 guard let `self` else { return }

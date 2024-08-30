@@ -23,6 +23,13 @@ protocol DrawingTextureProtocol {
     /// Returns an array containing the currently selected texture and the currently drawing texture
     func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?]
 
+    // Render `selectedLayer.texture` onto `targetTexture`
+    func drawDrawingTexture(
+        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        on targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    )
+
     /// Clears  the drawing textures.
     func clearDrawingTexture()
 

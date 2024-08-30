@@ -8,10 +8,10 @@
 import Foundation
 import Combine
 
-final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
+final class TextureLayerUndoManager: ObservableObject {
 
-    var addCurrentLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
-        addCurrentLayersToUndoStackSubject.eraseToAnyPublisher()
+    var addTextureLayersToUndoStackPublisher: AnyPublisher<Void, Never> {
+        addTextureLayersToUndoStackSubject.eraseToAnyPublisher()
     }
 
     var canUndoPublisher: AnyPublisher<Bool, Never> {
@@ -28,7 +28,7 @@ final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
     /// An undoManager with undoCount and redoCount
     let undoManager: UndoManager = UndoManagerWithCount()
 
-    private let addCurrentLayersToUndoStackSubject = PassthroughSubject<Void, Never>()
+    private let addTextureLayersToUndoStackSubject = PassthroughSubject<Void, Never>()
 
     private let canUndoSubject = CurrentValueSubject<Bool, Never>(true)
     private let canRedoSubject = CurrentValueSubject<Bool, Never>(true)
@@ -40,7 +40,7 @@ final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
     }
 
     func addCurrentLayersToUndoStack() {
-        addCurrentLayersToUndoStackSubject.send()
+        addTextureLayersToUndoStackSubject.send()
     }
 
     func undo() {
@@ -63,33 +63,32 @@ final class TextureLayerUndoManager: ObservableObject, UndoManagerProtocol {
 
     func addUndoObject(
         undoObject: TextureLayerUndoObject,
-        layerManager: TextureLayerManager
+        textureLayers: TextureLayers
     ) {
-        registerDrawingUndoAction(
+        registerUndoAction(
             with: undoObject,
-            layerManager: layerManager
+            textureLayers: textureLayers
         )
 
         updateUndoComponents()
     }
 
-    /// Registers an action to undo the drawing operation.
-    private func registerDrawingUndoAction(
+    private func registerUndoAction(
         with undoObject: TextureLayerUndoObject,
-        layerManager: TextureLayerManager
+        textureLayers: TextureLayers
     ) {
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
             guard
                 let `self`,
-                layerManager.layers.count != 0
+                textureLayers.layers.count != 0
             else { return }
 
-            self.registerDrawingUndoAction(
+            self.registerUndoAction(
                 with: .init(
-                    index: layerManager.index,
-                    layers: layerManager.layers
+                    index: textureLayers.index,
+                    layers: textureLayers.layers
                 ),
-                layerManager: layerManager
+                textureLayers: textureLayers
             )
 
             updateUndoComponents()

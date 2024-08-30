@@ -1,5 +1,5 @@
 //
-//  TextureLayerManager.swift
+//  TextureLayers.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/16.
@@ -7,9 +7,7 @@
 
 import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
-final class TextureLayerManager: LayerManager<TextureLayer> {
-    /// The texture of the selected layer
-    private var currentTexture: MTLTexture!
+final class TextureLayers: LayerManager<TextureLayer> {
     /// A texture that combines the textures of all layers below the selected layer
     private var bottomTexture: MTLTexture!
     /// A texture that combines the textures of all layers above the selected layer
@@ -19,16 +17,15 @@ final class TextureLayerManager: LayerManager<TextureLayer> {
 
 }
 
-extension TextureLayerManager {
-    /// Render the images of layers onto a single texture
+extension TextureLayers {
+    /// Render the textures of layers onto a single texture with the backgroundColor
     func drawAllTextures(
-        drawingTexture: DrawingTextureProtocol? = nil,
+        currentTexture: CanvasCurrentTexture? = nil,
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let selectedLayer,
             let destinationTexture
         else { return }
 
@@ -45,21 +42,21 @@ extension TextureLayerManager {
         )
 
         if layers[index].isVisible {
-            // Render `selectedLayer.texture` onto `currentTexture`
-            // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `currentTexture`.
-            let selectedTextures = drawingTexture?.getDrawingTexture(includingSelectedTexture: selectedLayer.texture) ?? [selectedLayer.texture]
-            MTLRenderer.drawTextures(
-                selectedTextures.compactMap { $0 },
-                on: currentTexture,
-                commandBuffer
-            )
-
-            MTLRenderer.merge(
-                texture: currentTexture,
-                alpha: selectedLayer.alpha,
-                into: destinationTexture,
-                commandBuffer
-            )
+            if let currentTexture {
+                MTLRenderer.merge(
+                    texture: currentTexture.currentTexture,
+                    alpha: layers[index].alpha,
+                    into: destinationTexture,
+                    commandBuffer
+                )
+            } else {
+                MTLRenderer.merge(
+                    texture: layers[index].texture,
+                    alpha: layers[index].alpha,
+                    into: destinationTexture,
+                    commandBuffer
+                )
+            }
         }
 
         MTLRenderer.merge(
@@ -76,7 +73,6 @@ extension TextureLayerManager {
     ) {
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
         var newLayers = newLayers
         if newLayers.isEmpty {
@@ -96,7 +92,7 @@ extension TextureLayerManager {
 
 }
 
-extension TextureLayerManager {
+extension TextureLayers {
     /// Combine the textures of unselected layers into `topTexture` and `bottomTexture`
     func updateUnselectedLayers(
         to commandBuffer: MTLCommandBuffer
@@ -153,6 +149,7 @@ extension TextureLayerManager {
         layers[index].updateThumbnail()
     }
 
+    /// Create a new instance when storing a texture in the UndoStack
     func updateTextureAddress() {
         guard
             let selectedLayer,

@@ -91,16 +91,6 @@ extension ContentView {
         bindModels(drawingTool)
     }
 
-    func bindUndoModels(_ undoManager: UndoManagerProtocol) {
-        undoManager.canUndoPublisher
-            .assign(to: \.isEnabled, on: undoButton)
-            .store(in: &cancellables)
-
-        undoManager.canRedoPublisher
-            .assign(to: \.isEnabled, on: redoButton)
-            .store(in: &cancellables)
-    }
-
     private func bindInputs(_ drawingTool: DrawingToolModel) {
 
         resetTransformButton.addAction(.init { [weak self] _ in

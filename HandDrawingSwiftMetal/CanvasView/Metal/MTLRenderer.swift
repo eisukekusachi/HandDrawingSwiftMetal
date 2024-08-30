@@ -64,6 +64,18 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
+    static func drawTexture(
+        _ texture: MTLTexture,
+        on targetTexture: MTLTexture,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        MTLRenderer.copy(
+            sourceTexture: texture,
+            destinationTexture: targetTexture,
+            commandBuffer
+        )
+    }
+
     static func drawTextures(
         _ textures: [MTLTexture],
         on targetTexture: MTLTexture,
