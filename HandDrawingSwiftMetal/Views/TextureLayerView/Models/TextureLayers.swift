@@ -18,7 +18,7 @@ final class TextureLayers: LayerManager<TextureLayer> {
 }
 
 extension TextureLayers {
-    /// Render the images of layers onto a single texture
+    /// Render the textures of layers onto a single texture with the backgroundColor
     func drawAllTextures(
         currentTexture: CanvasCurrentTexture? = nil,
         backgroundColor: UIColor,
@@ -148,6 +148,7 @@ extension TextureLayers {
         layers[index].updateThumbnail()
     }
 
+    /// Create a new instance when storing a texture in the UndoStack
     func updateTextureAddress() {
         guard
             let selectedLayer,
