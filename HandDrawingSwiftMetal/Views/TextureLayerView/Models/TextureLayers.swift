@@ -43,10 +43,11 @@ extension TextureLayers {
 
         if layers[index].isVisible {
             if let currentTexture {
-                currentTexture.drawCurrentTexture(
+                MTLRenderer.merge(
+                    texture: currentTexture.currentTexture,
                     alpha: layers[index].alpha,
-                    on: destinationTexture,
-                    with: commandBuffer
+                    into: destinationTexture,
+                    commandBuffer
                 )
             } else {
                 MTLRenderer.merge(

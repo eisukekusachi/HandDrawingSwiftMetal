@@ -23,19 +23,6 @@ extension CanvasCurrentTexture {
         currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
     }
 
-    func drawCurrentTexture(
-        alpha: Int,
-        on targetTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        MTLRenderer.merge(
-            texture: currentTexture,
-            alpha: alpha,
-            into: targetTexture,
-            commandBuffer
-        )
-    }
-
     func clearTexture() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         MTLRenderer.clear(texture: currentTexture, commandBuffer)
