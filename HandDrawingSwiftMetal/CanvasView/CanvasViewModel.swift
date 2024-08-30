@@ -466,12 +466,11 @@ extension CanvasViewModel {
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
-        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
-           let selectedLayerTexture = textureLayers.selectedLayer?.texture {
+        if let drawingTexture = drawingTexture as? EraserDrawingTexture {
             drawingTexture.drawOnEraserDrawingTexture(
                 points: grayScaleTextureCurvePoints,
                 alpha: drawingTool.eraserAlpha,
-                srcTexture: selectedLayerTexture,
+                srcTexture: selectedLayer.texture,
                 renderTarget.commandBuffer
             )
         } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
