@@ -8,8 +8,6 @@
 import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: LayerManager<TextureLayer> {
-    /// The texture of the selected layer
-    private var currentTexture: MTLTexture!
     /// A texture that combines the textures of all layers below the selected layer
     private var bottomTexture: MTLTexture!
     /// A texture that combines the textures of all layers above the selected layer
@@ -22,13 +20,12 @@ final class TextureLayers: LayerManager<TextureLayer> {
 extension TextureLayers {
     /// Render the images of layers onto a single texture
     func drawAllTextures(
-        drawingTexture: DrawingTextureProtocol? = nil,
+        currentTexture: CanvasCurrentTexture? = nil,
         backgroundColor: UIColor,
         onto destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let selectedLayer,
             let destinationTexture
         else { return }
 
@@ -45,21 +42,20 @@ extension TextureLayers {
         )
 
         if layers[index].isVisible {
-            // Render `selectedLayer.texture` onto `currentTexture`
-            // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `currentTexture`.
-            let selectedTextures = drawingTexture?.getDrawingTexture(includingSelectedTexture: selectedLayer.texture) ?? [selectedLayer.texture]
-            MTLRenderer.drawTextures(
-                selectedTextures.compactMap { $0 },
-                on: currentTexture,
-                commandBuffer
-            )
-
-            MTLRenderer.merge(
-                texture: currentTexture,
-                alpha: selectedLayer.alpha,
-                into: destinationTexture,
-                commandBuffer
-            )
+            if let currentTexture {
+                currentTexture.drawCurrentTexture(
+                    alpha: layers[index].alpha,
+                    on: destinationTexture,
+                    with: commandBuffer
+                )
+            } else {
+                MTLRenderer.merge(
+                    texture: layers[index].texture,
+                    alpha: layers[index].alpha,
+                    into: destinationTexture,
+                    commandBuffer
+                )
+            }
         }
 
         MTLRenderer.merge(
@@ -76,7 +72,6 @@ extension TextureLayers {
     ) {
         bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
         topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        currentTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
 
         var newLayers = newLayers
         if newLayers.isEmpty {

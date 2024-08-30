@@ -70,6 +70,9 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
+    /// A texture that combines the texture of the currently selected `TextureLayer` and `DrawingTexture`
+    private let currentTexture = CanvasCurrentTexture()
+
     /// A protocol for managing current drawing texture
     private (set) var drawingTexture: DrawingTextureProtocol?
     /// A drawing texture with a brush
@@ -156,6 +159,7 @@ final class CanvasViewModel {
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
 
+        currentTexture.initTexture(textureSize: textureSize)
         textureLayers.initLayers(textureSize: textureSize)
 
         renderTarget.initRenderTexture(textureSize: textureSize)
@@ -183,6 +187,7 @@ final class CanvasViewModel {
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
 
+        currentTexture.initTexture(textureSize: model.textureSize)
         textureLayers.initLayers(
             newLayers: model.layers,
             layerIndex: model.layerIndex,
@@ -215,6 +220,7 @@ final class CanvasViewModel {
         undoObject: TextureLayerUndoObject,
         to renderTarget: MTKRenderTextureProtocol
     ) {
+        currentTexture.clearTexture()
         textureLayers.initLayers(
             index: undoObject.index,
             layers: undoObject.layers
@@ -458,6 +464,8 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
+        guard let selectedLayer = textureLayers.selectedLayer else { return }
+
         if let drawingTexture = drawingTexture as? EraserDrawingTexture,
            let selectedLayerTexture = textureLayers.selectedLayer?.texture {
             drawingTexture.drawOnEraserDrawingTexture(
@@ -475,8 +483,13 @@ extension CanvasViewModel {
             )
         }
 
-        if  touchPhase == .ended,
-            let selectedLayer = textureLayers.selectedLayer {
+        drawingTexture?.drawDrawingTexture(
+            includingSelectedTextureLayer: selectedLayer,
+            on: currentTexture.currentTexture,
+            with: renderTarget.commandBuffer
+        )
+
+        if  touchPhase == .ended {
             drawingTexture?.mergeDrawingTexture(
                 into: selectedLayer.texture,
                 renderTarget.commandBuffer
@@ -484,7 +497,7 @@ extension CanvasViewModel {
         }
 
         textureLayers.drawAllTextures(
-            drawingTexture: drawingTexture,
+            currentTexture: currentTexture,
             backgroundColor: drawingTool.backgroundColor,
             onto: renderTarget.renderTexture,
             renderTarget.commandBuffer
@@ -569,6 +582,7 @@ extension CanvasViewModel {
         brushDrawingTexture.initTexture(renderTexture.size)
         eraserDrawingTexture.initTexture(renderTexture.size)
 
+        currentTexture.initTexture(textureSize: renderTexture.size)
         textureLayers.initLayers(textureSize: renderTexture.size)
 
         textureLayerUndoManager.clear()
