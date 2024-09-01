@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  CanvasContentView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/09.
@@ -8,9 +8,9 @@
 import UIKit
 import Combine
 
-final class ContentView: UIView {
+final class CanvasContentView: UIView {
 
-    @IBOutlet weak var canvasView: MTKTextureDisplayView!
+    @IBOutlet weak var canvasView: CanvasView!
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var activityIndicatorView: UIView!
@@ -81,7 +81,7 @@ final class ContentView: UIView {
 
 }
 
-extension ContentView {
+extension CanvasContentView {
 
     func bindTransforming(_ transformer: CanvasTransformer) {
         bindModels(transformer)
@@ -166,7 +166,7 @@ extension ContentView {
 
 }
 
-extension ContentView {
+extension CanvasContentView {
 
     @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
         canvasView.setNeedsDisplay()

@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  CanvasViewController.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2021/11/27.
@@ -9,9 +9,9 @@ import UIKit
 import SwiftUI
 import Combine
 
-class ViewController: UIViewController {
+class CanvasViewController: UIViewController {
 
-    @IBOutlet private weak var contentView: ContentView!
+    @IBOutlet private weak var contentView: CanvasContentView!
 
     private let canvasViewModel = CanvasViewModel()
 
@@ -49,7 +49,7 @@ class ViewController: UIViewController {
 
 }
 
-extension ViewController {
+extension CanvasViewController {
     private func setupCanvasViewModel() {
         // Initialize the canvas with `CGSize`,
         // if not initialized here, it will be initialized with the screen size
@@ -199,7 +199,7 @@ extension ViewController {
 
 }
 
-extension ViewController {
+extension CanvasViewController {
 
     func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
@@ -283,7 +283,7 @@ extension ViewController {
 
 }
 
-extension ViewController {
+extension CanvasViewController {
 
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
@@ -295,7 +295,7 @@ extension ViewController {
 
 }
 
-extension ViewController: FingerInputGestureSender {
+extension CanvasViewController: FingerInputGestureSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.onFingerGestureDetected(
@@ -308,7 +308,7 @@ extension ViewController: FingerInputGestureSender {
 
 }
 
-extension ViewController: PencilInputGestureSender {
+extension CanvasViewController: PencilInputGestureSender {
 
     func sendPencilTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.onPencilGestureDetected(
