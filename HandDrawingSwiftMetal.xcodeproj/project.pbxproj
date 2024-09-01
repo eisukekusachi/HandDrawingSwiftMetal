@@ -93,7 +93,7 @@
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
-		D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* ViewController.swift */; };
+		D4E1ECE12752388C00D4A23D /* CanvasViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */; };
 		D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE22752388C00D4A23D /* Main.storyboard */; };
 		D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE52752388E00D4A23D /* Assets.xcassets */; };
 		D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */; };
@@ -208,7 +208,7 @@
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		D4E1ECE02752388C00D4A23D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewController.swift; sourceTree = "<group>"; };
 		D4E1ECE32752388C00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D4E1ECE52752388E00D4A23D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4E1ECE82752388E00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -251,6 +251,7 @@
 		D40D975029DAB00100A82E6A /* CanvasView */ = {
 			isa = PBXGroup;
 			children = (
+				D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */,
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D41CACE12B9C01F100B8C7C5 /* CanvasContentView.swift */,
 				D41CACE02B9C01F100B8C7C5 /* CanvasContentView.xib */,
@@ -538,7 +539,6 @@
 			children = (
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
-				D4E1ECE02752388C00D4A23D /* ViewController.swift */,
 				D44D196A2BE5DAEB0069D4A9 /* LocalRepository */,
 				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
@@ -755,7 +755,7 @@
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D4C3971A2B9C941F0037312F /* DrawingToolModel.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */,
-				D4E1ECE12752388C00D4A23D /* ViewController.swift in Sources */,
+				D4E1ECE12752388C00D4A23D /* CanvasViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */,
 				D470D8512C80A5B900EE4262 /* CanvasCurrentTexture.swift in Sources */,
