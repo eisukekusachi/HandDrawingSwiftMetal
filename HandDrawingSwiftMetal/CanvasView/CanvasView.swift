@@ -1,5 +1,5 @@
 //
-//  MTKTextureDisplayView.swift
+//  CanvasView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/14.
@@ -9,7 +9,7 @@ import MetalKit
 import Combine
 
 /// A custom view for displaying textures with Metal support.
-class MTKTextureDisplayView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
+final class CanvasView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
 
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
