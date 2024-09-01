@@ -25,8 +25,8 @@
 		D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D979229DAB0D700A82E6A /* Interpolator.swift */; };
 		D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979629DAB0DE00A82E6A /* Texture.metal */; };
 		D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979729DAB0DE00A82E6A /* Drawing.metal */; };
-		D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41CACE02B9C01F100B8C7C5 /* ContentView.xib */; };
-		D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE12B9C01F100B8C7C5 /* ContentView.swift */; };
+		D41CACE22B9C01F200B8C7C5 /* CanvasContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41CACE02B9C01F100B8C7C5 /* CanvasContentView.xib */; };
+		D41CACE32B9C01F200B8C7C5 /* CanvasContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE12B9C01F100B8C7C5 /* CanvasContentView.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
 		D422D9C82AF4DD18004E058B /* TextureLayerUndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */; };
 		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
@@ -140,8 +140,8 @@
 		D40D979229DAB0D700A82E6A /* Interpolator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Interpolator.swift; sourceTree = "<group>"; };
 		D40D979629DAB0DE00A82E6A /* Texture.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Texture.metal; sourceTree = "<group>"; };
 		D40D979729DAB0DE00A82E6A /* Drawing.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Drawing.metal; sourceTree = "<group>"; };
-		D41CACE02B9C01F100B8C7C5 /* ContentView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContentView.xib; sourceTree = "<group>"; };
-		D41CACE12B9C01F100B8C7C5 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D41CACE02B9C01F100B8C7C5 /* CanvasContentView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CanvasContentView.xib; sourceTree = "<group>"; };
+		D41CACE12B9C01F100B8C7C5 /* CanvasContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasContentView.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		D422D9C72AF4DD18004E058B /* TextureLayerUndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerUndoObject.swift; sourceTree = "<group>"; };
 		D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensions.swift; sourceTree = "<group>"; };
@@ -252,8 +252,8 @@
 			isa = PBXGroup;
 			children = (
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
-				D41CACE12B9C01F100B8C7C5 /* ContentView.swift */,
-				D41CACE02B9C01F100B8C7C5 /* ContentView.xib */,
+				D41CACE12B9C01F100B8C7C5 /* CanvasContentView.swift */,
+				D41CACE02B9C01F100B8C7C5 /* CanvasContentView.xib */,
 				D440DF702ADA9E5100A4E425 /* CanvasView.swift */,
 				D472859E2BBEBC250035AFCD /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
@@ -683,7 +683,7 @@
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
 				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,
-				D41CACE22B9C01F200B8C7C5 /* ContentView.xib in Resources */,
+				D41CACE22B9C01F200B8C7C5 /* CanvasContentView.xib in Resources */,
 				D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -807,7 +807,7 @@
 				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* TextureLayerUndoObject.swift in Sources */,
 				D481A4312C5E1D7300279C91 /* InputDevice.swift in Sources */,
-				D41CACE32B9C01F200B8C7C5 /* ContentView.swift in Sources */,
+				D41CACE32B9C01F200B8C7C5 /* CanvasContentView.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,

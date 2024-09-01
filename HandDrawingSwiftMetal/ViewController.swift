@@ -11,7 +11,7 @@ import Combine
 
 class ViewController: UIViewController {
 
-    @IBOutlet private weak var contentView: ContentView!
+    @IBOutlet private weak var contentView: CanvasContentView!
 
     private let canvasViewModel = CanvasViewModel()
 
