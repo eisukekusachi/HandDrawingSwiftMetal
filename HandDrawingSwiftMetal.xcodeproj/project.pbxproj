@@ -259,12 +259,7 @@
 				D472859E2BBEBC250035AFCD /* Drawing */,
 				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
 				D46A30442BF857E30057DB69 /* DrawingTexture */,
-				D44D195E2BE5D1390069D4A9 /* Entities */,
-				D40D975529DAB03E00A82E6A /* Extensions */,
-				D44D19652BE5D8970069D4A9 /* FileManager */,
 				D40D975629DAB04700A82E6A /* Gestures */,
-				D40D975729DAB05400A82E6A /* Math */,
-				D40D975829DAB05F00A82E6A /* Metal */,
 				D46A304A2BF88E540057DB69 /* Models */,
 				D481A4362C5E374200279C91 /* TouchManagers */,
 			);
@@ -300,17 +295,6 @@
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
 			);
 			path = Gestures;
-			sourceTree = "<group>";
-		};
-		D40D975729DAB05400A82E6A /* Math */ = {
-			isa = PBXGroup;
-			children = (
-				D40D979029DAB0D700A82E6A /* Calculate.swift */,
-				D40D979229DAB0D700A82E6A /* Interpolator.swift */,
-				D40D975C29DAB09400A82E6A /* Iterator.swift */,
-				D469A85C2C56206800D10575 /* ScaleManager.swift */,
-			);
-			path = Math;
 			sourceTree = "<group>";
 		};
 		D40D975829DAB05F00A82E6A /* Metal */ = {
@@ -383,6 +367,7 @@
 		D4513AAF2AF63A3C00CA4438 /* FileView */ = {
 			isa = PBXGroup;
 			children = (
+				D44D19652BE5D8970069D4A9 /* FileManager */,
 				D4513AAD2AF63A2A00CA4438 /* FileView.swift */,
 			);
 			path = FileView;
@@ -445,6 +430,10 @@
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				D40D979029DAB0D700A82E6A /* Calculate.swift */,
+				D40D979229DAB0D700A82E6A /* Interpolator.swift */,
+				D40D975C29DAB09400A82E6A /* Iterator.swift */,
+				D469A85C2C56206800D10575 /* ScaleManager.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D44D19732BE5DFE80069D4A9 /* ToastModel.swift */,
 				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
@@ -462,6 +451,14 @@
 				D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */,
 			);
 			path = Drawing;
+			sourceTree = "<group>";
+		};
+		D4784EF42C848A0A00A02E11 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D44D195E2BE5D1390069D4A9 /* Entities */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		D481A42C2C5E1D2F00279C91 /* InputDevice */ = {
@@ -539,7 +536,10 @@
 			children = (
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
+				D40D975529DAB03E00A82E6A /* Extensions */,
 				D44D196A2BE5DAEB0069D4A9 /* LocalRepository */,
+				D40D975829DAB05F00A82E6A /* Metal */,
+				D4784EF42C848A0A00A02E11 /* Models */,
 				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D46D07D92ADBEB160093D861 /* Utils */,
