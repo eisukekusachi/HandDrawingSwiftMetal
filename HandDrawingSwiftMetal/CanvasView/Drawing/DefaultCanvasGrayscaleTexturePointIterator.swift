@@ -10,10 +10,6 @@ import UIKit
 final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<GrayscaleTexturePoint>()
 
-    var currentDictionaryKey: TouchHashValue?
-
-    var startAfterPoint: TouchPoint?
-
     // TODO: Delete it once actual values are used instead of estimated ones.
     private var tmpBrightness: CGFloat?
     private var startDrawing: Bool = false
@@ -37,9 +33,6 @@ extension DefaultCanvasGrayscaleTexturePointIterator {
 
     func reset() {
         iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
 
         // TODO: Delete it once actual values are used instead of estimated ones.
         tmpBrightness = nil

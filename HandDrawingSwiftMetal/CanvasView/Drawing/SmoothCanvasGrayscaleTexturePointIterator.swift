@@ -10,10 +10,6 @@ import UIKit
 final class SmoothCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<GrayscaleTexturePoint>()
 
-    var startAfterPoint: TouchPoint?
-
-    var currentDictionaryKey: TouchHashValue?
-
     private var tmpIterator = Iterator<GrayscaleTexturePoint>()
 
 }
@@ -49,9 +45,6 @@ extension SmoothCanvasGrayscaleTexturePointIterator {
     func reset() {
         tmpIterator.clear()
         iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
     }
 
 }
