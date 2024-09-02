@@ -1,5 +1,5 @@
 //
-//  TouchPoint.swift
+//  CanvasTouchPoint.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2022/11/19.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct TouchPoint: Equatable {
+struct CanvasTouchPoint: Equatable {
 
     let location: CGPoint
     let force: CGFloat
@@ -17,7 +17,7 @@ struct TouchPoint: Equatable {
 
 }
 
-extension TouchPoint {
+extension CanvasTouchPoint {
 
     init(
         touch: UITouch,
@@ -32,9 +32,9 @@ extension TouchPoint {
 
 }
 
-extension TouchPoint {
+extension CanvasTouchPoint {
 
-    func convertLocationToTextureScaleAndApplyMatrix(
+    func convertToTextureCoordinatesAndApplyMatrix(
         matrix: CGAffineTransform,
         frameSize: CGSize,
         drawableSize: CGSize,
@@ -91,7 +91,23 @@ extension TouchPoint {
 
 }
 
-extension Dictionary where Key: Hashable, Value == [TouchPoint] {
+extension Array where Element == CanvasTouchPoint {
+
+    var currentTouchPhase: UITouch.Phase {
+        if self.last?.phase == .cancelled {
+            .cancelled
+        } else if self.last?.phase == .ended {
+            .ended
+        } else if self.first?.phase == .began {
+            .began
+        } else {
+            .moved
+        }
+    }
+
+}
+
+extension Dictionary where Key: Hashable, Value == [CanvasTouchPoint] {
 
     func containsPhases(
         _ phases: [UITouch.Phase]

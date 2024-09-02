@@ -9,8 +9,10 @@ import UIKit
 
 final class PencilScreenTouchManager {
 
-    private (set) var touchArray: [TouchPoint] = []
+    private (set) var touchArray: [CanvasTouchPoint] = []
 
+    /// A variable used to get elements from the array starting from the next element after this point
+    var latestCanvasTouchPoint: CanvasTouchPoint?
 }
 
 extension PencilScreenTouchManager {
@@ -34,16 +36,9 @@ extension PencilScreenTouchManager {
         }
     }
 
-    func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
-        conditions.forEach { condition in
-            if touchArray.last?.phase == condition {
-                touchArray = []
-            }
-        }
-    }
-
     func reset() {
         touchArray = []
+        latestCanvasTouchPoint = nil
     }
 
 }

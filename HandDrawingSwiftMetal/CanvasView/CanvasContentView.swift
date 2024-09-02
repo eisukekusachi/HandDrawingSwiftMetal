@@ -86,12 +86,12 @@ extension CanvasContentView {
     func bindTransforming(_ transformer: CanvasTransformer) {
         bindModels(transformer)
     }
-    func applyDrawingParameters(_ drawingTool: DrawingToolModel) {
+    func applyDrawingParameters(_ drawingTool: CanvasDrawingToolStatus) {
         bindInputs(drawingTool)
         bindModels(drawingTool)
     }
 
-    private func bindInputs(_ drawingTool: DrawingToolModel) {
+    private func bindInputs(_ drawingTool: CanvasDrawingToolStatus) {
 
         resetTransformButton.addAction(.init { [weak self] _ in
             self?.tapResetTransformButton?()
@@ -152,7 +152,7 @@ extension CanvasContentView {
             .store(in: &cancellables)
     }
 
-    private func bindModels(_ drawingTool: DrawingToolModel) {
+    private func bindModels(_ drawingTool: CanvasDrawingToolStatus) {
 
         drawingTool.diameterPublisher
             .assign(to: \.value, on: diameterSlider)

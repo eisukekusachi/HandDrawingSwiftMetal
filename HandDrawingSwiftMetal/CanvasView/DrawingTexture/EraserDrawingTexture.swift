@@ -42,12 +42,13 @@ extension EraserDrawingTexture {
     }
 
     func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard 
             let drawingTexture,
-            let flippedTextureBuffers
+            let flippedTextureBuffers,
+            let destinationTexture
         else { return }
 
         MTLRenderer.copy(
@@ -74,15 +75,17 @@ extension EraserDrawingTexture {
         isDrawing = false
     }
 
-    // Render `selectedLayer.texture` onto `targetTexture`
-    // If drawing is in progress, render both `eraserTexture` onto `targetTexture`.
+    // Render `selectedTexture` onto `targetTexture`
+    // If drawing is in progress, render `eraserTexture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let selectedTexture else { return }
+
         MTLRenderer.drawTexture(
-            isDrawing ? eraserTexture : selectedLayer.texture,
+            isDrawing ? eraserTexture : selectedTexture,
             on: targetTexture,
             commandBuffer
         )
@@ -101,8 +104,8 @@ extension EraserDrawingTexture {
     /// then apply the intensity as transparency to add black color to the grayscale texture,
     /// and render the grayscale texture onto the drawing texture.
     /// After that, blend the drawing texture and the source texture using a blend factor for the eraser to create the eraser texture.
-    func drawOnEraserDrawingTexture(
-        points: [GrayscaleTexturePoint],
+    func drawPointsOnEraserDrawingTexture(
+        points: [CanvasGrayscaleDotPoint],
         alpha: Int,
         srcTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer

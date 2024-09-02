@@ -31,9 +31,11 @@ extension BrushDrawingTexture {
     }
 
     func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
+        guard let destinationTexture else { return }
+
         MTLRenderer.merge(
             texture: drawingTexture,
             into: destinationTexture,
@@ -43,15 +45,17 @@ extension BrushDrawingTexture {
         clearDrawingTexture(commandBuffer)
     }
 
-    // Render `selectedLayer.texture` onto `targetTexture`
-    // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `targetTexture`.
+    // Render `selectedTexture` onto `targetTexture`
+    // If drawing is in progress, render both `drawingTexture` and `selectedTexture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let selectedTexture else { return }
+
         MTLRenderer.drawTextures(
-            [selectedLayer.texture, drawingTexture].compactMap { $0 },
+            [selectedTexture, drawingTexture].compactMap { $0 },
             on: targetTexture,
             commandBuffer
         )
@@ -69,8 +73,8 @@ extension BrushDrawingTexture {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
     /// and render the colored grayscale texture onto the drawing texture."
-    func drawOnBrushDrawingTexture(
-        points: [GrayscaleTexturePoint],
+    func drawPointsOnBrushDrawingTexture(
+        points: [CanvasGrayscaleDotPoint],
         color: UIColor,
         alpha: Int,
         _ commandBuffer: MTLCommandBuffer

@@ -1,15 +1,28 @@
 //
-//  GrayscaleTexturePointIterator.swift
+//  CanvasGrayscaleTexturePointIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
-import Foundation
+import UIKit
 
-final class GrayscaleTexturePointIterator: Iterator<GrayscaleTexturePoint> {
+protocol CanvasGrayscaleTexturePointIterator {
 
-    typealias T = GrayscaleTexturePoint
+    typealias T = CanvasGrayscaleDotPoint
+
+    var iterator: Iterator<T> { get }
+
+    func appendToIterator(
+        points: [T],
+        touchPhase: UITouch.Phase
+    )
+
+    func reset()
+
+}
+
+extension CanvasGrayscaleTexturePointIterator {
 
     func makeCurvePoints(
         atEnd: Bool = false
@@ -17,14 +30,14 @@ final class GrayscaleTexturePointIterator: Iterator<GrayscaleTexturePoint> {
 
         var curve: [T] = []
 
-        while let subsequence = next(range: 4) {
+        while let subsequence = iterator.next(range: 4) {
 
-            if isFirstProcessing {
+            if iterator.isFirstProcessing {
                 curve.append(
                     contentsOf: makeFirstCurve(
-                        previousPoint: array[0],
-                        startPoint: array[1],
-                        endPoint: array[2],
+                        previousPoint: iterator.array[0],
+                        startPoint: iterator.array[1],
+                        endPoint: iterator.array[2],
                         addLastPoint: false
                     )
                 )
@@ -41,28 +54,28 @@ final class GrayscaleTexturePointIterator: Iterator<GrayscaleTexturePoint> {
         }
 
         if atEnd {
-            if index == 0 && array.count >= 3 {
+            if iterator.index == 0 && iterator.array.count >= 3 {
                 curve.append(
                     contentsOf: makeFirstCurve(
-                        previousPoint: array[0],
-                        startPoint: array[1],
-                        endPoint: array[2],
+                        previousPoint: iterator.array[0],
+                        startPoint: iterator.array[1],
+                        endPoint: iterator.array[2],
                         addLastPoint: false
                     )
                 )
             }
 
-            if array.count >= 3 {
+            if iterator.array.count >= 3 {
 
-                let index0 = array.count - 3
-                let index1 = array.count - 2
-                let index2 = array.count - 1
+                let index0 = iterator.array.count - 3
+                let index1 = iterator.array.count - 2
+                let index2 = iterator.array.count - 1
 
                 curve.append(
                     contentsOf: makeLastCurve(
-                        startPoint: array[index0],
-                        endPoint: array[index1],
-                        nextPoint: array[index2],
+                        startPoint: iterator.array[index0],
+                        endPoint: iterator.array[index1],
+                        nextPoint: iterator.array[index2],
                         addLastPoint: true
                     )
                 )
@@ -71,10 +84,9 @@ final class GrayscaleTexturePointIterator: Iterator<GrayscaleTexturePoint> {
 
         return curve
     }
-
 }
 
-extension GrayscaleTexturePointIterator {
+extension CanvasGrayscaleTexturePointIterator {
 
     private func makeFirstCurve(
         previousPoint: T,

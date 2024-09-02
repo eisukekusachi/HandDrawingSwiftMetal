@@ -1,5 +1,5 @@
 //
-//  DefaultGrayscaleCurve.swift
+//  DefaultCanvasGrayscaleTexturePointIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,52 +7,20 @@
 
 import UIKit
 
-final class DefaultGrayscaleCurve: GrayscaleCurve {
-
-    var iterator = GrayscaleTexturePointIterator()
-
-    var currentDictionaryKey: TouchHashValue?
-
-    var startAfterPoint: TouchPoint?
+final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
+    var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     // TODO: Delete it once actual values are used instead of estimated ones.
     private var tmpBrightness: CGFloat?
     private var startDrawing: Bool = false
     private var stopProcessing: Bool = false
 
-    func updateIterator(
-        points: [GrayscaleTexturePoint],
-        touchPhase: UITouch.Phase
-    ) -> [GrayscaleTexturePoint] {
-
-        appendToIterator(
-            points: points,
-            touchPhase: touchPhase
-        )
-
-        return makeCurvePointsFromIterator(
-            touchPhase: touchPhase
-        )
-    }
-
-    func reset() {
-        iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
-
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        tmpBrightness = nil
-        startDrawing = false
-        stopProcessing = false
-    }
-
 }
 
-extension DefaultGrayscaleCurve {
+extension DefaultCanvasGrayscaleTexturePointIterator {
 
-    private func appendToIterator(
-        points: [GrayscaleTexturePoint],
+    func appendToIterator(
+        points: [CanvasGrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         iterator.append(points)
@@ -63,15 +31,18 @@ extension DefaultGrayscaleCurve {
         }
     }
 
-    private func makeCurvePointsFromIterator(
-        touchPhase: UITouch.Phase
-    ) -> [GrayscaleTexturePoint] {
-        iterator.makeCurvePoints(atEnd: touchPhase == .ended)
+    func reset() {
+        iterator.clear()
+
+        // TODO: Delete it once actual values are used instead of estimated ones.
+        tmpBrightness = nil
+        startDrawing = false
+        stopProcessing = false
     }
 
 }
 
-extension DefaultGrayscaleCurve {
+extension DefaultCanvasGrayscaleTexturePointIterator {
 
     // TODO: Delete it once actual values are used instead of estimated ones. This process is almost meaningless.
     func setInaccurateAlphaToZero() {
