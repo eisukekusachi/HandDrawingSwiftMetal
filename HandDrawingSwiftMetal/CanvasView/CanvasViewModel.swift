@@ -334,6 +334,7 @@ extension CanvasViewModel {
                 grayscaleTexturePoints: grayscaleTextureCurvePoints,
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
+                selectedLayer: textureLayers.selectedLayer,
                 on: renderTarget
             )
 
@@ -411,6 +412,7 @@ extension CanvasViewModel {
             grayscaleTexturePoints: grayscaleTextureCurvePoints,
             with: grayscaleCurve,
             touchPhase: touchPhase,
+            selectedLayer: textureLayers.selectedLayer,
             on: renderTarget
         )
     }
@@ -446,11 +448,10 @@ extension CanvasViewModel {
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
+        selectedLayer: TextureLayer?,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else { return }
+        guard let selectedLayer else { return }
 
         if let drawingTexture = drawingTexture as? EraserDrawingTexture {
             drawingTexture.drawOnEraserDrawingTexture(
