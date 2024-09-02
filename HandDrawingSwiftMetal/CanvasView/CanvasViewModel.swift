@@ -299,7 +299,7 @@ extension CanvasViewModel {
             let latestTouchPoints = touchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
             fingerScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
-            guard let touchPhase = touchPoints.last?.phase else { return }
+            let touchPhase = latestTouchPoints.currentTouchPhase
 
             // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
             if touchPhase == .ended {
@@ -366,7 +366,7 @@ extension CanvasViewModel {
         let latestTouchPoints = touchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
         pencilScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
-        guard let touchPhase = touchPoints.last?.phase else { return }
+        let touchPhase = latestTouchPoints.currentTouchPhase
 
         // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
         if touchPhase == .ended {

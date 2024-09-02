@@ -91,6 +91,22 @@ extension CanvasTouchPoint {
 
 }
 
+extension Array where Element == CanvasTouchPoint {
+
+    var currentTouchPhase: UITouch.Phase {
+        if self.last?.phase == .cancelled {
+            .cancelled
+        } else if self.last?.phase == .ended {
+            .ended
+        } else if self.first?.phase == .began {
+            .began
+        } else {
+            .moved
+        }
+    }
+
+}
+
 extension Dictionary where Key: Hashable, Value == [CanvasTouchPoint] {
 
     func containsPhases(
