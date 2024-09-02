@@ -454,6 +454,7 @@ extension CanvasViewModel {
             )
         }
 
+        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
         drawingTexture?.drawDrawingTexture(
             includingSelectedTexture: textureLayers.selectedLayer?.texture,
             on: currentTexture.currentTexture,
@@ -465,12 +466,14 @@ extension CanvasViewModel {
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
             textureLayerUndoManager.addCurrentLayersToUndoStack()
 
+            // Draw `drawingTexture` onto `selectedLayer.texture`
             drawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
                 renderTarget.commandBuffer
             )
         }
 
+        // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
         textureLayers.drawAllTextures(
             currentTexture: currentTexture,
             backgroundColor: drawingTool.backgroundColor,

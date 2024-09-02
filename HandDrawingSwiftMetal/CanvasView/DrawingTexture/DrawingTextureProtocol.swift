@@ -23,7 +23,7 @@ protocol DrawingTextureProtocol {
     /// Returns an array containing the currently selected texture and the currently drawing texture
     func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?]
 
-    // Render `selectedLayer.texture` onto `targetTexture`
+    /// Combine `selectedTexture` and `drawingTexture`, then render them onto currentTexture
     func drawDrawingTexture(
         includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
