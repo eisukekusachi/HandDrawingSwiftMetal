@@ -469,7 +469,7 @@ extension CanvasViewModel {
         }
 
         drawingTexture?.drawDrawingTexture(
-            includingSelectedTextureLayer: selectedLayer,
+            includingSelectedTexture: selectedLayer.texture,
             on: currentTexture.currentTexture,
             with: renderTarget.commandBuffer
         )

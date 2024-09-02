@@ -77,12 +77,12 @@ extension EraserDrawingTexture {
     // Render `selectedLayer.texture` onto `targetTexture`
     // If drawing is in progress, render both `eraserTexture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        includingSelectedTexture selectedTexture: MTLTexture,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         MTLRenderer.drawTexture(
-            isDrawing ? eraserTexture : selectedLayer.texture,
+            isDrawing ? eraserTexture : selectedTexture,
             on: targetTexture,
             commandBuffer
         )

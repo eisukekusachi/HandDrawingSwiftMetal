@@ -46,12 +46,12 @@ extension BrushDrawingTexture {
     // Render `selectedLayer.texture` onto `targetTexture`
     // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        includingSelectedTexture selectedTexture: MTLTexture,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         MTLRenderer.drawTextures(
-            [selectedLayer.texture, drawingTexture].compactMap { $0 },
+            [selectedTexture, drawingTexture].compactMap { $0 },
             on: targetTexture,
             commandBuffer
         )

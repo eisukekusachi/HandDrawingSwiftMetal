@@ -25,7 +25,7 @@ protocol DrawingTextureProtocol {
 
     // Render `selectedLayer.texture` onto `targetTexture`
     func drawDrawingTexture(
-        includingSelectedTextureLayer selectedLayer: TextureLayer,
+        includingSelectedTexture selectedTexture: MTLTexture,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
