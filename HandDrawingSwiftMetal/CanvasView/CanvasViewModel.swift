@@ -115,7 +115,7 @@ final class CanvasViewModel {
                     ),
                     textureLayers: self.textureLayers
                 )
-                self.textureLayers.updateTextureAddress()
+                self.textureLayers.updateSelectedTextureAddress()
             }
             .store(in: &cancellables)
 

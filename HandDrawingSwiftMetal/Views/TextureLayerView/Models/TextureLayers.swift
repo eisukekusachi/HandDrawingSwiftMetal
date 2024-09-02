@@ -149,11 +149,10 @@ extension TextureLayers {
         layers[index].updateThumbnail()
     }
 
-    /// Create a new instance when storing a texture in the UndoStack
-    func updateTextureAddress() {
+    /// Update the currently selected texture with a new instance
+    func updateSelectedTextureAddress() {
         guard
-            let selectedLayer,
-            let newTexture = MTKTextureUtils.duplicateTexture(device, selectedLayer.texture)
+            let newTexture = MTKTextureUtils.duplicateTexture(device, layers[index].texture)
         else { return }
 
         layers[index].texture = newTexture
