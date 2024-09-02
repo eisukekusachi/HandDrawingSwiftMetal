@@ -293,7 +293,10 @@ extension CanvasViewModel {
             if fingerScreenTouchManager.currentDictionaryKey == nil {
                 fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
             }
-            guard let key = fingerScreenTouchManager.currentDictionaryKey else { return }
+            guard 
+                let grayscaleCurve,
+                let key = fingerScreenTouchManager.currentDictionaryKey
+            else { return }
 
             let touchPoints = fingerScreenTouchManager.getTouchPoints(for: key)
             let latestTouchPoints = touchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
@@ -318,8 +321,17 @@ extension CanvasViewModel {
                 )
             }
 
+            grayscaleCurve.appendToIterator(
+                points: grayscaleTexturePoints,
+                touchPhase: touchPhase
+            )
+
+            let grayscaleTextureCurvePoints = grayscaleCurve.makeCurvePoints(
+                atEnd: touchPhase == .ended
+            )
+
             drawPoints(
-                grayscaleTexturePoints: grayscaleTexturePoints,
+                grayscaleTexturePoints: grayscaleTextureCurvePoints,
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
                 on: renderTarget
@@ -361,6 +373,7 @@ extension CanvasViewModel {
         if !(grayscaleCurve is DefaultCanvasGrayscaleTexturePointIterator) {
             grayscaleCurve = DefaultCanvasGrayscaleTexturePointIterator()
         }
+        guard let grayscaleCurve else { return }
 
         let touchPoints = pencilScreenTouchManager.touchArray
         let latestTouchPoints = touchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
@@ -385,8 +398,17 @@ extension CanvasViewModel {
             )
         }
 
+        grayscaleCurve.appendToIterator(
+            points: grayscaleTexturePoints,
+            touchPhase: touchPhase
+        )
+
+        let grayscaleTextureCurvePoints = grayscaleCurve.makeCurvePoints(
+            atEnd: touchPhase == .ended
+        )
+
         drawPoints(
-            grayscaleTexturePoints: grayscaleTexturePoints,
+            grayscaleTexturePoints: grayscaleTextureCurvePoints,
             with: grayscaleCurve,
             touchPhase: touchPhase,
             on: renderTarget
@@ -426,30 +448,20 @@ extension CanvasViewModel {
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        grayscaleCurve?.appendToIterator(
-            points: grayscaleTexturePoints,
-            touchPhase: touchPhase
-        )
-
-        let grayScaleTextureCurvePoints = grayscaleCurve?.makeCurvePoints(
-            atEnd: touchPhase == .ended
-        )
-
         guard
-            let grayScaleTextureCurvePoints,
             let selectedLayer = textureLayers.selectedLayer
         else { return }
 
         if let drawingTexture = drawingTexture as? EraserDrawingTexture {
             drawingTexture.drawOnEraserDrawingTexture(
-                points: grayScaleTextureCurvePoints,
+                points: grayscaleTexturePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: selectedLayer.texture,
                 renderTarget.commandBuffer
             )
         } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
             drawingTexture.drawOnBrushDrawingTexture(
-                points: grayScaleTextureCurvePoints,
+                points: grayscaleTexturePoints,
                 color: drawingTool.brushColor,
                 alpha: drawingTool.brushColor.alpha,
                 renderTarget.commandBuffer
