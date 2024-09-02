@@ -299,14 +299,29 @@ extension CanvasViewModel {
             let latestTouchPoints = touchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
             fingerScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
+            guard let touchPhase = touchPoints.last?.phase else { return }
+
             // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
-            if touchPoints.last?.phase == .ended {
+            if touchPhase == .ended {
                 textureLayerUndoManager.addCurrentLayersToUndoStack()
             }
 
+            let grayscaleTexturePoints: [GrayscaleTexturePoint] = latestTouchPoints.map {
+                .init(
+                    touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                        matrix: canvasTransformer.matrix,
+                        frameSize: frameSize,
+                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                        textureSize: renderTarget.renderTexture?.size ?? .zero
+                    ),
+                    diameter: CGFloat(drawingTool.diameter)
+                )
+            }
+
             drawCurveOnCanvas(
-                latestTouchPoints,
+                grayscaleTexturePoints: grayscaleTexturePoints,
                 with: grayscaleCurve,
+                touchPhase: touchPhase,
                 on: renderTarget
             )
 
@@ -351,14 +366,29 @@ extension CanvasViewModel {
         let latestTouchPoints = touchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
         pencilScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
+        guard let touchPhase = touchPoints.last?.phase else { return }
+
         // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
-        if touchPoints.last?.phase == .ended {
+        if touchPhase == .ended {
             textureLayerUndoManager.addCurrentLayersToUndoStack()
         }
 
+        let grayscaleTexturePoints: [GrayscaleTexturePoint] = latestTouchPoints.map {
+            .init(
+                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                    matrix: canvasTransformer.matrix,
+                    frameSize: frameSize,
+                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
+                    textureSize: renderTarget.renderTexture?.size ?? .zero
+                ),
+                diameter: CGFloat(drawingTool.diameter)
+            )
+        }
+
         drawCurveOnCanvas(
-            latestTouchPoints,
+            grayscaleTexturePoints: grayscaleTexturePoints,
             with: grayscaleCurve,
+            touchPhase: touchPhase,
             on: renderTarget
         )
     }
@@ -391,24 +421,11 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawCurveOnCanvas(
-        _ screenTouchPoints: [CanvasTouchPoint],
+        grayscaleTexturePoints: [GrayscaleTexturePoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
+        touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        let touchPhase = screenTouchPoints.last?.phase ?? .cancelled
-
-        let grayscaleTexturePoints: [GrayscaleTexturePoint] = screenTouchPoints.map {
-            .init(
-                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
-                    matrix: canvasTransformer.matrix,
-                    frameSize: frameSize,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                    textureSize: renderTarget.renderTexture?.size ?? .zero
-                ),
-                diameter: CGFloat(drawingTool.diameter)
-            )
-        }
-
         grayscaleCurve?.appendToIterator(
             points: grayscaleTexturePoints,
             touchPhase: touchPhase
