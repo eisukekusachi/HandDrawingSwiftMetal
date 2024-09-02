@@ -14,6 +14,9 @@ final class FingerScreenTouchManager {
     /// A key currently used in the Dictionary
     var currentDictionaryKey: TouchHashValue?
 
+    /// A variable used to get elements from the array starting from the next element after this point
+    var latestCanvasTouchPoint: TouchPoint?
+
 }
 
 extension FingerScreenTouchManager {
@@ -60,6 +63,7 @@ extension FingerScreenTouchManager {
     func reset() {
         touchArrayDictionary = [:]
         currentDictionaryKey = nil
+        latestCanvasTouchPoint = nil
     }
 
 }

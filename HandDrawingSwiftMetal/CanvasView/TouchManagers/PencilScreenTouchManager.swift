@@ -11,6 +11,8 @@ final class PencilScreenTouchManager {
 
     private (set) var touchArray: [TouchPoint] = []
 
+    /// A variable used to get elements from the array starting from the next element after this point
+    var latestCanvasTouchPoint: TouchPoint?
 }
 
 extension PencilScreenTouchManager {
@@ -44,6 +46,7 @@ extension PencilScreenTouchManager {
 
     func reset() {
         touchArray = []
+        latestCanvasTouchPoint = nil
     }
 
 }

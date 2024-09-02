@@ -13,9 +13,6 @@ protocol GrayscaleCurve {
 
     var iterator: Iterator<T> { get }
 
-    /// A variable used to get elements from the array starting from the next element after this point
-    var startAfterPoint: TouchPoint? { get set }
-
     func appendToIterator(
         points: [T],
         touchPhase: UITouch.Phase
