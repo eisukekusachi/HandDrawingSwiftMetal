@@ -11,6 +11,9 @@ final class FingerScreenTouchManager {
 
     private (set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
+    /// A key currently used in the Dictionary
+    var currentDictionaryKey: TouchHashValue?
+
 }
 
 extension FingerScreenTouchManager {
@@ -56,6 +59,7 @@ extension FingerScreenTouchManager {
 
     func reset() {
         touchArrayDictionary = [:]
+        currentDictionaryKey = nil
     }
 
 }

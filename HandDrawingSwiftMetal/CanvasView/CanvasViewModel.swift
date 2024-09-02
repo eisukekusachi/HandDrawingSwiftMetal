@@ -290,10 +290,10 @@ extension CanvasViewModel {
             if !(grayscaleCurve is SmoothGrayscaleCurve) {
                 grayscaleCurve = SmoothGrayscaleCurve()
             }
-            if grayscaleCurve?.currentDictionaryKey == nil {
-                grayscaleCurve?.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
+            if fingerScreenTouchManager.currentDictionaryKey == nil {
+                fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
             }
-            guard let key = grayscaleCurve?.currentDictionaryKey else { return }
+            guard let key = fingerScreenTouchManager.currentDictionaryKey else { return }
 
             let touchPoints = fingerScreenTouchManager.getTouchPoints(for: key)
             let latestTouchPoints = touchPoints.elements(after: grayscaleCurve?.startAfterPoint) ?? touchPoints
