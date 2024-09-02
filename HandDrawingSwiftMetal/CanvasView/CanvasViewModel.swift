@@ -319,6 +319,7 @@ extension CanvasViewModel {
                 grayscaleTexturePoints: grayscaleCurve.makeCurvePoints(
                     atEnd: touchPhase == .ended
                 ),
+                drawingTool: drawingTool,
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
                 on: textureLayers,
@@ -396,6 +397,7 @@ extension CanvasViewModel {
             grayscaleTexturePoints: grayscaleCurve.makeCurvePoints(
                 atEnd: touchPhase == .ended
             ),
+            drawingTool: drawingTool,
             with: grayscaleCurve,
             touchPhase: touchPhase,
             on: textureLayers,
@@ -442,6 +444,7 @@ extension CanvasViewModel {
 
     private func drawPoints(
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
+        drawingTool: DrawingToolModel,
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
         on textureLayers: TextureLayers,
