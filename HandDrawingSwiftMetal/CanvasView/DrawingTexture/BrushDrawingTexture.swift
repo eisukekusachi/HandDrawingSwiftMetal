@@ -73,7 +73,7 @@ extension BrushDrawingTexture {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
     /// and render the colored grayscale texture onto the drawing texture."
-    func drawOnBrushDrawingTexture(
+    func drawPointsOnBrushDrawingTexture(
         points: [CanvasGrayscaleDotPoint],
         color: UIColor,
         alpha: Int,

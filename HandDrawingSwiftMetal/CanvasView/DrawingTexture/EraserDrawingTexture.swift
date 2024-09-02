@@ -104,7 +104,7 @@ extension EraserDrawingTexture {
     /// then apply the intensity as transparency to add black color to the grayscale texture,
     /// and render the grayscale texture onto the drawing texture.
     /// After that, blend the drawing texture and the source texture using a blend factor for the eraser to create the eraser texture.
-    func drawOnEraserDrawingTexture(
+    func drawPointsOnEraserDrawingTexture(
         points: [CanvasGrayscaleDotPoint],
         alpha: Int,
         srcTexture: MTLTexture,

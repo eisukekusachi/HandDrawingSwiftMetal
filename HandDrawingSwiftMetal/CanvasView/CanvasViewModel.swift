@@ -439,14 +439,14 @@ extension CanvasViewModel {
     ) {
         if let drawingTexture = drawingTexture as? EraserDrawingTexture,
            let selectedTexture = textureLayers.selectedLayer?.texture {
-            drawingTexture.drawOnEraserDrawingTexture(
+            drawingTexture.drawPointsOnEraserDrawingTexture(
                 points: grayscaleTexturePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: selectedTexture,
                 renderTarget.commandBuffer
             )
         } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
-            drawingTexture.drawOnBrushDrawingTexture(
+            drawingTexture.drawPointsOnBrushDrawingTexture(
                 points: grayscaleTexturePoints,
                 color: drawingTool.brushColor,
                 alpha: drawingTool.brushColor.alpha,
