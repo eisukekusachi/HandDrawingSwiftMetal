@@ -19,21 +19,6 @@ final class DefaultGrayscaleCurve: GrayscaleCurve {
     private var startDrawing: Bool = false
     private var stopProcessing: Bool = false
 
-    func updateIterator(
-        points: [GrayscaleTexturePoint],
-        touchPhase: UITouch.Phase
-    ) -> [GrayscaleTexturePoint] {
-
-        appendToIterator(
-            points: points,
-            touchPhase: touchPhase
-        )
-
-        return makeCurvePointsFromIterator(
-            touchPhase: touchPhase
-        )
-    }
-
     func reset() {
         iterator.clear()
 
@@ -50,7 +35,7 @@ final class DefaultGrayscaleCurve: GrayscaleCurve {
 
 extension DefaultGrayscaleCurve {
 
-    private func appendToIterator(
+    func appendToIterator(
         points: [GrayscaleTexturePoint],
         touchPhase: UITouch.Phase
     ) {
@@ -62,7 +47,7 @@ extension DefaultGrayscaleCurve {
         }
     }
 
-    private func makeCurvePointsFromIterator(
+    func makeCurvePointsFromIterator(
         touchPhase: UITouch.Phase
     ) -> [GrayscaleTexturePoint] {
         makeCurvePoints(atEnd: touchPhase == .ended)

@@ -409,10 +409,14 @@ extension CanvasViewModel {
             )
         }
 
-        let grayscaleCurveTexturePoints = grayscaleCurve?.updateIterator(
+        grayscaleCurve?.appendToIterator(
             points: grayscaleTexturePoints,
             touchPhase: touchPhase
-        ) ?? []
+        )
+
+        let grayscaleCurveTexturePoints = grayscaleCurve?.makeCurvePointsFromIterator(
+            touchPhase: touchPhase
+        )
 
         drawCurve(
             grayScaleTextureCurvePoints: grayscaleCurveTexturePoints,
@@ -459,12 +463,15 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawCurve(
-        grayScaleTextureCurvePoints: [GrayscaleTexturePoint],
+        grayScaleTextureCurvePoints: [GrayscaleTexturePoint]?,
         drawingTool: DrawingToolModel,
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        guard let selectedLayer = textureLayers.selectedLayer else { return }
+        guard 
+            let grayScaleTextureCurvePoints,
+            let selectedLayer = textureLayers.selectedLayer
+        else { return }
 
         if let drawingTexture = drawingTexture as? EraserDrawingTexture {
             drawingTexture.drawOnEraserDrawingTexture(
