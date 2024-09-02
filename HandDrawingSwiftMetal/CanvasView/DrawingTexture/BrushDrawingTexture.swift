@@ -31,9 +31,11 @@ extension BrushDrawingTexture {
     }
 
     func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
+        guard let destinationTexture else { return }
+
         MTLRenderer.merge(
             texture: drawingTexture,
             into: destinationTexture,
@@ -46,10 +48,12 @@ extension BrushDrawingTexture {
     // Render `selectedLayer.texture` onto `targetTexture`
     // If drawing is in progress, render both `drawingTexture` and `selectedLayer.texture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture,
+        includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let selectedTexture else { return }
+
         MTLRenderer.drawTextures(
             [selectedTexture, drawingTexture].compactMap { $0 },
             on: targetTexture,

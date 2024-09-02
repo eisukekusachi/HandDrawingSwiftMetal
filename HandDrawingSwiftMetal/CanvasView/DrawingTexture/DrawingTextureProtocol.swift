@@ -16,7 +16,7 @@ protocol DrawingTextureProtocol {
 
     /// Merges the drawing texture into the destination texture
     func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     )
     
@@ -25,7 +25,7 @@ protocol DrawingTextureProtocol {
 
     // Render `selectedLayer.texture` onto `targetTexture`
     func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture,
+        includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )

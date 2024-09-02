@@ -334,7 +334,7 @@ extension CanvasViewModel {
                 grayscaleTexturePoints: grayscaleTextureCurvePoints,
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
-                selectedLayer: textureLayers.selectedLayer,
+                textureLayers: textureLayers,
                 on: renderTarget
             )
 
@@ -412,7 +412,7 @@ extension CanvasViewModel {
             grayscaleTexturePoints: grayscaleTextureCurvePoints,
             with: grayscaleCurve,
             touchPhase: touchPhase,
-            selectedLayer: textureLayers.selectedLayer,
+            textureLayers: textureLayers,
             on: renderTarget
         )
     }
@@ -448,16 +448,15 @@ extension CanvasViewModel {
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
-        selectedLayer: TextureLayer?,
+        textureLayers: TextureLayers,
         on renderTarget: MTKRenderTextureProtocol
     ) {
-        guard let selectedLayer else { return }
-
-        if let drawingTexture = drawingTexture as? EraserDrawingTexture {
+        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
+           let selectedTexture = textureLayers.selectedLayer?.texture {
             drawingTexture.drawOnEraserDrawingTexture(
                 points: grayscaleTexturePoints,
                 alpha: drawingTool.eraserAlpha,
-                srcTexture: selectedLayer.texture,
+                srcTexture: selectedTexture,
                 renderTarget.commandBuffer
             )
         } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
@@ -470,14 +469,14 @@ extension CanvasViewModel {
         }
 
         drawingTexture?.drawDrawingTexture(
-            includingSelectedTexture: selectedLayer.texture,
+            includingSelectedTexture: textureLayers.selectedLayer?.texture,
             on: currentTexture.currentTexture,
             with: renderTarget.commandBuffer
         )
 
         if  touchPhase == .ended {
             drawingTexture?.mergeDrawingTexture(
-                into: selectedLayer.texture,
+                into: textureLayers.selectedLayer?.texture,
                 renderTarget.commandBuffer
             )
         }

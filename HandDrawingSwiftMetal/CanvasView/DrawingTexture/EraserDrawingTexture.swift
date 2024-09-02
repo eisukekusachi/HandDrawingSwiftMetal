@@ -42,12 +42,13 @@ extension EraserDrawingTexture {
     }
 
     func mergeDrawingTexture(
-        into destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
         guard 
             let drawingTexture,
-            let flippedTextureBuffers
+            let flippedTextureBuffers,
+            let destinationTexture
         else { return }
 
         MTLRenderer.copy(
@@ -77,10 +78,12 @@ extension EraserDrawingTexture {
     // Render `selectedLayer.texture` onto `targetTexture`
     // If drawing is in progress, render both `eraserTexture` onto `targetTexture`.
     func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture,
+        includingSelectedTexture selectedTexture: MTLTexture?,
         on targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let selectedTexture else { return }
+
         MTLRenderer.drawTexture(
             isDrawing ? eraserTexture : selectedTexture,
             on: targetTexture,
