@@ -267,9 +267,7 @@ extension CanvasViewModel {
         view: UIView,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        guard
-            inputDevice.update(.finger) != .pencil
-        else { return }
+        guard inputDevice.update(.finger) != .pencil else { return }
 
         fingerScreenTouchManager.append(
             event: event,
@@ -288,10 +286,10 @@ extension CanvasViewModel {
             }
             guard 
                 let grayscaleCurve,
-                let key = fingerScreenTouchManager.currentDictionaryKey
+                let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey
             else { return }
 
-            let touchPoints = fingerScreenTouchManager.getTouchPoints(for: key)
+            let touchPoints = fingerScreenTouchManager.getTouchPoints(for: currentTouchKey)
             let latestTouchPoints = touchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
             fingerScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
