@@ -414,61 +414,11 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        let grayscaleCurveTexturePoints = grayscaleCurve?.makeCurvePoints(
+        let grayScaleTextureCurvePoints = grayscaleCurve?.makeCurvePoints(
             atEnd: touchPhase == .ended
         )
 
-        drawCurve(
-            grayScaleTextureCurvePoints: grayscaleCurveTexturePoints,
-            drawingTool: drawingTool,
-            touchPhase: touchPhase,
-            on: renderTarget
-        )
-
-        if touchPhase == .ended || touchPhase == .cancelled {
-            initDrawingParameters()
-        }
-    }
-
-    private func transformCanvas(
-        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
-        on renderTarget: MTKRenderTextureProtocol
-    ) {
-        if canvasTransformer.isCurrentKeysNil {
-            canvasTransformer.initTransforming(touchPointsDictionary)
-        }
-
-        canvasTransformer.transformCanvas(
-            screenCenter: .init(
-                x: frameSize.width * 0.5,
-                y: frameSize.height * 0.5
-            ),
-            touchPointsDictionary
-        )
-
-        if touchPointsDictionary.containsPhases([.ended]) {
-            canvasTransformer.finishTransforming()
-        }
-
-        pauseDisplayLinkLoop(
-            touchPointsDictionary.containsPhases(
-                [.ended, .cancelled]
-            ),
-            renderTarget: renderTarget
-        )
-    }
-
-}
-
-extension CanvasViewModel {
-
-    private func drawCurve(
-        grayScaleTextureCurvePoints: [GrayscaleTexturePoint]?,
-        drawingTool: DrawingToolModel,
-        touchPhase: UITouch.Phase,
-        on renderTarget: MTKRenderTextureProtocol
-    ) {
-        guard 
+        guard
             let grayScaleTextureCurvePoints,
             let selectedLayer = textureLayers.selectedLayer
         else { return }
@@ -518,7 +468,43 @@ extension CanvasViewModel {
             // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
+
+        if touchPhase == .ended || touchPhase == .cancelled {
+            initDrawingParameters()
+        }
     }
+
+    private func transformCanvas(
+        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
+        if canvasTransformer.isCurrentKeysNil {
+            canvasTransformer.initTransforming(touchPointsDictionary)
+        }
+
+        canvasTransformer.transformCanvas(
+            screenCenter: .init(
+                x: frameSize.width * 0.5,
+                y: frameSize.height * 0.5
+            ),
+            touchPointsDictionary
+        )
+
+        if touchPointsDictionary.containsPhases([.ended]) {
+            canvasTransformer.finishTransforming()
+        }
+
+        pauseDisplayLinkLoop(
+            touchPointsDictionary.containsPhases(
+                [.ended, .cancelled]
+            ),
+            renderTarget: renderTarget
+        )
+    }
+
+}
+
+extension CanvasViewModel {
 
     /// Start or stop the display link loop.
     private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: MTKRenderTextureProtocol) {
