@@ -304,11 +304,6 @@ extension CanvasViewModel {
 
             let touchPhase = latestTouchPoints.currentTouchPhase
 
-            // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
-            if touchPhase == .ended {
-                textureLayerUndoManager.addCurrentLayersToUndoStack()
-            }
-
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
                 .init(
                     touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
@@ -381,11 +376,6 @@ extension CanvasViewModel {
         pencilScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
 
         let touchPhase = latestTouchPoints.currentTouchPhase
-
-        // Add the `layers` of `LayerManager` to the undo stack just before the drawing is completed
-        if touchPhase == .ended {
-            textureLayerUndoManager.addCurrentLayersToUndoStack()
-        }
 
         let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
             .init(
@@ -474,7 +464,11 @@ extension CanvasViewModel {
             with: renderTarget.commandBuffer
         )
 
-        if  touchPhase == .ended {
+        if touchPhase == .ended {
+            // Add `textureLayer` to the undo stack 
+            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
+
             drawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
                 renderTarget.commandBuffer
