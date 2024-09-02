@@ -414,8 +414,8 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        let grayscaleCurveTexturePoints = grayscaleCurve?.makeCurvePointsFromIterator(
-            touchPhase: touchPhase
+        let grayscaleCurveTexturePoints = grayscaleCurve?.makeCurvePoints(
+            atEnd: touchPhase == .ended
         )
 
         drawCurve(

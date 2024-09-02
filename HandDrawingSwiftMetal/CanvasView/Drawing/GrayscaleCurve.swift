@@ -24,10 +24,6 @@ protocol GrayscaleCurve {
         touchPhase: UITouch.Phase
     )
 
-    func makeCurvePointsFromIterator(
-        touchPhase: UITouch.Phase
-    ) -> [T]
-
     func reset()
 
 }

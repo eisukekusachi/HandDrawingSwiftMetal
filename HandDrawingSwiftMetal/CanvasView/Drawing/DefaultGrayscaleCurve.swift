@@ -47,12 +47,6 @@ extension DefaultGrayscaleCurve {
         }
     }
 
-    func makeCurvePointsFromIterator(
-        touchPhase: UITouch.Phase
-    ) -> [GrayscaleTexturePoint] {
-        makeCurvePoints(atEnd: touchPhase == .ended)
-    }
-
 }
 
 extension DefaultGrayscaleCurve {
