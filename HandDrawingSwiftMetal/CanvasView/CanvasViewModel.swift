@@ -343,8 +343,8 @@ extension CanvasViewModel {
             event: event,
             in: view
         )
-        if !(grayscaleCurve is DefaultGrayscaleCurve) {
-            grayscaleCurve = DefaultGrayscaleCurve()
+        if !(grayscaleCurve is DefaultCanvasGrayscaleTexturePointIterator) {
+            grayscaleCurve = DefaultCanvasGrayscaleTexturePointIterator()
         }
 
         let touchPoints = pencilScreenTouchManager.touchArray

@@ -1,5 +1,5 @@
 //
-//  DefaultGrayscaleCurve.swift
+//  DefaultCanvasGrayscaleTexturePointIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DefaultGrayscaleCurve: CanvasGrayscaleTexturePointIterator {
+final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<GrayscaleTexturePoint>()
 
     var currentDictionaryKey: TouchHashValue?
@@ -33,7 +33,7 @@ final class DefaultGrayscaleCurve: CanvasGrayscaleTexturePointIterator {
 
 }
 
-extension DefaultGrayscaleCurve {
+extension DefaultCanvasGrayscaleTexturePointIterator {
 
     func appendToIterator(
         points: [GrayscaleTexturePoint],
@@ -49,7 +49,7 @@ extension DefaultGrayscaleCurve {
 
 }
 
-extension DefaultGrayscaleCurve {
+extension DefaultCanvasGrayscaleTexturePointIterator {
 
     // TODO: Delete it once actual values are used instead of estimated ones. This process is almost meaningless.
     func setInaccurateAlphaToZero() {
