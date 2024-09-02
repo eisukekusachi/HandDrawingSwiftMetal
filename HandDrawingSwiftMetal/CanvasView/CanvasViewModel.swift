@@ -16,7 +16,7 @@ final class CanvasViewModel {
 
     let textureLayerUndoManager = TextureLayerUndoManager()
 
-    let drawingTool = DrawingToolModel()
+    let drawingTool = CanvasDrawingToolStatus()
 
     var frameSize: CGSize = .zero
 
@@ -444,7 +444,7 @@ extension CanvasViewModel {
 
     private func drawPoints(
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
-        drawingTool: DrawingToolModel,
+        drawingTool: CanvasDrawingToolStatus,
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
         on textureLayers: TextureLayers,

@@ -1,5 +1,5 @@
 //
-//  DrawingToolModel.swift
+//  CanvasDrawingToolStatus.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/09.
@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DrawingToolModel {
+final class CanvasDrawingToolStatus {
 
     var drawingTool: DrawingToolType {
         drawingToolSubject.value
@@ -58,7 +58,7 @@ final class DrawingToolModel {
 
 }
 
-extension DrawingToolModel {
+extension CanvasDrawingToolStatus {
 
     func setDrawingTool(_ tool: DrawingToolType) {
 
@@ -72,7 +72,7 @@ extension DrawingToolModel {
 
 }
 
-extension DrawingToolModel {
+extension CanvasDrawingToolStatus {
 
     @objc func handleDiameterSlider(_ sender: UISlider) {
         switch drawingTool {
@@ -83,7 +83,7 @@ extension DrawingToolModel {
 
 }
 
-extension DrawingToolModel {
+extension CanvasDrawingToolStatus {
 
     func setBrushColor(_ color: UIColor) {
         brushColor = color
@@ -94,7 +94,7 @@ extension DrawingToolModel {
 
 }
 
-extension DrawingToolModel {
+extension CanvasDrawingToolStatus {
     var diameter: Int {
         switch drawingTool {
         case .brush: brushDiameter
@@ -117,7 +117,7 @@ extension DrawingToolModel {
 
 }
 
-extension DrawingToolModel {
+extension CanvasDrawingToolStatus {
 
     func setBackgroundColor(_ color: UIColor) {
         self.backgroundColorSubject.send(color)

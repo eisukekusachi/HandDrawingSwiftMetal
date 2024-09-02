@@ -24,7 +24,7 @@ struct CanvasEntity: Codable, Equatable {
         textureSize: CGSize,
         layerIndex: Int,
         layers: [ImageLayerEntity],
-        drawingTool: DrawingToolModel
+        drawingTool: CanvasDrawingToolStatus
     ) {
         self.thumbnailName = thumbnailName
 
