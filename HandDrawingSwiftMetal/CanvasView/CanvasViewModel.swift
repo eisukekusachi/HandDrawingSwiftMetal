@@ -318,7 +318,7 @@ extension CanvasViewModel {
                 )
             }
 
-            drawCurveOnCanvas(
+            drawPoints(
                 grayscaleTexturePoints: grayscaleTexturePoints,
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
@@ -385,7 +385,7 @@ extension CanvasViewModel {
             )
         }
 
-        drawCurveOnCanvas(
+        drawPoints(
             grayscaleTexturePoints: grayscaleTexturePoints,
             with: grayscaleCurve,
             touchPhase: touchPhase,
@@ -420,7 +420,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawCurveOnCanvas(
+    private func drawPoints(
         grayscaleTexturePoints: [GrayscaleTexturePoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
