@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SmoothGrayscaleCurve: GrayscaleCurve {
+final class SmoothGrayscaleCurve: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<GrayscaleTexturePoint>()
 
     var startAfterPoint: TouchPoint?

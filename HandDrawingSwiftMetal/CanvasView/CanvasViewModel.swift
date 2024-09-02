@@ -58,7 +58,7 @@ final class CanvasViewModel {
         refreshCanRedoSubject.eraseToAnyPublisher()
     }
 
-    private var grayscaleCurve: GrayscaleCurve?
+    private var grayscaleCurve: CanvasGrayscaleTexturePointIterator?
 
     private let fingerScreenTouchManager = FingerScreenTouchManager()
 
@@ -392,7 +392,7 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(
         _ screenTouchPoints: [TouchPoint],
-        with grayscaleCurve: GrayscaleCurve?,
+        with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         on renderTarget: MTKRenderTextureProtocol
     ) {
         let touchPhase = screenTouchPoints.last?.phase ?? .cancelled

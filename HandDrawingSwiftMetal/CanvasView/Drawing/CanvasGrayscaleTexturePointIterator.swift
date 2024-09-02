@@ -1,5 +1,5 @@
 //
-//  GrayscaleCurve.swift
+//  CanvasGrayscaleTexturePointIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol GrayscaleCurve {
+protocol CanvasGrayscaleTexturePointIterator {
 
     typealias T = GrayscaleTexturePoint
 
@@ -22,7 +22,7 @@ protocol GrayscaleCurve {
 
 }
 
-extension GrayscaleCurve {
+extension CanvasGrayscaleTexturePointIterator {
 
     func makeCurvePoints(
         atEnd: Bool = false
@@ -86,7 +86,7 @@ extension GrayscaleCurve {
     }
 }
 
-extension GrayscaleCurve {
+extension CanvasGrayscaleTexturePointIterator {
 
     private func makeFirstCurve(
         previousPoint: T,

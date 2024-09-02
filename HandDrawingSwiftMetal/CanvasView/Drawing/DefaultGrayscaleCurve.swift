@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DefaultGrayscaleCurve: GrayscaleCurve {
+final class DefaultGrayscaleCurve: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<GrayscaleTexturePoint>()
 
     var currentDictionaryKey: TouchHashValue?
