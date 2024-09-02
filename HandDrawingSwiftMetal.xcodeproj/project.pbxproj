@@ -386,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				D40D976829DAB09C00A82E6A /* BrushDrawingTexture.swift */,
+				D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */,
 				D4C8EE972B25490B005947EC /* DrawingTextureProtocol.swift */,
 				D40D976A29DAB09D00A82E6A /* EraserDrawingTexture.swift */,
 			);
@@ -442,7 +443,6 @@
 		D472859E2BBEBC250035AFCD /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
-				D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */,
 				D469A86E2C5633FC00D10575 /* DefaultCanvasGrayscaleTexturePointIterator.swift */,
 				D469A8722C56342700D10575 /* CanvasGrayscaleTexturePointIterator.swift */,
 				D469A8702C56340B00D10575 /* SmoothCanvasGrayscaleTexturePointIterator.swift */,
