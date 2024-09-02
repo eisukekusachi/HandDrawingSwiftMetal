@@ -69,7 +69,7 @@ let flippedTextureNodes: TextureNodes = (
 enum MTLBuffers {
     static func makeGrayscalePointBuffers(
         device: MTLDevice?,
-        points: [GrayscaleTexturePoint],
+        points: [CanvasGrayscaleDotPoint],
         alpha: Int,
         textureSize: CGSize
     ) -> GrayscalePointBuffers? {

@@ -306,7 +306,7 @@ extension CanvasViewModel {
                 textureLayerUndoManager.addCurrentLayersToUndoStack()
             }
 
-            let grayscaleTexturePoints: [GrayscaleTexturePoint] = latestTouchPoints.map {
+            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
                 .init(
                     touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
                         matrix: canvasTransformer.matrix,
@@ -373,7 +373,7 @@ extension CanvasViewModel {
             textureLayerUndoManager.addCurrentLayersToUndoStack()
         }
 
-        let grayscaleTexturePoints: [GrayscaleTexturePoint] = latestTouchPoints.map {
+        let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
             .init(
                 touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
                     matrix: canvasTransformer.matrix,
@@ -421,7 +421,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawPoints(
-        grayscaleTexturePoints: [GrayscaleTexturePoint],
+        grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
         on renderTarget: MTKRenderTextureProtocol

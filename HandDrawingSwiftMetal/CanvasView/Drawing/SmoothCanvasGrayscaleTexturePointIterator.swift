@@ -8,16 +8,16 @@
 import UIKit
 
 final class SmoothCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
-    var iterator = Iterator<GrayscaleTexturePoint>()
+    var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
-    private var tmpIterator = Iterator<GrayscaleTexturePoint>()
+    private var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
 }
 
 extension SmoothCanvasGrayscaleTexturePointIterator {
 
     func appendToIterator(
-        points: [GrayscaleTexturePoint],
+        points: [CanvasGrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         tmpIterator.append(points)
@@ -29,7 +29,7 @@ extension SmoothCanvasGrayscaleTexturePointIterator {
         }
 
         while let subsequence = tmpIterator.next(range: 2) {
-            let dotPoint = GrayscaleTexturePoint.average(
+            let dotPoint = CanvasGrayscaleDotPoint.average(
                 subsequence[0],
                 subsequence[1]
             )

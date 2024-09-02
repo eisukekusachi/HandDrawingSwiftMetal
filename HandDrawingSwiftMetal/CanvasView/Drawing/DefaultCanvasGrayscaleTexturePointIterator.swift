@@ -8,7 +8,7 @@
 import UIKit
 
 final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
-    var iterator = Iterator<GrayscaleTexturePoint>()
+    var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     // TODO: Delete it once actual values are used instead of estimated ones.
     private var tmpBrightness: CGFloat?
@@ -20,7 +20,7 @@ final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePo
 extension DefaultCanvasGrayscaleTexturePointIterator {
 
     func appendToIterator(
-        points: [GrayscaleTexturePoint],
+        points: [CanvasGrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         iterator.append(points)

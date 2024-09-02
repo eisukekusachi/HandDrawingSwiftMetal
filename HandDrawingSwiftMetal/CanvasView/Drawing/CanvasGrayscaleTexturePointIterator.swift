@@ -9,7 +9,7 @@ import UIKit
 
 protocol CanvasGrayscaleTexturePointIterator {
 
-    typealias T = GrayscaleTexturePoint
+    typealias T = CanvasGrayscaleDotPoint
 
     var iterator: Iterator<T> { get }
 
