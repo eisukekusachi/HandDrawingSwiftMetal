@@ -9,13 +9,13 @@ import UIKit
 
 final class FingerScreenTouchManager {
 
-    private (set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
+    private (set) var touchArrayDictionary: [TouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently used in the Dictionary
     var currentDictionaryKey: TouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    var latestCanvasTouchPoint: TouchPoint?
+    var latestCanvasTouchPoint: CanvasTouchPoint?
 
 }
 
@@ -45,7 +45,7 @@ extension FingerScreenTouchManager {
         }
     }
 
-    func getTouchPoints(for key: TouchHashValue) -> [TouchPoint] {
+    func getTouchPoints(for key: TouchHashValue) -> [CanvasTouchPoint] {
         touchArrayDictionary[key] ?? []
     }
 

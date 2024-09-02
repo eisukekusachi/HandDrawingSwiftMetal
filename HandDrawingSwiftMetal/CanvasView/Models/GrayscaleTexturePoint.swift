@@ -22,7 +22,7 @@ struct GrayscaleTexturePoint: Equatable {
 extension GrayscaleTexturePoint {
 
     init(
-        touchPoint: TouchPoint,
+        touchPoint: CanvasTouchPoint,
         diameter: CGFloat
     ) {
         self.location = touchPoint.location

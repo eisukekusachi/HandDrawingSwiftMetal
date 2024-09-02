@@ -36,7 +36,7 @@ extension CanvasTransformer {
         keyA == nil || keyB == nil
     }
 
-    func initTransforming(_ dictionary: [TouchHashValue: [TouchPoint]]) {
+    func initTransforming(_ dictionary: [TouchHashValue: [CanvasTouchPoint]]) {
         updateCurrentKeys(from: dictionary)
 
         guard
@@ -50,7 +50,7 @@ extension CanvasTransformer {
         touchPointB = pointB
     }
 
-    func transformCanvas(screenCenter: CGPoint, _ dictionary: [TouchHashValue: [TouchPoint]]) {
+    func transformCanvas(screenCenter: CGPoint, _ dictionary: [TouchHashValue: [CanvasTouchPoint]]) {
         guard
             let keyA,
             let keyB,
@@ -100,7 +100,7 @@ extension CanvasTransformer {
 extension CanvasTransformer {
 
     private func updateCurrentKeys(
-        from dictionary: [TouchHashValue: [TouchPoint]]
+        from dictionary: [TouchHashValue: [CanvasTouchPoint]]
     ) {
         guard
             dictionary.count == 2,

@@ -391,7 +391,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawCurveOnCanvas(
-        _ screenTouchPoints: [TouchPoint],
+        _ screenTouchPoints: [CanvasTouchPoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         on renderTarget: MTKRenderTextureProtocol
     ) {
@@ -475,7 +475,7 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas(
-        _ touchPointsDictionary: [TouchHashValue: [TouchPoint]],
+        _ touchPointsDictionary: [TouchHashValue: [CanvasTouchPoint]],
         on renderTarget: MTKRenderTextureProtocol
     ) {
         if canvasTransformer.isCurrentKeysNil {
