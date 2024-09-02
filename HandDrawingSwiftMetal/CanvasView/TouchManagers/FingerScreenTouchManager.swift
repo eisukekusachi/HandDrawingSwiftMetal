@@ -51,8 +51,8 @@ extension FingerScreenTouchManager {
 
     func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
         touchArrayDictionary.keys.forEach { key in
-            if let touches = touchArrayDictionary[key], 
-                conditions.contains(touches.currentTouchPhase) {
+            if let touchArray = touchArrayDictionary[key],
+                conditions.contains(touchArray.currentTouchPhase) {
                 touchArrayDictionary.removeValue(forKey: key)
             }
         }
