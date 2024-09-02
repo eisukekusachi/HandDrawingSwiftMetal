@@ -267,13 +267,6 @@ extension CanvasViewModel {
         view: UIView,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        defer {
-            fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
-            if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
-                initDrawingParameters()
-            }
-        }
-
         guard
             inputDevice.update(.finger) != .pencil
         else { return }
@@ -340,6 +333,12 @@ extension CanvasViewModel {
         default:
             break
         }
+
+        fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+
+        if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+            initDrawingParameters()
+        }
     }
 
     func onPencilGestureDetected(
@@ -348,13 +347,6 @@ extension CanvasViewModel {
         view: UIView,
         renderTarget: MTKRenderTextureProtocol
     ) {
-        defer {
-            pencilScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
-            if pencilScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
-                initDrawingParameters()
-            }
-        }
-
         if inputDevice.status == .finger {
             cancelFingerInput(renderTarget)
         }
@@ -401,6 +393,12 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             on: renderTarget
         )
+
+        pencilScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+
+        if pencilScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+            initDrawingParameters()
+        }
     }
 
 }
