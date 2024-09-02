@@ -261,6 +261,9 @@ extension CanvasViewModel {
         textureLayerUndoManager.updateUndoComponents()
     }
 
+    // Manage the finger position on the screen using a Dictionary,
+    // determine the gesture from it,
+    // and based on that, either draw a line on the canvas or transform the canvas.
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -345,6 +348,7 @@ extension CanvasViewModel {
         }
     }
 
+    // Draw lines on the canvas using the data sent from an Apple Pencil.
     func onPencilGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
