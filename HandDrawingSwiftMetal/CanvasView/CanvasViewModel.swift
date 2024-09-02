@@ -477,7 +477,7 @@ extension CanvasViewModel {
         )
 
         pauseDisplayLinkLoop(
-            touchPhase == .ended || touchPhase == .cancelled,
+            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
             renderTarget: renderTarget
         )
 
@@ -486,7 +486,7 @@ extension CanvasViewModel {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
-        if touchPhase == .ended || touchPhase == .cancelled {
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
             initDrawingParameters()
         }
     }
