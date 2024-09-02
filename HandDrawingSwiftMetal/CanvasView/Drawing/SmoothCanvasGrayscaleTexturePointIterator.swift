@@ -16,14 +16,6 @@ final class SmoothCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePoi
 
     private var tmpIterator = Iterator<GrayscaleTexturePoint>()
 
-    func reset() {
-        tmpIterator.clear()
-        iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
-    }
-
 }
 
 extension SmoothCanvasGrayscaleTexturePointIterator {
@@ -52,6 +44,14 @@ extension SmoothCanvasGrayscaleTexturePointIterator {
             let lastElement = tmpIterator.array.last {
             iterator.append(lastElement)
         }
+    }
+
+    func reset() {
+        tmpIterator.clear()
+        iterator.clear()
+
+        startAfterPoint = nil
+        currentDictionaryKey = nil
     }
 
 }

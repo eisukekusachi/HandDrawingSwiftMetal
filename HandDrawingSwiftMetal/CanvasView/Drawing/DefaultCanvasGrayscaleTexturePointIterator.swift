@@ -19,18 +19,6 @@ final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePo
     private var startDrawing: Bool = false
     private var stopProcessing: Bool = false
 
-    func reset() {
-        iterator.clear()
-
-        startAfterPoint = nil
-        currentDictionaryKey = nil
-
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        tmpBrightness = nil
-        startDrawing = false
-        stopProcessing = false
-    }
-
 }
 
 extension DefaultCanvasGrayscaleTexturePointIterator {
@@ -45,6 +33,18 @@ extension DefaultCanvasGrayscaleTexturePointIterator {
         if !stopProcessing {
             setInaccurateAlphaToZero()
         }
+    }
+
+    func reset() {
+        iterator.clear()
+
+        startAfterPoint = nil
+        currentDictionaryKey = nil
+
+        // TODO: Delete it once actual values are used instead of estimated ones.
+        tmpBrightness = nil
+        startDrawing = false
+        stopProcessing = false
     }
 
 }
