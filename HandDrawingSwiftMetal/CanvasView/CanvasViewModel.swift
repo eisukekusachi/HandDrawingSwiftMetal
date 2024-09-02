@@ -261,7 +261,7 @@ extension CanvasViewModel {
         textureLayerUndoManager.updateUndoComponents()
     }
 
-    // Manage the finger position on the screen using a Dictionary,
+    // Manage all finger positions on the screen using a Dictionary,
     // determine the gesture from it,
     // and based on that, either draw a line on the canvas or transform the canvas.
     func onFingerGestureDetected(
