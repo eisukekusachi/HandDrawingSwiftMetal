@@ -394,9 +394,7 @@ extension CanvasViewModel {
             on: renderTarget
         )
 
-        pencilScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
-
-        if pencilScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchManager.touchArray.currentTouchPhase) {
             initDrawingParameters()
         }
     }

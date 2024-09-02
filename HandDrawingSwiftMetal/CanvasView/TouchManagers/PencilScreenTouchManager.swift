@@ -36,12 +36,6 @@ extension PencilScreenTouchManager {
         }
     }
 
-    func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
-        if conditions.contains(touchArray.currentTouchPhase) {
-            touchArray = []
-        }
-    }
-
     func reset() {
         touchArray = []
         latestCanvasTouchPoint = nil
