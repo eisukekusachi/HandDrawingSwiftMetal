@@ -37,10 +37,8 @@ extension PencilScreenTouchManager {
     }
 
     func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
-        conditions.forEach { condition in
-            if touchArray.last?.phase == condition {
-                touchArray = []
-            }
+        if conditions.contains(touchArray.currentTouchPhase) {
+            touchArray = []
         }
     }
 
