@@ -8,8 +8,7 @@
 import UIKit
 
 final class DefaultGrayscaleCurve: GrayscaleCurve {
-
-    var iterator = GrayscaleTexturePointIterator()
+    var iterator = Iterator<GrayscaleTexturePoint>()
 
     var currentDictionaryKey: TouchHashValue?
 
@@ -66,7 +65,7 @@ extension DefaultGrayscaleCurve {
     private func makeCurvePointsFromIterator(
         touchPhase: UITouch.Phase
     ) -> [GrayscaleTexturePoint] {
-        iterator.makeCurvePoints(atEnd: touchPhase == .ended)
+        makeCurvePoints(atEnd: touchPhase == .ended)
     }
 
 }

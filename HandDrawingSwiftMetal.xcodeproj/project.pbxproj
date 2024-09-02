@@ -58,7 +58,6 @@
 		D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */; };
 		D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85C2C56206800D10575 /* ScaleManager.swift */; };
 		D469A85F2C5620FB00D10575 /* GrayscaleTexturePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */; };
-		D469A86D2C56334100D10575 /* GrayscaleTexturePointIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */; };
 		D469A86F2C5633FC00D10575 /* DefaultGrayscaleCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A86E2C5633FC00D10575 /* DefaultGrayscaleCurve.swift */; };
 		D469A8712C56340B00D10575 /* SmoothGrayscaleCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */; };
 		D469A8732C56342700D10575 /* GrayscaleCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8722C56342700D10575 /* GrayscaleCurve.swift */; };
@@ -172,7 +171,6 @@
 		D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKRenderTextureProtocol.swift; sourceTree = "<group>"; };
 		D469A85C2C56206800D10575 /* ScaleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleManager.swift; sourceTree = "<group>"; };
 		D469A85E2C5620FB00D10575 /* GrayscaleTexturePoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleTexturePoint.swift; sourceTree = "<group>"; };
-		D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleTexturePointIterator.swift; sourceTree = "<group>"; };
 		D469A86E2C5633FC00D10575 /* DefaultGrayscaleCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultGrayscaleCurve.swift; sourceTree = "<group>"; };
 		D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothGrayscaleCurve.swift; sourceTree = "<group>"; };
 		D469A8722C56342700D10575 /* GrayscaleCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleCurve.swift; sourceTree = "<group>"; };
@@ -447,7 +445,6 @@
 				D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */,
 				D469A86E2C5633FC00D10575 /* DefaultGrayscaleCurve.swift */,
 				D469A8722C56342700D10575 /* GrayscaleCurve.swift */,
-				D469A86C2C56334100D10575 /* GrayscaleTexturePointIterator.swift */,
 				D469A8702C56340B00D10575 /* SmoothGrayscaleCurve.swift */,
 			);
 			path = Drawing;
@@ -763,7 +760,6 @@
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* DefaultGrayscaleCurve.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D469A86D2C56334100D10575 /* GrayscaleTexturePointIterator.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilScreenTouchManager.swift in Sources */,
 				D481A42F2C5E1D6600279C91 /* InputDeviceStatus.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerScreenTouchManager.swift in Sources */,
