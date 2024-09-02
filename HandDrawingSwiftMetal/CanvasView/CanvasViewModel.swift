@@ -318,7 +318,13 @@ extension CanvasViewModel {
                 ),
                 with: grayscaleCurve,
                 touchPhase: touchPhase,
+                on: textureLayers,
+                with: renderTarget.commandBuffer
+            )
+
+            renderTextures(
                 textureLayers: textureLayers,
+                touchPhase: touchPhase,
                 on: renderTarget
             )
 
@@ -388,7 +394,13 @@ extension CanvasViewModel {
             ),
             with: grayscaleCurve,
             touchPhase: touchPhase,
+            on: textureLayers,
+            with: renderTarget.commandBuffer
+        )
+
+        renderTextures(
             textureLayers: textureLayers,
+            touchPhase: touchPhase,
             on: renderTarget
         )
 
@@ -428,8 +440,8 @@ extension CanvasViewModel {
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
         with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
         touchPhase: UITouch.Phase,
-        textureLayers: TextureLayers,
-        on renderTarget: MTKRenderTextureProtocol
+        on textureLayers: TextureLayers,
+        with commandBuffer: MTLCommandBuffer
     ) {
         if let drawingTexture = drawingTexture as? EraserDrawingTexture,
            let selectedTexture = textureLayers.selectedLayer?.texture {
@@ -437,14 +449,14 @@ extension CanvasViewModel {
                 points: grayscaleTexturePoints,
                 alpha: drawingTool.eraserAlpha,
                 srcTexture: selectedTexture,
-                renderTarget.commandBuffer
+                commandBuffer
             )
         } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
             drawingTexture.drawPointsOnBrushDrawingTexture(
                 points: grayscaleTexturePoints,
                 color: drawingTool.brushColor,
                 alpha: drawingTool.brushColor.alpha,
-                renderTarget.commandBuffer
+                commandBuffer
             )
         }
 
@@ -452,7 +464,7 @@ extension CanvasViewModel {
         drawingTexture?.drawDrawingTexture(
             includingSelectedTexture: textureLayers.selectedLayer?.texture,
             on: currentTexture.currentTexture,
-            with: renderTarget.commandBuffer
+            with: commandBuffer
         )
 
         if touchPhase == .ended {
@@ -463,10 +475,16 @@ extension CanvasViewModel {
             // Draw `drawingTexture` onto `selectedLayer.texture`
             drawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
-                renderTarget.commandBuffer
+                commandBuffer
             )
         }
+    }
 
+    private func renderTextures(
+        textureLayers: TextureLayers,
+        touchPhase: UITouch.Phase,
+        on renderTarget: MTKRenderTextureProtocol
+    ) {
         // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
         textureLayers.drawAllTextures(
             currentTexture: currentTexture,
