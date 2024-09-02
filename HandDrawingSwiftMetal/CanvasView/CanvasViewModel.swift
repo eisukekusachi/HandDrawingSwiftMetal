@@ -297,7 +297,7 @@ extension CanvasViewModel {
 
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
                 .init(
-                    touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                    touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
                         matrix: canvasTransformer.matrix,
                         frameSize: frameSize,
                         drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
@@ -367,7 +367,7 @@ extension CanvasViewModel {
 
         let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
             .init(
-                touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
+                touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
                     matrix: canvasTransformer.matrix,
                     frameSize: frameSize,
                     drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,

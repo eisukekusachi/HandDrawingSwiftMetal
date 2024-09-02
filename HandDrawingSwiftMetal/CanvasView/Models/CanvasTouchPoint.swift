@@ -34,7 +34,7 @@ extension CanvasTouchPoint {
 
 extension CanvasTouchPoint {
 
-    func convertLocationToTextureScaleAndApplyMatrix(
+    func convertToTextureCoordinatesAndApplyMatrix(
         matrix: CGAffineTransform,
         frameSize: CGSize,
         drawableSize: CGSize,
