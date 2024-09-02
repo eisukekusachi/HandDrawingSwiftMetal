@@ -487,13 +487,13 @@ extension CanvasViewModel {
             renderTarget: renderTarget
         )
 
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
+            initDrawingParameters()
+        }
+
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
             // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
-
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
-            initDrawingParameters()
         }
     }
 
