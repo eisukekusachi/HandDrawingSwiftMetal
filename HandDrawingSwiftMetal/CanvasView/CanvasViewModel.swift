@@ -289,13 +289,13 @@ extension CanvasViewModel {
                 let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey
             else { return }
 
-            let touchPoints = fingerScreenTouchManager.getTouchPoints(for: currentTouchKey)
-            let latestTouchPoints = touchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
-            fingerScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
+            let screenTouchPoints = fingerScreenTouchManager.getTouchPoints(for: currentTouchKey)
+            let latestScreenTouchPoints = screenTouchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
+            fingerScreenTouchManager.latestCanvasTouchPoint = latestScreenTouchPoints.last
 
-            let touchPhase = latestTouchPoints.currentTouchPhase
+            let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
-            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
+            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
                 .init(
                     touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
                         matrix: canvasTransformer.matrix,
@@ -359,13 +359,13 @@ extension CanvasViewModel {
         }
         guard let grayscaleCurve else { return }
 
-        let touchPoints = pencilScreenTouchManager.touchArray
-        let latestTouchPoints = touchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? touchPoints
-        pencilScreenTouchManager.latestCanvasTouchPoint = touchPoints.last
+        let screenTouchPoints = pencilScreenTouchManager.touchArray
+        let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
+        pencilScreenTouchManager.latestCanvasTouchPoint = screenTouchPoints.last
 
-        let touchPhase = latestTouchPoints.currentTouchPhase
+        let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
-        let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestTouchPoints.map {
+        let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
             .init(
                 touchPoint: $0.convertLocationToTextureScaleAndApplyMatrix(
                     matrix: canvasTransformer.matrix,
