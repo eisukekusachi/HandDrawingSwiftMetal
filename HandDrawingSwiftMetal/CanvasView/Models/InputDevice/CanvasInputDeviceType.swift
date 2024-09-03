@@ -1,5 +1,5 @@
 //
-//  InputDeviceStatus.swift
+//  CanvasInputDeviceType.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum InputDeviceStatus {
+enum CanvasInputDeviceType {
     /// The status is still undetermined
     case undetermined
 

@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
+final class CanvasDefaultGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     // TODO: Delete it once actual values are used instead of estimated ones.
@@ -17,7 +17,7 @@ final class DefaultCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePo
 
 }
 
-extension DefaultCanvasGrayscaleTexturePointIterator {
+extension CanvasDefaultGrayscaleTexturePointIterator {
 
     func appendToIterator(
         points: [CanvasGrayscaleDotPoint],
@@ -42,7 +42,7 @@ extension DefaultCanvasGrayscaleTexturePointIterator {
 
 }
 
-extension DefaultCanvasGrayscaleTexturePointIterator {
+extension CanvasDefaultGrayscaleTexturePointIterator {
 
     // TODO: Delete it once actual values are used instead of estimated ones. This process is almost meaningless.
     func setInaccurateAlphaToZero() {

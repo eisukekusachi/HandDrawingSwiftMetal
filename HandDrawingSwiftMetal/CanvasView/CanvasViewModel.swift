@@ -60,13 +60,13 @@ final class CanvasViewModel {
 
     private var grayscaleCurve: CanvasGrayscaleTexturePointIterator?
 
-    private let fingerScreenTouchManager = FingerScreenTouchManager()
+    private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
-    private let pencilScreenTouchManager = PencilScreenTouchManager()
+    private let pencilScreenTouchManager = CanvasPencilScreenTouchPoints()
 
-    private let inputDevice = InputDevice()
+    private let inputDevice = CanvasInputDeviceStatus()
 
-    private let screenTouchGesture = ScreenTouchGesture()
+    private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
     private var localRepository: LocalRepository?
 
@@ -74,11 +74,11 @@ final class CanvasViewModel {
     private let currentTexture = CanvasCurrentTexture()
 
     /// A protocol for managing current drawing texture
-    private (set) var drawingTexture: DrawingTextureProtocol?
+    private (set) var drawingTexture: CanvasDrawingTextureProtocol?
     /// A drawing texture with a brush
-    private let brushDrawingTexture = BrushDrawingTexture()
+    private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
-    private let eraserDrawingTexture = EraserDrawingTexture()
+    private let eraserDrawingTexture = CanvasEraserDrawingTexture()
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
@@ -281,8 +281,8 @@ extension CanvasViewModel {
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(grayscaleCurve is SmoothCanvasGrayscaleTexturePointIterator) {
-                grayscaleCurve = SmoothCanvasGrayscaleTexturePointIterator()
+            if !(grayscaleCurve is CanvasSmoothGrayscaleTexturePointIterator) {
+                grayscaleCurve = CanvasSmoothGrayscaleTexturePointIterator()
             }
             if fingerScreenTouchManager.currentDictionaryKey == nil {
                 fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
@@ -365,8 +365,8 @@ extension CanvasViewModel {
             event: event,
             in: view
         )
-        if !(grayscaleCurve is DefaultCanvasGrayscaleTexturePointIterator) {
-            grayscaleCurve = DefaultCanvasGrayscaleTexturePointIterator()
+        if !(grayscaleCurve is CanvasDefaultGrayscaleTexturePointIterator) {
+            grayscaleCurve = CanvasDefaultGrayscaleTexturePointIterator()
         }
         guard let grayscaleCurve else { return }
 
@@ -450,7 +450,7 @@ extension CanvasViewModel {
         on textureLayers: TextureLayers,
         with commandBuffer: MTLCommandBuffer
     ) {
-        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
+        if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
            let selectedTexture = textureLayers.selectedLayer?.texture {
             drawingTexture.drawPointsOnEraserDrawingTexture(
                 points: grayscaleTexturePoints,
@@ -458,7 +458,7 @@ extension CanvasViewModel {
                 srcTexture: selectedTexture,
                 commandBuffer
             )
-        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
+        } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
             drawingTexture.drawPointsOnBrushDrawingTexture(
                 points: grayscaleTexturePoints,
                 color: drawingTool.brushColor,
@@ -516,7 +516,7 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas(
-        _ touchPointsDictionary: [TouchHashValue: [CanvasTouchPoint]],
+        _ touchPointsDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
         on renderTarget: MTKRenderTextureProtocol
     ) {
         if canvasTransformer.isCurrentKeysNil {

@@ -1,5 +1,5 @@
 //
-//  ScreenTouchGesture.swift
+//  CanvasInputDeviceStatus.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,15 +7,15 @@
 
 import Foundation
 
-final class ScreenTouchGesture {
+final class CanvasInputDeviceStatus {
 
-    typealias T = ScreenTouchGestureStatus
+    typealias T = CanvasInputDeviceType
 
     private (set) var status: T = .undetermined
 
-    /// Update the status if the status is not yet determined.
+    /// Update the status if it is not .pencil
     func update(_ newStatus: T) -> T {
-        if status == .undetermined {
+        if status != .pencil {
             status = newStatus
         }
         return status

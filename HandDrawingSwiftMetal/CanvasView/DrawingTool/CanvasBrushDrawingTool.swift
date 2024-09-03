@@ -1,5 +1,5 @@
 //
-//  DrawingToolBrush.swift
+//  CanvasBrushDrawingTool.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/03/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class DrawingToolBrush: DrawingTool {
+class CanvasBrushDrawingTool: CanvasDrawingTool {
     var color: UIColor {
         UIColor(red: CGFloat(rgb.0) / 255.0,
                 green: CGFloat(rgb.1) / 255.0,
@@ -77,7 +77,7 @@ class DrawingToolBrush: DrawingTool {
     }
 }
 
-extension DrawingToolBrush {
+extension CanvasBrushDrawingTool {
     static let minDiameter: Int = 1
     static let maxDiameter: Int = 64
 
