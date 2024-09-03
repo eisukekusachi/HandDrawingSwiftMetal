@@ -9,10 +9,10 @@ import UIKit
 
 final class CanvasFingerScreenTouchPoints {
 
-    private (set) var touchArrayDictionary: [TouchHashValue: [CanvasTouchPoint]] = [:]
+    private (set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently used in the Dictionary
-    var currentDictionaryKey: TouchHashValue?
+    var currentDictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
     var latestCanvasTouchPoint: CanvasTouchPoint?
@@ -31,7 +31,7 @@ extension CanvasFingerScreenTouchPoints {
         event?.allTouches?.forEach { touch in
             guard touch.type != .pencil else { return }
 
-            let key: TouchHashValue = touch.hashValue
+            let key: CanvasTouchHashValue = touch.hashValue
 
             if touch.phase == .began {
                 touchArrayDictionary[key] = []
@@ -45,7 +45,7 @@ extension CanvasFingerScreenTouchPoints {
         }
     }
 
-    func getTouchPoints(for key: TouchHashValue) -> [CanvasTouchPoint] {
+    func getTouchPoints(for key: CanvasTouchHashValue) -> [CanvasTouchPoint] {
         touchArrayDictionary[key] ?? []
     }
 

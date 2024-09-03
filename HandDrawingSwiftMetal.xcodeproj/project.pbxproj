@@ -99,7 +99,7 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
-		D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */; };
+		D4F00CFA2C59257E00FE8D26 /* CanvasTouchHashValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F00CF92C59257E00FE8D26 /* CanvasTouchHashValue.swift */; };
 		D4F1BB3E2B2D436F006EA102 /* TextureLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */; };
 /* End PBXBuildFile section */
 
@@ -216,7 +216,7 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchHashValue.swift; sourceTree = "<group>"; };
+		D4F00CF92C59257E00FE8D26 /* CanvasTouchHashValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTouchHashValue.swift; sourceTree = "<group>"; };
 		D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -481,7 +481,7 @@
 			children = (
 				D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouchPoints.swift */,
 				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */,
-				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
+				D4F00CF92C59257E00FE8D26 /* CanvasTouchHashValue.swift */,
 			);
 			path = TouchManagers;
 			sourceTree = "<group>";
@@ -743,7 +743,7 @@
 				D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */,
 				D469A85F2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
-				D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */,
+				D4F00CFA2C59257E00FE8D26 /* CanvasTouchHashValue.swift in Sources */,
 				D45941582B08B5CF00A18653 /* CanvasDrawingTool.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,

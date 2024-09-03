@@ -516,7 +516,7 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas(
-        _ touchPointsDictionary: [TouchHashValue: [CanvasTouchPoint]],
+        _ touchPointsDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
         on renderTarget: MTKRenderTextureProtocol
     ) {
         if canvasTransformer.isCurrentKeysNil {
