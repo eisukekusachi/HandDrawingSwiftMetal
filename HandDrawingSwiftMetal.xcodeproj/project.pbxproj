@@ -54,7 +54,7 @@
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D45ACBE22C57C2C3000002BE /* FingerScreenTouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */; };
-		D45ACBE42C57C2D9000002BE /* PencilScreenTouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilScreenTouchManager.swift */; };
+		D45ACBE42C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */; };
 		D46601B92C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */; };
 		D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85C2C56206800D10575 /* ScaleManager.swift */; };
 		D469A85F2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85E2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift */; };
@@ -167,7 +167,7 @@
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerScreenTouchManager.swift; sourceTree = "<group>"; };
-		D45ACBE32C57C2D9000002BE /* PencilScreenTouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilScreenTouchManager.swift; sourceTree = "<group>"; };
+		D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilScreenTouchPoints.swift; sourceTree = "<group>"; };
 		D46601B82C392D3D007F1BC9 /* MTKRenderTextureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKRenderTextureProtocol.swift; sourceTree = "<group>"; };
 		D469A85C2C56206800D10575 /* ScaleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleManager.swift; sourceTree = "<group>"; };
 		D469A85E2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasGrayscaleDotPoint.swift; sourceTree = "<group>"; };
@@ -480,7 +480,7 @@
 			isa = PBXGroup;
 			children = (
 				D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */,
-				D45ACBE32C57C2D9000002BE /* PencilScreenTouchManager.swift */,
+				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */,
 				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 			);
 			path = TouchManagers;
@@ -760,7 +760,7 @@
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* CanvasDefaultGrayscaleTexturePointIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D45ACBE42C57C2D9000002BE /* PencilScreenTouchManager.swift in Sources */,
+				D45ACBE42C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift in Sources */,
 				D481A42F2C5E1D6600279C91 /* CanvasInputDeviceType.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerScreenTouchManager.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,

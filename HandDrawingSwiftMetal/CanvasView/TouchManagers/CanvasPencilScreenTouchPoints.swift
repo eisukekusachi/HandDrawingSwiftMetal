@@ -1,5 +1,5 @@
 //
-//  PencilScreenTouchManager.swift
+//  CanvasPencilScreenTouchPoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class PencilScreenTouchManager {
+final class CanvasPencilScreenTouchPoints {
 
     private (set) var touchArray: [CanvasTouchPoint] = []
 
@@ -15,7 +15,7 @@ final class PencilScreenTouchManager {
     var latestCanvasTouchPoint: CanvasTouchPoint?
 }
 
-extension PencilScreenTouchManager {
+extension CanvasPencilScreenTouchPoints {
 
     var isEmpty: Bool {
         touchArray.isEmpty
