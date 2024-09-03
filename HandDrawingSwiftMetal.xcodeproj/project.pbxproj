@@ -15,7 +15,7 @@
 		D40D976029DAB09400A82E6A /* CanvasTouchPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975A29DAB09400A82E6A /* CanvasTouchPoint.swift */; };
 		D40D976229DAB09400A82E6A /* Iterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D975C29DAB09400A82E6A /* Iterator.swift */; };
 		D40D976B29DAB09D00A82E6A /* DrawingToolEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */; };
-		D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */; };
+		D40D976C29DAB09D00A82E6A /* CanvasBrushDrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976729DAB09C00A82E6A /* CanvasBrushDrawingTool.swift */; };
 		D40D976D29DAB09D00A82E6A /* CanvasBrushDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976829DAB09C00A82E6A /* CanvasBrushDrawingTexture.swift */; };
 		D40D976F29DAB09D00A82E6A /* CanvasEraserDrawingTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D976A29DAB09D00A82E6A /* CanvasEraserDrawingTexture.swift */; };
 		D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */; };
@@ -129,7 +129,7 @@
 		D40D975A29DAB09400A82E6A /* CanvasTouchPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasTouchPoint.swift; sourceTree = "<group>"; };
 		D40D975C29DAB09400A82E6A /* Iterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Iterator.swift; sourceTree = "<group>"; };
 		D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolEraser.swift; sourceTree = "<group>"; };
-		D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingToolBrush.swift; sourceTree = "<group>"; };
+		D40D976729DAB09C00A82E6A /* CanvasBrushDrawingTool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasBrushDrawingTool.swift; sourceTree = "<group>"; };
 		D40D976829DAB09C00A82E6A /* CanvasBrushDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasBrushDrawingTexture.swift; sourceTree = "<group>"; };
 		D40D976A29DAB09D00A82E6A /* CanvasEraserDrawingTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanvasEraserDrawingTexture.swift; sourceTree = "<group>"; };
 		D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformExtensions.swift; sourceTree = "<group>"; };
@@ -500,7 +500,7 @@
 			children = (
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */,
-				D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */,
+				D40D976729DAB09C00A82E6A /* CanvasBrushDrawingTool.swift */,
 				D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */,
 				D4C397192B9C941F0037312F /* CanvasDrawingToolStatus.swift */,
 				D4934F412ADA36C500C52B76 /* DrawingToolType.swift */,
@@ -771,7 +771,7 @@
 				D469A8732C56342700D10575 /* CanvasGrayscaleTexturePointIterator.swift in Sources */,
 				D4C9791E2ADBAA6400BB666D /* CanvasTransformer.swift in Sources */,
 				D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */,
-				D40D976C29DAB09D00A82E6A /* DrawingToolBrush.swift in Sources */,
+				D40D976C29DAB09D00A82E6A /* CanvasBrushDrawingTool.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,

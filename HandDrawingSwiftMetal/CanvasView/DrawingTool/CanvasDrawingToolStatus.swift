@@ -63,7 +63,7 @@ extension CanvasDrawingToolStatus {
     func setDrawingTool(_ tool: DrawingToolType) {
 
         switch drawingTool {
-        case .brush: diameterSubject.send(DrawingToolBrush.diameterFloatValue(brushDiameter))
+        case .brush: diameterSubject.send(CanvasBrushDrawingTool.diameterFloatValue(brushDiameter))
         case .eraser: diameterSubject.send(DrawingToolEraser.diameterFloatValue(eraserDiameter))
         }
 
@@ -102,7 +102,7 @@ extension CanvasDrawingToolStatus {
         }
     }
     func setBrushDiameter(_ value: Float) {
-        brushDiameter = DrawingToolBrush.diameterIntValue(value)
+        brushDiameter = CanvasBrushDrawingTool.diameterIntValue(value)
     }
     func setEraserDiameter(_ value: Float) {
         eraserDiameter = DrawingToolEraser.diameterIntValue(value)
