@@ -187,7 +187,7 @@ extension CanvasViewController {
     }
 
     private func subscribeEvents() {
-        let fingerInputGestureRecognizer = FingerInputGestureRecognizer()
+        let fingerInputGestureRecognizer = CanvasFingerInputGestureRecognizer()
         let pencilInputGestureRecognizer = PencilInputGestureRecognizer()
 
         contentView.canvasView.addGestureRecognizer(fingerInputGestureRecognizer)
@@ -295,7 +295,7 @@ extension CanvasViewController {
 
 }
 
-extension CanvasViewController: FingerInputGestureSender {
+extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.onFingerGestureDetected(
