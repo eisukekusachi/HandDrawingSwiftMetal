@@ -1,5 +1,5 @@
 //
-//  DrawingToolType.swift
+//  CanvasDrawingToolType.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/14.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum DrawingToolType: Int {
+enum CanvasDrawingToolType: Int {
     case brush = 0
     case eraser = 1
 
