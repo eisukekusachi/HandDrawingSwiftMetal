@@ -76,7 +76,7 @@ final class CanvasViewModel {
     /// A protocol for managing current drawing texture
     private (set) var drawingTexture: DrawingTextureProtocol?
     /// A drawing texture with a brush
-    private let brushDrawingTexture = BrushDrawingTexture()
+    private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
     private let eraserDrawingTexture = EraserDrawingTexture()
 
@@ -458,7 +458,7 @@ extension CanvasViewModel {
                 srcTexture: selectedTexture,
                 commandBuffer
             )
-        } else if let drawingTexture = drawingTexture as? BrushDrawingTexture {
+        } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
             drawingTexture.drawPointsOnBrushDrawingTexture(
                 points: grayscaleTexturePoints,
                 color: drawingTool.brushColor,
