@@ -74,7 +74,7 @@ final class CanvasViewModel {
     private let currentTexture = CanvasCurrentTexture()
 
     /// A protocol for managing current drawing texture
-    private (set) var drawingTexture: DrawingTextureProtocol?
+    private (set) var drawingTexture: CanvasDrawingTextureProtocol?
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
