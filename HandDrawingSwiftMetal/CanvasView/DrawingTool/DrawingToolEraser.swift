@@ -7,7 +7,7 @@
 
 import Foundation
 
-class DrawingToolEraser: DrawingTool {
+class DrawingToolEraser: CanvasDrawingTool {
     var diameter: Int = initEraserSize
 
     private (set) var alpha: Int = 255

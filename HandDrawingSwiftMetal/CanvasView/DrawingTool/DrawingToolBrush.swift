@@ -7,7 +7,7 @@
 
 import UIKit
 
-class DrawingToolBrush: DrawingTool {
+class DrawingToolBrush: CanvasDrawingTool {
     var color: UIColor {
         UIColor(red: CGFloat(rgb.0) / 255.0,
                 green: CGFloat(rgb.1) / 255.0,

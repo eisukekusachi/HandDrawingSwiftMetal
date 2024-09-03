@@ -50,7 +50,7 @@
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
-		D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* DrawingTool.swift */; };
+		D45941582B08B5CF00A18653 /* CanvasDrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */; };
 		D459415E2B08EEC000A18653 /* UndoManagerWithCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D45ACBE22C57C2C3000002BE /* FingerScreenTouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */; };
@@ -163,7 +163,7 @@
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
-		D45941572B08B5CF00A18653 /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
+		D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingTool.swift; sourceTree = "<group>"; };
 		D459415D2B08EEC000A18653 /* UndoManagerWithCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManagerWithCount.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D45ACBE12C57C2C3000002BE /* FingerScreenTouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerScreenTouchManager.swift; sourceTree = "<group>"; };
@@ -499,7 +499,7 @@
 			isa = PBXGroup;
 			children = (
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
-				D45941572B08B5CF00A18653 /* DrawingTool.swift */,
+				D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */,
 				D40D976729DAB09C00A82E6A /* DrawingToolBrush.swift */,
 				D40D976629DAB09C00A82E6A /* DrawingToolEraser.swift */,
 				D4C397192B9C941F0037312F /* CanvasDrawingToolStatus.swift */,
@@ -744,7 +744,7 @@
 				D469A85F2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */,
-				D45941582B08B5CF00A18653 /* DrawingTool.swift in Sources */,
+				D45941582B08B5CF00A18653 /* CanvasDrawingTool.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
