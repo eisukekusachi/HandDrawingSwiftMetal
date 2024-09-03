@@ -1,5 +1,5 @@
 //
-//  ScreenTouchGesture.swift
+//  CanvasScreenTouchGestureStatus.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class ScreenTouchGesture {
+final class CanvasScreenTouchGestureStatus {
 
     typealias T = CanvasScreenTouchGestureType
 

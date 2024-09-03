@@ -66,7 +66,7 @@ final class CanvasViewModel {
 
     private let inputDevice = CanvasInputDevice()
 
-    private let screenTouchGesture = ScreenTouchGesture()
+    private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
     private var localRepository: LocalRepository?
 
