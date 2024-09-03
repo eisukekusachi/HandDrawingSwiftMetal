@@ -72,7 +72,7 @@
 		D481A42F2C5E1D6600279C91 /* CanvasInputDeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A42E2C5E1D6600279C91 /* CanvasInputDeviceType.swift */; };
 		D481A4312C5E1D7300279C91 /* CanvasInputDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* CanvasInputDevice.swift */; };
 		D481A4332C5E1E5B00279C91 /* ScreenTouchGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */; };
-		D481A4352C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */; };
+		D481A4352C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48AC4202BCA963D00608E42 /* TextureLayerUndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */; };
 		D4934F422ADA36C500C52B76 /* CanvasDrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */; };
@@ -185,7 +185,7 @@
 		D481A42E2C5E1D6600279C91 /* CanvasInputDeviceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasInputDeviceType.swift; sourceTree = "<group>"; };
 		D481A4302C5E1D7300279C91 /* CanvasInputDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasInputDevice.swift; sourceTree = "<group>"; };
 		D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGesture.swift; sourceTree = "<group>"; };
-		D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTouchGestureStatus.swift; sourceTree = "<group>"; };
+		D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreenTouchGestureType.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerUndoManager.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingToolType.swift; sourceTree = "<group>"; };
@@ -471,7 +471,7 @@
 			isa = PBXGroup;
 			children = (
 				D481A4322C5E1E5B00279C91 /* ScreenTouchGesture.swift */,
-				D481A4342C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift */,
+				D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */,
 			);
 			path = ScreenTouchGesture;
 			sourceTree = "<group>";
@@ -794,7 +794,7 @@
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
 				D40D976D29DAB09D00A82E6A /* CanvasBrushDrawingTexture.swift in Sources */,
-				D481A4352C5E1E6D00279C91 /* ScreenTouchGestureStatus.swift in Sources */,
+				D481A4352C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift in Sources */,
 				D40D976029DAB09400A82E6A /* CanvasTouchPoint.swift in Sources */,
 				D4B4AAA02B3FBEA700298CFB /* MTKTextureUtils.swift in Sources */,
 				D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */,

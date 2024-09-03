@@ -9,7 +9,7 @@ import Foundation
 
 final class ScreenTouchGesture {
 
-    typealias T = ScreenTouchGestureStatus
+    typealias T = CanvasScreenTouchGestureType
 
     private (set) var status: T = .undetermined
 
