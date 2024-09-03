@@ -1,5 +1,5 @@
 //
-//  SmoothCanvasGrayscaleTexturePointIterator.swift
+//  CanvasSmoothGrayscaleTexturePointIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,14 +7,14 @@
 
 import UIKit
 
-final class SmoothCanvasGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
+final class CanvasSmoothGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     private var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
 }
 
-extension SmoothCanvasGrayscaleTexturePointIterator {
+extension CanvasSmoothGrayscaleTexturePointIterator {
 
     func appendToIterator(
         points: [CanvasGrayscaleDotPoint],
