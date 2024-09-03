@@ -78,7 +78,7 @@ final class CanvasViewModel {
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
-    private let eraserDrawingTexture = EraserDrawingTexture()
+    private let eraserDrawingTexture = CanvasEraserDrawingTexture()
 
     private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
 
@@ -450,7 +450,7 @@ extension CanvasViewModel {
         on textureLayers: TextureLayers,
         with commandBuffer: MTLCommandBuffer
     ) {
-        if let drawingTexture = drawingTexture as? EraserDrawingTexture,
+        if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
            let selectedTexture = textureLayers.selectedLayer?.texture {
             drawingTexture.drawPointsOnEraserDrawingTexture(
                 points: grayscaleTexturePoints,
