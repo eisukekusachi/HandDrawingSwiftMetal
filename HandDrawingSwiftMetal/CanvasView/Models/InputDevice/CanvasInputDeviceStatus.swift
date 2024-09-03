@@ -1,5 +1,5 @@
 //
-//  CanvasInputDevice.swift
+//  CanvasInputDeviceStatus.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class CanvasInputDevice {
+final class CanvasInputDeviceStatus {
 
     typealias T = CanvasInputDeviceType
 

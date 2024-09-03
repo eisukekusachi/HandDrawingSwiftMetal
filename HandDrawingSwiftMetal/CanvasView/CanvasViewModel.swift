@@ -64,7 +64,7 @@ final class CanvasViewModel {
 
     private let pencilScreenTouchManager = PencilScreenTouchManager()
 
-    private let inputDevice = CanvasInputDevice()
+    private let inputDevice = CanvasInputDeviceStatus()
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
