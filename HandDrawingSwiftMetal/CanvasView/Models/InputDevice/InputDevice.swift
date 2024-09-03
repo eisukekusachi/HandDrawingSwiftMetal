@@ -9,7 +9,7 @@ import Foundation
 
 final class InputDevice {
 
-    typealias T = InputDeviceStatus
+    typealias T = CanvasInputDeviceType
 
     private (set) var status: T = .undetermined
 
