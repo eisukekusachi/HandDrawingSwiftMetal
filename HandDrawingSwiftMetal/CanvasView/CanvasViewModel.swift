@@ -60,7 +60,7 @@ final class CanvasViewModel {
 
     private var grayscaleCurve: CanvasGrayscaleTexturePointIterator?
 
-    private let fingerScreenTouchManager = FingerScreenTouchManager()
+    private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
     private let pencilScreenTouchManager = CanvasPencilScreenTouchPoints()
 
