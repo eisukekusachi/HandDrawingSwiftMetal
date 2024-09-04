@@ -249,17 +249,13 @@
 		D40D975029DAB00100A82E6A /* CanvasView */ = {
 			isa = PBXGroup;
 			children = (
+				D40D975629DAB04700A82E6A /* Gestures */,
+				D46A304A2BF88E540057DB69 /* Models */,
 				D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */,
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D41CACE12B9C01F100B8C7C5 /* CanvasContentView.swift */,
 				D41CACE02B9C01F100B8C7C5 /* CanvasContentView.xib */,
 				D440DF702ADA9E5100A4E425 /* CanvasView.swift */,
-				D472859E2BBEBC250035AFCD /* Drawing */,
-				D4AEFE272B09B26500EE3EEF /* DrawingTool */,
-				D46A30442BF857E30057DB69 /* DrawingTexture */,
-				D40D975629DAB04700A82E6A /* Gestures */,
-				D46A304A2BF88E540057DB69 /* Models */,
-				D481A4362C5E374200279C91 /* TouchManagers */,
 			);
 			name = CanvasView;
 			path = ../CanvasView;
@@ -371,6 +367,28 @@
 			path = FileView;
 			sourceTree = "<group>";
 		};
+		D45F0B342C888E9200EF9820 /* Iterator */ = {
+			isa = PBXGroup;
+			children = (
+				D469A86E2C5633FC00D10575 /* CanvasDefaultGrayscaleTexturePointIterator.swift */,
+				D469A8722C56342700D10575 /* CanvasGrayscaleTexturePointIterator.swift */,
+				D469A8702C56340B00D10575 /* CanvasSmoothGrayscaleTexturePointIterator.swift */,
+			);
+			path = Iterator;
+			sourceTree = "<group>";
+		};
+		D45F0B352C888ECC00EF9820 /* Points */ = {
+			isa = PBXGroup;
+			children = (
+				D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouchPoints.swift */,
+				D469A85E2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift */,
+				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */,
+				D4F00CF92C59257E00FE8D26 /* CanvasTouchHashValue.swift */,
+				D40D975A29DAB09400A82E6A /* CanvasTouchPoint.swift */,
+			);
+			path = Points;
+			sourceTree = "<group>";
+		};
 		D463A5F02C6E346500D102AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -382,15 +400,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D46A30442BF857E30057DB69 /* DrawingTexture */ = {
+		D46A30442BF857E30057DB69 /* Textures */ = {
 			isa = PBXGroup;
 			children = (
-				D40D976829DAB09C00A82E6A /* CanvasBrushDrawingTexture.swift */,
 				D470D8502C80A5B900EE4262 /* CanvasCurrentTexture.swift */,
+				D40D976829DAB09C00A82E6A /* CanvasBrushDrawingTexture.swift */,
 				D4C8EE972B25490B005947EC /* CanvasDrawingTextureProtocol.swift */,
 				D40D976A29DAB09D00A82E6A /* CanvasEraserDrawingTexture.swift */,
 			);
-			path = DrawingTexture;
+			path = Textures;
 			sourceTree = "<group>";
 		};
 		D46A30482BF858760057DB69 /* Views */ = {
@@ -416,12 +434,11 @@
 		D46A304A2BF88E540057DB69 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D481A42C2C5E1D2F00279C91 /* InputDevice */,
-				D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */,
+				D4AEFE272B09B26500EE3EEF /* Tools */,
+				D472859E2BBEBC250035AFCD /* Drawing */,
+				D481A42C2C5E1D2F00279C91 /* Status */,
+				D46A30442BF857E30057DB69 /* Textures */,
 				D4507C152C3E2C1300CA3974 /* CanvasModel.swift */,
-				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
-				D469A85E2C5620FB00D10575 /* CanvasGrayscaleDotPoint.swift */,
-				D40D975A29DAB09400A82E6A /* CanvasTouchPoint.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -443,9 +460,9 @@
 		D472859E2BBEBC250035AFCD /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
-				D469A86E2C5633FC00D10575 /* CanvasDefaultGrayscaleTexturePointIterator.swift */,
-				D469A8722C56342700D10575 /* CanvasGrayscaleTexturePointIterator.swift */,
-				D469A8702C56340B00D10575 /* CanvasSmoothGrayscaleTexturePointIterator.swift */,
+				D45F0B352C888ECC00EF9820 /* Points */,
+				D45F0B342C888E9200EF9820 /* Iterator */,
+				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
@@ -453,37 +470,21 @@
 		D4784EF42C848A0A00A02E11 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D44D195E2BE5D1390069D4A9 /* Entities */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D481A42C2C5E1D2F00279C91 /* InputDevice */ = {
+		D481A42C2C5E1D2F00279C91 /* Status */ = {
 			isa = PBXGroup;
 			children = (
 				D481A4302C5E1D7300279C91 /* CanvasInputDeviceStatus.swift */,
 				D481A42E2C5E1D6600279C91 /* CanvasInputDeviceType.swift */,
-			);
-			path = InputDevice;
-			sourceTree = "<group>";
-		};
-		D481A42D2C5E1D3A00279C91 /* ScreenTouchGesture */ = {
-			isa = PBXGroup;
-			children = (
 				D481A4322C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift */,
 				D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */,
 			);
-			path = ScreenTouchGesture;
-			sourceTree = "<group>";
-		};
-		D481A4362C5E374200279C91 /* TouchManagers */ = {
-			isa = PBXGroup;
-			children = (
-				D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouchPoints.swift */,
-				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouchPoints.swift */,
-				D4F00CF92C59257E00FE8D26 /* CanvasTouchHashValue.swift */,
-			);
-			path = TouchManagers;
+			path = Status;
 			sourceTree = "<group>";
 		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
@@ -495,17 +496,16 @@
 			path = Shaders;
 			sourceTree = "<group>";
 		};
-		D4AEFE272B09B26500EE3EEF /* DrawingTool */ = {
+		D4AEFE272B09B26500EE3EEF /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
-				D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */,
 				D40D976729DAB09C00A82E6A /* CanvasBrushDrawingTool.swift */,
-				D40D976629DAB09C00A82E6A /* CanvasEraserDrawingTool.swift */,
+				D45941572B08B5CF00A18653 /* CanvasDrawingTool.swift */,
 				D4C397192B9C941F0037312F /* CanvasDrawingToolStatus.swift */,
 				D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */,
+				D40D976629DAB09C00A82E6A /* CanvasEraserDrawingTool.swift */,
 			);
-			path = DrawingTool;
+			path = Tools;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
