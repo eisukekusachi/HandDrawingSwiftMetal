@@ -63,7 +63,8 @@ final class CanvasViewModel {
 
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
-    private let pencilScreenTouchManager = CanvasPencilScreenTouchPoints()
+    /// A manager for handling Apple Pencil input values
+    private let pencilScreenTouchPoints = CanvasPencilScreenTouchPoints()
 
     private let inputDevice = CanvasInputDeviceStatus()
 
@@ -362,7 +363,7 @@ extension CanvasViewModel {
         }
         let _ = inputDevice.update(.pencil)
 
-        pencilScreenTouchManager.append(
+        pencilScreenTouchPoints.append(
             event: event,
             in: view
         )
@@ -371,9 +372,9 @@ extension CanvasViewModel {
         }
         guard let grayscaleTextureCurveIterator else { return }
 
-        let screenTouchPoints = pencilScreenTouchManager.touchArray
-        let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
-        pencilScreenTouchManager.latestCanvasTouchPoint = screenTouchPoints.last
+        let screenTouchPoints = pencilScreenTouchPoints.touchArray
+        let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchPoints.latestCanvasTouchPoint) ?? screenTouchPoints
+        pencilScreenTouchPoints.latestCanvasTouchPoint = screenTouchPoints.last
 
         let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
@@ -411,7 +412,7 @@ extension CanvasViewModel {
             on: canvasView
         )
 
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchManager.touchArray.currentTouchPhase) {
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchPoints.touchArray.currentTouchPhase) {
             initDrawingParameters()
         }
     }
@@ -427,7 +428,7 @@ extension CanvasViewModel {
         canvasTransformer.reset()
 
         fingerScreenTouchManager.reset()
-        pencilScreenTouchManager.reset()
+        pencilScreenTouchPoints.reset()
         grayscaleTextureCurveIterator = nil
     }
 
