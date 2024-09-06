@@ -10,11 +10,13 @@ import UIKit
 struct CanvasTouchPoint: Equatable {
 
     let location: CGPoint
+    let phase: UITouch.Phase
     let force: CGFloat
     let maximumPossibleForce: CGFloat
-    let phase: UITouch.Phase
-    let type: UITouch.TouchType
+    /// Index for identifying the estimated value
+    var estimationUpdateIndex: NSNumber? = nil
 
+    let timestamp: TimeInterval
 }
 
 extension CanvasTouchPoint {
@@ -24,10 +26,11 @@ extension CanvasTouchPoint {
         view: UIView
     ) {
         self.location = touch.preciseLocation(in: view)
+        self.phase = touch.phase
         self.force = touch.force
         self.maximumPossibleForce = touch.maximumPossibleForce
-        self.phase = touch.phase
-        self.type = touch.type
+        self.estimationUpdateIndex = touch.estimationUpdateIndex
+        self.timestamp = touch.timestamp
     }
 
 }
@@ -82,10 +85,11 @@ extension CanvasTouchPoint {
                 with: inverseMatrix,
                 textureSize: textureSize
             ),
+            phase: phase,
             force: force,
             maximumPossibleForce: maximumPossibleForce,
-            phase: phase,
-            type: type
+            estimationUpdateIndex: estimationUpdateIndex,
+            timestamp: timestamp
         )
     }
 
