@@ -38,7 +38,7 @@ class CanvasViewController: UIViewController {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
             contentView.canvasView.drawableSize,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 
@@ -302,7 +302,7 @@ extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
             touches: touches,
             with: event,
             view: view,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 
@@ -315,7 +315,7 @@ extension CanvasViewController: CanvasPencilInputGestureRecognizerSender {
             touches: touches,
             with: event,
             view: view,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 

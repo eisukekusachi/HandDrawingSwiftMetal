@@ -1,5 +1,5 @@
 //
-//  MTKRenderTextureProtocol.swift
+//  CanvasViewProtocol.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/06.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-protocol MTKRenderTextureProtocol {
+protocol CanvasViewProtocol {
     var commandBuffer: MTLCommandBuffer { get }
 
     var renderTexture: MTLTexture? { get }

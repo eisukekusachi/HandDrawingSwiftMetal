@@ -9,7 +9,7 @@ import MetalKit
 import Combine
 
 /// A custom view for displaying textures with Metal support.
-final class CanvasView: MTKView, MTKViewDelegate, MTKRenderTextureProtocol {
+final class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
     /// Transformation matrix for rendering.
     var matrix: CGAffineTransform = CGAffineTransform.identity
