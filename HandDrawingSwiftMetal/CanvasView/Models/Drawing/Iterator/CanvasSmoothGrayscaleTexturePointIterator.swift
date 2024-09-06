@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CanvasSmoothGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
+final class CanvasSmoothGrayscaleTexturePointIterator: CanvasGrayscaleCurveIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     private var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()

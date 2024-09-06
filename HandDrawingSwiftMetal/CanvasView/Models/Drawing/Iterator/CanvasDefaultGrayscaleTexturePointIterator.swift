@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CanvasDefaultGrayscaleTexturePointIterator: CanvasGrayscaleTexturePointIterator {
+final class CanvasDefaultGrayscaleTexturePointIterator: CanvasGrayscaleCurveIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     // TODO: Delete it once actual values are used instead of estimated ones.
