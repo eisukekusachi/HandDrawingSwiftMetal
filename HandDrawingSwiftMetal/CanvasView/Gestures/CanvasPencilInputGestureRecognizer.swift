@@ -13,11 +13,13 @@ protocol CanvasPencilInputGestureRecognizerSender: AnyObject {
 
 final class CanvasPencilInputGestureRecognizer: UIGestureRecognizer {
 
-    weak var gestureDelegate: CanvasPencilInputGestureRecognizerSender?
+    weak private var gestureDelegate: CanvasPencilInputGestureRecognizerSender?
 
-    init() {
+    init(delegate: CanvasPencilInputGestureRecognizerSender) {
         super.init(target: nil, action: nil)
         allowedTouchTypes = [UITouch.TouchType.pencil.rawValue as NSNumber]
+
+        gestureDelegate = delegate
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

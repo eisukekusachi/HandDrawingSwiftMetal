@@ -58,7 +58,8 @@ final class CanvasViewModel {
         refreshCanRedoSubject.eraseToAnyPublisher()
     }
 
-    private var grayscaleCurve: CanvasGrayscaleTexturePointIterator?
+    /// An iterator for managing a grayscale curve
+    private var grayscaleTextureCurveIterator: CanvasGrayscaleCurveIterator?
 
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
@@ -154,7 +155,7 @@ final class CanvasViewModel {
 
     func initCanvas(
         textureSize: CGSize,
-        renderTarget: MTKRenderTextureProtocol
+        canvasView: CanvasViewProtocol
     ) {
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
@@ -162,23 +163,23 @@ final class CanvasViewModel {
         currentTexture.initTexture(textureSize: textureSize)
         textureLayers.initLayers(textureSize: textureSize)
 
-        renderTarget.initRenderTexture(textureSize: textureSize)
+        canvasView.initRenderTexture(textureSize: textureSize)
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture!,
-            renderTarget.commandBuffer
+            onto: canvasView.renderTexture!,
+            canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
     func apply(
         model: CanvasModel,
-        to renderTarget: MTKRenderTextureProtocol
+        to canvasView: CanvasViewProtocol
     ) {
         projectName = model.projectName
 
@@ -202,23 +203,23 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        renderTarget.initRenderTexture(textureSize: model.textureSize)
+        canvasView.initRenderTexture(textureSize: model.textureSize)
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+            onto: canvasView.renderTexture,
+            canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
     func apply(
         undoObject: TextureLayerUndoObject,
-        to renderTarget: MTKRenderTextureProtocol
+        to canvasView: CanvasViewProtocol
     ) {
         currentTexture.clearTexture()
         textureLayers.initLayers(
@@ -231,15 +232,15 @@ final class CanvasViewModel {
         }
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+            onto: canvasView.renderTexture,
+            canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
 }
@@ -247,13 +248,13 @@ final class CanvasViewModel {
 extension CanvasViewModel {
     func onViewDidAppear(
         _ drawableTextureSize: CGSize,
-        renderTarget: MTKRenderTextureProtocol
+        canvasView: CanvasViewProtocol
     ) {
         // Initialize the canvas here if the renderTexture's texture is nil
-        if renderTarget.renderTexture == nil {
+        if canvasView.renderTexture == nil {
             initCanvas(
                 textureSize: drawableTextureSize,
-                renderTarget: renderTarget
+                canvasView: canvasView
             )
         }
 
@@ -268,7 +269,7 @@ extension CanvasViewModel {
         touches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView,
-        renderTarget: MTKRenderTextureProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
@@ -281,14 +282,14 @@ extension CanvasViewModel {
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(grayscaleCurve is CanvasSmoothGrayscaleTexturePointIterator) {
-                grayscaleCurve = CanvasSmoothGrayscaleTexturePointIterator()
+            if !(grayscaleTextureCurveIterator is CanvasSmoothGrayscaleCurveIterator) {
+                grayscaleTextureCurveIterator = CanvasSmoothGrayscaleCurveIterator()
             }
             if fingerScreenTouchManager.currentDictionaryKey == nil {
                 fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
             }
             guard 
-                let grayscaleCurve,
+                let grayscaleTextureCurveIterator,
                 let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey
             else { return }
 
@@ -303,39 +304,39 @@ extension CanvasViewModel {
                     touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
                         matrix: canvasTransformer.matrix,
                         frameSize: frameSize,
-                        drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                        textureSize: renderTarget.renderTexture?.size ?? .zero
+                        drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                        textureSize: canvasView.renderTexture?.size ?? .zero
                     ),
                     diameter: CGFloat(drawingTool.diameter)
                 )
             }
 
-            grayscaleCurve.appendToIterator(
+            grayscaleTextureCurveIterator.appendToIterator(
                 points: grayscaleTexturePoints,
                 touchPhase: touchPhase
             )
 
             drawPoints(
-                grayscaleTexturePoints: grayscaleCurve.makeCurvePoints(
+                grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                     atEnd: touchPhase == .ended
                 ),
                 drawingTool: drawingTool,
-                with: grayscaleCurve,
+                with: grayscaleTextureCurveIterator,
                 touchPhase: touchPhase,
                 on: textureLayers,
-                with: renderTarget.commandBuffer
+                with: canvasView.commandBuffer
             )
 
             renderTextures(
                 textureLayers: textureLayers,
                 touchPhase: touchPhase,
-                on: renderTarget
+                on: canvasView
             )
 
         case .transforming:
             transformCanvas(
                 fingerScreenTouchManager.touchArrayDictionary,
-                on: renderTarget
+                on: canvasView
             )
 
         default:
@@ -354,10 +355,10 @@ extension CanvasViewModel {
         touches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView,
-        renderTarget: MTKRenderTextureProtocol
+        canvasView: CanvasViewProtocol
     ) {
         if inputDevice.status == .finger {
-            cancelFingerInput(renderTarget)
+            cancelFingerInput(canvasView)
         }
         let _ = inputDevice.update(.pencil)
 
@@ -365,10 +366,10 @@ extension CanvasViewModel {
             event: event,
             in: view
         )
-        if !(grayscaleCurve is CanvasDefaultGrayscaleTexturePointIterator) {
-            grayscaleCurve = CanvasDefaultGrayscaleTexturePointIterator()
+        if !(grayscaleTextureCurveIterator is CanvasDefaultGrayscaleCurveIterator) {
+            grayscaleTextureCurveIterator = CanvasDefaultGrayscaleCurveIterator()
         }
-        guard let grayscaleCurve else { return }
+        guard let grayscaleTextureCurveIterator else { return }
 
         let screenTouchPoints = pencilScreenTouchManager.touchArray
         let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
@@ -381,33 +382,33 @@ extension CanvasViewModel {
                 touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
                     matrix: canvasTransformer.matrix,
                     frameSize: frameSize,
-                    drawableSize: renderTarget.viewDrawable?.texture.size ?? .zero,
-                    textureSize: renderTarget.renderTexture?.size ?? .zero
+                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                    textureSize: canvasView.renderTexture?.size ?? .zero
                 ),
                 diameter: CGFloat(drawingTool.diameter)
             )
         }
 
-        grayscaleCurve.appendToIterator(
+        grayscaleTextureCurveIterator.appendToIterator(
             points: grayscaleTexturePoints,
             touchPhase: touchPhase
         )
 
         drawPoints(
-            grayscaleTexturePoints: grayscaleCurve.makeCurvePoints(
+            grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                 atEnd: touchPhase == .ended
             ),
             drawingTool: drawingTool,
-            with: grayscaleCurve,
+            with: grayscaleTextureCurveIterator,
             touchPhase: touchPhase,
             on: textureLayers,
-            with: renderTarget.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         renderTextures(
             textureLayers: textureLayers,
             touchPhase: touchPhase,
-            on: renderTarget
+            on: canvasView
         )
 
         if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchManager.touchArray.currentTouchPhase) {
@@ -427,15 +428,15 @@ extension CanvasViewModel {
 
         fingerScreenTouchManager.reset()
         pencilScreenTouchManager.reset()
-        grayscaleCurve = nil
+        grayscaleTextureCurveIterator = nil
     }
 
-    private func cancelFingerInput(_ renderTarget: MTKRenderTextureProtocol) {
+    private func cancelFingerInput(_ canvasView: CanvasViewProtocol) {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
         drawingTexture?.clearDrawingTexture()
-        renderTarget.clearCommandBuffer()
-        renderTarget.setNeedsDisplay()
+        canvasView.clearCommandBuffer()
+        canvasView.setNeedsDisplay()
     }
 
 }
@@ -445,7 +446,7 @@ extension CanvasViewModel {
     private func drawPoints(
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
         drawingTool: CanvasDrawingToolStatus,
-        with grayscaleCurve: CanvasGrayscaleTexturePointIterator?,
+        with grayscaleCurve: CanvasGrayscaleCurveIterator?,
         touchPhase: UITouch.Phase,
         on textureLayers: TextureLayers,
         with commandBuffer: MTLCommandBuffer
@@ -490,7 +491,7 @@ extension CanvasViewModel {
     private func renderTextures(
         textureLayers: TextureLayers,
         touchPhase: UITouch.Phase,
-        on renderTarget: MTKRenderTextureProtocol
+        on renderTarget: CanvasViewProtocol
     ) {
         // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
         textureLayers.drawAllTextures(
@@ -517,7 +518,7 @@ extension CanvasViewModel {
 
     private func transformCanvas(
         _ touchPointsDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
-        on renderTarget: MTKRenderTextureProtocol
+        on renderTarget: CanvasViewProtocol
     ) {
         if canvasTransformer.isCurrentKeysNil {
             canvasTransformer.initTransforming(touchPointsDictionary)
@@ -548,7 +549,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: MTKRenderTextureProtocol) {
+    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: CanvasViewProtocol) {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
@@ -598,13 +599,13 @@ extension CanvasViewModel {
         requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
-    func didTapResetTransformButton(renderTarget: MTKRenderTextureProtocol) {
+    func didTapResetTransformButton(renderTarget: CanvasViewProtocol) {
         canvasTransformer.setMatrix(.identity)
         renderTarget.setNeedsDisplay()
     }
 
-    func didTapNewCanvasButton(renderTarget: MTKRenderTextureProtocol) {
-        guard 
+    func didTapNewCanvasButton(renderTarget: CanvasViewProtocol) {
+        guard
             let renderTexture = renderTarget.renderTexture
         else { return }
 
@@ -635,14 +636,14 @@ extension CanvasViewModel {
     func didTapLoadButton(filePath: String) {
         loadFile(from: filePath)
     }
-    func didTapSaveButton(renderTarget: MTKRenderTextureProtocol) {
+    func didTapSaveButton(renderTarget: CanvasViewProtocol) {
         saveFile(renderTexture: renderTarget.renderTexture!)
     }
 
     // MARK: Layers
     func didTapLayer(
         layer: TextureLayer,
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
         textureLayers.index = index
@@ -659,7 +660,7 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didTapAddLayerButton(
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
@@ -694,7 +695,7 @@ extension CanvasViewModel {
         renderTarget.setNeedsDisplay()
     }
     func didTapRemoveLayerButton(
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         guard
             textureLayers.layers.count > 1,
@@ -719,7 +720,7 @@ extension CanvasViewModel {
     func didTapLayerVisibility(
         layer: TextureLayer,
         isVisible: Bool,
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         guard 
             let index = textureLayers.getIndex(layer: layer)
@@ -744,7 +745,7 @@ extension CanvasViewModel {
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int,
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         guard
             let index = textureLayers.getIndex(layer: layer)
@@ -780,7 +781,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         source: IndexSet,
         destination: Int,
-        renderTarget: MTKRenderTextureProtocol
+        renderTarget: CanvasViewProtocol
     ) {
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 

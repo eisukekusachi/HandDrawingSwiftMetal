@@ -38,7 +38,7 @@ class CanvasViewController: UIViewController {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
             contentView.canvasView.drawableSize,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 
@@ -187,14 +187,12 @@ extension CanvasViewController {
     }
 
     private func subscribeEvents() {
-        let fingerInputGestureRecognizer = CanvasFingerInputGestureRecognizer()
-        let pencilInputGestureRecognizer = CanvasPencilInputGestureRecognizer()
-
-        contentView.canvasView.addGestureRecognizer(fingerInputGestureRecognizer)
-        contentView.canvasView.addGestureRecognizer(pencilInputGestureRecognizer)
-
-        fingerInputGestureRecognizer.gestureDelegate = self
-        pencilInputGestureRecognizer.gestureDelegate = self
+        contentView.canvasView.addGestureRecognizer(
+            CanvasFingerInputGestureRecognizer(delegate: self)
+        )
+        contentView.canvasView.addGestureRecognizer(
+            CanvasPencilInputGestureRecognizer(delegate: self)
+        )
     }
 
 }
@@ -302,7 +300,7 @@ extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
             touches: touches,
             with: event,
             view: view,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 
@@ -315,7 +313,7 @@ extension CanvasViewController: CanvasPencilInputGestureRecognizerSender {
             touches: touches,
             with: event,
             view: view,
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
     }
 
