@@ -366,8 +366,8 @@ extension CanvasViewModel {
             event: event,
             in: view
         )
-        if !(grayscaleTextureCurveIterator is CanvasDefaultGrayscaleTexturePointIterator) {
-            grayscaleTextureCurveIterator = CanvasDefaultGrayscaleTexturePointIterator()
+        if !(grayscaleTextureCurveIterator is CanvasDefaultGrayscaleCurveIterator) {
+            grayscaleTextureCurveIterator = CanvasDefaultGrayscaleCurveIterator()
         }
         guard let grayscaleTextureCurveIterator else { return }
 
