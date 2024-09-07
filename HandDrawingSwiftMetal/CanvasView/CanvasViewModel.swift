@@ -449,6 +449,10 @@ extension CanvasViewModel {
             touchPhase: touchPhase,
             on: canvasView
         )
+
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
+            initDrawingParameters()
+        }
     }
 
 }
@@ -540,10 +544,6 @@ extension CanvasViewModel {
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
             renderTarget: renderTarget
         )
-
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
-            initDrawingParameters()
-        }
 
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
             // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
