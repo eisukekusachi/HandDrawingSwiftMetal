@@ -40,9 +40,9 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVg-Dj-hIn">
-                    <rect key="frame" x="16" y="59" width="175" height="34.333333333333343"/>
+                    <rect key="frame" x="16.000000000000007" y="59" width="113.66666666666669" height="34.333333333333343"/>
                     <state key="normal" title="Button"/>
-                    <buttonConfiguration key="configuration" style="plain" title="Reset the transform"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Reset zoom"/>
                 </button>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P50-DK-emi">
                     <rect key="frame" x="152.66666666666663" y="59" width="224.33333333333337" height="34.333333333333343"/>
