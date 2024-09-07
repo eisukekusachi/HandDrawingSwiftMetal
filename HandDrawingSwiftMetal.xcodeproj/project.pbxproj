@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */; };
+		D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2772C8BEA5E00275138 /* UITouchDummy.swift */; };
+		D400A27C2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -123,6 +126,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTouchPointDummy.swift; sourceTree = "<group>"; };
+		D400A2772C8BEA5E00275138 /* UITouchDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchDummy.swift; sourceTree = "<group>"; };
+		D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilScreenTouchPointsTests.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -250,6 +256,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D400A2732C8BEA3000275138 /* Dummies */ = {
+			isa = PBXGroup;
+			children = (
+				D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */,
+				D400A2772C8BEA5E00275138 /* UITouchDummy.swift */,
+			);
+			path = Dummies;
+			sourceTree = "<group>";
+		};
+		D400A2742C8BEA3F00275138 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D400A2792C8BEA6A00275138 /* CanvasView */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D400A2792C8BEA6A00275138 /* CanvasView */ = {
+			isa = PBXGroup;
+			children = (
+				D400A27A2C8BEA7200275138 /* Models */,
+			);
+			path = CanvasView;
+			sourceTree = "<group>";
+		};
+		D400A27A2C8BEA7200275138 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		D40D975029DAB00100A82E6A /* CanvasView */ = {
 			isa = PBXGroup;
 			children = (
@@ -558,6 +597,8 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
+				D400A2732C8BEA3000275138 /* Dummies */,
+				D400A2742C8BEA3F00275138 /* Views */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 			);
 			path = HandDrawingSwiftMetalTests;
@@ -829,6 +870,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
+				D400A27C2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift in Sources */,
+				D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */,
+				D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
