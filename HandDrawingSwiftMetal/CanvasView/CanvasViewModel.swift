@@ -357,6 +357,13 @@ extension CanvasViewModel {
         view: UIView,
         canvasView: CanvasViewProtocol
     ) {
+        // Cancel if there is finger input
+        if inputDevice.status == .finger {
+            cancelFingerInput(canvasView)
+        }
+        // Set `inputDevice` to '.pencil'
+        let _ = inputDevice.update(.pencil)
+
         // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
             grayscaleTextureCurveIterator = CanvasDefaultGrayscaleCurveIterator()
@@ -381,13 +388,6 @@ extension CanvasViewModel {
         view: UIView,
         canvasView: CanvasViewProtocol
     ) {
-        // Cancel if there is finger input
-        if inputDevice.status == .finger {
-            cancelFingerInput(canvasView)
-        }
-        // Set `inputDevice` to '.pencil'
-        let _ = inputDevice.update(.pencil)
-
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         let actualTouchArray = Array(actualTouches).sorted { $0.timestamp < $1.timestamp }
         actualTouchArray.forEach { actualTouch in
