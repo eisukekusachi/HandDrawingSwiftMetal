@@ -474,6 +474,9 @@ extension CanvasViewModel {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
         drawingTexture?.clearDrawingTexture()
+
+        grayscaleTextureCurveIterator = nil
+
         canvasView.clearCommandBuffer()
         canvasView.setNeedsDisplay()
     }
