@@ -372,7 +372,7 @@ extension CanvasViewModel {
         }
         guard let grayscaleTextureCurveIterator else { return }
 
-        let screenTouchPoints = pencilScreenTouchPoints.touchArray
+        let screenTouchPoints = pencilScreenTouchPoints.estimatedTouchPointArray
         let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchPoints.latestCanvasTouchPoint) ?? screenTouchPoints
         pencilScreenTouchPoints.latestCanvasTouchPoint = screenTouchPoints.last
 
@@ -412,7 +412,7 @@ extension CanvasViewModel {
             on: canvasView
         )
 
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchPoints.touchArray.currentTouchPhase) {
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchPoints.estimatedTouchPointArray.currentTouchPhase) {
             initDrawingParameters()
         }
     }
