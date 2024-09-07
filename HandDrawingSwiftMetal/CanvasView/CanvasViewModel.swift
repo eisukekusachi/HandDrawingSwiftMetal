@@ -63,7 +63,8 @@ final class CanvasViewModel {
 
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
-    private let pencilScreenTouchManager = CanvasPencilScreenTouchPoints()
+    /// A manager for handling Apple Pencil input values
+    private let pencilScreenTouchPoints = CanvasPencilScreenTouchPoints()
 
     private let inputDevice = CanvasInputDeviceStatus()
 
@@ -350,34 +351,70 @@ extension CanvasViewModel {
         }
     }
 
-    // Draw lines on the canvas using the data sent from an Apple Pencil.
     func onPencilGestureDetected(
-        touches: Set<UITouch>,
+        estimatedTouches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView,
         canvasView: CanvasViewProtocol
     ) {
+        // Cancel if there is finger input
         if inputDevice.status == .finger {
             cancelFingerInput(canvasView)
         }
+        // Set `inputDevice` to '.pencil'
         let _ = inputDevice.update(.pencil)
 
-        pencilScreenTouchManager.append(
-            event: event,
-            in: view
-        )
-        if !(grayscaleTextureCurveIterator is CanvasDefaultGrayscaleCurveIterator) {
+        // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
+        if estimatedTouches.contains(where: {$0.phase == .began}) {
             grayscaleTextureCurveIterator = CanvasDefaultGrayscaleCurveIterator()
+            pencilScreenTouchPoints.reset()
+        }
+
+        // Append estimated values to the array
+        event?.allTouches?
+            .compactMap { $0.type == .pencil ? $0 : nil }
+            .sorted { $0.timestamp < $1.timestamp }
+            .forEach { touch in
+                event?.coalescedTouches(for: touch)?.forEach { coalescedTouch in
+                    pencilScreenTouchPoints.appendEstimatedValue(
+                        .init(touch: coalescedTouch, view: view)
+                    )
+                }
+            }
+    }
+
+    func onPencilGestureDetected(
+        actualTouches: Set<UITouch>,
+        view: UIView,
+        canvasView: CanvasViewProtocol
+    ) {
+        // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
+        let actualTouchArray = Array(actualTouches).sorted { $0.timestamp < $1.timestamp }
+        actualTouchArray.forEach { actualTouch in
+            pencilScreenTouchPoints.appendActualValueWithEstimatedValue(actualTouch)
+        }
+        if pencilScreenTouchPoints.hasActualValueReplacementCompleted {
+            pencilScreenTouchPoints.appendLastEstimatedTouchPointToActualTouchPointArray()
         }
         guard let grayscaleTextureCurveIterator else { return }
 
-        let screenTouchPoints = pencilScreenTouchManager.touchArray
-        let latestScreenTouchPoints = screenTouchPoints.elements(after: pencilScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
-        pencilScreenTouchManager.latestCanvasTouchPoint = screenTouchPoints.last
+        guard
+            // Wait to ensure sufficient time has passed since the previous process
+            // as the operation may not work correctly if the time difference is too short.
+            pencilScreenTouchPoints.hasSufficientTimeElapsedSincePreviousProcess(allowedDifferenceInSeconds: 0.03) ||
+            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(
+                pencilScreenTouchPoints.actualTouchPointArray.currentTouchPhase
+            )
+        else { return }
 
-        let touchPhase = latestScreenTouchPoints.currentTouchPhase
+        // Retrieve the latest touch points necessary for drawing from the array of stored touch points
+        let latestScreenTouchArray = pencilScreenTouchPoints.latestActualTouchPoints
+        pencilScreenTouchPoints.updateLatestActualTouchPoint()
 
-        let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
+        let touchPhase = latestScreenTouchArray.currentTouchPhase
+
+        // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
+        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
             .init(
                 touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
                     matrix: canvasTransformer.matrix,
@@ -390,10 +427,11 @@ extension CanvasViewModel {
         }
 
         grayscaleTextureCurveIterator.appendToIterator(
-            points: grayscaleTexturePoints,
+            points: latestTextureTouchArray,
             touchPhase: touchPhase
         )
 
+        // Retrieve curve points from the iterator and draw them onto the texture of `textureLayers`
         drawPoints(
             grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                 atEnd: touchPhase == .ended
@@ -405,13 +443,14 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
+        // Display the textures
         renderTextures(
             textureLayers: textureLayers,
             touchPhase: touchPhase,
             on: canvasView
         )
 
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(pencilScreenTouchManager.touchArray.currentTouchPhase) {
+        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
             initDrawingParameters()
         }
     }
@@ -427,7 +466,7 @@ extension CanvasViewModel {
         canvasTransformer.reset()
 
         fingerScreenTouchManager.reset()
-        pencilScreenTouchManager.reset()
+        pencilScreenTouchPoints.reset()
         grayscaleTextureCurveIterator = nil
     }
 
@@ -435,6 +474,9 @@ extension CanvasViewModel {
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
         drawingTexture?.clearDrawingTexture()
+
+        grayscaleTextureCurveIterator = nil
+
         canvasView.clearCommandBuffer()
         canvasView.setNeedsDisplay()
     }
@@ -505,10 +547,6 @@ extension CanvasViewModel {
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
             renderTarget: renderTarget
         )
-
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
-            initDrawingParameters()
-        }
 
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
             // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
