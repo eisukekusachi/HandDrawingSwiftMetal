@@ -200,32 +200,40 @@ enum MTLBuffers {
         )
     }
 
-    static func makeAspectFitTextureBuffers(
+    static func makeCanvasTextureBuffers(
         device: MTLDevice?,
         matrix: CGAffineTransform?,
+        frameSize: CGSize,
         sourceSize: CGSize,
         destinationSize: CGSize,
         nodes: TextureNodes
     ) -> TextureBuffers? {
-        guard let device = device else { return nil }
-
-        let texCoords = nodes.texCoords
-        let indices = nodes.indices
-
-        // Helper function to calculate vertex coordinates
-        func calculateVertexPosition(xOffset: CGFloat, yOffset: CGFloat) -> CGPoint {
-            let x = destinationSize.width * 0.5 + xOffset * sourceSize.width * 0.5
-            let y = destinationSize.height * 0.5 + yOffset * sourceSize.height * 0.5
-            return CGPoint(x: x, y: y)
-        }
+        guard let device else { return nil }
 
         // Calculate vertex positions for the four corners
-        var leftBottom = calculateVertexPosition(xOffset: -1, yOffset: 1)
-        var rightBottom = calculateVertexPosition(xOffset: 1, yOffset: 1)
-        var rightTop = calculateVertexPosition(xOffset: 1, yOffset: -1)
-        var leftTop = calculateVertexPosition(xOffset: -1, yOffset: -1)
+        var leftBottom: CGPoint = .init(
+            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * -1,
+            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * 1
+        )
+        var rightBottom: CGPoint = .init(
+            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * 1,
+            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * 1
+        )
+        var rightTop: CGPoint = .init(
+            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * 1,
+            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * -1
+        )
 
-        if let matrix = matrix {
+        var leftTop: CGPoint = .init(
+            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * -1,
+            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * -1
+        )
+
+        if let matrix {
+            var matrix = matrix
+            matrix.tx *= (CGFloat(destinationSize.width) / frameSize.width)
+            matrix.ty *= (CGFloat(destinationSize.height) / frameSize.height)
+
             // Translate origin to the top left corner
             leftBottom = CGPoint(
                 x: leftBottom.x - destinationSize.width * 0.5,
@@ -281,19 +289,37 @@ enum MTLBuffers {
             )
         }
 
-        // Normalize vertex positions to OpenGL coordinates
+        // Normalize vertex positions
         let vertices: [Float] = [
-            Float(leftBottom.x / destinationSize.width * 2.0 - 1.0), Float(leftBottom.y / destinationSize.height * 2.0 - 1.0),
-            Float(rightBottom.x / destinationSize.width * 2.0 - 1.0), Float(rightBottom.y / destinationSize.height * 2.0 - 1.0),
-            Float(rightTop.x / destinationSize.width * 2.0 - 1.0), Float(rightTop.y / destinationSize.height * 2.0 - 1.0),
-            Float(leftTop.x / destinationSize.width * 2.0 - 1.0), Float(leftTop.y / destinationSize.height * 2.0 - 1.0)
+            Float(leftBottom.x / destinationSize.width) * 2.0 - 1.0,
+            Float(leftBottom.y / destinationSize.height * 2.0 - 1.0),
+
+            Float(rightBottom.x / destinationSize.width) * 2.0 - 1.0,
+            Float(rightBottom.y / destinationSize.height) * 2.0 - 1.0,
+
+            Float(rightTop.x / destinationSize.width) * 2.0 - 1.0,
+            Float(rightTop.y / destinationSize.height) * 2.0 - 1.0,
+
+            Float(leftTop.x / destinationSize.width) * 2.0 - 1.0,
+            Float(leftTop.y / destinationSize.height) * 2.0 - 1.0
         ]
 
         // Create buffers
         guard
-            let vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size, options: []),
-            let texCoordsBuffer = device.makeBuffer(bytes: texCoords, length: texCoords.count * MemoryLayout<Float>.size, options: []),
-            let indexBuffer = device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size, options: [])
+            let vertexBuffer = device.makeBuffer(
+                bytes: vertices,
+                length: vertices.count * MemoryLayout<Float>.size,
+                options: []),
+            let texCoordsBuffer = device.makeBuffer(
+                bytes: nodes.texCoords,
+                length: nodes.texCoords.count * MemoryLayout<Float>.size,
+                options: []
+            ),
+            let indexBuffer = device.makeBuffer(
+                bytes: nodes.indices,
+                length: nodes.indices.count * MemoryLayout<UInt16>.size,
+                options: []
+            )
         else {
             return nil
         }
@@ -302,8 +328,7 @@ enum MTLBuffers {
             vertexBuffer: vertexBuffer,
             texCoordsBuffer: texCoordsBuffer,
             indexBuffer: indexBuffer,
-            indicesCount: indices.count
+            indicesCount: nodes.indices.count
         )
     }
-
 }

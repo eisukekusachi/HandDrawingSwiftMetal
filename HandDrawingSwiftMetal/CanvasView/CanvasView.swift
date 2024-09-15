@@ -77,26 +77,18 @@ final class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
             let drawable = view.currentDrawable
         else { return }
 
-        var canvasMatrix = matrix
-        canvasMatrix.tx *= (CGFloat(drawable.texture.width) / frame.size.width)
-        canvasMatrix.ty *= (CGFloat(drawable.texture.height) / frame.size.height)
-
         // Calculate the scale to fit the source size within the destination size
-        let scale = ScaleManager.getAspectFitFactor(
-            sourceSize: renderTexture.size,
-            destinationSize: drawable.texture.size
-        )
-        let resizedRenderTextureSize = CGSize(
-            width: renderTexture.size.width * scale,
-            height: renderTexture.size.height * scale
-        )
+        let textureToDrawableFitScale = ViewSize.getScaleToFit(renderTexture.size, to: drawable.texture.size)
 
         guard
-            let _renderTexture,
-            let textureBuffers = MTLBuffers.makeAspectFitTextureBuffers(
+            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 device: device,
-                matrix: canvasMatrix,
-                sourceSize: resizedRenderTextureSize,
+                matrix: matrix,
+                frameSize: frame.size,
+                sourceSize: .init(
+                    width: renderTexture.size.width * textureToDrawableFitScale,
+                    height: renderTexture.size.height * textureToDrawableFitScale
+                ),
                 destinationSize: drawable.texture.size,
                 nodes: textureNodes
             )
@@ -105,7 +97,7 @@ final class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         let commandBuffer = commandBufferManager.currentCommandBuffer
 
         MTLRenderer.draw(
-            texture: _renderTexture,
+            texture: renderTexture,
             buffers: textureBuffers,
             backgroundColor: (230, 230, 230),
             on: drawable.texture,
