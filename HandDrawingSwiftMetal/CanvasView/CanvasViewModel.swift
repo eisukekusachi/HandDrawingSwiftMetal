@@ -72,9 +72,10 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
+    /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
+    private var canvasTexture: MTLTexture?
     /// A texture that combines the texture of the currently selected `TextureLayer` and `DrawingTexture`
     private let currentTexture = CanvasCurrentTexture()
-
     /// A protocol for managing current drawing texture
     private (set) var drawingTexture: CanvasDrawingTextureProtocol?
     /// A drawing texture with a brush
@@ -158,6 +159,8 @@ final class CanvasViewModel {
         textureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
+        guard let device = MTLCreateSystemDefaultDevice() else { return }
+
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
 
@@ -165,6 +168,8 @@ final class CanvasViewModel {
         textureLayers.initLayers(textureSize: textureSize)
 
         canvasView.initRenderTexture(textureSize: textureSize)
+
+        canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
         textureLayers.updateUnselectedLayers(
             to: canvasView.commandBuffer
@@ -342,10 +347,29 @@ extension CanvasViewModel {
                 with: canvasView.commandBuffer
             )
 
-            renderTextures(
-                textureLayers: textureLayers,
-                touchPhase: touchPhase,
-                on: canvasView
+            // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
+            textureLayers.drawAllTextures(
+                currentTexture: currentTexture,
+                backgroundColor: drawingTool.backgroundColor,
+                onto: canvasTexture,
+                canvasView.commandBuffer
+            )
+
+            drawTextureWithAspectFit(
+                texture: canvasTexture,
+                withBackgroundColor: (230, 230, 230),
+                on: canvasView.renderTexture,
+                commandBuffer: canvasView.commandBuffer
+            )
+
+            if requestShowingLayerViewSubject.value && touchPhase == .ended {
+                // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            }
+
+            pauseDisplayLinkLoop(
+                [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+                renderTarget: canvasView
             )
 
         case .transforming:
@@ -471,11 +495,29 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        // Display the textures
-        renderTextures(
-            textureLayers: textureLayers,
-            touchPhase: touchPhase,
-            on: canvasView
+        // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
+        textureLayers.drawAllTextures(
+            currentTexture: currentTexture,
+            backgroundColor: drawingTool.backgroundColor,
+            onto: canvasTexture,
+            canvasView.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            texture: canvasTexture,
+            withBackgroundColor: (230, 230, 230),
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
+        )
+
+        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
+
+        pauseDisplayLinkLoop(
+            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+            renderTarget: canvasView
         )
 
         if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
@@ -555,30 +597,6 @@ extension CanvasViewModel {
                 into: textureLayers.selectedLayer?.texture,
                 commandBuffer
             )
-        }
-    }
-
-    private func renderTextures(
-        textureLayers: TextureLayers,
-        touchPhase: UITouch.Phase,
-        on renderTarget: CanvasViewProtocol
-    ) {
-        // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
-        textureLayers.drawAllTextures(
-            currentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
-        )
-
-        pauseDisplayLinkLoop(
-            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
-            renderTarget: renderTarget
-        )
-
-        if requestShowingLayerViewSubject.value && touchPhase == .ended {
-            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
     }
 
