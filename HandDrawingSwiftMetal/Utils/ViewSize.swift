@@ -10,11 +10,17 @@ import Foundation
 enum ViewSize {
 
     static func getScaleToFit(_ source: CGSize, to destination: CGSize) -> CGFloat {
+        let widthRatio = destination.width / source.width
+        let heightRatio = destination.height / source.height
 
-        let ratioWidth = destination.width / source.width
-        let ratioHeight = destination.height / source.height
+        return min(widthRatio, heightRatio)
+    }
 
-        return ratioWidth < ratioHeight ? ratioWidth : ratioHeight
+    static func getScaleToFill(_ source: CGSize, to destination: CGSize) -> CGFloat {
+        let widthRatio = destination.width / source.width
+        let heightRatio = destination.height / source.height
+
+        return max(widthRatio, heightRatio)
     }
 
 }
