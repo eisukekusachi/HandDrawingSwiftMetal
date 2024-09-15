@@ -373,9 +373,26 @@ extension CanvasViewModel {
             )
 
         case .transforming:
-            transformCanvas(
-                fingerScreenTouchManager.touchArrayDictionary,
-                on: canvasView
+            if canvasTransformer.isCurrentKeysNil {
+                canvasTransformer.initTransforming(fingerScreenTouchManager.touchArrayDictionary)
+            }
+
+            canvasTransformer.transformCanvas(
+                screenCenter: .init(
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
+                ),
+                fingerScreenTouchManager.touchArrayDictionary
+            )
+            if fingerScreenTouchManager.touchArrayDictionary.containsPhases([.ended]) {
+                canvasTransformer.finishTransforming()
+            }
+
+            pauseDisplayLinkLoop(
+                fingerScreenTouchManager.touchArrayDictionary.containsPhases(
+                    [.ended, .cancelled]
+                ),
+                renderTarget: canvasView
             )
 
         default:
@@ -598,34 +615,6 @@ extension CanvasViewModel {
                 commandBuffer
             )
         }
-    }
-
-    private func transformCanvas(
-        _ touchPointsDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
-        on renderTarget: CanvasViewProtocol
-    ) {
-        if canvasTransformer.isCurrentKeysNil {
-            canvasTransformer.initTransforming(touchPointsDictionary)
-        }
-
-        canvasTransformer.transformCanvas(
-            screenCenter: .init(
-                x: frameSize.width * 0.5,
-                y: frameSize.height * 0.5
-            ),
-            touchPointsDictionary
-        )
-
-        if touchPointsDictionary.containsPhases([.ended]) {
-            canvasTransformer.finishTransforming()
-        }
-
-        pauseDisplayLinkLoop(
-            touchPointsDictionary.containsPhases(
-                [.ended, .cancelled]
-            ),
-            renderTarget: renderTarget
-        )
     }
 
 }
