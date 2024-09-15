@@ -65,6 +65,43 @@ enum MTLRenderer {
     }
 
     static func drawTexture(
+        texture: MTLTexture,
+        buffers: TextureBuffers,
+        withBackgroundColor color: (Int, Int, Int)? = nil,
+        on destinationTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let destinationTexture else { return }
+
+        let descriptor = MTLRenderPassDescriptor()
+        descriptor.colorAttachments[0].texture = destinationTexture
+        descriptor.colorAttachments[0].loadAction = .clear
+
+        if let color {
+            descriptor.colorAttachments[0].clearColor = MTLClearColorMake(
+                min(CGFloat(color.0) / 255.0, 1.0),
+                min(CGFloat(color.1) / 255.0, 1.0),
+                min(CGFloat(color.2) / 255.0, 1.0),
+                CGFloat(1.0)
+            )
+        }
+
+        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)
+        encoder?.setRenderPipelineState(MTLPipelineManager.shared.drawTexture)
+        encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
+        encoder?.setVertexBuffer(buffers.texCoordsBuffer, offset: 0, index: 1)
+        encoder?.setFragmentTexture(texture, index: 0)
+        encoder?.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: buffers.indicesCount,
+            indexType: .uint16,
+            indexBuffer: buffers.indexBuffer,
+            indexBufferOffset: 0
+        )
+        encoder?.endEncoding()
+    }
+
+    static func drawTexture(
         _ texture: MTLTexture,
         on targetTexture: MTLTexture,
         _ commandBuffer: MTLCommandBuffer

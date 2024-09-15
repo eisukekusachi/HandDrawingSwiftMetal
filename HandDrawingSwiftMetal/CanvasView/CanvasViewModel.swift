@@ -649,6 +649,42 @@ extension CanvasViewModel {
         }
     }
 
+    /// Draw `texture` onto `destinationTexture` with aspect fit
+    private func drawTextureWithAspectFit(
+        texture: MTLTexture?,
+        withBackgroundColor color: (Int, Int, Int)? = nil,
+        on destinationTexture: MTLTexture?,
+        commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let texture,
+            let destinationTexture
+        else { return }
+
+        let ratio = ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
+
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let textureBuffers = MTLBuffers.makeTextureBuffers(
+                device: device,
+                sourceSize: .init(
+                    width: texture.size.width * ratio,
+                    height: texture.size.height * ratio
+                ),
+                destinationSize: destinationTexture.size,
+                nodes: textureNodes
+            )
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: texture,
+            buffers: textureBuffers,
+            withBackgroundColor: color,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
     private func convertToTextureCoordinates(
         location: CGPoint,
         frameSize: CGSize,

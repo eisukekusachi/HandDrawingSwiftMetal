@@ -147,6 +147,59 @@ enum MTLBuffers {
         )
     }
 
+    static func makeTextureBuffers(
+        device: MTLDevice?,
+        sourceSize: CGSize,
+        destinationSize: CGSize,
+        nodes: TextureNodes
+    ) -> TextureBuffers? {
+        guard let device else { return nil }
+
+        // Normalize vertex positions
+        let vertices: [Float] = [
+            // bottomLeft
+            Float((destinationSize.width * 0.5 + -1 * sourceSize.width * 0.5) / destinationSize.width) * 2.0 - 1.0,
+            Float((destinationSize.height * 0.5 + -1 * sourceSize.height * 0.5) / destinationSize.height) * 2.0 - 1.0,
+            // bottomRight
+            Float((destinationSize.width * 0.5 + 1 * sourceSize.width * 0.5) / destinationSize.width) * 2.0 - 1.0,
+            Float((destinationSize.height * 0.5 + -1 * sourceSize.height * 0.5) / destinationSize.height * 2.0 - 1.0),
+            // topRight
+            Float((destinationSize.width * 0.5 + 1 * sourceSize.width * 0.5) / destinationSize.width * 2.0 - 1.0),
+            Float((destinationSize.height * 0.5 + 1 * sourceSize.height * 0.5) / destinationSize.height * 2.0 - 1.0),
+            // topLeft
+            Float((destinationSize.width * 0.5 + -1 * sourceSize.width * 0.5) / destinationSize.width * 2.0 - 1.0),
+            Float((destinationSize.height * 0.5 + 1 * sourceSize.height * 0.5) / destinationSize.height * 2.0 - 1.0)
+        ]
+
+        // Create buffers
+        guard
+            let vertexBuffer = device.makeBuffer(
+                bytes: vertices,
+                length: vertices.count * MemoryLayout<Float>.size,
+                options: []
+            ),
+            let texCoordsBuffer = device.makeBuffer(
+                bytes: nodes.texCoords,
+                length: nodes.texCoords.count * MemoryLayout<Float>.size,
+                options: []
+            ),
+            let indexBuffer = device.makeBuffer(
+                bytes: nodes.indices,
+                length: nodes.indices.count * MemoryLayout<UInt16>.size,
+                options: []
+            )
+        else {
+            return nil
+        }
+
+        return TextureBuffers(
+            vertexBuffer: vertexBuffer,
+            texCoordsBuffer: texCoordsBuffer,
+            indexBuffer: indexBuffer,
+            indicesCount: nodes.indices.count
+        )
+    }
+
     static func makeAspectFitTextureBuffers(
         device: MTLDevice?,
         matrix: CGAffineTransform?,
