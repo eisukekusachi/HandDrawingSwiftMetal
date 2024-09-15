@@ -301,13 +301,15 @@ extension CanvasViewModel {
             let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
-                .init(
-                    touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
-                        matrix: canvasTransformer.matrix,
-                        frameSize: frameSize,
-                        drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
-                        textureSize: canvasView.renderTexture?.size ?? .zero
-                    ),
+                let location: CGPoint = convertToTextureCoordinatesAndApplyMatrix(
+                    location: $0.location,
+                    matrix: canvasTransformer.matrix,
+                    frameSize: frameSize,
+                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                    textureSize: canvasView.renderTexture?.size ?? .zero
+                )
+                return CanvasGrayscaleDotPoint.init(
+                    touchPoint: .init(location: location, touch: $0),
                     diameter: CGFloat(drawingTool.diameter)
                 )
             }
@@ -415,13 +417,15 @@ extension CanvasViewModel {
 
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
         let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
-            .init(
-                touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
-                    matrix: canvasTransformer.matrix,
-                    frameSize: frameSize,
-                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
-                    textureSize: canvasView.renderTexture?.size ?? .zero
-                ),
+            let location: CGPoint = convertToTextureCoordinatesAndApplyMatrix(
+                location: $0.location,
+                matrix: canvasTransformer.matrix,
+                frameSize: frameSize,
+                drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                textureSize: canvasView.renderTexture?.size ?? .zero
+            )
+            return CanvasGrayscaleDotPoint.init(
+                touchPoint: .init(location: location, touch: $0),
                 diameter: CGFloat(drawingTool.diameter)
             )
         }
@@ -621,6 +625,55 @@ extension CanvasViewModel {
         }
     }
 
+    private func convertToTextureCoordinatesAndApplyMatrix(
+        location: CGPoint,
+        matrix: CGAffineTransform,
+        frameSize: CGSize,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGPoint {
+        // Calculate the matrix.
+        let drawableScale = ScaleManager.getAspectFitFactor(
+            sourceSize: textureSize,
+            destinationSize: drawableSize
+        )
+        let adjustmentScaleFactor = max(
+            drawableSize.width / (textureSize.width * drawableScale),
+            drawableSize.height / (textureSize.height * drawableScale)
+        )
+        let offsetScale = ScaleManager.getAspectFitFactor(
+            sourceSize: frameSize,
+            destinationSize: textureSize
+        )
+        var inverseMatrix = matrix.inverted(flipY: true)
+        inverseMatrix.tx *= (offsetScale * adjustmentScaleFactor)
+        inverseMatrix.ty *= (offsetScale * adjustmentScaleFactor)
+
+        // Calculate the location.
+        let aspectFitFactor = ScaleManager.getAspectFitFactor(
+            sourceSize: frameSize,
+            destinationSize: drawableSize
+        )
+        var locationOnTexture: CGPoint = .init(
+            x: location.x * aspectFitFactor,
+            y: location.y * aspectFitFactor
+        )
+        if textureSize != drawableSize {
+            let aspectFillFactor = ScaleManager.getAspectFillFactor(
+                sourceSize: drawableSize,
+                destinationSize: textureSize
+            )
+            locationOnTexture = .init(
+                x: locationOnTexture.x * aspectFillFactor + (textureSize.width - drawableSize.width * aspectFillFactor) * 0.5,
+                y: locationOnTexture.y * aspectFillFactor + (textureSize.height - drawableSize.height * aspectFillFactor) * 0.5
+            )
+        }
+
+        return locationOnTexture.apply(
+            with: inverseMatrix,
+            textureSize: textureSize
+        )
+    }
 }
 
 extension CanvasViewModel {

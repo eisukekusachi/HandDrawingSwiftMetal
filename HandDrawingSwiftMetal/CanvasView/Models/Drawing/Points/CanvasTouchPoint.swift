@@ -33,64 +33,16 @@ extension CanvasTouchPoint {
         self.timestamp = touch.timestamp
     }
 
-}
-
-extension CanvasTouchPoint {
-
-    func convertToTextureCoordinatesAndApplyMatrix(
-        matrix: CGAffineTransform,
-        frameSize: CGSize,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> Self {
-        // Calculate the matrix.
-        let drawableScale = ScaleManager.getAspectFitFactor(
-            sourceSize: textureSize,
-            destinationSize: drawableSize
-        )
-        let adjustmentScaleFactor = max(
-            drawableSize.width / (textureSize.width * drawableScale),
-            drawableSize.height / (textureSize.height * drawableScale)
-        )
-        let offsetScale = ScaleManager.getAspectFitFactor(
-            sourceSize: frameSize,
-            destinationSize: textureSize
-        )
-        var inverseMatrix = matrix.inverted(flipY: true)
-        inverseMatrix.tx *= (offsetScale * adjustmentScaleFactor)
-        inverseMatrix.ty *= (offsetScale * adjustmentScaleFactor)
-
-        // Calculate the location.
-        let aspectFitFactor = ScaleManager.getAspectFitFactor(
-            sourceSize: frameSize,
-            destinationSize: drawableSize
-        )
-        var locationOnTexture: CGPoint = .init(
-            x: location.x * aspectFitFactor,
-            y: location.y * aspectFitFactor
-        )
-        if textureSize != drawableSize {
-            let aspectFillFactor = ScaleManager.getAspectFillFactor(
-                sourceSize: drawableSize,
-                destinationSize: textureSize
-            )
-            locationOnTexture = .init(
-                x: locationOnTexture.x * aspectFillFactor + (textureSize.width - drawableSize.width * aspectFillFactor) * 0.5,
-                y: locationOnTexture.y * aspectFillFactor + (textureSize.height - drawableSize.height * aspectFillFactor) * 0.5
-            )
-        }
-
-        return .init(
-            location: locationOnTexture.apply(
-                with: inverseMatrix,
-                textureSize: textureSize
-            ),
-            phase: phase,
-            force: force,
-            maximumPossibleForce: maximumPossibleForce,
-            estimationUpdateIndex: estimationUpdateIndex,
-            timestamp: timestamp
-        )
+    init(
+        location: CGPoint,
+        touch: CanvasTouchPoint
+    ) {
+        self.location = location
+        self.phase = touch.phase
+        self.force = touch.force
+        self.maximumPossibleForce = touch.maximumPossibleForce
+        self.estimationUpdateIndex = touch.estimationUpdateIndex
+        self.timestamp = touch.timestamp
     }
 
 }
