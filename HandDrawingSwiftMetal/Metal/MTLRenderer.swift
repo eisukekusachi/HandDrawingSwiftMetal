@@ -31,39 +31,6 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func draw(
-        texture: MTLTexture,
-        buffers: TextureBuffers,
-        backgroundColor color: (Int, Int, Int),
-        on targetTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        let clearColor = MTLClearColorMake(
-            CGFloat(color.0) / 255.0,
-            CGFloat(color.1) / 255.0,
-            CGFloat(color.2) / 255.0,
-            CGFloat(1.0)
-        )
-        let descriptor = MTLRenderPassDescriptor()
-        descriptor.colorAttachments[0].texture = targetTexture
-        descriptor.colorAttachments[0].clearColor = clearColor
-        descriptor.colorAttachments[0].loadAction = .clear
-
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)
-        encoder?.setRenderPipelineState(MTLPipelineManager.shared.drawTexture)
-        encoder?.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
-        encoder?.setVertexBuffer(buffers.texCoordsBuffer, offset: 0, index: 1)
-        encoder?.setFragmentTexture(texture, index: 0)
-        encoder?.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: buffers.indicesCount,
-            indexType: .uint16,
-            indexBuffer: buffers.indexBuffer,
-            indexBufferOffset: 0
-        )
-        encoder?.endEncoding()
-    }
-
     static func drawTexture(
         texture: MTLTexture,
         buffers: TextureBuffers,

@@ -96,12 +96,12 @@ final class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
         let commandBuffer = commandBufferManager.currentCommandBuffer
 
-        MTLRenderer.draw(
+        MTLRenderer.drawTexture(
             texture: renderTexture,
             buffers: textureBuffers,
-            backgroundColor: (230, 230, 230),
+            withBackgroundColor: (230, 230, 230),
             on: drawable.texture,
-            commandBuffer
+            with: commandBuffer
         )
 
         commandBuffer.present(drawable)
