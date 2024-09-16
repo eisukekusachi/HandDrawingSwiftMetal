@@ -12,10 +12,6 @@ protocol CanvasViewProtocol {
 
     var renderTexture: MTLTexture? { get }
 
-    var viewDrawable: CAMetalDrawable? { get }
-
-    func initRenderTexture(textureSize: CGSize)
-
     func clearCommandBuffer()
 
     func setNeedsDisplay()

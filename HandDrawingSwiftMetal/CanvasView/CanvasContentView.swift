@@ -83,9 +83,6 @@ final class CanvasContentView: UIView {
 
 extension CanvasContentView {
 
-    func bindTransforming(_ transformer: CanvasTransformer) {
-        bindModels(transformer)
-    }
     func applyDrawingParameters(_ drawingTool: CanvasDrawingToolStatus) {
         bindInputs(drawingTool)
         bindModels(drawingTool)
@@ -143,13 +140,6 @@ extension CanvasContentView {
             drawingTool,
             action:#selector(drawingTool.handleDiameterSlider),
             for: .valueChanged)
-    }
-
-    private func bindModels(_ transformer: CanvasTransformer) {
-
-        transformer.matrixPublisher
-            .assign(to: \.matrix, on: canvasView)
-            .store(in: &cancellables)
     }
 
     private func bindModels(_ drawingTool: CanvasDrawingToolStatus) {

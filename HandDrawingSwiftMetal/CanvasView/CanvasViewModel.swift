@@ -103,6 +103,8 @@ final class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let device = MTLCreateSystemDefaultDevice()
+
     init(
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
@@ -159,15 +161,13 @@ final class CanvasViewModel {
         textureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
-        guard let device = MTLCreateSystemDefaultDevice() else { return }
+        guard let device else { return }
 
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
 
         currentTexture.initTexture(textureSize: textureSize)
         textureLayers.initLayers(textureSize: textureSize)
-
-        canvasView.initRenderTexture(textureSize: textureSize)
 
         canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
@@ -176,8 +176,18 @@ final class CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture!,
+            onto: canvasTexture,
             canvasView.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -187,6 +197,8 @@ final class CanvasViewModel {
         model: CanvasModel,
         to canvasView: CanvasViewProtocol
     ) {
+        guard let device else { return }
+
         projectName = model.projectName
 
         textureLayerUndoManager.clear()
@@ -209,15 +221,25 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        canvasView.initRenderTexture(textureSize: model.textureSize)
+        canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
         textureLayers.updateUnselectedLayers(
             to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture,
+            onto: canvasTexture,
             canvasView.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -242,8 +264,18 @@ final class CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture,
+            onto: canvasTexture,
             canvasView.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -252,12 +284,27 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    func onUpdateRenderTexture(canvasView: CanvasViewProtocol) {
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
+    }
+
     func onViewDidAppear(
         _ drawableTextureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
         // Initialize the canvas here if the renderTexture's texture is nil
-        if canvasView.renderTexture == nil {
+        if canvasTexture == nil {
             initCanvas(
                 textureSize: drawableTextureSize,
                 canvasView: canvasView
@@ -306,17 +353,19 @@ extension CanvasViewModel {
             let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
-                let textureSize = canvasView.renderTexture?.size ?? .zero
+                let textureSize = canvasTexture?.size ?? .zero
+                let drawableSize = canvasView.renderTexture?.size ?? .zero
+
                 let textureMatrix = adjustMatrixTranslation(
                     matrix: canvasTransformer.matrix.inverted(flipY: true),
                     frameSize: frameSize,
-                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                    drawableSize: drawableSize,
                     textureSize: textureSize
                 )
                 let textureLocation: CGPoint = convertToTextureCoordinates(
                     location: $0.location,
                     frameSize: frameSize,
-                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                    drawableSize: drawableSize,
                     textureSize: textureSize
                 )
                 return CanvasGrayscaleDotPoint.init(
@@ -356,8 +405,11 @@ extension CanvasViewModel {
             )
 
             drawTextureWithAspectFit(
+                device: device,
                 texture: canvasTexture,
+                matrix: canvasTransformer.matrix,
                 withBackgroundColor: (230, 230, 230),
+                frameSize: frameSize,
                 on: canvasView.renderTexture,
                 commandBuffer: canvasView.commandBuffer
             )
@@ -387,6 +439,16 @@ extension CanvasViewModel {
             if fingerScreenTouchManager.touchArrayDictionary.containsPhases([.ended]) {
                 canvasTransformer.finishTransforming()
             }
+
+            drawTextureWithAspectFit(
+                device: device,
+                texture: canvasTexture,
+                matrix: canvasTransformer.matrix,
+                withBackgroundColor: (230, 230, 230),
+                frameSize: frameSize,
+                on: canvasView.renderTexture,
+                commandBuffer: canvasView.commandBuffer
+            )
 
             pauseDisplayLinkLoop(
                 fingerScreenTouchManager.touchArrayDictionary.containsPhases(
@@ -470,17 +532,19 @@ extension CanvasViewModel {
 
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
         let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
-            let textureSize = canvasView.renderTexture?.size ?? .zero
+            let textureSize = canvasTexture?.size ?? .zero
+            let drawableSize = canvasView.renderTexture?.size ?? .zero
+
             let textureMatrix = adjustMatrixTranslation(
                 matrix: canvasTransformer.matrix.inverted(flipY: true),
                 frameSize: frameSize,
-                drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                drawableSize: drawableSize,
                 textureSize: textureSize
             )
             let textureLocation: CGPoint = convertToTextureCoordinates(
                 location: $0.location,
                 frameSize: frameSize,
-                drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
+                drawableSize: drawableSize,
                 textureSize: textureSize
             )
             return CanvasGrayscaleDotPoint.init(
@@ -521,8 +585,11 @@ extension CanvasViewModel {
         )
 
         drawTextureWithAspectFit(
+            device: device,
             texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
             on: canvasView.renderTexture,
             commandBuffer: canvasView.commandBuffer
         )
@@ -565,6 +632,17 @@ extension CanvasViewModel {
         grayscaleTextureCurveIterator = nil
 
         canvasView.clearCommandBuffer()
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
+        )
+
         canvasView.setNeedsDisplay()
     }
 
@@ -658,25 +736,31 @@ extension CanvasViewModel {
 
     /// Draw `texture` onto `destinationTexture` with aspect fit
     private func drawTextureWithAspectFit(
+        device: MTLDevice?,
         texture: MTLTexture?,
+        matrix: CGAffineTransform?,
         withBackgroundColor color: (Int, Int, Int)? = nil,
+        frameSize: CGSize,
         on destinationTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let device,
             let texture,
             let destinationTexture
         else { return }
 
-        let ratio = ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
+        // Calculate the scale to fit the source size within the destination size
+        let textureToDrawableFitScale = ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
 
         guard
-            let device = MTLCreateSystemDefaultDevice(),
-            let textureBuffers = MTLBuffers.makeTextureBuffers(
+            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 device: device,
+                matrix: matrix,
+                frameSize: frameSize,
                 sourceSize: .init(
-                    width: texture.size.width * ratio,
-                    height: texture.size.height * ratio
+                    width: texture.size.width * textureToDrawableFitScale,
+                    height: texture.size.height * textureToDrawableFitScale
                 ),
                 destinationSize: destinationTexture.size,
                 nodes: textureNodes
@@ -756,6 +840,17 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton(renderTarget: CanvasViewProtocol) {
         canvasTransformer.setMatrix(.identity)
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
+        )
+
         renderTarget.setNeedsDisplay()
     }
 
@@ -781,8 +876,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -808,8 +913,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -843,8 +958,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -866,8 +991,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -891,8 +1026,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -913,8 +1058,18 @@ extension CanvasViewModel {
 
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()
@@ -950,8 +1105,18 @@ extension CanvasViewModel {
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
+            onto: canvasTexture,
             renderTarget.commandBuffer
+        )
+
+        drawTextureWithAspectFit(
+            device: device,
+            texture: canvasTexture,
+            matrix: canvasTransformer.matrix,
+            withBackgroundColor: (230, 230, 230),
+            frameSize: frameSize,
+            on: renderTarget.renderTexture,
+            commandBuffer: renderTarget.commandBuffer
         )
 
         renderTarget.setNeedsDisplay()

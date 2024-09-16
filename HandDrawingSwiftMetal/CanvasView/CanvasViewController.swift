@@ -63,7 +63,6 @@ extension CanvasViewController {
     }
 
     private func setupContentView() {
-        contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
 
         subscribeEvents()
@@ -193,6 +192,16 @@ extension CanvasViewController {
         contentView.canvasView.addGestureRecognizer(
             CanvasPencilInputGestureRecognizer(delegate: self)
         )
+
+        contentView.canvasView.updateTexturePublisher
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.canvasViewModel.onUpdateRenderTexture(
+                    canvasView: self.contentView.canvasView
+                )
+            }
+            .store(in: &cancellables)
+
     }
 
 }
