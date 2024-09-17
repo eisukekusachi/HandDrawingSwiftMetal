@@ -171,13 +171,9 @@ final class CanvasViewModel {
 
         canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -223,13 +219,9 @@ final class CanvasViewModel {
 
         canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -259,13 +251,9 @@ final class CanvasViewModel {
             textureLayers.layers[i].updateThumbnail()
         }
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -396,12 +384,9 @@ extension CanvasViewModel {
                 with: canvasView.commandBuffer
             )
 
-            // Render the textures of `textureLayers` onto `canvasView.renderTexture` with the backgroundColor
-            textureLayers.drawAllTextures(
-                currentTexture: currentTexture,
-                backgroundColor: drawingTool.backgroundColor,
-                onto: canvasTexture,
-                canvasView.commandBuffer
+            mergeAllTextureLayersOnCanvasTexture(
+                usingCurrentTextureWhileDrawing: true,
+                with: canvasView.commandBuffer
             )
 
             drawTextureWithAspectFit(
@@ -576,12 +561,9 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        // Render the textures of `textureLayers` onto `canvasView.renderTexture` with the backgroundColor
-        textureLayers.drawAllTextures(
-            currentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            usingCurrentTextureWhileDrawing: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -693,6 +675,25 @@ extension CanvasViewModel {
                 commandBuffer
             )
         }
+    }
+
+    private func mergeAllTextureLayersOnCanvasTexture(
+        alsoUpdateUnselectedLayers: Bool = false,
+        usingCurrentTextureWhileDrawing usingCurrentTexture: Bool = false,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        if alsoUpdateUnselectedLayers {
+            textureLayers.updateUnselectedLayers(
+                to: commandBuffer
+            )
+        }
+
+        textureLayers.mergeAllTextures(
+            usingCurrentTexture: usingCurrentTexture ? currentTexture : nil,
+            backgroundColor: drawingTool.backgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
     }
 
 }
@@ -871,13 +872,9 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -908,13 +905,9 @@ extension CanvasViewModel {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
         textureLayers.index = index
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -953,13 +946,9 @@ extension CanvasViewModel {
             textureLayers.updateThumbnail(index: index)
         }
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -986,13 +975,9 @@ extension CanvasViewModel {
 
         textureLayers.removeLayer(layer)
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1021,13 +1006,9 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1056,10 +1037,8 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1100,13 +1079,9 @@ extension CanvasViewModel {
             toOffset: destination
         )
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasTexture,
-            canvasView.commandBuffer
+        mergeAllTextureLayersOnCanvasTexture(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
