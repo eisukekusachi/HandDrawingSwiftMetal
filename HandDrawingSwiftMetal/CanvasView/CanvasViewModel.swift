@@ -350,9 +350,9 @@ extension CanvasViewModel {
                     drawableSize: drawableSize,
                     textureSize: textureSize
                 )
-                let textureLocation: CGPoint = convertToTextureCoordinates(
-                    location: $0.location,
-                    frameSize: frameSize,
+                let textureLocation: CGPoint = getLocationConvertedToTextureScale(
+                    screenLocation: $0.location,
+                    screenFrameSize: frameSize,
                     drawableSize: drawableSize,
                     textureSize: textureSize
                 )
@@ -525,9 +525,9 @@ extension CanvasViewModel {
                 drawableSize: drawableSize,
                 textureSize: textureSize
             )
-            let textureLocation: CGPoint = convertToTextureCoordinates(
-                location: $0.location,
-                frameSize: frameSize,
+            let textureLocation: CGPoint = getLocationConvertedToTextureScale(
+                screenLocation: $0.location,
+                screenFrameSize: frameSize,
                 drawableSize: drawableSize,
                 textureSize: textureSize
             )
@@ -772,26 +772,26 @@ extension CanvasViewModel {
         )
     }
 
-    private func convertToTextureCoordinates(
-        location: CGPoint,
-        frameSize: CGSize,
+    private func getLocationConvertedToTextureScale(
+        screenLocation: CGPoint,
+        screenFrameSize: CGSize,
         drawableSize: CGSize,
         textureSize: CGSize
     ) -> CGPoint {
         if textureSize != drawableSize {
             let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
-            let locationOnDrawable: CGPoint = .init(
-                x: location.x * (drawableSize.width / frameSize.width),
-                y: location.y * (drawableSize.width / frameSize.width)
+            let drawableLocation: CGPoint = .init(
+                x: screenLocation.x * (drawableSize.width / screenFrameSize.width),
+                y: screenLocation.y * (drawableSize.width / screenFrameSize.width)
             )
             return .init(
-                x: locationOnDrawable.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
-                y: locationOnDrawable.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
+                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
+                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
             )
         } else {
             return .init(
-                x: location.x * (textureSize.width / frameSize.width),
-                y: location.y * (textureSize.width / frameSize.width)
+                x: screenLocation.x * (textureSize.width / screenFrameSize.width),
+                y: screenLocation.y * (textureSize.width / screenFrameSize.width)
             )
         }
     }
