@@ -344,9 +344,8 @@ extension CanvasViewModel {
                 let textureSize = canvasTexture?.size ?? .zero
                 let drawableSize = canvasView.renderTexture?.size ?? .zero
 
-                let textureMatrix = adjustMatrixTranslation(
+                let textureMatrix = getMatrixAdjustedTranslations(
                     matrix: canvasTransformer.matrix.inverted(flipY: true),
-                    frameSize: frameSize,
                     drawableSize: drawableSize,
                     textureSize: textureSize
                 )
@@ -519,9 +518,8 @@ extension CanvasViewModel {
             let textureSize = canvasTexture?.size ?? .zero
             let drawableSize = canvasView.renderTexture?.size ?? .zero
 
-            let textureMatrix = adjustMatrixTranslation(
+            let textureMatrix = getMatrixAdjustedTranslations(
                 matrix: canvasTransformer.matrix.inverted(flipY: true),
-                frameSize: frameSize,
                 drawableSize: drawableSize,
                 textureSize: textureSize
             )
@@ -796,9 +794,8 @@ extension CanvasViewModel {
         }
     }
 
-    func adjustMatrixTranslation(
+    private func getMatrixAdjustedTranslations(
         matrix: CGAffineTransform,
-        frameSize: CGSize,
         drawableSize: CGSize,
         textureSize: CGSize
     ) -> CGAffineTransform {
