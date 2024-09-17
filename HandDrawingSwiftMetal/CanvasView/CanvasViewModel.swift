@@ -396,7 +396,7 @@ extension CanvasViewModel {
                 with: canvasView.commandBuffer
             )
 
-            // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
+            // Render the textures of `textureLayers` onto `canvasView.renderTexture` with the backgroundColor
             textureLayers.drawAllTextures(
                 currentTexture: currentTexture,
                 backgroundColor: drawingTool.backgroundColor,
@@ -421,7 +421,7 @@ extension CanvasViewModel {
 
             pauseDisplayLinkLoop(
                 [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
-                renderTarget: canvasView
+                canvasView: canvasView
             )
 
         case .transforming:
@@ -454,7 +454,7 @@ extension CanvasViewModel {
                 fingerScreenTouchManager.touchArrayDictionary.containsPhases(
                     [.ended, .cancelled]
                 ),
-                renderTarget: canvasView
+                canvasView: canvasView
             )
 
         default:
@@ -576,7 +576,7 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
+        // Render the textures of `textureLayers` onto `canvasView.renderTexture` with the backgroundColor
         textureLayers.drawAllTextures(
             currentTexture: currentTexture,
             backgroundColor: drawingTool.backgroundColor,
@@ -601,7 +601,7 @@ extension CanvasViewModel {
 
         pauseDisplayLinkLoop(
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
-            renderTarget: canvasView
+            canvasView: canvasView
         )
 
         if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
@@ -700,11 +700,11 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: CanvasViewProtocol) {
+    private func pauseDisplayLinkLoop(_ pause: Bool, canvasView: CanvasViewProtocol) {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
-                renderTarget.setNeedsDisplay()
+                canvasView.setNeedsDisplay()
                 pauseDisplayLinkSubject.send(true)
             }
 
@@ -838,7 +838,7 @@ extension CanvasViewModel {
         requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
-    func didTapResetTransformButton(renderTarget: CanvasViewProtocol) {
+    func didTapResetTransformButton(canvasView: CanvasViewProtocol) {
         canvasTransformer.setMatrix(.identity)
 
         drawTextureWithAspectFit(
@@ -847,16 +847,16 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
-    func didTapNewCanvasButton(renderTarget: CanvasViewProtocol) {
+    func didTapNewCanvasButton(canvasView: CanvasViewProtocol) {
         guard
-            let renderTexture = renderTarget.renderTexture
+            let renderTexture = canvasView.renderTexture
         else { return }
 
         projectName = Calendar.currentDate
@@ -872,12 +872,12 @@ extension CanvasViewModel {
         textureLayerUndoManager.clear()
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -886,35 +886,35 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
     func didTapLoadButton(filePath: String) {
         loadFile(from: filePath)
     }
-    func didTapSaveButton(renderTarget: CanvasViewProtocol) {
-        saveFile(renderTexture: renderTarget.renderTexture!)
+    func didTapSaveButton(canvasView: CanvasViewProtocol) {
+        saveFile(renderTexture: canvasView.renderTexture!)
     }
 
     // MARK: Layers
     func didTapLayer(
         layer: TextureLayer,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
         textureLayers.index = index
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -923,18 +923,18 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
     func didTapAddLayerButton(
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let renderTexture = renderTarget.renderTexture
+            let renderTexture = canvasView.renderTexture
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -954,12 +954,12 @@ extension CanvasViewModel {
         }
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -968,14 +968,14 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
     func didTapRemoveLayerButton(
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             textureLayers.layers.count > 1,
@@ -987,12 +987,12 @@ extension CanvasViewModel {
         textureLayers.removeLayer(layer)
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1001,16 +1001,16 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
         isVisible: Bool,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard 
             let index = textureLayers.getIndex(layer: layer)
@@ -1022,12 +1022,12 @@ extension CanvasViewModel {
         )
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1036,16 +1036,16 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             let index = textureLayers.getIndex(layer: layer)
@@ -1059,7 +1059,7 @@ extension CanvasViewModel {
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1068,11 +1068,11 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
     func didEditLayerTitle(
         layer: TextureLayer,
@@ -1091,7 +1091,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         source: IndexSet,
         destination: Int,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
@@ -1101,12 +1101,12 @@ extension CanvasViewModel {
         )
 
         textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
+            to: canvasView.commandBuffer
         )
         textureLayers.drawAllTextures(
             backgroundColor: drawingTool.backgroundColor,
             onto: canvasTexture,
-            renderTarget.commandBuffer
+            canvasView.commandBuffer
         )
 
         drawTextureWithAspectFit(
@@ -1115,11 +1115,11 @@ extension CanvasViewModel {
             matrix: canvasTransformer.matrix,
             withBackgroundColor: (230, 230, 230),
             frameSize: frameSize,
-            on: renderTarget.renderTexture,
-            commandBuffer: renderTarget.commandBuffer
+            on: canvasView.renderTexture,
+            commandBuffer: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        canvasView.setNeedsDisplay()
     }
 
 }

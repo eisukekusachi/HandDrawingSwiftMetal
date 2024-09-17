@@ -70,7 +70,7 @@ extension CanvasViewController {
         contentView.tapResetTransformButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapResetTransformButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
 
@@ -80,7 +80,7 @@ extension CanvasViewController {
         contentView.tapSaveButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapSaveButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
         contentView.tapLoadButton = { [weak self] in
@@ -212,7 +212,7 @@ extension CanvasViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapNewCanvasButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
     }
@@ -225,19 +225,19 @@ extension CanvasViewController {
                 guard let `self` else { return }
                 self.canvasViewModel.didTapLayer(
                     layer: layer,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapAddButton: { [weak self] in
                 guard let `self` else { return }
                 self.canvasViewModel.didTapAddLayerButton(
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapRemoveButton: { [weak self] in
                 guard let `self` else { return }
                 self.canvasViewModel.didTapRemoveLayerButton(
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapVisibility: { [weak self] layer, value in
@@ -245,7 +245,7 @@ extension CanvasViewController {
                 self.canvasViewModel.didTapLayerVisibility(
                     layer: layer,
                     isVisible: value,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didChangeAlpha: { [weak self] layer, value in
@@ -253,7 +253,7 @@ extension CanvasViewController {
                 self.canvasViewModel.didChangeLayerAlpha(
                     layer: layer,
                     value: value,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didEditTitle: { [weak self] layer, value in
@@ -268,7 +268,7 @@ extension CanvasViewController {
                     layer: layer, 
                     source: source,
                     destination: destination,
-                    renderTarget: self.contentView.canvasView)
+                    canvasView: self.contentView.canvasView)
             },
             on: self
         )
