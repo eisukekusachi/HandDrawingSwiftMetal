@@ -176,14 +176,10 @@ final class CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -224,14 +220,10 @@ final class CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -256,14 +248,10 @@ final class CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -274,14 +262,10 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func onUpdateRenderTexture(canvasView: CanvasViewProtocol) {
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -387,14 +371,10 @@ extension CanvasViewModel {
                 with: canvasView.commandBuffer
             )
 
-            drawTextureWithAspectFit(
-                device: device,
-                texture: canvasTexture,
+            drawCanvasTextureWithAspectFit(
                 matrix: canvasTransformer.matrix,
-                withBackgroundColor: (230, 230, 230),
-                frameSize: frameSize,
                 on: canvasView.renderTexture,
-                commandBuffer: canvasView.commandBuffer
+                with: canvasView.commandBuffer
             )
 
             if requestShowingLayerViewSubject.value && touchPhase == .ended {
@@ -423,14 +403,10 @@ extension CanvasViewModel {
                 canvasTransformer.finishTransforming()
             }
 
-            drawTextureWithAspectFit(
-                device: device,
-                texture: canvasTexture,
+            drawCanvasTextureWithAspectFit(
                 matrix: canvasTransformer.matrix,
-                withBackgroundColor: (230, 230, 230),
-                frameSize: frameSize,
                 on: canvasView.renderTexture,
-                commandBuffer: canvasView.commandBuffer
+                with: canvasView.commandBuffer
             )
 
             pauseDisplayLinkLoop(
@@ -561,14 +537,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
@@ -610,14 +582,10 @@ extension CanvasViewModel {
 
         canvasView.clearCommandBuffer()
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -729,18 +697,14 @@ extension CanvasViewModel {
     }
 
     /// Draw `texture` onto `destinationTexture` with aspect fit
-    private func drawTextureWithAspectFit(
-        device: MTLDevice?,
-        texture: MTLTexture?,
+    private func drawCanvasTextureWithAspectFit(
         matrix: CGAffineTransform?,
-        withBackgroundColor color: (Int, Int, Int)? = nil,
-        frameSize: CGSize,
         on destinationTexture: MTLTexture?,
-        commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let device,
-            let texture,
+            let texture = canvasTexture,
             let destinationTexture
         else { return }
 
@@ -764,7 +728,7 @@ extension CanvasViewModel {
         MTLRenderer.drawTexture(
             texture: texture,
             buffers: textureBuffers,
-            withBackgroundColor: color,
+            withBackgroundColor: (230, 230, 230),
             on: destinationTexture,
             with: commandBuffer
         )
@@ -834,14 +798,10 @@ extension CanvasViewModel {
     func didTapResetTransformButton(canvasView: CanvasViewProtocol) {
         canvasTransformer.setMatrix(.identity)
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -869,14 +829,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -902,14 +858,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -943,14 +895,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -972,14 +920,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -1003,14 +947,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -1033,14 +973,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -1076,14 +1012,10 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        drawTextureWithAspectFit(
-            device: device,
-            texture: canvasTexture,
+        drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
-            withBackgroundColor: (230, 230, 230),
-            frameSize: frameSize,
             on: canvasView.renderTexture,
-            commandBuffer: canvasView.commandBuffer
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
