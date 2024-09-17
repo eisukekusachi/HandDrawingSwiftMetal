@@ -373,14 +373,13 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            drawPoints(
+            // Retrieve curve points from the iterator and draw them onto `currentTexture`
+            drawPointsOnCurrentTexture(
                 grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                     atEnd: touchPhase == .ended
                 ),
-                drawingTool: drawingTool,
                 with: grayscaleTextureCurveIterator,
                 touchPhase: touchPhase,
-                on: textureLayers,
                 with: canvasView.commandBuffer
             )
 
@@ -549,15 +548,13 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        // Retrieve curve points from the iterator and draw them onto the texture of `textureLayers`
-        drawPoints(
+        // Retrieve curve points from the iterator and draw them onto `currentTexture`
+        drawPointsOnCurrentTexture(
             grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                 atEnd: touchPhase == .ended
             ),
-            drawingTool: drawingTool,
             with: grayscaleTextureCurveIterator,
             touchPhase: touchPhase,
-            on: textureLayers,
             with: canvasView.commandBuffer
         )
 
@@ -632,12 +629,10 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawPoints(
+    private func drawPointsOnCurrentTexture(
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
-        drawingTool: CanvasDrawingToolStatus,
         with grayscaleCurve: CanvasGrayscaleCurveIterator?,
         touchPhase: UITouch.Phase,
-        on textureLayers: TextureLayers,
         with commandBuffer: MTLCommandBuffer
     ) {
         if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
