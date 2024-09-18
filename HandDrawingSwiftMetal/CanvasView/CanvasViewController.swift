@@ -57,7 +57,7 @@ extension CanvasViewController {
         /*
         canvasViewModel.initCanvas(
             textureSize: .init(width: 768, height: 1024),
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
         */
     }
