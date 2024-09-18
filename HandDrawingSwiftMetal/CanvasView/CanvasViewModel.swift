@@ -367,7 +367,6 @@ extension CanvasViewModel {
             )
 
             if requestShowingLayerViewSubject.value && touchPhase == .ended {
-                // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
                 updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
             }
 
@@ -533,7 +532,6 @@ extension CanvasViewModel {
         )
 
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
-            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
@@ -674,6 +672,7 @@ extension CanvasViewModel {
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
     }
 
+    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
     private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
         Task {
             try await Task.sleep(nanoseconds: nanosecondsDuration)
