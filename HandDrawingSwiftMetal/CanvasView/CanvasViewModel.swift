@@ -158,8 +158,7 @@ final class CanvasViewModel {
     }
 
     func initCanvas(
-        textureSize: CGSize,
-        canvasView: CanvasViewProtocol
+        textureSize: CGSize
     ) {
         guard let device else { return }
 
@@ -170,19 +169,6 @@ final class CanvasViewModel {
         textureLayers.initLayers(textureSize: textureSize)
 
         canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
-
-        mergeAllTextureLayersOnCanvasTexture(
-            alsoUpdateUnselectedLayers: true,
-            with: canvasView.commandBuffer
-        )
-
-        drawCanvasTextureWithAspectFit(
-            matrix: canvasTransformer.matrix,
-            on: canvasView.renderTexture,
-            with: canvasView.commandBuffer
-        )
-
-        canvasView.setNeedsDisplay()
     }
 
     func apply(
@@ -262,6 +248,17 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func onUpdateRenderTexture(canvasView: CanvasViewProtocol) {
+        // Initialize the canvas here if `canvasTexture` is nil
+        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+            initCanvas(
+                textureSize: textureSize
+            )
+
+            mergeAllTextureLayersOnCanvasTexture(
+                with: canvasView.commandBuffer
+            )
+        }
+
         drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
             on: canvasView.renderTexture,
@@ -275,14 +272,6 @@ extension CanvasViewModel {
         _ drawableTextureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
-        // Initialize the canvas here if the renderTexture's texture is nil
-        if canvasTexture == nil {
-            initCanvas(
-                textureSize: drawableTextureSize,
-                canvasView: canvasView
-            )
-        }
-
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
     }
