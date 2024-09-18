@@ -18,12 +18,12 @@ final class TextureLayers: LayerManager<TextureLayer> {
 }
 
 extension TextureLayers {
-    /// Render the textures of layers onto a single texture with the backgroundColor
-    func drawAllTextures(
-        currentTexture: CanvasCurrentTexture? = nil,
+    /// Merge the textures of layers on a single texture with the backgroundColor
+    func mergeAllTextures(
+        usingCurrentTexture currentTexture: CanvasCurrentTexture? = nil,
         backgroundColor: UIColor,
-        onto destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        on destinationTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let destinationTexture

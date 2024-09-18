@@ -72,9 +72,10 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
+    /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
+    private var canvasTexture: MTLTexture?
     /// A texture that combines the texture of the currently selected `TextureLayer` and `DrawingTexture`
     private let currentTexture = CanvasCurrentTexture()
-
     /// A protocol for managing current drawing texture
     private (set) var drawingTexture: CanvasDrawingTextureProtocol?
     /// A drawing texture with a brush
@@ -101,6 +102,8 @@ final class CanvasViewModel {
     private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
 
     private var cancellables = Set<AnyCancellable>()
+
+    private let device = MTLCreateSystemDefaultDevice()
 
     init(
         localRepository: LocalRepository = DocumentsLocalRepository()
@@ -155,33 +158,25 @@ final class CanvasViewModel {
     }
 
     func initCanvas(
-        textureSize: CGSize,
-        canvasView: CanvasViewProtocol
+        textureSize: CGSize
     ) {
+        guard let device else { return }
+
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
 
         currentTexture.initTexture(textureSize: textureSize)
         textureLayers.initLayers(textureSize: textureSize)
 
-        canvasView.initRenderTexture(textureSize: textureSize)
-
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture!,
-            canvasView.commandBuffer
-        )
-
-        canvasView.setNeedsDisplay()
+        canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
     }
 
     func apply(
         model: CanvasModel,
         to canvasView: CanvasViewProtocol
     ) {
+        guard let device else { return }
+
         projectName = model.projectName
 
         textureLayerUndoManager.clear()
@@ -204,15 +199,17 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        canvasView.initRenderTexture(textureSize: model.textureSize)
+        canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture,
-            canvasView.commandBuffer
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -232,13 +229,15 @@ final class CanvasViewModel {
             textureLayers.layers[i].updateThumbnail()
         }
 
-        textureLayers.updateUnselectedLayers(
-            to: canvasView.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: canvasView.renderTexture,
-            canvasView.commandBuffer
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
         )
 
         canvasView.setNeedsDisplay()
@@ -247,18 +246,32 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    func onUpdateRenderTexture(canvasView: CanvasViewProtocol) {
+        // Initialize the canvas here if `canvasTexture` is nil
+        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+            initCanvas(
+                textureSize: textureSize
+            )
+
+            mergeLayersOnCanvasTextureWithBackgroundColor(
+                with: canvasView.commandBuffer
+            )
+        }
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
+    }
+
     func onViewDidAppear(
         _ drawableTextureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
-        // Initialize the canvas here if the renderTexture's texture is nil
-        if canvasView.renderTexture == nil {
-            initCanvas(
-                textureSize: drawableTextureSize,
-                canvasView: canvasView
-            )
-        }
-
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
     }
@@ -301,12 +314,27 @@ extension CanvasViewModel {
             let touchPhase = latestScreenTouchPoints.currentTouchPhase
 
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
-                .init(
-                    touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
-                        matrix: canvasTransformer.matrix,
-                        frameSize: frameSize,
-                        drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
-                        textureSize: canvasView.renderTexture?.size ?? .zero
+                let textureSize = canvasTexture?.size ?? .zero
+                let drawableSize = canvasView.renderTexture?.size ?? .zero
+
+                let textureMatrix = getMatrixAdjustedTranslations(
+                    matrix: canvasTransformer.matrix.inverted(flipY: true),
+                    drawableSize: drawableSize,
+                    textureSize: textureSize
+                )
+                let textureLocation: CGPoint = getLocationConvertedToTextureScale(
+                    screenLocation: $0.location,
+                    screenFrameSize: frameSize,
+                    drawableSize: drawableSize,
+                    textureSize: textureSize
+                )
+                return CanvasGrayscaleDotPoint.init(
+                    touchPoint: .init(
+                        location: textureLocation.apply(
+                            with: textureMatrix,
+                            textureSize: textureSize
+                        ),
+                        touch: $0
                     ),
                     diameter: CGFloat(drawingTool.diameter)
                 )
@@ -317,27 +345,63 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            drawPoints(
+            // Retrieve curve points from the iterator and draw them onto `currentTexture`
+            drawPointsOnCurrentTexture(
                 grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                     atEnd: touchPhase == .ended
                 ),
-                drawingTool: drawingTool,
                 with: grayscaleTextureCurveIterator,
                 touchPhase: touchPhase,
-                on: textureLayers,
                 with: canvasView.commandBuffer
             )
 
-            renderTextures(
-                textureLayers: textureLayers,
-                touchPhase: touchPhase,
-                on: canvasView
+            mergeLayersOnCanvasTextureWithBackgroundColor(
+                usingCurrentTextureWhileDrawing: true,
+                with: canvasView.commandBuffer
+            )
+
+            drawCanvasTextureWithAspectFit(
+                matrix: canvasTransformer.matrix,
+                on: canvasView.renderTexture,
+                with: canvasView.commandBuffer
+            )
+
+            if requestShowingLayerViewSubject.value && touchPhase == .ended {
+                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            }
+
+            pauseDisplayLinkLoop(
+                [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+                canvasView: canvasView
             )
 
         case .transforming:
-            transformCanvas(
-                fingerScreenTouchManager.touchArrayDictionary,
-                on: canvasView
+            if canvasTransformer.isCurrentKeysNil {
+                canvasTransformer.initTransforming(fingerScreenTouchManager.touchArrayDictionary)
+            }
+
+            canvasTransformer.transformCanvas(
+                screenCenter: .init(
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
+                ),
+                fingerScreenTouchManager.touchArrayDictionary
+            )
+            if fingerScreenTouchManager.touchArrayDictionary.containsPhases([.ended]) {
+                canvasTransformer.finishTransforming()
+            }
+
+            drawCanvasTextureWithAspectFit(
+                matrix: canvasTransformer.matrix,
+                on: canvasView.renderTexture,
+                with: canvasView.commandBuffer
+            )
+
+            pauseDisplayLinkLoop(
+                fingerScreenTouchManager.touchArrayDictionary.containsPhases(
+                    [.ended, .cancelled]
+                ),
+                canvasView: canvasView
             )
 
         default:
@@ -415,12 +479,27 @@ extension CanvasViewModel {
 
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
         let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
-            .init(
-                touchPoint: $0.convertToTextureCoordinatesAndApplyMatrix(
-                    matrix: canvasTransformer.matrix,
-                    frameSize: frameSize,
-                    drawableSize: canvasView.viewDrawable?.texture.size ?? .zero,
-                    textureSize: canvasView.renderTexture?.size ?? .zero
+            let textureSize = canvasTexture?.size ?? .zero
+            let drawableSize = canvasView.renderTexture?.size ?? .zero
+
+            let textureMatrix = getMatrixAdjustedTranslations(
+                matrix: canvasTransformer.matrix.inverted(flipY: true),
+                drawableSize: drawableSize,
+                textureSize: textureSize
+            )
+            let textureLocation: CGPoint = getLocationConvertedToTextureScale(
+                screenLocation: $0.location,
+                screenFrameSize: frameSize,
+                drawableSize: drawableSize,
+                textureSize: textureSize
+            )
+            return CanvasGrayscaleDotPoint.init(
+                touchPoint: .init(
+                    location: textureLocation.apply(
+                        with: textureMatrix,
+                        textureSize: textureSize
+                    ),
+                    touch: $0
                 ),
                 diameter: CGFloat(drawingTool.diameter)
             )
@@ -431,23 +510,34 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        // Retrieve curve points from the iterator and draw them onto the texture of `textureLayers`
-        drawPoints(
+        // Retrieve curve points from the iterator and draw them onto `currentTexture`
+        drawPointsOnCurrentTexture(
             grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
                 atEnd: touchPhase == .ended
             ),
-            drawingTool: drawingTool,
             with: grayscaleTextureCurveIterator,
             touchPhase: touchPhase,
-            on: textureLayers,
             with: canvasView.commandBuffer
         )
 
-        // Display the textures
-        renderTextures(
-            textureLayers: textureLayers,
-            touchPhase: touchPhase,
-            on: canvasView
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            usingCurrentTextureWhileDrawing: true,
+            with: canvasView.commandBuffer
+        )
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
+
+        pauseDisplayLinkLoop(
+            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+            canvasView: canvasView
         )
 
         if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
@@ -478,6 +568,13 @@ extension CanvasViewModel {
         grayscaleTextureCurveIterator = nil
 
         canvasView.clearCommandBuffer()
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
         canvasView.setNeedsDisplay()
     }
 
@@ -485,12 +582,10 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawPoints(
+    private func drawPointsOnCurrentTexture(
         grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
-        drawingTool: CanvasDrawingToolStatus,
         with grayscaleCurve: CanvasGrayscaleCurveIterator?,
         touchPhase: UITouch.Phase,
-        on textureLayers: TextureLayers,
         with commandBuffer: MTLCommandBuffer
     ) {
         if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
@@ -530,55 +625,22 @@ extension CanvasViewModel {
         }
     }
 
-    private func renderTextures(
-        textureLayers: TextureLayers,
-        touchPhase: UITouch.Phase,
-        on renderTarget: CanvasViewProtocol
+    private func mergeLayersOnCanvasTextureWithBackgroundColor(
+        alsoUpdateUnselectedLayers: Bool = false,
+        usingCurrentTextureWhileDrawing usingCurrentTexture: Bool = false,
+        with commandBuffer: MTLCommandBuffer
     ) {
-        // Render the textures of `textureLayers` onto `renderTarget.renderTexture` with the backgroundColor
-        textureLayers.drawAllTextures(
-            currentTexture: currentTexture,
+        if alsoUpdateUnselectedLayers {
+            textureLayers.updateUnselectedLayers(
+                to: commandBuffer
+            )
+        }
+
+        textureLayers.mergeAllTextures(
+            usingCurrentTexture: usingCurrentTexture ? currentTexture : nil,
             backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
-        )
-
-        pauseDisplayLinkLoop(
-            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
-            renderTarget: renderTarget
-        )
-
-        if requestShowingLayerViewSubject.value && touchPhase == .ended {
-            // Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
-    }
-
-    private func transformCanvas(
-        _ touchPointsDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
-        on renderTarget: CanvasViewProtocol
-    ) {
-        if canvasTransformer.isCurrentKeysNil {
-            canvasTransformer.initTransforming(touchPointsDictionary)
-        }
-
-        canvasTransformer.transformCanvas(
-            screenCenter: .init(
-                x: frameSize.width * 0.5,
-                y: frameSize.height * 0.5
-            ),
-            touchPointsDictionary
-        )
-
-        if touchPointsDictionary.containsPhases([.ended]) {
-            canvasTransformer.finishTransforming()
-        }
-
-        pauseDisplayLinkLoop(
-            touchPointsDictionary.containsPhases(
-                [.ended, .cancelled]
-            ),
-            renderTarget: renderTarget
+            on: canvasTexture,
+            with: commandBuffer
         )
     }
 
@@ -587,11 +649,11 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool, renderTarget: CanvasViewProtocol) {
+    private func pauseDisplayLinkLoop(_ pause: Bool, canvasView: CanvasViewProtocol) {
         if pause {
             if pauseDisplayLinkSubject.value == false {
                 // Pause the display link after updating the display.
-                renderTarget.setNeedsDisplay()
+                canvasView.setNeedsDisplay()
                 pauseDisplayLinkSubject.send(true)
             }
 
@@ -610,6 +672,7 @@ extension CanvasViewModel {
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
     }
 
+    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
     private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
         Task {
             try await Task.sleep(nanoseconds: nanosecondsDuration)
@@ -619,6 +682,89 @@ extension CanvasViewModel {
                 self.textureLayers.updateThumbnail(index: self.textureLayers.index)
             }
         }
+    }
+
+    /// Draw `texture` onto `destinationTexture` with aspect fit
+    private func drawCanvasTextureWithAspectFit(
+        matrix: CGAffineTransform?,
+        on destinationTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let device,
+            let texture = canvasTexture,
+            let destinationTexture
+        else { return }
+
+        // Calculate the scale to fit the source size within the destination size
+        let textureToDrawableFitScale = ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
+
+        guard
+            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
+                device: device,
+                matrix: matrix,
+                frameSize: frameSize,
+                sourceSize: .init(
+                    width: texture.size.width * textureToDrawableFitScale,
+                    height: texture.size.height * textureToDrawableFitScale
+                ),
+                destinationSize: destinationTexture.size,
+                nodes: textureNodes
+            )
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: texture,
+            buffers: textureBuffers,
+            withBackgroundColor: (230, 230, 230),
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
+    private func getLocationConvertedToTextureScale(
+        screenLocation: CGPoint,
+        screenFrameSize: CGSize,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGPoint {
+        if textureSize != drawableSize {
+            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
+            let drawableLocation: CGPoint = .init(
+                x: screenLocation.x * (drawableSize.width / screenFrameSize.width),
+                y: screenLocation.y * (drawableSize.width / screenFrameSize.width)
+            )
+            return .init(
+                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
+                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
+            )
+        } else {
+            return .init(
+                x: screenLocation.x * (textureSize.width / screenFrameSize.width),
+                y: screenLocation.y * (textureSize.width / screenFrameSize.width)
+            )
+        }
+    }
+
+    private func getMatrixAdjustedTranslations(
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGAffineTransform {
+
+        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
+        let drawableTextureSize: CGSize = .init(
+            width: textureSize.width * drawableScale,
+            height: textureSize.height * drawableScale
+        )
+
+        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
+        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
+
+        var matrix = matrix
+        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        return matrix
     }
 
 }
@@ -637,14 +783,21 @@ extension CanvasViewModel {
         requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
-    func didTapResetTransformButton(renderTarget: CanvasViewProtocol) {
+    func didTapResetTransformButton(canvasView: CanvasViewProtocol) {
         canvasTransformer.setMatrix(.identity)
-        renderTarget.setNeedsDisplay()
+
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
 
-    func didTapNewCanvasButton(renderTarget: CanvasViewProtocol) {
+    func didTapNewCanvasButton(canvasView: CanvasViewProtocol) {
         guard
-            let renderTexture = renderTarget.renderTexture
+            let renderTexture = canvasView.renderTexture
         else { return }
 
         projectName = Calendar.currentDate
@@ -659,50 +812,54 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
 
     func didTapLoadButton(filePath: String) {
         loadFile(from: filePath)
     }
-    func didTapSaveButton(renderTarget: CanvasViewProtocol) {
-        saveFile(renderTexture: renderTarget.renderTexture!)
+    func didTapSaveButton(canvasView: CanvasViewProtocol) {
+        saveFile(renderTexture: canvasView.renderTexture!)
     }
 
     // MARK: Layers
     func didTapLayer(
         layer: TextureLayer,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
         textureLayers.index = index
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
     func didTapAddLayerButton(
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let renderTexture = renderTarget.renderTexture
+            let renderTexture = canvasView.renderTexture
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -721,19 +878,21 @@ extension CanvasViewModel {
             textureLayers.updateThumbnail(index: index)
         }
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
     func didTapRemoveLayerButton(
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             textureLayers.layers.count > 1,
@@ -744,21 +903,23 @@ extension CanvasViewModel {
 
         textureLayers.removeLayer(layer)
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
         isVisible: Bool,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard 
             let index = textureLayers.getIndex(layer: layer)
@@ -769,21 +930,23 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         guard
             let index = textureLayers.getIndex(layer: layer)
@@ -794,13 +957,17 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
     func didEditLayerTitle(
         layer: TextureLayer,
@@ -819,7 +986,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         source: IndexSet,
         destination: Int,
-        renderTarget: CanvasViewProtocol
+        canvasView: CanvasViewProtocol
     ) {
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
@@ -828,16 +995,18 @@ extension CanvasViewModel {
             toOffset: destination
         )
 
-        textureLayers.updateUnselectedLayers(
-            to: renderTarget.commandBuffer
-        )
-        textureLayers.drawAllTextures(
-            backgroundColor: drawingTool.backgroundColor,
-            onto: renderTarget.renderTexture,
-            renderTarget.commandBuffer
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            alsoUpdateUnselectedLayers: true,
+            with: canvasView.commandBuffer
         )
 
-        renderTarget.setNeedsDisplay()
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+
+        canvasView.setNeedsDisplay()
     }
 
 }

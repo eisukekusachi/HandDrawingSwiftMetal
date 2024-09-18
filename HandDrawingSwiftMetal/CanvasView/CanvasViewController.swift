@@ -57,13 +57,12 @@ extension CanvasViewController {
         /*
         canvasViewModel.initCanvas(
             textureSize: .init(width: 768, height: 1024),
-            renderTarget: contentView.canvasView
+            canvasView: contentView.canvasView
         )
         */
     }
 
     private func setupContentView() {
-        contentView.bindTransforming(canvasViewModel.canvasTransformer)
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
 
         subscribeEvents()
@@ -71,7 +70,7 @@ extension CanvasViewController {
         contentView.tapResetTransformButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapResetTransformButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
 
@@ -81,7 +80,7 @@ extension CanvasViewController {
         contentView.tapSaveButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapSaveButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
         contentView.tapLoadButton = { [weak self] in
@@ -193,6 +192,16 @@ extension CanvasViewController {
         contentView.canvasView.addGestureRecognizer(
             CanvasPencilInputGestureRecognizer(delegate: self)
         )
+
+        contentView.canvasView.updateTexturePublisher
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.canvasViewModel.onUpdateRenderTexture(
+                    canvasView: self.contentView.canvasView
+                )
+            }
+            .store(in: &cancellables)
+
     }
 
 }
@@ -203,7 +212,7 @@ extension CanvasViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
             self.canvasViewModel.didTapNewCanvasButton(
-                renderTarget: self.contentView.canvasView
+                canvasView: self.contentView.canvasView
             )
         }
     }
@@ -216,19 +225,19 @@ extension CanvasViewController {
                 guard let `self` else { return }
                 self.canvasViewModel.didTapLayer(
                     layer: layer,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapAddButton: { [weak self] in
                 guard let `self` else { return }
                 self.canvasViewModel.didTapAddLayerButton(
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapRemoveButton: { [weak self] in
                 guard let `self` else { return }
                 self.canvasViewModel.didTapRemoveLayerButton(
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didTapVisibility: { [weak self] layer, value in
@@ -236,7 +245,7 @@ extension CanvasViewController {
                 self.canvasViewModel.didTapLayerVisibility(
                     layer: layer,
                     isVisible: value,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didChangeAlpha: { [weak self] layer, value in
@@ -244,7 +253,7 @@ extension CanvasViewController {
                 self.canvasViewModel.didChangeLayerAlpha(
                     layer: layer,
                     value: value,
-                    renderTarget: self.contentView.canvasView
+                    canvasView: self.contentView.canvasView
                 )
             },
             didEditTitle: { [weak self] layer, value in
@@ -259,7 +268,7 @@ extension CanvasViewController {
                     layer: layer, 
                     source: source,
                     destination: destination,
-                    renderTarget: self.contentView.canvasView)
+                    canvasView: self.contentView.canvasView)
             },
             on: self
         )
