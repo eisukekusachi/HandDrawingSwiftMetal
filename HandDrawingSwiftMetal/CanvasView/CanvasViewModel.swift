@@ -201,7 +201,7 @@ final class CanvasViewModel {
 
         canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -229,7 +229,7 @@ final class CanvasViewModel {
             textureLayers.layers[i].updateThumbnail()
         }
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -254,7 +254,7 @@ extension CanvasViewModel {
                 textureSize: textureSize
             )
 
-            mergeAllTextureLayersOnCanvasTexture(
+            mergeLayersOnCanvasTextureWithBackgroundColor(
                 with: canvasView.commandBuffer
             )
         }
@@ -355,7 +355,7 @@ extension CanvasViewModel {
                 with: canvasView.commandBuffer
             )
 
-            mergeAllTextureLayersOnCanvasTexture(
+            mergeLayersOnCanvasTextureWithBackgroundColor(
                 usingCurrentTextureWhileDrawing: true,
                 with: canvasView.commandBuffer
             )
@@ -521,7 +521,7 @@ extension CanvasViewModel {
             with: canvasView.commandBuffer
         )
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             usingCurrentTextureWhileDrawing: true,
             with: canvasView.commandBuffer
         )
@@ -627,7 +627,7 @@ extension CanvasViewModel {
         }
     }
 
-    private func mergeAllTextureLayersOnCanvasTexture(
+    private func mergeLayersOnCanvasTextureWithBackgroundColor(
         alsoUpdateUnselectedLayers: Bool = false,
         usingCurrentTextureWhileDrawing usingCurrentTexture: Bool = false,
         with commandBuffer: MTLCommandBuffer
@@ -813,7 +813,7 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -842,7 +842,7 @@ extension CanvasViewModel {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
         textureLayers.index = index
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -879,7 +879,7 @@ extension CanvasViewModel {
             textureLayers.updateThumbnail(index: index)
         }
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -904,7 +904,7 @@ extension CanvasViewModel {
 
         textureLayers.removeLayer(layer)
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -931,7 +931,7 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
@@ -958,7 +958,7 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             with: canvasView.commandBuffer
         )
 
@@ -996,7 +996,7 @@ extension CanvasViewModel {
             toOffset: destination
         )
 
-        mergeAllTextureLayersOnCanvasTexture(
+        mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
             with: canvasView.commandBuffer
         )
