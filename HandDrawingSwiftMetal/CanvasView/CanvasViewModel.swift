@@ -259,12 +259,13 @@ extension CanvasViewModel {
             )
         }
 
+        // Redraws the canvas when the screen rotates and the canvas size changes.
+        // Therefore, this code is placed outside the block.
         drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
             on: canvasView.renderTexture,
             with: canvasView.commandBuffer
         )
-
         canvasView.setNeedsDisplay()
     }
 
@@ -272,6 +273,24 @@ extension CanvasViewModel {
         _ drawableTextureSize: CGSize,
         canvasView: CanvasViewProtocol
     ) {
+        // Since `func onUpdateRenderTexture` is not called at app launch on iPhone,
+        // initialize the canvas here.
+        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+            initCanvas(
+                textureSize: textureSize
+            )
+
+            mergeLayersOnCanvasTextureWithBackgroundColor(
+                with: canvasView.commandBuffer
+            )
+            drawCanvasTextureWithAspectFit(
+                matrix: canvasTransformer.matrix,
+                on: canvasView.renderTexture,
+                with: canvasView.commandBuffer
+            )
+            canvasView.setNeedsDisplay()
+        }
+
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
     }

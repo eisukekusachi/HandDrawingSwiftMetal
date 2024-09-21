@@ -60,6 +60,10 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         self.autoResizeDrawable = true
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
+
+        if let textureSize: CGSize = currentDrawable?.texture.size {
+            _renderTexture = MTKTextureUtils.makeBlankTexture(device!, textureSize)
+        }
     }
 
     // MARK: - DrawTexture
