@@ -253,14 +253,13 @@ extension CanvasViewModel {
             initCanvas(
                 textureSize: textureSize
             )
-
-            mergeLayersOnCanvasTextureWithBackgroundColor(
-                with: canvasView.commandBuffer
-            )
         }
 
         // Redraws the canvas when the screen rotates and the canvas size changes.
         // Therefore, this code is placed outside the block.
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            with: canvasView.commandBuffer
+        )
         drawCanvasTextureWithAspectFit(
             matrix: canvasTransformer.matrix,
             on: canvasView.renderTexture,
@@ -279,17 +278,17 @@ extension CanvasViewModel {
             initCanvas(
                 textureSize: textureSize
             )
-
-            mergeLayersOnCanvasTextureWithBackgroundColor(
-                with: canvasView.commandBuffer
-            )
-            drawCanvasTextureWithAspectFit(
-                matrix: canvasTransformer.matrix,
-                on: canvasView.renderTexture,
-                with: canvasView.commandBuffer
-            )
-            canvasView.setNeedsDisplay()
         }
+
+        mergeLayersOnCanvasTextureWithBackgroundColor(
+            with: canvasView.commandBuffer
+        )
+        drawCanvasTextureWithAspectFit(
+            matrix: canvasTransformer.matrix,
+            on: canvasView.renderTexture,
+            with: canvasView.commandBuffer
+        )
+        canvasView.setNeedsDisplay()
 
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
