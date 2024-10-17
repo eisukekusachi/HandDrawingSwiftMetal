@@ -11,10 +11,6 @@ import Combine
 /// A custom view for displaying textures with Metal support.
 class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
-    var commandBuffer: MTLCommandBuffer {
-        commandManager.currentCommandBuffer
-    }
-
     var renderTexture: MTLTexture? {
         _renderTexture
     }
@@ -22,6 +18,8 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
     var updateTexturePublisher: AnyPublisher<Void, Never> {
         updateTextureSubject.eraseToAnyPublisher()
     }
+
+    private (set) var commandBuffer: MTLCommandBuffer?
 
     private var _renderTexture: MTLTexture? {
         didSet {
@@ -33,7 +31,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
     private let updateTextureSubject = PassthroughSubject<Void, Never>()
 
-    private var commandManager: MTLCommandManager!
+    private var commandQueue: MTLCommandQueue!
 
     override init(frame frameRect: CGRect, device: MTLDevice?) {
         super.init(frame: frameRect, device: device)
@@ -46,12 +44,13 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
     private func commonInit() {
         self.device = MTLCreateSystemDefaultDevice()
-        let commandQueue = self.device!.makeCommandQueue()
 
         assert(self.device != nil, "Device is nil.")
-        assert(commandQueue != nil, "CommandQueue is nil.")
 
-        commandManager = MTLCommandManager(device: self.device!)
+        guard let queue = device?.makeCommandQueue() else { return }
+
+        commandQueue = self.device!.makeCommandQueue()
+        clearCommandBuffer()
 
         textureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
 
@@ -69,6 +68,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
     // MARK: - DrawTexture
     func draw(in view: MTKView) {
         guard
+            let commandBuffer,
             let textureBuffers,
             let renderTexture,
             let drawable = view.currentDrawable
@@ -86,7 +86,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        commandManager.clearCurrentCommandBuffer()
+        clearCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -97,13 +97,8 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 }
 
 extension CanvasView {
-
     func clearCommandBuffer() {
-        commandManager.clearCurrentCommandBuffer()
-    }
-
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        setNeedsDisplay()
+        commandBuffer = commandQueue?.makeCommandBuffer()
     }
 
 }
