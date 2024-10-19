@@ -170,21 +170,27 @@ enum Interpolator {
         return result
     }
 
-    static func linear<T: FloatingPoint>(
-        begin: T,
-        change: T,
+    static func getLinearInterpolationValues(
+        begin: CGFloat,
+        change: CGFloat,
         duration: Int,
-        addLastPoint: Bool = false
-    ) -> [T] {
-        var result: [T] = []
+        shouldIncludeEndPoint: Bool
+    ) -> [CGFloat] {
+
+        var result: [CGFloat] = []
 
         for t in 0 ..< duration {
-            let difference = change - begin
-            let normalizedValue = T(t) / T(duration)
+            if begin == change {
+                result.append(begin)
+            } else {
+                let difference = (change - begin)
+                let normalizedValue = CGFloat(Float(t) / Float(duration))
 
-            result.append(difference * normalizedValue + begin)
+                result.append(difference * normalizedValue + begin)
+            }
         }
-        if addLastPoint {
+
+        if shouldIncludeEndPoint {
             result.append(change)
         }
 

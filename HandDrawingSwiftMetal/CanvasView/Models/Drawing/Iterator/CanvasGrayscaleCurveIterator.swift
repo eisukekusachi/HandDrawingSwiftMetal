@@ -106,16 +106,18 @@ extension CanvasGrayscaleCurveIterator {
 
         let duration = locations.count
 
-        let brightnessArray = Interpolator.linear(
+        let brightnessArray = Interpolator.getLinearInterpolationValues(
             begin: previousPoint.brightness,
             change: startPoint.brightness,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: false
         )
 
-        let diameterArray = Interpolator.linear(
+        let diameterArray = Interpolator.getLinearInterpolationValues(
             begin: previousPoint.diameter,
             change: startPoint.diameter,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: false
         )
 
         for i in 0 ..< locations.count {
@@ -149,16 +151,18 @@ extension CanvasGrayscaleCurveIterator {
 
         let duration = locations.count
 
-        let brightnessArray = Interpolator.linear(
+        let brightnessArray = Interpolator.getLinearInterpolationValues(
             begin: previousPoint.brightness,
             change: startPoint.brightness,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: false
         )
 
-        let diameterArray = Interpolator.linear(
+        let diameterArray = Interpolator.getLinearInterpolationValues(
             begin: previousPoint.diameter,
             change: startPoint.diameter,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: false
         )
 
         for i in 0 ..< locations.count {
@@ -192,16 +196,18 @@ extension CanvasGrayscaleCurveIterator {
 
         let duration = locations.count
 
-        let brightnessArray = Interpolator.linear(
+        let brightnessArray = Interpolator.getLinearInterpolationValues(
             begin: startPoint.brightness,
             change: endPoint.brightness,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: true
         )
 
-        let diameterArray = Interpolator.linear(
+        let diameterArray = Interpolator.getLinearInterpolationValues(
             begin: startPoint.diameter,
             change: endPoint.diameter,
-            duration: duration
+            duration: duration,
+            shouldIncludeEndPoint: true
         )
 
         for i in 0 ..< locations.count {
