@@ -339,8 +339,6 @@ extension CanvasViewModel {
             let latestScreenTouchPoints = screenTouchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
             fingerScreenTouchManager.latestCanvasTouchPoint = latestScreenTouchPoints.last
 
-            let touchPhase = latestScreenTouchPoints.currentTouchPhase
-
             let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
                 let textureSize = canvasTexture?.size ?? .zero
                 let drawableSize = canvasView.renderTexture?.size ?? .zero
@@ -370,18 +368,18 @@ extension CanvasViewModel {
 
             grayscaleTextureCurveIterator.appendToIterator(
                 points: grayscaleTexturePoints,
-                touchPhase: touchPhase
+                touchPhase: latestScreenTouchPoints.currentTouchPhase
             )
 
             // Retrieve curve points from the iterator and draw them onto `currentTexture`
-            drawPointsOnCurrentTexture(
-                grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
-                    atEnd: touchPhase == .ended
-                ),
-                with: grayscaleTextureCurveIterator,
-                touchPhase: touchPhase,
-                with: commandBuffer
-            )
+            if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
+                drawPointsOnCurrentTexture(
+                    grayscaleTexturePoints: texturePoints,
+                    with: grayscaleTextureCurveIterator,
+                    touchPhase: latestScreenTouchPoints.currentTouchPhase,
+                    with: commandBuffer
+                )
+            }
 
             displayCanvasTextureWithCurrentTextureWhileDrawing(
                 canvasTexture: canvasTexture,
@@ -390,12 +388,12 @@ extension CanvasViewModel {
                 on: canvasView
             )
 
-            if requestShowingLayerViewSubject.value && touchPhase == .ended {
+            if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
                 updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
             }
 
             pauseDisplayLinkLoop(
-                [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+                grayscaleTextureCurveIterator.isDrawingFinished,
                 canvasView: canvasView
             )
 
@@ -498,8 +496,6 @@ extension CanvasViewModel {
         let latestScreenTouchArray = pencilScreenTouchPoints.latestActualTouchPoints
         pencilScreenTouchPoints.updateLatestActualTouchPoint()
 
-        let touchPhase = latestScreenTouchArray.currentTouchPhase
-
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
         let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
             let textureSize = canvasTexture?.size ?? .zero
@@ -530,18 +526,18 @@ extension CanvasViewModel {
 
         grayscaleTextureCurveIterator.appendToIterator(
             points: latestTextureTouchArray,
-            touchPhase: touchPhase
+            touchPhase: latestScreenTouchArray.currentTouchPhase
         )
 
         // Retrieve curve points from the iterator and draw them onto `currentTexture`
-        drawPointsOnCurrentTexture(
-            grayscaleTexturePoints: grayscaleTextureCurveIterator.makeCurvePoints(
-                atEnd: touchPhase == .ended
-            ),
-            with: grayscaleTextureCurveIterator,
-            touchPhase: touchPhase,
-            with: commandBuffer
-        )
+        if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
+            drawPointsOnCurrentTexture(
+                grayscaleTexturePoints: texturePoints,
+                with: grayscaleTextureCurveIterator,
+                touchPhase: grayscaleTextureCurveIterator.currentTouchPhase,
+                with: commandBuffer
+            )
+        }
 
         displayCanvasTextureWithCurrentTextureWhileDrawing(
             canvasTexture: canvasTexture,
@@ -550,16 +546,16 @@ extension CanvasViewModel {
             on: canvasView
         )
 
-        if requestShowingLayerViewSubject.value && touchPhase == .ended {
+        if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
         pauseDisplayLinkLoop(
-            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
+            grayscaleTextureCurveIterator.isDrawingFinished,
             canvasView: canvasView
         )
 
-        if [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase) {
+        if grayscaleTextureCurveIterator.isDrawingFinished {
             initDrawingParameters()
         }
     }
@@ -576,6 +572,7 @@ extension CanvasViewModel {
 
         fingerScreenTouchManager.reset()
         pencilScreenTouchPoints.reset()
+
         grayscaleTextureCurveIterator = nil
     }
 

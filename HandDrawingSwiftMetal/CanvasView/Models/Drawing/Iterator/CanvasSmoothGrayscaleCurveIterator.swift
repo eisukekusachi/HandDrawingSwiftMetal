@@ -10,17 +10,27 @@ import UIKit
 final class CanvasSmoothGrayscaleCurveIterator: CanvasGrayscaleCurveIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
+    var currentTouchPhase: UITouch.Phase = .began
+
+    private var isFirstCurveHasBeenCreated: Bool = false
+
     private var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
 }
 
 extension CanvasSmoothGrayscaleCurveIterator {
 
+    /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
+    var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
+        iterator.array.count >= 3 && !isFirstCurveHasBeenCreated
+    }
+
     func appendToIterator(
         points: [CanvasGrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         tmpIterator.append(points)
+        currentTouchPhase = touchPhase
 
         // Add the first point.
         if (tmpIterator.array.count != 0 && iterator.array.count == 0),
@@ -42,9 +52,29 @@ extension CanvasSmoothGrayscaleCurveIterator {
         }
     }
 
-    func reset() {
+    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]? {
+        var array: [CanvasGrayscaleDotPoint] = []
+
+        if hasArrayThreeElementsButNoFirstCurveCreated {
+            array.append(contentsOf: makeFirstCurvePoints())
+            isFirstCurveHasBeenCreated = true
+        }
+
+        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
+
+        if isDrawingComplete {
+            array.append(contentsOf: makeLastCurvePoints())
+        }
+
+        return array.count != 0 ? array : nil
+    }
+
+    func clear() {
         tmpIterator.clear()
         iterator.clear()
+
+        currentTouchPhase = .began
+        isFirstCurveHasBeenCreated = false
     }
 
 }

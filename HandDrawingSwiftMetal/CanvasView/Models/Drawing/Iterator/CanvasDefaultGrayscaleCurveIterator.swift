@@ -10,76 +10,48 @@ import UIKit
 final class CanvasDefaultGrayscaleCurveIterator: CanvasGrayscaleCurveIterator {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
-    // TODO: Delete it once actual values are used instead of estimated ones.
-    private var tmpBrightness: CGFloat?
-    private var startDrawing: Bool = false
-    private var stopProcessing: Bool = false
+    var currentTouchPhase: UITouch.Phase = .began
 
+    private var isFirstCurveHasBeenCreated: Bool = false
 }
 
 extension CanvasDefaultGrayscaleCurveIterator {
+
+    /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
+    var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
+        iterator.array.count >= 3 && !isFirstCurveHasBeenCreated
+    }
 
     func appendToIterator(
         points: [CanvasGrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         iterator.append(points)
-
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        if !stopProcessing {
-            setInaccurateAlphaToZero()
-        }
+        currentTouchPhase = touchPhase
     }
 
-    func reset() {
+    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]? {
+        var array: [CanvasGrayscaleDotPoint] = []
+
+        if hasArrayThreeElementsButNoFirstCurveCreated {
+            array.append(contentsOf: makeFirstCurvePoints())
+            isFirstCurveHasBeenCreated = true
+        }
+
+        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
+
+        if isDrawingComplete {
+            array.append(contentsOf: makeLastCurvePoints())
+        }
+
+        return array.count != 0 ? array : nil
+    }
+
+    func clear() {
         iterator.clear()
 
-        // TODO: Delete it once actual values are used instead of estimated ones.
-        tmpBrightness = nil
-        startDrawing = false
-        stopProcessing = false
-    }
-
-}
-
-extension CanvasDefaultGrayscaleCurveIterator {
-
-    // TODO: Delete it once actual values are used instead of estimated ones. This process is almost meaningless.
-    func setInaccurateAlphaToZero() {
-        if tmpBrightness == nil {
-            tmpBrightness = iterator.array.first?.brightness
-        }
-
-        if let tmpBrightness {
-
-            var index: Int = 0
-            while index < iterator.array.count - 1 {
-                if !startDrawing && iterator.array[index].brightness != iterator.array[index + 1].brightness {
-                    iterator.replace(
-                        index: index,
-                        element: .init(
-                            location: iterator.array[index].location,
-                            diameter: iterator.array[index].diameter,
-                            brightness: 0.0
-                        )
-                    )
-                    startDrawing = true
-
-                } else if iterator.array[index + 1].brightness == tmpBrightness {
-                    iterator.replace(
-                        index: index,
-                        element: .init(
-                            location: iterator.array[index].location,
-                            diameter: iterator.array[index].diameter,
-                            brightness: 0.0
-                        )
-                    )
-                    stopProcessing = true
-                }
-
-                index += 1
-            }
-        }
+        currentTouchPhase = .began
+        isFirstCurveHasBeenCreated = false
     }
 
 }
