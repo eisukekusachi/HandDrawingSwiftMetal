@@ -273,6 +273,8 @@ extension CanvasViewModel {
     func onViewDidAppear(
         _ drawableTextureSize: CGSize
     ) {
+        assert(self.canvasView != nil, "var canvasView is nil.")
+
         guard let canvasView else { return }
 
         // Since `func onUpdateRenderTexture` is not called at app launch on iPhone,
