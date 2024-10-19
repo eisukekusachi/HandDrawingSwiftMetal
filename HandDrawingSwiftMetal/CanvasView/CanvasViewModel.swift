@@ -213,12 +213,13 @@ final class CanvasViewModel {
 
         canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func apply(undoObject: TextureLayerUndoObject) {
@@ -238,12 +239,13 @@ final class CanvasViewModel {
 
         MTLRenderer.clear(texture: currentTexture, commandBuffer)
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
@@ -263,13 +265,13 @@ extension CanvasViewModel {
             )
         }
 
-        // Redraws the canvas when the screen rotates and the canvas size changes.
-        // Therefore, this code is placed outside the block.
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            with: commandBuffer
+        // Redraws the canvas when the device rotates and the canvas size changes.
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func onViewDidAppear(
@@ -288,11 +290,12 @@ extension CanvasViewModel {
             )
         }
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
@@ -380,16 +383,16 @@ extension CanvasViewModel {
                 with: commandBuffer
             )
 
-            mergeLayersOnCanvasTextureWithBackgroundColor(
+            displayCanvasTextureWithCurrentTextureWhileDrawing(
+                canvasTexture: canvasTexture,
                 currentTexture: currentTexture,
-                with: commandBuffer
+                canvasTextureBackgroundColor: drawingTool.backgroundColor,
+                on: canvasView
             )
 
             if requestShowingLayerViewSubject.value && touchPhase == .ended {
                 updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
             }
-
-            displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
             pauseDisplayLinkLoop(
                 [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
@@ -540,16 +543,16 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
+        displayCanvasTextureWithCurrentTextureWhileDrawing(
+            canvasTexture: canvasTexture,
             currentTexture: currentTexture,
-            with: commandBuffer
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
         )
 
         if requestShowingLayerViewSubject.value && touchPhase == .ended {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
         pauseDisplayLinkLoop(
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
@@ -640,23 +643,53 @@ extension CanvasViewModel {
         }
     }
 
-    private func mergeLayersOnCanvasTextureWithBackgroundColor(
-        alsoUpdateUnselectedLayers: Bool = false,
-        currentTexture: MTLTexture? = nil,
-        with commandBuffer: MTLCommandBuffer
+    private func displayCanvasTextureWithMergedLayers(
+        textureLayers: TextureLayers,
+        canvasTexture: MTLTexture?,
+        canvasTextureBackgroundColor: UIColor,
+        isUnselectedLayerMergeNeeded: Bool = false,
+        on canvasView: CanvasViewProtocol?
     ) {
-        if alsoUpdateUnselectedLayers {
+        guard
+            let canvasView,
+            let commandBuffer = canvasView.commandBuffer
+        else { return }
+
+        if isUnselectedLayerMergeNeeded {
             textureLayers.updateUnselectedLayers(
                 to: commandBuffer
             )
         }
 
         textureLayers.mergeAllTextures(
-            usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
+            backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
             with: commandBuffer
         )
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+    }
+
+    private func displayCanvasTextureWithCurrentTextureWhileDrawing(
+        canvasTexture: MTLTexture?,
+        currentTexture: MTLTexture?,
+        canvasTextureBackgroundColor: UIColor,
+        on canvasView: CanvasViewProtocol?
+    ) {
+        guard
+            let canvasView,
+            let currentTexture,
+            let commandBuffer = canvasView.commandBuffer
+        else { return }
+
+        textureLayers.mergeAllTextures(
+            usingCurrentTexture: currentTexture,
+            backgroundColor: canvasTextureBackgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     private func displayCanvasTexture(
@@ -823,14 +856,15 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
-        )
-
         currentTexture = MTKTextureUtils.makeTexture(device, renderTextureSize)
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
+        )
     }
 
     func didTapLoadButton(filePath: String) {
@@ -851,12 +885,13 @@ extension CanvasViewModel {
 
         textureLayers.index = index
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapAddLayerButton() {
         guard
@@ -882,12 +917,13 @@ extension CanvasViewModel {
             textureLayers.updateThumbnail(index: index)
         }
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapRemoveLayerButton() {
         guard
@@ -900,12 +936,13 @@ extension CanvasViewModel {
 
         textureLayers.removeLayer(layer)
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
@@ -921,12 +958,13 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didChangeLayerAlpha(
         layer: TextureLayer,
@@ -942,11 +980,12 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didEditLayerTitle(
         layer: TextureLayer,
@@ -977,12 +1016,13 @@ extension CanvasViewModel {
             toOffset: destination
         )
 
-        mergeLayersOnCanvasTextureWithBackgroundColor(
-            alsoUpdateUnselectedLayers: true,
-            with: commandBuffer
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            isUnselectedLayerMergeNeeded: true,
+            on: canvasView
         )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
