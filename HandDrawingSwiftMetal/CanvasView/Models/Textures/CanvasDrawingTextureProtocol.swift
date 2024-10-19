@@ -26,7 +26,7 @@ protocol CanvasDrawingTextureProtocol {
     /// Combine `selectedTexture` and `drawingTexture`, then render them onto currentTexture
     func drawDrawingTexture(
         includingSelectedTexture selectedTexture: MTLTexture?,
-        on targetTexture: MTLTexture,
+        on targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     )
 

@@ -76,10 +76,13 @@ final class CanvasViewModel {
 
     /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
     private var canvasTexture: MTLTexture?
-    /// A texture that combines the texture of the currently selected `TextureLayer` and `DrawingTexture`
-    private let currentTexture = CanvasCurrentTexture()
+
     /// A protocol for managing current drawing texture
     private (set) var drawingTexture: CanvasDrawingTextureProtocol?
+
+    /// A texture that combines the texture of the currently selected `TextureLayer` and `drawingTexture`
+    private var currentTexture: MTLTexture?
+
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
@@ -209,8 +212,9 @@ final class CanvasViewModel {
         brushDrawingTexture.initTexture(textureSize)
         eraserDrawingTexture.initTexture(textureSize)
 
-        currentTexture.initTexture(textureSize: textureSize)
         textureLayers.initLayers(textureSize: textureSize)
+
+        currentTexture = MTKTextureUtils.makeTexture(device, textureSize)
 
         canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
     }
@@ -229,7 +233,6 @@ final class CanvasViewModel {
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
 
-        currentTexture.initTexture(textureSize: model.textureSize)
         textureLayers.initLayers(
             newLayers: model.layers,
             layerIndex: model.layerIndex,
@@ -243,6 +246,8 @@ final class CanvasViewModel {
         drawingTool.setBrushDiameter(model.brushDiameter)
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
+
+        currentTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
         canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
@@ -261,7 +266,6 @@ final class CanvasViewModel {
             let commandBuffer = canvasView.commandBuffer
         else { return }
 
-        currentTexture.clearTexture()
         textureLayers.initLayers(
             index: undoObject.index,
             layers: undoObject.layers
@@ -270,6 +274,8 @@ final class CanvasViewModel {
         for i in 0 ..< textureLayers.layers.count {
             textureLayers.layers[i].updateThumbnail()
         }
+
+        MTLRenderer.clear(texture: currentTexture, commandBuffer)
 
         mergeLayersOnCanvasTextureWithBackgroundColor(
             alsoUpdateUnselectedLayers: true,
@@ -417,7 +423,7 @@ extension CanvasViewModel {
             )
 
             mergeLayersOnCanvasTextureWithBackgroundColor(
-                usingCurrentTextureWhileDrawing: true,
+                currentTexture: currentTexture,
                 with: commandBuffer
             )
 
@@ -577,7 +583,7 @@ extension CanvasViewModel {
         )
 
         mergeLayersOnCanvasTextureWithBackgroundColor(
-            usingCurrentTextureWhileDrawing: true,
+            currentTexture: currentTexture,
             with: commandBuffer
         )
 
@@ -660,7 +666,7 @@ extension CanvasViewModel {
         // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
         drawingTexture?.drawDrawingTexture(
             includingSelectedTexture: textureLayers.selectedLayer?.texture,
-            on: currentTexture.currentTexture,
+            on: currentTexture,
             with: commandBuffer
         )
 
@@ -679,7 +685,7 @@ extension CanvasViewModel {
 
     private func mergeLayersOnCanvasTextureWithBackgroundColor(
         alsoUpdateUnselectedLayers: Bool = false,
-        usingCurrentTextureWhileDrawing usingCurrentTexture: Bool = false,
+        currentTexture: MTLTexture? = nil,
         with commandBuffer: MTLCommandBuffer
     ) {
         if alsoUpdateUnselectedLayers {
@@ -689,7 +695,7 @@ extension CanvasViewModel {
         }
 
         textureLayers.mergeAllTextures(
-            usingCurrentTexture: usingCurrentTexture ? currentTexture : nil,
+            usingCurrentTexture: currentTexture,
             backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
@@ -811,6 +817,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         guard
+            let device,
             let canvasView,
             let renderTextureSize = canvasView.renderTexture?.size,
             let commandBuffer = canvasView.commandBuffer
@@ -823,7 +830,6 @@ extension CanvasViewModel {
         brushDrawingTexture.initTexture(renderTextureSize)
         eraserDrawingTexture.initTexture(renderTextureSize)
 
-        currentTexture.initTexture(textureSize: renderTextureSize)
         textureLayers.initLayers(textureSize: renderTextureSize)
 
         textureLayerUndoManager.clear()
@@ -832,6 +838,8 @@ extension CanvasViewModel {
             alsoUpdateUnselectedLayers: true,
             with: commandBuffer
         )
+
+        currentTexture = MTKTextureUtils.makeTexture(device, renderTextureSize)
 
         requestCanvasTextureDrawToRenderTextureSubject.send()
         canvasView.setNeedsDisplay()
