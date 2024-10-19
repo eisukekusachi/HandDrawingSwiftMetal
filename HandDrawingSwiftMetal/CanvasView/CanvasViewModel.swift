@@ -184,8 +184,7 @@ final class CanvasViewModel {
     func apply(model: CanvasModel) {
         guard 
             let device,
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
+            let canvasView
         else { return }
 
         projectName = model.projectName
@@ -253,10 +252,7 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func onUpdateRenderTexture() {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
+        guard let canvasView else { return }
 
         // Initialize the canvas here if `canvasTexture` is nil
         if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
@@ -277,10 +273,7 @@ extension CanvasViewModel {
     func onViewDidAppear(
         _ drawableTextureSize: CGSize
     ) {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
+        guard let canvasView else { return }
 
         // Since `func onUpdateRenderTexture` is not called at app launch on iPhone,
         // initialize the canvas here.
@@ -577,18 +570,13 @@ extension CanvasViewModel {
     }
 
     private func cancelFingerInput() {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
-
         fingerScreenTouchManager.reset()
         canvasTransformer.reset()
         drawingTexture?.clearDrawingTexture()
 
         grayscaleTextureCurveIterator = nil
 
-        canvasView.clearCommandBuffer()
+        canvasView?.clearCommandBuffer()
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
@@ -647,10 +635,7 @@ extension CanvasViewModel {
         isUnselectedLayerMergeNeeded: Bool = false,
         on canvasView: CanvasViewProtocol?
     ) {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
+        guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         if isUnselectedLayerMergeNeeded {
             textureLayers.updateUnselectedLayers(
@@ -674,9 +659,8 @@ extension CanvasViewModel {
         on canvasView: CanvasViewProtocol?
     ) {
         guard
-            let canvasView,
             let currentTexture,
-            let commandBuffer = canvasView.commandBuffer
+            let commandBuffer = canvasView?.commandBuffer
         else { return }
 
         textureLayers.mergeAllTextures(
@@ -824,11 +808,6 @@ extension CanvasViewModel {
     }
 
     func didTapResetTransformButton() {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
-
         canvasTransformer.setMatrix(.identity)
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
@@ -838,8 +817,7 @@ extension CanvasViewModel {
         guard
             let device,
             let canvasView,
-            let renderTextureSize = canvasView.renderTexture?.size,
-            let commandBuffer = canvasView.commandBuffer
+            let renderTextureSize = canvasView.renderTexture?.size
         else { return }
 
         projectName = Calendar.currentDate
@@ -874,11 +852,7 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(layer: TextureLayer) {
-        guard
-            let index = textureLayers.getIndex(layer: layer),
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
+        guard let index = textureLayers.getIndex(layer: layer)  else { return }
 
         textureLayers.index = index
 
@@ -893,9 +867,7 @@ extension CanvasViewModel {
     func didTapAddLayerButton() {
         guard
             let device,
-            let canvasView,
-            let renderTextureSize = canvasView.renderTexture?.size,
-            let commandBuffer = canvasView.commandBuffer
+            let renderTextureSize = canvasView?.renderTexture?.size
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -925,8 +897,7 @@ extension CanvasViewModel {
     func didTapRemoveLayerButton() {
         guard
             textureLayers.layers.count > 1,
-            let layer = textureLayers.selectedLayer,
-            let commandBuffer = canvasView?.commandBuffer
+            let layer = textureLayers.selectedLayer
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -945,10 +916,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         isVisible: Bool
     ) {
-        guard 
-            let index = textureLayers.getIndex(layer: layer),
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
+        guard let index = textureLayers.getIndex(layer: layer) else { return }
 
         textureLayers.updateLayer(
             index: index,
@@ -967,10 +935,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         value: Int
     ) {
-        guard
-            let index = textureLayers.getIndex(layer: layer),
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
+        guard let index = textureLayers.getIndex(layer: layer) else { return }
 
         textureLayers.updateLayer(
             index: index,
@@ -1002,10 +967,6 @@ extension CanvasViewModel {
         source: IndexSet,
         destination: Int
     ) {
-        guard
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayers.moveLayer(

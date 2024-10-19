@@ -47,8 +47,6 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
         assert(self.device != nil, "Device is nil.")
 
-        guard let queue = device?.makeCommandQueue() else { return }
-
         commandQueue = self.device!.makeCommandQueue()
         clearCommandBuffer()
 
