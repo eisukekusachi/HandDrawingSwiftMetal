@@ -115,10 +115,6 @@ extension CanvasViewController {
     }
 
     private func bindViewModel() {
-        canvasViewModel.pauseDisplayLinkPublisher
-            .assign(to: \.isDisplayLinkPaused, on: contentView)
-            .store(in: &cancellables)
-
         canvasViewModel.requestShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)

@@ -23,10 +23,6 @@ final class CanvasViewModel {
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
 
-    var pauseDisplayLinkPublisher: AnyPublisher<Bool, Never> {
-        pauseDisplayLinkSubject.eraseToAnyPublisher()
-    }
-
     var requestShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
         requestShowingActivityIndicatorSubject.eraseToAnyPublisher()
     }
@@ -88,8 +84,6 @@ final class CanvasViewModel {
     /// A drawing texture with an eraser
     private let eraserDrawingTexture = CanvasEraserDrawingTexture()
 
-    private let pauseDisplayLinkSubject = CurrentValueSubject<Bool, Never>(true)
-
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let requestShowingAlertSubject = PassthroughSubject<String, Never>()
@@ -107,6 +101,8 @@ final class CanvasViewModel {
     private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
 
     private var cancellables = Set<AnyCancellable>()
+
+    private var displayLink: CADisplayLink?
 
     private let device = MTLCreateSystemDefaultDevice()
 
@@ -160,6 +156,14 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         drawingTool.setDrawingTool(.brush)
+    }
+
+    private func configureDisplayLink() {
+
+        // Configure the display link for rendering.
+        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
     }
 
     func setCanvasView(_ canvasView: CanvasViewProtocol) {
@@ -559,6 +563,10 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
+        canvasView?.setNeedsDisplay()
+    }
+
     private func initDrawingParameters() {
         inputDevice.reset()
         screenTouchGesture.reset()
@@ -715,15 +723,15 @@ extension CanvasViewModel {
     /// Start or stop the display link loop.
     private func pauseDisplayLinkLoop(_ pause: Bool, canvasView: CanvasViewProtocol) {
         if pause {
-            if pauseDisplayLinkSubject.value == false {
+            if displayLink?.isPaused == false {
                 // Pause the display link after updating the display.
                 canvasView.setNeedsDisplay()
-                pauseDisplayLinkSubject.send(true)
+                displayLink?.isPaused = true
             }
 
         } else {
-            if pauseDisplayLinkSubject.value == true {
-                pauseDisplayLinkSubject.send(false)
+            if displayLink?.isPaused == true {
+                displayLink?.isPaused = false
             }
         }
     }

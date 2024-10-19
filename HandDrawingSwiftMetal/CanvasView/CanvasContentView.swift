@@ -41,19 +41,12 @@ final class CanvasContentView: UIView {
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
 
-    var isDisplayLinkPaused: Bool = false {
-        didSet {
-            displayLink?.isPaused = isDisplayLinkPaused
-        }
-    }
     var isHiddenActivityIndicator: Bool = false {
         didSet {
             isHiddenActivityIndicator ? activityIndicator.stopAnimating() : activityIndicator.startAnimating()
             activityIndicatorView.isHidden = isHiddenActivityIndicator
         }
     }
-
-    private var displayLink: CADisplayLink?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -72,11 +65,6 @@ final class CanvasContentView: UIView {
         backgroundColor = .white
 
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        // Configure the display link for rendering.
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
     }
 
 }
@@ -152,14 +140,6 @@ extension CanvasContentView {
             .compactMap { $0 }
             .assign(to: \.backgroundColor, on: canvasView)
             .store(in: &cancellables)
-    }
-
-}
-
-extension CanvasContentView {
-
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        canvasView.setNeedsDisplay()
     }
 
 }
