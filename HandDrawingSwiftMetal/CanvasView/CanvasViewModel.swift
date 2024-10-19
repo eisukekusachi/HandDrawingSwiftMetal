@@ -414,12 +414,7 @@ extension CanvasViewModel {
 
             displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
-            pauseDisplayLinkLoop(
-                fingerScreenTouchManager.touchArrayDictionary.containsPhases(
-                    [.ended, .cancelled]
-                ),
-                canvasView: canvasView
-            )
+            canvasView.setNeedsDisplay()
 
         default:
             break
