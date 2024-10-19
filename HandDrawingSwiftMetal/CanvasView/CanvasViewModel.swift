@@ -98,8 +98,6 @@ final class CanvasViewModel {
 
     private let requestShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private let requestCanvasTextureDrawToRenderTextureSubject = PassthroughSubject<Void, Never>()
-
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
     private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<TextureLayerUndoObject, Never>()
@@ -116,42 +114,6 @@ final class CanvasViewModel {
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.localRepository = localRepository
-
-        requestCanvasTextureDrawToRenderTextureSubject
-            .sink { [weak self] _ in
-                guard
-                    let `self`,
-                    let sourceTexture = self.canvasTexture,
-                    let destinationTexture = self.canvasView?.renderTexture,
-                    let commandBuffer = self.canvasView?.commandBuffer
-                else { return }
-
-                // Calculate the scale to fit the source size within the destination size
-                let textureToDrawableFitScale = ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
-
-                guard
-                    let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                        device: self.device,
-                        matrix: self.canvasTransformer.matrix,
-                        frameSize: self.frameSize,
-                        sourceSize: .init(
-                            width: sourceTexture.size.width * textureToDrawableFitScale,
-                            height: sourceTexture.size.height * textureToDrawableFitScale
-                        ),
-                        destinationSize: destinationTexture.size,
-                        nodes: textureNodes
-                    )
-                else { return }
-
-                MTLRenderer.drawTexture(
-                    texture: sourceTexture,
-                    buffers: textureBuffers,
-                    withBackgroundColor: Constants.blankAreaBackgroundColor,
-                    on: destinationTexture,
-                    with: commandBuffer
-                )
-            }
-            .store(in: &cancellables)
 
         textureLayerUndoManager.addTextureLayersToUndoStackPublisher
             .sink { [weak self] in
@@ -256,8 +218,7 @@ final class CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func apply(undoObject: TextureLayerUndoObject) {
@@ -282,8 +243,7 @@ final class CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
@@ -309,8 +269,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func onViewDidAppear(
@@ -333,8 +292,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
@@ -431,7 +389,7 @@ extension CanvasViewModel {
                 updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
             }
 
-            requestCanvasTextureDrawToRenderTextureSubject.send()
+            displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
             pauseDisplayLinkLoop(
                 [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
@@ -454,7 +412,7 @@ extension CanvasViewModel {
                 canvasTransformer.finishTransforming()
             }
 
-            requestCanvasTextureDrawToRenderTextureSubject.send()
+            displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
             pauseDisplayLinkLoop(
                 fingerScreenTouchManager.touchArrayDictionary.containsPhases(
@@ -591,7 +549,7 @@ extension CanvasViewModel {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
         pauseDisplayLinkLoop(
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase),
@@ -632,8 +590,7 @@ extension CanvasViewModel {
 
         canvasView.clearCommandBuffer()
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
@@ -700,6 +657,39 @@ extension CanvasViewModel {
             on: canvasTexture,
             with: commandBuffer
         )
+    }
+
+    private func displayCanvasTexture(
+        canvasTexture: MTLTexture?,
+        on canvasView: CanvasViewProtocol?
+    ) {
+        guard
+            let device,
+            let sourceTexture = canvasTexture,
+            let destinationTexture = canvasView?.renderTexture,
+            let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
+                device: device,
+                matrix: canvasTransformer.matrix,
+                frameSize: frameSize,
+                sourceSize: .init(
+                    width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
+                    height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
+                ),
+                destinationSize: destinationTexture.size,
+                nodes: textureNodes
+            ),
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: sourceTexture,
+            buffers: sourceTextureBuffers,
+            withBackgroundColor: Constants.blankAreaBackgroundColor,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+
+        canvasView?.setNeedsDisplay()
     }
 
 }
@@ -811,8 +801,7 @@ extension CanvasViewModel {
 
         canvasTransformer.setMatrix(.identity)
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func didTapNewCanvasButton() {
@@ -841,8 +830,7 @@ extension CanvasViewModel {
 
         currentTexture = MTKTextureUtils.makeTexture(device, renderTextureSize)
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
     func didTapLoadButton(filePath: String) {
@@ -868,8 +856,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapAddLayerButton() {
         guard
@@ -900,8 +887,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapRemoveLayerButton() {
         guard
@@ -919,8 +905,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView?.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
@@ -941,8 +926,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView?.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didChangeLayerAlpha(
         layer: TextureLayer,
@@ -962,8 +946,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView?.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
     func didEditLayerTitle(
         layer: TextureLayer,
@@ -999,8 +982,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        requestCanvasTextureDrawToRenderTextureSubject.send()
-        canvasView?.setNeedsDisplay()
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
