@@ -457,271 +457,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    @objc private func updateCanvasViewWhileDrawing() {
-        guard
-            let drawingCurve,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        if let texturePoints = drawingCurve.makeCurvePointsFromIterator() {
-            if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
-               let selectedLayerTexture = textureLayers.selectedLayer?.texture {
-                drawingTexture.drawPointsOnEraserDrawingTexture(
-                    points: texturePoints,
-                    alpha: drawingTool.eraserAlpha,
-                    srcTexture: selectedLayerTexture,
-                    commandBuffer
-                )
-            } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
-                drawingTexture.drawPointsOnBrushDrawingTexture(
-                    points: texturePoints,
-                    color: drawingTool.brushColor,
-                    alpha: drawingTool.brushColor.alpha,
-                    commandBuffer
-                )
-            }
-        }
-
-        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
-        drawingTexture?.drawDrawingTexture(
-            includingSelectedTexture: textureLayers.selectedLayer?.texture,
-            on: currentTexture,
-            with: commandBuffer
-        )
-
-        if drawingCurve.isDrawingFinished {
-            // Add `textureLayer` to the undo stack
-            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            textureLayerUndoManager.addCurrentLayersToUndoStack()
-
-            // Draw `drawingTexture` onto `selectedLayer.texture`
-            drawingTexture?.mergeDrawingTexture(
-                into: textureLayers.selectedLayer?.texture,
-                commandBuffer
-            )
-        }
-
-        textureLayers.mergeAllTextures(
-            usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            on: canvasTexture,
-            with: commandBuffer
-        )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
-
-        if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
-
-        if drawingCurve.isDrawingFinished {
-            resetAllInputParameters()
-        }
-    }
-
-    private func resetAllInputParameters() {
-        inputDevice.reset()
-        screenTouchGesture.reset()
-
-        canvasTransformer.reset()
-
-        fingerScreenTouchManager.reset()
-        pencilScreenTouchPoints.reset()
-
-        drawingCurve = nil
-    }
-
-    private func cancelFingerInput() {
-        fingerScreenTouchManager.reset()
-        canvasTransformer.reset()
-        drawingTexture?.clearDrawingTexture()
-
-        drawingCurve = nil
-
-        canvasView?.clearCommandBuffer()
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
-    }
-
-}
-
-extension CanvasViewModel {
-
-    private func displayCanvasTextureWithMergedLayers(
-        textureLayers: TextureLayers,
-        canvasTexture: MTLTexture?,
-        canvasTextureBackgroundColor: UIColor,
-        isUnselectedLayerMergeNeeded: Bool = false,
-        on canvasView: CanvasViewProtocol?
-    ) {
-        guard let commandBuffer = canvasView?.commandBuffer else { return }
-
-        if isUnselectedLayerMergeNeeded {
-            textureLayers.updateUnselectedLayers(
-                to: commandBuffer
-            )
-        }
-
-        textureLayers.mergeAllTextures(
-            backgroundColor: canvasTextureBackgroundColor,
-            on: canvasTexture,
-            with: commandBuffer
-        )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
-    }
-
-    private func displayCanvasTexture(
-        canvasTexture: MTLTexture?,
-        on canvasView: CanvasViewProtocol?
-    ) {
-        guard
-            let device,
-            let sourceTexture = canvasTexture,
-            let destinationTexture = canvasView?.renderTexture,
-            let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                device: device,
-                matrix: canvasTransformer.matrix,
-                frameSize: frameSize,
-                sourceSize: .init(
-                    width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
-                    height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
-                ),
-                destinationSize: destinationTexture.size,
-                nodes: textureNodes
-            ),
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        MTLRenderer.drawTexture(
-            texture: sourceTexture,
-            buffers: sourceTextureBuffers,
-            withBackgroundColor: Constants.blankAreaBackgroundColor,
-            on: destinationTexture,
-            with: commandBuffer
-        )
-
-        canvasView?.setNeedsDisplay()
-    }
-
-}
-
-extension CanvasViewModel {
-
-    /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool) {
-        if pause {
-            if drawingDisplayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                updateCanvasViewWhileDrawing()
-                drawingDisplayLink?.isPaused = true
-            }
-
-        } else {
-            if drawingDisplayLink?.isPaused == true {
-                drawingDisplayLink?.isPaused = false
-            }
-        }
-    }
-
-    private func isAllFingersReleasedFromScreen(
-        touches: Set<UITouch>,
-        with event: UIEvent?
-    ) -> Bool {
-        touches.count == event?.allTouches?.count &&
-        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
-    }
-
-    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
-        Task {
-            try await Task.sleep(nanoseconds: nanosecondsDuration)
-
-            DispatchQueue.main.async { [weak self] in
-                guard let `self` else { return }
-                self.textureLayers.updateThumbnail(index: self.textureLayers.index)
-            }
-        }
-    }
-
-    private func convertScreenTouchPointToTextureDotPoint(
-        touchPoint: CanvasTouchPoint,
-        textureSize: CGSize,
-        drawableSize: CGSize
-    ) -> CanvasGrayscaleDotPoint {
-
-        let textureMatrix = getMatrixAdjustedTranslations(
-            matrix: canvasTransformer.matrix.inverted(flipY: true),
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        let textureLocation = getLocationConvertedToTextureScale(
-            screenLocation: touchPoint.location,
-            screenFrameSize: frameSize,
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        return .init(
-            touchPoint: .init(
-                location: textureLocation.apply(
-                    with: textureMatrix,
-                    textureSize: textureSize
-                ),
-                touch: touchPoint
-            ),
-            diameter: CGFloat(drawingTool.diameter)
-        )
-    }
-
-    private func getLocationConvertedToTextureScale(
-        screenLocation: CGPoint,
-        screenFrameSize: CGSize,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGPoint {
-        if textureSize != drawableSize {
-            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
-            let drawableLocation: CGPoint = .init(
-                x: screenLocation.x * (drawableSize.width / screenFrameSize.width),
-                y: screenLocation.y * (drawableSize.width / screenFrameSize.width)
-            )
-            return .init(
-                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
-                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
-            )
-        } else {
-            return .init(
-                x: screenLocation.x * (textureSize.width / screenFrameSize.width),
-                y: screenLocation.y * (textureSize.width / screenFrameSize.width)
-            )
-        }
-    }
-
-    private func getMatrixAdjustedTranslations(
-        matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGAffineTransform {
-
-        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
-        let drawableTextureSize: CGSize = .init(
-            width: textureSize.width * drawableScale,
-            height: textureSize.height * drawableScale
-        )
-
-        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
-        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
-
-        var matrix = matrix
-        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        return matrix
-    }
-
-}
-
-extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
         textureLayerUndoManager.undo()
@@ -909,6 +644,267 @@ extension CanvasViewModel {
             isUnselectedLayerMergeNeeded: true,
             on: canvasView
         )
+    }
+
+}
+
+extension CanvasViewModel {
+
+    @objc private func updateCanvasViewWhileDrawing() {
+        guard
+            let drawingCurve,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        if let texturePoints = drawingCurve.makeCurvePointsFromIterator() {
+            if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
+               let selectedLayerTexture = textureLayers.selectedLayer?.texture {
+                drawingTexture.drawPointsOnEraserDrawingTexture(
+                    points: texturePoints,
+                    alpha: drawingTool.eraserAlpha,
+                    srcTexture: selectedLayerTexture,
+                    commandBuffer
+                )
+            } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
+                drawingTexture.drawPointsOnBrushDrawingTexture(
+                    points: texturePoints,
+                    color: drawingTool.brushColor,
+                    alpha: drawingTool.brushColor.alpha,
+                    commandBuffer
+                )
+            }
+        }
+
+        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
+        drawingTexture?.drawDrawingTexture(
+            includingSelectedTexture: textureLayers.selectedLayer?.texture,
+            on: currentTexture,
+            with: commandBuffer
+        )
+
+        if drawingCurve.isDrawingFinished {
+            // Add `textureLayer` to the undo stack
+            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
+
+            // Draw `drawingTexture` onto `selectedLayer.texture`
+            drawingTexture?.mergeDrawingTexture(
+                into: textureLayers.selectedLayer?.texture,
+                commandBuffer
+            )
+        }
+
+        textureLayers.mergeAllTextures(
+            usingCurrentTexture: currentTexture,
+            backgroundColor: drawingTool.backgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+
+        if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
+
+        if drawingCurve.isDrawingFinished {
+            resetAllInputParameters()
+        }
+    }
+
+    private func displayCanvasTextureWithMergedLayers(
+        textureLayers: TextureLayers,
+        canvasTexture: MTLTexture?,
+        canvasTextureBackgroundColor: UIColor,
+        isUnselectedLayerMergeNeeded: Bool = false,
+        on canvasView: CanvasViewProtocol?
+    ) {
+        guard let commandBuffer = canvasView?.commandBuffer else { return }
+
+        if isUnselectedLayerMergeNeeded {
+            textureLayers.updateUnselectedLayers(
+                to: commandBuffer
+            )
+        }
+
+        textureLayers.mergeAllTextures(
+            backgroundColor: canvasTextureBackgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+    }
+
+    private func displayCanvasTexture(
+        canvasTexture: MTLTexture?,
+        on canvasView: CanvasViewProtocol?
+    ) {
+        guard
+            let device,
+            let sourceTexture = canvasTexture,
+            let destinationTexture = canvasView?.renderTexture,
+            let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
+                device: device,
+                matrix: canvasTransformer.matrix,
+                frameSize: frameSize,
+                sourceSize: .init(
+                    width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
+                    height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
+                ),
+                destinationSize: destinationTexture.size,
+                nodes: textureNodes
+            ),
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: sourceTexture,
+            buffers: sourceTextureBuffers,
+            withBackgroundColor: Constants.blankAreaBackgroundColor,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+
+        canvasView?.setNeedsDisplay()
+    }
+
+    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
+        Task {
+            try await Task.sleep(nanoseconds: nanosecondsDuration)
+
+            DispatchQueue.main.async { [weak self] in
+                guard let `self` else { return }
+                self.textureLayers.updateThumbnail(index: self.textureLayers.index)
+            }
+        }
+    }
+
+}
+
+extension CanvasViewModel {
+
+    /// Start or stop the display link loop.
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
+        if pause {
+            if drawingDisplayLink?.isPaused == false {
+                // Pause the display link after updating the display.
+                updateCanvasViewWhileDrawing()
+                drawingDisplayLink?.isPaused = true
+            }
+
+        } else {
+            if drawingDisplayLink?.isPaused == true {
+                drawingDisplayLink?.isPaused = false
+            }
+        }
+    }
+
+    private func isAllFingersReleasedFromScreen(
+        touches: Set<UITouch>,
+        with event: UIEvent?
+    ) -> Bool {
+        touches.count == event?.allTouches?.count &&
+        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
+    }
+
+    private func convertScreenTouchPointToTextureDotPoint(
+        touchPoint: CanvasTouchPoint,
+        textureSize: CGSize,
+        drawableSize: CGSize
+    ) -> CanvasGrayscaleDotPoint {
+
+        let textureMatrix = getMatrixAdjustedTranslations(
+            matrix: canvasTransformer.matrix.inverted(flipY: true),
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        let textureLocation = getLocationConvertedToTextureScale(
+            screenLocation: touchPoint.location,
+            screenFrameSize: frameSize,
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        return .init(
+            touchPoint: .init(
+                location: textureLocation.apply(
+                    with: textureMatrix,
+                    textureSize: textureSize
+                ),
+                touch: touchPoint
+            ),
+            diameter: CGFloat(drawingTool.diameter)
+        )
+    }
+
+    private func getMatrixAdjustedTranslations(
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGAffineTransform {
+
+        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
+        let drawableTextureSize: CGSize = .init(
+            width: textureSize.width * drawableScale,
+            height: textureSize.height * drawableScale
+        )
+
+        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
+        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
+
+        var matrix = matrix
+        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        return matrix
+    }
+
+    private func getLocationConvertedToTextureScale(
+        screenLocation: CGPoint,
+        screenFrameSize: CGSize,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGPoint {
+        if textureSize != drawableSize {
+            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
+            let drawableLocation: CGPoint = .init(
+                x: screenLocation.x * (drawableSize.width / screenFrameSize.width),
+                y: screenLocation.y * (drawableSize.width / screenFrameSize.width)
+            )
+            return .init(
+                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
+                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
+            )
+        } else {
+            return .init(
+                x: screenLocation.x * (textureSize.width / screenFrameSize.width),
+                y: screenLocation.y * (textureSize.width / screenFrameSize.width)
+            )
+        }
+    }
+
+    private func resetAllInputParameters() {
+        inputDevice.reset()
+        screenTouchGesture.reset()
+
+        canvasTransformer.reset()
+
+        fingerScreenTouchManager.reset()
+        pencilScreenTouchPoints.reset()
+
+        drawingCurve = nil
+    }
+
+    private func cancelFingerInput() {
+        fingerScreenTouchManager.reset()
+        canvasTransformer.reset()
+        drawingTexture?.clearDrawingTexture()
+
+        drawingCurve = nil
+
+        canvasView?.clearCommandBuffer()
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
 
 }
