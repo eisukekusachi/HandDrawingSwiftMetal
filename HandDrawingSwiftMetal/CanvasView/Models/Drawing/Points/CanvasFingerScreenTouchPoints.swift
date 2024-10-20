@@ -28,6 +28,15 @@ extension CanvasFingerScreenTouchPoints {
         touchArrayDictionary.containsPhases([.ended])
     }
 
+    func getFingerTouches(event: UIEvent?) -> [UITouch] {
+        var touches: [UITouch] = []
+        event?.allTouches?.forEach { touch in
+            guard touch.type != .pencil else { return }
+            touches.append(touch)
+        }
+        return touches
+    }
+
     func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
         touches.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {
