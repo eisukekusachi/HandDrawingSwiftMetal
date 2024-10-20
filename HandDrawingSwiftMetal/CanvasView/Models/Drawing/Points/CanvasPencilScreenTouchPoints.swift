@@ -112,22 +112,3 @@ extension CanvasPencilScreenTouchPoints {
     }
 
 }
-
-extension CanvasPencilScreenTouchPoints {
-
-    func append(event: UIEvent?, in view: UIView) {
-        event?.allTouches?.forEach { touch in
-            guard
-                touch.type == .pencil,
-                let coalescedTouches = event?.coalescedTouches(for: touch)
-            else { return }
-
-            coalescedTouches.forEach { coalescedTouch in
-                estimatedTouchPointArray.append(
-                    .init(touch: coalescedTouch, view: view)
-                )
-            }
-        }
-    }
-
-}

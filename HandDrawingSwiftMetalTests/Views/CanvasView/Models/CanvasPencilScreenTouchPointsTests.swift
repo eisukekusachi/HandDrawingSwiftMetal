@@ -42,48 +42,6 @@ final class CanvasPencilScreenTouchPointsTests: XCTestCase {
         XCTAssertTrue(subject.hasActualValueReplacementCompleted)
     }
 
-    /// Confirms that the specified amount of time has passed since the last process
-    func testHasSufficientTimeElapsedSincePreviousProcess() {
-        let allowedDifferenceInSeconds: TimeInterval = 2
-
-        let actualTouches: [(UITouch, Bool)] = [
-            /// Returns `true` since `latestActualTouchPoint` is nil, and then updates `latestActualTouchPoint`
-            (UITouchDummy.init(phase: .began, estimationUpdateIndex: 0, timestamp: 2), true),
-
-            /// Returns `false` since the time difference from `latestActualTouchPoint` is within 2 seconds
-            (UITouchDummy.init(phase: .moved, estimationUpdateIndex: 1, timestamp: 3), false),
-
-            /// Returns `true` since the time difference from `latestActualTouchPoint` exceeds 2 seconds, and then updates `latestActualTouchPoint`
-            (UITouchDummy.init(phase: .moved, estimationUpdateIndex: 2, timestamp: 4), true),
-
-            /// Returns `false` since the time difference from `latestActualTouchPoint` is within 2 seconds
-            (UITouchDummy.init(phase: .moved, estimationUpdateIndex: 3, timestamp: 5), false)
-        ]
-
-        let subject = CanvasPencilScreenTouchPoints(
-            estimatedTouchPointArray: [
-                .generate(phase: .began, estimationUpdateIndex: 0),
-                .generate(phase: .moved, estimationUpdateIndex: 1),
-                .generate(phase: .moved, estimationUpdateIndex: 2),
-                .generate(phase: .moved, estimationUpdateIndex: 3)
-            ]
-        )
-
-        actualTouches.forEach { actualTouch in
-            subject.appendActualValueWithEstimatedValue(actualTouch.0)
-
-            let hasSufficientTimeElapsed = subject.hasSufficientTimeElapsedSincePreviousProcess(
-                allowedDifferenceInSeconds: allowedDifferenceInSeconds
-            )
-            XCTAssertEqual(hasSufficientTimeElapsed, actualTouch.1)
-
-            /// Updates `latestActualTouchPoint` if the specified time has elapsed
-            if hasSufficientTimeElapsed {
-                subject.updateLatestActualTouchPoint()
-            }
-        }
-    }
-
     /// Confirms that elements created by combining actual and estimated values are added to `actualTouchPointArray`
     func testAppendActualValueWithEstimatedValue() {
         let estimatedTouches: [CanvasTouchPoint] = [
