@@ -376,7 +376,7 @@ extension CanvasViewModel {
                 ),
                 fingerDrawingDictionary.touchArrayDictionary
             )
-            if fingerDrawingDictionary.isTouchEnded {
+            if fingerDrawingDictionary.hasFingersLiftedOffScreen {
                 transformer.finishTransforming()
             }
 

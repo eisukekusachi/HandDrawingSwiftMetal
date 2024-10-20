@@ -24,8 +24,13 @@ extension CanvasFingerDrawingDictionary {
         touchArrayDictionary.isEmpty
     }
 
-    var isTouchEnded: Bool {
-        touchArrayDictionary.containsPhases([.ended])
+    var hasFingersLiftedOffScreen: Bool {
+        touchArrayDictionary.keys.contains { key in
+            guard let lastTouchPhase = touchArrayDictionary[key]?.last?.phase else {
+                return false
+            }
+            return [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(lastTouchPhase)
+        }
     }
 
     func getFingerTouches(event: UIEvent?) -> [UITouch] {
