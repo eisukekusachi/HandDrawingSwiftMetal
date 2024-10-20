@@ -52,7 +52,7 @@ final class CanvasViewModel {
 
     private var drawingCurve: CanvasDrawingCurve?
 
-    private let canvasTransformer = CanvasTransformer()
+    private let transformer = CanvasTransformer()
 
     private var drawingDisplayLink: CADisplayLink?
 
@@ -354,11 +354,11 @@ extension CanvasViewModel {
             pauseDisplayLinkLoop(drawingCurve.isDrawingFinished)
 
         case .transforming:
-            if canvasTransformer.isCurrentKeysNil {
-                canvasTransformer.initTransforming(fingerScreenTouchManager.touchArrayDictionary)
+            if transformer.isCurrentKeysNil {
+                transformer.initTransforming(fingerScreenTouchManager.touchArrayDictionary)
             }
 
-            canvasTransformer.transformCanvas(
+            transformer.transformCanvas(
                 screenCenter: .init(
                     x: frameSize.width * 0.5,
                     y: frameSize.height * 0.5
@@ -366,7 +366,7 @@ extension CanvasViewModel {
                 fingerScreenTouchManager.touchArrayDictionary
             )
             if fingerScreenTouchManager.isTouchEnded {
-                canvasTransformer.finishTransforming()
+                transformer.finishTransforming()
             }
 
             displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
@@ -471,7 +471,7 @@ extension CanvasViewModel {
     }
 
     func didTapResetTransformButton() {
-        canvasTransformer.setMatrix(.identity)
+        transformer.setMatrix(.identity)
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }
@@ -485,7 +485,7 @@ extension CanvasViewModel {
 
         projectName = Calendar.currentDate
 
-        canvasTransformer.setMatrix(.identity)
+        transformer.setMatrix(.identity)
 
         brushDrawingTexture.initTexture(renderTextureSize)
         eraserDrawingTexture.initTexture(renderTextureSize)
@@ -746,7 +746,7 @@ extension CanvasViewModel {
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 device: device,
-                matrix: canvasTransformer.matrix,
+                matrix: transformer.matrix,
                 frameSize: frameSize,
                 sourceSize: .init(
                     width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
@@ -813,20 +813,20 @@ extension CanvasViewModel {
         inputDevice.reset()
         screenTouchGesture.reset()
 
-        canvasTransformer.reset()
-
         fingerScreenTouchManager.reset()
         pencilScreenTouchPoints.reset()
 
         drawingCurve = nil
+        transformer.reset()
     }
 
     private func cancelFingerInput() {
         fingerScreenTouchManager.reset()
-        canvasTransformer.reset()
+
         drawingTexture?.clearDrawingTexture()
 
         drawingCurve = nil
+        transformer.reset()
 
         canvasView?.resetCommandBuffer()
 
@@ -844,7 +844,7 @@ extension CanvasViewModel {
     ) -> CanvasGrayscaleDotPoint {
 
         let textureMatrix = convertScreenMatrixToTextureMatrix(
-            matrix: canvasTransformer.matrix.inverted(flipY: true),
+            matrix: transformer.matrix.inverted(flipY: true),
             drawableSize: drawableSize,
             textureSize: textureSize
         )
