@@ -431,16 +431,6 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		D45F0B342C888E9200EF9820 /* Iterator */ = {
-			isa = PBXGroup;
-			children = (
-				D469A8722C56342700D10575 /* CanvasDrawingCurve.swift */,
-				D469A8702C56340B00D10575 /* CanvasDrawingCurveWithFinger.swift */,
-				D469A86E2C5633FC00D10575 /* CanvasDrawingCurveWithPencil.swift */,
-			);
-			path = Iterator;
-			sourceTree = "<group>";
-		};
 		D45F0B352C888ECC00EF9820 /* Points */ = {
 			isa = PBXGroup;
 			children = (
@@ -529,7 +519,9 @@
 			isa = PBXGroup;
 			children = (
 				D45F0B352C888ECC00EF9820 /* Points */,
-				D45F0B342C888E9200EF9820 /* Iterator */,
+				D469A8722C56342700D10575 /* CanvasDrawingCurve.swift */,
+				D469A8702C56340B00D10575 /* CanvasDrawingCurveWithFinger.swift */,
+				D469A86E2C5633FC00D10575 /* CanvasDrawingCurveWithPencil.swift */,
 				D4C9791D2ADBAA6400BB666D /* CanvasTransformer.swift */,
 			);
 			path = Drawing;
