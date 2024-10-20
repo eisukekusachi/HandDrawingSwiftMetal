@@ -10,11 +10,7 @@ import Combine
 
 final class CanvasViewModel {
 
-    let canvasTransformer = CanvasTransformer()
-
     let textureLayers = TextureLayers()
-
-    let textureLayerUndoManager = TextureLayerUndoManager()
 
     let drawingTool = CanvasDrawingToolStatus()
 
@@ -56,6 +52,8 @@ final class CanvasViewModel {
 
     private var drawingCurve: CanvasDrawingCurve?
 
+    private let canvasTransformer = CanvasTransformer()
+
     private var drawingDisplayLink: CADisplayLink?
 
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
@@ -70,6 +68,8 @@ final class CanvasViewModel {
     private var localRepository: LocalRepository?
 
     private var canvasView: CanvasViewProtocol?
+
+    private let textureLayerUndoManager = TextureLayerUndoManager()
 
     /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
     private var canvasTexture: MTLTexture?
