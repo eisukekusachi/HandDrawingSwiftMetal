@@ -902,7 +902,7 @@ extension CanvasViewModel {
 
         drawingCurve = nil
 
-        canvasView?.clearCommandBuffer()
+        canvasView?.resetCommandBuffer()
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
     }

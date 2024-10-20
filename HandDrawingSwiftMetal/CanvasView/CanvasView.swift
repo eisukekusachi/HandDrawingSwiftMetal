@@ -48,7 +48,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         assert(self.device != nil, "Device is nil.")
 
         commandQueue = self.device!.makeCommandQueue()
-        clearCommandBuffer()
+        resetCommandBuffer()
 
         textureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
 
@@ -84,7 +84,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        clearCommandBuffer()
+        resetCommandBuffer()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -95,7 +95,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 }
 
 extension CanvasView {
-    func clearCommandBuffer() {
+    func resetCommandBuffer() {
         commandBuffer = commandQueue?.makeCommandBuffer()
     }
 

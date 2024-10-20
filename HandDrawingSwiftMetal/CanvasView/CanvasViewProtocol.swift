@@ -12,7 +12,7 @@ protocol CanvasViewProtocol {
 
     var renderTexture: MTLTexture? { get }
 
-    func clearCommandBuffer()
+    func resetCommandBuffer()
 
     func setNeedsDisplay()
 }
