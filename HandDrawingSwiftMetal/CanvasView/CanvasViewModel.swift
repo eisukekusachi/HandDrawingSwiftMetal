@@ -322,8 +322,8 @@ extension CanvasViewModel {
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(drawingCurve is CanvasSmoothGrayscaleCurveIterator) {
-                drawingCurve = CanvasSmoothGrayscaleCurveIterator()
+            if !(drawingCurve is CanvasDrawingCurveWithFinger) {
+                drawingCurve = CanvasDrawingCurveWithFinger()
             }
             if fingerScreenTouchManager.currentDictionaryKey == nil {
                 fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
