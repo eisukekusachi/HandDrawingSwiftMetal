@@ -413,7 +413,7 @@ extension CanvasViewModel {
             cancelFingerInput()
         }
         // Set `inputDevice` to '.pencil'
-        let _ = inputDevice.update(.pencil)
+        inputDevice.update(.pencil)
 
         // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
