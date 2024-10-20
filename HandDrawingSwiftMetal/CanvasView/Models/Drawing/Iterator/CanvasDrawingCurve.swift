@@ -1,5 +1,5 @@
 //
-//  CanvasGrayscaleCurveIterator.swift
+//  CanvasDrawingCurve.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,15 +7,14 @@
 
 import UIKit
 
-protocol CanvasGrayscaleCurveIterator {
+/// Manages real-time curve drawing using an iterator and touch phases
+protocol CanvasDrawingCurve {
 
     typealias T = CanvasGrayscaleDotPoint
 
     var iterator: Iterator<T> { get }
 
     var currentTouchPhase: UITouch.Phase { get }
-
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
 
     func appendToIterator(
         points: [T],
@@ -27,7 +26,7 @@ protocol CanvasGrayscaleCurveIterator {
     func clear()
 }
 
-extension CanvasGrayscaleCurveIterator {
+extension CanvasDrawingCurve {
 
     /// Is the drawing finished successfully
     var isDrawingComplete: Bool {

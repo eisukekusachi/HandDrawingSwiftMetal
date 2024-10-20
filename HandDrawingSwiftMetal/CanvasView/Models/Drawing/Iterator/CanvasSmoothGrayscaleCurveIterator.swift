@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CanvasSmoothGrayscaleCurveIterator: CanvasGrayscaleCurveIterator {
+final class CanvasSmoothGrayscaleCurveIterator: CanvasDrawingCurve {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began

@@ -54,8 +54,7 @@ final class CanvasViewModel {
         refreshCanRedoSubject.eraseToAnyPublisher()
     }
 
-    /// An iterator for managing a grayscale curve
-    private var grayscaleTextureCurveIterator: CanvasGrayscaleCurveIterator?
+    private var drawingCurve: CanvasDrawingCurve?
 
     private var drawingDisplayLink: CADisplayLink?
 
@@ -323,14 +322,14 @@ extension CanvasViewModel {
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(grayscaleTextureCurveIterator is CanvasSmoothGrayscaleCurveIterator) {
-                grayscaleTextureCurveIterator = CanvasSmoothGrayscaleCurveIterator()
+            if !(drawingCurve is CanvasSmoothGrayscaleCurveIterator) {
+                drawingCurve = CanvasSmoothGrayscaleCurveIterator()
             }
             if fingerScreenTouchManager.currentDictionaryKey == nil {
                 fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
             }
             guard 
-                let grayscaleTextureCurveIterator,
+                let drawingCurve,
                 let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey
             else { return }
 
@@ -365,13 +364,13 @@ extension CanvasViewModel {
                 )
             }
 
-            grayscaleTextureCurveIterator.appendToIterator(
+            drawingCurve.appendToIterator(
                 points: grayscaleTexturePoints,
                 touchPhase: latestScreenTouchPoints.currentTouchPhase
             )
 
             pauseDisplayLinkLoop(
-                grayscaleTextureCurveIterator.isDrawingFinished,
+                drawingCurve.isDrawingFinished,
                 canvasView: canvasView
             )
 
@@ -418,7 +417,7 @@ extension CanvasViewModel {
 
         // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
-            grayscaleTextureCurveIterator = CanvasDefaultGrayscaleCurveIterator()
+            drawingCurve = CanvasDefaultGrayscaleCurveIterator()
             pencilScreenTouchPoints.reset()
         }
 
@@ -440,6 +439,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         guard
+            let drawingCurve,
             let canvasView
         else { return }
 
@@ -451,7 +451,6 @@ extension CanvasViewModel {
         if pencilScreenTouchPoints.hasActualValueReplacementCompleted {
             pencilScreenTouchPoints.appendLastEstimatedTouchPointToActualTouchPointArray()
         }
-        guard let grayscaleTextureCurveIterator else { return }
 
         // Retrieve the latest touch points necessary for drawing from the array of stored touch points
         let latestScreenTouchArray = pencilScreenTouchPoints.latestActualTouchPoints
@@ -485,13 +484,13 @@ extension CanvasViewModel {
             )
         }
 
-        grayscaleTextureCurveIterator.appendToIterator(
+        drawingCurve.appendToIterator(
             points: latestTextureTouchArray,
             touchPhase: latestScreenTouchArray.currentTouchPhase
         )
 
         pauseDisplayLinkLoop(
-            grayscaleTextureCurveIterator.isDrawingFinished,
+            drawingCurve.isDrawingFinished,
             canvasView: canvasView
         )
     }
@@ -502,11 +501,11 @@ extension CanvasViewModel {
 
     @objc private func updateCanvasViewWhileDrawing() {
         guard
-            let grayscaleTextureCurveIterator,
+            let drawingCurve,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
+        if let texturePoints = drawingCurve.makeCurvePointsFromIterator() {
             if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
                let selectedLayerTexture = textureLayers.selectedLayer?.texture {
                 drawingTexture.drawPointsOnEraserDrawingTexture(
@@ -532,7 +531,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        if grayscaleTextureCurveIterator.isDrawingFinished {
+        if drawingCurve.isDrawingFinished {
             // Add `textureLayer` to the undo stack
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
             textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -553,11 +552,11 @@ extension CanvasViewModel {
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
-        if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
+        if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
-        if grayscaleTextureCurveIterator.isDrawingFinished {
+        if drawingCurve.isDrawingFinished {
             initDrawingParameters()
         }
     }
@@ -571,7 +570,7 @@ extension CanvasViewModel {
         fingerScreenTouchManager.reset()
         pencilScreenTouchPoints.reset()
 
-        grayscaleTextureCurveIterator = nil
+        drawingCurve = nil
     }
 
     private func cancelFingerInput() {
@@ -579,7 +578,7 @@ extension CanvasViewModel {
         canvasTransformer.reset()
         drawingTexture?.clearDrawingTexture()
 
-        grayscaleTextureCurveIterator = nil
+        drawingCurve = nil
 
         canvasView?.clearCommandBuffer()
 
