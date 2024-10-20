@@ -56,7 +56,8 @@ final class CanvasViewModel {
 
     private var drawingDisplayLink: CADisplayLink?
 
-    private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
+    /// A dictionary for handling finger input values
+    private let fingerDrawingDictionary = CanvasFingerDrawingDictionary()
 
     /// Arrays for handling Apple Pencil input values
     private let pencilDrawingArrays = CanvasPencilDrawingArrays()
@@ -320,25 +321,25 @@ extension CanvasViewModel {
         guard inputDevice.update(.finger) != .pencil else { return }
 
         var dictionary: [CanvasTouchHashValue: CanvasTouchPoint] = [:]
-        fingerScreenTouchManager.getFingerTouches(event: event).forEach { touch in
+        fingerDrawingDictionary.getFingerTouches(event: event).forEach { touch in
             dictionary[touch.hashValue] = .init(touch: touch, view: view)
         }
-        fingerScreenTouchManager.appendTouches(dictionary)
+        fingerDrawingDictionary.appendTouches(dictionary)
 
         switch screenTouchGesture.update(
-            .init(from: fingerScreenTouchManager.touchArrayDictionary)
+            .init(from: fingerDrawingDictionary.touchArrayDictionary)
         ) {
         case .drawing:
             if !(drawingCurve is CanvasDrawingCurveWithFinger) {
                 drawingCurve = CanvasDrawingCurveWithFinger()
             }
-            if fingerScreenTouchManager.dictionaryKey == nil {
-                fingerScreenTouchManager.dictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
+            if fingerDrawingDictionary.dictionaryKey == nil {
+                fingerDrawingDictionary.dictionaryKey = fingerDrawingDictionary.touchArrayDictionary.keys.first
             }
             guard 
                 let drawingCurve,
-                let key = fingerScreenTouchManager.dictionaryKey,
-                let screenTouchPoints = fingerScreenTouchManager.getLatestTouchPoints(for: key)
+                let key = fingerDrawingDictionary.dictionaryKey,
+                let screenTouchPoints = fingerDrawingDictionary.getLatestTouchPoints(for: key)
             else { return }
 
             let touchPhase = screenTouchPoints.currentTouchPhase
@@ -365,7 +366,7 @@ extension CanvasViewModel {
 
         case .transforming:
             if transformer.isCurrentKeysNil {
-                transformer.initTransforming(fingerScreenTouchManager.touchArrayDictionary)
+                transformer.initTransforming(fingerDrawingDictionary.touchArrayDictionary)
             }
 
             transformer.transformCanvas(
@@ -373,9 +374,9 @@ extension CanvasViewModel {
                     x: frameSize.width * 0.5,
                     y: frameSize.height * 0.5
                 ),
-                fingerScreenTouchManager.touchArrayDictionary
+                fingerDrawingDictionary.touchArrayDictionary
             )
-            if fingerScreenTouchManager.isTouchEnded {
+            if fingerDrawingDictionary.isTouchEnded {
                 transformer.finishTransforming()
             }
 
@@ -385,9 +386,9 @@ extension CanvasViewModel {
             break
         }
 
-        fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+        fingerDrawingDictionary.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
-        if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if fingerDrawingDictionary.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
         }
     }
@@ -812,7 +813,7 @@ extension CanvasViewModel {
         inputDevice.reset()
         screenTouchGesture.reset()
 
-        fingerScreenTouchManager.reset()
+        fingerDrawingDictionary.reset()
         pencilDrawingArrays.reset()
 
         drawingCurve = nil
@@ -820,7 +821,7 @@ extension CanvasViewModel {
     }
 
     private func cancelFingerInput() {
-        fingerScreenTouchManager.reset()
+        fingerDrawingDictionary.reset()
 
         drawingTexture?.clearDrawingTexture()
 

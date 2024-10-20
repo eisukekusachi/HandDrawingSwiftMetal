@@ -1,5 +1,5 @@
 //
-//  CanvasFingerScreenTouchPoints.swift
+//  CanvasFingerDrawingDictionary.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CanvasFingerScreenTouchPoints {
+final class CanvasFingerDrawingDictionary {
 
     private (set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
@@ -19,7 +19,7 @@ final class CanvasFingerScreenTouchPoints {
 
 }
 
-extension CanvasFingerScreenTouchPoints {
+extension CanvasFingerDrawingDictionary {
     var isEmpty: Bool {
         touchArrayDictionary.isEmpty
     }
