@@ -53,7 +53,7 @@ extension CanvasPencilDrawingArrays {
         return touchPoints
     }
 
-    var hasActualValueReplacementCompleted: Bool {
+    var hasActualTouchPointArrayBeenCreated: Bool {
         actualTouchPointArray.last?.estimationUpdateIndex == lastEstimationUpdateIndexAtCompletion
     }
 
@@ -84,6 +84,10 @@ extension CanvasPencilDrawingArrays {
 
                 latestEstimatedTouchArrayIndex = i
             }
+        }
+
+        if hasActualTouchPointArrayBeenCreated {
+            appendLastEstimatedTouchPointToActualTouchPointArray()
         }
     }
 
