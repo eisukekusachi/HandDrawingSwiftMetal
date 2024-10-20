@@ -809,80 +809,6 @@ extension CanvasViewModel {
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
     }
 
-    private func convertScreenTouchPointToTextureDotPoint(
-        touchPoint: CanvasTouchPoint,
-        textureSize: CGSize,
-        drawableSize: CGSize
-    ) -> CanvasGrayscaleDotPoint {
-
-        let textureMatrix = getMatrixAdjustedTranslations(
-            matrix: canvasTransformer.matrix.inverted(flipY: true),
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        let textureLocation = getLocationConvertedToTextureScale(
-            screenLocation: touchPoint.location,
-            screenFrameSize: frameSize,
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        return .init(
-            touchPoint: .init(
-                location: textureLocation.apply(
-                    with: textureMatrix,
-                    textureSize: textureSize
-                ),
-                touch: touchPoint
-            ),
-            diameter: CGFloat(drawingTool.diameter)
-        )
-    }
-
-    private func getMatrixAdjustedTranslations(
-        matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGAffineTransform {
-
-        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
-        let drawableTextureSize: CGSize = .init(
-            width: textureSize.width * drawableScale,
-            height: textureSize.height * drawableScale
-        )
-
-        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
-        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
-
-        var matrix = matrix
-        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        return matrix
-    }
-
-    private func getLocationConvertedToTextureScale(
-        screenLocation: CGPoint,
-        screenFrameSize: CGSize,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGPoint {
-        if textureSize != drawableSize {
-            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
-            let drawableLocation: CGPoint = .init(
-                x: screenLocation.x * (drawableSize.width / screenFrameSize.width),
-                y: screenLocation.y * (drawableSize.width / screenFrameSize.width)
-            )
-            return .init(
-                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
-                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
-            )
-        } else {
-            return .init(
-                x: screenLocation.x * (textureSize.width / screenFrameSize.width),
-                y: screenLocation.y * (textureSize.width / screenFrameSize.width)
-            )
-        }
-    }
-
     private func resetAllInputParameters() {
         inputDevice.reset()
         screenTouchGesture.reset()
@@ -905,6 +831,84 @@ extension CanvasViewModel {
         canvasView?.resetCommandBuffer()
 
         displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+    }
+
+}
+
+extension CanvasViewModel {
+
+    private func convertScreenTouchPointToTextureDotPoint(
+        touchPoint: CanvasTouchPoint,
+        textureSize: CGSize,
+        drawableSize: CGSize
+    ) -> CanvasGrayscaleDotPoint {
+
+        let textureMatrix = convertScreenMatrixToTextureMatrix(
+            matrix: canvasTransformer.matrix.inverted(flipY: true),
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        let textureLocation = convertScreenLocationToTextureLocation(
+            touchLocation: touchPoint.location,
+            frameSize: frameSize,
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        return .init(
+            touchPoint: .init(
+                location: textureLocation.apply(
+                    with: textureMatrix,
+                    textureSize: textureSize
+                ),
+                touch: touchPoint
+            ),
+            diameter: CGFloat(drawingTool.diameter)
+        )
+    }
+
+    private func convertScreenMatrixToTextureMatrix(
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGAffineTransform {
+
+        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
+        let drawableTextureSize: CGSize = .init(
+            width: textureSize.width * drawableScale,
+            height: textureSize.height * drawableScale
+        )
+
+        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
+        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
+
+        var matrix = matrix
+        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
+        return matrix
+    }
+
+    private func convertScreenLocationToTextureLocation(
+        touchLocation: CGPoint,
+        frameSize: CGSize,
+        drawableSize: CGSize,
+        textureSize: CGSize
+    ) -> CGPoint {
+        if textureSize != drawableSize {
+            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
+            let drawableLocation: CGPoint = .init(
+                x: touchLocation.x * (drawableSize.width / frameSize.width),
+                y: touchLocation.y * (drawableSize.width / frameSize.width)
+            )
+            return .init(
+                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
+                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
+            )
+        } else {
+            return .init(
+                x: touchLocation.x * (textureSize.width / frameSize.width),
+                y: touchLocation.y * (textureSize.width / frameSize.width)
+            )
+        }
     }
 
 }
