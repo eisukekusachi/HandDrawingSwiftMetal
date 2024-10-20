@@ -58,8 +58,8 @@ final class CanvasViewModel {
 
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
-    /// A manager for handling Apple Pencil input values
-    private let pencilScreenTouchPoints = CanvasPencilScreenTouchPoints()
+    /// Arrays for handling Apple Pencil input values
+    private let pencilDrawingArrays = CanvasPencilDrawingArrays()
 
     private let inputDevice = CanvasInputDeviceStatus()
 
@@ -406,7 +406,7 @@ extension CanvasViewModel {
         // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
             drawingCurve = CanvasDrawingCurveWithPencil()
-            pencilScreenTouchPoints.reset()
+            pencilDrawingArrays.reset()
         }
 
         // Append estimated values to the array
@@ -415,7 +415,7 @@ extension CanvasViewModel {
             .sorted { $0.timestamp < $1.timestamp }
             .forEach { touch in
                 event?.coalescedTouches(for: touch)?.forEach { coalescedTouch in
-                    pencilScreenTouchPoints.appendEstimatedValue(
+                    pencilDrawingArrays.appendEstimatedValue(
                         .init(touch: coalescedTouch, view: view)
                     )
                 }
@@ -431,13 +431,13 @@ extension CanvasViewModel {
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         let actualTouchArray = Array(actualTouches).sorted { $0.timestamp < $1.timestamp }
         actualTouchArray.forEach { actualTouch in
-            pencilScreenTouchPoints.appendActualValueWithEstimatedValue(actualTouch)
+            pencilDrawingArrays.appendActualValueWithEstimatedValue(actualTouch)
         }
-        if pencilScreenTouchPoints.hasActualValueReplacementCompleted {
-            pencilScreenTouchPoints.appendLastEstimatedTouchPointToActualTouchPointArray()
+        if pencilDrawingArrays.hasActualValueReplacementCompleted {
+            pencilDrawingArrays.appendLastEstimatedTouchPointToActualTouchPointArray()
         }
 
-        let screenTouchPoints = pencilScreenTouchPoints.getLatestTouchPoints()
+        let screenTouchPoints = pencilDrawingArrays.getLatestTouchPoints()
 
         let touchPhase = screenTouchPoints.currentTouchPhase
 
@@ -816,7 +816,7 @@ extension CanvasViewModel {
         screenTouchGesture.reset()
 
         fingerScreenTouchManager.reset()
-        pencilScreenTouchPoints.reset()
+        pencilDrawingArrays.reset()
 
         drawingCurve = nil
         transformer.reset()
