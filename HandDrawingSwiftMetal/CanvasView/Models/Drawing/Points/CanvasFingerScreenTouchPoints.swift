@@ -15,7 +15,7 @@ final class CanvasFingerScreenTouchPoints {
     var currentDictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    var latestCanvasTouchPoint: CanvasTouchPoint?
+    private var latestTouchPoint: CanvasTouchPoint?
 
 }
 
@@ -45,8 +45,13 @@ extension CanvasFingerScreenTouchPoints {
         }
     }
 
-    func getTouchPoints(for key: CanvasTouchHashValue) -> [CanvasTouchPoint] {
-        touchArrayDictionary[key] ?? []
+    func getLatestTouchPoints(for key: CanvasTouchHashValue) -> [CanvasTouchPoint]? {
+        guard let touchPoints = touchArrayDictionary[key] else { return nil }
+
+        let latestTouchPoints = touchPoints.elements(after: latestTouchPoint) ?? touchPoints
+        latestTouchPoint = latestTouchPoints.last
+
+        return latestTouchPoints
     }
 
     func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
@@ -61,7 +66,7 @@ extension CanvasFingerScreenTouchPoints {
     func reset() {
         touchArrayDictionary = [:]
         currentDictionaryKey = nil
-        latestCanvasTouchPoint = nil
+        latestTouchPoint = nil
     }
 
 }

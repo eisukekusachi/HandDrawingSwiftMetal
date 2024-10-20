@@ -330,15 +330,14 @@ extension CanvasViewModel {
             }
             guard 
                 let drawingCurve,
-                let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey
+                let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey,
+                let screenTouchPoints = fingerScreenTouchManager.getLatestTouchPoints(for: currentTouchKey)
             else { return }
 
-            let screenTouchPoints = fingerScreenTouchManager.getTouchPoints(for: currentTouchKey)
-            let latestScreenTouchPoints = screenTouchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
-            fingerScreenTouchManager.latestCanvasTouchPoint = latestScreenTouchPoints.last
+            let touchPhase = screenTouchPoints.currentTouchPhase
 
-            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.compactMap {
-                guard 
+            let grayscaleTextureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
+                guard
                     let textureSize = canvasTexture?.size,
                     let drawableSize = canvasView.renderTexture?.size
                 else { return nil }
@@ -351,8 +350,8 @@ extension CanvasViewModel {
             }
 
             drawingCurve.appendToIterator(
-                points: grayscaleTexturePoints,
-                touchPhase: latestScreenTouchPoints.currentTouchPhase
+                points: grayscaleTextureDotPoints,
+                touchPhase: touchPhase
             )
 
             pauseDisplayLinkLoop(
