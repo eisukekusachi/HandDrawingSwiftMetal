@@ -75,7 +75,7 @@ final class CanvasViewModel {
     private var canvasTexture: MTLTexture?
 
     /// A protocol for managing current drawing texture
-    private (set) var drawingTexture: CanvasDrawingTextureProtocol?
+    private var drawingTexture: CanvasDrawingTexture?
 
     /// A texture that combines the texture of the currently selected `TextureLayer` and `drawingTexture`
     private var currentTexture: MTLTexture?

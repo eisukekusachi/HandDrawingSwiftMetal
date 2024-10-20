@@ -7,7 +7,7 @@
 
 import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class CanvasBrushDrawingTexture: CanvasDrawingTextureProtocol {
+class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     var drawingTexture: MTLTexture?
 

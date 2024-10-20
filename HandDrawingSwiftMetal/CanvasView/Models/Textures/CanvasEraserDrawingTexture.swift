@@ -7,7 +7,7 @@
 
 import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class CanvasEraserDrawingTexture: CanvasDrawingTextureProtocol {
+class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     var drawingTexture: MTLTexture?
 
