@@ -48,8 +48,10 @@ final class CanvasPencilScreenTouchPoints {
 extension CanvasPencilScreenTouchPoints {
 
     /// Use the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing
-    var latestActualTouchPoints: [CanvasTouchPoint] {
-        actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
+    func getLatestTouchPoints() -> [CanvasTouchPoint] {
+        let touchPoints = actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
+        latestActualTouchPoint = actualTouchPointArray.last
+        return touchPoints
     }
 
     var hasActualValueReplacementCompleted: Bool {
@@ -90,11 +92,6 @@ extension CanvasPencilScreenTouchPoints {
     func appendLastEstimatedTouchPointToActualTouchPointArray() {
         guard let point = estimatedTouchPointArray.last else { return }
         actualTouchPointArray.append(point)
-    }
-
-    /// After using the array, update `latestActualTouchPoint` with the last element of `actualTouchPointArray` and use it for the next drawing.
-    func updateLatestActualTouchPoint() {
-        latestActualTouchPoint = actualTouchPointArray.last
     }
 
     func updateLastEstimationUpdateIndexAtCompletionForTouchCompletion() {

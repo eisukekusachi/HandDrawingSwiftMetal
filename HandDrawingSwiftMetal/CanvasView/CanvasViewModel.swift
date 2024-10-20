@@ -437,12 +437,12 @@ extension CanvasViewModel {
             pencilScreenTouchPoints.appendLastEstimatedTouchPointToActualTouchPointArray()
         }
 
-        // Retrieve the latest touch points necessary for drawing from the array of stored touch points
-        let latestScreenTouchArray = pencilScreenTouchPoints.latestActualTouchPoints
-        pencilScreenTouchPoints.updateLatestActualTouchPoint()
+        let screenTouchPoints = pencilScreenTouchPoints.getLatestTouchPoints()
+
+        let touchPhase = screenTouchPoints.currentTouchPhase
 
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
-        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.compactMap {
+        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
             guard
                 let textureSize = canvasTexture?.size,
                 let drawableSize = canvasView.renderTexture?.size
@@ -457,7 +457,7 @@ extension CanvasViewModel {
 
         drawingCurve.appendToIterator(
             points: latestTextureTouchArray,
-            touchPhase: latestScreenTouchArray.currentTouchPhase
+            touchPhase: touchPhase
         )
 
         pauseDisplayLinkLoop(
