@@ -393,16 +393,15 @@ extension CanvasViewModel {
 
             displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
-            fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
-
-            if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
-                initDrawingParameters()
-            }
-
         default:
             break
         }
 
+        fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+
+        if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+            initDrawingParameters()
+        }
     }
 
     func onPencilGestureDetected(
