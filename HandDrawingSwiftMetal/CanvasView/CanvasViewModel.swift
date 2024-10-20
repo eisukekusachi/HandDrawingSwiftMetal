@@ -57,6 +57,8 @@ final class CanvasViewModel {
     /// An iterator for managing a grayscale curve
     private var grayscaleTextureCurveIterator: CanvasGrayscaleCurveIterator?
 
+    private var drawingDisplayLink: CADisplayLink?
+
     private let fingerScreenTouchManager = CanvasFingerScreenTouchPoints()
 
     /// A manager for handling Apple Pencil input values
@@ -102,14 +104,14 @@ final class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var displayLink: CADisplayLink?
-
     private let device = MTLCreateSystemDefaultDevice()
 
     init(
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.localRepository = localRepository
+
+        setupDisplayLink()
 
         textureLayerUndoManager.addTextureLayersToUndoStackPublisher
             .sink { [weak self] in
@@ -158,12 +160,11 @@ final class CanvasViewModel {
         drawingTool.setDrawingTool(.brush)
     }
 
-    private func configureDisplayLink() {
-
+    private func setupDisplayLink() {
         // Configure the display link for rendering.
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDisplayLink(_:)))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
+        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(updateCanvasViewWhileDrawing))
+        drawingDisplayLink?.add(to: .current, forMode: .common)
+        drawingDisplayLink?.isPaused = true
     }
 
     func setCanvasView(_ canvasView: CanvasViewProtocol) {
@@ -310,8 +311,7 @@ extension CanvasViewModel {
     ) {
         guard 
             inputDevice.update(.finger) != .pencil,
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
+            let canvasView
         else { return }
 
         fingerScreenTouchManager.append(
@@ -370,27 +370,6 @@ extension CanvasViewModel {
                 touchPhase: latestScreenTouchPoints.currentTouchPhase
             )
 
-            // Retrieve curve points from the iterator and draw them onto `currentTexture`
-            if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
-                drawPointsOnCurrentTexture(
-                    grayscaleTexturePoints: texturePoints,
-                    with: grayscaleTextureCurveIterator,
-                    touchPhase: latestScreenTouchPoints.currentTouchPhase,
-                    with: commandBuffer
-                )
-            }
-
-            displayCanvasTextureWithCurrentTextureWhileDrawing(
-                canvasTexture: canvasTexture,
-                currentTexture: currentTexture,
-                canvasTextureBackgroundColor: drawingTool.backgroundColor,
-                on: canvasView
-            )
-
-            if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
-                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-            }
-
             pauseDisplayLinkLoop(
                 grayscaleTextureCurveIterator.isDrawingFinished,
                 canvasView: canvasView
@@ -414,17 +393,16 @@ extension CanvasViewModel {
 
             displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
-            canvasView.setNeedsDisplay()
+            fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
+
+            if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+                initDrawingParameters()
+            }
 
         default:
             break
         }
 
-        fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
-
-        if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
-            initDrawingParameters()
-        }
     }
 
     func onPencilGestureDetected(
@@ -463,8 +441,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
+            let canvasView
         else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
@@ -523,43 +500,76 @@ extension CanvasViewModel {
             touchPhase: latestScreenTouchArray.currentTouchPhase
         )
 
-        // Retrieve curve points from the iterator and draw them onto `currentTexture`
-        if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
-            drawPointsOnCurrentTexture(
-                grayscaleTexturePoints: texturePoints,
-                with: grayscaleTextureCurveIterator,
-                touchPhase: grayscaleTextureCurveIterator.currentTouchPhase,
-                with: commandBuffer
-            )
-        }
-
-        displayCanvasTextureWithCurrentTextureWhileDrawing(
-            canvasTexture: canvasTexture,
-            currentTexture: currentTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
-        )
-
-        if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
-
         pauseDisplayLinkLoop(
             grayscaleTextureCurveIterator.isDrawingFinished,
             canvasView: canvasView
         )
-
-        if grayscaleTextureCurveIterator.isDrawingFinished {
-            initDrawingParameters()
-        }
     }
 
 }
 
 extension CanvasViewModel {
 
-    @objc private func updateDisplayLink(_ displayLink: CADisplayLink) {
-        canvasView?.setNeedsDisplay()
+    @objc private func updateCanvasViewWhileDrawing() {
+        guard
+            let grayscaleTextureCurveIterator,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        if let texturePoints = grayscaleTextureCurveIterator.makeCurvePointsFromIterator() {
+            if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
+               let selectedLayerTexture = textureLayers.selectedLayer?.texture {
+                drawingTexture.drawPointsOnEraserDrawingTexture(
+                    points: texturePoints,
+                    alpha: drawingTool.eraserAlpha,
+                    srcTexture: selectedLayerTexture,
+                    commandBuffer
+                )
+            } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
+                drawingTexture.drawPointsOnBrushDrawingTexture(
+                    points: texturePoints,
+                    color: drawingTool.brushColor,
+                    alpha: drawingTool.brushColor.alpha,
+                    commandBuffer
+                )
+            }
+        }
+
+        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
+        drawingTexture?.drawDrawingTexture(
+            includingSelectedTexture: textureLayers.selectedLayer?.texture,
+            on: currentTexture,
+            with: commandBuffer
+        )
+
+        if grayscaleTextureCurveIterator.isDrawingFinished {
+            // Add `textureLayer` to the undo stack
+            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
+
+            // Draw `drawingTexture` onto `selectedLayer.texture`
+            drawingTexture?.mergeDrawingTexture(
+                into: textureLayers.selectedLayer?.texture,
+                commandBuffer
+            )
+        }
+
+        textureLayers.mergeAllTextures(
+            usingCurrentTexture: currentTexture,
+            backgroundColor: drawingTool.backgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+
+        if requestShowingLayerViewSubject.value && grayscaleTextureCurveIterator.isDrawingComplete {
+            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+        }
+
+        if grayscaleTextureCurveIterator.isDrawingFinished {
+            initDrawingParameters()
+        }
     }
 
     private func initDrawingParameters() {
@@ -590,49 +600,6 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawPointsOnCurrentTexture(
-        grayscaleTexturePoints: [CanvasGrayscaleDotPoint],
-        with grayscaleCurve: CanvasGrayscaleCurveIterator?,
-        touchPhase: UITouch.Phase,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
-           let selectedTexture = textureLayers.selectedLayer?.texture {
-            drawingTexture.drawPointsOnEraserDrawingTexture(
-                points: grayscaleTexturePoints,
-                alpha: drawingTool.eraserAlpha,
-                srcTexture: selectedTexture,
-                commandBuffer
-            )
-        } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
-            drawingTexture.drawPointsOnBrushDrawingTexture(
-                points: grayscaleTexturePoints,
-                color: drawingTool.brushColor,
-                alpha: drawingTool.brushColor.alpha,
-                commandBuffer
-            )
-        }
-
-        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
-        drawingTexture?.drawDrawingTexture(
-            includingSelectedTexture: textureLayers.selectedLayer?.texture,
-            on: currentTexture,
-            with: commandBuffer
-        )
-
-        if touchPhase == .ended {
-            // Add `textureLayer` to the undo stack 
-            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            textureLayerUndoManager.addCurrentLayersToUndoStack()
-
-            // Draw `drawingTexture` onto `selectedLayer.texture`
-            drawingTexture?.mergeDrawingTexture(
-                into: textureLayers.selectedLayer?.texture,
-                commandBuffer
-            )
-        }
-    }
-
     private func displayCanvasTextureWithMergedLayers(
         textureLayers: TextureLayers,
         canvasTexture: MTLTexture?,
@@ -649,27 +616,6 @@ extension CanvasViewModel {
         }
 
         textureLayers.mergeAllTextures(
-            backgroundColor: canvasTextureBackgroundColor,
-            on: canvasTexture,
-            with: commandBuffer
-        )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
-    }
-
-    private func displayCanvasTextureWithCurrentTextureWhileDrawing(
-        canvasTexture: MTLTexture?,
-        currentTexture: MTLTexture?,
-        canvasTextureBackgroundColor: UIColor,
-        on canvasView: CanvasViewProtocol?
-    ) {
-        guard
-            let currentTexture,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        textureLayers.mergeAllTextures(
-            usingCurrentTexture: currentTexture,
             backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
             with: commandBuffer
@@ -718,15 +664,15 @@ extension CanvasViewModel {
     /// Start or stop the display link loop.
     private func pauseDisplayLinkLoop(_ pause: Bool, canvasView: CanvasViewProtocol) {
         if pause {
-            if displayLink?.isPaused == false {
+            if drawingDisplayLink?.isPaused == false {
                 // Pause the display link after updating the display.
-                canvasView.setNeedsDisplay()
-                displayLink?.isPaused = true
+                updateCanvasViewWhileDrawing()
+                drawingDisplayLink?.isPaused = true
             }
 
         } else {
-            if displayLink?.isPaused == true {
-                displayLink?.isPaused = false
+            if drawingDisplayLink?.isPaused == true {
+                drawingDisplayLink?.isPaused = false
             }
         }
     }
