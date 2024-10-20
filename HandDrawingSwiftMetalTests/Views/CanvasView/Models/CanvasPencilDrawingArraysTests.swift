@@ -2,31 +2,13 @@
 //  CanvasPencilDrawingArraysTests.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2024/09/07.
+//  Created by Eisuke Kusachi on 2024/10/20.
 //
 
 import XCTest
 @testable import HandDrawingSwiftMetal
 
 final class CanvasPencilDrawingArraysTests: XCTestCase {
-
-    func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = CanvasDrawingCurveWithPencil()
-
-        subject.appendToIterator(points: [.generate()], touchPhase: .began)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
-
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
-
-        /// Return true only once when 3 points are stored
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertTrue(subject.hasArrayThreeElementsButNoFirstCurveCreated)
-
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
-    }
-
     /// Confirms that the creation of `actualTouchPointArray` is complete
     func testHasProcessFinished() {
         let estimatedTouchPointArray: [CanvasTouchPoint] = [

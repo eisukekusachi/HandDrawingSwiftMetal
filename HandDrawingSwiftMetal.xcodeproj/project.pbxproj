@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */; };
 		D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2772C8BEA5E00275138 /* UITouchDummy.swift */; };
-		D400A27C2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */; };
+		D400A27C2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -82,6 +82,7 @@
 		D481A4312C5E1D7300279C91 /* CanvasInputDeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* CanvasInputDeviceStatus.swift */; };
 		D481A4332C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift */; };
 		D481A4352C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */; };
+		D4837AE22CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48AC4202BCA963D00608E42 /* TextureLayerUndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */; };
 		D4934F422ADA36C500C52B76 /* CanvasDrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */; };
@@ -133,7 +134,7 @@
 /* Begin PBXFileReference section */
 		D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTouchPointDummy.swift; sourceTree = "<group>"; };
 		D400A2772C8BEA5E00275138 /* UITouchDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchDummy.swift; sourceTree = "<group>"; };
-		D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilDrawingArraysTests.swift; sourceTree = "<group>"; };
+		D400A27B2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingCurveWithPencilTests.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -205,6 +206,7 @@
 		D481A4302C5E1D7300279C91 /* CanvasInputDeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasInputDeviceStatus.swift; sourceTree = "<group>"; };
 		D481A4322C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreenTouchGestureStatus.swift; sourceTree = "<group>"; };
 		D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreenTouchGestureType.swift; sourceTree = "<group>"; };
+		D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilDrawingArraysTests.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48AC41F2BCA963D00608E42 /* TextureLayerUndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerUndoManager.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingToolType.swift; sourceTree = "<group>"; };
@@ -295,7 +297,8 @@
 		D400A27A2C8BEA7200275138 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */,
+				D400A27B2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift */,
+				D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -889,8 +892,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
+				D4837AE22CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift in Sources */,
 				D4517A072CC369FD0047C274 /* CanvasGrayscaleDotPoint.swift in Sources */,
-				D400A27C2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift in Sources */,
+				D400A27C2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift in Sources */,
 				D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */,
 				D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */,
 			);
