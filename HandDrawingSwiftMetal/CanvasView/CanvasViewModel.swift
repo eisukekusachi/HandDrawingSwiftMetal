@@ -308,10 +308,7 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard 
-            inputDevice.update(.finger) != .pencil,
-            let canvasView
-        else { return }
+        guard inputDevice.update(.finger) != .pencil else { return }
 
         fingerScreenTouchManager.append(
             event: event,
@@ -339,7 +336,7 @@ extension CanvasViewModel {
             let grayscaleTextureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
                 guard
                     let textureSize = canvasTexture?.size,
-                    let drawableSize = canvasView.renderTexture?.size
+                    let drawableSize = canvasView?.renderTexture?.size
                 else { return nil }
 
                 return convertScreenTouchPointToTextureDotPoint(
@@ -354,10 +351,7 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            pauseDisplayLinkLoop(
-                drawingCurve.isDrawingFinished,
-                canvasView: canvasView
-            )
+            pauseDisplayLinkLoop(drawingCurve.isDrawingFinished)
 
         case .transforming:
             if canvasTransformer.isCurrentKeysNil {
@@ -423,10 +417,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        guard
-            let drawingCurve,
-            let canvasView
-        else { return }
+        guard let drawingCurve else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         let actualTouchArray = Array(actualTouches).sorted { $0.timestamp < $1.timestamp }
@@ -445,7 +436,7 @@ extension CanvasViewModel {
         let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
             guard
                 let textureSize = canvasTexture?.size,
-                let drawableSize = canvasView.renderTexture?.size
+                let drawableSize = canvasView?.renderTexture?.size
             else { return nil }
 
             return convertScreenTouchPointToTextureDotPoint(
@@ -460,10 +451,7 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        pauseDisplayLinkLoop(
-            drawingCurve.isDrawingFinished,
-            canvasView: canvasView
-        )
+        pauseDisplayLinkLoop(drawingCurve.isDrawingFinished)
     }
 
 }
@@ -622,7 +610,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool, canvasView: CanvasViewProtocol) {
+    private func pauseDisplayLinkLoop(_ pause: Bool) {
         if pause {
             if drawingDisplayLink?.isPaused == false {
                 // Pause the display link after updating the display.
