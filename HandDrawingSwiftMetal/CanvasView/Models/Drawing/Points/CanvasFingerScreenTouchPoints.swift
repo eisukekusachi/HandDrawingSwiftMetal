@@ -28,24 +28,14 @@ extension CanvasFingerScreenTouchPoints {
         touchArrayDictionary.containsPhases([.ended])
     }
 
-    func append(
-        event: UIEvent?,
-        in view: UIView
-    ) {
-        event?.allTouches?.forEach { touch in
-            guard touch.type != .pencil else { return }
-
-            let key: CanvasTouchHashValue = touch.hashValue
-
-            if touch.phase == .began {
+    func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
+        touches.keys.forEach { key in
+            if !touchArrayDictionary.keys.contains(key) {
                 touchArrayDictionary[key] = []
             }
-            touchArrayDictionary[key]?.append(
-                .init(
-                    touch: touch,
-                    view: view
-                )
-            )
+            if let value = touches[key] {
+                touchArrayDictionary[key]?.append(value)
+            }
         }
     }
 

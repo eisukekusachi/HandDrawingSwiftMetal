@@ -319,10 +319,12 @@ extension CanvasViewModel {
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
-        fingerScreenTouchManager.append(
-            event: event,
-            in: view
-        )
+        var dictionary: [CanvasTouchHashValue: CanvasTouchPoint] = [:]
+        event?.allTouches?.forEach { touch in
+            guard touch.type != .pencil else { return }
+            dictionary[touch.hashValue] = .init(touch: touch, view: view)
+        }
+        fingerScreenTouchManager.appendTouches(dictionary)
 
         switch screenTouchGesture.update(
             .init(from: fingerScreenTouchManager.touchArrayDictionary)
