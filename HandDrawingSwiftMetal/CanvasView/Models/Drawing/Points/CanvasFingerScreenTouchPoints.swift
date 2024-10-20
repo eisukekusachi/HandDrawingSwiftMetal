@@ -12,7 +12,7 @@ final class CanvasFingerScreenTouchPoints {
     private (set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently used in the Dictionary
-    var currentDictionaryKey: CanvasTouchHashValue?
+    var dictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
     private var latestTouchPoint: CanvasTouchPoint?
@@ -68,7 +68,7 @@ extension CanvasFingerScreenTouchPoints {
 
     func reset() {
         touchArrayDictionary = [:]
-        currentDictionaryKey = nil
+        dictionaryKey = nil
         latestTouchPoint = nil
     }
 

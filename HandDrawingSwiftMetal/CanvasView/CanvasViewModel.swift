@@ -332,13 +332,13 @@ extension CanvasViewModel {
             if !(drawingCurve is CanvasDrawingCurveWithFinger) {
                 drawingCurve = CanvasDrawingCurveWithFinger()
             }
-            if fingerScreenTouchManager.currentDictionaryKey == nil {
-                fingerScreenTouchManager.currentDictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
+            if fingerScreenTouchManager.dictionaryKey == nil {
+                fingerScreenTouchManager.dictionaryKey = fingerScreenTouchManager.touchArrayDictionary.keys.first
             }
             guard 
                 let drawingCurve,
-                let currentTouchKey = fingerScreenTouchManager.currentDictionaryKey,
-                let screenTouchPoints = fingerScreenTouchManager.getLatestTouchPoints(for: currentTouchKey)
+                let key = fingerScreenTouchManager.dictionaryKey,
+                let screenTouchPoints = fingerScreenTouchManager.getLatestTouchPoints(for: key)
             else { return }
 
             let touchPhase = screenTouchPoints.currentTouchPhase
