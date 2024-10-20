@@ -417,7 +417,7 @@ extension CanvasViewModel {
 
         // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
-            drawingCurve = CanvasDefaultGrayscaleCurveIterator()
+            drawingCurve = CanvasDrawingCurveWithPencil()
             pencilScreenTouchPoints.reset()
         }
 

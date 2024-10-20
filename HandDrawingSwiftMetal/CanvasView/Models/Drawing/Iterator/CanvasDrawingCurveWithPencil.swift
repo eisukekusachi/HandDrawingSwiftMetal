@@ -1,5 +1,5 @@
 //
-//  CanvasDefaultGrayscaleCurveIterator.swift
+//  CanvasDrawingCurveWithPencil.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CanvasDefaultGrayscaleCurveIterator: CanvasDrawingCurve {
+final class CanvasDrawingCurveWithPencil: CanvasDrawingCurve {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
@@ -15,7 +15,7 @@ final class CanvasDefaultGrayscaleCurveIterator: CanvasDrawingCurve {
     private var isFirstCurveHasBeenCreated: Bool = false
 }
 
-extension CanvasDefaultGrayscaleCurveIterator {
+extension CanvasDrawingCurveWithPencil {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
