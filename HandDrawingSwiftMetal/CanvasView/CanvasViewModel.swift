@@ -430,7 +430,7 @@ extension CanvasViewModel {
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         Array(actualTouches).sorted { $0.timestamp < $1.timestamp }.forEach { actualTouch in
-            pencilDrawingArrays.appendActualValueWithEstimatedValue(actualTouch)
+            pencilDrawingArrays.appendActualTouchWithEstimatedValue(actualTouch)
         }
 
         let screenTouchPoints = pencilDrawingArrays.getLatestTouchPoints()

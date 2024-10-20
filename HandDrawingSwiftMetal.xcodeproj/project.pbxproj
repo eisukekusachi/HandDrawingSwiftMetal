@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */; };
 		D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2772C8BEA5E00275138 /* UITouchDummy.swift */; };
-		D400A27C2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */; };
+		D400A27C2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -133,7 +133,7 @@
 /* Begin PBXFileReference section */
 		D400A2752C8BEA5100275138 /* CanvasTouchPointDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTouchPointDummy.swift; sourceTree = "<group>"; };
 		D400A2772C8BEA5E00275138 /* UITouchDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchDummy.swift; sourceTree = "<group>"; };
-		D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilScreenTouchPointsTests.swift; sourceTree = "<group>"; };
+		D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilDrawingArraysTests.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -295,7 +295,7 @@
 		D400A27A2C8BEA7200275138 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D400A27B2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift */,
+				D400A27B2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -890,7 +890,7 @@
 			files = (
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D4517A072CC369FD0047C274 /* CanvasGrayscaleDotPoint.swift in Sources */,
-				D400A27C2C8BEA8800275138 /* CanvasPencilScreenTouchPointsTests.swift in Sources */,
+				D400A27C2C8BEA8800275138 /* CanvasPencilDrawingArraysTests.swift in Sources */,
 				D400A2762C8BEA5100275138 /* CanvasTouchPointDummy.swift in Sources */,
 				D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */,
 			);
