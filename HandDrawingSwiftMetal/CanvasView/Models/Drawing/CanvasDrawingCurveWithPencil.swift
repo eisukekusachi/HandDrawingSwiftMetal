@@ -19,7 +19,13 @@ extension CanvasDrawingCurveWithPencil {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
-        iterator.array.count >= 3 && !isFirstCurveHasBeenCreated
+        let isFirstCurveToBeCreated = iterator.array.count >= 3 && !isFirstCurveHasBeenCreated
+        
+        if isFirstCurveToBeCreated {
+            isFirstCurveHasBeenCreated = true
+        }
+
+        return isFirstCurveToBeCreated
     }
 
     func appendToIterator(
@@ -28,23 +34,6 @@ extension CanvasDrawingCurveWithPencil {
     ) {
         iterator.append(points)
         currentTouchPhase = touchPhase
-    }
-
-    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]? {
-        var array: [CanvasGrayscaleDotPoint] = []
-
-        if hasArrayThreeElementsButNoFirstCurveCreated {
-            array.append(contentsOf: makeFirstCurvePoints())
-            isFirstCurveHasBeenCreated = true
-        }
-
-        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
-
-        if isDrawingComplete {
-            array.append(contentsOf: makeLastCurvePoints())
-        }
-
-        return array.count != 0 ? array : nil
     }
 
     func clear() {

@@ -16,12 +16,12 @@ protocol CanvasDrawingCurve {
 
     var currentTouchPhase: UITouch.Phase { get }
 
+    var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
+
     func appendToIterator(
         points: [T],
         touchPhase: UITouch.Phase
     )
-
-    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]?
 
     func clear()
 }
@@ -40,6 +40,22 @@ extension CanvasDrawingCurve {
 
     var isCurrentlyDrawing: Bool {
         iterator.array.count != 0
+    }
+
+    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]? {
+        var array: [CanvasGrayscaleDotPoint] = []
+
+        if hasArrayThreeElementsButNoFirstCurveCreated {
+            array.append(contentsOf: makeFirstCurvePoints())
+        }
+
+        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
+
+        if isDrawingComplete {
+            array.append(contentsOf: makeLastCurvePoints())
+        }
+
+        return array.count != 0 ? array : nil
     }
 
     /// Makes an array of first curve points from an iterator
