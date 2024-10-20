@@ -337,30 +337,16 @@ extension CanvasViewModel {
             let latestScreenTouchPoints = screenTouchPoints.elements(after: fingerScreenTouchManager.latestCanvasTouchPoint) ?? screenTouchPoints
             fingerScreenTouchManager.latestCanvasTouchPoint = latestScreenTouchPoints.last
 
-            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.map {
-                let textureSize = canvasTexture?.size ?? .zero
-                let drawableSize = canvasView.renderTexture?.size ?? .zero
+            let grayscaleTexturePoints: [CanvasGrayscaleDotPoint] = latestScreenTouchPoints.compactMap {
+                guard 
+                    let textureSize = canvasTexture?.size,
+                    let drawableSize = canvasView.renderTexture?.size
+                else { return nil }
 
-                let textureMatrix = getMatrixAdjustedTranslations(
-                    matrix: canvasTransformer.matrix.inverted(flipY: true),
-                    drawableSize: drawableSize,
-                    textureSize: textureSize
-                )
-                let textureLocation: CGPoint = getLocationConvertedToTextureScale(
-                    screenLocation: $0.location,
-                    screenFrameSize: frameSize,
-                    drawableSize: drawableSize,
-                    textureSize: textureSize
-                )
-                return .init(
-                    touchPoint: .init(
-                        location: textureLocation.apply(
-                            with: textureMatrix,
-                            textureSize: textureSize
-                        ),
-                        touch: $0
-                    ),
-                    diameter: CGFloat(drawingTool.diameter)
+                return convertScreenTouchPointToTextureDotPoint(
+                    touchPoint: $0,
+                    textureSize: textureSize,
+                    drawableSize: drawableSize
                 )
             }
 
@@ -457,30 +443,16 @@ extension CanvasViewModel {
         pencilScreenTouchPoints.updateLatestActualTouchPoint()
 
         // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
-        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.map {
-            let textureSize = canvasTexture?.size ?? .zero
-            let drawableSize = canvasView.renderTexture?.size ?? .zero
+        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = latestScreenTouchArray.compactMap {
+            guard
+                let textureSize = canvasTexture?.size,
+                let drawableSize = canvasView.renderTexture?.size
+            else { return nil }
 
-            let textureMatrix = getMatrixAdjustedTranslations(
-                matrix: canvasTransformer.matrix.inverted(flipY: true),
-                drawableSize: drawableSize,
-                textureSize: textureSize
-            )
-            let textureLocation: CGPoint = getLocationConvertedToTextureScale(
-                screenLocation: $0.location,
-                screenFrameSize: frameSize,
-                drawableSize: drawableSize,
-                textureSize: textureSize
-            )
-            return .init(
-                touchPoint: .init(
-                    location: textureLocation.apply(
-                        with: textureMatrix,
-                        textureSize: textureSize
-                    ),
-                    touch: $0
-                ),
-                diameter: CGFloat(drawingTool.diameter)
+            return convertScreenTouchPointToTextureDotPoint(
+                touchPoint: $0,
+                textureSize: textureSize,
+                drawableSize: drawableSize
             )
         }
 
@@ -684,6 +656,35 @@ extension CanvasViewModel {
                 self.textureLayers.updateThumbnail(index: self.textureLayers.index)
             }
         }
+    }
+
+    private func convertScreenTouchPointToTextureDotPoint(
+        touchPoint: CanvasTouchPoint,
+        textureSize: CGSize,
+        drawableSize: CGSize
+    ) -> CanvasGrayscaleDotPoint {
+
+        let textureMatrix = getMatrixAdjustedTranslations(
+            matrix: canvasTransformer.matrix.inverted(flipY: true),
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        let textureLocation = getLocationConvertedToTextureScale(
+            screenLocation: touchPoint.location,
+            screenFrameSize: frameSize,
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+        return .init(
+            touchPoint: .init(
+                location: textureLocation.apply(
+                    with: textureMatrix,
+                    textureSize: textureSize
+                ),
+                touch: touchPoint
+            ),
+            diameter: CGFloat(drawingTool.diameter)
+        )
     }
 
     private func getLocationConvertedToTextureScale(
