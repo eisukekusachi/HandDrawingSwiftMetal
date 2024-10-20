@@ -378,7 +378,7 @@ extension CanvasViewModel {
         fingerScreenTouchManager.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
         if fingerScreenTouchManager.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
-            initDrawingParameters()
+            resetAllInputParameters()
         }
     }
 
@@ -516,11 +516,11 @@ extension CanvasViewModel {
         }
 
         if drawingCurve.isDrawingFinished {
-            initDrawingParameters()
+            resetAllInputParameters()
         }
     }
 
-    private func initDrawingParameters() {
+    private func resetAllInputParameters() {
         inputDevice.reset()
         screenTouchGesture.reset()
 
