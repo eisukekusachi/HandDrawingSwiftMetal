@@ -24,6 +24,10 @@ extension CanvasFingerScreenTouchPoints {
         touchArrayDictionary.isEmpty
     }
 
+    var isTouchEnded: Bool {
+        touchArrayDictionary.containsPhases([.ended])
+    }
+
     func append(
         event: UIEvent?,
         in view: UIView

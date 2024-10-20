@@ -365,7 +365,7 @@ extension CanvasViewModel {
                 ),
                 fingerScreenTouchManager.touchArrayDictionary
             )
-            if fingerScreenTouchManager.touchArrayDictionary.containsPhases([.ended]) {
+            if fingerScreenTouchManager.isTouchEnded {
                 canvasTransformer.finishTransforming()
             }
 
