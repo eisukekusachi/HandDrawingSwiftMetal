@@ -352,7 +352,7 @@ extension CanvasViewModel {
                     drawableSize: drawableSize,
                     textureSize: textureSize
                 )
-                return CanvasGrayscaleDotPoint.init(
+                return .init(
                     touchPoint: .init(
                         location: textureLocation.apply(
                             with: textureMatrix,
@@ -472,7 +472,7 @@ extension CanvasViewModel {
                 drawableSize: drawableSize,
                 textureSize: textureSize
             )
-            return CanvasGrayscaleDotPoint.init(
+            return .init(
                 touchPoint: .init(
                     location: textureLocation.apply(
                         with: textureMatrix,
