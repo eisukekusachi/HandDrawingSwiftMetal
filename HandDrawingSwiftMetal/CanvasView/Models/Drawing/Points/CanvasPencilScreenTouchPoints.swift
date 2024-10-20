@@ -56,19 +56,6 @@ extension CanvasPencilScreenTouchPoints {
         actualTouchPointArray.last?.estimationUpdateIndex == lastEstimationUpdateIndexAtCompletion
     }
 
-    /// Check if the time difference between the creation of the last element in `actualTouchPointArray` and `latestActualTouchPoint` is within the allowed difference in seconds
-    func hasSufficientTimeElapsedSincePreviousProcess(allowedDifferenceInSeconds seconds: TimeInterval) -> Bool {
-        guard
-            let latestActualTouchPointTimestamp = actualTouchPointArray.last?.timestamp
-        else { return false }
-
-        if let endLineTimestamp = latestActualTouchPoint?.timestamp {
-            return endLineTimestamp.isTimeDifferenceExceeding(latestActualTouchPointTimestamp, allowedDifferenceInSeconds: seconds)
-        } else {
-            return true
-        }
-    }
-
     func appendEstimatedValue(_ touchPoint: CanvasTouchPoint) {
         estimatedTouchPointArray.append(touchPoint)
         updateLastEstimationUpdateIndexAtCompletionForTouchCompletion()

@@ -454,15 +454,6 @@ extension CanvasViewModel {
         }
         guard let grayscaleTextureCurveIterator else { return }
 
-        guard
-            // Wait to ensure sufficient time has passed since the previous process
-            // as the operation may not work correctly if the time difference is too short.
-            pencilScreenTouchPoints.hasSufficientTimeElapsedSincePreviousProcess(allowedDifferenceInSeconds: 0.03) ||
-            [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(
-                pencilScreenTouchPoints.actualTouchPointArray.currentTouchPhase
-            )
-        else { return }
-
         // Retrieve the latest touch points necessary for drawing from the array of stored touch points
         let latestScreenTouchArray = pencilScreenTouchPoints.latestActualTouchPoints
         pencilScreenTouchPoints.updateLatestActualTouchPoint()
