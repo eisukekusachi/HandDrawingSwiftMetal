@@ -101,6 +101,8 @@ final class CanvasViewModel {
 
     private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
 
+    private let runDisplayLinkSubject = PassthroughSubject<Bool, Never>()
+
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()
@@ -153,6 +155,13 @@ final class CanvasViewModel {
                 case .eraser:
                     self.drawingTexture = self.eraserDrawingTexture
                 }
+            }
+            .store(in: &cancellables)
+
+        runDisplayLinkSubject
+            .map { !$0 }
+            .sink { [weak self] isPause in
+                self?.drawingDisplayLink?.isPaused = isPause
             }
             .store(in: &cancellables)
 
@@ -351,7 +360,7 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            pauseDisplayLinkLoop(drawingCurve.isDrawingFinished)
+            runDrawingDisplayLinkToUpdateCanvasView(!drawingCurve.isDrawingFinished)
 
         case .transforming:
             if transformer.isCurrentKeysNil {
@@ -451,7 +460,7 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        pauseDisplayLinkLoop(drawingCurve.isDrawingFinished)
+        runDrawingDisplayLinkToUpdateCanvasView(!drawingCurve.isDrawingFinished)
     }
 
 }
@@ -784,20 +793,13 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
     /// Start or stop the display link loop.
-    private func pauseDisplayLinkLoop(_ pause: Bool) {
-        if pause {
-            if drawingDisplayLink?.isPaused == false {
-                // Pause the display link after updating the display.
-                displayCanvasTextureWhileDrawing()
-                drawingDisplayLink?.isPaused = true
-            }
+    private func runDrawingDisplayLinkToUpdateCanvasView(_ isRunning: Bool) {
+        runDisplayLinkSubject.send(isRunning)
 
-        } else {
-            if drawingDisplayLink?.isPaused == true {
-                drawingDisplayLink?.isPaused = false
-            }
+        // Update `CanvasView` when stopping as the last line isn’t drawn
+        if !isRunning {
+            displayCanvasTextureWhileDrawing()
         }
     }
 
