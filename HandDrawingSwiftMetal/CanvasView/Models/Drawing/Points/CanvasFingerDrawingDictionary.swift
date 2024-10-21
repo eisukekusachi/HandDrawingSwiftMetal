@@ -15,7 +15,12 @@ final class CanvasFingerDrawingDictionary {
     var dictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    private var latestTouchPoint: CanvasTouchPoint?
+    private (set) var latestTouchPoint: CanvasTouchPoint?
+
+    convenience init(touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
+        self.init()
+        self.touchArrayDictionary = touchArrayDictionary
+    }
 
 }
 
@@ -31,15 +36,6 @@ extension CanvasFingerDrawingDictionary {
             }
             return [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(lastTouchPhase)
         }
-    }
-
-    func getFingerTouches(event: UIEvent?) -> [UITouch] {
-        var touches: [UITouch] = []
-        event?.allTouches?.forEach { touch in
-            guard touch.type != .pencil else { return }
-            touches.append(touch)
-        }
-        return touches
     }
 
     func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {

@@ -321,7 +321,7 @@ extension CanvasViewModel {
         guard inputDevice.update(.finger) != .pencil else { return }
 
         var dictionary: [CanvasTouchHashValue: CanvasTouchPoint] = [:]
-        fingerDrawingDictionary.getFingerTouches(event: event).forEach { touch in
+        UITouch.getFingerTouches(event: event).forEach { touch in
             dictionary[touch.hashValue] = .init(touch: touch, view: view)
         }
         fingerDrawingDictionary.appendTouches(dictionary)
