@@ -7,7 +7,7 @@
 
 import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class CanvasBrushDrawingTexture: CanvasDrawingTextureProtocol {
+class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     var drawingTexture: MTLTexture?
 
@@ -49,10 +49,13 @@ extension CanvasBrushDrawingTexture {
     // If drawing is in progress, render both `drawingTexture` and `selectedTexture` onto `targetTexture`.
     func drawDrawingTexture(
         includingSelectedTexture selectedTexture: MTLTexture?,
-        on targetTexture: MTLTexture,
+        on targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let selectedTexture else { return }
+        guard
+            let targetTexture,
+            let selectedTexture
+        else { return }
 
         MTLRenderer.drawTextures(
             [selectedTexture, drawingTexture].compactMap { $0 },

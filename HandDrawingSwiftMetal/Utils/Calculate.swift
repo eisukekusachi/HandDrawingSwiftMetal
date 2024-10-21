@@ -17,6 +17,15 @@ enum Calculate {
         sqrt(pow(vector.dx, 2) + pow(vector.dy, 2))
     }
 
+    /// Get the total distance by connecting points
+    static func getTotalLength(points: [CGPoint]) -> CGFloat {
+        var totalLength: CGFloat = 0.0
+        for i in 0 ..< points.count - 1 {
+            totalLength += getLength(points[i], to: points[i + 1])
+        }
+        return totalLength
+    }
+
     static func getRadian(_ leftHandSide: CGVector, _ rightHandSide: CGVector) -> CGFloat {
         let dotProduct = leftHandSide.dx * rightHandSide.dx + leftHandSide.dy * rightHandSide.dy
         let divisor = Calculate.getLength(leftHandSide) * Calculate.getLength(rightHandSide)

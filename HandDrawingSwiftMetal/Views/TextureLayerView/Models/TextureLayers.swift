@@ -20,7 +20,7 @@ final class TextureLayers: LayerManager<TextureLayer> {
 extension TextureLayers {
     /// Merge the textures of layers on a single texture with the backgroundColor
     func mergeAllTextures(
-        usingCurrentTexture currentTexture: CanvasCurrentTexture? = nil,
+        usingCurrentTexture currentTexture: MTLTexture? = nil,
         backgroundColor: UIColor,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
@@ -44,7 +44,7 @@ extension TextureLayers {
         if layers[index].isVisible {
             if let currentTexture {
                 MTLRenderer.merge(
-                    texture: currentTexture.currentTexture,
+                    texture: currentTexture,
                     alpha: layers[index].alpha,
                     into: destinationTexture,
                     commandBuffer

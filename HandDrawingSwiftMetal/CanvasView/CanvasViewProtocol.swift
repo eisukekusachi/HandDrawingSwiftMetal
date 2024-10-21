@@ -8,11 +8,11 @@
 import MetalKit
 
 protocol CanvasViewProtocol {
-    var commandBuffer: MTLCommandBuffer { get }
+    var commandBuffer: MTLCommandBuffer? { get }
 
     var renderTexture: MTLTexture? { get }
 
-    func clearCommandBuffer()
+    func resetCommandBuffer()
 
     func setNeedsDisplay()
 }

@@ -14,6 +14,7 @@ final class CanvasInputDeviceStatus {
     private (set) var status: T = .undetermined
 
     /// Update the status if it is not .pencil
+    @discardableResult
     func update(_ newStatus: T) -> T {
         if status != .pencil {
             status = newStatus

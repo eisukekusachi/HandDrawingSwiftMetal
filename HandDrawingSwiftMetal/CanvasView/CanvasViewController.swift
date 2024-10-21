@@ -37,8 +37,7 @@ class CanvasViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
-            contentView.canvasView.drawableSize,
-            canvasView: contentView.canvasView
+            contentView.canvasView.drawableSize
         )
     }
 
@@ -51,6 +50,9 @@ class CanvasViewController: UIViewController {
 
 extension CanvasViewController {
     private func setupCanvasViewModel() {
+
+        canvasViewModel.setCanvasView(contentView.canvasView)
+
         // Initialize the canvas with `CGSize`,
         // if not initialized here, it will be initialized with the screen size
         // when `func viewDidAppear` is called.
@@ -67,20 +69,14 @@ extension CanvasViewController {
         subscribeEvents()
 
         contentView.tapResetTransformButton = { [weak self] in
-            guard let `self` else { return }
-            self.canvasViewModel.didTapResetTransformButton(
-                canvasView: self.contentView.canvasView
-            )
+            self?.canvasViewModel.didTapResetTransformButton()
         }
 
         contentView.tapLayerButton = { [weak self] in
             self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            guard let `self` else { return }
-            self.canvasViewModel.didTapSaveButton(
-                canvasView: self.contentView.canvasView
-            )
+            self?.canvasViewModel.didTapSaveButton()
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
@@ -119,10 +115,6 @@ extension CanvasViewController {
     }
 
     private func bindViewModel() {
-        canvasViewModel.pauseDisplayLinkPublisher
-            .assign(to: \.isDisplayLinkPaused, on: contentView)
-            .store(in: &cancellables)
-
         canvasViewModel.requestShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
@@ -156,22 +148,14 @@ extension CanvasViewController {
         canvasViewModel.refreshCanvasPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
-                guard let `self` else { return }
-                self.canvasViewModel.apply(
-                    model: model,
-                    to: self.contentView.canvasView
-                )
+                self?.canvasViewModel.apply(model: model)
             }
             .store(in: &cancellables)
 
         canvasViewModel.refreshCanvasWithUndoObjectPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] undoObject in
-                guard let `self` else { return }
-                self.canvasViewModel.apply(
-                    undoObject: undoObject,
-                    to: self.contentView.canvasView
-                )
+                self?.canvasViewModel.apply(undoObject: undoObject)
             }
             .store(in: &cancellables)
 
@@ -194,10 +178,7 @@ extension CanvasViewController {
 
         contentView.canvasView.updateTexturePublisher
             .sink { [weak self] in
-                guard let `self` else { return }
-                self.canvasViewModel.onUpdateRenderTexture(
-                    canvasView: self.contentView.canvasView
-                )
+                self?.canvasViewModel.onUpdateRenderTexture()
             }
             .store(in: &cancellables)
 
@@ -209,10 +190,7 @@ extension CanvasViewController {
 
     func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            guard let `self` else { return }
-            self.canvasViewModel.didTapNewCanvasButton(
-                canvasView: self.contentView.canvasView
-            )
+            self?.canvasViewModel.didTapNewCanvasButton()
         }
     }
 
@@ -221,38 +199,24 @@ extension CanvasViewController {
             textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in
-                guard let `self` else { return }
-                self.canvasViewModel.didTapLayer(
-                    layer: layer,
-                    canvasView: self.contentView.canvasView
-                )
+                self?.canvasViewModel.didTapLayer(layer: layer)
             },
             didTapAddButton: { [weak self] in
-                guard let `self` else { return }
-                self.canvasViewModel.didTapAddLayerButton(
-                    canvasView: self.contentView.canvasView
-                )
+                self?.canvasViewModel.didTapAddLayerButton()
             },
             didTapRemoveButton: { [weak self] in
-                guard let `self` else { return }
-                self.canvasViewModel.didTapRemoveLayerButton(
-                    canvasView: self.contentView.canvasView
-                )
+                self?.canvasViewModel.didTapRemoveLayerButton()
             },
             didTapVisibility: { [weak self] layer, value in
-                guard let `self` else { return }
-                self.canvasViewModel.didTapLayerVisibility(
+                self?.canvasViewModel.didTapLayerVisibility(
                     layer: layer,
-                    isVisible: value,
-                    canvasView: self.contentView.canvasView
+                    isVisible: value
                 )
             },
             didChangeAlpha: { [weak self] layer, value in
-                guard let `self` else { return }
-                self.canvasViewModel.didChangeLayerAlpha(
+                self?.canvasViewModel.didChangeLayerAlpha(
                     layer: layer,
-                    value: value,
-                    canvasView: self.contentView.canvasView
+                    value: value
                 )
             },
             didEditTitle: { [weak self] layer, value in
@@ -262,12 +226,11 @@ extension CanvasViewController {
                 )
             },
             didMove: { [weak self] layer, source, destination in
-                guard let `self` else { return }
-                self.canvasViewModel.didMoveLayers(
-                    layer: layer, 
+                self?.canvasViewModel.didMoveLayers(
+                    layer: layer,
                     source: source,
-                    destination: destination,
-                    canvasView: self.contentView.canvasView)
+                    destination: destination
+                )
             },
             on: self
         )
@@ -307,8 +270,7 @@ extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
         canvasViewModel.onFingerGestureDetected(
             touches: touches,
             with: event,
-            view: view,
-            canvasView: contentView.canvasView
+            view: view
         )
     }
 
@@ -320,16 +282,14 @@ extension CanvasViewController: CanvasPencilInputGestureRecognizerSender {
         canvasViewModel.onPencilGestureDetected(
             estimatedTouches: touches,
             with: event,
-            view: view,
-            canvasView: contentView.canvasView
+            view: view
         )
     }
 
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView) {
         canvasViewModel.onPencilGestureDetected(
             actualTouches: touches,
-            view: view,
-            canvasView: contentView.canvasView
+            view: view
         )
     }
 
