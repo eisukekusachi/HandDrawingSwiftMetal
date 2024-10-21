@@ -369,14 +369,15 @@ extension CanvasViewModel {
                 transformer.initTransforming(fingerDrawingDictionary.touchArrayDictionary)
             }
 
-            transformer.transformCanvas(
-                screenCenter: .init(
-                    x: frameSize.width * 0.5,
-                    y: frameSize.height * 0.5
-                ),
-                fingerDrawingDictionary.touchArrayDictionary
-            )
-            if fingerDrawingDictionary.hasFingersLiftedOffScreen {
+            if !fingerDrawingDictionary.hasFingersLiftedOffScreen {
+                transformer.transformCanvas(
+                    screenCenter: .init(
+                        x: frameSize.width * 0.5,
+                        y: frameSize.height * 0.5
+                    ),
+                    fingerDrawingDictionary.touchArrayDictionary
+                )
+            } else {
                 transformer.finishTransforming()
             }
 
