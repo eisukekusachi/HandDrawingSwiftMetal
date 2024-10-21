@@ -301,9 +301,8 @@
 		D400A27A2C8BEA7200275138 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D4837AEB2CC5EC3400BD25F5 /* Drawing */,
 				D400A27B2C8BEA8800275138 /* CanvasDrawingCurveWithPencilTests.swift */,
-				D4837AE72CC5080E00BD25F5 /* CanvasFingerDrawingDictionaryTests.swift */,
-				D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -554,6 +553,23 @@
 				D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */,
 			);
 			path = Status;
+			sourceTree = "<group>";
+		};
+		D4837AEB2CC5EC3400BD25F5 /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				D4837AEC2CC5EC3900BD25F5 /* Points */,
+			);
+			path = Drawing;
+			sourceTree = "<group>";
+		};
+		D4837AEC2CC5EC3900BD25F5 /* Points */ = {
+			isa = PBXGroup;
+			children = (
+				D4837AE72CC5080E00BD25F5 /* CanvasFingerDrawingDictionaryTests.swift */,
+				D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */,
+			);
+			path = Points;
 			sourceTree = "<group>";
 		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
