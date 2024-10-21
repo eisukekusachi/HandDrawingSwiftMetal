@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// Manages real-time smooth curve drawing using two iterators and touch phases
 final class CanvasDrawingCurveWithFinger: CanvasDrawingCurve {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
@@ -14,7 +15,7 @@ final class CanvasDrawingCurveWithFinger: CanvasDrawingCurve {
 
     private var isFirstCurveHasBeenCreated: Bool = false
 
-    private var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
+    private (set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
 }
 
