@@ -170,7 +170,7 @@ final class CanvasViewModel {
     }
 
     private func setupDisplayLink() {
-        // Configure the display link for rendering.
+        // Configure the display link for rendering
         drawingDisplayLink = CADisplayLink(target: self, selector: #selector(displayCanvasTextureWhileDrawing))
         drawingDisplayLink?.add(to: .current, forMode: .common)
         drawingDisplayLink?.isPaused = true
@@ -310,9 +310,7 @@ extension CanvasViewModel {
         textureLayerUndoManager.updateUndoComponents()
     }
 
-    // Manage all finger positions on the screen using a Dictionary,
-    // determine the gesture from it,
-    // and based on that, either draw a line on the canvas or transform the canvas.
+    /// Manages all finger positions on the screen using a dictionary
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -326,6 +324,7 @@ extension CanvasViewModel {
         }
         fingerDrawingDictionary.appendTouches(dictionary)
 
+        // determine the gesture from the dictionary, and based on that, either draw a line on the canvas or transform the canvas
         switch screenTouchGesture.update(
             .init(from: fingerDrawingDictionary.touchArrayDictionary)
         ) {
@@ -344,7 +343,8 @@ extension CanvasViewModel {
 
             let touchPhase = screenTouchPoints.currentTouchPhase
 
-            let grayscaleTextureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
+            // Convert screen scale points to texture scale
+            let textureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
                 guard
                     let textureSize = canvasTexture?.size,
                     let drawableSize = canvasView?.renderTexture?.size
@@ -358,7 +358,7 @@ extension CanvasViewModel {
             }
 
             drawingCurve.appendToIterator(
-                points: grayscaleTextureDotPoints,
+                points: textureDotPoints,
                 touchPhase: touchPhase
             )
 
@@ -440,8 +440,8 @@ extension CanvasViewModel {
 
         let touchPhase = screenTouchPoints.currentTouchPhase
 
-        // Convert screen scale points to texture scale, and apply the canvas transformation values to the points
-        let latestTextureTouchArray: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
+        // Convert screen scale points to texture scale
+        let textureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
             guard
                 let textureSize = canvasTexture?.size,
                 let drawableSize = canvasView?.renderTexture?.size
@@ -455,7 +455,7 @@ extension CanvasViewModel {
         }
 
         drawingCurve.appendToIterator(
-            points: latestTextureTouchArray,
+            points: textureDotPoints,
             touchPhase: touchPhase
         )
 
@@ -792,7 +792,7 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Start or stop the display link loop.
+    /// Starts or stops the display link loop
     private func runDrawingDisplayLinkToUpdateCanvasView(_ isRunning: Bool) {
         runDisplayLinkSubject.send(isRunning)
 
