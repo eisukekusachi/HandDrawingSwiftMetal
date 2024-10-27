@@ -22,8 +22,8 @@ enum MTKTextureUtils {
             .shaderWrite]
         return device.makeTexture(descriptor: textureDescriptor)
     }
-    static func makeTexture(_ device: MTLDevice, fromBundleImage imageName: String) -> MTLTexture? {
-        guard let image = UIImage(named: imageName)?.cgImage else {
+    static func makeTexture(device: MTLDevice, bundleImageName: String) -> MTLTexture? {
+        guard let image = UIImage(named: bundleImageName)?.cgImage else {
             return nil
         }
 
@@ -47,10 +47,14 @@ enum MTKTextureUtils {
                                        height: vImagePixelCount(image.height),
                                        width: vImagePixelCount(image.width),
                                        rowBytes: bytesPerRow)
+        defer { bgraBytes.deallocate() }
+
         var rgbaBuffer = vImage_Buffer(data: rgbaBytes,
                                        height: vImagePixelCount(image.height),
                                        width: vImagePixelCount(image.width),
                                        rowBytes: bytesPerRow)
+        defer { rgbaBytes.deallocate() }
+
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: w, height: h, mipmapped: false)
@@ -62,8 +66,6 @@ enum MTKTextureUtils {
                          withBytes: bgraBytes,
                          bytesPerRow: bytesPerRow,
                          bytesPerImage: bytesPerRow * h)
-        rgbaBytes.deallocate()
-        bgraBytes.deallocate()
 
         return texture
     }

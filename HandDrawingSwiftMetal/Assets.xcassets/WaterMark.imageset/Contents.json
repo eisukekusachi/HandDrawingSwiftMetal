@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "cat_kotatsu_neko.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -299,16 +299,75 @@ extension CanvasViewModel {
             )
         }
 
-        displayCanvasTextureWithMergedLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
-        )
+        if let device,
+           let targetTexture = textureLayers.selectedLayer?.texture,
+           let imageTexture = MTKTextureUtils.makeTexture(device: device, bundleImageName: "WaterMark"),
+           let commandBuffer = canvasView.commandBuffer,
+           let textureBuffers = MTLBuffers.makeTextureBuffers(
+            device: device,
+            nodes: getTextureNode(
+                frame: .init(origin: .init(x: 100, y: 100), size: .init(width: imageTexture.size.width * 2, height: imageTexture.size.height * 2)),
+                targetTextureSize: targetTexture.size
+            )
+           ) {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: targetTexture,
+                with: commandBuffer
+            )
+
+            textureLayers.mergeAllTextures(
+                backgroundColor: drawingTool.backgroundColor,
+                on: canvasTexture,
+                with: commandBuffer
+            )
+        }
+
+        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
 
         // Update the display of the Undo and Redo buttons
         textureLayerUndoManager.updateUndoComponents()
     }
+
+    func getTextureNode(frame: CGRect, targetTextureSize: CGSize) -> TextureNodes {
+        let leftTop: CGPoint = .init(
+            x: (frame.origin.x / targetTextureSize.width) * 2.0 - 1.0,
+            y: (frame.origin.y / targetTextureSize.height) * 2.0 - 1.0
+        )
+        let leftBottom: CGPoint = .init(
+            x: (frame.origin.x / targetTextureSize.width) * 2.0 - 1.0,
+            y: ((frame.origin.y + frame.size.height) / targetTextureSize.height) * 2.0 - 1.0
+        )
+        let rightTop: CGPoint = .init(
+            x: ((frame.origin.x + frame.size.width) / targetTextureSize.width) * 2.0 - 1.0,
+            y: (frame.origin.y / targetTextureSize.height) * 2.0 - 1.0
+        )
+        let rightBottom: CGPoint = .init(
+            x: ((frame.origin.x + frame.size.width) / targetTextureSize.width) * 2.0 - 1.0,
+            y: ((frame.origin.y + frame.size.height) / targetTextureSize.height) * 2.0 - 1.0
+        )
+
+        return (
+            vertices: [
+                Float(leftBottom.x), Float(leftBottom.y), // LB
+                Float(rightBottom.x), Float(rightBottom.y), // RB
+                Float(rightTop.x), Float(rightTop.y), // RT
+                Float(leftTop.x), Float(leftTop.y)  // LT
+            ],
+            texCoords: [
+                0.0, 1.0, // LB
+                1.0, 1.0, // RB
+                1.0, 0.0, // RT
+                0.0, 0.0  // LT
+            ],
+            indices: [
+                0, 1, 2,
+                0, 2, 3
+            ]
+        )
+    }
+
 
     /// Manages all finger positions on the screen using a dictionary
     func onFingerGestureDetected(
