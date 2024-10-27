@@ -313,6 +313,7 @@ extension CanvasViewModel {
             MTLRenderer.drawTexture(
                 texture: imageTexture,
                 buffers: textureBuffers,
+                withBackgroundColor: .clear,
                 on: targetTexture,
                 with: commandBuffer
             )
@@ -828,7 +829,7 @@ extension CanvasViewModel {
         MTLRenderer.drawTexture(
             texture: sourceTexture,
             buffers: sourceTextureBuffers,
-            withBackgroundColor: Constants.blankAreaBackgroundColor,
+            withBackgroundColor: .init(230, 230, 230),
             on: destinationTexture,
             with: commandBuffer
         )

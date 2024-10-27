@@ -34,7 +34,7 @@ enum MTLRenderer {
     static func drawTexture(
         texture: MTLTexture,
         buffers: TextureBuffers,
-        withBackgroundColor color: (Int, Int, Int)? = nil,
+        withBackgroundColor color: UIColor? = nil,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -44,12 +44,12 @@ enum MTLRenderer {
         descriptor.colorAttachments[0].texture = destinationTexture
         descriptor.colorAttachments[0].loadAction = .clear
 
-        if let color {
+        if let rgba = color?.rgba {
             descriptor.colorAttachments[0].clearColor = MTLClearColorMake(
-                min(CGFloat(color.0) / 255.0, 1.0),
-                min(CGFloat(color.1) / 255.0, 1.0),
-                min(CGFloat(color.2) / 255.0, 1.0),
-                CGFloat(1.0)
+                CGFloat(rgba.0) / 255.0,
+                CGFloat(rgba.1) / 255.0,
+                CGFloat(rgba.2) / 255.0,
+                CGFloat(rgba.3) / 255.0
             )
         }
 
