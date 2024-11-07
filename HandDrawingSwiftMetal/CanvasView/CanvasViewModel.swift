@@ -709,8 +709,6 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        displayCanvasTexture(canvasTexture, on: canvasView)
-
         if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
@@ -718,6 +716,8 @@ extension CanvasViewModel {
         if drawingCurve.isDrawingFinished {
             resetAllInputParameters()
         }
+
+        displayCanvasTexture(canvasTexture, on: canvasView)
     }
 
     private func displayCanvasTextureWithMergedLayers(
