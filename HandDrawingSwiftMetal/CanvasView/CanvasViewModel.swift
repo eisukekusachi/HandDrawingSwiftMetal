@@ -769,7 +769,7 @@ extension CanvasViewModel {
         MTLRenderer.drawTexture(
             texture: sourceTexture,
             buffers: sourceTextureBuffers,
-            withBackgroundColor: Constants.blankAreaBackgroundColor,
+            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
             on: destinationTexture,
             with: commandBuffer
         )
