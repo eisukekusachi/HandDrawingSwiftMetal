@@ -381,7 +381,7 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+            displayCanvasTexture(canvasTexture, on: canvasView)
 
         default:
             break
@@ -481,7 +481,7 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        displayCanvasTexture(canvasTexture, on: canvasView)
     }
 
     func didTapNewCanvasButton() {
@@ -709,7 +709,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        displayCanvasTexture(canvasTexture, on: canvasView)
 
         if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
@@ -741,16 +741,16 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        displayCanvasTexture(canvasTexture, on: canvasView)
     }
 
     private func displayCanvasTexture(
-        canvasTexture: MTLTexture?,
+        _ texture: MTLTexture?,
         on canvasView: CanvasViewProtocol?
     ) {
         guard
             let device,
-            let sourceTexture = canvasTexture,
+            let sourceTexture = texture,
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 device: device,
@@ -831,7 +831,7 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        displayCanvasTexture(canvasTexture, on: canvasView)
     }
 
 }
