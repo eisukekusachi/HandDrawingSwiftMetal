@@ -21,7 +21,10 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     required init() {
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            device: device,
+            nodes: MTLTextureNodes.flippedTextureNodes
+        )
     }
 
 }

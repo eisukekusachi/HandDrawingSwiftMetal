@@ -761,7 +761,7 @@ extension CanvasViewModel {
                     height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
                 ),
                 destinationSize: destinationTexture.size,
-                nodes: textureNodes
+                nodes: MTLTextureNodes.textureNodes
             ),
             let commandBuffer = canvasView?.commandBuffer
         else { return }
