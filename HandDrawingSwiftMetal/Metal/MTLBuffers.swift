@@ -7,62 +7,48 @@
 
 import MetalKit
 
-typealias GrayscalePointBuffers = (
-    vertexBuffer: MTLBuffer,
-    diameterIncludingBlurBuffer: MTLBuffer,
-    brightnessBuffer: MTLBuffer,
-    blurSizeBuffer: MTLBuffer,
-    numberOfPoints: Int
-)
+struct GrayscalePointBuffers {
+    let vertexBuffer: MTLBuffer
+    let diameterIncludingBlurBuffer: MTLBuffer
+    let brightnessBuffer: MTLBuffer
+    let blurSizeBuffer: MTLBuffer
+    let numberOfPoints: Int
+}
 
-typealias TextureBuffers = (
-    vertexBuffer: MTLBuffer,
-    texCoordsBuffer: MTLBuffer,
-    indexBuffer: MTLBuffer,
-    indicesCount: Int
-)
+struct TextureBuffers {
+    let vertexBuffer: MTLBuffer
+    let texCoordsBuffer: MTLBuffer
+    let indexBuffer: MTLBuffer
+    let indicesCount: Int
+}
 
-typealias TextureNodes = (
-    vertices: [Float],
-    texCoords: [Float],
-    indices: [UInt16]
-)
-
-let textureNodes: TextureNodes = (
-    vertices: [
+struct TextureNodes {
+    var vertices: [Float] = [
         Float(-1.0), Float( 1.0), // LB
         Float( 1.0), Float( 1.0), // RB
         Float( 1.0), Float(-1.0), // RT
         Float(-1.0), Float(-1.0)  // LT
-    ],
-    texCoords: [
+    ]
+    var texCoords: [Float] = [
         0.0, 1.0, // LB *
         1.0, 1.0, // RB *
         1.0, 0.0, // RT
         0.0, 0.0  // LT
-    ],
-    indices: [
+    ]
+    var indices: [UInt16] = [
         0, 1, 2,
         0, 2, 3
     ]
-)
+}
 
-let flippedTextureNodes: TextureNodes = (
-    vertices: [
-        Float(-1.0), Float( 1.0), // LB
-        Float( 1.0), Float( 1.0), // RB
-        Float( 1.0), Float(-1.0), // RT
-        Float(-1.0), Float(-1.0)  // LT
-    ],
+let textureNodes: TextureNodes = .init()
+
+let flippedTextureNodes: TextureNodes = .init(
     texCoords: [
         0.0, 0.0, // LB *
         1.0, 0.0, // RB *
         1.0, 1.0, // RT
         0.0, 1.0  // LT
-    ],
-    indices: [
-        0, 1, 2,
-        0, 2, 3
     ]
 )
 
@@ -116,7 +102,7 @@ enum MTLBuffers {
             let blurSizeBuffer
         else { return nil }
 
-        return (
+        return .init(
             vertexBuffer: vertexBuffer,
             diameterIncludingBlurBuffer: diameterIncludingBlurSizeBuffer,
             brightnessBuffer: alphaBuffer,
@@ -139,7 +125,7 @@ enum MTLBuffers {
             let indexBuffer = device?.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size)
         else { return nil }
 
-        return (
+        return .init(
             vertexBuffer: vertexBuffer,
             texCoordsBuffer: texCoordsBuffer,
             indexBuffer: indexBuffer,
@@ -271,7 +257,7 @@ enum MTLBuffers {
             return nil
         }
 
-        return (
+        return .init(
             vertexBuffer: vertexBuffer,
             texCoordsBuffer: texCoordsBuffer,
             indexBuffer: indexBuffer,
