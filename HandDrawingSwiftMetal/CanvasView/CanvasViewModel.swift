@@ -381,7 +381,7 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            displayCanvasTexture(canvasTexture, on: canvasView)
+            updateCanvasWithTexture(canvasTexture, on: canvasView)
 
         default:
             break
@@ -481,7 +481,7 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
 
-        displayCanvasTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
     func didTapNewCanvasButton() {
@@ -717,7 +717,7 @@ extension CanvasViewModel {
             resetAllInputParameters()
         }
 
-        displayCanvasTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
     private func displayCanvasTextureWithMergedLayers(
@@ -741,10 +741,10 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        displayCanvasTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
-    private func displayCanvasTexture(
+    private func updateCanvasWithTexture(
         _ texture: MTLTexture?,
         on canvasView: CanvasViewProtocol?
     ) {
@@ -831,7 +831,7 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        displayCanvasTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
 }
