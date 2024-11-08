@@ -109,7 +109,8 @@ enum MTLBuffers {
         frameSize: CGSize,
         sourceSize: CGSize,
         destinationSize: CGSize,
-        nodes: MTLTextureNodes
+        textureCoord: MTLTextureCoordinates = MTLTextureNodes.screenTextureCoordinates,
+        indices: MTLTextureIndices = MTLTextureNodes.textureIndices
     ) -> TextureBuffers? {
         guard let device else { return nil }
 
@@ -207,8 +208,8 @@ enum MTLBuffers {
             Float(leftTop.y / destinationSize.height) * 2.0 - 1.0
         ]
 
-        let textureCoord = nodes.textureCoord.getValues()
-        let indices = nodes.indices.getValues()
+        let textureCoord = textureCoord.getValues()
+        let indices = indices.getValues()
 
         // Create buffers
         guard
