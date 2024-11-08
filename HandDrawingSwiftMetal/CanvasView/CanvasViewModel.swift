@@ -230,7 +230,7 @@ final class CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -256,7 +256,7 @@ final class CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -508,7 +508,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -531,7 +531,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -561,7 +561,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -579,7 +579,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -598,7 +598,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -649,7 +649,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -724,18 +724,13 @@ extension CanvasViewModel {
         textureLayers: TextureLayers,
         canvasTexture: MTLTexture?,
         canvasTextureBackgroundColor: UIColor,
-        isUnselectedLayerMergeNeeded: Bool = false,
+        shouldUpdateAllLayers: Bool = false,
         on canvasView: CanvasViewProtocol?
     ) {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
-        if isUnselectedLayerMergeNeeded {
-            textureLayers.updateUnselectedLayers(
-                to: commandBuffer
-            )
-        }
-
         textureLayers.mergeAllTextures(
+            shouldUpdateAllLayers: shouldUpdateAllLayers,
             backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
             with: commandBuffer

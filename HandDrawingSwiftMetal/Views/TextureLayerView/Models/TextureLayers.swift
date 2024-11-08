@@ -21,6 +21,7 @@ extension TextureLayers {
     /// Merge the textures of layers on a single texture with the backgroundColor
     func mergeAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
+        shouldUpdateAllLayers: Bool = false,
         backgroundColor: UIColor,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
@@ -28,6 +29,12 @@ extension TextureLayers {
         guard
             let destinationTexture
         else { return }
+
+        if shouldUpdateAllLayers {
+            updateUnselectedLayers(
+                to: commandBuffer
+            )
+        }
 
         MTLRenderer.fill(
             destinationTexture,
