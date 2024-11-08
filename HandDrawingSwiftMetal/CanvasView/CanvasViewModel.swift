@@ -683,10 +683,10 @@ extension CanvasViewModel {
             }
         }
 
-        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
-        drawingTexture?.drawDrawingTexture(
-            includingSelectedTexture: textureLayers.selectedLayer?.texture,
-            on: currentTexture,
+        // Render `selectedLayer.texture` and `drawingTexture` onto currentTexture
+        drawingTexture?.renderDrawingTexture(
+            withSelectedTexture: textureLayers.selectedLayer?.texture,
+            onto: currentTexture,
             with: commandBuffer
         )
 

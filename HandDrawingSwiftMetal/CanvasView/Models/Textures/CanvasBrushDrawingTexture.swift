@@ -45,11 +45,11 @@ extension CanvasBrushDrawingTexture {
         clearDrawingTexture(commandBuffer)
     }
 
-    // Render `selectedTexture` onto `targetTexture`
-    // If drawing is in progress, render both `drawingTexture` and `selectedTexture` onto `targetTexture`.
-    func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture?,
-        on targetTexture: MTLTexture?,
+    /// Renders `selectedTexture` onto `targetTexture`.
+    /// If a drawing operation is in progress, it renders both `drawingTexture` and `selectedTexture` onto `targetTexture`.
+    func renderDrawingTexture(
+        withSelectedTexture selectedTexture: MTLTexture?,
+        onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard

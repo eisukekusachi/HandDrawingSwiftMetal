@@ -23,10 +23,10 @@ protocol CanvasDrawingTexture {
     /// Returns an array containing the currently selected texture and the currently drawing texture
     func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?]
 
-    /// Combine `selectedTexture` and `drawingTexture`, then render them onto currentTexture
-    func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture?,
-        on targetTexture: MTLTexture?,
+    /// Renders `selectedTexture` and `drawingTexture`, then render them onto targetTexture
+    func renderDrawingTexture(
+        withSelectedTexture selectedTexture: MTLTexture?,
+        onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     )
 
