@@ -171,7 +171,7 @@ final class CanvasViewModel {
 
     private func setupDisplayLink() {
         // Configure the display link for rendering
-        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(displayCanvasTextureWhileDrawing))
+        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(updateCanvasViewWhileDrawing))
         drawingDisplayLink?.add(to: .current, forMode: .common)
         drawingDisplayLink?.isPaused = true
     }
@@ -226,11 +226,11 @@ final class CanvasViewModel {
 
         canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -252,11 +252,11 @@ final class CanvasViewModel {
 
         MTLRenderer.clear(texture: currentTexture, commandBuffer)
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -276,7 +276,7 @@ extension CanvasViewModel {
         }
 
         // Redraws the canvas when the device rotates and the canvas size changes.
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
@@ -299,7 +299,7 @@ extension CanvasViewModel {
             )
         }
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
@@ -381,7 +381,7 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+            updateCanvasWithTexture(canvasTexture, on: canvasView)
 
         default:
             break
@@ -481,7 +481,7 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
     func didTapNewCanvasButton() {
@@ -504,11 +504,11 @@ extension CanvasViewModel {
 
         currentTexture = MTKTextureUtils.makeTexture(device, renderTextureSize)
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -527,11 +527,11 @@ extension CanvasViewModel {
 
         textureLayers.index = index
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -557,11 +557,11 @@ extension CanvasViewModel {
             textureLayers.updateThumbnail(index: index)
         }
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -575,11 +575,11 @@ extension CanvasViewModel {
 
         textureLayers.removeLayer(layer)
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -594,11 +594,11 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -613,7 +613,7 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
@@ -645,11 +645,11 @@ extension CanvasViewModel {
             toOffset: destination
         )
 
-        displayCanvasTextureWithMergedLayers(
+        updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            isUnselectedLayerMergeNeeded: true,
+            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -658,7 +658,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    @objc private func displayCanvasTextureWhileDrawing() {
+    @objc private func updateCanvasViewWhileDrawing() {
         guard
             let drawingCurve,
             let commandBuffer = canvasView?.commandBuffer
@@ -683,10 +683,10 @@ extension CanvasViewModel {
             }
         }
 
-        // Combine `selectedLayer.texture` and `drawingTexture`, then render them onto currentTexture
-        drawingTexture?.drawDrawingTexture(
-            includingSelectedTexture: textureLayers.selectedLayer?.texture,
-            on: currentTexture,
+        // Render `selectedLayer.texture` and `drawingTexture` onto currentTexture
+        drawingTexture?.renderDrawingTexture(
+            withSelectedTexture: textureLayers.selectedLayer?.texture,
+            onto: currentTexture,
             with: commandBuffer
         )
 
@@ -702,15 +702,6 @@ extension CanvasViewModel {
             )
         }
 
-        textureLayers.mergeAllTextures(
-            usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            on: canvasTexture,
-            with: commandBuffer
-        )
-
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
-
         if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
@@ -718,42 +709,46 @@ extension CanvasViewModel {
         if drawingCurve.isDrawingFinished {
             resetAllInputParameters()
         }
+
+        updateCanvasViewWithTextureLayers(
+            textureLayers: textureLayers,
+            usingCurrentTexture: currentTexture,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
+        )
     }
 
-    private func displayCanvasTextureWithMergedLayers(
+    private func updateCanvasViewWithTextureLayers(
         textureLayers: TextureLayers,
+        usingCurrentTexture: MTLTexture? = nil,
         canvasTexture: MTLTexture?,
         canvasTextureBackgroundColor: UIColor,
-        isUnselectedLayerMergeNeeded: Bool = false,
+        shouldUpdateAllLayers: Bool = false,
         on canvasView: CanvasViewProtocol?
     ) {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
-        if isUnselectedLayerMergeNeeded {
-            textureLayers.updateUnselectedLayers(
-                to: commandBuffer
-            )
-        }
-
         textureLayers.mergeAllTextures(
+            usingCurrentTexture: usingCurrentTexture,
+            shouldUpdateAllLayers: shouldUpdateAllLayers,
             backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
             with: commandBuffer
         )
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
-    private func displayCanvasTexture(
-        canvasTexture: MTLTexture?,
+    private func updateCanvasWithTexture(
+        _ texture: MTLTexture?,
         on canvasView: CanvasViewProtocol?
     ) {
         guard
             let device,
-            let sourceTexture = canvasTexture,
+            let sourceTexture = texture,
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                device: device,
                 matrix: transformer.matrix,
                 frameSize: frameSize,
                 sourceSize: .init(
@@ -761,7 +756,7 @@ extension CanvasViewModel {
                     height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
                 ),
                 destinationSize: destinationTexture.size,
-                nodes: textureNodes
+                with: device
             ),
             let commandBuffer = canvasView?.commandBuffer
         else { return }
@@ -769,7 +764,7 @@ extension CanvasViewModel {
         MTLRenderer.drawTexture(
             texture: sourceTexture,
             buffers: sourceTextureBuffers,
-            withBackgroundColor: Constants.blankAreaBackgroundColor,
+            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
             on: destinationTexture,
             with: commandBuffer
         )
@@ -798,7 +793,7 @@ extension CanvasViewModel {
 
         // Update `CanvasView` when stopping as the last line isn’t drawn
         if !isRunning {
-            displayCanvasTextureWhileDrawing()
+            updateCanvasViewWhileDrawing()
         }
     }
 
@@ -831,7 +826,7 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        displayCanvasTexture(canvasTexture: canvasTexture, on: canvasView)
+        updateCanvasWithTexture(canvasTexture, on: canvasView)
     }
 
 }

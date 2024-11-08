@@ -21,7 +21,10 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     required init() {
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(device: device, nodes: flippedTextureNodes)
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: MTLTextureNodes.flippedTextureNodes,
+            with: device
+        )
     }
 
 }
@@ -75,11 +78,11 @@ extension CanvasEraserDrawingTexture {
         isDrawing = false
     }
 
-    // Render `selectedTexture` onto `targetTexture`
-    // If drawing is in progress, render `eraserTexture` onto `targetTexture`.
-    func drawDrawingTexture(
-        includingSelectedTexture selectedTexture: MTLTexture?,
-        on targetTexture: MTLTexture?,
+    /// Renders `selectedTexture` onto `targetTexture`
+    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
+    func renderDrawingTexture(
+        withSelectedTexture selectedTexture: MTLTexture?,
+        onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -116,10 +119,10 @@ extension CanvasEraserDrawingTexture {
         guard
             let textureSize = drawingTexture?.size,
             let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
-                device: device,
                 points: points,
                 alpha: alpha,
-                textureSize: textureSize
+                textureSize: textureSize,
+                with: device
             )
         else { return }
 
