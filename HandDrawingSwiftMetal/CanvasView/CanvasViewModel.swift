@@ -702,13 +702,6 @@ extension CanvasViewModel {
             )
         }
 
-        textureLayers.mergeAllTextures(
-            usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            on: canvasTexture,
-            with: commandBuffer
-        )
-
         if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
@@ -717,11 +710,18 @@ extension CanvasViewModel {
             resetAllInputParameters()
         }
 
-        updateCanvasWithTexture(canvasTexture, on: canvasView)
+        displayCanvasTextureWithMergedLayers(
+            textureLayers: textureLayers,
+            usingCurrentTexture: currentTexture,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
+        )
     }
 
     private func displayCanvasTextureWithMergedLayers(
         textureLayers: TextureLayers,
+        usingCurrentTexture: MTLTexture? = nil,
         canvasTexture: MTLTexture?,
         canvasTextureBackgroundColor: UIColor,
         shouldUpdateAllLayers: Bool = false,
@@ -730,6 +730,7 @@ extension CanvasViewModel {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         textureLayers.mergeAllTextures(
+            usingCurrentTexture: usingCurrentTexture,
             shouldUpdateAllLayers: shouldUpdateAllLayers,
             backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
