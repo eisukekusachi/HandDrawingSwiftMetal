@@ -171,7 +171,7 @@ final class CanvasViewModel {
 
     private func setupDisplayLink() {
         // Configure the display link for rendering
-        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(displayCanvasTextureWhileDrawing))
+        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(updateCanvasViewWhileDrawing))
         drawingDisplayLink?.add(to: .current, forMode: .common)
         drawingDisplayLink?.isPaused = true
     }
@@ -658,7 +658,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    @objc private func displayCanvasTextureWhileDrawing() {
+    @objc private func updateCanvasViewWhileDrawing() {
         guard
             let drawingCurve,
             let commandBuffer = canvasView?.commandBuffer
@@ -794,7 +794,7 @@ extension CanvasViewModel {
 
         // Update `CanvasView` when stopping as the last line isn’t drawn
         if !isRunning {
-            displayCanvasTextureWhileDrawing()
+            updateCanvasViewWhileDrawing()
         }
     }
 
