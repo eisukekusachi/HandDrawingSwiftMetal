@@ -749,14 +749,14 @@ extension CanvasViewModel {
             let sourceTexture = texture,
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                device: device,
                 matrix: transformer.matrix,
                 frameSize: frameSize,
                 sourceSize: .init(
                     width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
                     height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
                 ),
-                destinationSize: destinationTexture.size
+                destinationSize: destinationTexture.size,
+                with: device
             ),
             let commandBuffer = canvasView?.commandBuffer
         else { return }

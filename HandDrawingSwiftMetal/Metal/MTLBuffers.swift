@@ -24,10 +24,10 @@ struct TextureBuffers {
 
 enum MTLBuffers {
     static func makeGrayscalePointBuffers(
-        device: MTLDevice?,
         points: [CanvasGrayscaleDotPoint],
         alpha: Int,
-        textureSize: CGSize
+        textureSize: CGSize,
+        with device: MTLDevice?
     ) -> GrayscalePointBuffers? {
         guard points.count != .zero else { return nil }
 
@@ -82,8 +82,8 @@ enum MTLBuffers {
     }
 
     static func makeTextureBuffers(
-        device: MTLDevice?,
-        nodes: MTLTextureNodes
+        nodes: MTLTextureNodes,
+        with device: MTLDevice?
     ) -> TextureBuffers? {
         let vertices = nodes.vertices.getValues()
         let texCoords = nodes.textureCoord.getValues()
@@ -104,13 +104,13 @@ enum MTLBuffers {
     }
 
     static func makeCanvasTextureBuffers(
-        device: MTLDevice?,
         matrix: CGAffineTransform?,
         frameSize: CGSize,
         sourceSize: CGSize,
         destinationSize: CGSize,
         textureCoord: MTLTextureCoordinates = MTLTextureNodes.screenTextureCoordinates,
-        indices: MTLTextureIndices = MTLTextureNodes.textureIndices
+        indices: MTLTextureIndices = MTLTextureNodes.textureIndices,
+        with device: MTLDevice?
     ) -> TextureBuffers? {
         guard let device else { return nil }
 

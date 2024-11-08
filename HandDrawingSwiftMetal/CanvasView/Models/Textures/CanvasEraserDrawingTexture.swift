@@ -22,8 +22,8 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            device: device,
-            nodes: MTLTextureNodes.flippedTextureNodes
+            nodes: MTLTextureNodes.flippedTextureNodes,
+            with: device
         )
     }
 
@@ -119,10 +119,10 @@ extension CanvasEraserDrawingTexture {
         guard
             let textureSize = drawingTexture?.size,
             let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
-                device: device,
                 points: points,
                 alpha: alpha,
-                textureSize: textureSize
+                textureSize: textureSize,
+                with: device
             )
         else { return }
 

@@ -85,10 +85,10 @@ extension CanvasBrushDrawingTexture {
         guard
             let textureSize = drawingTexture?.size,
             let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
-                device: device,
                 points: points,
                 alpha: alpha,
-                textureSize: textureSize
+                textureSize: textureSize,
+                with: device
             )
         else { return }
 
