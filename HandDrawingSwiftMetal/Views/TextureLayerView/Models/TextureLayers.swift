@@ -31,9 +31,7 @@ extension TextureLayers {
         else { return }
 
         if shouldUpdateAllLayers {
-            updateUnselectedLayers(
-                to: commandBuffer
-            )
+            updateUnselectedLayers(with: commandBuffer)
         }
 
         MTLRenderer.fill(
@@ -102,7 +100,7 @@ extension TextureLayers {
 extension TextureLayers {
     /// Combine the textures of unselected layers into `topTexture` and `bottomTexture`
     func updateUnselectedLayers(
-        to commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
