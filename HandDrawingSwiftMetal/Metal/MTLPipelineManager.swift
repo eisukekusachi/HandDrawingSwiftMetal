@@ -15,7 +15,7 @@ class MTLPipelineManager {
     private (set) var drawTexture: MTLRenderPipelineState!
     private (set) var erase: MTLRenderPipelineState!
     private (set) var colorize: MTLComputePipelineState!
-    private (set) var merge: MTLComputePipelineState!
+    private (set) var mergeTextures: MTLComputePipelineState!
     private (set) var fillColor: MTLComputePipelineState!
     private (set) var copy: MTLComputePipelineState!
 
@@ -70,7 +70,7 @@ class MTLPipelineManager {
             label: "Colorize",
             shaderName: "colorize_grayscale_texture"
         )
-        self.merge = makeComputePipeline(
+        self.mergeTextures = makeComputePipeline(
             device: device,
             library: library,
             label: "Marge textures",
