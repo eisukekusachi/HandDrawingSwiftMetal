@@ -97,13 +97,13 @@ extension TextureLayers {
         layerIndex: Int = 0,
         textureSize: CGSize
     ) {
-        bottomTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
-        topTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
-        temporaryTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
+        bottomTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        topTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
 
         var newLayers = newLayers
         if newLayers.isEmpty,
-           let newTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device
+           let newTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device
            ) {
             newLayers.append(
                 .init(
@@ -187,7 +187,7 @@ extension TextureLayers {
     /// Update the currently selected texture with a new instance
     func updateSelectedTextureAddress() {
         guard 
-            let newTexture = MTLTextureUtils.duplicateTexture(
+            let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: layers[index].texture,
                 with: device
             )

@@ -58,9 +58,9 @@ final class CanvasModel {
             let textureData = try Data(contentsOf: folderURL.appendingPathComponent(layer.textureName))
 
             if let hexadecimalData = textureData.encodedHexadecimals,
-               let texture = MTLTextureUtils.makeTexture(
+               let texture = MTLTextureCreator.makeTexture(
                 size: textureSize,
-                array: hexadecimalData,
+                colorArray: hexadecimalData,
                 with: device
                ) {
                 layers.append(
@@ -75,7 +75,7 @@ final class CanvasModel {
         }
 
         if layers.count == 0,
-           let newTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device) {
+           let newTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device) {
             layers.append(
                 .init(
                     texture: newTexture,
