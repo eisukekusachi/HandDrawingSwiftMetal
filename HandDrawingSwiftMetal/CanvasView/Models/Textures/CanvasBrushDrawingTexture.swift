@@ -13,6 +13,8 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     private var grayscaleTexture: MTLTexture!
 
+    private var temporaryTexture: MTLTexture!
+
     private var flippedTextureBuffers: MTLTextureBuffers?
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -31,6 +33,7 @@ extension CanvasBrushDrawingTexture {
     func initTexture(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        self.temporaryTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
 
         clearDrawingTexture()
     }
@@ -43,11 +46,22 @@ extension CanvasBrushDrawingTexture {
         into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        guard let destinationTexture else { return }
+        guard 
+            let flippedTextureBuffers,
+            let destinationTexture
+        else { return }
 
         MTLRenderer.mergeTextures(
-            texture: drawingTexture,
-            into: destinationTexture,
+            sourceTexture: drawingTexture,
+            destinationTexture: destinationTexture,
+            into: temporaryTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.drawTexture(
+            texture: temporaryTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
             with: commandBuffer
         )
 
@@ -82,8 +96,16 @@ extension CanvasBrushDrawingTexture {
 
             } else {
                 MTLRenderer.mergeTextures(
-                    texture: textures[i],
-                    into: targetTexture,
+                    sourceTexture: textures[i],
+                    destinationTexture: targetTexture,
+                    into: temporaryTexture,
+                    with: commandBuffer
+                )
+                MTLRenderer.drawTexture(
+                    texture: temporaryTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: targetTexture,
                     with: commandBuffer
                 )
             }

@@ -175,30 +175,31 @@ enum MTLRenderer {
     }
 
     static func mergeTextures(
-        texture: MTLTexture?,
+        sourceTexture: MTLTexture?,
+        destinationTexture: MTLTexture,
         alpha: Int = 255,
-        into destinationTexture: MTLTexture,
+        into resultTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / threadGroupLength),
-            height: Int(destinationTexture.height / threadGroupLength),
+            width: Int(resultTexture.width / threadGroupLength),
+            height: Int(resultTexture.height / threadGroupLength),
             depth: 1
         )
         let width = threadGroupSize.width
         let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (destinationTexture.width  + width - 1) / width,
-            height: (destinationTexture.height + height - 1) / height,
+            width: (resultTexture.width  + width - 1) / width,
+            height: (resultTexture.height + height - 1) / height,
             depth: 1
         )
         var alpha: Float = max(0.0, min(Float(alpha) / 255.0, 1.0))
 
         let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(MTLPipelineManager.shared.merge)
-        encoder?.setTexture(texture, index: 0)
+        encoder?.setComputePipelineState(MTLPipelineManager.shared.mergeTextures)
+        encoder?.setTexture(sourceTexture, index: 0)
         encoder?.setTexture(destinationTexture, index: 1)
-        encoder?.setTexture(destinationTexture, index: 2)
+        encoder?.setTexture(resultTexture, index: 2)
         encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()

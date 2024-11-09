@@ -13,7 +13,18 @@ final class TextureLayers: LayerManager<TextureLayer> {
     /// A texture that combines the textures of all layers above the selected layer
     private var topTexture: MTLTexture!
 
+    private var temporaryTexture: MTLTexture!
+
+    private var flippedTextureBuffers: MTLTextureBuffers?
+
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
+    override init() {
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: device
+        )
+    }
 
 }
 
@@ -27,6 +38,7 @@ extension TextureLayers {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let flippedTextureBuffers,
             let destinationTexture
         else { return }
 
@@ -41,32 +53,65 @@ extension TextureLayers {
         )
 
         MTLRenderer.mergeTextures(
-            texture: bottomTexture,
-            into: destinationTexture,
+            sourceTexture: bottomTexture,
+            destinationTexture: destinationTexture,
+            into: temporaryTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.drawTexture(
+            texture: temporaryTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
             with: commandBuffer
         )
 
         if layers[index].isVisible {
             if let currentTexture {
                 MTLRenderer.mergeTextures(
-                    texture: currentTexture,
+                    sourceTexture: currentTexture,
+                    destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    into: destinationTexture,
+                    into: temporaryTexture,
                     with: commandBuffer
                 )
+                MTLRenderer.drawTexture(
+                    texture: temporaryTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: destinationTexture,
+                    with: commandBuffer
+                )
+
             } else {
                 MTLRenderer.mergeTextures(
-                    texture: layers[index].texture,
+                    sourceTexture: layers[index].texture,
+                    destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    into: destinationTexture,
+                    into: temporaryTexture,
+                    with: commandBuffer
+                )
+                MTLRenderer.drawTexture(
+                    texture: temporaryTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: destinationTexture,
                     with: commandBuffer
                 )
             }
         }
 
         MTLRenderer.mergeTextures(
-            texture: topTexture,
-            into: destinationTexture,
+            sourceTexture: topTexture,
+            destinationTexture: destinationTexture,
+            into: temporaryTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.drawTexture(
+            texture: temporaryTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
             with: commandBuffer
         )
     }
@@ -78,6 +123,7 @@ extension TextureLayers {
     ) {
         bottomTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
         topTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
+        temporaryTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
 
         var newLayers = newLayers
         if newLayers.isEmpty,
@@ -104,6 +150,8 @@ extension TextureLayers {
     func updateUnselectedLayers(
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let flippedTextureBuffers else { return }
+
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
@@ -113,9 +161,17 @@ extension TextureLayers {
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
                 MTLRenderer.mergeTextures(
-                    texture: layers[i].texture,
+                    sourceTexture: layers[i].texture,
+                    destinationTexture: bottomTexture,
                     alpha: layers[i].alpha,
-                    into: bottomTexture,
+                    into: temporaryTexture,
+                    with: commandBuffer
+                )
+                MTLRenderer.drawTexture(
+                    texture: temporaryTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: bottomTexture,
                     with: commandBuffer
                 )
             }
@@ -123,9 +179,17 @@ extension TextureLayers {
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
                 MTLRenderer.mergeTextures(
-                    texture: layers[i].texture,
+                    sourceTexture: layers[i].texture,
+                    destinationTexture: topTexture,
                     alpha: layers[i].alpha,
-                    into: topTexture,
+                    into: temporaryTexture,
+                    with: commandBuffer
+                )
+                MTLRenderer.drawTexture(
+                    texture: temporaryTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: topTexture,
                     with: commandBuffer
                 )
             }
