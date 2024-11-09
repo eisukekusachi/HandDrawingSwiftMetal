@@ -11,6 +11,8 @@ import Accelerate
 enum MTLTextureCreator {
 
     static let pixelFormat: MTLPixelFormat = .bgra8Unorm
+    static let bytesPerPixel = 4
+    static let bitsPerComponent = 8
 
     static func makeTexture(
         size: CGSize,
@@ -35,9 +37,7 @@ enum MTLTextureCreator {
         let height: Int = Int(image.size.height)
 
         let map: [UInt8] = [2, 1, 0, 3]
-        let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
-        let bitsPerComponent = 8
         let totalNumBytes: Int = width * height * bytesPerPixel
 
         let rgbaBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
@@ -100,7 +100,6 @@ enum MTLTextureCreator {
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
 
-        let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
 
         let texture = makeTexture(size: .init(width: width, height: height), with: device)
