@@ -177,4 +177,75 @@ enum MTLTextureCreator {
         return textureDescriptor
     }
 
+    static func makeTextureWithColor(
+        pixelFormat: MTLPixelFormat = MTLTextureCreator.pixelFormat,
+        size: CGSize,
+        with device: MTLDevice
+    ) -> MTLTexture? {
+        let width = Int(size.width)
+        let height = Int(size.height)
+
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let totalNumBytes: Int = width * height * bytesPerPixel
+
+        var array: [UInt8] = Array(repeating: 0, count: totalNumBytes)
+
+        for x in 100 ..< 300 {
+            for y in 100 ..< 300 {
+                let index = (x + y * width) * bytesPerPixel
+                // bgra
+                array[index] = 0
+                array[index + 1] = 0
+                array[index + 2] = 255
+                array[index + 3] = 100
+            }
+        }
+
+        for x in 300 ..< 500 {
+            for y in 100 ..< 300 {
+                let index = (x + y * width) * bytesPerPixel
+                // bgra
+                array[index] = 0
+                array[index + 1] = 255
+                array[index + 2] = 255
+                array[index + 3] = 100
+            }
+        }
+
+        for x in 100 ..< 300 {
+            for y in 300 ..< 500 {
+                let index = (x + y * width) * bytesPerPixel
+                // bgra
+                array[index] = 255
+                array[index + 1] = 0
+                array[index + 2] = 0
+                array[index + 3] = 50
+            }
+        }
+
+        for x in 300 ..< 500 {
+            for y in 300 ..< 500 {
+                let index = (x + y * width) * bytesPerPixel
+                // bgra
+                array[index] = 255
+                array[index + 1] = 0
+                array[index + 2] = 255
+                array[index + 3] = 50
+            }
+        }
+
+        let texture = makeTexture(size: .init(width: width, height: height), with: device)
+
+        texture?.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            slice: 0,
+            withBytes: array,
+            bytesPerRow: bytesPerRow,
+            bytesPerImage: bytesPerRow * height
+        )
+        return texture
+    }
+
 }

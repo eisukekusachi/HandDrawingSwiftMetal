@@ -299,6 +299,47 @@ extension CanvasViewModel {
             )
         }
 
+        if let device,
+           let image = UIImage(named: "Image"),
+           let targetTexture = textureLayers.selectedLayer?.texture,
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let textureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .init(
+                vertices: .makeTextureVertices(
+                    sourceFrame: .init(
+                        origin: .init(x: 150, y: 150),
+                        size: .init(width: image.size.width * 2, height: image.size.height * 2)
+                    ),
+                    destinationSize: targetTexture.size
+                )
+            ),
+            with: device
+           ),
+           let commandBuffer = canvasView.commandBuffer
+        {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: targetTexture,
+                with: commandBuffer
+            )
+        }
+
+        if let device,
+           let targetTexture = textureLayers.selectedLayer?.texture,
+           let imageTexture = MTLTextureCreator.makeTextureWithColor(size: targetTexture.size, with: device),
+           let textureBuffers = MTLBuffers.makeTextureBuffers(with: device),
+           let commandBuffer = canvasView.commandBuffer
+        {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: targetTexture,
+                with: commandBuffer
+            )
+        }
+
+
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
