@@ -30,6 +30,10 @@ enum MTLTextureCreator {
         let totalNumBytes: Int = h * w * bytesPerPixel
         let rgbaBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
         let bgraBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
+
+        rgbaBytes.deallocate()
+        bgraBytes.deallocate()
+
         let context = CGContext(data: rgbaBytes,
                                 width: w,
                                 height: h,
@@ -42,10 +46,12 @@ enum MTLTextureCreator {
                                        height: vImagePixelCount(image.height),
                                        width: vImagePixelCount(image.width),
                                        rowBytes: bytesPerRow)
+
         var rgbaBuffer = vImage_Buffer(data: rgbaBytes,
                                        height: vImagePixelCount(image.height),
                                        width: vImagePixelCount(image.width),
                                        rowBytes: bytesPerRow)
+
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
         let texture = device.makeTexture(
@@ -57,9 +63,6 @@ enum MTLTextureCreator {
                          withBytes: bgraBytes,
                          bytesPerRow: bytesPerRow,
                          bytesPerImage: bytesPerRow * h)
-        rgbaBytes.deallocate()
-        bgraBytes.deallocate()
-
         return texture
     }
     static func makeTexture(size: CGSize, array: [UInt8], with device: MTLDevice) -> MTLTexture? {
