@@ -190,9 +190,9 @@ final class CanvasViewModel {
 
         textureLayers.initLayers(textureSize: textureSize)
 
-        currentTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        currentTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        canvasTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        canvasTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
     }
 
     func apply(model: CanvasModel) {
@@ -222,9 +222,9 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        currentTexture = MTLTextureUtils.makeTexture(size: model.textureSize, with: device)
+        currentTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
-        canvasTexture = MTLTextureUtils.makeTexture(size: model.textureSize, with: device)
+        canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -502,7 +502,7 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        currentTexture = MTLTextureUtils.makeTexture(size: renderTextureSize, with: device)
+        currentTexture = MTLTextureCreator.makeTexture(size: renderTextureSize, with: device)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -539,7 +539,7 @@ extension CanvasViewModel {
         guard
             let device,
             let renderTextureSize = canvasView?.renderTexture?.size,
-            let newTexture = MTLTextureUtils.makeBlankTexture(
+            let newTexture = MTLTextureCreator.makeBlankTexture(
                 size: renderTextureSize,
                 with: device
             )

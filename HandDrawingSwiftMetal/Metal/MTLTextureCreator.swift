@@ -1,5 +1,5 @@
 //
-//  MTLTextureUtils.swift
+//  MTLTextureCreator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/30.
@@ -8,7 +8,7 @@
 import MetalKit
 import Accelerate
 
-enum MTLTextureUtils {
+enum MTLTextureCreator {
 
     static let pixelFormat: MTLPixelFormat = .bgra8Unorm
 
