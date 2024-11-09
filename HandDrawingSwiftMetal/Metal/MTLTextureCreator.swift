@@ -17,13 +17,14 @@ enum MTLTextureCreator {
             descriptor: getTextureDescriptor(size: size)
         )
     }
-    static func makeTexture(fromBundleImage imageName: String, with device: MTLDevice) -> MTLTexture? {
-        guard let image = UIImage(named: imageName)?.cgImage else {
-            return nil
-        }
+    static func makeTexture(image: UIImage?, with device: MTLDevice) -> MTLTexture? {
+        guard
+            let image,
+            let cgImage = image.cgImage
+        else { return nil }
 
-        let width: Int = Int(image.width)
-        let height: Int = Int(image.height)
+        let width: Int = Int(image.size.width)
+        let height: Int = Int(image.size.height)
 
         let map: [UInt8] = [2, 1, 0, 3]
         let bytesPerPixel = 4
@@ -48,7 +49,7 @@ enum MTLTextureCreator {
         )
 
         context?.draw(
-            image,
+            cgImage,
             in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height))
         )
 
