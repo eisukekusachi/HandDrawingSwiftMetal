@@ -69,42 +69,6 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func drawTexture(
-        texture: MTLTexture,
-        on targetTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        copyTexture(
-            sourceTexture: texture,
-            destinationTexture: targetTexture,
-            with: commandBuffer
-        )
-    }
-
-    static func drawTextures(
-        textures: [MTLTexture],
-        on targetTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        if textures.count == 0 { return }
-
-        for i in 0 ..< textures.count {
-            if i == 0 {
-                copyTexture(
-                    sourceTexture: textures.first!,
-                    destinationTexture: targetTexture,
-                    with: commandBuffer
-                )
-            } else {
-                mergeTextures(
-                    texture: textures[i],
-                    into: targetTexture,
-                    with: commandBuffer
-                )
-            }
-        }
-    }
-
     static func makeEraseTexture(
         sourceTexture: MTLTexture,
         buffers: MTLTextureBuffers,

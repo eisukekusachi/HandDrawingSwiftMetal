@@ -52,16 +52,36 @@ extension CanvasBrushDrawingTexture {
         onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
+        let textures = [selectedTexture, drawingTexture].compactMap { $0 }
+
         guard
+            textures.count != 0,
             let targetTexture,
-            let selectedTexture
+            let flippedBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+                nodes: .flippedTextureNodes,
+                with: device
+            ),
+            let firstTexture = textures.first
         else { return }
 
-        MTLRenderer.drawTextures(
-            textures: [selectedTexture, drawingTexture].compactMap { $0 },
-            on: targetTexture,
-            with: commandBuffer
-        )
+        for i in 0 ..< textures.count {
+            if i == 0 {
+                MTLRenderer.drawTexture(
+                    texture: firstTexture,
+                    buffers: flippedBuffers,
+                    withBackgroundColor: .clear,
+                    on: targetTexture,
+                    with: commandBuffer
+                )
+
+            } else {
+                MTLRenderer.mergeTextures(
+                    texture: textures[i],
+                    into: targetTexture,
+                    with: commandBuffer
+                )
+            }
+        }
     }
 
     func clearDrawingTexture() {

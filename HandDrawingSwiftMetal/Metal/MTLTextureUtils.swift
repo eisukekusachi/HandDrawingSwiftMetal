@@ -118,14 +118,21 @@ enum MTLTextureUtils {
         guard
             let texture,
             let newTexture = makeTexture(size: texture.size, with: device),
+            let buffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+                nodes: .flippedTextureNodes,
+                with: device
+            ),
             let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else { return nil }
 
-        MTLRenderer.copyTexture(
-            sourceTexture: texture,
-            destinationTexture: newTexture,
+        MTLRenderer.drawTexture(
+            texture: texture,
+            buffers: buffers,
+            withBackgroundColor: .clear,
+            on: newTexture,
             with: commandBuffer
         )
+
         commandBuffer.commit()
 
         return newTexture
