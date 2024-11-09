@@ -94,7 +94,7 @@ enum MTLTextureCreator {
 
     static func makeTexture(
         size: CGSize,
-        array: [UInt8],
+        colorArray: [UInt8],
         with device: MTLDevice
     ) -> MTLTexture? {
         let width: Int = Int(size.width)
@@ -108,7 +108,7 @@ enum MTLTextureCreator {
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
             slice: 0,
-            withBytes: array,
+            withBytes: colorArray,
             bytesPerRow: bytesPerRow,
             bytesPerImage: bytesPerRow * height
         )

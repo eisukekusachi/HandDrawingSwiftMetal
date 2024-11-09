@@ -60,7 +60,7 @@ final class CanvasModel {
             if let hexadecimalData = textureData.encodedHexadecimals,
                let texture = MTLTextureCreator.makeTexture(
                 size: textureSize,
-                array: hexadecimalData,
+                colorArray: hexadecimalData,
                 with: device
                ) {
                 layers.append(
