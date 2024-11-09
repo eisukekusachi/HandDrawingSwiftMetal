@@ -69,42 +69,6 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func drawTexture(
-        texture: MTLTexture,
-        on targetTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        copyTexture(
-            sourceTexture: texture,
-            destinationTexture: targetTexture,
-            with: commandBuffer
-        )
-    }
-
-    static func drawTextures(
-        textures: [MTLTexture],
-        on targetTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        if textures.count == 0 { return }
-
-        for i in 0 ..< textures.count {
-            if i == 0 {
-                copyTexture(
-                    sourceTexture: textures.first!,
-                    destinationTexture: targetTexture,
-                    with: commandBuffer
-                )
-            } else {
-                mergeTextures(
-                    texture: textures[i],
-                    into: targetTexture,
-                    with: commandBuffer
-                )
-            }
-        }
-    }
-
     static func makeEraseTexture(
         sourceTexture: MTLTexture,
         buffers: MTLTextureBuffers,
@@ -275,31 +239,6 @@ enum MTLRenderer {
         encoder?.setComputePipelineState(MTLPipelineManager.shared.fillColor)
         encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
         encoder?.setTexture(texture, index: 0)
-        encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
-        encoder?.endEncoding()
-    }
-    static func copyTexture(
-        sourceTexture: MTLTexture,
-        destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / threadGroupLength),
-            height: Int(destinationTexture.height / threadGroupLength),
-            depth: 1
-        )
-        let width = threadGroupSize.width
-        let height = threadGroupSize.height
-        let threadGroupCount = MTLSize(
-            width: (destinationTexture.width  + width - 1) / width,
-            height: (destinationTexture.height + height - 1) / height,
-            depth: 1
-        )
-
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(MTLPipelineManager.shared.copy)
-        encoder?.setTexture(destinationTexture, index: 0)
-        encoder?.setTexture(sourceTexture, index: 1)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
     }

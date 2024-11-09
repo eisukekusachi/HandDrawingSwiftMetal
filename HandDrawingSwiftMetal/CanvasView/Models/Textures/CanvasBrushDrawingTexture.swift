@@ -13,7 +13,16 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     private var grayscaleTexture: MTLTexture!
 
+    private var flippedTextureBuffers: MTLTextureBuffers?
+
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
+    required init() {
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: device
+        )
+    }
 
 }
 
@@ -52,16 +61,33 @@ extension CanvasBrushDrawingTexture {
         onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
+        let textures = [selectedTexture, drawingTexture].compactMap { $0 }
+
         guard
+            textures.count != 0,
             let targetTexture,
-            let selectedTexture
+            let flippedTextureBuffers,
+            let firstTexture = textures.first
         else { return }
 
-        MTLRenderer.drawTextures(
-            textures: [selectedTexture, drawingTexture].compactMap { $0 },
-            on: targetTexture,
-            with: commandBuffer
-        )
+        for i in 0 ..< textures.count {
+            if i == 0 {
+                MTLRenderer.drawTexture(
+                    texture: firstTexture,
+                    buffers: flippedTextureBuffers,
+                    withBackgroundColor: .clear,
+                    on: targetTexture,
+                    with: commandBuffer
+                )
+
+            } else {
+                MTLRenderer.mergeTextures(
+                    texture: textures[i],
+                    into: targetTexture,
+                    with: commandBuffer
+                )
+            }
+        }
     }
 
     func clearDrawingTexture() {

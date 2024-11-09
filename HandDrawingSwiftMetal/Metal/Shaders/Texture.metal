@@ -74,9 +74,3 @@ kernel void add_color_to_texture(uint2 gid [[ thread_position_in_grid ]],
                                  texture2d<float, access::write> resultTexture [[ texture(0) ]]) {
     resultTexture.write(color, gid);
 }
-kernel void copy_texture(uint2 gid [[ thread_position_in_grid ]],
-                         texture2d<float, access::write> resultTexture [[ texture(0) ]],
-                         texture2d<float, access::read> srcTexture [[ texture(1) ]]) {
-    float4 srcColor = srcTexture.read(gid);
-    resultTexture.write(srcColor, gid);
-}

@@ -27,7 +27,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         }
     }
 
-    private var textureBuffers: MTLTextureBuffers?
+    private var flippedTextureBuffers: MTLTextureBuffers?
 
     private let updateTextureSubject = PassthroughSubject<Void, Never>()
 
@@ -50,7 +50,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         commandQueue = self.device!.makeCommandQueue()
         resetCommandBuffer()
 
-        textureBuffers = MTLBuffers.makeTextureBuffers(
+        flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )
@@ -70,7 +70,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
     func draw(in view: MTKView) {
         guard
             let commandBuffer,
-            let textureBuffers,
+            let flippedTextureBuffers,
             let renderTexture,
             let drawable = view.currentDrawable
         else { return }
@@ -78,7 +78,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         // Draw `renderTexture` directly onto `drawable.texture`
         MTLRenderer.drawTexture(
             texture: renderTexture,
-            buffers: textureBuffers,
+            buffers: flippedTextureBuffers,
             on: drawable.texture,
             with: commandBuffer
         )

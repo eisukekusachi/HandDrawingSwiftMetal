@@ -54,9 +54,11 @@ extension CanvasEraserDrawingTexture {
             let destinationTexture
         else { return }
 
-        MTLRenderer.copyTexture(
-            sourceTexture: destinationTexture,
-            destinationTexture: eraserTexture,
+        MTLRenderer.drawTexture(
+            texture: destinationTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: eraserTexture,
             with: commandBuffer
         )
 
@@ -67,9 +69,11 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        MTLRenderer.copyTexture(
-            sourceTexture: eraserTexture,
-            destinationTexture: destinationTexture,
+        MTLRenderer.drawTexture(
+            texture: eraserTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
             with: commandBuffer
         )
 
@@ -87,11 +91,14 @@ extension CanvasEraserDrawingTexture {
     ) {
         guard
             let targetTexture,
-            let selectedTexture
+            let selectedTexture,
+            let flippedTextureBuffers
         else { return }
 
         MTLRenderer.drawTexture(
             texture: isDrawing ? eraserTexture : selectedTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
             on: targetTexture,
             with: commandBuffer
         )
@@ -123,7 +130,8 @@ extension CanvasEraserDrawingTexture {
                 alpha: alpha,
                 textureSize: textureSize,
                 with: device
-            )
+            ),
+            let flippedTextureBuffers
         else { return }
 
         MTLRenderer.drawCurve(
@@ -139,15 +147,17 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        MTLRenderer.copyTexture(
-            sourceTexture: srcTexture,
-            destinationTexture: eraserTexture,
+        MTLRenderer.drawTexture(
+            texture: srcTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: eraserTexture,
             with: commandBuffer
         )
 
         MTLRenderer.makeEraseTexture(
             sourceTexture: drawingTexture!,
-            buffers: flippedTextureBuffers!,
+            buffers: flippedTextureBuffers,
             into: eraserTexture!,
             with: commandBuffer
         )
