@@ -112,121 +112,20 @@ enum MTLBuffers {
         indices: MTLTextureIndices = .init(),
         with device: MTLDevice?
     ) -> MTLTextureBuffers? {
-        guard let device else { return nil }
+        let vertices: [Float] = MTLTextureVertices.makeCenterAlignedTextureVertices(
+            matrix: matrix,
+            frameSize: frameSize,
+            sourceSize: sourceSize,
+            destinationSize: destinationSize
+        ).getValues()
+        let textureCoord: [Float]  = textureCoord.getValues()
+        let indices: [UInt16] = indices.getValues()
 
-        // Calculate vertex positions for the four corners
-        var leftBottom: CGPoint = .init(
-            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * -1,
-            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * 1
-        )
-        var rightBottom: CGPoint = .init(
-            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * 1,
-            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * 1
-        )
-        var rightTop: CGPoint = .init(
-            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * 1,
-            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * -1
-        )
-
-        var leftTop: CGPoint = .init(
-            x: destinationSize.width * 0.5 + sourceSize.width * 0.5 * -1,
-            y: destinationSize.height * 0.5 + sourceSize.height * 0.5 * -1
-        )
-
-        if let matrix {
-            var matrix = matrix
-            matrix.tx *= (CGFloat(destinationSize.width) / frameSize.width)
-            matrix.ty *= (CGFloat(destinationSize.height) / frameSize.height)
-
-            // Translate origin to the top left corner
-            leftBottom = CGPoint(
-                x: leftBottom.x - destinationSize.width * 0.5,
-                y: leftBottom.y - destinationSize.height * 0.5
-            )
-            rightBottom = CGPoint(
-                x: rightBottom.x - destinationSize.width * 0.5,
-                y: rightBottom.y - destinationSize.height * 0.5
-            )
-            rightTop = CGPoint(
-                x: rightTop.x - destinationSize.width * 0.5,
-                y: rightTop.y - destinationSize.height * 0.5
-            )
-            leftTop = CGPoint(
-                x: leftTop.x - destinationSize.width * 0.5,
-                y: leftTop.y - destinationSize.height * 0.5
-            )
-
-            // Coordinate transformation
-            leftBottom = CGPoint(
-                x: (leftBottom.x * matrix.a + leftBottom.y * matrix.c + matrix.tx),
-                y: (leftBottom.x * matrix.b + leftBottom.y * matrix.d + matrix.ty)
-            )
-            rightBottom = CGPoint(
-                x: (rightBottom.x * matrix.a + rightBottom.y * matrix.c + matrix.tx),
-                y: (rightBottom.x * matrix.b + rightBottom.y * matrix.d + matrix.ty)
-            )
-            rightTop = CGPoint(
-                x: (rightTop.x * matrix.a + rightTop.y * matrix.c + matrix.tx),
-                y: (rightTop.x * matrix.b + rightTop.y * matrix.d + matrix.ty)
-            )
-            leftTop = CGPoint(
-                x: (leftTop.x * matrix.a + leftTop.y * matrix.c + matrix.tx),
-                y: (leftTop.x * matrix.b + leftTop.y * matrix.d + matrix.ty)
-            )
-
-            // Translate origin back to the center
-            leftBottom = CGPoint(
-                x: leftBottom.x + destinationSize.width * 0.5,
-                y: leftBottom.y + destinationSize.height * 0.5
-            )
-            rightBottom = CGPoint(
-                x: rightBottom.x + destinationSize.width * 0.5,
-                y: rightBottom.y + destinationSize.height * 0.5
-            )
-            rightTop = CGPoint(
-                x: rightTop.x + destinationSize.width * 0.5,
-                y: rightTop.y + destinationSize.height * 0.5
-            )
-            leftTop = CGPoint(
-                x: leftTop.x + destinationSize.width * 0.5,
-                y: leftTop.y + destinationSize.height * 0.5
-            )
-        }
-
-        // Normalize vertex positions
-        let vertices: [Float] = [
-            Float(leftBottom.x / destinationSize.width) * 2.0 - 1.0,
-            Float(leftBottom.y / destinationSize.height * 2.0 - 1.0),
-
-            Float(rightBottom.x / destinationSize.width) * 2.0 - 1.0,
-            Float(rightBottom.y / destinationSize.height) * 2.0 - 1.0,
-
-            Float(rightTop.x / destinationSize.width) * 2.0 - 1.0,
-            Float(rightTop.y / destinationSize.height) * 2.0 - 1.0,
-
-            Float(leftTop.x / destinationSize.width) * 2.0 - 1.0,
-            Float(leftTop.y / destinationSize.height) * 2.0 - 1.0
-        ]
-
-        let textureCoord = textureCoord.getValues()
-        let indices = indices.getValues()
-
-        // Create buffers
         guard
-            let vertexBuffer = device.makeBuffer(
-                bytes: vertices,
-                length: vertices.count * MemoryLayout<Float>.size,
-                options: []),
-            let texCoordsBuffer = device.makeBuffer(
-                bytes: textureCoord,
-                length: textureCoord.count * MemoryLayout<Float>.size,
-                options: []
-            ),
-            let indexBuffer = device.makeBuffer(
-                bytes: indices,
-                length: indices.count * MemoryLayout<UInt16>.size,
-                options: []
-            )
+            let device,
+            let vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size),
+            let texCoordsBuffer = device.makeBuffer(bytes: textureCoord, length: textureCoord.count * MemoryLayout<Float>.size),
+            let indexBuffer = device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size)
         else {
             return nil
         }
