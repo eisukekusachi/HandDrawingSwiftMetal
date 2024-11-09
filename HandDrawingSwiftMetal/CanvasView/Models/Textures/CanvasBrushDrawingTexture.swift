@@ -36,10 +36,10 @@ extension CanvasBrushDrawingTexture {
     ) {
         guard let destinationTexture else { return }
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: drawingTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         clearDrawingTexture(commandBuffer)
@@ -58,9 +58,9 @@ extension CanvasBrushDrawingTexture {
         else { return }
 
         MTLRenderer.drawTextures(
-            [selectedTexture, drawingTexture].compactMap { $0 },
+            textures: [selectedTexture, drawingTexture].compactMap { $0 },
             on: targetTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -95,10 +95,10 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.drawCurve(
             buffers: pointBuffers,
             onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.colorize(
+        MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
             color: color.rgb,
             resultTexture: drawingTexture!,
@@ -111,8 +111,15 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clear(texture: drawingTexture, commandBuffer)
-        MTLRenderer.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
+        MTLRenderer.clearTexture(
+            texture: drawingTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.fillTexture(
+            texture: grayscaleTexture,
+            withRGB: (0, 0, 0),
+            with: commandBuffer
+        )
     }
 
 }

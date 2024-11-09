@@ -250,7 +250,7 @@ final class CanvasViewModel {
             textureLayers.layers[i].updateThumbnail()
         }
 
-        MTLRenderer.clear(texture: currentTexture, commandBuffer)
+        MTLRenderer.clearTexture(texture: currentTexture, with: commandBuffer)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,

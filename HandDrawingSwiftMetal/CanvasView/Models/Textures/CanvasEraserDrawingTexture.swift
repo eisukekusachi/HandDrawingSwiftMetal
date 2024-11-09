@@ -54,23 +54,23 @@ extension CanvasEraserDrawingTexture {
             let destinationTexture
         else { return }
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: destinationTexture,
             destinationTexture: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         MTLRenderer.makeEraseTexture(
             sourceTexture: drawingTexture,
             buffers: flippedTextureBuffers,
             into: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: eraserTexture,
             destinationTexture: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         clearDrawingTexture(commandBuffer)
@@ -91,9 +91,9 @@ extension CanvasEraserDrawingTexture {
         else { return }
 
         MTLRenderer.drawTexture(
-            isDrawing ? eraserTexture : selectedTexture,
+            texture: isDrawing ? eraserTexture : selectedTexture,
             on: targetTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -129,27 +129,27 @@ extension CanvasEraserDrawingTexture {
         MTLRenderer.drawCurve(
             buffers: pointBuffers,
             onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.colorize(
+        MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
             color: (0, 0, 0),
             resultTexture: drawingTexture!,
             with: commandBuffer
         )
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: srcTexture,
             destinationTexture: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         MTLRenderer.makeEraseTexture(
             sourceTexture: drawingTexture!,
             buffers: flippedTextureBuffers!,
             into: eraserTexture!,
-            commandBuffer
+            with: commandBuffer
         )
 
         isDrawing = true
@@ -160,17 +160,17 @@ extension CanvasEraserDrawingTexture {
 extension CanvasEraserDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clear(
+        MTLRenderer.clearTextures(
             textures: [
                 eraserTexture,
                 drawingTexture
             ],
-            commandBuffer
+            with: commandBuffer
         )
-        MTLRenderer.fill(
-            grayscaleTexture,
+        MTLRenderer.fillTexture(
+            texture: grayscaleTexture,
             withRGB: (0, 0, 0),
-            commandBuffer
+            with: commandBuffer
         )
     }
 

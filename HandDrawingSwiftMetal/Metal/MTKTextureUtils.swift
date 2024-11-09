@@ -92,9 +92,9 @@ enum MTKTextureUtils {
         let texture = MTKTextureUtils.makeTexture(device, textureSize)!
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        MTLRenderer.clear(
+        MTLRenderer.clearTexture(
             texture: texture,
-            commandBuffer
+            with: commandBuffer
         )
         commandBuffer.commit()
 
@@ -108,10 +108,10 @@ enum MTKTextureUtils {
             let newTexture = MTKTextureUtils.makeTexture(device, sourceTexture.size)
         else { return nil }
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: sourceTexture,
             destinationTexture: newTexture,
-            commandBuffer
+            with: commandBuffer
         )
         commandBuffer.commit()
 

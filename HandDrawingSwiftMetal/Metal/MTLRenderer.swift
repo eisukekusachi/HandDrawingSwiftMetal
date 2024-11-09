@@ -13,7 +13,7 @@ enum MTLRenderer {
     static func drawCurve(
         buffers: GrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer?
+        with commandBuffer: MTLCommandBuffer?
     ) {
         guard let buffers = buffers else { return }
 
@@ -70,36 +70,36 @@ enum MTLRenderer {
     }
 
     static func drawTexture(
-        _ texture: MTLTexture,
+        texture: MTLTexture,
         on targetTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
-        MTLRenderer.copy(
+        copyTexture(
             sourceTexture: texture,
             destinationTexture: targetTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
     static func drawTextures(
-        _ textures: [MTLTexture],
+        textures: [MTLTexture],
         on targetTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         if textures.count == 0 { return }
 
         for i in 0 ..< textures.count {
             if i == 0 {
-                MTLRenderer.copy(
+                copyTexture(
                     sourceTexture: textures.first!,
                     destinationTexture: targetTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             } else {
-                MTLRenderer.merge(
+                mergeTextures(
                     texture: textures[i],
                     into: targetTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
@@ -109,7 +109,7 @@ enum MTLRenderer {
         sourceTexture: MTLTexture,
         buffers: TextureBuffers,
         into targetTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = targetTexture
@@ -130,7 +130,7 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func colorize(
+    static func colorizeTexture(
         grayscaleTexture: MTLTexture,
         color rgb: (Int, Int, Int),
         resultTexture: MTLTexture,
@@ -164,25 +164,24 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func fill(
-        _ texture: MTLTexture,
+
+    static func fillTexture(
+        texture: MTLTexture,
         withRGB rgb: (Int, Int, Int),
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
-        fill(
-            texture,
+        fillTexture(
+            texture: texture,
             withRGBA: (rgb.0, rgb.1, rgb.2, 255),
-            commandBuffer
+            with: commandBuffer
         )
     }
-    static func fill(
-        _ texture: MTLTexture?,
+    static func fillTexture(
+        texture: MTLTexture?,
         withRGBA rgba: (Int, Int, Int, Int),
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard let texture else {
-            return
-        }
+        guard let texture else { return }
 
         let threadGroupSize = MTLSize(
             width: Int(texture.width / threadGroupLength),
@@ -196,11 +195,11 @@ enum MTLRenderer {
             Float(rgba.3) / 255.0
         ]
 
-        let w = threadGroupSize.width
-        let h = threadGroupSize.height
+        let width = threadGroupSize.width
+        let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (texture.width  + w - 1) / w,
-            height: (texture.height + h - 1) / h,
+            width: (texture.width  + width - 1) / width,
+            height: (texture.height + height - 1) / height,
             depth: 1
         )
 
@@ -218,19 +217,19 @@ enum MTLRenderer {
         _ commandBuffer: MTLCommandBuffer
     ) {
         layers.forEach {
-            merge(
+            mergeTextures(
                 texture: $0.texture,
                 alpha: $0.alpha,
                 into: destinationTexture,
-                commandBuffer
+                with: commandBuffer
             )
         }
     }
-    static func merge(
+    static func mergeTextures(
         texture: MTLTexture?,
         alpha: Int = 255,
         into destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
             width: Int(destinationTexture.width / threadGroupLength),
@@ -256,31 +255,33 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func clear(
+    static func clearTextures(
         textures: [MTLTexture?],
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         textures.forEach {
-            clear(texture: $0, commandBuffer)
+            clearTexture(
+                texture: $0,
+                with: commandBuffer
+            )
         }
     }
-    static func clear(
+    static func clearTexture(
         texture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard let texture = texture else {
-            return
-        }
+        guard let texture else { return }
+
         let threadGroupSize = MTLSize(
             width: Int(texture.width / threadGroupLength),
             height: Int(texture.height / threadGroupLength),
             depth: 1
         )
-        let w = threadGroupSize.width
-        let h = threadGroupSize.height
+        let width = threadGroupSize.width
+        let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (texture.width  + w - 1) / w,
-            height: (texture.height + h - 1) / h,
+            width: (texture.width  + width - 1) / width,
+            height: (texture.height + height - 1) / height,
             depth: 1
         )
         var rgba: [Float] = [0.0, 0.0, 0.0, 0.0]
@@ -292,10 +293,10 @@ enum MTLRenderer {
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
     }
-    static func copy(
+    static func copyTexture(
         sourceTexture: MTLTexture,
         destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
             width: Int(destinationTexture.width / threadGroupLength),

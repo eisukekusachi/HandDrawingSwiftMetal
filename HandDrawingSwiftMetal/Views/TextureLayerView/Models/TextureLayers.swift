@@ -34,40 +34,40 @@ extension TextureLayers {
             updateUnselectedLayers(with: commandBuffer)
         }
 
-        MTLRenderer.fill(
-            destinationTexture,
+        MTLRenderer.fillTexture(
+            texture: destinationTexture,
             withRGB: backgroundColor.rgb,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: bottomTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         if layers[index].isVisible {
             if let currentTexture {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: currentTexture,
                     alpha: layers[index].alpha,
                     into: destinationTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             } else {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[index].texture,
                     alpha: layers[index].alpha,
                     into: destinationTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: topTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -105,26 +105,26 @@ extension TextureLayers {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
-        MTLRenderer.clear(texture: bottomTexture, commandBuffer)
-        MTLRenderer.clear(texture: topTexture, commandBuffer)
+        MTLRenderer.clearTexture(texture: bottomTexture, with: commandBuffer)
+        MTLRenderer.clearTexture(texture: topTexture, with: commandBuffer)
 
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: bottomTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: topTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
