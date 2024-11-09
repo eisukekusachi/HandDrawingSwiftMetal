@@ -13,7 +13,16 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     private var grayscaleTexture: MTLTexture!
 
+    private var flippedTextureBuffers: MTLTextureBuffers?
+
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
+    required init() {
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: device
+        )
+    }
 
 }
 
@@ -57,10 +66,7 @@ extension CanvasBrushDrawingTexture {
         guard
             textures.count != 0,
             let targetTexture,
-            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
-                nodes: .flippedTextureNodes,
-                with: device
-            ),
+            let flippedTextureBuffers,
             let firstTexture = textures.first
         else { return }
 
