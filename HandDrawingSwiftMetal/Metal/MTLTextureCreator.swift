@@ -43,8 +43,10 @@ enum MTLTextureCreator {
         let rgbaBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
         let bgraBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
 
-        rgbaBytes.deallocate()
-        bgraBytes.deallocate()
+        defer {
+            rgbaBytes.deallocate()
+            bgraBytes.deallocate()
+        }
 
         let context = CGContext(
             data: rgbaBytes,
