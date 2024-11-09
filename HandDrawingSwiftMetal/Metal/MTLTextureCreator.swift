@@ -97,6 +97,8 @@ enum MTLTextureCreator {
         colorArray: [UInt8],
         with device: MTLDevice
     ) -> MTLTexture? {
+        guard colorArray.count == Int(size.width * size.height) * bytesPerPixel else { return nil }
+
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
 
