@@ -178,9 +178,43 @@ enum MTLRenderer {
         sourceTexture: MTLTexture?,
         destinationTexture: MTLTexture,
         alpha: Int = 255,
+        temporaryTexture: MTLTexture,
+        temporaryTextureBuffers: MTLTextureBuffers,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard 
+            sourceTexture?.size ?? .zero == destinationTexture.size &&
+            destinationTexture.size == temporaryTexture.size
+        else { return }
+
+        MTLRenderer.mergeTextures(
+            sourceTexture: sourceTexture,
+            destinationTexture: destinationTexture,
+            alpha: alpha,
+            into: temporaryTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.drawTexture(
+            texture: temporaryTexture,
+            buffers: temporaryTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
+    static func mergeTextures(
+        sourceTexture: MTLTexture?,
+        destinationTexture: MTLTexture,
+        alpha: Int = 255,
         into resultTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard
+            sourceTexture?.size ?? .zero == destinationTexture.size &&
+            destinationTexture.size == resultTexture.size
+        else { return }
+
         let threadGroupSize = MTLSize(
             width: Int(resultTexture.width / threadGroupLength),
             height: Int(resultTexture.height / threadGroupLength),

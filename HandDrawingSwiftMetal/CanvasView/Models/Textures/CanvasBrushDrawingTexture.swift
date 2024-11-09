@@ -54,14 +54,8 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.mergeTextures(
             sourceTexture: drawingTexture,
             destinationTexture: destinationTexture,
-            into: temporaryTexture,
-            with: commandBuffer
-        )
-        MTLRenderer.drawTexture(
-            texture: temporaryTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: destinationTexture,
+            temporaryTexture: temporaryTexture,
+            temporaryTextureBuffers: flippedTextureBuffers,
             with: commandBuffer
         )
 
@@ -98,14 +92,8 @@ extension CanvasBrushDrawingTexture {
                 MTLRenderer.mergeTextures(
                     sourceTexture: textures[i],
                     destinationTexture: targetTexture,
-                    into: temporaryTexture,
-                    with: commandBuffer
-                )
-                MTLRenderer.drawTexture(
-                    texture: temporaryTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: targetTexture,
+                    temporaryTexture: temporaryTexture,
+                    temporaryTextureBuffers: flippedTextureBuffers,
                     with: commandBuffer
                 )
             }

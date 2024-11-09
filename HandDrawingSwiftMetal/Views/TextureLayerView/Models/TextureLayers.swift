@@ -55,14 +55,8 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: bottomTexture,
             destinationTexture: destinationTexture,
-            into: temporaryTexture,
-            with: commandBuffer
-        )
-        MTLRenderer.drawTexture(
-            texture: temporaryTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: destinationTexture,
+            temporaryTexture: temporaryTexture,
+            temporaryTextureBuffers: flippedTextureBuffers,
             with: commandBuffer
         )
 
@@ -72,14 +66,8 @@ extension TextureLayers {
                     sourceTexture: currentTexture,
                     destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    into: temporaryTexture,
-                    with: commandBuffer
-                )
-                MTLRenderer.drawTexture(
-                    texture: temporaryTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: destinationTexture,
+                    temporaryTexture: temporaryTexture,
+                    temporaryTextureBuffers: flippedTextureBuffers,
                     with: commandBuffer
                 )
 
@@ -88,14 +76,8 @@ extension TextureLayers {
                     sourceTexture: layers[index].texture,
                     destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    into: temporaryTexture,
-                    with: commandBuffer
-                )
-                MTLRenderer.drawTexture(
-                    texture: temporaryTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: destinationTexture,
+                    temporaryTexture: temporaryTexture,
+                    temporaryTextureBuffers: flippedTextureBuffers,
                     with: commandBuffer
                 )
             }
@@ -104,14 +86,8 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: topTexture,
             destinationTexture: destinationTexture,
-            into: temporaryTexture,
-            with: commandBuffer
-        )
-        MTLRenderer.drawTexture(
-            texture: temporaryTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: destinationTexture,
+            temporaryTexture: temporaryTexture,
+            temporaryTextureBuffers: flippedTextureBuffers,
             with: commandBuffer
         )
     }
@@ -164,14 +140,8 @@ extension TextureLayers {
                     sourceTexture: layers[i].texture,
                     destinationTexture: bottomTexture,
                     alpha: layers[i].alpha,
-                    into: temporaryTexture,
-                    with: commandBuffer
-                )
-                MTLRenderer.drawTexture(
-                    texture: temporaryTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: bottomTexture,
+                    temporaryTexture: temporaryTexture,
+                    temporaryTextureBuffers: flippedTextureBuffers,
                     with: commandBuffer
                 )
             }
@@ -182,14 +152,8 @@ extension TextureLayers {
                     sourceTexture: layers[i].texture,
                     destinationTexture: topTexture,
                     alpha: layers[i].alpha,
-                    into: temporaryTexture,
-                    with: commandBuffer
-                )
-                MTLRenderer.drawTexture(
-                    texture: temporaryTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: topTexture,
+                    temporaryTexture: temporaryTexture,
+                    temporaryTextureBuffers: flippedTextureBuffers,
                     with: commandBuffer
                 )
             }
