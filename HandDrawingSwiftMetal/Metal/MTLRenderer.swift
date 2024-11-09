@@ -248,9 +248,9 @@ enum MTLRenderer {
 
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder?.setComputePipelineState(MTLPipelineManager.shared.merge)
-        encoder?.setTexture(destinationTexture, index: 0)
+        encoder?.setTexture(texture, index: 0)
         encoder?.setTexture(destinationTexture, index: 1)
-        encoder?.setTexture(texture, index: 2)
+        encoder?.setTexture(destinationTexture, index: 2)
         encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
