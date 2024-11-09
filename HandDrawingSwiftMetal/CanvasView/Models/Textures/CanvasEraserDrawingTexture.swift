@@ -14,7 +14,7 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
 
-    private var flippedTextureBuffers: TextureBuffers?
+    private var flippedTextureBuffers: MTLTextureBuffers?
 
     private var isDrawing: Bool = false
 

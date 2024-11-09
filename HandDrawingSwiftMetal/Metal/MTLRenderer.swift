@@ -11,7 +11,7 @@ enum MTLRenderer {
     static let threadGroupLength: Int = 16
 
     static func drawCurve(
-        buffers: GrayscalePointBuffers?,
+        buffers: MTLGrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer?
     ) {
@@ -33,7 +33,7 @@ enum MTLRenderer {
 
     static func drawTexture(
         texture: MTLTexture,
-        buffers: TextureBuffers,
+        buffers: MTLTextureBuffers,
         withBackgroundColor color: UIColor? = nil,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
@@ -107,7 +107,7 @@ enum MTLRenderer {
 
     static func makeEraseTexture(
         sourceTexture: MTLTexture,
-        buffers: TextureBuffers,
+        buffers: MTLTextureBuffers,
         into targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {

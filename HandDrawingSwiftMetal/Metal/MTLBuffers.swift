@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct GrayscalePointBuffers {
+struct MTLGrayscalePointBuffers {
     let vertexBuffer: MTLBuffer
     let diameterIncludingBlurBuffer: MTLBuffer
     let brightnessBuffer: MTLBuffer
@@ -15,7 +15,7 @@ struct GrayscalePointBuffers {
     let numberOfPoints: Int
 }
 
-struct TextureBuffers {
+struct MTLTextureBuffers {
     let vertexBuffer: MTLBuffer
     let texCoordsBuffer: MTLBuffer
     let indexBuffer: MTLBuffer
@@ -28,7 +28,7 @@ enum MTLBuffers {
         alpha: Int,
         textureSize: CGSize,
         with device: MTLDevice?
-    ) -> GrayscalePointBuffers? {
+    ) -> MTLGrayscalePointBuffers? {
         guard points.count != .zero else { return nil }
 
         var vertexArray: [Float] = []
@@ -84,7 +84,7 @@ enum MTLBuffers {
     static func makeTextureBuffers(
         nodes: MTLTextureNodes,
         with device: MTLDevice?
-    ) -> TextureBuffers? {
+    ) -> MTLTextureBuffers? {
         let vertices = nodes.vertices.getValues()
         let texCoords = nodes.textureCoord.getValues()
         let indices = nodes.indices.getValues()
@@ -111,7 +111,7 @@ enum MTLBuffers {
         textureCoord: MTLTextureCoordinates = MTLTextureNodes.screenTextureCoordinates,
         indices: MTLTextureIndices = MTLTextureNodes.textureIndices,
         with device: MTLDevice?
-    ) -> TextureBuffers? {
+    ) -> MTLTextureBuffers? {
         guard let device else { return nil }
 
         // Calculate vertex positions for the four corners

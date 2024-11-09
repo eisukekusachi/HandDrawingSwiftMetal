@@ -27,7 +27,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         }
     }
 
-    private var textureBuffers: TextureBuffers?
+    private var textureBuffers: MTLTextureBuffers?
 
     private let updateTextureSubject = PassthroughSubject<Void, Never>()
 
