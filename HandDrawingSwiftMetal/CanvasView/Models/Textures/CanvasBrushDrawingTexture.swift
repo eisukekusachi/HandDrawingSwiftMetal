@@ -57,7 +57,7 @@ extension CanvasBrushDrawingTexture {
         guard
             textures.count != 0,
             let targetTexture,
-            let flippedBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
                 nodes: .flippedTextureNodes,
                 with: device
             ),
@@ -68,7 +68,7 @@ extension CanvasBrushDrawingTexture {
             if i == 0 {
                 MTLRenderer.drawTexture(
                     texture: firstTexture,
-                    buffers: flippedBuffers,
+                    buffers: flippedTextureBuffers,
                     withBackgroundColor: .clear,
                     on: targetTexture,
                     with: commandBuffer

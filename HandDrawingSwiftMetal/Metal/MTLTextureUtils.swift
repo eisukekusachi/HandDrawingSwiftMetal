@@ -118,7 +118,7 @@ enum MTLTextureUtils {
         guard
             let texture,
             let newTexture = makeTexture(size: texture.size, with: device),
-            let buffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
                 nodes: .flippedTextureNodes,
                 with: device
             ),
@@ -127,7 +127,7 @@ enum MTLTextureUtils {
 
         MTLRenderer.drawTexture(
             texture: texture,
-            buffers: buffers,
+            buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: newTexture,
             with: commandBuffer
