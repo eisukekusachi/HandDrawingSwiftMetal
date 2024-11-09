@@ -134,9 +134,9 @@ extension CanvasEraserDrawingTexture {
 
         MTLRenderer.colorize(
             grayscaleTexture: grayscaleTexture,
-            with: (0, 0, 0),
-            result: drawingTexture!,
-            commandBuffer
+            color: (0, 0, 0),
+            resultTexture: drawingTexture!,
+            with: commandBuffer
         )
 
         MTLRenderer.copy(

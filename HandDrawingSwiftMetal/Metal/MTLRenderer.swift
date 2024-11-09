@@ -132,9 +132,9 @@ enum MTLRenderer {
 
     static func colorize(
         grayscaleTexture: MTLTexture,
-        with rgb: (Int, Int, Int),
-        result targetTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        color rgb: (Int, Int, Int),
+        resultTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
             width: Int(grayscaleTexture.width / threadGroupLength),
@@ -158,8 +158,8 @@ enum MTLRenderer {
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder?.setComputePipelineState(MTLPipelineManager.shared.colorize)
         encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
-        encoder?.setTexture(targetTexture, index: 0)
-        encoder?.setTexture(grayscaleTexture, index: 1)
+        encoder?.setTexture(grayscaleTexture, index: 0)
+        encoder?.setTexture(resultTexture, index: 1)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
     }

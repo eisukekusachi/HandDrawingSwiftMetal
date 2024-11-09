@@ -100,9 +100,9 @@ extension CanvasBrushDrawingTexture {
 
         MTLRenderer.colorize(
             grayscaleTexture: grayscaleTexture,
-            with: color.rgb,
-            result: drawingTexture!,
-            commandBuffer
+            color: color.rgb,
+            resultTexture: drawingTexture!,
+            with: commandBuffer
         )
     }
 

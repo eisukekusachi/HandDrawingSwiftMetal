@@ -33,13 +33,16 @@ fragment float4 draw_texture_fragment(TextureData data [[ stage_in ]],
 
 kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
                                        constant float4 &rgba [[ buffer(0) ]],
-                                       texture2d<float, access::write> resultTexture [[ texture(0) ]],
-                                       texture2d<float, access::read> srcTexture [[ texture(1) ]]) {
+                                       texture2d<float, access::read> srcTexture [[ texture(0) ]],
+                                       texture2d<float, access::write> resultTexture [[ texture(1) ]]
+                                       ) {
     float4 src = srcTexture.read(gid);
+
     float a = src[0];
     float r = rgba[0] * a;
     float g = rgba[1] * a;
     float b = rgba[2] * a;
+
     resultTexture.write(float4(r, g, b, a), gid);
 }
 kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
