@@ -20,8 +20,8 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
-        self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
-        self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.drawingTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        self.grayscaleTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
 
         clearDrawingTexture()
     }

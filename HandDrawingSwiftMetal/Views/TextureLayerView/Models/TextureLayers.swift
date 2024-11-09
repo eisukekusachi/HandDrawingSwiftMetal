@@ -76,14 +76,16 @@ extension TextureLayers {
         layerIndex: Int = 0,
         textureSize: CGSize
     ) {
-        bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        bottomTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
+        topTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
 
         var newLayers = newLayers
-        if newLayers.isEmpty {
+        if newLayers.isEmpty,
+           let newTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device
+           ) {
             newLayers.append(
                 .init(
-                    texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+                    texture: newTexture,
                     title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
                 )
             )
@@ -156,8 +158,11 @@ extension TextureLayers {
 
     /// Update the currently selected texture with a new instance
     func updateSelectedTextureAddress() {
-        guard
-            let newTexture = MTKTextureUtils.duplicateTexture(device, layers[index].texture)
+        guard 
+            let newTexture = MTLTextureUtils.duplicateTexture(
+                texture: layers[index].texture,
+                with: device
+            )
         else { return }
 
         layers[index].texture = newTexture

@@ -1,5 +1,5 @@
 //
-//  MTKTextureUtils.swift
+//  MTLTextureUtils.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/30.
@@ -8,8 +8,8 @@
 import MetalKit
 import Accelerate
 
-enum MTKTextureUtils {
-    static func makeTexture(_ device: MTLDevice, _ size: CGSize, _ pixelFormat: MTLPixelFormat = .bgra8Unorm) -> MTLTexture? {
+enum MTLTextureUtils {
+    static func makeTexture(size: CGSize, pixelFormat: MTLPixelFormat = .bgra8Unorm, with device: MTLDevice) -> MTLTexture? {
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: pixelFormat,
             width: Int(size.width),
@@ -19,10 +19,11 @@ enum MTKTextureUtils {
         textureDescriptor.usage = [
             .renderTarget,
             .shaderRead,
-            .shaderWrite]
+            .shaderWrite
+        ]
         return device.makeTexture(descriptor: textureDescriptor)
     }
-    static func makeTexture(_ device: MTLDevice, fromBundleImage imageName: String) -> MTLTexture? {
+    static func makeTexture(fromBundleImage imageName: String, with device: MTLDevice) -> MTLTexture? {
         guard let image = UIImage(named: imageName)?.cgImage else {
             return nil
         }
@@ -67,7 +68,7 @@ enum MTKTextureUtils {
 
         return texture
     }
-    static func makeTexture(_ device: MTLDevice, _ size: CGSize, _ array: [UInt8]) -> MTLTexture? {
+    static func makeTexture(size: CGSize, array: [UInt8], with device: MTLDevice) -> MTLTexture? {
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
         let bytesPerPixel = 4
@@ -83,15 +84,24 @@ enum MTKTextureUtils {
                          bytesPerImage: bytesPerRow * height)
         return texture
     }
-    static func makeTexture(_ device: MTLDevice, url: URL, textureSize: CGSize) throws -> MTLTexture? {
+    static func makeTexture(url: URL, textureSize: CGSize, with device: MTLDevice) throws -> MTLTexture? {
         guard let textureData = try Data(contentsOf: url).encodedHexadecimals else { return nil }
-        return MTKTextureUtils.makeTexture(device, textureSize, textureData)
+        return makeTexture(
+            size: textureSize,
+            array: textureData,
+            with: device
+        )
     }
 
-    static func makeBlankTexture(_ device: MTLDevice, _ textureSize: CGSize) -> MTLTexture {
-        let texture = MTKTextureUtils.makeTexture(device, textureSize)!
+    static func makeBlankTexture(
+        size: CGSize,
+        with device: MTLDevice
+    ) -> MTLTexture? {
+        guard
+            let texture = makeTexture(size: size, with: device),
+            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+        else { return nil }
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         MTLRenderer.clearTexture(
             texture: texture,
             with: commandBuffer
@@ -101,15 +111,18 @@ enum MTKTextureUtils {
         return texture
     }
 
-    static func duplicateTexture(_ device: MTLDevice, _ sourceTexture: MTLTexture?) -> MTLTexture? {
+    static func duplicateTexture(
+        texture: MTLTexture?,
+        with device: MTLDevice
+    ) -> MTLTexture? {
         guard
-            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer(),
-            let sourceTexture,
-            let newTexture = MTKTextureUtils.makeTexture(device, sourceTexture.size)
+            let texture,
+            let newTexture = makeTexture(size: texture.size, with: device),
+            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else { return nil }
 
         MTLRenderer.copyTexture(
-            sourceTexture: sourceTexture,
+            sourceTexture: texture,
             destinationTexture: newTexture,
             with: commandBuffer
         )

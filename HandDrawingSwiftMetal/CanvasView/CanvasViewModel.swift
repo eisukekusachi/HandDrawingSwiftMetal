@@ -190,9 +190,9 @@ final class CanvasViewModel {
 
         textureLayers.initLayers(textureSize: textureSize)
 
-        currentTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        currentTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
 
-        canvasTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        canvasTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
     }
 
     func apply(model: CanvasModel) {
@@ -222,9 +222,9 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        currentTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
+        currentTexture = MTLTextureUtils.makeTexture(size: model.textureSize, with: device)
 
-        canvasTexture = MTKTextureUtils.makeTexture(device, model.textureSize)
+        canvasTexture = MTLTextureUtils.makeTexture(size: model.textureSize, with: device)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -502,7 +502,7 @@ extension CanvasViewModel {
 
         textureLayerUndoManager.clear()
 
-        currentTexture = MTKTextureUtils.makeTexture(device, renderTextureSize)
+        currentTexture = MTLTextureUtils.makeTexture(size: renderTextureSize, with: device)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -538,16 +538,17 @@ extension CanvasViewModel {
     func didTapAddLayerButton() {
         guard
             let device,
-            let renderTextureSize = canvasView?.renderTexture?.size
+            let renderTextureSize = canvasView?.renderTexture?.size,
+            let newTexture = MTLTextureUtils.makeBlankTexture(
+                size: renderTextureSize,
+                with: device
+            )
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         let layer: TextureLayer = .init(
-            texture: MTKTextureUtils.makeBlankTexture(
-                device,
-                renderTextureSize
-            ),
+            texture: newTexture,
             title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
         )
         textureLayers.addLayer(layer)
