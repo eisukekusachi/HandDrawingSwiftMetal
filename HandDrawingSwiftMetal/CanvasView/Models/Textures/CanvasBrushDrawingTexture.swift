@@ -20,8 +20,8 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
-        self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
-        self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.drawingTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        self.grayscaleTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
 
         clearDrawingTexture()
     }
@@ -36,10 +36,10 @@ extension CanvasBrushDrawingTexture {
     ) {
         guard let destinationTexture else { return }
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: drawingTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         clearDrawingTexture(commandBuffer)
@@ -58,9 +58,9 @@ extension CanvasBrushDrawingTexture {
         else { return }
 
         MTLRenderer.drawTextures(
-            [selectedTexture, drawingTexture].compactMap { $0 },
+            textures: [selectedTexture, drawingTexture].compactMap { $0 },
             on: targetTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -95,14 +95,14 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.drawCurve(
             buffers: pointBuffers,
             onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.colorize(
+        MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
-            with: color.rgb,
-            result: drawingTexture!,
-            commandBuffer
+            color: color.rgb,
+            resultTexture: drawingTexture!,
+            with: commandBuffer
         )
     }
 
@@ -111,8 +111,15 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clear(texture: drawingTexture, commandBuffer)
-        MTLRenderer.fill(grayscaleTexture, withRGB: (0, 0, 0), commandBuffer)
+        MTLRenderer.clearTexture(
+            texture: drawingTexture,
+            with: commandBuffer
+        )
+        MTLRenderer.fillTexture(
+            texture: grayscaleTexture,
+            withRGB: (0, 0, 0),
+            with: commandBuffer
+        )
     }
 
 }

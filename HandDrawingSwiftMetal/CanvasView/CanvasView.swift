@@ -27,7 +27,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         }
     }
 
-    private var textureBuffers: TextureBuffers?
+    private var textureBuffers: MTLTextureBuffers?
 
     private let updateTextureSubject = PassthroughSubject<Void, Never>()
 
@@ -51,7 +51,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         resetCommandBuffer()
 
         textureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: MTLTextureNodes.flippedTextureNodes,
+            nodes: .flippedTextureNodes,
             with: device
         )
 
@@ -61,8 +61,8 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
 
-        if let textureSize: CGSize = currentDrawable?.texture.size {
-            _renderTexture = MTKTextureUtils.makeBlankTexture(device!, textureSize)
+        if let device, let textureSize: CGSize = currentDrawable?.texture.size {
+            _renderTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
         }
     }
 
@@ -91,8 +91,10 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        guard let device else { return }
+
         // Align the size of `_renderTexture` with `drawableSize`
-        _renderTexture = MTKTextureUtils.makeBlankTexture(device!, size)
+        _renderTexture = MTLTextureUtils.makeBlankTexture(size: size, with: device)
     }
 
 }

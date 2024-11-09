@@ -30,3 +30,53 @@ fragment float4 draw_texture_fragment(TextureData data [[ stage_in ]],
     float r = color[0];
     return float4(r, g, b, a);
 }
+
+kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
+                                       constant float4 &rgba [[ buffer(0) ]],
+                                       texture2d<float, access::read> srcTexture [[ texture(0) ]],
+                                       texture2d<float, access::write> resultTexture [[ texture(1) ]]
+                                       ) {
+    float4 src = srcTexture.read(gid);
+
+    float a = src[0];
+    float r = rgba[0] * a;
+    float g = rgba[1] * a;
+    float b = rgba[2] * a;
+
+    resultTexture.write(float4(r, g, b, a), gid);
+}
+kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
+                           texture2d<float, access::read> srcTexture [[ texture(0) ]],
+                           texture2d<float, access::read> dstTexture [[ texture(1) ]],
+                           texture2d<float, access::write> resultTexture [[ texture(2) ]],
+                           constant float &alpha [[ buffer(3) ]]
+                           ) {
+    float4 src = srcTexture.read(gid);
+    float4 dst = dstTexture.read(gid);
+
+    float srcA = src[3] * alpha;
+    float srcB = src[2] * alpha;
+    float srcG = src[1] * alpha;
+    float srcR = src[0] * alpha;
+    float dstA = dst[3];
+    float dstB = dst[2];
+    float dstG = dst[1];
+    float dstR = dst[0];
+    float r = srcR + dstR * (1 - srcA);
+    float g = srcG + dstG * (1 - srcA);
+    float b = srcB + dstB * (1 - srcA);
+    float a = srcA + dstA * (1 - srcA);
+
+    resultTexture.write(float4(r, g, b, a), gid);
+}
+kernel void add_color_to_texture(uint2 gid [[ thread_position_in_grid ]],
+                                 constant float4 &color [[ buffer(0) ]],
+                                 texture2d<float, access::write> resultTexture [[ texture(0) ]]) {
+    resultTexture.write(color, gid);
+}
+kernel void copy_texture(uint2 gid [[ thread_position_in_grid ]],
+                         texture2d<float, access::write> resultTexture [[ texture(0) ]],
+                         texture2d<float, access::read> srcTexture [[ texture(1) ]]) {
+    float4 srcColor = srcTexture.read(gid);
+    resultTexture.write(srcColor, gid);
+}

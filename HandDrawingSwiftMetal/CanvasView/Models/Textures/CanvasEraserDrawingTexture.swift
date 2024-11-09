@@ -14,7 +14,7 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
 
-    private var flippedTextureBuffers: TextureBuffers?
+    private var flippedTextureBuffers: MTLTextureBuffers?
 
     private var isDrawing: Bool = false
 
@@ -22,7 +22,7 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: MTLTextureNodes.flippedTextureNodes,
+            nodes: .flippedTextureNodes,
             with: device
         )
     }
@@ -33,9 +33,9 @@ extension CanvasEraserDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
 
-        self.drawingTexture = MTKTextureUtils.makeTexture(device, textureSize)
-        self.grayscaleTexture = MTKTextureUtils.makeTexture(device, textureSize)
-        self.eraserTexture = MTKTextureUtils.makeTexture(device, textureSize)
+        self.drawingTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        self.grayscaleTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
+        self.eraserTexture = MTLTextureUtils.makeTexture(size: textureSize, with: device)
 
         clearDrawingTexture()
     }
@@ -54,23 +54,23 @@ extension CanvasEraserDrawingTexture {
             let destinationTexture
         else { return }
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: destinationTexture,
             destinationTexture: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         MTLRenderer.makeEraseTexture(
             sourceTexture: drawingTexture,
             buffers: flippedTextureBuffers,
             into: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: eraserTexture,
             destinationTexture: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         clearDrawingTexture(commandBuffer)
@@ -91,9 +91,9 @@ extension CanvasEraserDrawingTexture {
         else { return }
 
         MTLRenderer.drawTexture(
-            isDrawing ? eraserTexture : selectedTexture,
+            texture: isDrawing ? eraserTexture : selectedTexture,
             on: targetTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -129,27 +129,27 @@ extension CanvasEraserDrawingTexture {
         MTLRenderer.drawCurve(
             buffers: pointBuffers,
             onGrayscaleTexture: grayscaleTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.colorize(
+        MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
-            with: (0, 0, 0),
-            result: drawingTexture!,
-            commandBuffer
+            color: (0, 0, 0),
+            resultTexture: drawingTexture!,
+            with: commandBuffer
         )
 
-        MTLRenderer.copy(
+        MTLRenderer.copyTexture(
             sourceTexture: srcTexture,
             destinationTexture: eraserTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         MTLRenderer.makeEraseTexture(
             sourceTexture: drawingTexture!,
             buffers: flippedTextureBuffers!,
             into: eraserTexture!,
-            commandBuffer
+            with: commandBuffer
         )
 
         isDrawing = true
@@ -160,17 +160,17 @@ extension CanvasEraserDrawingTexture {
 extension CanvasEraserDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clear(
+        MTLRenderer.clearTextures(
             textures: [
                 eraserTexture,
                 drawingTexture
             ],
-            commandBuffer
+            with: commandBuffer
         )
-        MTLRenderer.fill(
-            grayscaleTexture,
+        MTLRenderer.fillTexture(
+            texture: grayscaleTexture,
             withRGB: (0, 0, 0),
-            commandBuffer
+            with: commandBuffer
         )
     }
 

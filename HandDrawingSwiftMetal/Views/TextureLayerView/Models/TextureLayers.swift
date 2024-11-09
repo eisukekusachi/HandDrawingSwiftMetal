@@ -34,40 +34,40 @@ extension TextureLayers {
             updateUnselectedLayers(with: commandBuffer)
         }
 
-        MTLRenderer.fill(
-            destinationTexture,
+        MTLRenderer.fillTexture(
+            texture: destinationTexture,
             withRGB: backgroundColor.rgb,
-            commandBuffer
+            with: commandBuffer
         )
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: bottomTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
 
         if layers[index].isVisible {
             if let currentTexture {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: currentTexture,
                     alpha: layers[index].alpha,
                     into: destinationTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             } else {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[index].texture,
                     alpha: layers[index].alpha,
                     into: destinationTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
 
-        MTLRenderer.merge(
+        MTLRenderer.mergeTextures(
             texture: topTexture,
             into: destinationTexture,
-            commandBuffer
+            with: commandBuffer
         )
     }
 
@@ -76,14 +76,16 @@ extension TextureLayers {
         layerIndex: Int = 0,
         textureSize: CGSize
     ) {
-        bottomTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
-        topTexture = MTKTextureUtils.makeBlankTexture(device, textureSize)
+        bottomTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
+        topTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device)
 
         var newLayers = newLayers
-        if newLayers.isEmpty {
+        if newLayers.isEmpty,
+           let newTexture = MTLTextureUtils.makeBlankTexture(size: textureSize, with: device
+           ) {
             newLayers.append(
                 .init(
-                    texture: MTKTextureUtils.makeBlankTexture(device, textureSize),
+                    texture: newTexture,
                     title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
                 )
             )
@@ -105,26 +107,26 @@ extension TextureLayers {
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
-        MTLRenderer.clear(texture: bottomTexture, commandBuffer)
-        MTLRenderer.clear(texture: topTexture, commandBuffer)
+        MTLRenderer.clearTexture(texture: bottomTexture, with: commandBuffer)
+        MTLRenderer.clearTexture(texture: topTexture, with: commandBuffer)
 
         if bottomIndex >= 0 {
             for i in 0 ... bottomIndex where layers[i].isVisible {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: bottomTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
         if topIndex < layers.count {
             for i in topIndex ..< layers.count where layers[i].isVisible {
-                MTLRenderer.merge(
+                MTLRenderer.mergeTextures(
                     texture: layers[i].texture,
                     alpha: layers[i].alpha,
                     into: topTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }
@@ -156,8 +158,11 @@ extension TextureLayers {
 
     /// Update the currently selected texture with a new instance
     func updateSelectedTextureAddress() {
-        guard
-            let newTexture = MTKTextureUtils.duplicateTexture(device, layers[index].texture)
+        guard 
+            let newTexture = MTLTextureUtils.duplicateTexture(
+                texture: layers[index].texture,
+                with: device
+            )
         else { return }
 
         layers[index].texture = newTexture
