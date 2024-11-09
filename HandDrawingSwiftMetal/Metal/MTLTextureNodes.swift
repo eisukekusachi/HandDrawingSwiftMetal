@@ -197,9 +197,9 @@ struct MTLTextureIndices {
 }
 
 struct MTLTextureNodes {
-    var vertices: MTLTextureVertices = textureVertices
+    var vertices: MTLTextureVertices = MTLTextureVertices()
     var textureCoord: MTLTextureCoordinates = .screenTextureCoordinates
-    var indices: MTLTextureIndices = textureIndices
+    var indices: MTLTextureIndices = MTLTextureIndices()
 }
 
 extension MTLTextureNodes {
@@ -207,13 +207,9 @@ extension MTLTextureNodes {
     static let textureNodes: MTLTextureNodes = .init()
 
     static let flippedTextureNodes: MTLTextureNodes = .init(
-        vertices: textureVertices,
+        vertices: MTLTextureVertices(),
         textureCoord: .cartesianTextureCoordinates,
-        indices: textureIndices
+        indices: MTLTextureIndices()
     )
-
-    static let textureVertices = MTLTextureVertices()
-
-    static let textureIndices = MTLTextureIndices()
 
 }

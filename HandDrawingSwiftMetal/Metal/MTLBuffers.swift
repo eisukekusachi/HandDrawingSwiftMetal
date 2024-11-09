@@ -109,7 +109,7 @@ enum MTLBuffers {
         sourceSize: CGSize,
         destinationSize: CGSize,
         textureCoord: MTLTextureCoordinates = .screenTextureCoordinates,
-        indices: MTLTextureIndices = MTLTextureNodes.textureIndices,
+        indices: MTLTextureIndices = .init(),
         with device: MTLDevice?
     ) -> MTLTextureBuffers? {
         guard let device else { return nil }
