@@ -69,9 +69,8 @@ enum MTLTextureCreator {
 
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
-        let texture = device.makeTexture(
-            descriptor: getTextureDescriptor(size: .init(width: width, height: height))
-        )
+        let texture = makeTexture(size: image.size, with: device)
+
         texture?.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
@@ -89,9 +88,8 @@ enum MTLTextureCreator {
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
 
-        let texture = device.makeTexture(
-            descriptor: getTextureDescriptor(size: .init(width: width, height: height))
-        )
+        let texture = makeTexture(size: .init(width: width, height: height), with: device)
+
         texture?.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
