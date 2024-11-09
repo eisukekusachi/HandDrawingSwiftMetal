@@ -82,7 +82,7 @@ enum MTLBuffers {
     }
 
     static func makeTextureBuffers(
-        nodes: MTLTextureNodes,
+        nodes: MTLTextureNodes = .textureNodes,
         with device: MTLDevice?
     ) -> MTLTextureBuffers? {
         let vertices = nodes.vertices.getValues()

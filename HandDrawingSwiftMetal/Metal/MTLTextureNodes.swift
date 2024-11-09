@@ -54,18 +54,14 @@ struct MTLTextureIndices {
 }
 
 struct MTLTextureNodes {
-    var vertices: MTLTextureVertices
-    var textureCoord: MTLTextureCoordinates = MTLTextureNodes.screenTextureCoordinates
-    var indices: MTLTextureIndices = MTLTextureNodes.textureIndices
+    var vertices: MTLTextureVertices = textureVertices
+    var textureCoord: MTLTextureCoordinates = screenTextureCoordinates
+    var indices: MTLTextureIndices = textureIndices
 }
 
 extension MTLTextureNodes {
 
-    static let textureNodes: MTLTextureNodes = .init(
-        vertices: textureVertices,
-        textureCoord: screenTextureCoordinates,
-        indices: textureIndices
-    )
+    static let textureNodes: MTLTextureNodes = .init()
 
     static let flippedTextureNodes: MTLTextureNodes = .init(
         vertices: textureVertices,

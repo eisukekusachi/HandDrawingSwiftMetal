@@ -22,7 +22,7 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: MTLTextureNodes.flippedTextureNodes,
+            nodes: .flippedTextureNodes,
             with: device
         )
     }
