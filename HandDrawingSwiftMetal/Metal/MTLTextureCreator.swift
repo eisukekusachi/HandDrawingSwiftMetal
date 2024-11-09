@@ -22,12 +22,15 @@ enum MTLTextureCreator {
             return nil
         }
 
-        let (w, h) = (Int(image.width), Int(image.height))
+        let width: Int = Int(image.width)
+        let height: Int = Int(image.height)
+
         let map: [UInt8] = [2, 1, 0, 3]
         let bytesPerPixel = 4
-        let bytesPerRow = bytesPerPixel * w
+        let bytesPerRow = bytesPerPixel * width
         let bitsPerComponent = 8
-        let totalNumBytes: Int = h * w * bytesPerPixel
+        let totalNumBytes: Int = width * height * bytesPerPixel
+
         let rgbaBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
         let bgraBytes: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: totalNumBytes)
 
@@ -35,39 +38,40 @@ enum MTLTextureCreator {
         bgraBytes.deallocate()
 
         let context = CGContext(data: rgbaBytes,
-                                width: w,
-                                height: h,
+                                width: width,
+                                height: height,
                                 bitsPerComponent: bitsPerComponent,
                                 bytesPerRow: bytesPerRow,
                                 space: CGColorSpaceCreateDeviceRGB(),
                                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
-        context?.draw(image, in: CGRect(x: 0, y: 0, width: CGFloat(w), height: CGFloat(h)))
+        context?.draw(image, in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
         var bgraBuffer = vImage_Buffer(data: bgraBytes,
-                                       height: vImagePixelCount(image.height),
-                                       width: vImagePixelCount(image.width),
+                                       height: vImagePixelCount(height),
+                                       width: vImagePixelCount(width),
                                        rowBytes: bytesPerRow)
 
         var rgbaBuffer = vImage_Buffer(data: rgbaBytes,
-                                       height: vImagePixelCount(image.height),
-                                       width: vImagePixelCount(image.width),
+                                       height: vImagePixelCount(height),
+                                       width: vImagePixelCount(width),
                                        rowBytes: bytesPerRow)
 
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
         let texture = device.makeTexture(
-            descriptor: getTextureDescriptor(size: .init(width: w, height: h))
+            descriptor: getTextureDescriptor(size: .init(width: width, height: height))
         )
-        texture?.replace(region: MTLRegionMake2D(0, 0, w, h),
+        texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
                          mipmapLevel: 0,
                          slice: 0,
                          withBytes: bgraBytes,
                          bytesPerRow: bytesPerRow,
-                         bytesPerImage: bytesPerRow * h)
+                         bytesPerImage: bytesPerRow * height)
         return texture
     }
     static func makeTexture(size: CGSize, array: [UInt8], with device: MTLDevice) -> MTLTexture? {
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
+
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
 
