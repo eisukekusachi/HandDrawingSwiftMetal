@@ -12,12 +12,20 @@ enum MTLTextureCreator {
 
     static let pixelFormat: MTLPixelFormat = .bgra8Unorm
 
-    static func makeTexture(size: CGSize, pixelFormat: MTLPixelFormat = pixelFormat, with device: MTLDevice) -> MTLTexture? {
+    static func makeTexture(
+        size: CGSize,
+        pixelFormat: MTLPixelFormat = pixelFormat,
+        with device: MTLDevice
+    ) -> MTLTexture? {
         device.makeTexture(
             descriptor: getTextureDescriptor(size: size)
         )
     }
-    static func makeTexture(image: UIImage?, with device: MTLDevice) -> MTLTexture? {
+
+    static func makeTexture(
+        image: UIImage?,
+        with device: MTLDevice
+    ) -> MTLTexture? {
         guard
             let image,
             let cgImage = image.cgImage
@@ -81,7 +89,12 @@ enum MTLTextureCreator {
         )
         return texture
     }
-    static func makeTexture(size: CGSize, array: [UInt8], with device: MTLDevice) -> MTLTexture? {
+
+    static func makeTexture(
+        size: CGSize,
+        array: [UInt8],
+        with device: MTLDevice
+    ) -> MTLTexture? {
         let width: Int = Int(size.width)
         let height: Int = Int(size.height)
 
