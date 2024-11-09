@@ -40,6 +40,8 @@ fragment float4 draw_gray_points_fragment(GrayscalePoint data [[ stage_in ]],
     float radiusPlusBlurSize = data.diameterPlusBlurSize * 0.5;
     float blurRatio = data.blurSize / radiusPlusBlurSize;
     float x = 1.0 - (distance * 2);
+
+    // The boundaries of the blur become more distinct as the power of squaring increases
     float alpha = data.alpha * pow(min(x / blurRatio, 1.0), 3);
 
     return float4(alpha,
