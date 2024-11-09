@@ -82,12 +82,6 @@ class MTLPipelineManager {
             label: "Add color to a texture",
             shaderName: "add_color_to_texture"
         )
-        self.copy = makeComputePipeline(
-            device: device,
-            library: library,
-            label: "Copy a texture",
-            shaderName: "copy_texture"
-        )
     }
 
 }

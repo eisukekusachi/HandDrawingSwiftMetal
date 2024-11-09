@@ -242,30 +242,5 @@ enum MTLRenderer {
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
     }
-    static func copyTexture(
-        sourceTexture: MTLTexture,
-        destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / threadGroupLength),
-            height: Int(destinationTexture.height / threadGroupLength),
-            depth: 1
-        )
-        let width = threadGroupSize.width
-        let height = threadGroupSize.height
-        let threadGroupCount = MTLSize(
-            width: (destinationTexture.width  + width - 1) / width,
-            height: (destinationTexture.height + height - 1) / height,
-            depth: 1
-        )
-
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(MTLPipelineManager.shared.copy)
-        encoder?.setTexture(destinationTexture, index: 0)
-        encoder?.setTexture(sourceTexture, index: 1)
-        encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
-        encoder?.endEncoding()
-    }
 
 }
