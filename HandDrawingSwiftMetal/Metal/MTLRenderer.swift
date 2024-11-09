@@ -141,11 +141,11 @@ enum MTLRenderer {
             height: Int(grayscaleTexture.height / threadGroupLength),
             depth: 1
         )
-        let w = threadGroupSize.width
-        let h = threadGroupSize.height
+        let width = threadGroupSize.width
+        let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (grayscaleTexture.width  + w - 1) / w,
-            height: (grayscaleTexture.height + h - 1) / h,
+            width: (grayscaleTexture.width  + width - 1) / width,
+            height: (grayscaleTexture.height + height - 1) / height,
             depth: 1
         )
         var rgba: [Float] = [
@@ -221,11 +221,11 @@ enum MTLRenderer {
             height: Int(destinationTexture.height / threadGroupLength),
             depth: 1
         )
-        let w = threadGroupSize.width
-        let h = threadGroupSize.height
+        let width = threadGroupSize.width
+        let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (destinationTexture.width  + w - 1) / w,
-            height: (destinationTexture.height + h - 1) / h,
+            width: (destinationTexture.width  + width - 1) / width,
+            height: (destinationTexture.height + height - 1) / height,
             depth: 1
         )
         var alpha: Float = max(0.0, min(Float(alpha) / 255.0, 1.0))
@@ -288,11 +288,11 @@ enum MTLRenderer {
             height: Int(destinationTexture.height / threadGroupLength),
             depth: 1
         )
-        let w = threadGroupSize.width
-        let h = threadGroupSize.height
+        let width = threadGroupSize.width
+        let height = threadGroupSize.height
         let threadGroupCount = MTLSize(
-            width: (destinationTexture.width  + w - 1) / w,
-            height: (destinationTexture.height + h - 1) / h,
+            width: (destinationTexture.width  + width - 1) / width,
+            height: (destinationTexture.height + height - 1) / height,
             depth: 1
         )
 
