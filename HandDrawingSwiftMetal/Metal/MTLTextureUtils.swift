@@ -13,18 +13,9 @@ enum MTLTextureUtils {
     static let pixelFormat: MTLPixelFormat = .bgra8Unorm
 
     static func makeTexture(size: CGSize, pixelFormat: MTLPixelFormat = pixelFormat, with device: MTLDevice) -> MTLTexture? {
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: pixelFormat,
-            width: Int(size.width),
-            height: Int(size.height),
-            mipmapped: false
+        device.makeTexture(
+            descriptor: getTextureDescriptor(size: size)
         )
-        textureDescriptor.usage = [
-            .renderTarget,
-            .shaderRead,
-            .shaderWrite
-        ]
-        return device.makeTexture(descriptor: textureDescriptor)
     }
     static func makeTexture(fromBundleImage imageName: String, with device: MTLDevice) -> MTLTexture? {
         guard let image = UIImage(named: imageName)?.cgImage else {
@@ -57,9 +48,9 @@ enum MTLTextureUtils {
                                        rowBytes: bytesPerRow)
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: w, height: h, mipmapped: false)
-        textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = device.makeTexture(descriptor: textureDescriptor)
+        let texture = device.makeTexture(
+            descriptor: getTextureDescriptor(size: .init(width: w, height: h))
+        )
         texture?.replace(region: MTLRegionMake2D(0, 0, w, h),
                          mipmapLevel: 0,
                          slice: 0,
@@ -76,9 +67,10 @@ enum MTLTextureUtils {
         let height: Int = Int(size.height)
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: width, height: height, mipmapped: false)
-        textureDescriptor.usage = [.renderTarget, .shaderRead, .shaderWrite]
-        let texture = device.makeTexture(descriptor: textureDescriptor)
+
+        let texture = device.makeTexture(
+            descriptor: getTextureDescriptor(size: .init(width: width, height: height))
+        )
         texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
                          mipmapLevel: 0,
                          slice: 0,
@@ -139,6 +131,21 @@ enum MTLTextureUtils {
         commandBuffer.commit()
 
         return newTexture
+    }
+
+    private static func getTextureDescriptor(size: CGSize) -> MTLTextureDescriptor {
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: pixelFormat,
+            width: Int(size.width),
+            height: Int(size.height),
+            mipmapped: false
+        )
+        textureDescriptor.usage = [
+            .renderTarget,
+            .shaderRead,
+            .shaderWrite
+        ]
+        return textureDescriptor
     }
 
 }
