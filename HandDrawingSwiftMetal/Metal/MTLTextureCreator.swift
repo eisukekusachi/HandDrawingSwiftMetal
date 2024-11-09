@@ -79,14 +79,6 @@ enum MTLTextureCreator {
                          bytesPerImage: bytesPerRow * height)
         return texture
     }
-    static func makeTexture(url: URL, textureSize: CGSize, with device: MTLDevice) throws -> MTLTexture? {
-        guard let textureData = try Data(contentsOf: url).encodedHexadecimals else { return nil }
-        return makeTexture(
-            size: textureSize,
-            array: textureData,
-            with: device
-        )
-    }
 
     static func makeBlankTexture(
         size: CGSize,
