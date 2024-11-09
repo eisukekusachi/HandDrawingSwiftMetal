@@ -164,7 +164,6 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-
     static func fillTexture(
         texture: MTLTexture,
         withRGB rgb: (Int, Int, Int),
@@ -211,20 +210,6 @@ enum MTLRenderer {
         encoder?.endEncoding()
     }
 
-    static func merge(
-        layers: [TextureLayer],
-        into destinationTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        layers.forEach {
-            mergeTextures(
-                texture: $0.texture,
-                alpha: $0.alpha,
-                into: destinationTexture,
-                with: commandBuffer
-            )
-        }
-    }
     static func mergeTextures(
         texture: MTLTexture?,
         alpha: Int = 255,
