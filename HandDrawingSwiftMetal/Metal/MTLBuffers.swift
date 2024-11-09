@@ -108,7 +108,7 @@ enum MTLBuffers {
         frameSize: CGSize,
         sourceSize: CGSize,
         destinationSize: CGSize,
-        textureCoord: MTLTextureCoordinates = MTLTextureNodes.screenTextureCoordinates,
+        textureCoord: MTLTextureCoordinates = .screenTextureCoordinates,
         indices: MTLTextureIndices = MTLTextureNodes.textureIndices,
         with device: MTLDevice?
     ) -> MTLTextureBuffers? {

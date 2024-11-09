@@ -37,6 +37,25 @@ struct MTLTextureCoordinates {
             Float(LT.x), Float(LT.y)
         ]
     }
+
+    /// UV coordinates for a screen coordinate system with the origin at the top-left corner.
+    /// This is typical in `UIKit`, where (0,0) represents the top-left of the screen.
+    static let screenTextureCoordinates: Self = .init(
+        LT: .init(x: 0.0, y: 0.0),
+        RT: .init(x: 1.0, y: 0.0),
+        RB: .init(x: 1.0, y: 1.0),
+        LB: .init(x: 0.0, y: 1.0)
+    )
+
+    /// UV coordinates for a Cartesian coordinate system with the origin at the bottom-left corner
+    /// Commonly used in `Metal` rendering, where the bottom-left is (0,0).
+    static let cartesianTextureCoordinates: Self = .init(
+        LT: .init(x: 0.0, y: 1.0),
+        RT: .init(x: 1.0, y: 1.0),
+        RB: .init(x: 1.0, y: 0.0),
+        LB: .init(x: 0.0, y: 0.0)
+    )
+
 }
 
 struct MTLTextureIndices {
@@ -55,7 +74,7 @@ struct MTLTextureIndices {
 
 struct MTLTextureNodes {
     var vertices: MTLTextureVertices = textureVertices
-    var textureCoord: MTLTextureCoordinates = screenTextureCoordinates
+    var textureCoord: MTLTextureCoordinates = .screenTextureCoordinates
     var indices: MTLTextureIndices = textureIndices
 }
 
@@ -65,29 +84,11 @@ extension MTLTextureNodes {
 
     static let flippedTextureNodes: MTLTextureNodes = .init(
         vertices: textureVertices,
-        textureCoord: cartesianTextureCoordinates,
+        textureCoord: .cartesianTextureCoordinates,
         indices: textureIndices
     )
 
     static let textureVertices = MTLTextureVertices()
-
-    /// UV coordinates for a screen coordinate system with the origin at the top-left corner.
-    /// This is typical in `UIKit`, where (0,0) represents the top-left of the screen.
-    static let screenTextureCoordinates: MTLTextureCoordinates = .init(
-        LT: .init(x: 0.0, y: 0.0),
-        RT: .init(x: 1.0, y: 0.0),
-        RB: .init(x: 1.0, y: 1.0),
-        LB: .init(x: 0.0, y: 1.0)
-    )
-
-    /// UV coordinates for a Cartesian coordinate system with the origin at the bottom-left corner
-    /// Commonly used in `Metal` rendering, where the bottom-left is (0,0).
-    static let cartesianTextureCoordinates: MTLTextureCoordinates = .init(
-        LT: .init(x: 0.0, y: 1.0),
-        RT: .init(x: 1.0, y: 1.0),
-        RB: .init(x: 1.0, y: 0.0),
-        LB: .init(x: 0.0, y: 0.0)
-    )
 
     static let textureIndices = MTLTextureIndices()
 
