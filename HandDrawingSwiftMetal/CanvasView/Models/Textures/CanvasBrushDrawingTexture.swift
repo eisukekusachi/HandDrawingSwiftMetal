@@ -9,7 +9,7 @@ import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
 class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
-    var drawingTexture: MTLTexture?
+    var texture: MTLTexture?
 
     private var grayscaleTexture: MTLTexture!
 
@@ -31,7 +31,7 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
-        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        self.texture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.temporaryTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
@@ -59,7 +59,7 @@ extension CanvasBrushDrawingTexture {
         )
 
         MTLRenderer.mergeTextures(
-            sourceTexture: drawingTexture,
+            sourceTexture: texture,
             destinationTexture: targetTexture,
             temporaryTexture: temporaryTexture,
             temporaryTextureBuffers: flippedTextureBuffers,
@@ -77,7 +77,7 @@ extension CanvasBrushDrawingTexture {
         else { return }
 
         MTLRenderer.mergeTextures(
-            sourceTexture: drawingTexture,
+            sourceTexture: texture,
             destinationTexture: destinationTexture,
             temporaryTexture: temporaryTexture,
             temporaryTextureBuffers: flippedTextureBuffers,
@@ -105,11 +105,11 @@ extension CanvasBrushDrawingTexture {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let textureSize = drawingTexture?.size,
+            let texture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
                 alpha: color.alpha,
-                textureSize: textureSize,
+                textureSize: texture.size,
                 with: device
             )
         else { return }
@@ -123,7 +123,7 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
             color: color.rgb,
-            resultTexture: drawingTexture!,
+            resultTexture: texture,
             with: commandBuffer
         )
     }
@@ -135,7 +135,7 @@ extension CanvasBrushDrawingTexture {
     private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clearTextures(
             textures: [
-                drawingTexture,
+                texture,
                 grayscaleTexture
             ],
             with: commandBuffer

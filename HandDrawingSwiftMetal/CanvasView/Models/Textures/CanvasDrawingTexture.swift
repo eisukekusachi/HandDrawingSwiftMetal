@@ -9,7 +9,7 @@ import MetalKit
 /// A protocol with the currently drawing texture
 protocol CanvasDrawingTexture {
     /// A currently drawing texture
-    var drawingTexture: MTLTexture? { get }
+    var texture: MTLTexture? { get }
 
     /// Initializes the textures for drawing with the specified texture size.
     func initTexture(_ textureSize: CGSize)
