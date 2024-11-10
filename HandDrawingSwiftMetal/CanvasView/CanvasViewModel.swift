@@ -699,14 +699,12 @@ extension CanvasViewModel {
                 into: textureLayers.selectedLayer?.texture,
                 with: commandBuffer
             )
+
+            resetAllInputParameters()
         }
 
         if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-        }
-
-        if drawingCurve.isDrawingFinished {
-            resetAllInputParameters()
         }
 
         updateCanvasViewWithTextureLayers(
