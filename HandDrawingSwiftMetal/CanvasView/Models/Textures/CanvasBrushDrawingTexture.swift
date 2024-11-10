@@ -35,7 +35,7 @@ extension CanvasBrushDrawingTexture {
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.temporaryTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        clearDrawingTexture()
+        clearAllTextures()
     }
 
     /// Renders `selectedTexture` onto `targetTexture`.
@@ -93,12 +93,12 @@ extension CanvasBrushDrawingTexture {
             with: commandBuffer
         )
 
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(commandBuffer)
     }
 
-    func clearDrawingTexture() {
+    func clearAllTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -142,7 +142,7 @@ extension CanvasBrushDrawingTexture {
 
 extension CanvasBrushDrawingTexture {
 
-    private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
+    private func clearAllTextures(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clearTextures(
             textures: [
                 drawingTexture,

@@ -37,7 +37,7 @@ extension CanvasEraserDrawingTexture {
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.eraserTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        clearDrawingTexture()
+        clearAllTextures()
     }
 
     /// Renders `selectedTexture` onto `targetTexture`
@@ -95,14 +95,14 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(commandBuffer)
 
         isDrawing = false
     }
 
-    func clearDrawingTexture() {
+    func clearAllTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(commandBuffer)
         commandBuffer.commit()
     }
 
@@ -165,7 +165,7 @@ extension CanvasEraserDrawingTexture {
 
 extension CanvasEraserDrawingTexture {
 
-    private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
+    private func clearAllTextures(_ commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clearTextures(
             textures: [
                 eraserTexture,

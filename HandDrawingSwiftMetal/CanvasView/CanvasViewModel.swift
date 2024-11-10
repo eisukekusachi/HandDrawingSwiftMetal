@@ -819,7 +819,7 @@ extension CanvasViewModel {
     private func cancelFingerInput() {
         fingerDrawingDictionary.reset()
 
-        currentDrawingTexture?.clearDrawingTexture()
+        currentDrawingTexture?.clearAllTextures()
 
         drawingCurve = nil
         transformer.reset()

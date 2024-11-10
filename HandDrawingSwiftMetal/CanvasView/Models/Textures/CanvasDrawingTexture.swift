@@ -27,7 +27,7 @@ protocol CanvasDrawingTexture {
         _ commandBuffer: MTLCommandBuffer
     )
 
-    /// Clears  the drawing textures.
-    func clearDrawingTexture()
+    /// Clears all textures
+    func clearAllTextures()
 
 }
