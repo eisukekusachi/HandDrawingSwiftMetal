@@ -677,8 +677,7 @@ extension CanvasViewModel {
                 currentDrawingTexture.drawPointsOnBrushDrawingTexture(
                     points: texturePoints,
                     color: drawingTool.brushColor,
-                    alpha: drawingTool.brushColor.alpha,
-                    commandBuffer
+                    with: commandBuffer
                 )
             }
         }

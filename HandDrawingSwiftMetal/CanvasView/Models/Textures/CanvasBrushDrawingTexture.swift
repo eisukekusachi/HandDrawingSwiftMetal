@@ -107,25 +107,24 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
     /// First, draw lines in grayscale on the grayscale texture,
     /// then apply the intensity as transparency to colorize the grayscale texture,
-    /// and render the colored grayscale texture onto the drawing texture."
+    /// and render the colored grayscale texture onto the drawing texture.
     func drawPointsOnBrushDrawingTexture(
         points: [CanvasGrayscaleDotPoint],
         color: UIColor,
-        alpha: Int,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let textureSize = drawingTexture?.size,
-            let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
-                alpha: alpha,
+                alpha: color.alpha,
                 textureSize: textureSize,
                 with: device
             )
         else { return }
 
         MTLRenderer.drawCurve(
-            buffers: pointBuffers,
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
