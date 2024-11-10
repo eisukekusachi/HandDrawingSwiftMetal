@@ -41,16 +41,16 @@ extension CanvasEraserDrawingTexture {
     }
 
     /// Renders `selectedTexture` onto `targetTexture`
-    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
+    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`
     func renderDrawingTexture(
         withSelectedTexture selectedTexture: MTLTexture?,
         onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let targetTexture,
             let selectedTexture,
-            let flippedTextureBuffers
+            let flippedTextureBuffers,
+            let targetTexture
         else { return }
 
         MTLRenderer.drawTexture(

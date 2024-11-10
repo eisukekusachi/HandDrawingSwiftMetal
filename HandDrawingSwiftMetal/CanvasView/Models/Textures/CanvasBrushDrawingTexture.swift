@@ -38,42 +38,33 @@ extension CanvasBrushDrawingTexture {
         clearAllTextures()
     }
 
-    /// Renders `selectedTexture` onto `targetTexture`.
-    /// If a drawing operation is in progress, it renders both `drawingTexture` and `selectedTexture` onto `targetTexture`.
+    /// Renders `drawingTexture` and `selectedTexture` onto `targetTexture`
     func renderDrawingTexture(
         withSelectedTexture selectedTexture: MTLTexture?,
         onto targetTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        let textures = [selectedTexture, drawingTexture].compactMap { $0 }
-
         guard
-            textures.count != 0,
-            let targetTexture,
+            let selectedTexture,
             let flippedTextureBuffers,
-            let firstTexture = textures.first
+            let targetTexture
         else { return }
 
-        for i in 0 ..< textures.count {
-            if i == 0 {
-                MTLRenderer.drawTexture(
-                    texture: firstTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: targetTexture,
-                    with: commandBuffer
-                )
+        MTLRenderer.drawTexture(
+            texture: selectedTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: targetTexture,
+            with: commandBuffer
+        )
 
-            } else {
-                MTLRenderer.mergeTextures(
-                    sourceTexture: textures[i],
-                    destinationTexture: targetTexture,
-                    temporaryTexture: temporaryTexture,
-                    temporaryTextureBuffers: flippedTextureBuffers,
-                    with: commandBuffer
-                )
-            }
-        }
+        MTLRenderer.mergeTextures(
+            sourceTexture: drawingTexture,
+            destinationTexture: targetTexture,
+            temporaryTexture: temporaryTexture,
+            temporaryTextureBuffers: flippedTextureBuffers,
+            with: commandBuffer
+        )
     }
 
     func mergeDrawingTexture(
