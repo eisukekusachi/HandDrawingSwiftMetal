@@ -40,10 +40,6 @@ extension CanvasEraserDrawingTexture {
         clearDrawingTexture()
     }
 
-    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?] {
-        isDrawing ? [eraserTexture] : [texture]
-    }
-
     /// Renders `selectedTexture` onto `targetTexture`
     /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
     func renderDrawingTexture(
@@ -173,13 +169,9 @@ extension CanvasEraserDrawingTexture {
         MTLRenderer.clearTextures(
             textures: [
                 eraserTexture,
-                drawingTexture
+                drawingTexture,
+                grayscaleTexture
             ],
-            with: commandBuffer
-        )
-        MTLRenderer.fillTexture(
-            texture: grayscaleTexture,
-            withRGB: (0, 0, 0),
             with: commandBuffer
         )
     }

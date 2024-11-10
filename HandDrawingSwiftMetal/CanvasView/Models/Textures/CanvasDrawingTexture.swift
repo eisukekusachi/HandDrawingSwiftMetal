@@ -14,9 +14,6 @@ protocol CanvasDrawingTexture {
     /// Initializes the textures for drawing with the specified texture size.
     func initTexture(_ textureSize: CGSize)
 
-    /// Returns an array containing the currently selected texture and the currently drawing texture
-    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?]
-
     /// Renders `selectedTexture` and `drawingTexture`, then render them onto targetTexture
     func renderDrawingTexture(
         withSelectedTexture selectedTexture: MTLTexture?,

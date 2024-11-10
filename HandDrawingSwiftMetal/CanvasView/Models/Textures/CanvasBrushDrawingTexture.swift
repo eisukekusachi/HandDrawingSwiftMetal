@@ -38,10 +38,6 @@ extension CanvasBrushDrawingTexture {
         clearDrawingTexture()
     }
 
-    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?] {
-        [texture, drawingTexture]
-    }
-
     /// Renders `selectedTexture` onto `targetTexture`.
     /// If a drawing operation is in progress, it renders both `drawingTexture` and `selectedTexture` onto `targetTexture`.
     func renderDrawingTexture(
@@ -147,13 +143,11 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clearTexture(
-            texture: drawingTexture,
-            with: commandBuffer
-        )
-        MTLRenderer.fillTexture(
-            texture: grayscaleTexture,
-            withRGB: (0, 0, 0),
+        MTLRenderer.clearTextures(
+            textures: [
+                drawingTexture,
+                grayscaleTexture
+            ],
             with: commandBuffer
         )
     }
