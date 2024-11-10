@@ -6,17 +6,19 @@
 //
 
 import UIKit
-
-/// Manages real-time smooth curve drawing using two iterators and touch phases
+/// A class that saves points in real-time to an iterator, then generates a smooth curve based on those points
+/// - Parameters:
+///   - iterator: An iterator that stores the average position of `tmpIterator`
+///   - tmpIterator: An iterator that stores points
+///   - currentTouchPhase: Manages the touch phases from the beginning to the end of drawing a single line
 final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
 
-    private var isFirstCurveHasBeenCreated: Bool = false
-
     private (set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
+    private var isFirstCurveHasBeenCreated: Bool = false
 }
 
 extension CanvasFingerDrawingCurvePoints {

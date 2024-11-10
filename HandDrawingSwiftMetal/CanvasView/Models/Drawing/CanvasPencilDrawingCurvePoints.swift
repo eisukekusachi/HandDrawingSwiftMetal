@@ -6,8 +6,10 @@
 //
 
 import UIKit
-
-/// Manages real-time curve drawing using an iterator and touch phases
+/// A class that saves points in real-time to an iterator, then generates a curve based on those points.
+/// - Parameters:
+///   - iterator: An iterator that stores points
+///   - currentTouchPhase: Manages the touch phases from the beginning to the end of drawing a single line
 final class CanvasPencilDrawingCurvePoints: CanvasDrawingCurvePoints {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
