@@ -671,7 +671,7 @@ extension CanvasViewModel {
                     points: texturePoints,
                     alpha: drawingTool.eraserAlpha,
                     srcTexture: selectedLayerTexture,
-                    commandBuffer
+                    with: commandBuffer
                 )
             } else if let currentDrawingTexture = currentDrawingTexture as? CanvasBrushDrawingTexture {
                 currentDrawingTexture.drawPointsOnBrushDrawingTexture(

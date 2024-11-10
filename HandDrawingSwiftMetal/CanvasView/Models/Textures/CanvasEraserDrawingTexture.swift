@@ -117,11 +117,11 @@ extension CanvasEraserDrawingTexture {
         points: [CanvasGrayscaleDotPoint],
         alpha: Int,
         srcTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let textureSize = drawingTexture?.size,
-            let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
                 alpha: alpha,
                 textureSize: textureSize,
@@ -131,7 +131,7 @@ extension CanvasEraserDrawingTexture {
         else { return }
 
         MTLRenderer.drawCurve(
-            buffers: pointBuffers,
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
