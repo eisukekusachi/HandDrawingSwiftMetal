@@ -84,12 +84,12 @@ extension CanvasBrushDrawingTexture {
             with: commandBuffer
         )
 
-        clearAllTextures(commandBuffer)
+        clearAllTextures(with: commandBuffer)
     }
 
     func clearAllTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearAllTextures(commandBuffer)
+        clearAllTextures(with: commandBuffer)
         commandBuffer.commit()
     }
 
@@ -132,7 +132,7 @@ extension CanvasBrushDrawingTexture {
 
 extension CanvasBrushDrawingTexture {
 
-    private func clearAllTextures(_ commandBuffer: MTLCommandBuffer) {
+    private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clearTextures(
             textures: [
                 drawingTexture,
