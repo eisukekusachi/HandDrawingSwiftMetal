@@ -95,15 +95,15 @@ extension TextureLayers {
     func initLayers(
         newLayers: [TextureLayer] = [],
         layerIndex: Int = 0,
-        textureSize: CGSize
+        size: CGSize
     ) {
-        bottomTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-        topTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
 
         var newLayers = newLayers
         if newLayers.isEmpty,
-           let newTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device
+           let newTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device
            ) {
             newLayers.append(
                 .init(

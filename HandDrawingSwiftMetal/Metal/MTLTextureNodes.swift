@@ -7,6 +7,24 @@
 
 import Foundation
 
+struct MTLTextureNodes {
+    var vertices: MTLTextureVertices = MTLTextureVertices()
+    var textureCoord: MTLTextureCoordinates = .screenTextureCoordinates
+    var indices: MTLTextureIndices = MTLTextureIndices()
+}
+
+extension MTLTextureNodes {
+
+    static let textureNodes: MTLTextureNodes = .init()
+
+    static let flippedTextureNodes: MTLTextureNodes = .init(
+        vertices: MTLTextureVertices(),
+        textureCoord: .cartesianTextureCoordinates,
+        indices: MTLTextureIndices()
+    )
+
+}
+
 struct MTLTextureVertices {
     var LT: CGPoint = .init(x: -1.0, y: -1.0)
     var RT: CGPoint = .init(x:  1.0, y: -1.0)
@@ -194,22 +212,4 @@ struct MTLTextureIndices {
             LB, RT, LT
         ]
     }
-}
-
-struct MTLTextureNodes {
-    var vertices: MTLTextureVertices = MTLTextureVertices()
-    var textureCoord: MTLTextureCoordinates = .screenTextureCoordinates
-    var indices: MTLTextureIndices = MTLTextureIndices()
-}
-
-extension MTLTextureNodes {
-
-    static let textureNodes: MTLTextureNodes = .init()
-
-    static let flippedTextureNodes: MTLTextureNodes = .init(
-        vertices: MTLTextureVertices(),
-        textureCoord: .cartesianTextureCoordinates,
-        indices: MTLTextureIndices()
-    )
-
 }

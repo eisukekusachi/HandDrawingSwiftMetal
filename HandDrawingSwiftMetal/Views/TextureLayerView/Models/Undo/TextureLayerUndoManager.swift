@@ -51,8 +51,8 @@ final class TextureLayerUndoManager: ObservableObject {
         (undoManager as? UndoManagerWithCount)?.performRedo()
         updateUndoComponents()
     }
-    func clear() {
-        (undoManager as? UndoManagerWithCount)?.clear()
+    func reset() {
+        (undoManager as? UndoManagerWithCount)?.reset()
         updateUndoComponents()
     }
 

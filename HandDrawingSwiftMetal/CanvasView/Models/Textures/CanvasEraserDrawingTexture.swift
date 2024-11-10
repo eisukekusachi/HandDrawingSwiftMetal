@@ -9,7 +9,7 @@ import MetalKit
 /// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
 class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
-    var drawingTexture: MTLTexture?
+    var texture: MTLTexture?
 
     private var grayscaleTexture: MTLTexture!
     private var eraserTexture: MTLTexture!
@@ -33,23 +33,41 @@ extension CanvasEraserDrawingTexture {
 
     func initTexture(_ textureSize: CGSize) {
 
-        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        self.texture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.eraserTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        clearDrawingTexture()
+        clearAllTextures()
     }
 
-    func getDrawingTexture(includingSelectedTexture texture: MTLTexture) -> [MTLTexture?] {
-        isDrawing ? [eraserTexture] : [texture]
+    /// Renders `selectedTexture` onto `targetTexture`
+    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`
+    func renderDrawingTexture(
+        withSelectedTexture selectedTexture: MTLTexture?,
+        onto targetTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let selectedTexture,
+            let flippedTextureBuffers,
+            let targetTexture
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: isDrawing ? eraserTexture : selectedTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: targetTexture,
+            with: commandBuffer
+        )
     }
 
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard 
-            let drawingTexture,
+        guard
+            let texture,
             let flippedTextureBuffers,
             let destinationTexture
         else { return }
@@ -63,7 +81,7 @@ extension CanvasEraserDrawingTexture {
         )
 
         MTLRenderer.makeEraseTexture(
-            sourceTexture: drawingTexture,
+            sourceTexture: texture,
             buffers: flippedTextureBuffers,
             into: eraserTexture,
             with: commandBuffer
@@ -77,36 +95,14 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(with: commandBuffer)
 
         isDrawing = false
     }
 
-    /// Renders `selectedTexture` onto `targetTexture`
-    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
-    func renderDrawingTexture(
-        withSelectedTexture selectedTexture: MTLTexture?,
-        onto targetTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let targetTexture,
-            let selectedTexture,
-            let flippedTextureBuffers
-        else { return }
-
-        MTLRenderer.drawTexture(
-            texture: isDrawing ? eraserTexture : selectedTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: targetTexture,
-            with: commandBuffer
-        )
-    }
-
-    func clearDrawingTexture() {
+    func clearAllTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTexture(commandBuffer)
+        clearAllTextures(with: commandBuffer)
         commandBuffer.commit()
     }
 
@@ -121,21 +117,21 @@ extension CanvasEraserDrawingTexture {
         points: [CanvasGrayscaleDotPoint],
         alpha: Int,
         srcTexture: MTLTexture,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let textureSize = drawingTexture?.size,
-            let pointBuffers = MTLBuffers.makeGrayscalePointBuffers(
+            let texture,
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
                 alpha: alpha,
-                textureSize: textureSize,
+                textureSize: texture.size,
                 with: device
             ),
             let flippedTextureBuffers
         else { return }
 
         MTLRenderer.drawCurve(
-            buffers: pointBuffers,
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
@@ -143,7 +139,7 @@ extension CanvasEraserDrawingTexture {
         MTLRenderer.colorizeTexture(
             grayscaleTexture: grayscaleTexture,
             color: (0, 0, 0),
-            resultTexture: drawingTexture!,
+            resultTexture: texture,
             with: commandBuffer
         )
 
@@ -156,7 +152,7 @@ extension CanvasEraserDrawingTexture {
         )
 
         MTLRenderer.makeEraseTexture(
-            sourceTexture: drawingTexture!,
+            sourceTexture: texture,
             buffers: flippedTextureBuffers,
             into: eraserTexture!,
             with: commandBuffer
@@ -169,17 +165,13 @@ extension CanvasEraserDrawingTexture {
 
 extension CanvasEraserDrawingTexture {
 
-    private func clearDrawingTexture(_ commandBuffer: MTLCommandBuffer) {
+    private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
         MTLRenderer.clearTextures(
             textures: [
+                texture,
                 eraserTexture,
-                drawingTexture
+                grayscaleTexture
             ],
-            with: commandBuffer
-        )
-        MTLRenderer.fillTexture(
-            texture: grayscaleTexture,
-            withRGB: (0, 0, 0),
             with: commandBuffer
         )
     }
