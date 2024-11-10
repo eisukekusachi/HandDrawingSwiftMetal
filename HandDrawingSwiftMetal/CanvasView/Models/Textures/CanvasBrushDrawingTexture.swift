@@ -78,7 +78,7 @@ extension CanvasBrushDrawingTexture {
 
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let flippedTextureBuffers,

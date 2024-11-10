@@ -698,7 +698,7 @@ extension CanvasViewModel {
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
-                commandBuffer
+                with: commandBuffer
             )
         }
 

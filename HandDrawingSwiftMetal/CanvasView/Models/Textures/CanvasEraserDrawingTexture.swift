@@ -64,7 +64,7 @@ extension CanvasEraserDrawingTexture {
 
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let drawingTexture,

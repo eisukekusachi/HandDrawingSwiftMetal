@@ -24,7 +24,7 @@ protocol CanvasDrawingTexture {
     /// Merges the drawing texture into the destination texture
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     )
 
     /// Clears all textures
