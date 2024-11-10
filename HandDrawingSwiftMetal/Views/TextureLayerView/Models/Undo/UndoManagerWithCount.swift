@@ -16,7 +16,7 @@ class UndoManagerWithCount: UndoManager {
 
     override init() {
         super.init()
-        clear()
+        reset()
     }
 
     func incrementUndoCount() {
@@ -51,7 +51,7 @@ class UndoManagerWithCount: UndoManager {
         return false
     }
 
-    func clear() {
+    func reset() {
         removeAllActions()
 
         undoNumber = 0
