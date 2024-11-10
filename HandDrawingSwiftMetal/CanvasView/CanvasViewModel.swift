@@ -50,7 +50,7 @@ final class CanvasViewModel {
         refreshCanRedoSubject.eraseToAnyPublisher()
     }
 
-    private var drawingCurve: CanvasDrawingCurve?
+    private var drawingCurvePoints: CanvasDrawingCurvePoints?
 
     private let transformer = CanvasTransformer()
 
@@ -328,14 +328,14 @@ extension CanvasViewModel {
             .init(from: fingerDrawingDictionary.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(drawingCurve is CanvasDrawingCurveWithFinger) {
-                drawingCurve = CanvasDrawingCurveWithFinger()
+            if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
+                drawingCurvePoints = CanvasFingerDrawingCurvePoints()
             }
             if fingerDrawingDictionary.dictionaryKey == nil {
                 fingerDrawingDictionary.dictionaryKey = fingerDrawingDictionary.touchArrayDictionary.keys.first
             }
             guard 
-                let drawingCurve,
+                let drawingCurvePoints,
                 let key = fingerDrawingDictionary.dictionaryKey,
                 let screenTouchPoints = fingerDrawingDictionary.getLatestTouchPoints(for: key)
             else { return }
@@ -356,12 +356,12 @@ extension CanvasViewModel {
                 )
             }
 
-            drawingCurve.appendToIterator(
+            drawingCurvePoints.appendToIterator(
                 points: textureDotPoints,
                 touchPhase: touchPhase
             )
 
-            runDrawingDisplayLinkToUpdateCanvasView(!drawingCurve.isDrawingFinished)
+            runDrawingDisplayLinkToUpdateCanvasView(!drawingCurvePoints.isDrawingFinished)
 
         case .transforming:
             if transformer.isCurrentKeysNil {
@@ -405,9 +405,9 @@ extension CanvasViewModel {
         // Set `inputDevice` to '.pencil'
         inputDevice.update(.pencil)
 
-        // Make `grayscaleTextureCurveIterator` and reset the parameters when a touch begins
+        // Make `drawingCurvePoints` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
-            drawingCurve = CanvasDrawingCurveWithPencil()
+            drawingCurvePoints = CanvasPencilDrawingCurvePoints()
             pencilDrawingArrays.reset()
         }
 
@@ -428,7 +428,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        guard let drawingCurve else { return }
+        guard let drawingCurvePoints else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         Array(actualTouches).sorted { $0.timestamp < $1.timestamp }.forEach { actualTouch in
@@ -453,12 +453,12 @@ extension CanvasViewModel {
             )
         }
 
-        drawingCurve.appendToIterator(
+        drawingCurvePoints.appendToIterator(
             points: textureDotPoints,
             touchPhase: touchPhase
         )
 
-        runDrawingDisplayLinkToUpdateCanvasView(!drawingCurve.isDrawingFinished)
+        runDrawingDisplayLinkToUpdateCanvasView(!drawingCurvePoints.isDrawingFinished)
     }
 
 }
@@ -660,36 +660,37 @@ extension CanvasViewModel {
 
     @objc private func updateCanvasViewWhileDrawing() {
         guard
-            let drawingCurve,
+            let drawingCurvePoints,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        if let texturePoints = drawingCurve.makeCurvePointsFromIterator() {
+        // Draw curve points on `drawingTexture`
+        if let textureCurvePoints = drawingCurvePoints.makeCurvePointsFromIterator() {
             if let currentDrawingTexture = currentDrawingTexture as? CanvasEraserDrawingTexture,
                let selectedLayerTexture = textureLayers.selectedLayer?.texture {
                 currentDrawingTexture.drawPointsOnEraserDrawingTexture(
-                    points: texturePoints,
+                    points: textureCurvePoints,
                     alpha: drawingTool.eraserAlpha,
                     srcTexture: selectedLayerTexture,
                     with: commandBuffer
                 )
             } else if let currentDrawingTexture = currentDrawingTexture as? CanvasBrushDrawingTexture {
                 currentDrawingTexture.drawPointsOnBrushDrawingTexture(
-                    points: texturePoints,
+                    points: textureCurvePoints,
                     color: drawingTool.brushColor,
                     with: commandBuffer
                 )
             }
         }
 
-        // Render `selectedLayer.texture` and `drawingTexture` onto currentTexture
+        // Draw `selectedLayer.texture` and `drawingTexture` onto currentTexture
         currentDrawingTexture?.renderDrawingTexture(
             withSelectedTexture: textureLayers.selectedLayer?.texture,
             onto: currentTexture,
             with: commandBuffer
         )
 
-        if drawingCurve.isDrawingFinished {
+        if drawingCurvePoints.isDrawingFinished {
             // Add `textureLayer` to the undo stack
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
             textureLayerUndoManager.addCurrentLayersToUndoStack()
@@ -703,10 +704,11 @@ extension CanvasViewModel {
             resetAllInputParameters()
         }
 
-        if requestShowingLayerViewSubject.value && drawingCurve.isDrawingComplete {
+        if requestShowingLayerViewSubject.value && drawingCurvePoints.isDrawingComplete {
             updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
         }
 
+        // Update `canvasView` with `canvasTexture`
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             usingCurrentTexture: currentTexture,
@@ -809,7 +811,7 @@ extension CanvasViewModel {
         fingerDrawingDictionary.reset()
         pencilDrawingArrays.reset()
 
-        drawingCurve = nil
+        drawingCurvePoints = nil
         transformer.reset()
     }
 
@@ -818,7 +820,7 @@ extension CanvasViewModel {
 
         currentDrawingTexture?.clearAllTextures()
 
-        drawingCurve = nil
+        drawingCurvePoints = nil
         transformer.reset()
 
         canvasView?.resetCommandBuffer()

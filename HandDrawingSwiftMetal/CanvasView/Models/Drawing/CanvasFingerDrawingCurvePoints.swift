@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurveWithFinger.swift
+//  CanvasFingerDrawingCurvePoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// Manages real-time smooth curve drawing using two iterators and touch phases
-final class CanvasDrawingCurveWithFinger: CanvasDrawingCurve {
+final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
@@ -19,7 +19,7 @@ final class CanvasDrawingCurveWithFinger: CanvasDrawingCurve {
 
 }
 
-extension CanvasDrawingCurveWithFinger {
+extension CanvasFingerDrawingCurvePoints {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {

@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurveWithPencilTests.swift
+//  CanvasPencilDrawingCurvePointsTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class CanvasDrawingCurveWithPencilTests: XCTestCase {
+final class CanvasPencilDrawingCurvePointsTests: XCTestCase {
 
     func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = CanvasDrawingCurveWithPencil()
+        let subject = CanvasPencilDrawingCurvePoints()
 
         subject.appendToIterator(points: [.generate()], touchPhase: .began)
         XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)

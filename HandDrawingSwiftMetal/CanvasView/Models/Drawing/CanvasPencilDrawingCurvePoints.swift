@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurveWithPencil.swift
+//  CanvasPencilDrawingCurvePoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,7 +7,8 @@
 
 import UIKit
 
-final class CanvasDrawingCurveWithPencil: CanvasDrawingCurve {
+/// Manages real-time curve drawing using an iterator and touch phases
+final class CanvasPencilDrawingCurvePoints: CanvasDrawingCurvePoints {
     var iterator = Iterator<CanvasGrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
@@ -15,7 +16,7 @@ final class CanvasDrawingCurveWithPencil: CanvasDrawingCurve {
     private var isFirstCurveHasBeenCreated: Bool = false
 }
 
-extension CanvasDrawingCurveWithPencil {
+extension CanvasPencilDrawingCurvePoints {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {

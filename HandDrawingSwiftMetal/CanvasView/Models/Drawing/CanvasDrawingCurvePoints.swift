@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurve.swift
+//  CanvasDrawingCurvePoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// Manages real-time curve drawing using an iterator and touch phases
-protocol CanvasDrawingCurve {
+protocol CanvasDrawingCurvePoints {
 
     typealias T = CanvasGrayscaleDotPoint
 
@@ -26,7 +26,7 @@ protocol CanvasDrawingCurve {
     func clear()
 }
 
-extension CanvasDrawingCurve {
+extension CanvasDrawingCurvePoints {
 
     /// Is the drawing finished successfully
     var isDrawingComplete: Bool {
