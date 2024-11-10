@@ -75,12 +75,11 @@ final class CanvasViewModel {
     /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
     private var canvasTexture: MTLTexture?
 
-    /// A protocol for managing current drawing texture
-    private var drawingTexture: CanvasDrawingTexture?
-
     /// A texture that combines the texture of the currently selected `TextureLayer` and `drawingTexture`
     private var currentTexture: MTLTexture?
 
+    /// A protocol for managing current drawing texture
+    private var currentDrawingTexture: CanvasDrawingTexture?
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture()
     /// A drawing texture with an eraser
@@ -152,9 +151,9 @@ final class CanvasViewModel {
                 guard let `self` else { return }
                 switch tool {
                 case .brush:
-                    self.drawingTexture = self.brushDrawingTexture
+                    self.currentDrawingTexture = self.brushDrawingTexture
                 case .eraser:
-                    self.drawingTexture = self.eraserDrawingTexture
+                    self.currentDrawingTexture = self.eraserDrawingTexture
                 }
             }
             .store(in: &cancellables)
@@ -666,16 +665,16 @@ extension CanvasViewModel {
         else { return }
 
         if let texturePoints = drawingCurve.makeCurvePointsFromIterator() {
-            if let drawingTexture = drawingTexture as? CanvasEraserDrawingTexture,
+            if let currentDrawingTexture = currentDrawingTexture as? CanvasEraserDrawingTexture,
                let selectedLayerTexture = textureLayers.selectedLayer?.texture {
-                drawingTexture.drawPointsOnEraserDrawingTexture(
+                currentDrawingTexture.drawPointsOnEraserDrawingTexture(
                     points: texturePoints,
                     alpha: drawingTool.eraserAlpha,
                     srcTexture: selectedLayerTexture,
                     commandBuffer
                 )
-            } else if let drawingTexture = drawingTexture as? CanvasBrushDrawingTexture {
-                drawingTexture.drawPointsOnBrushDrawingTexture(
+            } else if let currentDrawingTexture = currentDrawingTexture as? CanvasBrushDrawingTexture {
+                currentDrawingTexture.drawPointsOnBrushDrawingTexture(
                     points: texturePoints,
                     color: drawingTool.brushColor,
                     alpha: drawingTool.brushColor.alpha,
@@ -685,7 +684,7 @@ extension CanvasViewModel {
         }
 
         // Render `selectedLayer.texture` and `drawingTexture` onto currentTexture
-        drawingTexture?.renderDrawingTexture(
+        currentDrawingTexture?.renderDrawingTexture(
             withSelectedTexture: textureLayers.selectedLayer?.texture,
             onto: currentTexture,
             with: commandBuffer
@@ -697,7 +696,7 @@ extension CanvasViewModel {
             textureLayerUndoManager.addCurrentLayersToUndoStack()
 
             // Draw `drawingTexture` onto `selectedLayer.texture`
-            drawingTexture?.mergeDrawingTexture(
+            currentDrawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
                 commandBuffer
             )
@@ -820,7 +819,7 @@ extension CanvasViewModel {
     private func cancelFingerInput() {
         fingerDrawingDictionary.reset()
 
-        drawingTexture?.clearDrawingTexture()
+        currentDrawingTexture?.clearDrawingTexture()
 
         drawingCurve = nil
         transformer.reset()
