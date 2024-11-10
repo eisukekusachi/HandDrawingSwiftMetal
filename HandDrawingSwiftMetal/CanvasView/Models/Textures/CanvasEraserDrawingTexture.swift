@@ -44,11 +44,33 @@ extension CanvasEraserDrawingTexture {
         isDrawing ? [eraserTexture] : [texture]
     }
 
+    /// Renders `selectedTexture` onto `targetTexture`
+    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
+    func renderDrawingTexture(
+        withSelectedTexture selectedTexture: MTLTexture?,
+        onto targetTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let targetTexture,
+            let selectedTexture,
+            let flippedTextureBuffers
+        else { return }
+
+        MTLRenderer.drawTexture(
+            texture: isDrawing ? eraserTexture : selectedTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: targetTexture,
+            with: commandBuffer
+        )
+    }
+
     func mergeDrawingTexture(
         into destinationTexture: MTLTexture?,
         _ commandBuffer: MTLCommandBuffer
     ) {
-        guard 
+        guard
             let drawingTexture,
             let flippedTextureBuffers,
             let destinationTexture
@@ -80,28 +102,6 @@ extension CanvasEraserDrawingTexture {
         clearDrawingTexture(commandBuffer)
 
         isDrawing = false
-    }
-
-    /// Renders `selectedTexture` onto `targetTexture`
-    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`.
-    func renderDrawingTexture(
-        withSelectedTexture selectedTexture: MTLTexture?,
-        onto targetTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let targetTexture,
-            let selectedTexture,
-            let flippedTextureBuffers
-        else { return }
-
-        MTLRenderer.drawTexture(
-            texture: isDrawing ? eraserTexture : selectedTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: targetTexture,
-            with: commandBuffer
-        )
     }
 
     func clearDrawingTexture() {

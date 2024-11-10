@@ -42,26 +42,6 @@ extension CanvasBrushDrawingTexture {
         [texture, drawingTexture]
     }
 
-    func mergeDrawingTexture(
-        into destinationTexture: MTLTexture?,
-        _ commandBuffer: MTLCommandBuffer
-    ) {
-        guard 
-            let flippedTextureBuffers,
-            let destinationTexture
-        else { return }
-
-        MTLRenderer.mergeTextures(
-            sourceTexture: drawingTexture,
-            destinationTexture: destinationTexture,
-            temporaryTexture: temporaryTexture,
-            temporaryTextureBuffers: flippedTextureBuffers,
-            with: commandBuffer
-        )
-
-        clearDrawingTexture(commandBuffer)
-    }
-
     /// Renders `selectedTexture` onto `targetTexture`.
     /// If a drawing operation is in progress, it renders both `drawingTexture` and `selectedTexture` onto `targetTexture`.
     func renderDrawingTexture(
@@ -98,6 +78,26 @@ extension CanvasBrushDrawingTexture {
                 )
             }
         }
+    }
+
+    func mergeDrawingTexture(
+        into destinationTexture: MTLTexture?,
+        _ commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let flippedTextureBuffers,
+            let destinationTexture
+        else { return }
+
+        MTLRenderer.mergeTextures(
+            sourceTexture: drawingTexture,
+            destinationTexture: destinationTexture,
+            temporaryTexture: temporaryTexture,
+            temporaryTextureBuffers: flippedTextureBuffers,
+            with: commandBuffer
+        )
+
+        clearDrawingTexture(commandBuffer)
     }
 
     func clearDrawingTexture() {
