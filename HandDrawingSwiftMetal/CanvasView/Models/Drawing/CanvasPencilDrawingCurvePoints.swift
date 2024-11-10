@@ -37,8 +37,8 @@ extension CanvasPencilDrawingCurvePoints {
         currentTouchPhase = touchPhase
     }
 
-    func clear() {
-        iterator.clear()
+    func reset() {
+        iterator.reset()
 
         currentTouchPhase = .began
         isFirstCurveHasBeenCreated = false

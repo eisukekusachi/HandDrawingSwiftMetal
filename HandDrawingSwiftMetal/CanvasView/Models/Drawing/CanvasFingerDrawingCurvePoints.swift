@@ -59,9 +59,9 @@ extension CanvasFingerDrawingCurvePoints {
         }
     }
 
-    func clear() {
-        tmpIterator.clear()
-        iterator.clear()
+    func reset() {
+        tmpIterator.reset()
+        iterator.reset()
 
         currentTouchPhase = .began
         isFirstCurveHasBeenCreated = false

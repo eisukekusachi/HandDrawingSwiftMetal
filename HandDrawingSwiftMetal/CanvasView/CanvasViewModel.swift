@@ -200,7 +200,7 @@ final class CanvasViewModel {
 
         projectName = model.projectName
 
-        textureLayerUndoManager.clear()
+        textureLayerUndoManager.reset()
 
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
@@ -493,7 +493,7 @@ extension CanvasViewModel {
 
         textureLayers.initLayers(size: renderTextureSize)
 
-        textureLayerUndoManager.clear()
+        textureLayerUndoManager.reset()
 
         currentTexture = MTLTextureCreator.makeTexture(size: renderTextureSize, with: device)
 

@@ -23,7 +23,7 @@ protocol CanvasDrawingCurvePoints {
         touchPhase: UITouch.Phase
     )
 
-    func clear()
+    func reset()
 }
 
 extension CanvasDrawingCurvePoints {
