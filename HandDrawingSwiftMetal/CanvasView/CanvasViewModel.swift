@@ -179,19 +179,17 @@ final class CanvasViewModel {
         self.canvasView = canvasView
     }
 
-    func initCanvas(
-        textureSize: CGSize
-    ) {
+    func initCanvas(size: CGSize) {
         guard let device else { return }
 
-        brushDrawingTexture.initTexture(textureSize)
-        eraserDrawingTexture.initTexture(textureSize)
+        brushDrawingTexture.initTexture(size)
+        eraserDrawingTexture.initTexture(size)
 
-        textureLayers.initLayers(textureSize: textureSize)
+        textureLayers.initLayers(size: size)
 
-        currentTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
-        canvasTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
     }
 
     func apply(model: CanvasModel) {
@@ -210,7 +208,7 @@ final class CanvasViewModel {
         textureLayers.initLayers(
             newLayers: model.layers,
             layerIndex: model.layerIndex,
-            textureSize: model.textureSize
+            size: model.textureSize
         )
 
         for i in 0 ..< textureLayers.layers.count {
@@ -269,9 +267,7 @@ extension CanvasViewModel {
 
         // Initialize the canvas here if `canvasTexture` is nil
         if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
-            initCanvas(
-                textureSize: textureSize
-            )
+            initCanvas(size: textureSize)
         }
 
         // Redraws the canvas when the device rotates and the canvas size changes.
@@ -293,9 +289,7 @@ extension CanvasViewModel {
         // Since `func onUpdateRenderTexture` is not called at app launch on iPhone,
         // initialize the canvas here.
         if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
-            initCanvas(
-                textureSize: textureSize
-            )
+            initCanvas(size: textureSize)
         }
 
         updateCanvasViewWithTextureLayers(
@@ -497,7 +491,7 @@ extension CanvasViewModel {
         brushDrawingTexture.initTexture(renderTextureSize)
         eraserDrawingTexture.initTexture(renderTextureSize)
 
-        textureLayers.initLayers(textureSize: renderTextureSize)
+        textureLayers.initLayers(size: renderTextureSize)
 
         textureLayerUndoManager.clear()
 
