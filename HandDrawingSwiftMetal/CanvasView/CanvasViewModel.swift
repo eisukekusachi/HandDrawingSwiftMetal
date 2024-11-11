@@ -690,10 +690,11 @@ extension CanvasViewModel {
             )
 
             resetAllInputParameters()
-        }
 
-        if requestShowingLayerViewSubject.value && drawingCurvePoints.isDrawingComplete {
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            // Update the thumbnail when the layerView is visible
+            if requestShowingLayerViewSubject.value {
+                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            }
         }
 
         // Update `canvasView` with `canvasTexture`
