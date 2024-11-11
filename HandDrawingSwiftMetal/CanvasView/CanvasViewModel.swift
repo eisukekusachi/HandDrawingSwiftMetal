@@ -479,23 +479,17 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         guard
-            let device,
-            let canvasView,
-            let renderTextureSize = canvasView.renderTexture?.size
+            let size = canvasTexture?.size,
+            let canvasView
         else { return }
 
         projectName = Calendar.currentDate
 
         transformer.setMatrix(.identity)
 
-        brushDrawingTexture.initTexture(renderTextureSize)
-        eraserDrawingTexture.initTexture(renderTextureSize)
-
-        textureLayers.initLayers(size: renderTextureSize)
-
         textureLayerUndoManager.reset()
 
-        currentTexture = MTLTextureCreator.makeTexture(size: renderTextureSize, with: device)
+        initCanvas(size: size)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
