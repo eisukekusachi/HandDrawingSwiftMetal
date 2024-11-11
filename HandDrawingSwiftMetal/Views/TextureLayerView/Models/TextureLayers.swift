@@ -55,8 +55,7 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: bottomTexture,
             destinationTexture: destinationTexture,
-            temporaryTexture: temporaryTexture,
-            temporaryTextureBuffers: flippedTextureBuffers,
+            into: destinationTexture,
             with: commandBuffer
         )
 
@@ -66,8 +65,7 @@ extension TextureLayers {
                     sourceTexture: currentTexture,
                     destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    temporaryTexture: temporaryTexture,
-                    temporaryTextureBuffers: flippedTextureBuffers,
+                    into: destinationTexture,
                     with: commandBuffer
                 )
 
@@ -76,8 +74,7 @@ extension TextureLayers {
                     sourceTexture: layers[index].texture,
                     destinationTexture: destinationTexture,
                     alpha: layers[index].alpha,
-                    temporaryTexture: temporaryTexture,
-                    temporaryTextureBuffers: flippedTextureBuffers,
+                    into: destinationTexture,
                     with: commandBuffer
                 )
             }
@@ -86,8 +83,7 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: topTexture,
             destinationTexture: destinationTexture,
-            temporaryTexture: temporaryTexture,
-            temporaryTextureBuffers: flippedTextureBuffers,
+            into: destinationTexture,
             with: commandBuffer
         )
     }
@@ -140,8 +136,7 @@ extension TextureLayers {
                     sourceTexture: layers[i].texture,
                     destinationTexture: bottomTexture,
                     alpha: layers[i].alpha,
-                    temporaryTexture: temporaryTexture,
-                    temporaryTextureBuffers: flippedTextureBuffers,
+                    into: bottomTexture,
                     with: commandBuffer
                 )
             }
@@ -152,8 +147,7 @@ extension TextureLayers {
                     sourceTexture: layers[i].texture,
                     destinationTexture: topTexture,
                     alpha: layers[i].alpha,
-                    temporaryTexture: temporaryTexture,
-                    temporaryTextureBuffers: flippedTextureBuffers,
+                    into: bottomTexture,
                     with: commandBuffer
                 )
             }
