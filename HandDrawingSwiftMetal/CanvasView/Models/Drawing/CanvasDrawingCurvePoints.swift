@@ -28,11 +28,6 @@ protocol CanvasDrawingCurvePoints {
 
 extension CanvasDrawingCurvePoints {
 
-    /// Is the drawing finished successfully
-    var isDrawingComplete: Bool {
-        [UITouch.Phase.ended].contains(currentTouchPhase)
-    }
-
     /// Is the drawing finished
     var isDrawingFinished: Bool {
         [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(currentTouchPhase)
@@ -51,7 +46,7 @@ extension CanvasDrawingCurvePoints {
 
         array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
 
-        if isDrawingComplete {
+        if isDrawingFinished {
             array.append(contentsOf: makeLastCurvePoints())
         }
 

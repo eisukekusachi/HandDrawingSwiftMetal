@@ -588,23 +588,17 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         guard
-            let device,
-            let canvasView,
-            let renderTextureSize = canvasView.renderTexture?.size
+            let size = canvasTexture?.size,
+            let canvasView
         else { return }
 
         projectName = Calendar.currentDate
 
         transformer.setMatrix(.identity)
 
-        brushDrawingTexture.initTexture(renderTextureSize)
-        eraserDrawingTexture.initTexture(renderTextureSize)
-
-        textureLayers.initLayers(size: renderTextureSize)
-
         textureLayerUndoManager.reset()
 
-        currentTexture = MTLTextureCreator.makeTexture(size: renderTextureSize, with: device)
+        initCanvas(size: size)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -796,7 +790,7 @@ extension CanvasViewModel {
         if drawingCurvePoints.isDrawingFinished {
             // Add `textureLayer` to the undo stack
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            textureLayerUndoManager.addCurrentLayersToUndoStack()
+            // textureLayerUndoManager.addCurrentLayersToUndoStack()
 
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
@@ -805,10 +799,11 @@ extension CanvasViewModel {
             )
 
             resetAllInputParameters()
-        }
 
-        if requestShowingLayerViewSubject.value && drawingCurvePoints.isDrawingComplete {
-            updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            // Update the thumbnail when the layerView is visible
+            if requestShowingLayerViewSubject.value {
+                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+            }
         }
 
         // Update `canvasView` with `canvasTexture`

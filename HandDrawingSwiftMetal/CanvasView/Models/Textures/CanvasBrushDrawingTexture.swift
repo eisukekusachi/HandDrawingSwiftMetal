@@ -13,8 +13,6 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     private var grayscaleTexture: MTLTexture!
 
-    private var temporaryTexture: MTLTexture!
-
     private var flippedTextureBuffers: MTLTextureBuffers?
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -33,7 +31,6 @@ extension CanvasBrushDrawingTexture {
     func initTexture(_ textureSize: CGSize) {
         self.texture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-        self.temporaryTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
         clearAllTextures()
     }
@@ -61,8 +58,7 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.mergeTextures(
             sourceTexture: texture,
             destinationTexture: targetTexture,
-            temporaryTexture: temporaryTexture,
-            temporaryTextureBuffers: flippedTextureBuffers,
+            into: targetTexture,
             with: commandBuffer
         )
     }
@@ -79,8 +75,7 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.mergeTextures(
             sourceTexture: texture,
             destinationTexture: destinationTexture,
-            temporaryTexture: temporaryTexture,
-            temporaryTextureBuffers: flippedTextureBuffers,
+            into: destinationTexture,
             with: commandBuffer
         )
 
