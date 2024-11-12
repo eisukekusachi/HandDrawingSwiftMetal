@@ -453,6 +453,7 @@ extension CanvasViewModel {
                 else { return nil }
 
                 return convertScreenTouchPointToTextureDotPoint(
+                    matrix: transformer.matrix.inverted(flipY: true),
                     touchPoint: $0,
                     textureSize: textureSize,
                     drawableSize: drawableSize
@@ -483,7 +484,11 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            updateCanvasWithTexture(canvasTexture, on: canvasView)
+            updateCanvasWithTexture(
+                canvasTexture,
+                matrix: transformer.matrix,
+                on: canvasView
+            )
 
         default:
             break
@@ -550,6 +555,7 @@ extension CanvasViewModel {
             else { return nil }
 
             return convertScreenTouchPointToTextureDotPoint(
+                matrix: transformer.matrix.inverted(flipY: true),
                 touchPoint: $0,
                 textureSize: textureSize,
                 drawableSize: drawableSize
@@ -583,7 +589,11 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
 
-        updateCanvasWithTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(
+            canvasTexture,
+            matrix: transformer.matrix,
+            on: canvasView
+        )
     }
 
     func didTapNewCanvasButton() {
@@ -834,11 +844,16 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        updateCanvasWithTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(
+            canvasTexture,
+            matrix: transformer.matrix,
+            on: canvasView
+        )
     }
 
     private func updateCanvasWithTexture(
         _ texture: MTLTexture?,
+        matrix: CGAffineTransform,
         on canvasView: CanvasViewProtocol?
     ) {
         guard
@@ -846,7 +861,7 @@ extension CanvasViewModel {
             let sourceTexture = texture,
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                matrix: transformer.matrix,
+                matrix: matrix,
                 frameSize: frameSize,
                 sourceSize: .init(
                     width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
@@ -923,7 +938,11 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        updateCanvasWithTexture(canvasTexture, on: canvasView)
+        updateCanvasWithTexture(
+            canvasTexture,
+            matrix: transformer.matrix,
+            on: canvasView
+        )
     }
 
 }
@@ -931,13 +950,14 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func convertScreenTouchPointToTextureDotPoint(
+        matrix: CGAffineTransform,
         touchPoint: CanvasTouchPoint,
         textureSize: CGSize,
         drawableSize: CGSize
     ) -> CanvasGrayscaleDotPoint {
 
         let textureMatrix = convertScreenMatrixToTextureMatrix(
-            matrix: transformer.matrix.inverted(flipY: true),
+            matrix: matrix,
             drawableSize: drawableSize,
             textureSize: textureSize
         )
