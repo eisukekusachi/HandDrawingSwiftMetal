@@ -147,7 +147,7 @@ extension TextureLayers {
                     sourceTexture: layers[i].texture,
                     destinationTexture: topTexture,
                     alpha: layers[i].alpha,
-                    into: bottomTexture,
+                    into: topTexture,
                     with: commandBuffer
                 )
             }
