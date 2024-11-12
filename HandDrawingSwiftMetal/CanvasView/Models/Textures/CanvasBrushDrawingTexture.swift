@@ -67,10 +67,7 @@ extension CanvasBrushDrawingTexture {
         into destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let flippedTextureBuffers,
-            let destinationTexture
-        else { return }
+        guard let destinationTexture else { return }
 
         MTLRenderer.mergeTextures(
             sourceTexture: texture,
