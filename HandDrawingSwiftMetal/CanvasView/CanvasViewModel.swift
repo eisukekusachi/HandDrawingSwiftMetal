@@ -514,8 +514,8 @@ extension CanvasViewModel {
         loadFile(from: filePath)
     }
     func didTapSaveButton() {
-        guard let renderTexture = canvasView?.renderTexture else { return }
-        saveFile(renderTexture: renderTexture)
+        guard let canvasTexture else { return }
+        saveFile(canvasTexture: canvasTexture)
     }
 
     // MARK: Layers
@@ -937,9 +937,9 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-    private func saveFile(renderTexture: MTLTexture) {
+    private func saveFile(canvasTexture: MTLTexture) {
         localRepository?.saveDataToDocuments(
-            renderTexture: renderTexture,
+            renderTexture: canvasTexture,
             textureLayers: textureLayers,
             drawingTool: drawingTool,
             to: URL.documents.appendingPathComponent(
