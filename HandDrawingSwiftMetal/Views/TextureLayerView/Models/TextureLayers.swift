@@ -9,9 +9,9 @@ import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: LayerManager<TextureLayer> {
     /// A texture that combines the textures of all layers below the selected layer
-    private var bottomTexture: MTLTexture!
+    private (set) var bottomTexture: MTLTexture!
     /// A texture that combines the textures of all layers above the selected layer
-    private var topTexture: MTLTexture!
+    private (set) var topTexture: MTLTexture!
 
     private var temporaryTexture: MTLTexture!
 
@@ -37,10 +37,7 @@ extension TextureLayers {
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let flippedTextureBuffers,
-            let destinationTexture
-        else { return }
+        guard let destinationTexture else { return }
 
         if shouldUpdateAllLayers {
             updateUnselectedLayers(with: commandBuffer)
@@ -90,11 +87,13 @@ extension TextureLayers {
 
     func initLayers(
         newLayers: [TextureLayer] = [],
+        newTopTexture: MTLTexture? = nil,
+        newBottomTexture: MTLTexture? = nil,
         layerIndex: Int = 0,
         size: CGSize
     ) {
-        bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        topTexture = newTopTexture ?? MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        bottomTexture = newBottomTexture ?? MTLTextureCreator.makeBlankTexture(size: size, with: device)
         temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
 
         var newLayers = newLayers
@@ -122,8 +121,6 @@ extension TextureLayers {
     func updateUnselectedLayers(
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let flippedTextureBuffers else { return }
-
         let bottomIndex: Int = index - 1
         let topIndex: Int = index + 1
 
@@ -176,18 +173,6 @@ extension TextureLayers {
     func updateThumbnail(index: Int) {
         guard index < layers.count else { return }
         layers[index].updateThumbnail()
-    }
-
-    /// Update the currently selected texture with a new instance
-    func updateSelectedTextureAddress() {
-        guard 
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: layers[index].texture,
-                with: device
-            )
-        else { return }
-
-        layers[index].texture = newTexture
     }
 
 }

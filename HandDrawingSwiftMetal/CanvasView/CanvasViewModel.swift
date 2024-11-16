@@ -66,11 +66,10 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
+    private var undoRepository: UndoRepository?
     private var localRepository: LocalRepository?
 
     private var canvasView: CanvasViewProtocol?
-
-    private let textureLayerUndoManager = TextureLayerUndoManager()
 
     /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
     private var canvasTexture: MTLTexture?
@@ -108,39 +107,29 @@ final class CanvasViewModel {
     private let device = MTLCreateSystemDefaultDevice()
 
     init(
+        undoRepository: UndoRepository = UndoRepository(undoCount: 8),
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
+        self.undoRepository = undoRepository
         self.localRepository = localRepository
 
         setupDisplayLink()
 
-        textureLayerUndoManager.addTextureLayersToUndoStackPublisher
-            .sink { [weak self] in
-                guard let `self` else { return }
-                self.textureLayerUndoManager.addUndoObject(
-                    undoObject: .init(
-                        index: self.textureLayers.index,
-                        layers: self.textureLayers.layers
-                    ),
-                    textureLayers: self.textureLayers
-                )
-                self.textureLayers.updateSelectedTextureAddress()
-            }
-            .store(in: &cancellables)
-
-        textureLayerUndoManager.refreshCanvasPublisher
+        self.undoRepository?.refreshCanvasPublisher
             .sink { [weak self] undoObject in
                 self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
             }
             .store(in: &cancellables)
 
-        textureLayerUndoManager.canUndoPublisher
+        self.undoRepository?.canUndoPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.refreshCanUndoSubject.send(value)
             }
             .store(in: &cancellables)
 
-        textureLayerUndoManager.canRedoPublisher
+        self.undoRepository?.canRedoPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.refreshCanRedoSubject.send(value)
             }
@@ -200,7 +189,7 @@ final class CanvasViewModel {
 
         projectName = model.projectName
 
-        textureLayerUndoManager.reset()
+        undoRepository?.reset()
 
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
@@ -233,27 +222,24 @@ final class CanvasViewModel {
     }
 
     func apply(undoObject: TextureLayerUndoObject) {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
+        guard let canvasView else { return }
 
         textureLayers.initLayers(
-            index: undoObject.index,
-            layers: undoObject.layers
+            newLayers: undoObject.layers,
+            newTopTexture: undoObject.topTexture,
+            newBottomTexture: undoObject.bottomTexture,
+            layerIndex: undoObject.index,
+            size: undoObject.textureSize
         )
 
         for i in 0 ..< textureLayers.layers.count {
             textureLayers.layers[i].updateThumbnail()
         }
 
-        MTLRenderer.clearTexture(texture: currentTexture, with: commandBuffer)
-
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
             on: canvasView
         )
     }
@@ -300,7 +286,7 @@ extension CanvasViewModel {
         )
 
         // Update the display of the Undo and Redo buttons
-        textureLayerUndoManager.updateUndoComponents()
+        undoRepository?.updateUndoComponents()
     }
 
     /// Manages all finger positions on the screen using a dictionary
@@ -466,10 +452,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
-        textureLayerUndoManager.undo()
+        undoRepository?.undo()
     }
     func didTapRedoButton() {
-        textureLayerUndoManager.redo()
+        undoRepository?.redo()
     }
 
     func didTapLayerButton() {
@@ -497,7 +483,7 @@ extension CanvasViewModel {
 
         transformer.setMatrix(.identity)
 
-        textureLayerUndoManager.reset()
+        undoRepository?.reset()
 
         initCanvas(size: size)
 
@@ -542,7 +528,7 @@ extension CanvasViewModel {
             )
         else { return }
 
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
+        pushToUndoStackSubject()
 
         let layer: TextureLayer = .init(
             texture: newTexture,
@@ -569,7 +555,7 @@ extension CanvasViewModel {
             let layer = textureLayers.selectedLayer
         else { return }
 
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
+        pushToUndoStackSubject()
 
         textureLayers.removeLayer(layer)
 
@@ -636,7 +622,7 @@ extension CanvasViewModel {
         source: IndexSet,
         destination: Int
     ) {
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
+        pushToUndoStackSubject()
 
         textureLayers.moveLayer(
             fromOffsets: source,
@@ -691,7 +677,7 @@ extension CanvasViewModel {
         if drawingCurvePoints.isDrawingFinished {
             // Add `textureLayer` to the undo stack
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            textureLayerUndoManager.addCurrentLayersToUndoStack()
+            pushToUndoStackSubject()
 
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
@@ -806,6 +792,19 @@ extension CanvasViewModel {
     ) -> Bool {
         touches.count == event?.allTouches?.count &&
         touches.contains { $0.phase == .ended || $0.phase == .cancelled }
+    }
+
+    private func pushToUndoStackSubject() {
+        guard
+            let device,
+            let object = textureLayers.getUndoObject(device: device)
+        else { return }
+
+        undoRepository?.pushUndoObject(
+            textureLayers: textureLayers,
+            undoObject: object,
+            with: device
+        )
     }
 
     private func resetAllInputParameters() {
