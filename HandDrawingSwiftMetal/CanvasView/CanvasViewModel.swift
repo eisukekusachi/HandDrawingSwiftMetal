@@ -691,7 +691,7 @@ extension CanvasViewModel {
         if drawingCurvePoints.isDrawingFinished {
             // Add `textureLayer` to the undo stack
             // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            // textureLayerUndoManager.addCurrentLayersToUndoStack()
+            textureLayerUndoManager.addCurrentLayersToUndoStack()
 
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
