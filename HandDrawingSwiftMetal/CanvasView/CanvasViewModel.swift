@@ -384,6 +384,37 @@ extension CanvasViewModel {
             )
         }
 
+        if let device,
+           let image = UIImage(named: "Image"),
+           let targetTexture = textureLayers.selectedLayer?.texture,
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let textureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .init(
+                vertices: .makeTextureVertices(
+                    sourceFrame: .init(
+                        origin: .init(x: 350, y: 850),
+                        size: .init(width: image.size.width, height: image.size.height)
+                    ),
+                    destinationSize: targetTexture.size
+                ),
+                textureCoord: .init(
+                    LT: .init(x: 0.1, y: 0.1),
+                    RT: .init(x: 0.75, y: 0.1),
+                    RB: .init(x: 0.75, y: 0.75),
+                    LB: .init(x: 0.1, y: 0.75)
+                )
+            ),
+            with: device
+           ),
+           let commandBuffer = canvasView.commandBuffer
+        {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: targetTexture,
+                with: commandBuffer
+            )
+        }
 
 
         if let device,
@@ -400,6 +431,40 @@ extension CanvasViewModel {
             )
         }
 
+
+        if let device,
+           let image = UIImage(named: "Brush"),
+           let targetTexture = textureLayers.selectedLayer?.texture,
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let commandBuffer = canvasView.commandBuffer {
+
+            var buffers: [MTLTextureNodes] = []
+
+            for i in 0 ..< 50 {
+                buffers.append(
+                    .init(
+                        vertices: .makeTextureVertices(
+                            sourceFrame: .init(
+                                origin: .init(x: 50 + (i * 25), y: 550),
+                                size: .init(width: imageTexture.size.width, height: imageTexture.size.height)
+                            ),
+                            destinationSize: targetTexture.size
+                        ),
+                        textureCoord: .screenTextureCoordinates,
+                        indices: .init(offset: MTLTextureIndices.getOffset(nodeCount: i))
+                    )
+                )
+            }
+
+            if let textureBuffers = MTLBuffers.makeTextureBuffers(nodeArray: buffers, with: device) {
+                MTLRenderer.drawTexture(
+                    texture: imageTexture,
+                    buffers: textureBuffers,
+                    on: targetTexture,
+                    with: commandBuffer
+                )
+            }
+        }
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,

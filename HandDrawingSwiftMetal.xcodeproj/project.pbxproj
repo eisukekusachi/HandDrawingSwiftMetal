@@ -83,6 +83,9 @@
 		D481A4312C5E1D7300279C91 /* CanvasInputDeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4302C5E1D7300279C91 /* CanvasInputDeviceStatus.swift */; };
 		D481A4332C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4322C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift */; };
 		D481A4352C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */; };
+		D482225C2CF1659500182ED3 /* MTLTextureVertices.swift in Sources */ = {isa = PBXBuildFile; fileRef = D482225B2CF1659500182ED3 /* MTLTextureVertices.swift */; };
+		D482225E2CF165AC00182ED3 /* MTLTextureCoordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = D482225D2CF165AC00182ED3 /* MTLTextureCoordinates.swift */; };
+		D48222612CF165D100182ED3 /* MTLTextureIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48222602CF165D100182ED3 /* MTLTextureIndices.swift */; };
 		D4837AE22CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */; };
 		D4837AE82CC5080E00BD25F5 /* CanvasFingerDrawingDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE72CC5080E00BD25F5 /* CanvasFingerDrawingDictionaryTests.swift */; };
 		D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */; };
@@ -211,6 +214,9 @@
 		D481A4302C5E1D7300279C91 /* CanvasInputDeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasInputDeviceStatus.swift; sourceTree = "<group>"; };
 		D481A4322C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreenTouchGestureStatus.swift; sourceTree = "<group>"; };
 		D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasScreenTouchGestureType.swift; sourceTree = "<group>"; };
+		D482225B2CF1659500182ED3 /* MTLTextureVertices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureVertices.swift; sourceTree = "<group>"; };
+		D482225D2CF165AC00182ED3 /* MTLTextureCoordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureCoordinates.swift; sourceTree = "<group>"; };
+		D48222602CF165D100182ED3 /* MTLTextureIndices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureIndices.swift; sourceTree = "<group>"; };
 		D4837AE12CC500C200BD25F5 /* CanvasPencilDrawingArraysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilDrawingArraysTests.swift; sourceTree = "<group>"; };
 		D4837AE72CC5080E00BD25F5 /* CanvasFingerDrawingDictionaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasFingerDrawingDictionaryTests.swift; sourceTree = "<group>"; };
 		D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchExtensions.swift; sourceTree = "<group>"; };
@@ -369,7 +375,7 @@
 				D469A8822C56422D00D10575 /* MTLPipelineManager.swift */,
 				D469A8862C56430D00D10575 /* MTLRenderer.swift */,
 				D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */,
-				D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */,
+				D482225F2CF165BE00182ED3 /* MTLTextureNodes */,
 				D48FECC12C5A6AD300221212 /* Shaders */,
 			);
 			path = Metal;
@@ -559,6 +565,17 @@
 				D481A4342C5E1E6D00279C91 /* CanvasScreenTouchGestureType.swift */,
 			);
 			path = Status;
+			sourceTree = "<group>";
+		};
+		D482225F2CF165BE00182ED3 /* MTLTextureNodes */ = {
+			isa = PBXGroup;
+			children = (
+				D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */,
+				D482225D2CF165AC00182ED3 /* MTLTextureCoordinates.swift */,
+				D48222602CF165D100182ED3 /* MTLTextureIndices.swift */,
+				D482225B2CF1659500182ED3 /* MTLTextureVertices.swift */,
+			);
+			path = MTLTextureNodes;
 			sourceTree = "<group>";
 		};
 		D4837AEB2CC5EC3400BD25F5 /* Drawing */ = {
@@ -839,6 +856,7 @@
 				D4F00CFA2C59257E00FE8D26 /* CanvasTouchHashValue.swift in Sources */,
 				D45941582B08B5CF00A18653 /* CanvasDrawingTool.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
+				D482225C2CF1659500182ED3 /* MTLTextureVertices.swift in Sources */,
 				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,
 				D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */,
 				D48AC4202BCA963D00608E42 /* TextureLayerUndoManager.swift in Sources */,
@@ -867,6 +885,7 @@
 				D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */,
 				D40D976C29DAB09D00A82E6A /* CanvasBrushDrawingTool.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
+				D48222612CF165D100182ED3 /* MTLTextureIndices.swift in Sources */,
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,
 				D46A30432BF842570057DB69 /* LayerManager.swift in Sources */,
@@ -904,6 +923,7 @@
 				D45179F82CC347BA0047C274 /* Constants.swift in Sources */,
 				D422D9C82AF4DD18004E058B /* TextureLayerUndoObject.swift in Sources */,
 				D481A4312C5E1D7300279C91 /* CanvasInputDeviceStatus.swift in Sources */,
+				D482225E2CF165AC00182ED3 /* MTLTextureCoordinates.swift in Sources */,
 				D41CACE32B9C01F200B8C7C5 /* CanvasContentView.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
