@@ -351,39 +351,6 @@ extension CanvasViewModel {
             )
         }
 
-
-        if let device,
-           let image = UIImage(named: "Image"),
-           let targetTexture = textureLayers.selectedLayer?.texture,
-           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
-           let textureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: .init(
-                vertices: .makeTextureVertices(
-                    sourceFrame: .init(
-                        origin: .init(x: 350, y: 1350),
-                        size: .init(width: image.size.width, height: image.size.height)
-                    ),
-                    destinationSize: targetTexture.size
-                ),
-                textureCoord: .init(
-                    LT: .init(x: 0.5, y: 0.5),
-                    RT: .init(x: 1.0, y: 0.5),
-                    RB: .init(x: 1.0, y: 1.0),
-                    LB: .init(x: 0.5, y: 1.0)
-                )
-            ),
-            with: device
-           ),
-           let commandBuffer = canvasView.commandBuffer
-        {
-            MTLRenderer.drawTexture(
-                texture: imageTexture,
-                buffers: textureBuffers,
-                on: targetTexture,
-                with: commandBuffer
-            )
-        }
-
         if let device,
            let image = UIImage(named: "Image"),
            let targetTexture = textureLayers.selectedLayer?.texture,

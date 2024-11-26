@@ -14,6 +14,7 @@ final class TextureLayers: LayerManager<TextureLayer> {
     private var topTexture: MTLTexture!
 
     private var temporaryTexture: MTLTexture!
+    private var coloredTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
@@ -47,8 +48,30 @@ extension TextureLayers {
         }
 
         MTLRenderer.fillTexture(
-            texture: destinationTexture,
-            withRGB: backgroundColor.rgb,
+            texture: coloredTexture,
+            withRGBA: UIColor.red.withAlphaComponent(0.25).rgba,
+            with: commandBuffer
+        )
+
+        if let image = UIImage(named: "Background"),
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let textureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .init(),
+            with: device
+           )
+        {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: destinationTexture,
+                with: commandBuffer
+            )
+        }
+
+        MTLRenderer.mergeTextures(
+            sourceTexture: coloredTexture,
+            destinationTexture: destinationTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
 
@@ -96,6 +119,7 @@ extension TextureLayers {
         bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
         topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
         temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        coloredTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
 
         var newLayers = newLayers
         if newLayers.isEmpty,
