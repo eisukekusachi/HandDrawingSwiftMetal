@@ -905,10 +905,24 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
+        if let image = UIImage(named: "Background"),
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let textureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .init(),
+            with: device
+           )
+        {
+            MTLRenderer.drawTexture(
+                texture: imageTexture,
+                buffers: textureBuffers,
+                on: destinationTexture,
+                with: commandBuffer
+            )
+        }
+
         MTLRenderer.drawTexture(
             texture: sourceTexture,
             buffers: sourceTextureBuffers,
-            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
             on: destinationTexture,
             with: commandBuffer
         )

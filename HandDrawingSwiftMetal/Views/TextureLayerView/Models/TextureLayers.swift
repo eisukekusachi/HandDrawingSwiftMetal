@@ -48,30 +48,8 @@ extension TextureLayers {
         }
 
         MTLRenderer.fillTexture(
-            texture: coloredTexture,
+            texture: destinationTexture,
             withRGBA: UIColor.red.withAlphaComponent(0.25).rgba,
-            with: commandBuffer
-        )
-
-        if let image = UIImage(named: "Background"),
-           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
-           let textureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: .init(),
-            with: device
-           )
-        {
-            MTLRenderer.drawTexture(
-                texture: imageTexture,
-                buffers: textureBuffers,
-                on: destinationTexture,
-                with: commandBuffer
-            )
-        }
-
-        MTLRenderer.mergeTextures(
-            sourceTexture: coloredTexture,
-            destinationTexture: destinationTexture,
-            into: destinationTexture,
             with: commandBuffer
         )
 
