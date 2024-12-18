@@ -5,6 +5,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22684"/>
         <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,6 +20,8 @@
                 <outlet property="diameterSlider" destination="s4f-db-5LA" id="Lec-ZW-hmI"/>
                 <outlet property="eraserButton" destination="Ydn-J6-zrX" id="6fj-Bu-pwF"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
+                <outlet property="imageView1" destination="1oQ-rk-ODz" id="qXx-zD-WPS"/>
+                <outlet property="imageView2" destination="jP8-OO-1nZ" id="d1e-MM-eUZ"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
                 <outlet property="newButton" destination="ML0-1y-T1Z" id="LCz-ss-GSK"/>
@@ -125,6 +128,22 @@
                         </button>
                     </subviews>
                 </stackView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1oQ-rk-ODz">
+                    <rect key="frame" x="0.0" y="483.66666666666674" width="100" height="100"/>
+                    <color key="backgroundColor" name="AccentColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="100" id="Sck-Ax-8JG"/>
+                        <constraint firstAttribute="width" constant="100" id="ck9-vw-KzK"/>
+                    </constraints>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jP8-OO-1nZ">
+                    <rect key="frame" x="293" y="483.66666666666674" width="100" height="100"/>
+                    <color key="backgroundColor" name="AccentColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="100" id="Nn0-Td-dcP"/>
+                        <constraint firstAttribute="width" constant="100" id="iVG-8f-KbP"/>
+                    </constraints>
+                </imageView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PR8-io-HFj" userLabel="ActivityIndicatorView">
                     <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                     <subviews>
@@ -162,11 +181,13 @@
             <constraints>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="qtN-lB-os6" secondAttribute="bottom" id="2wt-Bs-phB"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3hA-PR-FpI"/>
+                <constraint firstItem="qtN-lB-os6" firstAttribute="top" secondItem="1oQ-rk-ODz" secondAttribute="bottom" constant="200" id="Cp9-G4-9yf"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="Epa-wm-YYq"/>
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GzD-nN-Z2I"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="centerY" secondItem="P50-DK-emi" secondAttribute="centerY" id="IJP-iX-eIY"/>
                 <constraint firstItem="PR8-io-HFj" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="R9e-oB-haj"/>
+                <constraint firstItem="1oQ-rk-ODz" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="W0H-JD-bcX"/>
                 <constraint firstAttribute="bottom" secondItem="PR8-io-HFj" secondAttribute="bottom" id="WMe-BJ-eF1"/>
                 <constraint firstAttribute="trailing" secondItem="PR8-io-HFj" secondAttribute="trailing" id="XKg-DO-D9V"/>
                 <constraint firstItem="P50-DK-emi" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="ZLC-p5-E1x"/>
@@ -174,7 +195,9 @@
                 <constraint firstItem="qtN-lB-os6" firstAttribute="centerX" secondItem="vUN-kp-3ea" secondAttribute="centerX" id="fO0-py-vJO"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="P50-DK-emi" secondAttribute="trailing" constant="16" id="gUB-QZ-nmC"/>
                 <constraint firstAttribute="bottom" secondItem="Rri-Cz-Fww" secondAttribute="bottom" id="npb-fh-cuo"/>
+                <constraint firstItem="qtN-lB-os6" firstAttribute="top" secondItem="jP8-OO-1nZ" secondAttribute="bottom" constant="200" id="o7H-9L-VFp"/>
                 <constraint firstItem="PR8-io-HFj" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="s5A-rC-J5c"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="jP8-OO-1nZ" secondAttribute="trailing" id="seE-rg-f7a"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="uNl-Qs-2Na"/>
             </constraints>
             <point key="canvasLocation" x="91" y="21"/>
@@ -190,11 +213,14 @@
         <image name="square.2.layers.3d" catalog="system" width="128" height="117"/>
         <image name="square.and.arrow.down" catalog="system" width="112" height="128"/>
         <image name="square.and.arrow.up" catalog="system" width="108" height="128"/>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

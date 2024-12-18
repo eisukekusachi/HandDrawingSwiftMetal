@@ -40,7 +40,10 @@ final class CanvasContentView: UIView {
 
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
-
+    
+    @IBOutlet weak var imageView1: UIImageView!
+    @IBOutlet weak var imageView2: UIImageView!
+    
     var isHiddenActivityIndicator: Bool = false {
         didSet {
             isHiddenActivityIndicator ? activityIndicator.stopAnimating() : activityIndicator.startAnimating()

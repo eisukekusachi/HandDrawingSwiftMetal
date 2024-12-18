@@ -103,6 +103,10 @@ final class CanvasViewModel {
 
     private let runDisplayLinkSubject = PassthroughSubject<Bool, Never>()
 
+
+    let uiImageSubject1 = PassthroughSubject<UIImage?, Never>()
+    let uiImageSubject2 = PassthroughSubject<UIImage?, Never>()
+
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()
@@ -431,6 +435,39 @@ extension CanvasViewModel {
                     with: commandBuffer
                 )
             }
+        }
+
+        if let device,
+           let image = UIImage(named: "Brush"),
+           let image2 = UIImage(named: "Image"),
+           let imageTexture = MTLTextureCreator.makeTexture(image: image, with: device),
+           let imageTexture2 = MTLTextureCreator.makeTexture(image: image2, with: device),
+           let textureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+               nodes: .textureNodes,
+               with: device
+           ),
+           let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+               nodes: .flippedTextureNodes,
+               with: device
+           ),
+           let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+        {
+            uiImageSubject1.send(imageTexture.upsideDownUIImage)
+
+            MTLRenderer.clearTexture(texture: imageTexture, with: commandBuffer)
+
+            MTLRenderer.drawTexture(
+                texture: imageTexture2,
+                buffers: flippedTextureBuffers,
+                withBackgroundColor: .clear,
+                on: imageTexture,
+                with: commandBuffer
+            )
+
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+
+            uiImageSubject2.send(imageTexture.upsideDownUIImage)
         }
 
         updateCanvasViewWithTextureLayers(

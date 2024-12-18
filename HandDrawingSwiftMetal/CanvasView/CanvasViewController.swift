@@ -169,6 +169,20 @@ extension CanvasViewController {
         canvasViewModel.refreshCanRedoPublisher
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
+
+        canvasViewModel.uiImageSubject1
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] image in
+                self?.contentView.imageView1.image = image
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.uiImageSubject2
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] image in
+                self?.contentView.imageView2.image = image
+            }
+            .store(in: &cancellables)
     }
 
     private func subscribeEvents() {
