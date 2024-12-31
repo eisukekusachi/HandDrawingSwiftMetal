@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
     /// A texture that combines the textures of all layers below the selected layer
@@ -24,6 +25,37 @@ final class TextureLayers: Layers<TextureLayer> {
             nodes: .flippedTextureNodes,
             with: device
         )
+    }
+
+    func initLayers(
+        size: CGSize,
+        layers: [TextureLayer] = [],
+        layerIndex: Int = 0
+    ) {
+        bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+
+        if layers.isEmpty,
+           let texture = MTLTextureCreator.makeBlankTexture(
+            size: size,
+            with: device
+           ) {
+            initLayers(
+                index: layerIndex,
+                layers: [
+                    .init(
+                        texture: texture,
+                        title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+                    )
+                ]
+            )
+        } else {
+            initLayers(
+                index: max(0, min(layerIndex, layers.count - 1)),
+                layers: layers
+            )
+        }
     }
 
 }
@@ -85,33 +117,6 @@ extension TextureLayers {
             destinationTexture: destinationTexture,
             into: destinationTexture,
             with: commandBuffer
-        )
-    }
-
-    func initLayers(
-        newLayers: [TextureLayer] = [],
-        layerIndex: Int = 0,
-        size: CGSize
-    ) {
-        bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-
-        var newLayers = newLayers
-        if newLayers.isEmpty,
-           let newTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device
-           ) {
-            newLayers.append(
-                .init(
-                    texture: newTexture,
-                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-                )
-            )
-        }
-
-        super.initLayers(
-            index: layerIndex,
-            layers: newLayers
         )
     }
 

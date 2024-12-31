@@ -206,9 +206,9 @@ final class CanvasViewModel {
         eraserDrawingTexture.initTexture(model.textureSize)
 
         textureLayers.initLayers(
-            newLayers: model.layers,
-            layerIndex: model.layerIndex,
-            size: model.textureSize
+            size: model.textureSize,
+            layers: model.layers,
+            layerIndex: model.layerIndex
         )
 
         for i in 0 ..< textureLayers.layers.count {
