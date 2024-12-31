@@ -13,7 +13,10 @@ struct TwoRowsSliderView: View {
     var value: Int
     let style: SliderStyle
     var range = 0 ... 255
+
+    var didStartChanging: (() -> Void)?
     var didChange: ((Int) -> Void)?
+    var didFinishChanging: (() -> Void)?
 
     var buttonSize: CGFloat = 20
     var valueLabelWidth: CGFloat = 64
@@ -24,7 +27,9 @@ struct TwoRowsSliderView: View {
             IntSlider(
                 value: value,
                 in: range,
-                didChange: didChange
+                didStart: didStartChanging,
+                didChange: didChange,
+                didEnded: didFinishChanging
             )
             .environment(\.sliderStyle, style)
         }

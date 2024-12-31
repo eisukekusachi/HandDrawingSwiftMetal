@@ -13,7 +13,7 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
 
     var didTapLayer: (T) -> Void
     var didTapVisibility: (T, Bool) -> Void
-    var didMove: (T, IndexSet, Int) -> Void
+    var didMove: (IndexSet, Int) -> Void
 
     var body: some View {
         List {
@@ -35,8 +35,7 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                guard let targetLayer = textureLayers.selectedLayer else { return }
-                didMove(targetLayer, source, destination)
+                didMove(source, destination)
             })
             .listRowSeparator(.hidden)
         }
@@ -145,7 +144,7 @@ extension TextureLayerListView {
         didTapVisibility: { layer, isVisible in
             print("Tap visibility")
         },
-        didMove: { layer, source, destination in
+        didMove: { source, destination in
             print("Moved")
         }
     )

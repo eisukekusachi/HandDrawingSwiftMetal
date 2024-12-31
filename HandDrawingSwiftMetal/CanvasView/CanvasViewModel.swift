@@ -528,6 +528,8 @@ extension CanvasViewModel {
             on: canvasView
         )
     }
+
+    func didStartChangingLayerAlpha(layer: TextureLayer) {}
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int
@@ -546,6 +548,8 @@ extension CanvasViewModel {
             on: canvasView
         )
     }
+    func didFinishChangingLayerAlpha(layer: TextureLayer) {}
+
     func didEditLayerTitle(
         layer: TextureLayer,
         title: String
@@ -559,14 +563,14 @@ extension CanvasViewModel {
             title: title
         )
     }
+
     func didMoveLayers(
-        layer: TextureLayer,
-        source: IndexSet,
-        destination: Int
+        fromOffsets: IndexSet,
+        toOffset: Int
     ) {
         textureLayers.moveLayer(
-            fromListOffsets: source,
-            toListOffset: destination
+            fromListOffsets: fromOffsets,
+            toListOffset: toOffset
         )
 
         updateCanvasViewWithTextureLayers(

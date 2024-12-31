@@ -10,19 +10,27 @@ import SwiftUI
 struct IntSlider: View {
     @Environment(\.sliderStyle) var style
     @State private var knobOffsetX: CGFloat?
+    @State private var isDragging: Bool = false
 
     private var value: Int
     private let closedRange: ClosedRange<Int>
+
+    private let didStart: (() -> Void)?
     private let didChange: ((Int) -> Void)?
+    private let didEnded: (() -> Void)?
 
     init(
         value: Int,
         in range: ClosedRange<Int>,
-        didChange: ((Int) -> Void)? = nil
+        didStart: (() -> Void)? = nil,
+        didChange: ((Int) -> Void)? = nil,
+        didEnded: (() -> Void)? = nil
     ) {
         self.value = value
         self.closedRange = range
+        self.didStart = didStart
         self.didChange = didChange
+        self.didEnded = didEnded
     }
 
     var body: some View {
@@ -70,6 +78,10 @@ struct IntSlider: View {
                     .gesture(
                         DragGesture()
                             .onChanged { dragGestureValue in
+                                if !isDragging {
+                                    isDragging = true
+                                    didStart?()
+                                }
                                 dragging(
                                     geometry: geometry,
                                     dragGestureValue: dragGestureValue,
@@ -80,7 +92,9 @@ struct IntSlider: View {
                                 )
                             }
                             .onEnded { _ in
+                                isDragging = false
                                 knobOffsetX = nil
+                                didEnded?()
                             }
                     )
             }
@@ -91,7 +105,7 @@ struct IntSlider: View {
 
 extension IntSlider {
     private func dragging(
-        geometry: GeometryProxy, 
+        geometry: GeometryProxy,
         dragGestureValue: DragGesture.Value,
         sliderValue: Int,
         didChange: (Int) -> Void
