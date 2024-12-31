@@ -137,16 +137,34 @@ enum MTLTextureCreator {
 
     static func duplicateTexture(
         texture: MTLTexture?,
-        with device: MTLDevice
+        with device: MTLDevice?
     ) -> MTLTexture? {
         guard
+            let commandBuffer = device?.makeCommandQueue()?.makeCommandBuffer(),
+            let duplicateCurrentLayerTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                withDevice: device,
+                withCommandBuffer: commandBuffer
+            )
+        else { return nil }
+
+        commandBuffer.commit()
+
+        return duplicateCurrentLayerTexture
+    }
+    static func duplicateTexture(
+        texture: MTLTexture?,
+        withDevice device: MTLDevice?,
+        withCommandBuffer commandBuffer: MTLCommandBuffer
+    ) -> MTLTexture? {
+        guard
+            let device,
             let texture,
             let newTexture = makeTexture(size: texture.size, with: device),
             let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
                 nodes: .flippedTextureNodes,
                 with: device
-            ),
-            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+            )
         else { return nil }
 
         MTLRenderer.drawTexture(
@@ -156,8 +174,6 @@ enum MTLTextureCreator {
             on: newTexture,
             with: commandBuffer
         )
-
-        commandBuffer.commit()
 
         return newTexture
     }

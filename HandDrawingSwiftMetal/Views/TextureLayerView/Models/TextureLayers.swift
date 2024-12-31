@@ -18,7 +18,7 @@ final class TextureLayers: Layers<TextureLayer> {
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     override init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -178,8 +178,6 @@ extension TextureLayers {
         fromListOffsets: IndexSet,
         toListOffset: Int
     ) {
-        guard let selectedLayer else { return }
-
         // Since `textureLayers` and `List` have reversed orders,
         // reverse the array, perform move operations, and then reverse it back
         reverseLayers()
@@ -188,8 +186,6 @@ extension TextureLayers {
             toOffset: toListOffset
         )
         reverseLayers()
-
-        updateIndex(selectedLayer)
     }
 
 }

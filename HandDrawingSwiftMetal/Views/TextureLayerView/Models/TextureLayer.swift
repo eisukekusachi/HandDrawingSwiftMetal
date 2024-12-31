@@ -9,9 +9,9 @@ import MetalKit
 /// A layer with a texture
 struct TextureLayer: TextureLayerProtocol {
     /// The unique identifier for the layer
-    let id: UUID = UUID()
+    var id: UUID = UUID()
     /// The texture of the layer
-    var texture: MTLTexture
+    var texture: MTLTexture?
     /// The name of the layer
     var title: String
     /// The thumbnail image of the layer
@@ -24,13 +24,43 @@ struct TextureLayer: TextureLayerProtocol {
 }
 
 extension TextureLayer {
+    init(textureLayer: TextureLayer, withNewTexture newTexture: MTLTexture?) {
+        id = textureLayer.id
+        title = textureLayer.title
+        alpha = textureLayer.alpha
+        isVisible = textureLayer.isVisible
+
+        texture = newTexture
+        updateThumbnail()
+    }
 
     mutating func updateThumbnail() {
-        thumbnail = texture.upsideDownUIImage?.resizeWithAspectRatio(width: 64)
+        thumbnail = texture?.upsideDownUIImage?.resizeWithAspectRatio(width: 64)
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
+    }
+
+    func getLayerWithNewTexture(withDevice device: MTLDevice, withCommandBuffer commandBuffer: MTLCommandBuffer) -> Self {
+        .init(
+            textureLayer: self,
+            withNewTexture: MTLTextureCreator.duplicateTexture(
+                texture: self.texture,
+                withDevice: device,
+                withCommandBuffer: commandBuffer
+            )
+        )
+    }
+
+    func getLayerWithNewTexture(device: MTLDevice) -> Self {
+        .init(
+            textureLayer: self,
+            withNewTexture: MTLTextureCreator.duplicateTexture(
+                texture: self.texture,
+                with: device
+            )
+        )
     }
 
 }

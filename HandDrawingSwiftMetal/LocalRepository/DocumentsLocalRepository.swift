@@ -146,7 +146,7 @@ extension DocumentsLocalRepository {
                     let textureName = UUID().uuidString
 
                     try FileOutputManager.saveImage(
-                        bytes: layer.texture.bytes,
+                        bytes: layer.texture?.bytes ?? [],
                         to: url.appendingPathComponent(textureName)
                     )
                     layerEntities.append(

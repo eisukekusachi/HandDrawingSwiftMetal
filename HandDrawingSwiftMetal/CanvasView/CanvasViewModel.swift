@@ -39,11 +39,11 @@ final class CanvasViewModel {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
-    var refreshCanUndoPublisher: AnyPublisher<Bool, Never> {
-        refreshCanUndoSubject.eraseToAnyPublisher()
+    var updateUndoButtonIsEnabledState: AnyPublisher<Bool, Never> {
+        updateUndoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
-    var refreshCanRedoPublisher: AnyPublisher<Bool, Never> {
-        refreshCanRedoSubject.eraseToAnyPublisher()
+    var updateRedoButtonIsEnabledState: AnyPublisher<Bool, Never> {
+        updateRedoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
 
     private var drawingCurvePoints: CanvasDrawingCurvePoints?
@@ -51,6 +51,9 @@ final class CanvasViewModel {
     private let transformer = CanvasTransformer()
 
     private var drawingDisplayLink: CADisplayLink?
+
+    private let textureLayerUndoStack: UndoStack<TextureLayerUndoObject> = .init(undoManager: UndoManager())
+    private var tmpTextureLayerUndoObject: TextureLayerUndoObject?
 
     /// A dictionary for handling finger input values
     private let fingerDrawingDictionary = CanvasFingerDrawingDictionary()
@@ -89,9 +92,9 @@ final class CanvasViewModel {
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let refreshCanUndoSubject = PassthroughSubject<Bool, Never>()
+    private let updateUndoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
 
-    private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
+    private let updateRedoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
 
     private let runDisplayLinkSubject = PassthroughSubject<Bool, Never>()
 
@@ -125,6 +128,14 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        textureLayerUndoStack.undoDataPublisher
+            .sink { [weak self] undoObject in
+                self?.textureLayers.updateLayersWithUndoObject(undoObject) {
+                    self?.updateCanvas(withAllLayerUpdates: true)
+                }
+            }
+            .store(in: &cancellables)
+
         drawingTool.setDrawingTool(.brush)
     }
 
@@ -148,6 +159,9 @@ final class CanvasViewModel {
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
+
+        textureLayerUndoStack.reset()
+        refreshUndoRedoButtons()
     }
 
     func apply(model: CanvasModel) {
@@ -183,6 +197,9 @@ final class CanvasViewModel {
             withAllLayerUpdates: true,
             on: canvasView
         )
+
+        textureLayerUndoStack.reset()
+        refreshUndoRedoButtons()
     }
 
 }
@@ -390,10 +407,12 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
-
+        textureLayerUndoStack.undo()
+        refreshUndoRedoButtons()
     }
     func didTapRedoButton() {
-
+        textureLayerUndoStack.redo()
+        refreshUndoRedoButtons()
     }
 
     func didTapLayerButton() {
@@ -484,6 +503,15 @@ extension CanvasViewModel {
             withAllLayerUpdates: true,
             on: canvasView
         )
+
+        // Push an undo object for inserting to the undo stack
+        textureLayerUndoStack.pushUndoObject(
+            .init(
+                insertIndex: index,
+                textureLayer: layer.getLayerWithNewTexture(device: device)
+            )
+        )
+        refreshUndoRedoButtons()
     }
     func didTapRemoveLayerButton() {
         guard
@@ -502,12 +530,29 @@ extension CanvasViewModel {
             withAllLayerUpdates: true,
             on: canvasView
         )
+
+        // Push an undo object for inserting to the undo stack
+        textureLayerUndoStack.pushUndoObject(
+            .init(
+                removeIndex: index,
+                textureLayer: layer.getLayerWithNewTexture(device: device)
+            )
+        )
+        refreshUndoRedoButtons()
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
         isVisible: Bool
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
+
+        // Since the display visibility can be changed without selecting a layer, `textureLayers.index` is used here
+        let selectedIndex = textureLayers.index
+        let undoObject: TextureLayerUndoObject = .init(
+            editIndex: index,
+            textureLayer: layer,
+            selectedIndex: selectedIndex
+        )
 
         textureLayers.updateLayer(
             index: index,
@@ -521,9 +566,31 @@ extension CanvasViewModel {
             withAllLayerUpdates: true,
             on: canvasView
         )
+
+        // Push an undo object for editing to the undo stack
+        if let layer = textureLayers.getLayer(index: index) {
+            textureLayerUndoStack.pushUndoObject(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: .init(
+                        editIndex: index,
+                        textureLayer: layer,
+                        selectedIndex: selectedIndex
+                    )
+                )
+            )
+            refreshUndoRedoButtons()
+        }
     }
 
-    func didStartChangingLayerAlpha(layer: TextureLayer) {}
+    func didStartChangingLayerAlpha(layer: TextureLayer) {
+        guard let index = textureLayers.getIndex(layer: layer) else { return }
+
+        tmpTextureLayerUndoObject = .init(
+            editIndex: index,
+            textureLayer: layer
+        )
+    }
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int
@@ -542,30 +609,87 @@ extension CanvasViewModel {
             on: canvasView
         )
     }
-    func didFinishChangingLayerAlpha(layer: TextureLayer) {}
+    func didFinishChangingLayerAlpha(layer: TextureLayer) {
+        guard let index = textureLayers.getIndex(layer: layer) else { return }
+
+        // Push an undo object for editing to the undo stack
+        if let undoObject = tmpTextureLayerUndoObject {
+            textureLayerUndoStack.pushUndoObject(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: .init(
+                        editIndex: index,
+                        textureLayer: layer
+                    )
+                )
+            )
+            refreshUndoRedoButtons()
+        }
+    }
 
     func didEditLayerTitle(
         layer: TextureLayer,
         title: String
     ) {
-        guard
-            let index = textureLayers.getIndex(layer: layer)
-        else { return }
+        guard let index = textureLayers.getIndex(layer: layer) else { return }
+        let undoObject: TextureLayerUndoObject = .init(
+            editIndex: index,
+            textureLayer: layer
+        )
 
         textureLayers.updateLayer(
             index: index,
             title: title
         )
+
+        // Push an undo object for editing to the undo stack
+        if let layer = textureLayers.getLayer(index: index) {
+            textureLayerUndoStack.pushUndoObject(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: .init(
+                        editIndex: index,
+                        textureLayer: layer
+                    )
+                )
+            )
+            refreshUndoRedoButtons()
+        }
     }
 
     func didMoveLayers(
         fromOffsets: IndexSet,
         toOffset: Int
     ) {
+        let listFromIndex = fromOffsets.first ?? 0
+        let listToIndex = toOffset
+
+        // Convert the value received from `onMove(perform:)` into a value used in an array
+        let listSource = listFromIndex
+        let listDestination = UndoMoveData.getMoveDestination(fromIndex: listFromIndex, toIndex: listToIndex)
+
+        let textureLayerSource = TextureLayers.getReversedIndex(
+            index: listSource,
+            layerCount: textureLayers.count
+        )
+        let textureLayerDestination = TextureLayers.getReversedIndex(
+            index: listDestination,
+            layerCount: textureLayers.count
+        )
+        let textureLayer = textureLayers.layers[textureLayerSource]
+
+        let textureLayerSelectedIndex = textureLayers.index
+        let textureLayerSelectedIndexAfterMove = UndoMoveData.makeSelectedIndexAfterMove(
+            source: textureLayerSource,
+            destination: textureLayerDestination,
+            selectedIndex: textureLayerSelectedIndex
+        )
+
         textureLayers.moveLayer(
             fromListOffsets: fromOffsets,
             toListOffset: toOffset
         )
+        textureLayers.setIndex(textureLayerSelectedIndexAfterMove)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -574,6 +698,24 @@ extension CanvasViewModel {
             withAllLayerUpdates: true,
             on: canvasView
         )
+
+        // Push an undo object for moving to the undo stack
+        let undoData: UndoMoveData = .init(
+            source: textureLayerSource,
+            destination: textureLayerDestination,
+            selectedIndex: textureLayerSelectedIndex,
+            selectedIndexAfterMove: textureLayerSelectedIndexAfterMove
+        )
+        textureLayerUndoStack.pushUndoObject(
+            .init(
+                fromIndex: undoData.fromIndex,
+                toIndex: undoData.toIndex,
+                selectedIndex: undoData.selectedIndex,
+                selectedIndexAfterMove: undoData.selectedIndexAfterMove,
+                textureLayer: textureLayer
+            )
+        )
+        refreshUndoRedoButtons()
     }
 
 }
@@ -613,6 +755,37 @@ extension CanvasViewModel {
         )
 
         if drawingCurvePoints.isDrawingFinished {
+            let undoIndex = self.textureLayers.index
+            let undoLayer = self.textureLayers.selectedLayer?.getLayerWithNewTexture(
+                device: self.device
+            )
+            commandBuffer.addCompletedHandler { _ in
+                DispatchQueue.main.async { [weak self] in
+                    guard
+                        let `self`,
+                        let undoLayer,
+                        let redoLayer = self.textureLayers.selectedLayer?.getLayerWithNewTexture(device: self.device)
+                    else { return }
+
+                    let redoIndex = self.textureLayers.index
+
+                    // Push an undo object for drawing to the undo stack
+                    textureLayerUndoStack.pushUndoObject(
+                        .init(
+                            undoObject: .init(
+                                drawingIndex: undoIndex,
+                                textureLayer: undoLayer
+                            ),
+                            redoObject: .init(
+                                drawingIndex: redoIndex,
+                                textureLayer: redoLayer
+                            )
+                        )
+                    )
+                    refreshUndoRedoButtons()
+                }
+            }
+
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
@@ -633,6 +806,16 @@ extension CanvasViewModel {
             usingCurrentTexture: currentTexture,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            on: canvasView
+        )
+    }
+
+    private func updateCanvas(withAllLayerUpdates allUpdates: Bool = false) {
+        updateCanvasViewWithTextureLayers(
+            textureLayers: textureLayers,
+            canvasTexture: canvasTexture,
+            canvasTextureBackgroundColor: drawingTool.backgroundColor,
+            withAllLayerUpdates: allUpdates,
             on: canvasView
         )
     }
@@ -704,6 +887,11 @@ extension CanvasViewModel {
                 self.textureLayers.updateThumbnail(index: self.textureLayers.index)
             }
         }
+    }
+
+    private func refreshUndoRedoButtons() {
+        updateUndoButtonIsEnabledStateSubject.send(textureLayerUndoStack.canUndo)
+        updateRedoButtonIsEnabledStateSubject.send(textureLayerUndoStack.canRedo)
     }
 
 }
