@@ -64,7 +64,7 @@ extension TextureLayers {
     /// Merge the textures of layers on a single texture with the backgroundColor
     func mergeAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
-        shouldUpdateAllLayers: Bool = false,
+        withAllLayerUpdates allUpdates: Bool = false,
         backgroundColor: UIColor,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
@@ -74,7 +74,7 @@ extension TextureLayers {
         else { return }
 
         // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
-        if shouldUpdateAllLayers {
+        if allUpdates {
             let bottomIndex: Int = index - 1
             let topIndex: Int = index + 1
 

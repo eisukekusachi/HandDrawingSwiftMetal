@@ -180,7 +180,7 @@ final class CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -427,7 +427,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -450,7 +450,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -481,7 +481,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -499,7 +499,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -518,7 +518,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -571,7 +571,7 @@ extension CanvasViewModel {
             textureLayers: textureLayers,
             canvasTexture: canvasTexture,
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
+            withAllLayerUpdates: true,
             on: canvasView
         )
     }
@@ -642,14 +642,14 @@ extension CanvasViewModel {
         usingCurrentTexture: MTLTexture? = nil,
         canvasTexture: MTLTexture?,
         canvasTextureBackgroundColor: UIColor,
-        shouldUpdateAllLayers: Bool = false,
+        withAllLayerUpdates allUpdates: Bool = false,
         on canvasView: CanvasViewProtocol?
     ) {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         textureLayers.mergeAllTextures(
             usingCurrentTexture: usingCurrentTexture,
-            shouldUpdateAllLayers: shouldUpdateAllLayers,
+            withAllLayerUpdates: allUpdates,
             backgroundColor: canvasTextureBackgroundColor,
             on: canvasTexture,
             with: commandBuffer
