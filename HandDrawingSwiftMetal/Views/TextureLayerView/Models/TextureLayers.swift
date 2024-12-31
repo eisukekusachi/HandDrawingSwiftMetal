@@ -150,21 +150,21 @@ extension TextureLayers {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard index < layers.count else { return }
+        guard layers.indices.contains(index) else { return }
+
         if let title {
             layers[index].title = title
         }
         if let isVisible {
             layers[index].isVisible = isVisible
         }
-
         if let alpha {
             layers[index].alpha = alpha
         }
     }
 
     func updateThumbnail(index: Int) {
-        guard index < layers.count else { return }
+        guard layers.indices.contains(index) else { return }
         layers[index].updateThumbnail()
     }
 
