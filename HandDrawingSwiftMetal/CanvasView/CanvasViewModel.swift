@@ -128,7 +128,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        textureLayerUndoStack.sendUndoData
+        textureLayerUndoStack.undoDataPublisher
             .sink { [weak self] undoObject in
                 self?.textureLayers.updateLayersWithUndoObject(undoObject) {
                     self?.updateCanvas(withAllLayerUpdates: true)

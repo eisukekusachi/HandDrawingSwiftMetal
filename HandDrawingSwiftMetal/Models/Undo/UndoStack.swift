@@ -12,7 +12,10 @@ final class UndoStack<T> {
 
     let undoManager: UndoManager
 
-    let sendUndoData = PassthroughSubject<T, Never>()
+    var undoDataPublisher: AnyPublisher<T, Never> {
+        undoDataSubject.eraseToAnyPublisher()
+    }
+    let undoDataSubject = PassthroughSubject<T, Never>()
 
     var undoObject: T?
     var redoObject: T?
@@ -50,7 +53,7 @@ final class UndoStack<T> {
     ) {
         undoManager.beginUndoGrouping()
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
-            self?.sendUndoData.send(undoStackObject.undoObject)
+            self?.undoDataSubject.send(undoStackObject.undoObject)
 
             // Redo Registration
             self?.pushUndoObject(
