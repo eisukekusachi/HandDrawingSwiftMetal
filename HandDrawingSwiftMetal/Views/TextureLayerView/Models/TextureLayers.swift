@@ -70,12 +70,37 @@ extension TextureLayers {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let flippedTextureBuffers,
             let destinationTexture
         else { return }
 
+        // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
         if shouldUpdateAllLayers {
-            updateUnselectedLayers(with: commandBuffer)
+            let bottomIndex: Int = index - 1
+            let topIndex: Int = index + 1
+
+            MTLRenderer.clearTexture(texture: bottomTexture, with: commandBuffer)
+            MTLRenderer.clearTexture(texture: topTexture, with: commandBuffer)
+
+            if bottomIndex >= 0 {
+                for i in 0 ... bottomIndex where layers[i].isVisible {
+                    MTLRenderer.mergeTextures(
+                        sourceTexture: layers[i].texture,
+                        sourceAlpha: layers[i].alpha,
+                        destinationTexture: bottomTexture,
+                        with: commandBuffer
+                    )
+                }
+            }
+            if topIndex < layers.count {
+                for i in topIndex ..< layers.count where layers[i].isVisible {
+                    MTLRenderer.mergeTextures(
+                        sourceTexture: layers[i].texture,
+                        sourceAlpha: layers[i].alpha,
+                        destinationTexture: topTexture,
+                        with: commandBuffer
+                    )
+                }
+            }
         }
 
         MTLRenderer.fillTexture(
@@ -87,7 +112,6 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: bottomTexture,
             destinationTexture: destinationTexture,
-            into: destinationTexture,
             with: commandBuffer
         )
 
@@ -95,18 +119,16 @@ extension TextureLayers {
             if let currentTexture {
                 MTLRenderer.mergeTextures(
                     sourceTexture: currentTexture,
+                    sourceAlpha: layers[index].alpha,
                     destinationTexture: destinationTexture,
-                    alpha: layers[index].alpha,
-                    into: destinationTexture,
                     with: commandBuffer
                 )
 
             } else {
                 MTLRenderer.mergeTextures(
                     sourceTexture: layers[index].texture,
+                    sourceAlpha: layers[index].alpha,
                     destinationTexture: destinationTexture,
-                    alpha: layers[index].alpha,
-                    into: destinationTexture,
                     with: commandBuffer
                 )
             }
@@ -115,7 +137,6 @@ extension TextureLayers {
         MTLRenderer.mergeTextures(
             sourceTexture: topTexture,
             destinationTexture: destinationTexture,
-            into: destinationTexture,
             with: commandBuffer
         )
     }
@@ -123,42 +144,6 @@ extension TextureLayers {
 }
 
 extension TextureLayers {
-    /// Combine the textures of unselected layers into `topTexture` and `bottomTexture`
-    func updateUnselectedLayers(
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let flippedTextureBuffers else { return }
-
-        let bottomIndex: Int = index - 1
-        let topIndex: Int = index + 1
-
-        MTLRenderer.clearTexture(texture: bottomTexture, with: commandBuffer)
-        MTLRenderer.clearTexture(texture: topTexture, with: commandBuffer)
-
-        if bottomIndex >= 0 {
-            for i in 0 ... bottomIndex where layers[i].isVisible {
-                MTLRenderer.mergeTextures(
-                    sourceTexture: layers[i].texture,
-                    destinationTexture: bottomTexture,
-                    alpha: layers[i].alpha,
-                    into: bottomTexture,
-                    with: commandBuffer
-                )
-            }
-        }
-        if topIndex < layers.count {
-            for i in topIndex ..< layers.count where layers[i].isVisible {
-                MTLRenderer.mergeTextures(
-                    sourceTexture: layers[i].texture,
-                    destinationTexture: topTexture,
-                    alpha: layers[i].alpha,
-                    into: topTexture,
-                    with: commandBuffer
-                )
-            }
-        }
-    }
-
     func updateLayer(
         index: Int,
         title: String? = nil,

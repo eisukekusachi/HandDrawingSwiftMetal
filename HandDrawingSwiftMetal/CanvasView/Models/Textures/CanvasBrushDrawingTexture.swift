@@ -58,7 +58,6 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.mergeTextures(
             sourceTexture: texture,
             destinationTexture: targetTexture,
-            into: targetTexture,
             with: commandBuffer
         )
     }
@@ -72,7 +71,6 @@ extension CanvasBrushDrawingTexture {
         MTLRenderer.mergeTextures(
             sourceTexture: texture,
             destinationTexture: destinationTexture,
-            into: destinationTexture,
             with: commandBuffer
         )
 
