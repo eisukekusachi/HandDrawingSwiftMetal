@@ -168,18 +168,6 @@ extension TextureLayers {
         layers[index].updateThumbnail()
     }
 
-    /// Update the currently selected texture with a new instance
-    func updateSelectedTextureAddress() {
-        guard 
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: layers[index].texture,
-                with: device
-            )
-        else { return }
-
-        layers[index].texture = newTexture
-    }
-
     /// Sort TextureLayers's `layers` based on the values received from `List`
     func moveLayer(
         fromListOffsets: IndexSet,

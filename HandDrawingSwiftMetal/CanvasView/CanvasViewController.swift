@@ -155,13 +155,6 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanvasWithUndoObjectPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] undoObject in
-                self?.canvasViewModel.apply(undoObject: undoObject)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.refreshCanUndoPublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)

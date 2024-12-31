@@ -39,10 +39,6 @@ final class CanvasViewModel {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
 
-    var refreshCanvasWithUndoObjectPublisher: AnyPublisher<TextureLayerUndoObject, Never> {
-        refreshCanvasWithUndoObjectSubject.eraseToAnyPublisher()
-    }
-
     var refreshCanUndoPublisher: AnyPublisher<Bool, Never> {
         refreshCanUndoSubject.eraseToAnyPublisher()
     }
@@ -70,8 +66,6 @@ final class CanvasViewModel {
 
     private var canvasView: CanvasViewProtocol?
 
-    private let textureLayerUndoManager = TextureLayerUndoManager()
-
     /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
     private var canvasTexture: MTLTexture?
 
@@ -95,8 +89,6 @@ final class CanvasViewModel {
 
     private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let refreshCanvasWithUndoObjectSubject = PassthroughSubject<TextureLayerUndoObject, Never>()
-
     private let refreshCanUndoSubject = PassthroughSubject<Bool, Never>()
 
     private let refreshCanRedoSubject = PassthroughSubject<Bool, Never>()
@@ -113,38 +105,6 @@ final class CanvasViewModel {
         self.localRepository = localRepository
 
         setupDisplayLink()
-
-        textureLayerUndoManager.addTextureLayersToUndoStackPublisher
-            .sink { [weak self] in
-                guard let `self` else { return }
-                self.textureLayerUndoManager.addUndoObject(
-                    undoObject: .init(
-                        index: self.textureLayers.index,
-                        layers: self.textureLayers.layers
-                    ),
-                    textureLayers: self.textureLayers
-                )
-                self.textureLayers.updateSelectedTextureAddress()
-            }
-            .store(in: &cancellables)
-
-        textureLayerUndoManager.refreshCanvasPublisher
-            .sink { [weak self] undoObject in
-                self?.refreshCanvasWithUndoObjectSubject.send(undoObject)
-            }
-            .store(in: &cancellables)
-
-        textureLayerUndoManager.canUndoPublisher
-            .sink { [weak self] value in
-                self?.refreshCanUndoSubject.send(value)
-            }
-            .store(in: &cancellables)
-
-        textureLayerUndoManager.canRedoPublisher
-            .sink { [weak self] value in
-                self?.refreshCanRedoSubject.send(value)
-            }
-            .store(in: &cancellables)
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -200,8 +160,6 @@ final class CanvasViewModel {
 
         projectName = model.projectName
 
-        textureLayerUndoManager.reset()
-
         brushDrawingTexture.initTexture(model.textureSize)
         eraserDrawingTexture.initTexture(model.textureSize)
 
@@ -222,32 +180,6 @@ final class CanvasViewModel {
         currentTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
         canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
-
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            shouldUpdateAllLayers: true,
-            on: canvasView
-        )
-    }
-
-    func apply(undoObject: TextureLayerUndoObject) {
-        guard
-            let canvasView,
-            let commandBuffer = canvasView.commandBuffer
-        else { return }
-
-        textureLayers.initLayers(
-            index: undoObject.index,
-            layers: undoObject.layers
-        )
-
-        for i in 0 ..< textureLayers.layers.count {
-            textureLayers.layers[i].updateThumbnail()
-        }
-
-        MTLRenderer.clearTexture(texture: currentTexture, with: commandBuffer)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -298,9 +230,6 @@ extension CanvasViewModel {
             canvasTextureBackgroundColor: drawingTool.backgroundColor,
             on: canvasView
         )
-
-        // Update the display of the Undo and Redo buttons
-        textureLayerUndoManager.updateUndoComponents()
     }
 
     /// Manages all finger positions on the screen using a dictionary
@@ -466,10 +395,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     // MARK: Toolbar
     func didTapUndoButton() {
-        textureLayerUndoManager.undo()
+
     }
     func didTapRedoButton() {
-        textureLayerUndoManager.redo()
+
     }
 
     func didTapLayerButton() {
@@ -496,8 +425,6 @@ extension CanvasViewModel {
         projectName = Calendar.currentDate
 
         transformer.setMatrix(.identity)
-
-        textureLayerUndoManager.reset()
 
         initCanvas(size: size)
 
@@ -542,8 +469,6 @@ extension CanvasViewModel {
             )
         else { return }
 
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
-
         let layer: TextureLayer = .init(
             texture: newTexture,
             title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
@@ -572,8 +497,6 @@ extension CanvasViewModel {
             let layer = textureLayers.selectedLayer,
             let index = textureLayers.getIndex(layer: layer)
         else { return }
-
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayers.removeLayer(layer)
         textureLayers.setIndex(index - 1)
@@ -641,8 +564,6 @@ extension CanvasViewModel {
         source: IndexSet,
         destination: Int
     ) {
-        textureLayerUndoManager.addCurrentLayersToUndoStack()
-
         textureLayers.moveLayer(
             fromListOffsets: source,
             toListOffset: destination
@@ -694,10 +615,6 @@ extension CanvasViewModel {
         )
 
         if drawingCurvePoints.isDrawingFinished {
-            // Add `textureLayer` to the undo stack
-            // when the drawing is ended and before `DrawingTexture` is merged with `selectedLayer.texture`
-            // textureLayerUndoManager.addCurrentLayersToUndoStack()
-
             // Draw `drawingTexture` onto `selectedLayer.texture`
             currentDrawingTexture?.mergeDrawingTexture(
                 into: textureLayers.selectedLayer?.texture,
