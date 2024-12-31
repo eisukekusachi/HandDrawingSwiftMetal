@@ -97,7 +97,7 @@ final class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let device = MTLCreateSystemDefaultDevice()
+    private let device = MTLCreateSystemDefaultDevice()!
 
     init(
         localRepository: LocalRepository = DocumentsLocalRepository()
@@ -140,8 +140,6 @@ final class CanvasViewModel {
     }
 
     func initCanvas(size: CGSize) {
-        guard let device else { return }
-
         brushDrawingTexture.initTexture(size)
         eraserDrawingTexture.initTexture(size)
 
@@ -153,10 +151,7 @@ final class CanvasViewModel {
     }
 
     func apply(model: CanvasModel) {
-        guard 
-            let device,
-            let canvasView
-        else { return }
+        guard let canvasView else { return }
 
         projectName = model.projectName
 
@@ -461,7 +456,6 @@ extension CanvasViewModel {
     }
     func didTapAddLayerButton() {
         guard
-            let device,
             let renderTextureSize = canvasView?.renderTexture?.size,
             let newTexture = MTLTextureCreator.makeBlankTexture(
                 size: renderTextureSize,
@@ -674,7 +668,6 @@ extension CanvasViewModel {
         on canvasView: CanvasViewProtocol?
     ) {
         guard
-            let device,
             let sourceTexture = texture,
             let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
