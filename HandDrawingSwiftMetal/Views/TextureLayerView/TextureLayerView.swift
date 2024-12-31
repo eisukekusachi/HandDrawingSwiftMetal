@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerView<T: TextureLayerProtocol>: View {
 
-    @ObservedObject var textureLayers: LayerManager<T>
+    @ObservedObject var textureLayers: Layers<T>
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State var isTextFieldPresented: Bool = false
@@ -77,7 +77,7 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 extension TextureLayerView {
 
     func toolbar(
-        textureLayers: LayerManager<T>,
+        textureLayers: Layers<T>,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
         didEditTitle: @escaping (T, String) -> Void

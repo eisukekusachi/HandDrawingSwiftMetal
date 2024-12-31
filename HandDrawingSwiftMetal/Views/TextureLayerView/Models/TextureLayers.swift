@@ -7,7 +7,7 @@
 
 import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
-final class TextureLayers: LayerManager<TextureLayer> {
+final class TextureLayers: Layers<TextureLayer> {
     /// A texture that combines the textures of all layers below the selected layer
     private var bottomTexture: MTLTexture!
     /// A texture that combines the textures of all layers above the selected layer
@@ -188,6 +188,30 @@ extension TextureLayers {
         else { return }
 
         layers[index].texture = newTexture
+    }
+
+    /// Sort TextureLayers's `layers` based on the values received from `List`
+    func moveLayer(
+        fromListOffsets: IndexSet,
+        toListOffset: Int
+    ) {
+        guard let selectedLayer else { return }
+
+        // Since `textureLayers` and `List` have reversed orders,
+        // reverse the array, perform move operations, and then reverse it back
+        reverseLayers()
+        moveLayer(
+            fromOffsets: fromListOffsets,
+            toOffset: toListOffset
+        )
+        reverseLayers()
+
+        updateIndex(selectedLayer)
+    }
+
+    func updateIndex(_ layer: TextureLayer?) {
+        guard let layer, let layerIndex = layers.firstIndex(of: layer) else { return }
+        index = layerIndex
     }
 
 }

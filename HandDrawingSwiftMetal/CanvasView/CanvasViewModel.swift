@@ -548,12 +548,15 @@ extension CanvasViewModel {
             texture: newTexture,
             title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
         )
-        textureLayers.addLayer(layer)
+        let index = textureLayers.index + 1
+        textureLayers.insertLayer(
+            layer: layer,
+            at: index
+        )
+        textureLayers.setIndex(from: layer)
 
         // Makes a thumbnail
-        if let index = textureLayers.getIndex(layer: layer) {
-            textureLayers.updateThumbnail(index: index)
-        }
+        textureLayers.updateThumbnail(index: index)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -565,13 +568,15 @@ extension CanvasViewModel {
     }
     func didTapRemoveLayerButton() {
         guard
-            textureLayers.layers.count > 1,
-            let layer = textureLayers.selectedLayer
+            textureLayers.canDeleteLayer,
+            let layer = textureLayers.selectedLayer,
+            let index = textureLayers.getIndex(layer: layer)
         else { return }
 
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayers.removeLayer(layer)
+        textureLayers.setIndex(index - 1)
 
         updateCanvasViewWithTextureLayers(
             textureLayers: textureLayers,
@@ -639,8 +644,8 @@ extension CanvasViewModel {
         textureLayerUndoManager.addCurrentLayersToUndoStack()
 
         textureLayers.moveLayer(
-            fromOffsets: source,
-            toOffset: destination
+            fromListOffsets: source,
+            toListOffset: destination
         )
 
         updateCanvasViewWithTextureLayers(

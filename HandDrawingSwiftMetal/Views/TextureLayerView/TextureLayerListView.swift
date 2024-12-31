@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerListView<T: TextureLayerProtocol>: View {
 
-    @ObservedObject var textureLayers: LayerManager<T>
+    @ObservedObject var textureLayers: Layers<T>
 
     var didTapLayer: (T) -> Void
     var didTapVisibility: (T, Bool) -> Void
