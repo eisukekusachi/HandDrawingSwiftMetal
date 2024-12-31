@@ -168,6 +168,11 @@ extension TextureLayers {
         layers[index].updateThumbnail()
     }
 
+    func updateIndex(_ layer: TextureLayer?) {
+        guard let layer, let layerIndex = layers.firstIndex(of: layer) else { return }
+        index = layerIndex
+    }
+
     /// Sort TextureLayers's `layers` based on the values received from `List`
     func moveLayer(
         fromListOffsets: IndexSet,
@@ -185,11 +190,6 @@ extension TextureLayers {
         reverseLayers()
 
         updateIndex(selectedLayer)
-    }
-
-    func updateIndex(_ layer: TextureLayer?) {
-        guard let layer, let layerIndex = layers.firstIndex(of: layer) else { return }
-        index = layerIndex
     }
 
 }
