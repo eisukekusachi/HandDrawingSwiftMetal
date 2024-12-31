@@ -52,7 +52,7 @@ final class TextureLayers: Layers<TextureLayer> {
             )
         } else {
             initLayers(
-                index: max(0, min(layerIndex, layers.count - 1)),
+                index: layerIndex,
                 layers: layers
             )
         }
