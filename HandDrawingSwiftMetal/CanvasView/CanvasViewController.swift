@@ -112,9 +112,6 @@ extension CanvasViewController {
         contentView.tapRedoButton = { [weak self] in
             self?.canvasViewModel.didTapRedoButton()
         }
-
-        contentView.undoButton.isHidden = true
-        contentView.redoButton.isHidden = true
     }
 
     private func bindViewModel() {
@@ -155,11 +152,11 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanUndoPublisher
+        canvasViewModel.updateUndoButtonIsEnabledState
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanRedoPublisher
+        canvasViewModel.updateRedoButtonIsEnabledState
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
     }
