@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerView<T: TextureLayerProtocol>: View {
 
-    @ObservedObject var textureLayers: LayerManager<T>
+    @ObservedObject var textureLayers: Layers<T>
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State var isTextFieldPresented: Bool = false
@@ -19,9 +19,11 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
     var didTapAddButton: () -> Void
     var didTapRemoveButton: () -> Void
     var didTapVisibility: (T, Bool) -> Void
+    var didStartChangingAlpha: (T) -> Void
     var didChangeAlpha: (T, Int) -> Void
+    var didFinishChangingAlpha: (T) -> Void
     var didEditTitle: (T, String) -> Void
-    var didMove: (T, IndexSet, Int) -> Void
+    var didMove: (IndexSet, Int) -> Void
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -50,8 +52,8 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
                     didTapVisibility: { layer, isVisibility in
                         didTapVisibility(layer, isVisibility)
                     },
-                    didMove: { layer, source, destination in
-                        didMove(layer, source, destination)
+                    didMove: { source, destination in
+                        didMove(source, destination)
                     }
                 )
 
@@ -60,9 +62,17 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
                     value: textureLayers.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
+                    didStartChanging: {
+                        guard let selectedLayer = textureLayers.selectedLayer else { return }
+                        didStartChangingAlpha(selectedLayer)
+                    },
                     didChange: { value in
                         guard let selectedLayer = textureLayers.selectedLayer else { return }
                         didChangeAlpha(selectedLayer, value)
+                    },
+                    didFinishChanging: {
+                        guard let selectedLayer = textureLayers.selectedLayer else { return }
+                        didFinishChangingAlpha(selectedLayer)
                     }
                 )
                 .padding(.top, 4)
@@ -77,7 +87,7 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 extension TextureLayerView {
 
     func toolbar(
-        textureLayers: LayerManager<T>,
+        textureLayers: Layers<T>,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
         didEditTitle: @escaping (T, String) -> Void
@@ -148,13 +158,19 @@ extension TextureLayerView {
         didTapVisibility: { layer, value in
             print("Change visibility")
         },
+        didStartChangingAlpha: { layer in
+            print("Start changing alpha")
+        },
         didChangeAlpha: { layer, value in
             print("Change alpha")
+        },
+        didFinishChangingAlpha: { layer in
+            print("Finish changing alpha")
         },
         didEditTitle: { layer, value in
             print("Change title")
         },
-        didMove: { layer, source, destination in
+        didMove: { source, destination in
             print("Moved")
         }
     )

@@ -22,9 +22,11 @@ final class TextureLayerViewPresenter {
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
         didTapVisibility: @escaping (TextureLayer, Bool) -> Void,
+        didStartChangingAlpha: @escaping (TextureLayer) -> Void,
         didChangeAlpha: @escaping (TextureLayer, Int) -> Void,
+        didFinishChangingAlpha: @escaping (TextureLayer) -> Void,
         didEditTitle: @escaping (TextureLayer, String) -> Void,
-        didMove: @escaping (TextureLayer, IndexSet, Int) -> Void,
+        didMove: @escaping (IndexSet, Int) -> Void,
         on viewController: UIViewController
     ) {
         layerView = TextureLayerView(
@@ -42,14 +44,20 @@ final class TextureLayerViewPresenter {
             didTapVisibility: { entity, value in
                 didTapVisibility(entity, value)
             },
+            didStartChangingAlpha: { value in
+                didStartChangingAlpha(value)
+            },
             didChangeAlpha: { entity, value in
                 didChangeAlpha(entity, value)
+            },
+            didFinishChangingAlpha: { value in
+                didFinishChangingAlpha(value)
             },
             didEditTitle: { entity, value in
                 didEditTitle(entity, value)
             },
-            didMove: { layer, source, destination in
-                didMove(layer, source, destination)
+            didMove: { source, destination in
+                didMove(source, destination)
             }
         )
 

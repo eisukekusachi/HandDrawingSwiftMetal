@@ -155,13 +155,6 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanvasWithUndoObjectPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] undoObject in
-                self?.canvasViewModel.apply(undoObject: undoObject)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.refreshCanUndoPublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)
@@ -216,11 +209,17 @@ extension CanvasViewController {
                     isVisible: value
                 )
             },
+            didStartChangingAlpha: { [weak self] layer in
+                self?.canvasViewModel.didStartChangingLayerAlpha(layer: layer)
+            },
             didChangeAlpha: { [weak self] layer, value in
                 self?.canvasViewModel.didChangeLayerAlpha(
                     layer: layer,
                     value: value
                 )
+            },
+            didFinishChangingAlpha: { [weak self] layer in
+                self?.canvasViewModel.didFinishChangingLayerAlpha(layer: layer)
             },
             didEditTitle: { [weak self] layer, value in
                 self?.canvasViewModel.didEditLayerTitle(
@@ -228,11 +227,10 @@ extension CanvasViewController {
                     title: value
                 )
             },
-            didMove: { [weak self] layer, source, destination in
+            didMove: { [weak self] fromOffsets, toOffset in
                 self?.canvasViewModel.didMoveLayers(
-                    layer: layer,
-                    source: source,
-                    destination: destination
+                    fromOffsets: fromOffsets,
+                    toOffset: toOffset
                 )
             },
             on: self
