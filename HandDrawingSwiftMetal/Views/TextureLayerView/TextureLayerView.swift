@@ -126,6 +126,7 @@ extension TextureLayerView {
                     Image(systemName: "pencil").buttonModifier(diameter: buttonSize)
                 }
             )
+            .hidden()
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
