@@ -65,6 +65,9 @@ final class CanvasContentView: UIView {
         backgroundColor = .white
 
         diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+
+        undoButton.isHidden = true
+        redoButton.isHidden = true
     }
 
 }
