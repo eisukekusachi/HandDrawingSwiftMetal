@@ -82,6 +82,8 @@ final class MTLRenderer: MTLRendering {
 
     private let pipelines = MTLPipelines()
 
+    private init() {}
+
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture,
