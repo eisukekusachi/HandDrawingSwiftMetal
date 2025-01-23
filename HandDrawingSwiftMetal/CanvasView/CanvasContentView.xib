@@ -40,36 +40,36 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVg-Dj-hIn">
-                    <rect key="frame" x="16.000000000000007" y="59" width="113.66666666666669" height="34.333333333333343"/>
+                    <rect key="frame" x="16.000000000000007" y="59.333333333333329" width="113.66666666666669" height="34.333333333333329"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="Reset zoom"/>
                 </button>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P50-DK-emi">
-                    <rect key="frame" x="152.66666666666663" y="59" width="224.33333333333337" height="34.333333333333343"/>
+                    <rect key="frame" x="159.66666666666663" y="59" width="217.33333333333337" height="34.666666666666657"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ugs-EZ-K7D">
-                            <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
+                            <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.up" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RSE-Ca-Pvz">
-                            <rect key="frame" x="48.333333333333343" y="0.0" width="51" height="34.333333333333336"/>
+                            <rect key="frame" x="48.333333333333343" y="0.0" width="44" height="34.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <buttonConfiguration key="configuration" style="plain" image="square.2.layers.3d" catalog="system"/>
+                            <buttonConfiguration key="configuration" style="plain" image="Layer"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ve-sD-YOE">
-                            <rect key="frame" x="99.333333333333343" y="0.0" width="48.333333333333343" height="34.333333333333336"/>
+                            <rect key="frame" x="92.333333333333343" y="0.0" width="48.333333333333343" height="34.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
-                            <rect key="frame" x="147.66666666666666" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
+                            <rect key="frame" x="140.66666666666666" y="0.0" width="54.666666666666657" height="34.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="photo" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="photo" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ML0-1y-T1Z">
-                            <rect key="frame" x="202.33333333333334" y="0.0" width="22" height="34.333333333333336"/>
+                            <rect key="frame" x="195.33333333333334" y="0.0" width="22" height="34.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="plus.square.fill.on.square.fill" catalog="system"/>
                         </button>
@@ -182,13 +182,13 @@
     </objects>
     <resources>
         <image name="Eraser" width="19.845800399780273" height="19.648799896240234"/>
+        <image name="Layer" width="20.322299957275391" height="20.830099105834961"/>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
         <image name="circle.fill" catalog="system" width="128" height="123"/>
         <image name="eraser" catalog="system" width="128" height="119"/>
         <image name="photo" catalog="system" width="128" height="93"/>
         <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
-        <image name="square.2.layers.3d" catalog="system" width="128" height="117"/>
         <image name="square.and.arrow.down" catalog="system" width="114" height="128"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">
