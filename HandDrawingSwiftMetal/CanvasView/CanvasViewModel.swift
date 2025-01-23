@@ -653,7 +653,9 @@ extension CanvasViewModel {
 
             // Update the thumbnail when the layerView is visible
             if requestShowingLayerViewSubject.value {
-                updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+                DispatchQueue.main.async { [weak self] in
+                    self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+                }
             }
         }
 
@@ -735,14 +737,12 @@ extension CanvasViewModel {
     }
 
     /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
+    @MainActor
     private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             try await Task.sleep(nanoseconds: nanosecondsDuration)
-
-            DispatchQueue.main.async { [weak self] in
-                guard let `self` else { return }
-                self.textureLayers.updateThumbnail(index: self.textureLayers.index)
-            }
+            self.textureLayers.updateThumbnail(index: self.textureLayers.index)
         }
     }
 
