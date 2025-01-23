@@ -723,7 +723,7 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: sourceTexture,
             buffers: sourceTextureBuffers,
             withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),

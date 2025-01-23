@@ -42,12 +42,13 @@ extension CanvasBrushDrawingTexture {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let texture,
             let selectedTexture,
             let flippedTextureBuffers,
             let targetTexture
         else { return }
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: selectedTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
@@ -55,9 +56,9 @@ extension CanvasBrushDrawingTexture {
             with: commandBuffer
         )
 
-        MTLRenderer.mergeTextures(
-            sourceTexture: texture,
-            destinationTexture: targetTexture,
+        MTLRenderer.shared.mergeTexture(
+            texture: texture,
+            on: targetTexture,
             with: commandBuffer
         )
     }
@@ -66,11 +67,14 @@ extension CanvasBrushDrawingTexture {
         into destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let destinationTexture else { return }
+        guard
+            let texture,
+            let destinationTexture
+        else { return }
 
-        MTLRenderer.mergeTextures(
-            sourceTexture: texture,
-            destinationTexture: destinationTexture,
+        MTLRenderer.shared.mergeTexture(
+            texture: texture,
+            on: destinationTexture,
             with: commandBuffer
         )
 
@@ -104,16 +108,16 @@ extension CanvasBrushDrawingTexture {
             )
         else { return }
 
-        MTLRenderer.drawCurve(
+        MTLRenderer.shared.drawGrayPointBuffersWithMaxBlendMode(
             buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
 
-        MTLRenderer.colorizeTexture(
+        MTLRenderer.shared.drawTexture(
             grayscaleTexture: grayscaleTexture,
             color: color.rgb,
-            resultTexture: texture,
+            on: texture,
             with: commandBuffer
         )
     }
@@ -123,7 +127,7 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clearTextures(
+        MTLRenderer.shared.clearTextures(
             textures: [
                 texture,
                 grayscaleTexture

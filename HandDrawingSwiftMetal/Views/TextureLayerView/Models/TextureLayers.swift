@@ -78,65 +78,69 @@ extension TextureLayers {
             let bottomIndex: Int = index - 1
             let topIndex: Int = index + 1
 
-            MTLRenderer.clearTexture(texture: bottomTexture, with: commandBuffer)
-            MTLRenderer.clearTexture(texture: topTexture, with: commandBuffer)
+            MTLRenderer.shared.clearTexture(texture: bottomTexture, with: commandBuffer)
+            MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
 
             if bottomIndex >= 0 {
                 for i in 0 ... bottomIndex where layers[i].isVisible {
-                    MTLRenderer.mergeTextures(
-                        sourceTexture: layers[i].texture,
-                        sourceAlpha: layers[i].alpha,
-                        destinationTexture: bottomTexture,
-                        with: commandBuffer
-                    )
+                    if let texture = layers[i].texture {
+                        MTLRenderer.shared.mergeTexture(
+                            texture: texture,
+                            alpha: layers[i].alpha,
+                            on: bottomTexture,
+                            with: commandBuffer
+                        )
+                    }
                 }
             }
             if topIndex < layers.count {
                 for i in topIndex ..< layers.count where layers[i].isVisible {
-                    MTLRenderer.mergeTextures(
-                        sourceTexture: layers[i].texture,
-                        sourceAlpha: layers[i].alpha,
-                        destinationTexture: topTexture,
-                        with: commandBuffer
-                    )
+                    if let texture = layers[i].texture {
+                        MTLRenderer.shared.mergeTexture(
+                            texture: texture,
+                            alpha: layers[i].alpha,
+                            on: topTexture,
+                            with: commandBuffer
+                        )
+                    }
                 }
             }
         }
 
-        MTLRenderer.fillTexture(
+        MTLRenderer.shared.fillTexture(
             texture: destinationTexture,
             withRGB: backgroundColor.rgb,
             with: commandBuffer
         )
 
-        MTLRenderer.mergeTextures(
-            sourceTexture: bottomTexture,
-            destinationTexture: destinationTexture,
+        MTLRenderer.shared.mergeTexture(
+            texture: bottomTexture,
+            on: destinationTexture,
             with: commandBuffer
         )
 
         if layers[index].isVisible {
             if let currentTexture {
-                MTLRenderer.mergeTextures(
-                    sourceTexture: currentTexture,
-                    sourceAlpha: layers[index].alpha,
-                    destinationTexture: destinationTexture,
+                MTLRenderer.shared.mergeTexture(
+                    texture: currentTexture,
+                    alpha: layers[index].alpha,
+                    on: destinationTexture,
                     with: commandBuffer
                 )
 
-            } else {
-                MTLRenderer.mergeTextures(
-                    sourceTexture: layers[index].texture,
-                    sourceAlpha: layers[index].alpha,
-                    destinationTexture: destinationTexture,
+            } else if let texture = layers[index].texture {
+                MTLRenderer.shared.mergeTexture(
+                    texture: texture,
+                    alpha: layers[index].alpha,
+                    on: destinationTexture,
                     with: commandBuffer
                 )
             }
         }
 
-        MTLRenderer.mergeTextures(
-            sourceTexture: topTexture,
-            destinationTexture: destinationTexture,
+        MTLRenderer.shared.mergeTexture(
+            texture: topTexture,
+            on: destinationTexture,
             with: commandBuffer
         )
     }
