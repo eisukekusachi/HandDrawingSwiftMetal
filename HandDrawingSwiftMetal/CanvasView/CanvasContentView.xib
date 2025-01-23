@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22684"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -85,40 +85,40 @@
                     </constraints>
                 </slider>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qtN-lB-os6">
-                    <rect key="frame" x="75.666666666666686" y="783.66666666666663" width="242" height="34.333333333333371"/>
+                    <rect key="frame" x="76" y="784.33333333333337" width="241" height="33.666666666666629"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dMS-qm-Xjc">
-                            <rect key="frame" x="0.0" y="0.0" width="49.666666666666664" height="34.333333333333336"/>
+                            <rect key="frame" x="0.0" y="0.0" width="49.666666666666664" height="33.666666666666664"/>
                             <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="circle.fill" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="circle.fill" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zOD-md-2qy">
-                            <rect key="frame" x="49.666666666666657" y="0.0" width="49.666666666666657" height="34.333333333333336"/>
+                            <rect key="frame" x="49.666666666666671" y="0.0" width="49.666666666666671" height="33.666666666666664"/>
                             <color key="tintColor" systemColor="systemRedColor"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="circle.fill" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="circle.fill" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ydn-J6-zrX">
-                            <rect key="frame" x="99.333333333333329" y="0.0" width="44.666666666666671" height="34.333333333333336"/>
+                            <rect key="frame" x="99.333333333333343" y="0.0" width="43.666666666666657" height="33.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal">
                                 <imageReference key="image" image="eraser" catalog="system" symbolScale="default"/>
                             </state>
                             <buttonConfiguration key="configuration" style="plain">
-                                <imageReference key="image" image="eraser" catalog="system" symbolScale="default"/>
+                                <imageReference key="image" image="Eraser" symbolScale="default"/>
                             </buttonConfiguration>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
-                            <rect key="frame" x="144" y="0.0" width="49" height="34.333333333333336"/>
+                            <rect key="frame" x="143" y="0.0" width="49" height="33.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.backward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward.square" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UCl-eJ-tD6">
-                            <rect key="frame" x="193" y="0.0" width="49" height="34.333333333333336"/>
+                            <rect key="frame" x="192" y="0.0" width="49" height="33.666666666666664"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.forward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
@@ -181,6 +181,7 @@
         </view>
     </objects>
     <resources>
+        <image name="Eraser" width="19.845800399780273" height="19.648799896240234"/>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
         <image name="circle.fill" catalog="system" width="128" height="123"/>
@@ -188,13 +189,13 @@
         <image name="photo" catalog="system" width="128" height="93"/>
         <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
         <image name="square.2.layers.3d" catalog="system" width="128" height="117"/>
-        <image name="square.and.arrow.down" catalog="system" width="112" height="128"/>
-        <image name="square.and.arrow.up" catalog="system" width="108" height="128"/>
+        <image name="square.and.arrow.down" catalog="system" width="114" height="128"/>
+        <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
