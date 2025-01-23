@@ -53,7 +53,7 @@ extension CanvasEraserDrawingTexture {
             let targetTexture
         else { return }
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: isDrawing ? eraserTexture : selectedTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
@@ -72,7 +72,7 @@ extension CanvasEraserDrawingTexture {
             let destinationTexture
         else { return }
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: destinationTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
@@ -80,14 +80,14 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        MTLRenderer.makeEraseTexture(
-            sourceTexture: texture,
+        MTLRenderer.shared.mergeTextureWithEraseBlendMode(
+            texture: texture,
             buffers: flippedTextureBuffers,
-            into: eraserTexture,
+            on: eraserTexture,
             with: commandBuffer
         )
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: eraserTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
@@ -130,20 +130,20 @@ extension CanvasEraserDrawingTexture {
             let flippedTextureBuffers
         else { return }
 
-        MTLRenderer.drawCurve(
+        MTLRenderer.shared.drawGrayPointBuffersWithMaxBlendMode(
             buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
 
-        MTLRenderer.colorizeTexture(
+        MTLRenderer.shared.drawTexture(
             grayscaleTexture: grayscaleTexture,
             color: (0, 0, 0),
-            resultTexture: texture,
+            on: texture,
             with: commandBuffer
         )
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: srcTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
@@ -151,10 +151,10 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        MTLRenderer.makeEraseTexture(
-            sourceTexture: texture,
+        MTLRenderer.shared.mergeTextureWithEraseBlendMode(
+            texture: texture,
             buffers: flippedTextureBuffers,
-            into: eraserTexture!,
+            on: eraserTexture!,
             with: commandBuffer
         )
 
@@ -166,7 +166,7 @@ extension CanvasEraserDrawingTexture {
 extension CanvasEraserDrawingTexture {
 
     private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.clearTextures(
+        MTLRenderer.shared.clearTextures(
             textures: [
                 texture,
                 eraserTexture,

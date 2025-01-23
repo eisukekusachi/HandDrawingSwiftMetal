@@ -126,7 +126,7 @@ enum MTLTextureCreator {
             let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else { return nil }
 
-        MTLRenderer.clearTexture(
+        MTLRenderer.shared.clearTexture(
             texture: texture,
             with: commandBuffer
         )
@@ -167,7 +167,7 @@ enum MTLTextureCreator {
             )
         else { return nil }
 
-        MTLRenderer.drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: texture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,

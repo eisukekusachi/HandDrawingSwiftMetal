@@ -80,7 +80,7 @@
 		D469A8712C56340B00D10575 /* CanvasFingerDrawingCurvePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8702C56340B00D10575 /* CanvasFingerDrawingCurvePoints.swift */; };
 		D469A8732C56342700D10575 /* CanvasDrawingCurvePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8722C56342700D10575 /* CanvasDrawingCurvePoints.swift */; };
 		D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8802C563FA100D10575 /* MTLBuffers.swift */; };
-		D469A8832C56422D00D10575 /* MTLPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8822C56422D00D10575 /* MTLPipelineManager.swift */; };
+		D469A8832C56422D00D10575 /* MTLPipelines.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8822C56422D00D10575 /* MTLPipelines.swift */; };
 		D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */; };
 		D469A8872C56430D00D10575 /* MTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8862C56430D00D10575 /* MTLRenderer.swift */; };
 		D46A30412BF841270057DB69 /* TextureLayerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */; };
@@ -215,7 +215,7 @@
 		D469A8702C56340B00D10575 /* CanvasFingerDrawingCurvePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasFingerDrawingCurvePoints.swift; sourceTree = "<group>"; };
 		D469A8722C56342700D10575 /* CanvasDrawingCurvePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingCurvePoints.swift; sourceTree = "<group>"; };
 		D469A8802C563FA100D10575 /* MTLBuffers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLBuffers.swift; sourceTree = "<group>"; };
-		D469A8822C56422D00D10575 /* MTLPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLPipelineManager.swift; sourceTree = "<group>"; };
+		D469A8822C56422D00D10575 /* MTLPipelines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLPipelines.swift; sourceTree = "<group>"; };
 		D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandBufferManager.swift; sourceTree = "<group>"; };
 		D469A8862C56430D00D10575 /* MTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLRenderer.swift; sourceTree = "<group>"; };
 		D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerProtocol.swift; sourceTree = "<group>"; };
@@ -381,7 +381,7 @@
 				D469A8802C563FA100D10575 /* MTLBuffers.swift */,
 				D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */,
 				D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */,
-				D469A8822C56422D00D10575 /* MTLPipelineManager.swift */,
+				D469A8822C56422D00D10575 /* MTLPipelines.swift */,
 				D469A8862C56430D00D10575 /* MTLRenderer.swift */,
 				D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */,
 				D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */,
@@ -868,7 +868,7 @@
 			files = (
 				D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */,
 				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
-				D469A8832C56422D00D10575 /* MTLPipelineManager.swift in Sources */,
+				D469A8832C56422D00D10575 /* MTLPipelines.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
 				D46A30412BF841270057DB69 /* TextureLayerProtocol.swift in Sources */,
