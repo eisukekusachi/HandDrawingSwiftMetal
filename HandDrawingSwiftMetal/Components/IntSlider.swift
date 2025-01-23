@@ -144,7 +144,7 @@ extension IntSlider {
 
 #Preview {
 
-    var alpha: Int = 125
+    let alpha: Int = 125
     return IntSlider(value: alpha, in: 0 ... 255)
 
 }

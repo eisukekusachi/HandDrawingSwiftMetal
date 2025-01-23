@@ -58,7 +58,7 @@ extension CanvasViewController {
         // when `func viewDidAppear` is called.
         /*
         canvasViewModel.initCanvas(
-            textureSize: .init(width: 768, height: 1024)
+            size: .init(width: 768, height: 1024)
         )
         */
     }

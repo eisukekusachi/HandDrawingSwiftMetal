@@ -15,18 +15,18 @@ import UIKit
 final class CanvasPencilDrawingArrays {
 
     /// An array that holds elements combining actualTouches, where the force values are accurate, and estimatedTouchPointArray.
-    private (set) var actualTouchPointArray: [CanvasTouchPoint] = []
+    private(set) var actualTouchPointArray: [CanvasTouchPoint] = []
 
     /// An array that holds estimated values where the TouchPhase values are accurate.
-    private (set) var estimatedTouchPointArray: [CanvasTouchPoint] = []
+    private(set) var estimatedTouchPointArray: [CanvasTouchPoint] = []
 
     /// An index of the processed elements in `estimatedTouchPointArray`
-    private (set) var latestEstimatedTouchArrayIndex = 0
+    private(set) var latestEstimatedTouchArrayIndex = 0
 
     /// An element processed in `actualTouchPointArray`
-    private (set) var latestActualTouchPoint: CanvasTouchPoint? = nil
+    private(set) var latestActualTouchPoint: CanvasTouchPoint? = nil
 
-    private (set) var lastEstimationUpdateIndex: NSNumber? = nil
+    private(set) var lastEstimationUpdateIndex: NSNumber? = nil
 
     /// A variable used to get elements from the array starting from the next element after this point
     var latestCanvasTouchPoint: CanvasTouchPoint?

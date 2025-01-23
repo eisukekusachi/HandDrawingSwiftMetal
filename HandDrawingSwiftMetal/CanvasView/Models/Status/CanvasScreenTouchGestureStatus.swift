@@ -11,7 +11,7 @@ final class CanvasScreenTouchGestureStatus {
 
     typealias T = CanvasScreenTouchGestureType
 
-    private (set) var status: T = .undetermined
+    private(set) var status: T = .undetermined
 
     /// Update the status if the status is not yet determined.
     func update(_ newStatus: T) -> T {

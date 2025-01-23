@@ -16,7 +16,7 @@ final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
 
     var currentTouchPhase: UITouch.Phase = .began
 
-    private (set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
+    private(set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
     private var isFirstCurveHasBeenCreated: Bool = false
 }

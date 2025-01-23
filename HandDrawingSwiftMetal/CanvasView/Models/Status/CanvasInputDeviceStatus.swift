@@ -11,7 +11,7 @@ final class CanvasInputDeviceStatus {
 
     typealias T = CanvasInputDeviceType
 
-    private (set) var status: T = .undetermined
+    private(set) var status: T = .undetermined
 
     /// Update the status if it is not .pencil
     @discardableResult

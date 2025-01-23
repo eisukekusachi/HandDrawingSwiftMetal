@@ -20,8 +20,8 @@ class CanvasBrushDrawingTool: CanvasDrawingTool {
         BlurredDotSize(diameter: Float(diameter), blurSize: blurSize)
     }
 
-    private (set) var rgb: (Int, Int, Int) = (0, 0, 0)
-    private (set) var alpha: Int = 255
+    private(set) var rgb: (Int, Int, Int) = (0, 0, 0)
+    private(set) var alpha: Int = 255
 
     private var blurSize: Float = BlurredDotSize.initBlurSize
 
