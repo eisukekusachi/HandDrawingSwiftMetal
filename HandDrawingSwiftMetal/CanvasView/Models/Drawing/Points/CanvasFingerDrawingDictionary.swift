@@ -9,13 +9,13 @@ import UIKit
 
 final class CanvasFingerDrawingDictionary {
 
-    private (set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
+    private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently used in the Dictionary
     var dictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    private (set) var latestTouchPoint: CanvasTouchPoint?
+    private(set) var latestTouchPoint: CanvasTouchPoint?
 
     convenience init(touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
         self.init()

@@ -89,7 +89,7 @@ struct TwoRowsSliderView: View {
 
 #Preview {
 
-    var alpha: Int = 125
+    let alpha: Int = 125
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
 

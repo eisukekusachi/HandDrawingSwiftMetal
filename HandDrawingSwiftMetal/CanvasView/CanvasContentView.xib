@@ -108,7 +108,7 @@
                                 <imageReference key="image" image="eraser" catalog="system" symbolScale="default"/>
                             </state>
                             <buttonConfiguration key="configuration" style="plain">
-                                <imageReference key="image" image="Eraser" symbolScale="default"/>
+                                <imageReference key="image" image="DrawingEraser" symbolScale="default"/>
                             </buttonConfiguration>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
@@ -181,7 +181,7 @@
         </view>
     </objects>
     <resources>
-        <image name="Eraser" width="19.845800399780273" height="19.648799896240234"/>
+        <image name="DrawingEraser" width="19.845800399780273" height="19.648799896240234"/>
         <image name="Layer" width="20.322299957275391" height="20.830099105834961"/>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>

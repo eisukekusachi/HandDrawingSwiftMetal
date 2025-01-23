@@ -505,14 +505,6 @@ extension CanvasViewModel {
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
 
-        // Since the display visibility can be changed without selecting a layer, `textureLayers.index` is used here
-        let selectedIndex = textureLayers.index
-        let undoObject: TextureLayerUndoObject = .init(
-            editIndex: index,
-            textureLayer: layer,
-            selectedIndex: selectedIndex
-        )
-
         textureLayers.updateLayer(
             index: index,
             isVisible: isVisible
@@ -552,10 +544,6 @@ extension CanvasViewModel {
         title: String
     ) {
         guard let index = textureLayers.getIndex(layer: layer) else { return }
-        let undoObject: TextureLayerUndoObject = .init(
-            editIndex: index,
-            textureLayer: layer
-        )
 
         textureLayers.updateLayer(
             index: index,
@@ -582,7 +570,6 @@ extension CanvasViewModel {
             index: listDestination,
             layerCount: textureLayers.count
         )
-        let textureLayer = textureLayers.layers[textureLayerSource]
 
         let textureLayerSelectedIndex = textureLayers.index
         let textureLayerSelectedIndexAfterMove = UndoMoveData.makeSelectedIndexAfterMove(

@@ -34,10 +34,10 @@ final class CanvasDrawingToolStatus {
 
     private let backgroundColorSubject = CurrentValueSubject<UIColor, Never>(.white)
 
-    private (set) var brushColor: UIColor
-    private (set) var eraserAlpha: Int
-    private (set) var brushDiameter: Int
-    private (set) var eraserDiameter: Int
+    private(set) var brushColor: UIColor
+    private(set) var eraserAlpha: Int
+    private(set) var brushDiameter: Int
+    private(set) var eraserDiameter: Int
 
     private var cancellables = Set<AnyCancellable>()
 

@@ -10,7 +10,7 @@ import Foundation
 class CanvasEraserDrawingTool: CanvasDrawingTool {
     var diameter: Int = initEraserSize
 
-    private (set) var alpha: Int = 255
+    private(set) var alpha: Int = 255
 
     private var blurSize: Float = BlurredDotSize.initBlurSize
 
