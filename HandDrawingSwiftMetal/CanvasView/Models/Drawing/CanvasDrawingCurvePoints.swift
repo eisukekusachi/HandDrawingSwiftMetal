@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// Manages real-time curve drawing using an iterator and touch phases
+/// A protocol used for real-time drawing using an iterator and a touchPhase
 protocol CanvasDrawingCurvePoints {
 
     typealias T = CanvasGrayscaleDotPoint
