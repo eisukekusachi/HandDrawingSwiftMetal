@@ -76,8 +76,8 @@ final class CanvasViewModel {
     /// A texture that combines the texture of the currently selected `TextureLayer` and `drawingTexture`
     private var currentTexture: MTLTexture?
 
-    /// A protocol for managing current drawing texture
-    private var currentDrawingTexture: CanvasDrawingTexture?
+    /// A protocol for real-time drawing on a texture
+    private var drawingTexture: CanvasDrawingTexture?
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture(renderer: MTLRenderer.shared)
     /// A drawing texture with an eraser
@@ -115,9 +115,9 @@ final class CanvasViewModel {
                 guard let `self` else { return }
                 switch tool {
                 case .brush:
-                    self.currentDrawingTexture = self.brushDrawingTexture
+                    self.drawingTexture = self.brushDrawingTexture
                 case .eraser:
-                    self.currentDrawingTexture = self.eraserDrawingTexture
+                    self.drawingTexture = self.eraserDrawingTexture
                 }
             }
             .store(in: &cancellables)
@@ -134,7 +134,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        currentDrawingTexture?.drawingFinishedPublisher
+        drawingTexture?.drawingFinishedPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
                 self.resetAllInputParameters()
@@ -635,7 +635,7 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        currentDrawingTexture?.drawCurveUsingSelectedTexture(
+        drawingTexture?.drawCurveUsingSelectedTexture(
             drawingCurvePoints: drawingCurvePoints,
             selectedTexture: selectedTexture,
             on: currentTexture,
@@ -765,7 +765,7 @@ extension CanvasViewModel {
         fingerDrawingDictionary.reset()
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        currentDrawingTexture?.clearDrawingTextures(with: commandBuffer)
+        drawingTexture?.clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
 
         drawingCurvePoints = nil
