@@ -42,11 +42,8 @@ final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     func initTextures(_ textureSize: CGSize) {
-        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-
-        drawingTexture.label = "drawingTexture"
-        grayscaleTexture.label = "grayscaleTexture"
+        self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
+        self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)

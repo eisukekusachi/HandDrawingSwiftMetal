@@ -43,13 +43,9 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 extension CanvasEraserDrawingTexture {
 
     func initTextures(_ textureSize: CGSize) {
-        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-        self.lineDrawnTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-
-        drawingTexture.label = "drawingTexture"
-        grayscaleTexture.label = "grayscaleTexture"
-        lineDrawnTexture.label = "lineDrawnTexture"
+        self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
+        self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
+        self.lineDrawnTexture = MTLTextureCreator.makeTexture(label: "lineDrawnTexture", size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)
