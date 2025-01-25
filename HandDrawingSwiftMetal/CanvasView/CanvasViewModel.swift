@@ -46,6 +46,10 @@ final class CanvasViewModel {
         updateRedoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
 
+    var isLayerViewVisible: Bool {
+        requestShowingLayerViewSubject.value
+    }
+
     private var drawingCurvePoints: CanvasDrawingCurvePoints?
 
     private let transformer = CanvasTransformer()
@@ -75,9 +79,9 @@ final class CanvasViewModel {
     /// A protocol for managing current drawing texture
     private var currentDrawingTexture: CanvasDrawingTexture?
     /// A drawing texture with a brush
-    private let brushDrawingTexture = CanvasBrushDrawingTexture()
+    private let brushDrawingTexture = CanvasBrushDrawingTexture(renderer: MTLRenderer.shared)
     /// A drawing texture with an eraser
-    private let eraserDrawingTexture = CanvasEraserDrawingTexture()
+    private let eraserDrawingTexture = CanvasEraserDrawingTexture(renderer: MTLRenderer.shared)
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -118,6 +122,32 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        drawingTool.brushColorPublisher
+            .sink { [weak self] color in
+                self?.brushDrawingTexture.setBlushColor(color)
+            }
+            .store(in: &cancellables)
+
+        drawingTool.eraserAlphaPublisher
+            .sink { [weak self] alpha in
+                self?.eraserDrawingTexture.setEraserAlpha(alpha)
+            }
+            .store(in: &cancellables)
+
+        currentDrawingTexture?.drawingFinishedPublisher
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.resetAllInputParameters()
+
+                // Update the thumbnail when the layerView is visible
+                if self.isLayerViewVisible {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         runDisplayLinkSubject
             .map { !$0 }
             .sink { [weak self] isPause in
@@ -140,8 +170,8 @@ final class CanvasViewModel {
     }
 
     func initCanvas(size: CGSize) {
-        brushDrawingTexture.initTexture(size)
-        eraserDrawingTexture.initTexture(size)
+        brushDrawingTexture.initTextures(size)
+        eraserDrawingTexture.initTextures(size)
 
         textureLayers.initLayers(size: size)
 
@@ -155,8 +185,8 @@ final class CanvasViewModel {
 
         projectName = model.projectName
 
-        brushDrawingTexture.initTexture(model.textureSize)
-        eraserDrawingTexture.initTexture(model.textureSize)
+        brushDrawingTexture.initTextures(model.textureSize)
+        eraserDrawingTexture.initTextures(model.textureSize)
 
         textureLayers.initLayers(
             size: model.textureSize,
@@ -600,52 +630,17 @@ extension CanvasViewModel {
     @objc private func updateCanvasViewWhileDrawing() {
         guard
             let drawingCurvePoints,
+            let currentTexture,
+            let selectedTexture = textureLayers.selectedLayer?.texture,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        let textureCurvePoints = drawingCurvePoints.makeCurvePointsFromIterator()
-        if !textureCurvePoints.isEmpty {
-            // Draw curve points on `drawingTexture`
-            if let currentDrawingTexture = currentDrawingTexture as? CanvasEraserDrawingTexture,
-               let selectedLayerTexture = textureLayers.selectedLayer?.texture {
-                currentDrawingTexture.drawPointsOnEraserDrawingTexture(
-                    points: textureCurvePoints,
-                    alpha: drawingTool.eraserAlpha,
-                    srcTexture: selectedLayerTexture,
-                    with: commandBuffer
-                )
-            } else if let currentDrawingTexture = currentDrawingTexture as? CanvasBrushDrawingTexture {
-                currentDrawingTexture.drawPointsOnBrushDrawingTexture(
-                    points: textureCurvePoints,
-                    color: drawingTool.brushColor,
-                    with: commandBuffer
-                )
-            }
-        }
-
-        // Draw `selectedLayer.texture` and `drawingTexture` onto currentTexture
-        currentDrawingTexture?.renderDrawingTexture(
-            withSelectedTexture: textureLayers.selectedLayer?.texture,
-            onto: currentTexture,
+        currentDrawingTexture?.drawCurveUsingSelectedTexture(
+            drawingCurvePoints: drawingCurvePoints,
+            selectedTexture: selectedTexture,
+            on: currentTexture,
             with: commandBuffer
         )
-
-        if drawingCurvePoints.isDrawingFinished {
-            // Draw `drawingTexture` onto `selectedLayer.texture`
-            currentDrawingTexture?.mergeDrawingTexture(
-                into: textureLayers.selectedLayer?.texture,
-                with: commandBuffer
-            )
-
-            resetAllInputParameters()
-
-            // Update the thumbnail when the layerView is visible
-            if requestShowingLayerViewSubject.value {
-                DispatchQueue.main.async { [weak self] in
-                    self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-                }
-            }
-        }
 
         // Update `canvasView` with `canvasTexture`
         updateCanvasViewWithTextureLayers(
@@ -769,7 +764,9 @@ extension CanvasViewModel {
     private func cancelFingerInput() {
         fingerDrawingDictionary.reset()
 
-        currentDrawingTexture?.clearAllTextures()
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        currentDrawingTexture?.clearDrawingTextures(with: commandBuffer)
+        commandBuffer.commit()
 
         drawingCurvePoints = nil
         transformer.reset()

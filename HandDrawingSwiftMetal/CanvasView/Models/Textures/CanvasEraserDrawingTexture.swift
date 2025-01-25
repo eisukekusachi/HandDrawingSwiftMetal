@@ -6,21 +6,32 @@
 //
 
 import MetalKit
-/// This class encapsulates a series of actions for drawing a single line on a texture using an eraser.
-class CanvasEraserDrawingTexture: CanvasDrawingTexture {
+import Combine
 
-    var texture: MTLTexture?
+/// A class used for real-time drawing on a texture using an eraser
+final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
+    var drawingFinishedPublisher: AnyPublisher<Void, Never> {
+        drawingFinishedSubject.eraseToAnyPublisher()
+    }
+
+    private let drawingFinishedSubject = PassthroughSubject<Void, Never>()
+
+    private var eraserAlpha: Int = 255
+
+    private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
-    private var eraserTexture: MTLTexture!
+    private var lineDrawnTexture: MTLTexture!
 
-    private var flippedTextureBuffers: MTLTextureBuffers?
+    private var flippedTextureBuffers: MTLTextureBuffers!
 
-    private var isDrawing: Bool = false
+    private let renderer: MTLRendering!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init() {
+    required init(renderer: MTLRendering) {
+        self.renderer = renderer
+
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -31,149 +42,140 @@ class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
 extension CanvasEraserDrawingTexture {
 
-    func initTexture(_ textureSize: CGSize) {
-
-        self.texture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+    func initTextures(_ textureSize: CGSize) {
+        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
-        self.eraserTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        self.lineDrawnTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        clearAllTextures()
+        drawingTexture.label = "drawingTexture"
+        grayscaleTexture.label = "grayscaleTexture"
+        lineDrawnTexture.label = "lineDrawnTexture"
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTextures(with: commandBuffer)
+        commandBuffer.commit()
     }
 
-    /// Renders `selectedTexture` onto `targetTexture`
-    /// If drawing is in progress, renders `eraserTexture` onto `targetTexture`
-    func renderDrawingTexture(
-        withSelectedTexture selectedTexture: MTLTexture?,
-        onto targetTexture: MTLTexture?,
+    func setEraserAlpha(_ alpha: Int) {
+        eraserAlpha = alpha
+    }
+
+    func drawCurveUsingSelectedTexture(
+        drawingCurvePoints: CanvasDrawingCurvePoints,
+        selectedTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let selectedTexture,
-            let flippedTextureBuffers,
-            let targetTexture
-        else { return }
+        drawCurvePointsOnDrawingTexture(
+            points: drawingCurvePoints.makeCurvePointsFromIterator(),
+            sourceTexture: selectedTexture,
+            with: commandBuffer
+        )
 
-        MTLRenderer.shared.drawTexture(
-            texture: isDrawing ? eraserTexture : selectedTexture,
+        drawDrawingTextureWithSelectedTexture(
+            selectedTexture: selectedTexture,
+            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
+    func clearDrawingTextures(with commandBuffer: MTLCommandBuffer) {
+        renderer.clearTextures(
+            textures: [
+                drawingTexture,
+                grayscaleTexture,
+                lineDrawnTexture
+            ],
+            with: commandBuffer
+        )
+    }
+
+}
+
+extension CanvasEraserDrawingTexture {
+
+    private func drawCurvePointsOnDrawingTexture(
+        points: [CanvasGrayscaleDotPoint],
+        sourceTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.drawTexture(
+            texture: sourceTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: drawingTexture,
+            with: commandBuffer
+        )
+
+        renderer.drawGrayPointBuffersWithMaxBlendMode(
+            buffers: MTLBuffers.makeGrayscalePointBuffers(
+                points: points,
+                alpha: eraserAlpha,
+                textureSize: lineDrawnTexture.size,
+                with: device
+            ),
+            onGrayscaleTexture: grayscaleTexture,
+            with: commandBuffer
+        )
+
+        renderer.drawTexture(
+            grayscaleTexture: grayscaleTexture,
+            color: (0, 0, 0),
+            on: lineDrawnTexture,
+            with: commandBuffer
+        )
+
+        renderer.mergeTextureWithEraseBlendMode(
+            texture: lineDrawnTexture,
+            buffers: flippedTextureBuffers,
+            on: drawingTexture,
+            with: commandBuffer
+        )
+    }
+
+    private func drawDrawingTextureWithSelectedTexture(
+        selectedTexture: MTLTexture,
+        shouldUpdateSelectedTexture: Bool,
+        on targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.drawTexture(
+            texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: targetTexture,
             with: commandBuffer
         )
-    }
 
-    func mergeDrawingTexture(
-        into destinationTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let flippedTextureBuffers,
-            let destinationTexture
-        else { return }
+        if shouldUpdateSelectedTexture {
+            renderer.drawTexture(
+                texture: selectedTexture,
+                buffers: flippedTextureBuffers,
+                withBackgroundColor: .clear,
+                on: drawingTexture,
+                with: commandBuffer
+            )
 
-        MTLRenderer.shared.drawTexture(
-            texture: destinationTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: eraserTexture,
-            with: commandBuffer
-        )
+            renderer.mergeTextureWithEraseBlendMode(
+                texture: lineDrawnTexture,
+                buffers: flippedTextureBuffers,
+                on: drawingTexture,
+                with: commandBuffer
+            )
 
-        MTLRenderer.shared.mergeTextureWithEraseBlendMode(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            on: eraserTexture,
-            with: commandBuffer
-        )
+            renderer.drawTexture(
+                texture: drawingTexture,
+                buffers: flippedTextureBuffers,
+                withBackgroundColor: .clear,
+                on: selectedTexture,
+                with: commandBuffer
+            )
 
-        MTLRenderer.shared.drawTexture(
-            texture: eraserTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: destinationTexture,
-            with: commandBuffer
-        )
+            clearDrawingTextures(with: commandBuffer)
 
-        clearAllTextures(with: commandBuffer)
-
-        isDrawing = false
-    }
-
-    func clearAllTextures() {
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearAllTextures(with: commandBuffer)
-        commandBuffer.commit()
-    }
-
-}
-
-extension CanvasEraserDrawingTexture {
-    /// First, draw lines in grayscale on a grayscale texture,
-    /// then apply the intensity as transparency to add black color to the grayscale texture,
-    /// and render the grayscale texture onto the drawing texture.
-    /// After that, blend the drawing texture and the source texture using a blend factor for the eraser to create the eraser texture.
-    func drawPointsOnEraserDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
-        alpha: Int,
-        srcTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: points,
-                alpha: alpha,
-                textureSize: texture.size,
-                with: device
-            ),
-            let flippedTextureBuffers
-        else { return }
-
-        MTLRenderer.shared.drawGrayPointBuffersWithMaxBlendMode(
-            buffers: buffers,
-            onGrayscaleTexture: grayscaleTexture,
-            with: commandBuffer
-        )
-
-        MTLRenderer.shared.drawTexture(
-            grayscaleTexture: grayscaleTexture,
-            color: (0, 0, 0),
-            on: texture,
-            with: commandBuffer
-        )
-
-        MTLRenderer.shared.drawTexture(
-            texture: srcTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: eraserTexture,
-            with: commandBuffer
-        )
-
-        MTLRenderer.shared.mergeTextureWithEraseBlendMode(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            on: eraserTexture!,
-            with: commandBuffer
-        )
-
-        isDrawing = true
-    }
-
-}
-
-extension CanvasEraserDrawingTexture {
-
-    private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.shared.clearTextures(
-            textures: [
-                texture,
-                eraserTexture,
-                grayscaleTexture
-            ],
-            with: commandBuffer
-        )
+            drawingFinishedSubject.send(())
+        }
     }
 
 }

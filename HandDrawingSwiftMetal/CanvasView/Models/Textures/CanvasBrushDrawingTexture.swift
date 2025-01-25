@@ -6,18 +6,31 @@
 //
 
 import MetalKit
-/// This class encapsulates a series of actions for drawing a single line on a texture using a brush.
-class CanvasBrushDrawingTexture: CanvasDrawingTexture {
+import Combine
 
-    var texture: MTLTexture?
+/// A class used for real-time drawing on a texture using a brush
+final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
+    var drawingFinishedPublisher: AnyPublisher<Void, Never> {
+        drawingFinishedSubject.eraseToAnyPublisher()
+    }
+
+    private let drawingFinishedSubject = PassthroughSubject<Void, Never>()
+
+    private var blushColor: UIColor = .black
+
+    private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
 
-    private var flippedTextureBuffers: MTLTextureBuffers?
+    private var flippedTextureBuffers: MTLTextureBuffers!
+
+    private let renderer: MTLRendering!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init() {
+    required init(renderer: MTLRendering) {
+        self.renderer = renderer
+
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -28,112 +41,109 @@ class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
 extension CanvasBrushDrawingTexture {
 
-    func initTexture(_ textureSize: CGSize) {
-        self.texture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+    func initTextures(_ textureSize: CGSize) {
+        self.drawingTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
-        clearAllTextures()
-    }
+        drawingTexture.label = "drawingTexture"
+        grayscaleTexture.label = "grayscaleTexture"
 
-    /// Renders `drawingTexture` and `selectedTexture` onto `targetTexture`
-    func renderDrawingTexture(
-        withSelectedTexture selectedTexture: MTLTexture?,
-        onto targetTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let selectedTexture,
-            let flippedTextureBuffers,
-            let targetTexture
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: selectedTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: targetTexture,
-            with: commandBuffer
-        )
-
-        MTLRenderer.shared.mergeTexture(
-            texture: texture,
-            on: targetTexture,
-            with: commandBuffer
-        )
-    }
-
-    func mergeDrawingTexture(
-        into destinationTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let destinationTexture
-        else { return }
-
-        MTLRenderer.shared.mergeTexture(
-            texture: texture,
-            on: destinationTexture,
-            with: commandBuffer
-        )
-
-        clearAllTextures(with: commandBuffer)
-    }
-
-    func clearAllTextures() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearAllTextures(with: commandBuffer)
+        clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
     }
 
-}
+    func setBlushColor(_ color: UIColor) {
+        blushColor = color
+    }
 
-extension CanvasBrushDrawingTexture {
-    /// First, draw lines in grayscale on the grayscale texture,
-    /// then apply the intensity as transparency to colorize the grayscale texture,
-    /// and render the colored grayscale texture onto the drawing texture.
-    func drawPointsOnBrushDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
-        color: UIColor,
+    func drawCurveUsingSelectedTexture(
+        drawingCurvePoints: CanvasDrawingCurvePoints,
+        selectedTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let texture,
-            let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: points,
-                alpha: color.alpha,
-                textureSize: texture.size,
-                with: device
-            )
-        else { return }
-
-        MTLRenderer.shared.drawGrayPointBuffersWithMaxBlendMode(
-            buffers: buffers,
-            onGrayscaleTexture: grayscaleTexture,
+        drawCurvePointsOnDrawingTexture(
+            points: drawingCurvePoints.makeCurvePointsFromIterator(),
             with: commandBuffer
         )
 
-        MTLRenderer.shared.drawTexture(
-            grayscaleTexture: grayscaleTexture,
-            color: color.rgb,
-            on: texture,
+        drawDrawingTextureWithSelectedTexture(
+            selectedTexture: selectedTexture,
+            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+            on: destinationTexture,
             with: commandBuffer
         )
     }
 
-}
-
-extension CanvasBrushDrawingTexture {
-
-    private func clearAllTextures(with commandBuffer: MTLCommandBuffer) {
-        MTLRenderer.shared.clearTextures(
+    func clearDrawingTextures(with commandBuffer: MTLCommandBuffer) {
+        renderer.clearTextures(
             textures: [
-                texture,
+                drawingTexture,
                 grayscaleTexture
             ],
             with: commandBuffer
         )
+    }
+
+}
+
+extension CanvasBrushDrawingTexture {
+
+    private func drawCurvePointsOnDrawingTexture(
+        points: [CanvasGrayscaleDotPoint],
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.drawGrayPointBuffersWithMaxBlendMode(
+            buffers: MTLBuffers.makeGrayscalePointBuffers(
+                points: points,
+                alpha: blushColor.alpha,
+                textureSize: drawingTexture.size,
+                with: device
+            ),
+            onGrayscaleTexture: grayscaleTexture,
+            with: commandBuffer
+        )
+
+        renderer.drawTexture(
+            grayscaleTexture: grayscaleTexture,
+            color: blushColor.rgb,
+            on: drawingTexture,
+            with: commandBuffer
+        )
+    }
+
+    private func drawDrawingTextureWithSelectedTexture(
+        selectedTexture: MTLTexture,
+        shouldUpdateSelectedTexture: Bool,
+        on destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.drawTexture(
+            texture: selectedTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+
+        renderer.mergeTexture(
+            texture: drawingTexture,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+
+        if shouldUpdateSelectedTexture {
+            renderer.mergeTexture(
+                texture: drawingTexture,
+                on: selectedTexture,
+                with: commandBuffer
+            )
+
+            clearDrawingTextures(with: commandBuffer)
+
+            drawingFinishedSubject.send(())
+        }
     }
 
 }
