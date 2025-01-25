@@ -603,8 +603,9 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        // Draw curve points on `drawingTexture`
-        if let textureCurvePoints = drawingCurvePoints.makeCurvePointsFromIterator() {
+        let textureCurvePoints = drawingCurvePoints.makeCurvePointsFromIterator()
+        if !textureCurvePoints.isEmpty {
+            // Draw curve points on `drawingTexture`
             if let currentDrawingTexture = currentDrawingTexture as? CanvasEraserDrawingTexture,
                let selectedLayerTexture = textureLayers.selectedLayer?.texture {
                 currentDrawingTexture.drawPointsOnEraserDrawingTexture(

@@ -37,7 +37,7 @@ extension CanvasDrawingCurvePoints {
         iterator.array.count != 0
     }
 
-    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint]? {
+    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint] {
         var array: [CanvasGrayscaleDotPoint] = []
 
         if hasArrayThreeElementsButNoFirstCurveCreated {
@@ -50,7 +50,7 @@ extension CanvasDrawingCurvePoints {
             array.append(contentsOf: makeLastCurvePoints())
         }
 
-        return array.count != 0 ? array : nil
+        return array
     }
 
     /// Makes an array of first curve points from an iterator
