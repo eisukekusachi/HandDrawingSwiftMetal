@@ -96,14 +96,6 @@ extension CanvasEraserDrawingTexture {
         sourceTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        renderer.drawTexture(
-            texture: sourceTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: drawingTexture,
-            with: commandBuffer
-        )
-
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
@@ -119,6 +111,14 @@ extension CanvasEraserDrawingTexture {
             grayscaleTexture: grayscaleTexture,
             color: (0, 0, 0),
             on: lineDrawnTexture,
+            with: commandBuffer
+        )
+
+        renderer.drawTexture(
+            texture: sourceTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: drawingTexture,
             with: commandBuffer
         )
 
