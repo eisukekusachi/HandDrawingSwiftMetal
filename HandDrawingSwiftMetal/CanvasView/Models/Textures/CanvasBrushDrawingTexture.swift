@@ -54,7 +54,7 @@ extension CanvasBrushDrawingTexture {
         blushColor = color
     }
 
-    func drawCurveUsingSelectedTexture(
+    func drawCurvePointsUsingSelectedTexture(
         drawingCurvePoints: CanvasDrawingCurvePoints,
         selectedTexture: MTLTexture,
         on destinationTexture: MTLTexture,

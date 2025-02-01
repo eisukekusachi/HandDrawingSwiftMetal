@@ -56,7 +56,7 @@ extension CanvasEraserDrawingTexture {
         eraserAlpha = alpha
     }
 
-    func drawCurveUsingSelectedTexture(
+    func drawCurvePointsUsingSelectedTexture(
         drawingCurvePoints: CanvasDrawingCurvePoints,
         selectedTexture: MTLTexture,
         on destinationTexture: MTLTexture,

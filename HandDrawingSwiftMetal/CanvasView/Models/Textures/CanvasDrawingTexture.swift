@@ -17,8 +17,8 @@ protocol CanvasDrawingTexture {
     /// Initializes the textures for drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)
 
-    /// Draws a curve on `destinationTexture` using the selected texture
-    func drawCurveUsingSelectedTexture(
+    /// Draws a curve points on `destinationTexture` using the selected texture
+    func drawCurvePointsUsingSelectedTexture(
         drawingCurvePoints: CanvasDrawingCurvePoints,
         selectedTexture: MTLTexture,
         on destinationTexture: MTLTexture,

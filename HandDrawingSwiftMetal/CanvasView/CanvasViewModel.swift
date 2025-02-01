@@ -635,7 +635,7 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawingTexture?.drawCurveUsingSelectedTexture(
+        drawingTexture?.drawCurvePointsUsingSelectedTexture(
             drawingCurvePoints: drawingCurvePoints,
             selectedTexture: selectedTexture,
             on: currentTexture,
