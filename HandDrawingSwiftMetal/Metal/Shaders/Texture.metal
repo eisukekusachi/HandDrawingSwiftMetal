@@ -38,6 +38,7 @@ kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
                                        ) {
     float4 src = srcTexture.read(gid);
 
+    // The grayscale value is used as the alpha value. The array index can be any of 0 to 2.
     float a = src[0];
     float r = rgba[0] * a;
     float g = rgba[1] * a;

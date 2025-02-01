@@ -15,16 +15,20 @@ enum MTLTextureCreator {
     static let bitsPerComponent = 8
 
     static func makeTexture(
+        label: String? = nil,
         size: CGSize,
         pixelFormat: MTLPixelFormat = pixelFormat,
         with device: MTLDevice
     ) -> MTLTexture? {
-        device.makeTexture(
+        let texture = device.makeTexture(
             descriptor: getTextureDescriptor(size: size)
         )
+        texture?.label = label
+        return texture
     }
 
     static func makeTexture(
+        label: String? = nil,
         image: UIImage?,
         with device: MTLDevice
     ) -> MTLTexture? {
@@ -79,8 +83,7 @@ enum MTLTextureCreator {
 
         vImagePermuteChannels_ARGB8888(&rgbaBuffer, &bgraBuffer, map, 0)
 
-        let texture = makeTexture(size: image.size, with: device)
-
+        let texture = makeTexture(label: label, size: image.size, with: device)
         texture?.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
@@ -93,6 +96,7 @@ enum MTLTextureCreator {
     }
 
     static func makeTexture(
+        label: String? = nil,
         size: CGSize,
         colorArray: [UInt8],
         with device: MTLDevice
@@ -104,8 +108,7 @@ enum MTLTextureCreator {
 
         let bytesPerRow = bytesPerPixel * width
 
-        let texture = makeTexture(size: .init(width: width, height: height), with: device)
-
+        let texture = makeTexture(label: label, size: .init(width: width, height: height), with: device)
         texture?.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
@@ -118,11 +121,12 @@ enum MTLTextureCreator {
     }
 
     static func makeBlankTexture(
+        label: String? = nil,
         size: CGSize,
         with device: MTLDevice
     ) -> MTLTexture? {
         guard
-            let texture = makeTexture(size: size, with: device),
+            let texture = makeTexture(label: label, size: size, with: device),
             let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else { return nil }
 
@@ -160,7 +164,7 @@ enum MTLTextureCreator {
         guard
             let device,
             let texture,
-            let newTexture = makeTexture(size: texture.size, with: device),
+            let newTexture = makeTexture(label: texture.label, size: texture.size, with: device),
             let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
                 nodes: .flippedTextureNodes,
                 with: device

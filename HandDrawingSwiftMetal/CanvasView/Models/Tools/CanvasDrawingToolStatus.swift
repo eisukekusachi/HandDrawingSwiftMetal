@@ -18,6 +18,13 @@ final class CanvasDrawingToolStatus {
         backgroundColorSubject.value
     }
 
+    var brushColorPublisher: AnyPublisher<UIColor, Never> {
+        brushColorSubject.eraseToAnyPublisher()
+    }
+    var eraserAlphaPublisher: AnyPublisher<Int, Never> {
+        eraserAlphaSubject.eraseToAnyPublisher()
+    }
+
     var drawingToolPublisher: AnyPublisher<CanvasDrawingToolType, Never> {
         drawingToolSubject.eraseToAnyPublisher()
     }
@@ -27,6 +34,9 @@ final class CanvasDrawingToolStatus {
     var backgroundColorPublisher: AnyPublisher<UIColor, Never> {
         backgroundColorSubject.eraseToAnyPublisher()
     }
+
+    private let brushColorSubject = CurrentValueSubject<UIColor, Never>(.black)
+    private let eraserAlphaSubject = CurrentValueSubject<Int, Never>(255)
 
     private let drawingToolSubject = CurrentValueSubject<CanvasDrawingToolType, Never>(.brush)
 
@@ -52,6 +62,9 @@ final class CanvasDrawingToolStatus {
         self.eraserDiameter = eraserDiameter
         self.brushColor = brushColor
         self.eraserAlpha = eraserAlpha
+
+        brushColorSubject.send(brushColor)
+        eraserAlphaSubject.send(eraserAlpha)
 
         setBackgroundColor(backgroundColor)
     }
@@ -87,9 +100,11 @@ extension CanvasDrawingToolStatus {
 
     func setBrushColor(_ color: UIColor) {
         brushColor = color
+        brushColorSubject.send(brushColor)
     }
     func setEraserAlpha(_ alpha: Int) {
         eraserAlpha = alpha
+        eraserAlphaSubject.send(eraserAlpha)
     }
 
 }
@@ -103,16 +118,20 @@ extension CanvasDrawingToolStatus {
     }
     func setBrushDiameter(_ value: Float) {
         brushDiameter = CanvasBrushDrawingTool.diameterIntValue(value)
+        diameterSubject.send(CanvasBrushDrawingTool.diameterFloatValue(brushDiameter))
     }
     func setEraserDiameter(_ value: Float) {
         eraserDiameter = CanvasEraserDrawingTool.diameterIntValue(value)
+        diameterSubject.send(CanvasEraserDrawingTool.diameterFloatValue(eraserDiameter))
     }
 
     func setBrushDiameter(_ value: Int) {
         brushDiameter = value
+        diameterSubject.send(CanvasBrushDrawingTool.diameterFloatValue(brushDiameter))
     }
     func setEraserDiameter(_ value: Int) {
         eraserDiameter = value
+        diameterSubject.send(CanvasEraserDrawingTool.diameterFloatValue(eraserDiameter))
     }
 
 }
