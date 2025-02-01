@@ -30,10 +30,10 @@ protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
-    func mergeTextureWithEraseBlendMode(
+    func subtractTextureWithEraseBlendMode(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
-        on destinationTexture: MTLTexture,
+        from destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
@@ -141,10 +141,10 @@ final class MTLRenderer: MTLRendering {
         encoder?.endEncoding()
     }
 
-    func mergeTextureWithEraseBlendMode(
+    func subtractTextureWithEraseBlendMode(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
-        on destinationTexture: MTLTexture,
+        from destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         let descriptor = MTLRenderPassDescriptor()

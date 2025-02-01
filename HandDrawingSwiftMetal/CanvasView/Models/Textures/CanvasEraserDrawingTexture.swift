@@ -122,10 +122,10 @@ extension CanvasEraserDrawingTexture {
             with: commandBuffer
         )
 
-        renderer.mergeTextureWithEraseBlendMode(
+        renderer.subtractTextureWithEraseBlendMode(
             texture: lineDrawnTexture,
             buffers: flippedTextureBuffers,
-            on: drawingTexture,
+            from: drawingTexture,
             with: commandBuffer
         )
     }
@@ -153,10 +153,10 @@ extension CanvasEraserDrawingTexture {
                 with: commandBuffer
             )
 
-            renderer.mergeTextureWithEraseBlendMode(
+            renderer.subtractTextureWithEraseBlendMode(
                 texture: lineDrawnTexture,
                 buffers: flippedTextureBuffers,
-                on: drawingTexture,
+                from: drawingTexture,
                 with: commandBuffer
             )
 
