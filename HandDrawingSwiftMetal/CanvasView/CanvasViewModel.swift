@@ -134,7 +134,10 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingTexture?.drawingFinishedPublisher
+        Publishers.Merge(
+            brushDrawingTexture.drawingFinishedPublisher,
+            eraserDrawingTexture.drawingFinishedPublisher
+        )
             .sink { [weak self] in
                 guard let `self` else { return }
                 self.resetAllInputParameters()
