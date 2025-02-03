@@ -11,15 +11,15 @@ import Combine
 /// A class used for real-time drawing on a texture using an eraser
 final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
-    var drawingTexturePublisher: AnyPublisher<(MTLTexture?, MTLCommandBuffer?), Never> {
-        drawingTextureSubject.eraseToAnyPublisher()
+    var resultTexturePublisher: AnyPublisher<(MTLTexture?, MTLCommandBuffer?), Never> {
+        resultTextureSubject.eraseToAnyPublisher()
     }
 
     var drawingFinishedPublisher: AnyPublisher<Void, Never> {
         drawingFinishedSubject.eraseToAnyPublisher()
     }
 
-    private let drawingTextureSubject = PassthroughSubject<(MTLTexture?, MTLCommandBuffer?), Never>()
+    private let resultTextureSubject = PassthroughSubject<(MTLTexture?, MTLCommandBuffer?), Never>()
 
     private let drawingFinishedSubject = PassthroughSubject<Void, Never>()
 

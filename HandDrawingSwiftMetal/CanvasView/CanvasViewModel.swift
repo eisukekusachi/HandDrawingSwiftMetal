@@ -152,8 +152,8 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         Publishers.Merge(
-            brushDrawingTexture.drawingTexturePublisher,
-            eraserDrawingTexture.drawingTexturePublisher
+            brushDrawingTexture.resultTexturePublisher,
+            eraserDrawingTexture.resultTexturePublisher
         )
             .sink { [weak self] (texture, commandBuffer) in
                 guard let `self`, let texture, let commandBuffer else { return }
@@ -167,7 +167,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        textureLayers.drawingTexturePublisher
+        textureLayers.resultTexturePublisher
             .sink { [weak self] (texture, commandBuffer) in
                 guard
                     let `self`,
