@@ -164,9 +164,15 @@ final class CanvasViewModel {
                     on: self.canvasTexture,
                     with: commandBuffer
                 )
+            }
+            .store(in: &cancellables)
+
+        textureLayers.drawingTexturePublisher
+            .sink { [weak self] (texture, commandBuffer) in
+                guard let `self`, let texture, let commandBuffer else { return }
 
                 self.updateCanvasWithTexture(
-                    self.canvasTexture,
+                    texture,
                     matrix: self.transformer.matrix,
                     on: self.canvasView
                 )
