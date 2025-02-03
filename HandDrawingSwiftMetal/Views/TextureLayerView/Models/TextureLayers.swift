@@ -69,8 +69,8 @@ final class TextureLayers: Layers<TextureLayer> {
 }
 
 extension TextureLayers {
-    /// Merge the textures of layers on a single texture with the backgroundColor
-    func mergeAllTextures(
+    /// Draws the textures of layers on `destinationTexture` with the backgroundColor
+    func drawAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
         withAllLayerUpdates allUpdates: Bool = false,
         backgroundColor: UIColor,

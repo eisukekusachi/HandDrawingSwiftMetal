@@ -158,7 +158,7 @@ final class CanvasViewModel {
             .sink { [weak self] (texture, commandBuffer) in
                 guard let `self`, let texture, let commandBuffer else { return }
 
-                self.textureLayers.mergeAllTextures(
+                self.textureLayers.drawAllTextures(
                     usingCurrentTexture: texture,
                     backgroundColor: drawingTool.backgroundColor,
                     on: self.canvasTexture,
@@ -714,7 +714,7 @@ extension CanvasViewModel {
     ) {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
-        textureLayers.mergeAllTextures(
+        textureLayers.drawAllTextures(
             usingCurrentTexture: usingCurrentTexture,
             withAllLayerUpdates: allUpdates,
             backgroundColor: canvasTextureBackgroundColor,
