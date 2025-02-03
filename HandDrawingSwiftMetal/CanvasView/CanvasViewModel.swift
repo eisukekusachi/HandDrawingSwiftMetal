@@ -694,16 +694,6 @@ extension CanvasViewModel {
         )
     }
 
-    private func updateCanvas(withAllLayerUpdates allUpdates: Bool = false) {
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: allUpdates,
-            on: canvasView
-        )
-    }
-
     private func updateCanvasViewWithTextureLayers(
         textureLayers: TextureLayers,
         usingCurrentTexture: MTLTexture? = nil,
