@@ -151,6 +151,28 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        Publishers.Merge(
+            brushDrawingTexture.drawingTexturePublisher,
+            eraserDrawingTexture.drawingTexturePublisher
+        )
+            .sink { [weak self] (texture, commandBuffer) in
+                guard let `self`, let texture, let commandBuffer else { return }
+
+                self.textureLayers.mergeAllTextures(
+                    usingCurrentTexture: texture,
+                    backgroundColor: drawingTool.backgroundColor,
+                    on: self.canvasTexture,
+                    with: commandBuffer
+                )
+
+                self.updateCanvasWithTexture(
+                    self.canvasTexture,
+                    matrix: self.transformer.matrix,
+                    on: self.canvasView
+                )
+            }
+            .store(in: &cancellables)
+
         runDisplayLinkSubject
             .map { !$0 }
             .sink { [weak self] isPause in
@@ -643,15 +665,6 @@ extension CanvasViewModel {
             selectedTexture: selectedTexture,
             on: currentTexture,
             with: commandBuffer
-        )
-
-        // Update `canvasView` with `canvasTexture`
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            usingCurrentTexture: currentTexture,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
         )
     }
 

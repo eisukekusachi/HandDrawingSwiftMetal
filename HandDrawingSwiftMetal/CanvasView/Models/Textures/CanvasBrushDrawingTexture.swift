@@ -11,9 +11,15 @@ import Combine
 /// A class used for real-time drawing on a texture using a brush
 final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
+    var drawingTexturePublisher: AnyPublisher<(MTLTexture?, MTLCommandBuffer?), Never> {
+        drawingTextureSubject.eraseToAnyPublisher()
+    }
+
     var drawingFinishedPublisher: AnyPublisher<Void, Never> {
         drawingFinishedSubject.eraseToAnyPublisher()
     }
+
+    private let drawingTextureSubject = PassthroughSubject<(MTLTexture?, MTLCommandBuffer?), Never>()
 
     private let drawingFinishedSubject = PassthroughSubject<Void, Never>()
 
@@ -71,6 +77,8 @@ extension CanvasBrushDrawingTexture {
             on: destinationTexture,
             with: commandBuffer
         )
+
+        drawingTextureSubject.send((destinationTexture, commandBuffer))
     }
 
     func clearDrawingTextures(with commandBuffer: MTLCommandBuffer) {
