@@ -711,19 +711,6 @@ extension CanvasViewModel {
             on: canvasTexture,
             with: commandBuffer
         )
-
-        guard
-            let renderTexture = canvasView?.renderTexture,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        drawTexture(
-            texture: canvasTexture,
-            matrix: transformer.matrix,
-            on: renderTexture,
-            with: commandBuffer
-        )
-        canvasView?.setNeedsDisplay()
     }
 
     private func drawTexture(
