@@ -11,7 +11,7 @@ import Combine
 /// A protocol used for real-time drawing on a texture
 protocol CanvasDrawingTexture {
     /// A publisher that emits `(MTLTexture?, MTLCommandBuffer?)` while  drawing
-    var resultTexturePublisher: AnyPublisher<(MTLTexture?, MTLCommandBuffer?), Never> { get }
+    var resultTexturePublisher: AnyPublisher<(MTLTexture, MTLCommandBuffer), Never> { get }
 
     /// A publisher that emits `Void` when the drawing process is finished
     var drawingFinishedPublisher: AnyPublisher<Void, Never> { get }

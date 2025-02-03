@@ -11,11 +11,11 @@ import Combine
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
 
-    var resultTexturePublisher: AnyPublisher<(MTLTexture?, MTLCommandBuffer?), Never> {
+    var resultTexturePublisher: AnyPublisher<(MTLTexture, MTLCommandBuffer), Never> {
         resultTextureSubject.eraseToAnyPublisher()
     }
 
-    private let resultTextureSubject = PassthroughSubject<(MTLTexture?, MTLCommandBuffer?), Never>()
+    private let resultTextureSubject = PassthroughSubject<(MTLTexture, MTLCommandBuffer), Never>()
 
     /// A texture that combines the textures of all layers below the selected layer
     private var bottomTexture: MTLTexture!

@@ -156,7 +156,7 @@ final class CanvasViewModel {
             eraserDrawingTexture.resultTexturePublisher
         )
             .sink { [weak self] (texture, commandBuffer) in
-                guard let `self`, let texture, let commandBuffer else { return }
+                guard let `self` else { return }
 
                 self.textureLayers.drawAllTextures(
                     usingCurrentTexture: texture,
@@ -171,9 +171,8 @@ final class CanvasViewModel {
             .sink { [weak self] (texture, commandBuffer) in
                 guard
                     let `self`,
-                    let texture,
-                    let renderTexture = canvasView?.renderTexture,
-                    let commandBuffer else { return }
+                    let renderTexture = canvasView?.renderTexture
+                else { return }
 
                 self.drawTexture(
                     texture: texture,
