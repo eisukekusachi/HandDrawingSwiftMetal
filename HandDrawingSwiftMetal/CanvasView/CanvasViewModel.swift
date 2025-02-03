@@ -169,13 +169,19 @@ final class CanvasViewModel {
 
         textureLayers.drawingTexturePublisher
             .sink { [weak self] (texture, commandBuffer) in
-                guard let `self`, let texture, let commandBuffer else { return }
+                guard
+                    let `self`,
+                    let texture,
+                    let renderTexture = canvasView?.renderTexture,
+                    let commandBuffer else { return }
 
-                self.updateCanvasWithTexture(
-                    texture,
+                self.drawTexture(
+                    texture: texture,
                     matrix: self.transformer.matrix,
-                    on: self.canvasView
+                    on: renderTexture,
+                    with: commandBuffer
                 )
+                self.canvasView?.setNeedsDisplay()
             }
             .store(in: &cancellables)
 
@@ -360,11 +366,18 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            updateCanvasWithTexture(
-                canvasTexture,
+            guard
+                let renderTexture = canvasView?.renderTexture,
+                let commandBuffer = canvasView?.commandBuffer
+            else { return }
+
+            drawTexture(
+                texture: canvasTexture,
                 matrix: transformer.matrix,
-                on: canvasView
+                on: renderTexture,
+                with: commandBuffer
             )
+            canvasView?.setNeedsDisplay()
 
         default:
             break
@@ -461,11 +474,18 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
 
-        updateCanvasWithTexture(
-            canvasTexture,
+        guard
+            let renderTexture = canvasView?.renderTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        drawTexture(
+            texture: canvasTexture,
             matrix: transformer.matrix,
-            on: canvasView
+            on: renderTexture,
+            with: commandBuffer
         )
+        canvasView?.setNeedsDisplay()
     }
 
     func didTapNewCanvasButton() {
@@ -702,21 +722,28 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        updateCanvasWithTexture(
-            canvasTexture,
+        guard
+            let renderTexture = canvasView?.renderTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        drawTexture(
+            texture: canvasTexture,
             matrix: transformer.matrix,
-            on: canvasView
+            on: renderTexture,
+            with: commandBuffer
         )
+        canvasView?.setNeedsDisplay()
     }
 
-    private func updateCanvasWithTexture(
-        _ texture: MTLTexture?,
+    private func drawTexture(
+        texture: MTLTexture?,
         matrix: CGAffineTransform,
-        on canvasView: CanvasViewProtocol?
+        on destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let sourceTexture = texture,
-            let destinationTexture = canvasView?.renderTexture,
             let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 matrix: matrix,
                 frameSize: frameSize,
@@ -726,8 +753,7 @@ extension CanvasViewModel {
                 ),
                 destinationSize: destinationTexture.size,
                 with: device
-            ),
-            let commandBuffer = canvasView?.commandBuffer
+            )
         else { return }
 
         MTLRenderer.shared.drawTexture(
@@ -737,8 +763,6 @@ extension CanvasViewModel {
             on: destinationTexture,
             with: commandBuffer
         )
-
-        canvasView?.setNeedsDisplay()
     }
 
     /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
@@ -795,11 +819,18 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        updateCanvasWithTexture(
-            canvasTexture,
+        guard
+            let renderTexture = canvasView?.renderTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        drawTexture(
+            texture: canvasTexture,
             matrix: transformer.matrix,
-            on: canvasView
+            on: renderTexture,
+            with: commandBuffer
         )
+        canvasView?.setNeedsDisplay()
     }
 
 }
