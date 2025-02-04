@@ -54,8 +54,6 @@ final class CanvasViewModel {
 
     private let transformer = CanvasTransformer()
 
-    private var drawingDisplayLink: CADisplayLink?
-
     /// A dictionary for handling finger input values
     private let fingerDrawingDictionary = CanvasFingerDrawingDictionary()
 
@@ -67,6 +65,8 @@ final class CanvasViewModel {
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
     private var localRepository: LocalRepository?
+
+    private var drawingDisplayLinkPoller = CanvasDrawingDisplayLinkPoller()
 
     private var canvasView: CanvasViewProtocol?
 
@@ -97,8 +97,6 @@ final class CanvasViewModel {
 
     private let updateRedoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
 
-    private let runDisplayLinkSubject = PassthroughSubject<Bool, Never>()
-
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()!
@@ -107,8 +105,6 @@ final class CanvasViewModel {
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.localRepository = localRepository
-
-        setupDisplayLink()
 
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
@@ -151,25 +147,21 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        runDisplayLinkSubject
-            .map { !$0 }
-            .sink { [weak self] isPause in
-                self?.drawingDisplayLink?.isPaused = isPause
+        drawingDisplayLinkPoller.requestDrawingOnCanvasPublisher
+            .sink { [weak self] texture, commandBuffer in
+                self?.updateCanvas(texture: texture, commandBuffer: commandBuffer)
             }
             .store(in: &cancellables)
 
         drawingTool.setDrawingTool(.brush)
     }
 
-    private func setupDisplayLink() {
-        // Configure the display link for rendering
-        drawingDisplayLink = CADisplayLink(target: self, selector: #selector(updateCanvasViewWhileDrawing))
-        drawingDisplayLink?.add(to: .current, forMode: .common)
-        drawingDisplayLink?.isPaused = true
-    }
-
     func setCanvasView(_ canvasView: CanvasViewProtocol) {
         self.canvasView = canvasView
+
+        drawingDisplayLinkPoller.onViewDidLoad(
+            canvasView: canvasView
+        )
     }
 
     func initCanvas(size: CGSize) {
@@ -297,7 +289,10 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            runDrawingDisplayLinkToUpdateCanvasView(!drawingCurvePoints.isDrawingFinished)
+            drawingDisplayLinkPoller.updateDrawingTextureWithPolling(
+                isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
+                texture: currentTexture
+            )
 
         case .transforming:
             if transformer.isCurrentKeysNil {
@@ -406,7 +401,10 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        runDrawingDisplayLinkToUpdateCanvasView(!drawingCurvePoints.isDrawingFinished)
+        drawingDisplayLinkPoller.updateDrawingTextureWithPolling(
+            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
+            texture: currentTexture
+        )
     }
 
 }
@@ -694,15 +692,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Starts or stops the display link loop
-    private func runDrawingDisplayLinkToUpdateCanvasView(_ isRunning: Bool) {
-        runDisplayLinkSubject.send(isRunning)
-
-        // Update `CanvasView` when stopping as the last line isn’t drawn
-        if !isRunning {
-            updateCanvasViewWhileDrawing()
-        }
-    }
 
     private func isAllFingersReleasedFromScreen(
         touches: Set<UITouch>,
