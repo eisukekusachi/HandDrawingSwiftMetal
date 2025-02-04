@@ -289,7 +289,7 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            drawingDisplayLinkPoller.updateDrawingTextureWithPolling(
+            drawingDisplayLinkPoller.updateCanvasWithPolling(
                 isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
                 texture: currentTexture
             )
@@ -401,7 +401,7 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        drawingDisplayLinkPoller.updateDrawingTextureWithPolling(
+        drawingDisplayLinkPoller.updateCanvasWithPolling(
             isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
             texture: currentTexture
         )

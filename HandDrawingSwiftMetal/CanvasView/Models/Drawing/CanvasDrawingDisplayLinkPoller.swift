@@ -30,7 +30,7 @@ final class CanvasDrawingDisplayLinkPoller {
         self.canvasView = canvasView
     }
 
-    func updateDrawingTextureWithPolling(
+    func updateCanvasWithPolling(
         isCurrentlyDrawing: Bool,
         texture: MTLTexture?
     ) {
