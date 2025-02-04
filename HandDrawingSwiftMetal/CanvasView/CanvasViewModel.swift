@@ -151,39 +151,6 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        Publishers.Merge(
-            brushDrawingTexture.resultTexturePublisher,
-            eraserDrawingTexture.resultTexturePublisher
-        )
-            .sink { [weak self] (texture, commandBuffer) in
-                guard let `self` else { return }
-
-                self.textureLayers.drawAllTextures(
-                    usingCurrentTexture: texture,
-                    backgroundColor: drawingTool.backgroundColor,
-                    on: self.canvasTexture,
-                    with: commandBuffer
-                )
-            }
-            .store(in: &cancellables)
-
-        textureLayers.resultTexturePublisher
-            .sink { [weak self] (texture, commandBuffer) in
-                guard
-                    let `self`,
-                    let renderTexture = canvasView?.renderTexture
-                else { return }
-
-                self.drawTexture(
-                    texture: texture,
-                    matrix: self.transformer.matrix,
-                    on: renderTexture,
-                    with: commandBuffer
-                )
-                self.canvasView?.setNeedsDisplay()
-            }
-            .store(in: &cancellables)
-
         runDisplayLinkSubject
             .map { !$0 }
             .sink { [weak self] isPause in
@@ -242,13 +209,7 @@ final class CanvasViewModel {
 
         canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
 
 }
@@ -264,12 +225,7 @@ extension CanvasViewModel {
         }
 
         // Redraws the canvas when the device rotates and the canvas size changes.
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
 
     func onViewDidAppear(
@@ -285,12 +241,7 @@ extension CanvasViewModel {
             initCanvas(size: textureSize)
         }
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
 
     /// Manages all finger positions on the screen using a dictionary
@@ -499,13 +450,7 @@ extension CanvasViewModel {
 
         initCanvas(size: size)
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
 
     func didTapLoadButton(filePath: String) {
@@ -522,13 +467,7 @@ extension CanvasViewModel {
 
         textureLayers.index = index
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
     func didTapAddLayerButton() {
         guard
@@ -553,13 +492,7 @@ extension CanvasViewModel {
         // Makes a thumbnail
         textureLayers.updateThumbnail(index: index)
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
     func didTapRemoveLayerButton() {
         guard
@@ -571,13 +504,7 @@ extension CanvasViewModel {
         textureLayers.removeLayer(layer)
         textureLayers.setIndex(index - 1)
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
@@ -590,13 +517,7 @@ extension CanvasViewModel {
             isVisible: isVisible
         )
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
     func didStartChangingLayerAlpha(layer: TextureLayer) {}
     func didChangeLayerAlpha(
@@ -610,12 +531,7 @@ extension CanvasViewModel {
             alpha: value
         )
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            on: canvasView
-        )
+        updateCanvasView()
     }
     func didFinishChangingLayerAlpha(layer: TextureLayer) {}
 
@@ -664,24 +580,80 @@ extension CanvasViewModel {
         )
         textureLayers.setIndex(textureLayerSelectedIndexAfterMove)
 
-        updateCanvasViewWithTextureLayers(
-            textureLayers: textureLayers,
-            canvasTexture: canvasTexture,
-            canvasTextureBackgroundColor: drawingTool.backgroundColor,
-            withAllLayerUpdates: true,
-            on: canvasView
-        )
+        updateCanvasView(allLayerUpdates: true)
     }
 
 }
 
 extension CanvasViewModel {
 
+    private func drawTexture(
+        texture: MTLTexture?,
+        matrix: CGAffineTransform,
+        on destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let texture,
+            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
+                matrix: matrix,
+                frameSize: frameSize,
+                sourceSize: .init(
+                    width: texture.size.width * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size),
+                    height: texture.size.height * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
+                ),
+                destinationSize: destinationTexture.size,
+                with: device
+            )
+        else { return }
+
+        MTLRenderer.shared.drawTexture(
+            texture: texture,
+            buffers: textureBuffers,
+            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
     @objc private func updateCanvasViewWhileDrawing() {
         guard
-            let drawingCurvePoints,
             let currentTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        updateCanvas(texture: currentTexture, commandBuffer: commandBuffer)
+    }
+
+    private func updateCanvasView(allLayerUpdates: Bool = false) {
+        guard
+            let renderTexture = canvasView?.renderTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        textureLayers.drawAllTextures(
+            withAllLayerUpdates: allLayerUpdates,
+            backgroundColor: drawingTool.backgroundColor,
+            on: canvasTexture,
+            with: commandBuffer
+        )
+
+        drawTexture(
+            texture: canvasTexture,
+            matrix: transformer.matrix,
+            on: renderTexture,
+            with: commandBuffer
+        )
+
+        canvasView?.setNeedsDisplay()
+    }
+
+    private func updateCanvas(texture: MTLTexture, commandBuffer: MTLCommandBuffer) {
+        guard
+            let drawingCurvePoints,
             let selectedTexture = textureLayers.selectedLayer?.texture,
+            let currentTexture,
+            let renderTexture = canvasView?.renderTexture,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
@@ -691,54 +663,22 @@ extension CanvasViewModel {
             on: currentTexture,
             with: commandBuffer
         )
-    }
-
-    private func updateCanvasViewWithTextureLayers(
-        textureLayers: TextureLayers,
-        usingCurrentTexture: MTLTexture? = nil,
-        canvasTexture: MTLTexture?,
-        canvasTextureBackgroundColor: UIColor,
-        withAllLayerUpdates allUpdates: Bool = false,
-        on canvasView: CanvasViewProtocol?
-    ) {
-        guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         textureLayers.drawAllTextures(
-            usingCurrentTexture: usingCurrentTexture,
-            withAllLayerUpdates: allUpdates,
-            backgroundColor: canvasTextureBackgroundColor,
+            usingCurrentTexture: currentTexture,
+            backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
         )
-    }
 
-    private func drawTexture(
-        texture: MTLTexture?,
-        matrix: CGAffineTransform,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let sourceTexture = texture,
-            let sourceTextureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                matrix: matrix,
-                frameSize: frameSize,
-                sourceSize: .init(
-                    width: sourceTexture.size.width * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size),
-                    height: sourceTexture.size.height * ViewSize.getScaleToFit(sourceTexture.size, to: destinationTexture.size)
-                ),
-                destinationSize: destinationTexture.size,
-                with: device
-            )
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: sourceTexture,
-            buffers: sourceTextureBuffers,
-            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
-            on: destinationTexture,
+        drawTexture(
+            texture: canvasTexture,
+            matrix: transformer.matrix,
+            on: renderTexture,
             with: commandBuffer
         )
+
+        canvasView?.setNeedsDisplay()
     }
 
     /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
