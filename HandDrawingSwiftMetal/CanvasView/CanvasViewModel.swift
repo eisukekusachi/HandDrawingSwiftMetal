@@ -650,7 +650,6 @@ extension CanvasViewModel {
         guard
             let drawingCurvePoints,
             let selectedTexture = textureLayers.selectedLayer?.texture,
-            let currentTexture,
             let renderTexture = canvasView?.renderTexture,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
@@ -658,12 +657,12 @@ extension CanvasViewModel {
         drawingTexture?.drawCurvePointsUsingSelectedTexture(
             drawingCurvePoints: drawingCurvePoints,
             selectedTexture: selectedTexture,
-            on: currentTexture,
+            on: texture,
             with: commandBuffer
         )
 
         textureLayers.drawAllTextures(
-            usingCurrentTexture: currentTexture,
+            usingCurrentTexture: texture,
             backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
