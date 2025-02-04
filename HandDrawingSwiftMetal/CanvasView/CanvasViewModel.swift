@@ -614,15 +614,6 @@ extension CanvasViewModel {
         )
     }
 
-    @objc private func updateCanvasViewWhileDrawing() {
-        guard
-            let currentTexture,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        updateCanvas(texture: currentTexture, commandBuffer: commandBuffer)
-    }
-
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
             let renderTexture = canvasView?.renderTexture,
