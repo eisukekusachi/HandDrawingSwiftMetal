@@ -338,7 +338,7 @@ extension CanvasViewModel {
 
         fingerDrawingDictionary.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
-        if fingerDrawingDictionary.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if fingerDrawingDictionary.isEmpty && UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
         }
     }
@@ -668,14 +668,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    private func isAllFingersReleasedFromScreen(
-        touches: Set<UITouch>,
-        with event: UIEvent?
-    ) -> Bool {
-        touches.count == event?.allTouches?.count &&
-        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
-    }
 
     private func resetAllInputParameters() {
         inputDevice.reset()

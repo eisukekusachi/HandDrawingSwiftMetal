@@ -18,4 +18,12 @@ extension UITouch {
         return touches
     }
 
+    static func isAllFingersReleasedFromScreen(
+        touches: Set<UITouch>,
+        with event: UIEvent?
+    ) -> Bool {
+        touches.count == event?.allTouches?.count &&
+        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
+    }
+
 }
