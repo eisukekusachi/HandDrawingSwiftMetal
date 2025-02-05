@@ -106,6 +106,39 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
+        drawingTool.setDrawingTool(.brush)
+
+        subscribe()
+    }
+
+    private func subscribe() {
+
+        drawingDisplayLink.requestDrawingOnCanvasPublisher
+            .sink { [weak self] in
+                self?.updateCanvasWithDrawing()
+            }
+            .store(in: &cancellables)
+
+        Publishers.Merge(
+            brushDrawingTexture.drawingFinishedPublisher,
+            eraserDrawingTexture.drawingFinishedPublisher
+        )
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.resetAllInputParameters()
+
+                // Update the thumbnail when the layerView is visible
+                if self.isLayerViewVisible {
+                    self.canvasView?.commandBuffer?.addCompletedHandler { [weak self] _ in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let `self` else { return }
+                            self.textureLayers.updateThumbnail(index: self.textureLayers.index)
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
                 guard let `self` else { return }
@@ -129,35 +162,6 @@ final class CanvasViewModel {
                 self?.eraserDrawingTexture.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
-
-        Publishers.Merge(
-            brushDrawingTexture.drawingFinishedPublisher,
-            eraserDrawingTexture.drawingFinishedPublisher
-        )
-            .sink { [weak self] in
-                guard let `self` else { return }
-                self.resetAllInputParameters()
-
-                // Update the thumbnail when the layerView is visible
-                if self.isLayerViewVisible {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-                    }
-                }
-            }
-            .store(in: &cancellables)
-
-        drawingDisplayLink.requestDrawingOnCanvasPublisher
-            .sink { [weak self] in
-                self?.updateCanvasWithDrawing()
-            }
-            .store(in: &cancellables)
-
-        drawingTool.setDrawingTool(.brush)
-    }
-
-    func setCanvasView(_ canvasView: CanvasViewProtocol) {
-        self.canvasView = canvasView
     }
 
     func initCanvas(size: CGSize) {
@@ -172,8 +176,6 @@ final class CanvasViewModel {
     }
 
     func apply(model: CanvasModel) {
-        guard let canvasView else { return }
-
         projectName = model.projectName
 
         brushDrawingTexture.initTextures(model.textureSize)
@@ -203,17 +205,15 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    func onViewDidLoad(
+        canvasView: CanvasViewProtocol,
+        textureSize: CGSize? = nil
+    ) {
+        self.canvasView = canvasView
 
-    func onUpdateRenderTexture() {
-        guard let canvasView else { return }
-
-        // Initialize the canvas here if `canvasTexture` is nil
-        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+        if let textureSize {
             initCanvas(size: textureSize)
         }
-
-        // Redraws the canvas when the device rotates and the canvas size changes.
-        updateCanvasView(allLayerUpdates: true)
     }
 
     func onViewDidAppear(
@@ -229,6 +229,18 @@ extension CanvasViewModel {
             initCanvas(size: textureSize)
         }
 
+        updateCanvasView(allLayerUpdates: true)
+    }
+
+    func onUpdateRenderTexture() {
+        guard let canvasView else { return }
+
+        // Initialize the canvas here if `canvasTexture` is nil
+        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+            initCanvas(size: textureSize)
+        }
+
+        // Redraws the canvas when the device rotates and the canvas size changes.
         updateCanvasView(allLayerUpdates: true)
     }
 
@@ -272,11 +284,13 @@ extension CanvasViewModel {
                     let drawableSize = canvasView?.renderTexture?.size
                 else { return nil }
 
-                return convertScreenTouchPointToTextureDotPoint(
+                return .init(
                     matrix: transformer.matrix.inverted(flipY: true),
                     touchPoint: $0,
                     textureSize: textureSize,
-                    drawableSize: drawableSize
+                    drawableSize: drawableSize,
+                    frameSize: frameSize,
+                    diameter: CGFloat(drawingTool.brushDiameter)
                 )
             }
 
@@ -311,10 +325,12 @@ extension CanvasViewModel {
                 let commandBuffer = canvasView?.commandBuffer
             else { return }
 
-            drawTexture(
+            MTLRenderer.shared.drawTexture(
                 texture: canvasTexture,
                 matrix: transformer.matrix,
+                frameSize: frameSize,
                 on: renderTexture,
+                device: device,
                 with: commandBuffer
             )
             canvasView?.setNeedsDisplay()
@@ -325,7 +341,7 @@ extension CanvasViewModel {
 
         fingerDrawingDictionary.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
-        if fingerDrawingDictionary.isEmpty && isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
         }
     }
@@ -383,11 +399,13 @@ extension CanvasViewModel {
                 let drawableSize = canvasView?.renderTexture?.size
             else { return nil }
 
-            return convertScreenTouchPointToTextureDotPoint(
+            return .init(
                 matrix: transformer.matrix.inverted(flipY: true),
                 touchPoint: $0,
                 textureSize: textureSize,
-                drawableSize: drawableSize
+                drawableSize: drawableSize,
+                frameSize: frameSize,
+                diameter: CGFloat(drawingTool.brushDiameter)
             )
         }
 
@@ -421,10 +439,12 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
         canvasView?.setNeedsDisplay()
@@ -432,8 +452,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         guard
-            let size = canvasTexture?.size,
-            let canvasView
+            let size = canvasTexture?.size
         else { return }
 
         projectName = Calendar.currentDate
@@ -579,35 +598,6 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawTexture(
-        texture: MTLTexture?,
-        matrix: CGAffineTransform,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                matrix: matrix,
-                frameSize: frameSize,
-                sourceSize: .init(
-                    width: texture.size.width * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size),
-                    height: texture.size.height * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
-                ),
-                destinationSize: destinationTexture.size,
-                with: device
-            )
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: texture,
-            buffers: textureBuffers,
-            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
-            on: destinationTexture,
-            with: commandBuffer
-        )
-    }
-
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
             let renderTexture = canvasView?.renderTexture,
@@ -621,10 +611,12 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
 
@@ -654,37 +646,21 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
 
         canvasView?.setNeedsDisplay()
     }
 
-    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-    @MainActor
-    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
-        Task { [weak self] in
-            guard let self else { return }
-            try await Task.sleep(nanoseconds: nanosecondsDuration)
-            self.textureLayers.updateThumbnail(index: self.textureLayers.index)
-        }
-    }
-
 }
 
 extension CanvasViewModel {
-
-    private func isAllFingersReleasedFromScreen(
-        touches: Set<UITouch>,
-        with event: UIEvent?
-    ) -> Bool {
-        touches.count == event?.allTouches?.count &&
-        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
-    }
 
     private func resetAllInputParameters() {
         inputDevice.reset()
@@ -714,92 +690,15 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
         canvasView?.setNeedsDisplay()
-    }
-
-}
-
-extension CanvasViewModel {
-
-    private func convertScreenTouchPointToTextureDotPoint(
-        matrix: CGAffineTransform,
-        touchPoint: CanvasTouchPoint,
-        textureSize: CGSize,
-        drawableSize: CGSize
-    ) -> CanvasGrayscaleDotPoint {
-
-        let textureMatrix = convertScreenMatrixToTextureMatrix(
-            matrix: matrix,
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        let textureLocation = convertScreenLocationToTextureLocation(
-            touchLocation: touchPoint.location,
-            frameSize: frameSize,
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-        return .init(
-            touchPoint: .init(
-                location: textureLocation.apply(
-                    with: textureMatrix,
-                    textureSize: textureSize
-                ),
-                touch: touchPoint
-            ),
-            diameter: CGFloat(drawingTool.diameter)
-        )
-    }
-
-    private func convertScreenMatrixToTextureMatrix(
-        matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGAffineTransform {
-
-        let drawableScale = ViewSize.getScaleToFit(textureSize, to: drawableSize)
-        let drawableTextureSize: CGSize = .init(
-            width: textureSize.width * drawableScale,
-            height: textureSize.height * drawableScale
-        )
-
-        let frameToTextureFitScale = ViewSize.getScaleToFit(frameSize, to: textureSize)
-        let drawableTextureToDrawableFillScale = ViewSize.getScaleToFill(drawableTextureSize, to: drawableSize)
-
-        var matrix = matrix
-        matrix.tx *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        matrix.ty *= (frameToTextureFitScale * drawableTextureToDrawableFillScale)
-        return matrix
-    }
-
-    private func convertScreenLocationToTextureLocation(
-        touchLocation: CGPoint,
-        frameSize: CGSize,
-        drawableSize: CGSize,
-        textureSize: CGSize
-    ) -> CGPoint {
-        if textureSize != drawableSize {
-            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
-            let drawableLocation: CGPoint = .init(
-                x: touchLocation.x * (drawableSize.width / frameSize.width),
-                y: touchLocation.y * (drawableSize.width / frameSize.width)
-            )
-            return .init(
-                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
-                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
-            )
-        } else {
-            return .init(
-                x: touchLocation.x * (textureSize.width / frameSize.width),
-                y: touchLocation.y * (textureSize.width / frameSize.width)
-            )
-        }
     }
 
 }
