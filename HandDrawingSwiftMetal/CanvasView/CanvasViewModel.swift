@@ -172,8 +172,6 @@ final class CanvasViewModel {
     }
 
     func apply(model: CanvasModel) {
-        guard let canvasView else { return }
-
         projectName = model.projectName
 
         brushDrawingTexture.initTextures(model.textureSize)
@@ -440,8 +438,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         guard
-            let size = canvasTexture?.size,
-            let canvasView
+            let size = canvasTexture?.size
         else { return }
 
         projectName = Calendar.currentDate
