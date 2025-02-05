@@ -106,6 +106,38 @@ final class MTLRenderer: MTLRendering {
     }
 
     func drawTexture(
+        texture: MTLTexture?,
+        matrix: CGAffineTransform,
+        frameSize: CGSize,
+        backgroundColor: UIColor = UIColor(rgb: Constants.blankAreaBackgroundColor),
+        on destinationTexture: MTLTexture,
+        device: MTLDevice,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let texture,
+            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
+                matrix: matrix,
+                frameSize: frameSize,
+                sourceSize: .init(
+                    width: texture.size.width * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size),
+                    height: texture.size.height * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
+                ),
+                destinationSize: destinationTexture.size,
+                with: device
+            )
+        else { return }
+
+        MTLRenderer.shared.drawTexture(
+            texture: texture,
+            buffers: textureBuffers,
+            withBackgroundColor: backgroundColor,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
+    func drawTexture(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
         withBackgroundColor color: UIColor? = nil,

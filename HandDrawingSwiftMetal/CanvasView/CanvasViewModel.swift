@@ -311,10 +311,12 @@ extension CanvasViewModel {
                 let commandBuffer = canvasView?.commandBuffer
             else { return }
 
-            drawTexture(
+            MTLRenderer.shared.drawTexture(
                 texture: canvasTexture,
                 matrix: transformer.matrix,
+                frameSize: frameSize,
                 on: renderTexture,
+                device: device,
                 with: commandBuffer
             )
             canvasView?.setNeedsDisplay()
@@ -421,10 +423,12 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
         canvasView?.setNeedsDisplay()
@@ -579,35 +583,6 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawTexture(
-        texture: MTLTexture?,
-        matrix: CGAffineTransform,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
-                matrix: matrix,
-                frameSize: frameSize,
-                sourceSize: .init(
-                    width: texture.size.width * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size),
-                    height: texture.size.height * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
-                ),
-                destinationSize: destinationTexture.size,
-                with: device
-            )
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: texture,
-            buffers: textureBuffers,
-            withBackgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
-            on: destinationTexture,
-            with: commandBuffer
-        )
-    }
-
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
             let renderTexture = canvasView?.renderTexture,
@@ -621,10 +596,12 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
 
@@ -654,10 +631,12 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
 
@@ -714,10 +693,12 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawTexture(
+        MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
+            frameSize: frameSize,
             on: renderTexture,
+            device: device,
             with: commandBuffer
         )
         canvasView?.setNeedsDisplay()
