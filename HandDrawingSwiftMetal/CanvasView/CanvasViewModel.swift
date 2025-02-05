@@ -106,6 +106,36 @@ final class CanvasViewModel {
     ) {
         self.localRepository = localRepository
 
+        drawingTool.setDrawingTool(.brush)
+
+        subscribe()
+    }
+
+    private func subscribe() {
+
+        drawingDisplayLink.requestDrawingOnCanvasPublisher
+            .sink { [weak self] in
+                self?.updateCanvasWithDrawing()
+            }
+            .store(in: &cancellables)
+
+        Publishers.Merge(
+            brushDrawingTexture.drawingFinishedPublisher,
+            eraserDrawingTexture.drawingFinishedPublisher
+        )
+            .sink { [weak self] in
+                guard let `self` else { return }
+                self.resetAllInputParameters()
+
+                // Update the thumbnail when the layerView is visible
+                if self.isLayerViewVisible {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         drawingTool.drawingToolPublisher
             .sink { [weak self] tool in
                 guard let `self` else { return }
@@ -129,31 +159,6 @@ final class CanvasViewModel {
                 self?.eraserDrawingTexture.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
-
-        Publishers.Merge(
-            brushDrawingTexture.drawingFinishedPublisher,
-            eraserDrawingTexture.drawingFinishedPublisher
-        )
-            .sink { [weak self] in
-                guard let `self` else { return }
-                self.resetAllInputParameters()
-
-                // Update the thumbnail when the layerView is visible
-                if self.isLayerViewVisible {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
-                    }
-                }
-            }
-            .store(in: &cancellables)
-
-        drawingDisplayLink.requestDrawingOnCanvasPublisher
-            .sink { [weak self] in
-                self?.updateCanvasWithDrawing()
-            }
-            .store(in: &cancellables)
-
-        drawingTool.setDrawingTool(.brush)
     }
 
     func setCanvasView(_ canvasView: CanvasViewProtocol) {
