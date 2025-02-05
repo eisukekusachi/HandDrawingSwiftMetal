@@ -161,10 +161,6 @@ final class CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    func setCanvasView(_ canvasView: CanvasViewProtocol) {
-        self.canvasView = canvasView
-    }
-
     func initCanvas(size: CGSize) {
         brushDrawingTexture.initTextures(size)
         eraserDrawingTexture.initTextures(size)
@@ -206,17 +202,15 @@ final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    func onViewDidLoad(
+        canvasView: CanvasViewProtocol,
+        textureSize: CGSize? = nil
+    ) {
+        self.canvasView = canvasView
 
-    func onUpdateRenderTexture() {
-        guard let canvasView else { return }
-
-        // Initialize the canvas here if `canvasTexture` is nil
-        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+        if let textureSize {
             initCanvas(size: textureSize)
         }
-
-        // Redraws the canvas when the device rotates and the canvas size changes.
-        updateCanvasView(allLayerUpdates: true)
     }
 
     func onViewDidAppear(
@@ -232,6 +226,18 @@ extension CanvasViewModel {
             initCanvas(size: textureSize)
         }
 
+        updateCanvasView(allLayerUpdates: true)
+    }
+
+    func onUpdateRenderTexture() {
+        guard let canvasView else { return }
+
+        // Initialize the canvas here if `canvasTexture` is nil
+        if canvasTexture == nil, let textureSize = canvasView.renderTexture?.size {
+            initCanvas(size: textureSize)
+        }
+
+        // Redraws the canvas when the device rotates and the canvas size changes.
         updateCanvasView(allLayerUpdates: true)
     }
 

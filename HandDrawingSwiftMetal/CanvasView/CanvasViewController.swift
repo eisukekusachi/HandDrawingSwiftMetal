@@ -26,12 +26,19 @@ class CanvasViewController: UIViewController {
         super.viewDidLoad()
 
         setupContentView()
-        setupCanvasViewModel()
 
         setupNewCanvasDialogPresenter()
         setupLayerViewPresenter()
 
         bindViewModel()
+
+        canvasViewModel.onViewDidLoad(
+            canvasView: contentView.canvasView//,
+            // Initialize the canvas with `CGSize`,
+            // if not initialized here, it will be initialized with the screen size
+            // when `func viewDidAppear` is called.
+            //textureSize: .init(width: 768, height: 1024)
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -49,19 +56,6 @@ class CanvasViewController: UIViewController {
 }
 
 extension CanvasViewController {
-    private func setupCanvasViewModel() {
-
-        canvasViewModel.setCanvasView(contentView.canvasView)
-
-        // Initialize the canvas with `CGSize`,
-        // if not initialized here, it will be initialized with the screen size
-        // when `func viewDidAppear` is called.
-        /*
-        canvasViewModel.initCanvas(
-            size: .init(width: 768, height: 1024)
-        )
-        */
-    }
 
     private func setupContentView() {
         contentView.applyDrawingParameters(canvasViewModel.drawingTool)
