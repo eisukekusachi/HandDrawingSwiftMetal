@@ -341,7 +341,7 @@ extension CanvasViewModel {
 
         fingerDrawingDictionary.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
-        if fingerDrawingDictionary.isEmpty && UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
         }
     }
