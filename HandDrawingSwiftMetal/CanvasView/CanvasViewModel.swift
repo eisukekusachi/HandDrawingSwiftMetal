@@ -129,8 +129,11 @@ final class CanvasViewModel {
 
                 // Update the thumbnail when the layerView is visible
                 if self.isLayerViewVisible {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: 1000_000)
+                    self.canvasView?.commandBuffer?.addCompletedHandler { [weak self] _ in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let `self` else { return }
+                            self.textureLayers.updateThumbnail(index: self.textureLayers.index)
+                        }
                     }
                 }
             }
@@ -653,16 +656,6 @@ extension CanvasViewModel {
         )
 
         canvasView?.setNeedsDisplay()
-    }
-
-    /// Makes a thumbnail with a slight delay to allow processing after the Metal command buffer has completed
-    @MainActor
-    private func updateCurrentLayerThumbnailWithDelay(nanosecondsDuration: UInt64) {
-        Task { [weak self] in
-            guard let self else { return }
-            try await Task.sleep(nanoseconds: nanosecondsDuration)
-            self.textureLayers.updateThumbnail(index: self.textureLayers.index)
-        }
     }
 
 }
