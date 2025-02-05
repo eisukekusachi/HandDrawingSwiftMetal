@@ -30,6 +30,39 @@ extension CanvasGrayscaleDotPoint {
         self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
     }
 
+    init(
+        matrix: CGAffineTransform,
+        touchPoint: CanvasTouchPoint,
+        textureSize: CGSize,
+        drawableSize: CGSize,
+        frameSize: CGSize,
+        diameter: CGFloat
+    ) {
+        let textureMatrix = ViewSize.convertScreenMatrixToTextureMatrix(
+            matrix: matrix,
+            drawableSize: drawableSize,
+            textureSize: textureSize,
+            frameSize: frameSize
+        )
+        let textureLocation = ViewSize.convertScreenLocationToTextureLocation(
+            touchLocation: touchPoint.location,
+            frameSize: frameSize,
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+
+        let touchPoint: CanvasTouchPoint = .init(
+            location: textureLocation.apply(
+                with: textureMatrix,
+                textureSize: textureSize
+            ),
+            touch: touchPoint
+        )
+
+        self.location = touchPoint.location
+        self.diameter = diameter
+        self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
+    }
 }
 
 extension CanvasGrayscaleDotPoint {
