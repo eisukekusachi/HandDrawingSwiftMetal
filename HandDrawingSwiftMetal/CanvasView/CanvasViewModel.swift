@@ -66,7 +66,7 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
-    private var drawingDisplayLinkPoller = CanvasDrawingDisplayLinkPoller()
+    private var drawingDisplayLink = CanvasDrawingDisplayLink()
 
     private var canvasView: CanvasViewProtocol?
 
@@ -147,9 +147,9 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingDisplayLinkPoller.requestDrawingOnCanvasPublisher
-            .sink { [weak self] texture, commandBuffer in
-                self?.updateCanvas(texture: texture, commandBuffer: commandBuffer)
+        drawingDisplayLink.requestDrawingOnCanvasPublisher
+            .sink { [weak self] in
+                self?.updateCanvasWithDrawing()
             }
             .store(in: &cancellables)
 
@@ -158,10 +158,6 @@ final class CanvasViewModel {
 
     func setCanvasView(_ canvasView: CanvasViewProtocol) {
         self.canvasView = canvasView
-
-        drawingDisplayLinkPoller.onViewDidLoad(
-            canvasView: canvasView
-        )
     }
 
     func initCanvas(size: CGSize) {
@@ -289,9 +285,8 @@ extension CanvasViewModel {
                 touchPhase: touchPhase
             )
 
-            drawingDisplayLinkPoller.updateCanvasWithPolling(
-                isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
-                texture: currentTexture
+            drawingDisplayLink.runDisplayLink(
+                isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
             )
 
         case .transforming:
@@ -401,9 +396,8 @@ extension CanvasViewModel {
             touchPhase: touchPhase
         )
 
-        drawingDisplayLinkPoller.updateCanvasWithPolling(
-            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing,
-            texture: currentTexture
+        drawingDisplayLink.runDisplayLink(
+            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
         )
     }
 
@@ -637,9 +631,10 @@ extension CanvasViewModel {
         canvasView?.setNeedsDisplay()
     }
 
-    private func updateCanvas(texture: MTLTexture, commandBuffer: MTLCommandBuffer) {
+    private func updateCanvasWithDrawing() {
         guard
             let drawingCurvePoints,
+            let currentTexture,
             let selectedTexture = textureLayers.selectedLayer?.texture,
             let renderTexture = canvasView?.renderTexture,
             let commandBuffer = canvasView?.commandBuffer
@@ -648,12 +643,12 @@ extension CanvasViewModel {
         drawingTexture?.drawCurvePointsUsingSelectedTexture(
             drawingCurvePoints: drawingCurvePoints,
             selectedTexture: selectedTexture,
-            on: texture,
+            on: currentTexture,
             with: commandBuffer
         )
 
         textureLayers.drawAllTextures(
-            usingCurrentTexture: texture,
+            usingCurrentTexture: currentTexture,
             backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
