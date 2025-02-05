@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-/// A displayLink that emits Void while drawing a line
+/// A class that manages the displayLink for drawing
 final class CanvasDrawingDisplayLink {
 
     // Requesting to draw a line on the canvas emits `Void`
