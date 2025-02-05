@@ -34,7 +34,7 @@ extension CanvasDrawingCurvePoints {
     }
 
     var isCurrentlyDrawing: Bool {
-        iterator.array.count != 0
+        !isDrawingFinished
     }
 
     func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint] {

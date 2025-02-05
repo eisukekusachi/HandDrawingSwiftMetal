@@ -6,9 +6,11 @@
 //
 
 import MetalKit
+import Combine
 
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
+
     /// A texture that combines the textures of all layers below the selected layer
     private var bottomTexture: MTLTexture!
     /// A texture that combines the textures of all layers above the selected layer
@@ -61,8 +63,8 @@ final class TextureLayers: Layers<TextureLayer> {
 }
 
 extension TextureLayers {
-    /// Merge the textures of layers on a single texture with the backgroundColor
-    func mergeAllTextures(
+    /// Draws the textures of layers on `destinationTexture` with the backgroundColor
+    func drawAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
         withAllLayerUpdates allUpdates: Bool = false,
         backgroundColor: UIColor,
