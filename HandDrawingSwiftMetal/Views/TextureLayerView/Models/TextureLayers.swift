@@ -107,23 +107,13 @@ extension TextureLayers {
             with: commandBuffer
         )
 
-        if layers[index].isVisible {
-            if let currentTexture {
-                MTLRenderer.shared.mergeTexture(
-                    texture: currentTexture,
-                    alpha: layers[index].alpha,
-                    on: destinationTexture,
-                    with: commandBuffer
-                )
-
-            } else if let texture = layers[index].texture {
-                MTLRenderer.shared.mergeTexture(
-                    texture: texture,
-                    alpha: layers[index].alpha,
-                    on: destinationTexture,
-                    with: commandBuffer
-                )
-            }
+        if layers[index].isVisible, let texture = currentTexture ?? layers[index].texture {
+            MTLRenderer.shared.mergeTexture(
+                texture: texture,
+                alpha: layers[index].alpha,
+                on: destinationTexture,
+                with: commandBuffer
+            )
         }
 
         MTLRenderer.shared.mergeTexture(
