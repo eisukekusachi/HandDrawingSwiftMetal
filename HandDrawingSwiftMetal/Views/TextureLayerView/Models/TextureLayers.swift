@@ -74,7 +74,7 @@ extension TextureLayers {
     /// Draws the textures of layers on `destinationTexture` with the backgroundColor
     func drawAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
-        withAllLayerUpdates allUpdates: Bool = false,
+        allLayerUpdates: Bool = false,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -83,7 +83,7 @@ extension TextureLayers {
         else { return }
 
         // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
-        if allUpdates {
+        if allLayerUpdates {
             let bottomIndex: Int = index - 1
             let topIndex: Int = index + 1
 

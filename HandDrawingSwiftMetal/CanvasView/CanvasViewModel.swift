@@ -610,7 +610,7 @@ extension CanvasViewModel {
         else { return }
 
         textureLayers.drawAllTextures(
-            withAllLayerUpdates: allLayerUpdates,
+            allLayerUpdates: allLayerUpdates,
             on: canvasTexture,
             with: commandBuffer
         )
