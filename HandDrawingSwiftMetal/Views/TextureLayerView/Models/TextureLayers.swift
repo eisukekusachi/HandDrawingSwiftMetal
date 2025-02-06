@@ -84,35 +84,14 @@ extension TextureLayers {
 
         // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
         if allLayerUpdates {
-            let bottomIndex: Int = index - 1
-            let topIndex: Int = index + 1
-
             MTLRenderer.shared.clearTexture(texture: bottomTexture, with: commandBuffer)
             MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
 
-            if bottomIndex >= 0 {
-                for i in 0 ... bottomIndex where layers[i].isVisible {
-                    if let texture = layers[i].texture {
-                        MTLRenderer.shared.mergeTexture(
-                            texture: texture,
-                            alpha: layers[i].alpha,
-                            on: bottomTexture,
-                            with: commandBuffer
-                        )
-                    }
-                }
+            if index > 0 {
+                updateTexture(targetTexture: bottomTexture, range: 0 ... index - 1, commandBuffer: commandBuffer)
             }
-            if topIndex < layers.count {
-                for i in topIndex ..< layers.count where layers[i].isVisible {
-                    if let texture = layers[i].texture {
-                        MTLRenderer.shared.mergeTexture(
-                            texture: texture,
-                            alpha: layers[i].alpha,
-                            on: topTexture,
-                            with: commandBuffer
-                        )
-                    }
-                }
+            if index < layers.count - 1 {
+                updateTexture(targetTexture: topTexture, range: index + 1 ... layers.count - 1, commandBuffer: commandBuffer)
             }
         }
 
@@ -199,6 +178,28 @@ extension TextureLayers {
             toOffset: toListOffset
         )
         reverseLayers()
+    }
+
+}
+
+extension TextureLayers {
+
+    private func updateTexture(
+        targetTexture: MTLTexture,
+        range: ClosedRange<Int>,
+        commandBuffer: MTLCommandBuffer
+    ) {
+        layers[range]
+            .filter { $0.isVisible }
+            .forEach { layer in
+                guard let texture = layer.texture else { return }
+                MTLRenderer.shared.mergeTexture(
+                    texture: texture,
+                    alpha: layer.alpha,
+                    on: targetTexture,
+                    with: commandBuffer
+                )
+            }
     }
 
 }
