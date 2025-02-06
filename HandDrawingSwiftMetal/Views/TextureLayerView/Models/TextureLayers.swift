@@ -27,33 +27,43 @@ final class TextureLayers: Layers<TextureLayer> {
     }
 
     func initLayers(
-        size: CGSize,
         layers: [TextureLayer] = [],
         layerIndex: Int = 0
     ) {
-        bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        guard
+            let size = layers.first?.texture?.size,
+            let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
+            let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        else { return }
 
-        if layers.isEmpty,
-           let texture = MTLTextureCreator.makeBlankTexture(
-            size: size,
-            with: device
-           ) {
-            initLayers(
-                index: layerIndex,
-                layers: [
-                    .init(
-                        texture: texture,
-                        title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-                    )
-                ]
-            )
-        } else {
-            initLayers(
-                index: layerIndex,
-                layers: layers
-            )
-        }
+        self.bottomTexture = bottomTexture
+        self.topTexture = topTexture
+
+        initLayers(
+            index: layerIndex,
+            layers: layers
+        )
+    }
+
+    func initLayers(size: CGSize) {
+        guard
+            let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
+            let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
+            let texture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        else { return }
+
+        self.bottomTexture = bottomTexture
+        self.topTexture = topTexture
+
+        initLayers(
+            index: 0,
+            layers: [
+                .init(
+                    texture: texture,
+                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+                )
+            ]
+        )
     }
 
 }
