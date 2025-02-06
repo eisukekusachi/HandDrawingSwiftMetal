@@ -6,7 +6,6 @@
 //
 
 import MetalKit
-import Combine
 
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
@@ -16,11 +15,9 @@ final class TextureLayers: Layers<TextureLayer> {
     /// A texture that combines the textures of all layers above the selected layer
     private var topTexture: MTLTexture!
 
-    private var temporaryTexture: MTLTexture!
-
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     override init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -36,7 +33,6 @@ final class TextureLayers: Layers<TextureLayer> {
     ) {
         bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
         topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        temporaryTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
 
         if layers.isEmpty,
            let texture = MTLTextureCreator.makeBlankTexture(
