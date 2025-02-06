@@ -17,6 +17,8 @@ final class TextureLayers: Layers<TextureLayer> {
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
+    var backgroundColor: UIColor = .white
+
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     override init() {
@@ -73,7 +75,6 @@ extension TextureLayers {
     func drawAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
         withAllLayerUpdates allUpdates: Bool = false,
-        backgroundColor: UIColor,
         on destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {

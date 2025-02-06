@@ -162,6 +162,12 @@ final class CanvasViewModel {
                 self?.eraserDrawingTexture.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
+
+        drawingTool.backgroundColorPublisher
+            .sink { [weak self] color in
+                self?.textureLayers.backgroundColor = color
+            }
+            .store(in: &cancellables)
     }
 
     func initCanvas(size: CGSize) {
@@ -605,7 +611,6 @@ extension CanvasViewModel {
 
         textureLayers.drawAllTextures(
             withAllLayerUpdates: allLayerUpdates,
-            backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
         )
@@ -640,7 +645,6 @@ extension CanvasViewModel {
 
         textureLayers.drawAllTextures(
             usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
             on: canvasTexture,
             with: commandBuffer
         )
