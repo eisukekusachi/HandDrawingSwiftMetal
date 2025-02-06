@@ -17,7 +17,7 @@ final class TextureLayers: Layers<TextureLayer> {
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     override init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
