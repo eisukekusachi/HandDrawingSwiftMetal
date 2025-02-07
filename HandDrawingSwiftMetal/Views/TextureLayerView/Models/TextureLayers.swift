@@ -83,11 +83,11 @@ final class TextureLayers: Layers<TextureLayer> {
 }
 
 extension TextureLayers {
-    /// Draws the textures of layers on `destinationTexture` with the backgroundColor
-    func drawAllTextures(
+    /// Merges the textures of layers into `destinationTexture` with the backgroundColor
+    func mergeAllTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
         allLayerUpdates: Bool = false,
-        on destinationTexture: MTLTexture?,
+        into destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -120,7 +120,7 @@ extension TextureLayers {
 
         MTLRenderer.shared.mergeTexture(
             texture: bottomTexture,
-            on: destinationTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
 
@@ -128,14 +128,14 @@ extension TextureLayers {
             MTLRenderer.shared.mergeTexture(
                 texture: texture,
                 alpha: layers[index].alpha,
-                on: destinationTexture,
+                into: destinationTexture,
                 with: commandBuffer
             )
         }
 
         MTLRenderer.shared.mergeTexture(
             texture: topTexture,
-            on: destinationTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
     }
@@ -193,7 +193,7 @@ extension TextureLayers {
 
     private func mergeLayerTextures(
         range: ClosedRange<Int>,
-        into targetTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         layers[range]
@@ -206,7 +206,7 @@ extension TextureLayers {
                 MTLRenderer.shared.mergeTexture(
                     texture: result.0,
                     alpha: result.1,
-                    on: targetTexture,
+                    into: destinationTexture,
                     with: commandBuffer
                 )
             }

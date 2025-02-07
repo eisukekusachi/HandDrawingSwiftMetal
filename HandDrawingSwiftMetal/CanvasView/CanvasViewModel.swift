@@ -615,9 +615,9 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        textureLayers.drawAllTextures(
+        textureLayers.mergeAllTextures(
             allLayerUpdates: allLayerUpdates,
-            on: canvasTexture,
+            into: canvasTexture,
             with: commandBuffer
         )
 
@@ -649,9 +649,9 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        textureLayers.drawAllTextures(
+        textureLayers.mergeAllTextures(
             usingCurrentTexture: currentTexture,
-            on: canvasTexture,
+            into: canvasTexture,
             with: commandBuffer
         )
 

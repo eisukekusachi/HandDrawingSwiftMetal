@@ -39,14 +39,14 @@ protocol MTLRendering {
 
     func mergeTexture(
         texture: MTLTexture,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
     func mergeTexture(
         texture: MTLTexture,
         alpha: Int,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
@@ -202,13 +202,13 @@ final class MTLRenderer: MTLRendering {
 
     func mergeTexture(
         texture: MTLTexture,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         mergeTexture(
             texture: texture,
             alpha: 255,
-            on: destinationTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
     }
@@ -216,7 +216,7 @@ final class MTLRenderer: MTLRendering {
     func mergeTexture(
         texture: MTLTexture,
         alpha: Int = 255,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
