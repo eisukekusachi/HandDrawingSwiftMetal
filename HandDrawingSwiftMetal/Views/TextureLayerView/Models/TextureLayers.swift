@@ -88,10 +88,10 @@ extension TextureLayers {
             MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
 
             if index > 0 {
-                updateTexture(targetTexture: bottomTexture, range: 0 ... index - 1, commandBuffer: commandBuffer)
+                mergeLayerTextures(range: 0 ... index - 1, into: bottomTexture, with: commandBuffer)
             }
             if index < layers.count - 1 {
-                updateTexture(targetTexture: topTexture, range: index + 1 ... layers.count - 1, commandBuffer: commandBuffer)
+                mergeLayerTextures(range: index + 1 ... layers.count - 1, into: topTexture, with: commandBuffer)
             }
         }
 
@@ -174,18 +174,21 @@ extension TextureLayers {
 
 extension TextureLayers {
 
-    private func updateTexture(
-        targetTexture: MTLTexture,
+    private func mergeLayerTextures(
         range: ClosedRange<Int>,
-        commandBuffer: MTLCommandBuffer
+        into targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) {
         layers[range]
             .filter { $0.isVisible }
-            .forEach { layer in
-                guard let texture = layer.texture else { return }
+            .compactMap { layer -> (MTLTexture, Int)? in
+                guard let texture: MTLTexture = layer.texture else { return nil }
+                return (texture, layer.alpha)
+            }
+            .forEach { result in
                 MTLRenderer.shared.mergeTexture(
-                    texture: texture,
-                    alpha: layer.alpha,
+                    texture: result.0,
+                    alpha: result.1,
                     on: targetTexture,
                     with: commandBuffer
                 )
