@@ -11,11 +11,15 @@ import MetalKit
 final class TextureLayers: Layers<TextureLayer> {
 
     /// A texture that combines the textures of all layers below the selected layer
-    private var bottomTexture: MTLTexture!
+    private var bottomTexture: MTLTexture?
     /// A texture that combines the textures of all layers above the selected layer
-    private var topTexture: MTLTexture!
+    private var topTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers?
+
+    var isTextureInitialized: Bool {
+        bottomTexture != nil && topTexture != nil
+    }
 
     var backgroundColor: UIColor = .white
 
@@ -36,7 +40,11 @@ final class TextureLayers: Layers<TextureLayer> {
             let size = layers.first?.texture?.size,
             let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        else { return }
+        else {
+            bottomTexture = nil
+            topTexture = nil
+            return
+        }
 
         self.bottomTexture = bottomTexture
         self.topTexture = topTexture
@@ -49,10 +57,14 @@ final class TextureLayers: Layers<TextureLayer> {
 
     func initLayers(size: CGSize) {
         guard
+            size > MTLRenderer.minimumTextureSize,
             let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let texture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        else { return }
+        else {
+            assert(false, "Failed to generate texture")
+            return
+        }
 
         self.bottomTexture = bottomTexture
         self.topTexture = topTexture
@@ -79,8 +91,13 @@ extension TextureLayers {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
+            let bottomTexture,
+            let topTexture,
             let destinationTexture
-        else { return }
+        else {
+            Logger.standard.error("TextureLayers's textures are nil")
+            return
+        }
 
         // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
         if allLayerUpdates {

@@ -171,10 +171,11 @@ final class CanvasViewModel {
     }
 
     func initCanvas(size: CGSize) {
-        brushDrawingTexture.initTextures(size)
-        eraserDrawingTexture.initTextures(size)
 
         textureLayers.initLayers(size: size)
+
+        brushDrawingTexture.initTextures(size)
+        eraserDrawingTexture.initTextures(size)
 
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
@@ -182,15 +183,20 @@ final class CanvasViewModel {
     }
 
     func apply(model: CanvasModel) {
-        projectName = model.projectName
 
-        brushDrawingTexture.initTextures(model.textureSize)
-        eraserDrawingTexture.initTextures(model.textureSize)
+        projectName = model.projectName
 
         textureLayers.initLayers(
             layers: model.layers,
             layerIndex: model.layerIndex
         )
+
+        if textureLayers.isTextureInitialized {
+            textureLayers.initLayers(size: model.textureSize)
+        }
+
+        brushDrawingTexture.initTextures(model.textureSize)
+        eraserDrawingTexture.initTextures(model.textureSize)
 
         for i in 0 ..< textureLayers.layers.count {
             textureLayers.layers[i].updateThumbnail()
