@@ -10,13 +10,6 @@ import MetalKit
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
 
-    /// A texture that combines the textures of all layers below the selected layer
-    private var bottomTexture: MTLTexture?
-    /// A texture that combines the textures of all layers above the selected layer
-    private var topTexture: MTLTexture?
-
-    private var flippedTextureBuffers: MTLTextureBuffers?
-
     var isTextureInitialized: Bool {
         bottomTexture != nil && topTexture != nil
     }
@@ -24,6 +17,13 @@ final class TextureLayers: Layers<TextureLayer> {
     var backgroundColor: UIColor = .white
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
+    /// A texture that combines the textures of all layers below the selected layer
+    private var bottomTexture: MTLTexture?
+    /// A texture that combines the textures of all layers above the selected layer
+    private var topTexture: MTLTexture?
+
+    private var flippedTextureBuffers: MTLTextureBuffers?
 
     override init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -101,16 +101,50 @@ extension TextureLayers {
 
         // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
         if allLayerUpdates {
-            MTLRenderer.shared.clearTexture(texture: bottomTexture, with: commandBuffer)
-            MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
-
-            if index > 0 {
-                mergeLayerTextures(range: 0 ... index - 1, into: bottomTexture, with: commandBuffer)
-            }
-            if index < layers.count - 1 {
-                mergeLayerTextures(range: index + 1 ... layers.count - 1, into: topTexture, with: commandBuffer)
-            }
+            updateBottomTextureIfNeeded(commandBuffer: commandBuffer)
+            updateTopTextureIfNeeded(commandBuffer: commandBuffer)
         }
+
+        mergeLayerTextures(
+            usingCurrentTexture: currentTexture,
+            into: destinationTexture,
+            with: commandBuffer
+        )
+    }
+
+    func updateBottomTextureIfNeeded(
+        commandBuffer: MTLCommandBuffer
+    ) {
+        guard let bottomTexture else { return }
+
+        MTLRenderer.shared.clearTexture(texture: bottomTexture, with: commandBuffer)
+
+        if index > 0 {
+            mergeLayerTextures(range: 0 ... index - 1, into: bottomTexture, with: commandBuffer)
+        }
+    }
+    func updateTopTextureIfNeeded(
+        commandBuffer: MTLCommandBuffer
+    ) {
+        guard let topTexture else { return }
+
+        MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
+
+        if index < layers.count - 1 {
+            mergeLayerTextures(range: index + 1 ... layers.count - 1, into: topTexture, with: commandBuffer)
+        }
+    }
+
+    func mergeLayerTextures(
+        usingCurrentTexture currentTexture: MTLTexture? = nil,
+        into destinationTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let bottomTexture,
+            let topTexture,
+            let destinationTexture
+        else { return }
 
         MTLRenderer.shared.fillTexture(
             texture: destinationTexture,
@@ -143,6 +177,7 @@ extension TextureLayers {
 }
 
 extension TextureLayers {
+
     func updateLayer(
         index: Int,
         title: String? = nil,
