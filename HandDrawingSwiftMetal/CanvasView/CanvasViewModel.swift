@@ -283,32 +283,24 @@ extension CanvasViewModel {
 
             guard
                 let drawingCurvePoints,
+                let textureSize = canvasTexture?.size,
+                let drawableSize = canvasView?.renderTexture?.size,
                 let key = fingerDrawingDictionary.dictionaryKey,
                 let screenTouchPoints = fingerDrawingDictionary.getLatestTouchPoints(for: key)
             else { return }
 
-            let touchPhase = screenTouchPoints.currentTouchPhase
-
-            // Convert screen scale points to texture scale
-            let textureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
-                guard
-                    let textureSize = canvasTexture?.size,
-                    let drawableSize = canvasView?.renderTexture?.size
-                else { return nil }
-
-                return .init(
-                    matrix: transformer.matrix.inverted(flipY: true),
-                    touchPoint: $0,
-                    textureSize: textureSize,
-                    drawableSize: drawableSize,
-                    frameSize: frameSize,
-                    diameter: CGFloat(drawingTool.diameter)
-                )
-            }
-
             drawingCurvePoints.appendToIterator(
-                points: textureDotPoints,
-                touchPhase: touchPhase
+                points: screenTouchPoints.map {
+                    .init(
+                        matrix: transformer.matrix.inverted(flipY: true),
+                        touchPoint: $0,
+                        textureSize: textureSize,
+                        drawableSize: drawableSize,
+                        frameSize: frameSize,
+                        diameter: CGFloat(drawingTool.diameter)
+                    )
+                },
+                touchPhase: screenTouchPoints.currentTouchPhase
             )
 
             drawingDisplayLink.runDisplayLink(
@@ -393,7 +385,11 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        guard let drawingCurvePoints else { return }
+        guard
+            let drawingCurvePoints,
+            let textureSize = canvasTexture?.size,
+            let drawableSize = canvasView?.renderTexture?.size
+        else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         Array(actualTouches).sorted { $0.timestamp < $1.timestamp }.forEach { actualTouch in
@@ -402,28 +398,18 @@ extension CanvasViewModel {
 
         let screenTouchPoints = pencilDrawingArrays.getLatestActualTouchPoints()
 
-        let touchPhase = screenTouchPoints.currentTouchPhase
-
-        // Convert screen scale points to texture scale
-        let textureDotPoints: [CanvasGrayscaleDotPoint] = screenTouchPoints.compactMap {
-            guard
-                let textureSize = canvasTexture?.size,
-                let drawableSize = canvasView?.renderTexture?.size
-            else { return nil }
-
-            return .init(
-                matrix: transformer.matrix.inverted(flipY: true),
-                touchPoint: $0,
-                textureSize: textureSize,
-                drawableSize: drawableSize,
-                frameSize: frameSize,
-                diameter: CGFloat(drawingTool.diameter)
-            )
-        }
-
         drawingCurvePoints.appendToIterator(
-            points: textureDotPoints,
-            touchPhase: touchPhase
+            points: screenTouchPoints.map {
+                .init(
+                    matrix: transformer.matrix.inverted(flipY: true),
+                    touchPoint: $0,
+                    textureSize: textureSize,
+                    drawableSize: drawableSize,
+                    frameSize: frameSize,
+                    diameter: CGFloat(drawingTool.diameter)
+                )
+            },
+            touchPhase: screenTouchPoints.currentTouchPhase
         )
 
         drawingDisplayLink.runDisplayLink(
