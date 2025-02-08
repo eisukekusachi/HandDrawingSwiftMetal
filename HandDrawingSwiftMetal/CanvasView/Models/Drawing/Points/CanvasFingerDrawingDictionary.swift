@@ -38,6 +38,11 @@ extension CanvasFingerDrawingDictionary {
         }
     }
 
+    func updateDictionaryKeyIfKeyIsNil() {
+        if dictionaryKey == nil {
+            dictionaryKey = touchArrayDictionary.keys.first
+        }
+    }
     func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
         touches.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {

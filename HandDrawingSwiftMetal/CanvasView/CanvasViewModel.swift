@@ -278,10 +278,10 @@ extension CanvasViewModel {
             if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
                 drawingCurvePoints = CanvasFingerDrawingCurvePoints()
             }
-            if fingerDrawingDictionary.dictionaryKey == nil {
-                fingerDrawingDictionary.dictionaryKey = fingerDrawingDictionary.touchArrayDictionary.keys.first
-            }
-            guard 
+
+            fingerDrawingDictionary.updateDictionaryKeyIfKeyIsNil()
+
+            guard
                 let drawingCurvePoints,
                 let key = fingerDrawingDictionary.dictionaryKey,
                 let screenTouchPoints = fingerDrawingDictionary.getLatestTouchPoints(for: key)
