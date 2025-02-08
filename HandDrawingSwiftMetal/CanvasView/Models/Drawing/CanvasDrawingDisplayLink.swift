@@ -12,11 +12,11 @@ import Combine
 final class CanvasDrawingDisplayLink {
 
     // Requesting to draw a line on the canvas emits `Void`
-    var requestDrawingOnCanvasPublisher: AnyPublisher<Void, Never> {
-        requestDrawingOnCanvasSubject.eraseToAnyPublisher()
+    var requestUpdateCanvasWithDrawingPublisher: AnyPublisher<Void, Never> {
+        requestUpdateCanvasWithDrawingSubject.eraseToAnyPublisher()
     }
 
-    private let requestDrawingOnCanvasSubject = PassthroughSubject<Void, Never>()
+    private let requestUpdateCanvasWithDrawingSubject = PassthroughSubject<Void, Never>()
 
     private(set) var displayLink: CADisplayLink?
 
@@ -24,7 +24,7 @@ final class CanvasDrawingDisplayLink {
         setupDisplayLink()
     }
 
-    func runDisplayLink(
+    func updateCanvasWithDrawing(
         isCurrentlyDrawing: Bool
     ) {
         if isCurrentlyDrawing {
@@ -33,8 +33,8 @@ final class CanvasDrawingDisplayLink {
             displayLink?.isPaused = true
 
             // When stopping the displayLink upon finger release,
-            // the rendering process does not complete, so `updateDrawingTextureWhileDrawing()` is executed once.
-            updateDrawingTextureWhileDrawing()
+            // the rendering process does not complete, so `updateCanvasWhileDrawing()` is executed once.
+            updateCanvasWhileDrawing()
         }
     }
 
@@ -43,13 +43,13 @@ final class CanvasDrawingDisplayLink {
 extension CanvasDrawingDisplayLink {
     private func setupDisplayLink() {
         // Configure the display link for drawing
-        displayLink = CADisplayLink(target: self, selector: #selector(updateDrawingTextureWhileDrawing))
+        displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
         displayLink?.add(to: .current, forMode: .common)
         displayLink?.isPaused = true
     }
 
-    @objc private func updateDrawingTextureWhileDrawing() {
-        requestDrawingOnCanvasSubject.send(())
+    @objc private func updateCanvasWhileDrawing() {
+        requestUpdateCanvasWithDrawingSubject.send(())
     }
 
 }

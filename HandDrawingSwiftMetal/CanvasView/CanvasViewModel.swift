@@ -113,7 +113,7 @@ final class CanvasViewModel {
 
     private func subscribe() {
 
-        drawingDisplayLink.requestDrawingOnCanvasPublisher
+        drawingDisplayLink.requestUpdateCanvasWithDrawingPublisher
             .sink { [weak self] in
                 self?.updateCanvasWithDrawing()
             }
@@ -303,7 +303,7 @@ extension CanvasViewModel {
                 touchPhase: screenTouchPoints.currentTouchPhase
             )
 
-            drawingDisplayLink.runDisplayLink(
+            drawingDisplayLink.updateCanvasWithDrawing(
                 isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
             )
 
@@ -396,7 +396,7 @@ extension CanvasViewModel {
             touchPhase: screenTouchPoints.currentTouchPhase
         )
 
-        drawingDisplayLink.runDisplayLink(
+        drawingDisplayLink.updateCanvasWithDrawing(
             isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
         )
     }
