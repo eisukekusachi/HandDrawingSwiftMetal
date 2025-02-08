@@ -302,7 +302,7 @@ extension CanvasViewModel {
                     textureSize: textureSize,
                     drawableSize: drawableSize,
                     frameSize: frameSize,
-                    diameter: CGFloat(drawingTool.brushDiameter)
+                    diameter: CGFloat(drawingTool.diameter)
                 )
             }
 
@@ -417,7 +417,7 @@ extension CanvasViewModel {
                 textureSize: textureSize,
                 drawableSize: drawableSize,
                 frameSize: frameSize,
-                diameter: CGFloat(drawingTool.brushDiameter)
+                diameter: CGFloat(drawingTool.diameter)
             )
         }
 
