@@ -70,18 +70,18 @@ final class CanvasViewModel {
 
     private var canvasView: CanvasViewProtocol?
 
-    /// A texture with a background color, composed of `drawingTexture` and `currentTexture`
-    private var canvasTexture: MTLTexture?
-
-    /// A texture that combines the texture of the currently selected `TextureLayer` and `drawingTexture`
-    private var currentTexture: MTLTexture?
-
     /// A protocol for real-time drawing on a texture
     private var drawingTexture: CanvasDrawingTexture?
     /// A drawing texture with a brush
     private let brushDrawingTexture = CanvasBrushDrawingTexture(renderer: MTLRenderer.shared)
     /// A drawing texture with an eraser
     private let eraserDrawingTexture = CanvasEraserDrawingTexture(renderer: MTLRenderer.shared)
+
+    /// A texture that combines the texture of the currently selected layer and the `drawingTexture`
+    private var currentTexture: MTLTexture?
+
+    /// A texture that combines the background color, the texture of `TextureLayers` and `currentTexture`
+    private var canvasTexture: MTLTexture?
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
