@@ -283,13 +283,13 @@ extension CanvasViewModel {
 
             guard
                 let drawingCurvePoints,
-                let touchPoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)?.getLatestTouchPoints(fingerScreenTouches.touchArrayDictionary),
+                let screenTouchPoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)?.getLatestTouchPoints(fingerScreenTouches.touchArrayDictionary),
                 let textureSize = canvasTexture?.size,
                 let drawableSize = canvasView?.renderTexture?.size
             else { return }
 
             drawingCurvePoints.appendToIterator(
-                points: touchPoints.map {
+                points: screenTouchPoints.map {
                     .init(
                         matrix: transformer.matrix.inverted(flipY: true),
                         touchPoint: $0,
@@ -299,7 +299,7 @@ extension CanvasViewModel {
                         diameter: CGFloat(drawingTool.diameter)
                     )
                 },
-                touchPhase: touchPoints.currentTouchPhase
+                touchPhase: screenTouchPoints.currentTouchPhase
             )
 
             drawingDisplayLink.runDisplayLink(
