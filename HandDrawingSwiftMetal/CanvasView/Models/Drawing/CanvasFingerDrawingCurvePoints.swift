@@ -45,10 +45,10 @@ extension CanvasFingerDrawingCurvePoints {
         return isFirstCurveToBeCreated
     }
 
-    func getLatestTouchPoints(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) -> [CanvasTouchPoint]? {
+    func getLatestTouchPoints(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) -> [CanvasTouchPoint] {
         guard
             let touchPoints = dictionary[dictionaryKey]
-        else { return nil }
+        else { return [] }
 
         let latestTouchPoints = touchPoints.elements(after: latestTouchPoint) ?? touchPoints
         latestTouchPoint = latestTouchPoints.last

@@ -282,11 +282,12 @@ extension CanvasViewModel {
             }
 
             guard
-                let drawingCurvePoints,
-                let screenTouchPoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)?.getLatestTouchPoints(fingerScreenTouches.touchArrayDictionary),
                 let textureSize = canvasTexture?.size,
-                let drawableSize = canvasView?.renderTexture?.size
+                let drawableSize = canvasView?.renderTexture?.size,
+                let drawingCurvePoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)
             else { return }
+
+            let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(fingerScreenTouches.touchArrayDictionary)
 
             drawingCurvePoints.appendToIterator(
                 points: screenTouchPoints.map {
@@ -370,9 +371,9 @@ extension CanvasViewModel {
         view: UIView
     ) {
         guard
-            let drawingCurvePoints,
             let textureSize = canvasTexture?.size,
-            let drawableSize = canvasView?.renderTexture?.size
+            let drawableSize = canvasView?.renderTexture?.size,
+            let drawingCurvePoints = (drawingCurvePoints as? CanvasPencilDrawingCurvePoints)
         else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
