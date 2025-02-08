@@ -191,7 +191,8 @@ final class CanvasViewModel {
             layerIndex: model.layerIndex
         )
 
-        if textureLayers.isTextureInitialized {
+        // If `textureLayers` initialization has failed, perform the initialization
+        if !textureLayers.isTextureInitialized {
             textureLayers.initLayers(size: model.textureSize)
         }
 
