@@ -480,57 +480,38 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>) {
+        // Since the pencil takes priority, even if `drawingCurvePoints` contains an instance,
+        // it will be overwritten when touchBegan occurs.
         if actualTouches.contains(where: { $0.phase == .began }) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
         }
-
-        guard
-            let textureSize = canvasTexture?.size,
-            let drawableSize = canvasView?.renderTexture?.size,
-            let drawingCurvePoints = (drawingCurvePoints as? CanvasPencilDrawingCurvePoints)
-        else { return }
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         pencilScreenTouch.appendActualTouchWithEstimatedValues(
             actualTouches.sorted { $0.timestamp < $1.timestamp }
         )
 
-        let screenTouchPoints = pencilScreenTouch.getLatestActualTouchPoints()
-
-        drawingCurvePoints.appendToIterator(
-            points: screenTouchPoints.map {
-                .init(
-                    matrix: transformer.matrix.inverted(flipY: true),
-                    touchPoint: $0,
-                    textureSize: textureSize,
-                    drawableSize: drawableSize,
-                    frameSize: frameSize,
-                    diameter: CGFloat(drawingTool.diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
-        )
-
-        drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
-        )
+        drawCurveOnCanvas(pencilScreenTouch.latestActualTouchPoints)
     }
 
     private func drawFingerCurveOnCanvas() {
-        if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
-           !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
-            drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
+        // If `drawingCurvePoints` is nil, an instance of `CanvasFingerDrawingCurvePoints` will be set.
+        if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
+            drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
+        fingerScreenTouches.updateDictionaryKeyIfKeyIsNil()
+
+        drawCurveOnCanvas(fingerScreenTouches.latestTouchPoints)
+    }
+
+    private func drawCurveOnCanvas(_ screenTouchPoints: [CanvasTouchPoint]) {
         guard
             let textureSize = canvasTexture?.size,
-            let drawableSize = canvasView?.renderTexture?.size,
-            let drawingCurvePoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)
+            let drawableSize = canvasView?.renderTexture?.size
         else { return }
 
-        let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(from: fingerScreenTouches.touchArrayDictionary)
-
-        drawingCurvePoints.appendToIterator(
+        drawingCurvePoints?.appendToIterator(
             points: screenTouchPoints.map {
                 .init(
                     matrix: transformer.matrix.inverted(flipY: true),
@@ -545,7 +526,7 @@ extension CanvasViewModel {
         )
 
         drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
+            isCurrentlyDrawing: drawingCurvePoints?.isCurrentlyDrawing ?? false
         )
     }
 
@@ -640,17 +621,16 @@ extension CanvasViewModel {
     }
 
     private func cancelFingerInput() {
-        fingerScreenTouches.reset()
-
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         drawingTexture?.clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
+
+        fingerScreenTouches.reset()
 
         drawingCurvePoints = nil
         transformer.resetMatrix()
 
         canvasView?.resetCommandBuffer()
-
         updateCanvas()
     }
 

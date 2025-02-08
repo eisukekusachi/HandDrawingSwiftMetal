@@ -53,6 +53,13 @@ extension CanvasPencilScreenTouch {
         actualTouchPointArray.last?.estimationUpdateIndex == lastEstimationUpdateIndex
     }
 
+    /// Use the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing
+    var latestActualTouchPoints: [CanvasTouchPoint] {
+        let touchPoints = actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
+        latestActualTouchPoint = actualTouchPointArray.last
+        return touchPoints
+    }
+
     func hasPencilLiftedOffScreen(_ touchPhase: UITouch.Phase?) -> Bool {
         [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase)
     }
@@ -99,13 +106,6 @@ extension CanvasPencilScreenTouch {
         if hasProcessFinished, let point = estimatedTouchPointArray.last {
             actualTouchPointArray.append(point)
         }
-    }
-
-    /// Use the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing
-    func getLatestActualTouchPoints() -> [CanvasTouchPoint] {
-        let touchPoints = actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
-        latestActualTouchPoint = actualTouchPointArray.last
-        return touchPoints
     }
 
     func setLastEstimationUpdateIndexIfPencilLiftedOffScreen() {

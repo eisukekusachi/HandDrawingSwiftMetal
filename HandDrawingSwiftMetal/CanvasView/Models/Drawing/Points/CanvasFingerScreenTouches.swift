@@ -13,6 +13,12 @@ final class CanvasFingerScreenTouches {
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
+    /// A key currently in use in the finger touch dictionary
+    private var dictionaryKey: CanvasTouchHashValue?
+
+    /// A variable used to get elements from the array starting from the next element after this point
+    private(set) var latestTouchPoint: CanvasTouchPoint?
+
     convenience init(touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
         self.init()
         self.touchArrayDictionary = touchArrayDictionary
@@ -25,12 +31,33 @@ extension CanvasFingerScreenTouches {
         touchArrayDictionary.isEmpty
     }
 
+    var latestTouchPoints: [CanvasTouchPoint] {
+        guard
+            let dictionaryKey,
+            let touchPoints = touchArrayDictionary[dictionaryKey]
+        else { return [] }
+
+        let latestTouchPoints = touchPoints.elements(after: latestTouchPoint) ?? touchPoints
+        latestTouchPoint = latestTouchPoints.last
+
+        return latestTouchPoints
+    }
+
     var isFingersOnScreen: Bool {
         !touchArrayDictionary.keys.contains { key in
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(
                 touchArrayDictionary[key]?.last?.phase ?? .cancelled
             )
         }
+    }
+
+    func updateDictionaryKeyIfKeyIsNil() {
+        guard
+            let key = touchArrayDictionary.keys.first,
+            dictionaryKey == nil
+        else { return }
+
+        dictionaryKey = key
     }
 
     func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
@@ -55,6 +82,7 @@ extension CanvasFingerScreenTouches {
 
     func reset() {
         touchArrayDictionary = [:]
+        dictionaryKey = nil
     }
 
 }
