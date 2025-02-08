@@ -266,7 +266,7 @@ extension CanvasViewModel {
 
         fingerScreenTouches.appendTouches(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
-                $0[$1.hashValue] = CanvasTouchPoint(touch: $1, view: view)
+                $0[$1.hashValue] = .init(touch: $1, view: view)
             }
         )
 
