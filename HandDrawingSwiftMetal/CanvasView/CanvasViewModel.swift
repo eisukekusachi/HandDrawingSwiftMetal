@@ -518,8 +518,7 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvasWithFinger() {
         if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
-           !(drawingCurvePoints is CanvasFingerDrawingCurvePoints)
-        {
+           !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
         }
 
