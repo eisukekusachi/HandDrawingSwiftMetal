@@ -296,11 +296,6 @@ extension CanvasViewModel {
         // Set `inputDevice` to '.pencil'
         inputDevice.update(.pencil)
 
-        // Make `drawingCurvePoints` and reset the parameters when a touch begins
-        if estimatedTouches.contains(where: {$0.phase == .began}) {
-            drawingCurvePoints = CanvasPencilDrawingCurvePoints()
-        }
-
         // Append estimated values to the array
         event?.allTouches?
             .compactMap { $0.type == .pencil ? $0 : nil }
@@ -316,6 +311,10 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
+        if actualTouches.contains(where: { $0.phase == .began }) {
+            drawingCurvePoints = CanvasPencilDrawingCurvePoints()
+        }
+
         guard
             let textureSize = canvasTexture?.size,
             let drawableSize = canvasView?.renderTexture?.size,
