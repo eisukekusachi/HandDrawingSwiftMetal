@@ -50,15 +50,15 @@ final class CanvasViewModel {
         requestShowingLayerViewSubject.value
     }
 
-    private var drawingCurvePoints: CanvasDrawingCurvePoints?
-
-    private let transformer = CanvasTransformer()
-
     /// A class for handling finger input values
     private let fingerScreenTouches = CanvasFingerScreenTouches()
 
     /// A class for handling Apple Pencil inputs
     private let pencilScreenTouch = CanvasPencilScreenTouch()
+
+    private var drawingCurvePoints: CanvasDrawingCurvePoints?
+
+    private let transformer = CanvasTransformer()
 
     private let inputDevice = CanvasInputDeviceStatus()
 
@@ -275,8 +275,8 @@ extension CanvasViewModel {
             .init(from: fingerScreenTouches.touchArrayDictionary)
         ) {
         case .drawing:
-            if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints),
-               let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first
+            if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
+               !(drawingCurvePoints is CanvasFingerDrawingCurvePoints)
             {
                 drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
             }
