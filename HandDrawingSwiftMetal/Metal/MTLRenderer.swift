@@ -131,7 +131,10 @@ final class MTLRenderer: MTLRendering {
                 destinationSize: destinationTexture.size,
                 with: device
             )
-        else { return }
+        else {
+            Logger.standard.error("Failed to create textureBuffers")
+            return
+        }
 
         MTLRenderer.shared.drawTexture(
             texture: texture,
