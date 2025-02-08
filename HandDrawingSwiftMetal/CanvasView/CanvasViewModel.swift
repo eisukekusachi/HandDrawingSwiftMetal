@@ -358,12 +358,10 @@ extension CanvasViewModel {
         event?.allTouches?
             .compactMap { $0.type == .pencil ? $0 : nil }
             .sorted { $0.timestamp < $1.timestamp }
-            .forEach { touch in
-                event?.coalescedTouches(for: touch)?.forEach { coalescedTouch in
-                    pencilScreenTouch.appendEstimatedValue(
-                        .init(touch: coalescedTouch, view: view)
-                    )
-                }
+            .forEach { [weak self] touch in
+                self?.pencilScreenTouch.appendEstimatedValues(
+                    event?.coalescedTouches(for: touch)?.map { .init(touch: $0, view: view) } ?? []
+                )
             }
     }
 

@@ -57,9 +57,11 @@ extension CanvasPencilScreenTouch {
         [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase)
     }
 
-    func appendEstimatedValue(_ touchPoint: CanvasTouchPoint) {
-        estimatedTouchPointArray.append(touchPoint)
-        setLastEstimationUpdateIndexIfPencilLiftedOffScreen()
+    func appendEstimatedValues(_ touchPoints: [CanvasTouchPoint]) {
+        touchPoints.forEach { touchPoint in
+            estimatedTouchPointArray.append(touchPoint)
+            setLastEstimationUpdateIndexIfPencilLiftedOffScreen()
+        }
     }
 
     func appendActualTouchWithEstimatedValues(_ actualTouches: [UITouch]) {
