@@ -264,11 +264,11 @@ extension CanvasViewModel {
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
-        var dictionary: [CanvasTouchHashValue: CanvasTouchPoint] = [:]
-        UITouch.getFingerTouches(event: event).forEach { touch in
-            dictionary[touch.hashValue] = .init(touch: touch, view: view)
-        }
-        fingerScreenTouches.appendTouches(dictionary)
+        fingerScreenTouches.appendTouches(
+            UITouch.getFingerTouches(event: event).reduce(into: [:]) {
+                $0[$1.hashValue] = CanvasTouchPoint(touch: $1, view: view)
+            }
+        )
 
         // determine the gesture from the dictionary, and based on that, either draw a line on the canvas or transform the canvas
         switch screenTouchGesture.update(
