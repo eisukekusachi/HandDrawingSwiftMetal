@@ -54,8 +54,8 @@ final class CanvasViewModel {
 
     private let transformer = CanvasTransformer()
 
-    /// A dictionary for handling finger input values
-    private let fingerDrawingDictionary = CanvasFingerDrawingDictionary()
+    /// A class for handling finger input values
+    private let fingerScreenTouches = CanvasFingerScreenTouches()
 
     /// Arrays for handling Apple Pencil input values
     private let pencilDrawingArrays = CanvasPencilDrawingArrays()
@@ -268,25 +268,25 @@ extension CanvasViewModel {
         UITouch.getFingerTouches(event: event).forEach { touch in
             dictionary[touch.hashValue] = .init(touch: touch, view: view)
         }
-        fingerDrawingDictionary.appendTouches(dictionary)
+        fingerScreenTouches.appendTouches(dictionary)
 
         // determine the gesture from the dictionary, and based on that, either draw a line on the canvas or transform the canvas
         switch screenTouchGesture.update(
-            .init(from: fingerDrawingDictionary.touchArrayDictionary)
+            .init(from: fingerScreenTouches.touchArrayDictionary)
         ) {
         case .drawing:
             if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
                 drawingCurvePoints = CanvasFingerDrawingCurvePoints()
             }
 
-            fingerDrawingDictionary.updateDictionaryKeyIfKeyIsNil()
+            fingerScreenTouches.updateDictionaryKeyIfKeyIsNil()
 
             guard
                 let drawingCurvePoints,
                 let textureSize = canvasTexture?.size,
                 let drawableSize = canvasView?.renderTexture?.size,
-                let key = fingerDrawingDictionary.dictionaryKey,
-                let screenTouchPoints = fingerDrawingDictionary.getLatestTouchPoints(for: key)
+                let key = fingerScreenTouches.dictionaryKey,
+                let screenTouchPoints = fingerScreenTouches.getLatestTouchPoints(for: key)
             else { return }
 
             drawingCurvePoints.appendToIterator(
@@ -309,16 +309,16 @@ extension CanvasViewModel {
 
         case .transforming:
             if transformer.isCurrentKeysNil {
-                transformer.initTransforming(fingerDrawingDictionary.touchArrayDictionary)
+                transformer.initTransforming(fingerScreenTouches.touchArrayDictionary)
             }
 
-            if !fingerDrawingDictionary.hasFingersLiftedOffScreen {
+            if !fingerScreenTouches.hasFingersLiftedOffScreen {
                 transformer.transformCanvas(
                     screenCenter: .init(
                         x: frameSize.width * 0.5,
                         y: frameSize.height * 0.5
                     ),
-                    fingerDrawingDictionary.touchArrayDictionary
+                    fingerScreenTouches.touchArrayDictionary
                 )
             } else {
                 transformer.finishTransforming()
@@ -343,7 +343,7 @@ extension CanvasViewModel {
             break
         }
 
-        fingerDrawingDictionary.removeIfLastElementMatches(phases: [.ended, .cancelled])
+        fingerScreenTouches.removeIfLastElementMatches(phases: [.ended, .cancelled])
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
@@ -662,7 +662,7 @@ extension CanvasViewModel {
         inputDevice.reset()
         screenTouchGesture.reset()
 
-        fingerDrawingDictionary.reset()
+        fingerScreenTouches.reset()
         pencilDrawingArrays.reset()
 
         drawingCurvePoints = nil
@@ -670,7 +670,7 @@ extension CanvasViewModel {
     }
 
     private func cancelFingerInput() {
-        fingerDrawingDictionary.reset()
+        fingerScreenTouches.reset()
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         drawingTexture?.clearDrawingTextures(with: commandBuffer)
