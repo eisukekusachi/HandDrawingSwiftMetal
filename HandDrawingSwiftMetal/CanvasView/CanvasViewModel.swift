@@ -482,9 +482,9 @@ extension CanvasViewModel {
     }
     func didTapAddLayerButton() {
         guard
-            let renderTextureSize = canvasView?.renderTexture?.size,
+            let canvasTextureSize = canvasTexture?.size,
             let newTexture = MTLTextureCreator.makeBlankTexture(
-                size: renderTextureSize,
+                size: canvasTextureSize,
                 with: device
             )
         else { return }

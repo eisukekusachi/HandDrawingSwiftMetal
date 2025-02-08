@@ -21,6 +21,8 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
 
     private(set) var commandBuffer: MTLCommandBuffer?
 
+    /// A texture that is rendered on the screen.
+    /// Its size changes when the device is rotated.
     private var _renderTexture: MTLTexture? {
         didSet {
             updateTextureSubject.send(())
