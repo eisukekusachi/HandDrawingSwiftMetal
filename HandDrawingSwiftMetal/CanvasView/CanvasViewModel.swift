@@ -287,7 +287,7 @@ extension CanvasViewModel {
                 let drawingCurvePoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)
             else { return }
 
-            let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(fingerScreenTouches.touchArrayDictionary)
+            let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(from: fingerScreenTouches.touchArrayDictionary)
 
             drawingCurvePoints.appendToIterator(
                 points: screenTouchPoints.map {
