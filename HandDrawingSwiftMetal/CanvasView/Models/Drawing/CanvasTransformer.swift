@@ -8,8 +8,8 @@
 import UIKit
 import Combine
 
-/// A class for view rotation.
-class CanvasTransformer {
+/// A class for canvas rotation
+final class CanvasTransformer {
 
     var matrix: CGAffineTransform {
         matrixSubject.value
@@ -18,50 +18,52 @@ class CanvasTransformer {
     var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
         matrixSubject.eraseToAnyPublisher()
     }
-
-    private var keyA: CanvasTouchHashValue?
-    private var keyB: CanvasTouchHashValue?
-    private var touchPointA: CGPoint?
-    private var touchPointB: CGPoint?
+    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
 
     private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+    private var keyA: CanvasTouchHashValue?
+    private var keyB: CanvasTouchHashValue?
+    private var firstTouchPointA: CGPoint?
+    private var firstTouchPointB: CGPoint?
 
 }
 
 extension CanvasTransformer {
 
-    var isCurrentKeysNil: Bool {
-        keyA == nil || keyB == nil
+    var isKeysInitialized: Bool {
+        keyA != nil && keyB != nil
     }
 
-    func initTransforming(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
-        updateCurrentKeys(from: dictionary)
-
+    func initTransformingIfNeeded(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
         guard
-            let keyA,
-            let keyB,
+            !isKeysInitialized,
+            dictionary.count == 2,
+            let keyA = dictionary.keys.sorted().first,
+            let keyB = dictionary.keys.sorted().last,
             let pointA = dictionary[keyA]?.first?.location,
             let pointB = dictionary[keyB]?.first?.location
         else { return }
 
-        touchPointA = pointA
-        touchPointB = pointB
+        self.keyA = keyA
+        self.keyB = keyB
+        self.firstTouchPointA = pointA
+        self.firstTouchPointB = pointB
     }
 
     func transformCanvas(screenCenter: CGPoint, _ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
         guard
+            dictionary.count == 2,
             let keyA,
             let keyB,
-            let touchPointA,
-            let touchPointB,
+            let firstTouchPointA,
+            let firstTouchPointB,
             let lastTouchPointA = dictionary[keyA]?.last?.location,
             let lastTouchPointB = dictionary[keyB]?.last?.location,
             let newMatrix = CGAffineTransform.makeMatrix(
                 center: screenCenter,
-                pointsA: (touchPointA, lastTouchPointA),
-                pointsB: (touchPointB, lastTouchPointB),
+                pointsA: (firstTouchPointA, lastTouchPointA),
+                pointsB: (firstTouchPointB, lastTouchPointB),
                 counterRotate: true,
                 flipY: true
             )
@@ -75,41 +77,28 @@ extension CanvasTransformer {
     func setMatrix(_ matrix: CGAffineTransform) {
         matrixSubject.send(matrix)
         storedMatrix = matrix
-        touchPointA = nil
-        touchPointB = nil
+        resetParameters()
+    }
+
+    func resetMatrix() {
+        matrixSubject.value = storedMatrix
+        resetParameters()
     }
 
     func finishTransforming() {
         storedMatrix = matrixSubject.value
-        keyA = nil
-        keyB = nil
-        touchPointA = nil
-        touchPointB = nil
-    }
-
-    func reset() {
-        matrixSubject.value = storedMatrix
-        keyA = nil
-        keyB = nil
-        touchPointA = nil
-        touchPointB = nil
+        resetParameters()
     }
 
 }
 
 extension CanvasTransformer {
 
-    private func updateCurrentKeys(
-        from dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]
-    ) {
-        guard
-            dictionary.count == 2,
-            let firstHashValue = dictionary.keys.sorted().first,
-            let lastHashValue = dictionary.keys.sorted().last
-        else { return }
-
-        keyA = firstHashValue
-        keyB = lastHashValue
+    private func resetParameters() {
+        keyA = nil
+        keyB = nil
+        firstTouchPointA = nil
+        firstTouchPointB = nil
     }
 
 }

@@ -307,11 +307,11 @@ extension CanvasViewModel {
             )
 
         case .transforming:
-            if transformer.isCurrentKeysNil {
-                transformer.initTransforming(fingerScreenTouches.touchArrayDictionary)
-            }
+            transformer.initTransformingIfNeeded(
+                fingerScreenTouches.touchArrayDictionary
+            )
 
-            if !fingerScreenTouches.hasFingerLiftedOffScreen {
+            if fingerScreenTouches.isFingersOnScreen {
                 transformer.transformCanvas(
                     screenCenter: .init(
                         x: frameSize.width * 0.5,
@@ -323,20 +323,7 @@ extension CanvasViewModel {
                 transformer.finishTransforming()
             }
 
-            guard
-                let renderTexture = canvasView?.renderTexture,
-                let commandBuffer = canvasView?.commandBuffer
-            else { return }
-
-            MTLRenderer.shared.drawTexture(
-                texture: canvasTexture,
-                matrix: transformer.matrix,
-                frameSize: frameSize,
-                on: renderTexture,
-                device: device,
-                with: commandBuffer
-            )
-            canvasView?.setNeedsDisplay()
+            updateCanvas()
 
         default:
             break
@@ -430,21 +417,7 @@ extension CanvasViewModel {
 
     func didTapResetTransformButton() {
         transformer.setMatrix(.identity)
-
-        guard
-            let renderTexture = canvasView?.renderTexture,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: canvasTexture,
-            matrix: transformer.matrix,
-            frameSize: frameSize,
-            on: renderTexture,
-            device: device,
-            with: commandBuffer
-        )
-        canvasView?.setNeedsDisplay()
+        updateCanvas()
     }
 
     func didTapNewCanvasButton() {
@@ -597,7 +570,6 @@ extension CanvasViewModel {
 
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
-            let renderTexture = canvasView?.renderTexture,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
@@ -607,16 +579,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        MTLRenderer.shared.drawTexture(
-            texture: canvasTexture,
-            matrix: transformer.matrix,
-            frameSize: frameSize,
-            on: renderTexture,
-            device: device,
-            with: commandBuffer
-        )
-
-        canvasView?.setNeedsDisplay()
+        updateCanvas()
     }
 
     private func updateCanvasWithDrawing() {
@@ -624,7 +587,6 @@ extension CanvasViewModel {
             let drawingCurvePoints,
             let currentTexture,
             let selectedTexture = textureLayers.selectedLayer?.texture,
-            let renderTexture = canvasView?.renderTexture,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
@@ -641,6 +603,15 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
+        updateCanvas()
+    }
+
+    private func updateCanvas() {
+        guard
+            let renderTexture = canvasView?.renderTexture,
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
         MTLRenderer.shared.drawTexture(
             texture: canvasTexture,
             matrix: transformer.matrix,
@@ -649,7 +620,6 @@ extension CanvasViewModel {
             device: device,
             with: commandBuffer
         )
-
         canvasView?.setNeedsDisplay()
     }
 
@@ -665,7 +635,7 @@ extension CanvasViewModel {
         pencilDrawingArrays.reset()
 
         drawingCurvePoints = nil
-        transformer.reset()
+        transformer.resetMatrix()
     }
 
     private func cancelFingerInput() {
@@ -676,7 +646,7 @@ extension CanvasViewModel {
         commandBuffer.commit()
 
         drawingCurvePoints = nil
-        transformer.reset()
+        transformer.resetMatrix()
 
         canvasView?.resetCommandBuffer()
 
