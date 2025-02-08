@@ -272,7 +272,7 @@ extension CanvasViewModel {
 
         // determine the gesture from the dictionary
         switch screenTouchGesture.update(.init(from: fingerScreenTouches.touchArrayDictionary)) {
-        case .drawing: drawCurveOnCanvasWithFinger()
+        case .drawing: drawFingerCurveOnCanvas()
         case .transforming: transformCanvas()
         default: break
         }
@@ -311,7 +311,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        drawCurveOnCanvasWithPencil(actualTouches: actualTouches)
+        drawPencilCurveOnCanvas(actualTouches: actualTouches)
     }
 
 }
@@ -479,7 +479,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawCurveOnCanvasWithPencil(actualTouches: Set<UITouch>) {
+    private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>) {
         if actualTouches.contains(where: { $0.phase == .began }) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
         }
@@ -516,7 +516,7 @@ extension CanvasViewModel {
         )
     }
 
-    private func drawCurveOnCanvasWithFinger() {
+    private func drawFingerCurveOnCanvas() {
         if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
            !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
