@@ -311,40 +311,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        if actualTouches.contains(where: { $0.phase == .began }) {
-            drawingCurvePoints = CanvasPencilDrawingCurvePoints()
-        }
-
-        guard
-            let textureSize = canvasTexture?.size,
-            let drawableSize = canvasView?.renderTexture?.size,
-            let drawingCurvePoints = (drawingCurvePoints as? CanvasPencilDrawingCurvePoints)
-        else { return }
-
-        // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
-        pencilScreenTouch.appendActualTouchWithEstimatedValues(
-            actualTouches.sorted { $0.timestamp < $1.timestamp }
-        )
-
-        let screenTouchPoints = pencilScreenTouch.getLatestActualTouchPoints()
-
-        drawingCurvePoints.appendToIterator(
-            points: screenTouchPoints.map {
-                .init(
-                    matrix: transformer.matrix.inverted(flipY: true),
-                    touchPoint: $0,
-                    textureSize: textureSize,
-                    drawableSize: drawableSize,
-                    frameSize: frameSize,
-                    diameter: CGFloat(drawingTool.diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
-        )
-
-        drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
-        )
+        drawCurveOnCanvasWithPencil(actualTouches: actualTouches)
     }
 
 }
@@ -511,6 +478,43 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    private func drawCurveOnCanvasWithPencil(actualTouches: Set<UITouch>) {
+        if actualTouches.contains(where: { $0.phase == .began }) {
+            drawingCurvePoints = CanvasPencilDrawingCurvePoints()
+        }
+
+        guard
+            let textureSize = canvasTexture?.size,
+            let drawableSize = canvasView?.renderTexture?.size,
+            let drawingCurvePoints = (drawingCurvePoints as? CanvasPencilDrawingCurvePoints)
+        else { return }
+
+        // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
+        pencilScreenTouch.appendActualTouchWithEstimatedValues(
+            actualTouches.sorted { $0.timestamp < $1.timestamp }
+        )
+
+        let screenTouchPoints = pencilScreenTouch.getLatestActualTouchPoints()
+
+        drawingCurvePoints.appendToIterator(
+            points: screenTouchPoints.map {
+                .init(
+                    matrix: transformer.matrix.inverted(flipY: true),
+                    touchPoint: $0,
+                    textureSize: textureSize,
+                    drawableSize: drawableSize,
+                    frameSize: frameSize,
+                    diameter: CGFloat(drawingTool.diameter)
+                )
+            },
+            touchPhase: screenTouchPoints.currentTouchPhase
+        )
+
+        drawingDisplayLink.updateCanvasWithDrawing(
+            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
+        )
+    }
 
     private func drawCurveOnCanvasWithFinger() {
         if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
