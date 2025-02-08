@@ -162,13 +162,20 @@ final class CanvasViewModel {
                 self?.eraserDrawingTexture.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
+
+        drawingTool.backgroundColorPublisher
+            .sink { [weak self] color in
+                self?.textureLayers.backgroundColor = color
+            }
+            .store(in: &cancellables)
     }
 
     func initCanvas(size: CGSize) {
-        brushDrawingTexture.initTextures(size)
-        eraserDrawingTexture.initTextures(size)
 
         textureLayers.initLayers(size: size)
+
+        brushDrawingTexture.initTextures(size)
+        eraserDrawingTexture.initTextures(size)
 
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
@@ -176,16 +183,21 @@ final class CanvasViewModel {
     }
 
     func apply(model: CanvasModel) {
+
         projectName = model.projectName
 
-        brushDrawingTexture.initTextures(model.textureSize)
-        eraserDrawingTexture.initTextures(model.textureSize)
-
         textureLayers.initLayers(
-            size: model.textureSize,
             layers: model.layers,
             layerIndex: model.layerIndex
         )
+
+        // If `textureLayers` initialization has failed, perform the initialization
+        if !textureLayers.isTextureInitialized {
+            textureLayers.initLayers(size: model.textureSize)
+        }
+
+        brushDrawingTexture.initTextures(model.textureSize)
+        eraserDrawingTexture.initTextures(model.textureSize)
 
         for i in 0 ..< textureLayers.layers.count {
             textureLayers.layers[i].updateThumbnail()
@@ -604,10 +616,9 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        textureLayers.drawAllTextures(
-            withAllLayerUpdates: allLayerUpdates,
-            backgroundColor: drawingTool.backgroundColor,
-            on: canvasTexture,
+        textureLayers.mergeAllTextures(
+            allLayerUpdates: allLayerUpdates,
+            into: canvasTexture,
             with: commandBuffer
         )
 
@@ -639,10 +650,9 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        textureLayers.drawAllTextures(
+        textureLayers.mergeAllTextures(
             usingCurrentTexture: currentTexture,
-            backgroundColor: drawingTool.backgroundColor,
-            on: canvasTexture,
+            into: canvasTexture,
             with: commandBuffer
         )
 

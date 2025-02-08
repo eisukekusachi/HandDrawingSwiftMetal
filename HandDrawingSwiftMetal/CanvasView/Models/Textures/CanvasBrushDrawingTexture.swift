@@ -126,14 +126,14 @@ extension CanvasBrushDrawingTexture {
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            on: destinationTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
 
         if shouldUpdateSelectedTexture {
             renderer.mergeTexture(
                 texture: drawingTexture,
-                on: selectedTexture,
+                into: selectedTexture,
                 with: commandBuffer
             )
 

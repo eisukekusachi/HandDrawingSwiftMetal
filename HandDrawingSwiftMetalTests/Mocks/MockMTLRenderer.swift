@@ -134,7 +134,7 @@ final class MockMTLRenderer: MTLRendering {
 
     func mergeTexture(
         texture: MTLTexture,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         let sourceTexture = texture.label ?? ""
@@ -144,7 +144,7 @@ final class MockMTLRenderer: MTLRendering {
             [
                 "mergeTexture(",
                 "texture: \(sourceTexture), ",
-                "on: \(destinationTextureLabel), ",
+                "into: \(destinationTextureLabel), ",
                 "with: \(commandBufferLabel)",
                 ")"
             ].joined()
@@ -154,7 +154,7 @@ final class MockMTLRenderer: MTLRendering {
     func mergeTexture(
         texture: MTLTexture,
         alpha: Int,
-        on destinationTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         let sourceTexture = texture.label ?? ""
@@ -165,7 +165,7 @@ final class MockMTLRenderer: MTLRendering {
                 "mergeTexture(",
                 "texture: \(sourceTexture), ",
                 "alpha: \(alpha), ",
-                "on: \(destinationTextureLabel), ",
+                "into: \(destinationTextureLabel), ",
                 "with: \(commandBufferLabel)",
                 ")"
             ].joined()
