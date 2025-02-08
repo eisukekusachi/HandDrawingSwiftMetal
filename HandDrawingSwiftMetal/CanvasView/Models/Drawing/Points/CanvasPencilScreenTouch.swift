@@ -1,5 +1,5 @@
 //
-//  CanvasPencilDrawingArrays.swift
+//  CanvasPencilScreenTouch.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -12,7 +12,7 @@ import UIKit
 ///  This class is a model that combines estimated and actual values to create an array of `CanvasTouchPoint`.
 ///  It stores the estimated values in `estimatedTouchPointArray` and then combines them with the actual values received later
 ///  to create the values for `actualTouchPointArray`.
-final class CanvasPencilDrawingArrays {
+final class CanvasPencilScreenTouch {
 
     /// An array that holds elements combining actualTouches, where the force values are accurate, and estimatedTouchPointArray.
     private(set) var actualTouchPointArray: [CanvasTouchPoint] = []
@@ -47,7 +47,7 @@ final class CanvasPencilDrawingArrays {
 
 }
 
-extension CanvasPencilDrawingArrays {
+extension CanvasPencilScreenTouch {
 
     var hasProcessFinished: Bool {
         actualTouchPointArray.last?.estimationUpdateIndex == lastEstimationUpdateIndex

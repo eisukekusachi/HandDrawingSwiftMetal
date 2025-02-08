@@ -57,8 +57,8 @@ final class CanvasViewModel {
     /// A class for handling finger input values
     private let fingerScreenTouches = CanvasFingerScreenTouches()
 
-    /// Arrays for handling Apple Pencil input values
-    private let pencilDrawingArrays = CanvasPencilDrawingArrays()
+    /// A class for handling Apple Pencil inputs
+    private let pencilScreenTouch = CanvasPencilScreenTouch()
 
     private let inputDevice = CanvasInputDeviceStatus()
 
@@ -351,7 +351,7 @@ extension CanvasViewModel {
         // Make `drawingCurvePoints` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
-            pencilDrawingArrays.reset()
+            pencilScreenTouch.reset()
         }
 
         // Append estimated values to the array
@@ -360,7 +360,7 @@ extension CanvasViewModel {
             .sorted { $0.timestamp < $1.timestamp }
             .forEach { touch in
                 event?.coalescedTouches(for: touch)?.forEach { coalescedTouch in
-                    pencilDrawingArrays.appendEstimatedValue(
+                    pencilScreenTouch.appendEstimatedValue(
                         .init(touch: coalescedTouch, view: view)
                     )
                 }
@@ -379,10 +379,10 @@ extension CanvasViewModel {
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         Array(actualTouches).sorted { $0.timestamp < $1.timestamp }.forEach { actualTouch in
-            pencilDrawingArrays.appendActualTouchWithEstimatedValue(actualTouch)
+            pencilScreenTouch.appendActualTouchWithEstimatedValue(actualTouch)
         }
 
-        let screenTouchPoints = pencilDrawingArrays.getLatestActualTouchPoints()
+        let screenTouchPoints = pencilScreenTouch.getLatestActualTouchPoints()
 
         drawingCurvePoints.appendToIterator(
             points: screenTouchPoints.map {
@@ -632,7 +632,7 @@ extension CanvasViewModel {
         screenTouchGesture.reset()
 
         fingerScreenTouches.reset()
-        pencilDrawingArrays.reset()
+        pencilScreenTouch.reset()
 
         drawingCurvePoints = nil
         transformer.resetMatrix()
