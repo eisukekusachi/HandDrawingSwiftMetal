@@ -76,7 +76,7 @@ final class CanvasFingerDrawingDictionaryTests: XCTestCase {
             let subject = CanvasFingerDrawingDictionary()
             subject.appendTouches(condition.fingers)
 
-            XCTAssertEqual(subject.hasFingersLiftedOffScreen, expectation.result)
+            XCTAssertEqual(subject.hasFingerLiftedOffScreen, expectation.result)
         }
     }
 

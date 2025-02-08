@@ -25,7 +25,7 @@ extension CanvasFingerScreenTouches {
         touchArrayDictionary.isEmpty
     }
 
-    var hasFingersLiftedOffScreen: Bool {
+    var hasFingerLiftedOffScreen: Bool {
         touchArrayDictionary.keys.contains { key in
             guard let lastTouchPhase = touchArrayDictionary[key]?.last?.phase else {
                 return false

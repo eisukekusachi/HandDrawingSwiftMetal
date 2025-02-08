@@ -311,7 +311,7 @@ extension CanvasViewModel {
                 transformer.initTransforming(fingerScreenTouches.touchArrayDictionary)
             }
 
-            if !fingerScreenTouches.hasFingersLiftedOffScreen {
+            if !fingerScreenTouches.hasFingerLiftedOffScreen {
                 transformer.transformCanvas(
                     screenCenter: .init(
                         x: frameSize.width * 0.5,
