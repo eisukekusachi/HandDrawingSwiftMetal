@@ -352,7 +352,6 @@ extension CanvasViewModel {
         // Make `drawingCurvePoints` and reset the parameters when a touch begins
         if estimatedTouches.contains(where: {$0.phase == .began}) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
-            pencilScreenTouch.reset()
         }
 
         // Append estimated values to the array
