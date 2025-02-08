@@ -651,20 +651,7 @@ extension CanvasViewModel {
 
         canvasView?.resetCommandBuffer()
 
-        guard
-            let renderTexture = canvasView?.renderTexture,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        MTLRenderer.shared.drawTexture(
-            texture: canvasTexture,
-            matrix: transformer.matrix,
-            frameSize: frameSize,
-            on: renderTexture,
-            device: device,
-            with: commandBuffer
-        )
-        canvasView?.setNeedsDisplay()
+        updateCanvas()
     }
 
 }
