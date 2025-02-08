@@ -16,9 +16,20 @@ final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
 
     var currentTouchPhase: UITouch.Phase = .began
 
+    /// A key currently in use in the finger touch dictionary
+    var dictionaryKey: CanvasTouchHashValue
+
+    /// A variable used to get elements from the array starting from the next element after this point
+    private(set) var latestTouchPoint: CanvasTouchPoint?
+
     private(set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
     private var isFirstCurveHasBeenCreated: Bool = false
+
+    init(dictionaryKey: CanvasTouchHashValue) {
+        self.dictionaryKey = dictionaryKey
+    }
+
 }
 
 extension CanvasFingerDrawingCurvePoints {
@@ -32,6 +43,17 @@ extension CanvasFingerDrawingCurvePoints {
         }
 
         return isFirstCurveToBeCreated
+    }
+
+    func getLatestTouchPoints(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) -> [CanvasTouchPoint]? {
+        guard
+            let touchPoints = dictionary[dictionaryKey]
+        else { return nil }
+
+        let latestTouchPoints = touchPoints.elements(after: latestTouchPoint) ?? touchPoints
+        latestTouchPoint = latestTouchPoints.last
+
+        return latestTouchPoints
     }
 
     func appendToIterator(
