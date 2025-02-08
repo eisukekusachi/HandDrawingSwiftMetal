@@ -62,9 +62,11 @@ extension CanvasPencilScreenTouch {
         setLastEstimationUpdateIndexIfPencilLiftedOffScreen()
     }
 
-    func appendActualTouchWithEstimatedValue(_ actualTouch: UITouch) {
-        appendActualTouchToActualTouchPointArray(actualTouch)
-        appendLastEstimatedTouchToActualTouchPointArrayAtEnd()
+    func appendActualTouchWithEstimatedValues(_ actualTouches: [UITouch]) {
+        actualTouches.forEach { touch in
+            appendActualTouchToActualTouchPointArray(touch)
+            appendLastEstimatedTouchToActualTouchPointArrayAtEnd()
+        }
     }
 
     /// Combines `actualTouches` with the estimated values to create new elements and append them to `actualTouchPointArray`
