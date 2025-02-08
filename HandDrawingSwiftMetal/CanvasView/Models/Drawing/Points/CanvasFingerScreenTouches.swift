@@ -71,13 +71,10 @@ extension CanvasFingerScreenTouches {
         }
     }
 
-    func removeIfLastElementMatches(phases conditions: [UITouch.Phase]) {
-        touchArrayDictionary.keys.forEach { key in
-            if let touchArray = touchArrayDictionary[key],
-                conditions.contains(touchArray.currentTouchPhase) {
-                touchArrayDictionary.removeValue(forKey: key)
-            }
-        }
+    func removeTouchArrayFromDictionaryIfLastElementMatches(phases conditions: [UITouch.Phase]) {
+        touchArrayDictionary.keys
+            .filter { conditions.contains(touchArrayDictionary[$0]?.currentTouchPhase ?? .cancelled) }
+            .forEach { touchArrayDictionary.removeValue(forKey: $0) }
     }
 
     func reset() {

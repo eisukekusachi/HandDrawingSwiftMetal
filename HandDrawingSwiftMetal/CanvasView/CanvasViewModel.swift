@@ -277,7 +277,7 @@ extension CanvasViewModel {
         default: break
         }
 
-        fingerScreenTouches.removeIfLastElementMatches(phases: [.ended, .cancelled])
+        fingerScreenTouches.removeTouchArrayFromDictionaryIfLastElementMatches(phases: [.ended, .cancelled])
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
