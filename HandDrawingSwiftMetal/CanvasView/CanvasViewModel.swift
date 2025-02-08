@@ -270,64 +270,11 @@ extension CanvasViewModel {
             }
         )
 
-        // determine the gesture from the dictionary, and based on that, either draw a line on the canvas or transform the canvas
-        switch screenTouchGesture.update(
-            .init(from: fingerScreenTouches.touchArrayDictionary)
-        ) {
-        case .drawing:
-            if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
-               !(drawingCurvePoints is CanvasFingerDrawingCurvePoints)
-            {
-                drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
-            }
-
-            guard
-                let textureSize = canvasTexture?.size,
-                let drawableSize = canvasView?.renderTexture?.size,
-                let drawingCurvePoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)
-            else { return }
-
-            let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(from: fingerScreenTouches.touchArrayDictionary)
-
-            drawingCurvePoints.appendToIterator(
-                points: screenTouchPoints.map {
-                    .init(
-                        matrix: transformer.matrix.inverted(flipY: true),
-                        touchPoint: $0,
-                        textureSize: textureSize,
-                        drawableSize: drawableSize,
-                        frameSize: frameSize,
-                        diameter: CGFloat(drawingTool.diameter)
-                    )
-                },
-                touchPhase: screenTouchPoints.currentTouchPhase
-            )
-
-            drawingDisplayLink.updateCanvasWithDrawing(
-                isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
-            )
-
-        case .transforming:
-            transformer.initTransformingIfNeeded(
-                fingerScreenTouches.touchArrayDictionary
-            )
-
-            if fingerScreenTouches.isFingersOnScreen {
-                transformer.transformCanvas(
-                    screenCenter: .init(
-                        x: frameSize.width * 0.5,
-                        y: frameSize.height * 0.5
-                    ),
-                    fingerScreenTouches.touchArrayDictionary
-                )
-            } else {
-                transformer.finishTransforming()
-            }
-
-            updateCanvas()
-
-        default:
-            break
+        // determine the gesture from the dictionary
+        switch screenTouchGesture.update(.init(from: fingerScreenTouches.touchArrayDictionary)) {
+        case .drawing: drawCurveOnCanvasWithFinger()
+        case .transforming: transformCanvas()
+        default: break
         }
 
         fingerScreenTouches.removeIfLastElementMatches(phases: [.ended, .cancelled])
@@ -565,6 +512,60 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    private func drawCurveOnCanvasWithFinger() {
+        if let dictionaryKey = fingerScreenTouches.touchArrayDictionary.keys.first,
+           !(drawingCurvePoints is CanvasFingerDrawingCurvePoints)
+        {
+            drawingCurvePoints = CanvasFingerDrawingCurvePoints(dictionaryKey: dictionaryKey)
+        }
+
+        guard
+            let textureSize = canvasTexture?.size,
+            let drawableSize = canvasView?.renderTexture?.size,
+            let drawingCurvePoints = (drawingCurvePoints as? CanvasFingerDrawingCurvePoints)
+        else { return }
+
+        let screenTouchPoints = drawingCurvePoints.getLatestTouchPoints(from: fingerScreenTouches.touchArrayDictionary)
+
+        drawingCurvePoints.appendToIterator(
+            points: screenTouchPoints.map {
+                .init(
+                    matrix: transformer.matrix.inverted(flipY: true),
+                    touchPoint: $0,
+                    textureSize: textureSize,
+                    drawableSize: drawableSize,
+                    frameSize: frameSize,
+                    diameter: CGFloat(drawingTool.diameter)
+                )
+            },
+            touchPhase: screenTouchPoints.currentTouchPhase
+        )
+
+        drawingDisplayLink.updateCanvasWithDrawing(
+            isCurrentlyDrawing: drawingCurvePoints.isCurrentlyDrawing
+        )
+    }
+
+    private func transformCanvas() {
+        transformer.initTransformingIfNeeded(
+            fingerScreenTouches.touchArrayDictionary
+        )
+
+        if fingerScreenTouches.isFingersOnScreen {
+            transformer.transformCanvas(
+                screenCenter: .init(
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
+                ),
+                fingerScreenTouches.touchArrayDictionary
+            )
+        } else {
+            transformer.finishTransforming()
+        }
+
+        updateCanvas()
+    }
 
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
