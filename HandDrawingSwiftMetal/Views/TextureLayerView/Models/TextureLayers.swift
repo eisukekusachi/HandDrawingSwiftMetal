@@ -6,26 +6,29 @@
 //
 
 import MetalKit
-
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
 
     var isTextureInitialized: Bool {
-        bottomTexture != nil && topTexture != nil
+        unselectedBottomTexture != nil && unselectedTopTexture != nil
     }
 
     var backgroundColor: UIColor = .white
 
     let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
+    private let renderer: MTLRendering!
+
     /// A texture that combines the textures of all layers below the selected layer
-    private var bottomTexture: MTLTexture?
+    private var unselectedBottomTexture: MTLTexture?
     /// A texture that combines the textures of all layers above the selected layer
-    private var topTexture: MTLTexture?
+    private var unselectedTopTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    override init() {
+    init(renderer: MTLRendering = MTLRenderer.shared) {
+        self.renderer = renderer
+
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -41,13 +44,16 @@ final class TextureLayers: Layers<TextureLayer> {
             let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
         else {
-            bottomTexture = nil
-            topTexture = nil
+            unselectedBottomTexture = nil
+            unselectedTopTexture = nil
             return
         }
 
-        self.bottomTexture = bottomTexture
-        self.topTexture = topTexture
+        self.unselectedBottomTexture = bottomTexture
+        self.unselectedTopTexture = topTexture
+
+        self.unselectedBottomTexture?.label = "unselectedBottomTexture"
+        self.unselectedTopTexture?.label = "unselectedTopTexture"
 
         initLayers(
             index: layerIndex,
@@ -57,7 +63,7 @@ final class TextureLayers: Layers<TextureLayer> {
 
     func initLayers(size: CGSize) {
         guard
-            size > MTLRenderer.minimumTextureSize,
+            size >= MTLRenderer.minimumTextureSize,
             let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
             let texture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
@@ -66,8 +72,8 @@ final class TextureLayers: Layers<TextureLayer> {
             return
         }
 
-        self.bottomTexture = bottomTexture
-        self.topTexture = topTexture
+        self.unselectedBottomTexture = bottomTexture
+        self.unselectedTopTexture = topTexture
 
         initLayers(
             index: 0,
@@ -90,76 +96,54 @@ extension TextureLayers {
         into destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let bottomTexture,
-            let topTexture,
-            let destinationTexture
-        else {
-            Logger.standard.error("TextureLayers's textures are nil")
-            return
-        }
+        guard let destinationTexture else { return }
 
-        // Combine the textures of unselected layers into `topTexture` and `bottomTexture`
+        // Combine the textures of unselected layers into `unselectedTopTexture` and `unselectedBottomTexture`
+        // Even if the number of layers increases, performance will not be affected.
+        // It is not necessary to update the texture of the unselected layers every time.
         if allLayerUpdates {
-            updateBottomTextureIfNeeded(commandBuffer: commandBuffer)
-            updateTopTextureIfNeeded(commandBuffer: commandBuffer)
+            updateUnselectedTexturesIfNeeded(commandBuffer: commandBuffer)
         }
 
-        mergeLayerTextures(
+        makeTextureFromUnselectedTextures(
             usingCurrentTexture: currentTexture,
-            into: destinationTexture,
+            to: destinationTexture,
             with: commandBuffer
         )
     }
 
-    func updateBottomTextureIfNeeded(
+    func updateUnselectedTexturesIfNeeded(
         commandBuffer: MTLCommandBuffer
     ) {
-        guard let bottomTexture else { return }
-
-        MTLRenderer.shared.clearTexture(texture: bottomTexture, with: commandBuffer)
-
-        if index > 0 {
-            mergeLayerTextures(range: 0 ... index - 1, into: bottomTexture, with: commandBuffer)
-        }
-    }
-    func updateTopTextureIfNeeded(
-        commandBuffer: MTLCommandBuffer
-    ) {
-        guard let topTexture else { return }
-
-        MTLRenderer.shared.clearTexture(texture: topTexture, with: commandBuffer)
-
-        if index < layers.count - 1 {
-            mergeLayerTextures(range: index + 1 ... layers.count - 1, into: topTexture, with: commandBuffer)
-        }
+        updateUnselectedBottomTextureIfNeeded(commandBuffer: commandBuffer)
+        updateUnselectedTopTextureIfNeeded(commandBuffer: commandBuffer)
     }
 
-    func mergeLayerTextures(
+    func makeTextureFromUnselectedTextures(
         usingCurrentTexture currentTexture: MTLTexture? = nil,
-        into destinationTexture: MTLTexture?,
+        to destinationTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let bottomTexture,
-            let topTexture,
+            let unselectedBottomTexture,
+            let unselectedTopTexture,
             let destinationTexture
         else { return }
 
-        MTLRenderer.shared.fillTexture(
+        renderer.fillTexture(
             texture: destinationTexture,
             withRGB: backgroundColor.rgb,
             with: commandBuffer
         )
 
-        MTLRenderer.shared.mergeTexture(
-            texture: bottomTexture,
+        renderer.mergeTexture(
+            texture: unselectedBottomTexture,
             into: destinationTexture,
             with: commandBuffer
         )
 
         if layers[index].isVisible, let texture = currentTexture ?? layers[index].texture {
-            MTLRenderer.shared.mergeTexture(
+            renderer.mergeTexture(
                 texture: texture,
                 alpha: layers[index].alpha,
                 into: destinationTexture,
@@ -167,8 +151,8 @@ extension TextureLayers {
             )
         }
 
-        MTLRenderer.shared.mergeTexture(
-            texture: topTexture,
+        renderer.mergeTexture(
+            texture: unselectedTopTexture,
             into: destinationTexture,
             with: commandBuffer
         )
@@ -238,13 +222,47 @@ extension TextureLayers {
                 return (texture, layer.alpha)
             }
             .forEach { result in
-                MTLRenderer.shared.mergeTexture(
+                renderer.mergeTexture(
                     texture: result.0,
                     alpha: result.1,
                     into: destinationTexture,
                     with: commandBuffer
                 )
             }
+    }
+
+    /// Merges the textures of layers below the selected layer into `unselectedBottomTexture`
+    private func updateUnselectedBottomTextureIfNeeded(
+        commandBuffer: MTLCommandBuffer
+    ) {
+        guard let unselectedBottomTexture else {
+            Logger.standard.error("unselectedBottomTexture is nil")
+            return
+        }
+
+        renderer.clearTexture(texture: unselectedBottomTexture, with: commandBuffer)
+
+        // The textures of the layers below the selected layer are drawn into `unselectedBottomTexture`
+        if index > 0 {
+            mergeLayerTextures(range: 0 ... index - 1, into: unselectedBottomTexture, with: commandBuffer)
+        }
+    }
+
+    /// Merges the textures of layers above the selected layer into `unselectedTopTexture`
+    private func updateUnselectedTopTextureIfNeeded(
+        commandBuffer: MTLCommandBuffer
+    ) {
+        guard let unselectedTopTexture else {
+            Logger.standard.error("unselectedTopTexture is nil")
+            return
+        }
+
+        renderer.clearTexture(texture: unselectedTopTexture, with: commandBuffer)
+
+        // The textures of the layers above the selected layer are drawn into `unselectedTopTexture`
+        if index < layers.count - 1 {
+            mergeLayerTextures(range: index + 1 ... layers.count - 1, into: unselectedTopTexture, with: commandBuffer)
+        }
     }
 
 }

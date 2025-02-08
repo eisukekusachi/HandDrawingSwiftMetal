@@ -17,6 +17,14 @@ extension CGSize {
         return lhs.width * lhs.height > rhs.width * rhs.height
     }
 
+    public static func <= (lhs: CGSize, rhs: CGSize) -> Bool {
+        return lhs.width * lhs.height <= rhs.width * rhs.height
+    }
+
+    public static func >= (lhs: CGSize, rhs: CGSize) -> Bool {
+        return lhs.width * lhs.height >= rhs.width * rhs.height
+    }
+
     public static func == (lhs: CGSize, rhs: CGSize) -> Bool {
         return lhs.width == rhs.width && lhs.height == rhs.height
     }
