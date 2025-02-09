@@ -57,7 +57,7 @@ extension CanvasFingerScreenTouches {
         activeDictionaryKey = key
     }
 
-    func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
+    func appendTouchPointToDictionary(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
         touches.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {
                 touchArrayDictionary[key] = []
