@@ -271,7 +271,7 @@ extension CanvasViewModel {
         )
 
         // determine the gesture from the dictionary
-        switch screenTouchGesture.update(.init(from: fingerScreenTouches.touchArrayDictionary)) {
+        switch screenTouchGesture.update(fingerScreenTouches.touchArrayDictionary) {
         case .drawing: drawFingerCurveOnCanvas()
         case .transforming: transformCanvas()
         default: break
