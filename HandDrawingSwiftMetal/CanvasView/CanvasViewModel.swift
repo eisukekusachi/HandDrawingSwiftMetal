@@ -496,7 +496,7 @@ extension CanvasViewModel {
 
     private func drawFingerCurveOnCanvas() {
         // If `drawingCurvePoints` is nil, an instance of `CanvasFingerDrawingCurvePoints` will be set.
-        if !(drawingCurvePoints is CanvasFingerDrawingCurvePoints) {
+        if drawingCurvePoints == nil {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
