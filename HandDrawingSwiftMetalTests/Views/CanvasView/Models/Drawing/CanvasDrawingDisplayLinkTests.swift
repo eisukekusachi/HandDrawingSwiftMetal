@@ -26,13 +26,13 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
         let publisherExpectation = XCTestExpectation()
 
         // Confirm that `requestDrawingOnCanvasPublisher` emits `Void`
-        subject.requestDrawingOnCanvasPublisher
+        subject.requestUpdateCanvasWithDrawingPublisher
             .sink {
                 publisherExpectation.fulfill()
             }
             .store(in: &cancellables)
 
-        subject.runDisplayLink(isCurrentlyDrawing: true)
+        subject.updateCanvasWithDrawing(isCurrentlyDrawing: true)
 
         XCTAssertEqual(subject.displayLink?.isPaused, false)
 
@@ -46,13 +46,13 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
         let publisherExpectation = XCTestExpectation()
 
         // `requestDrawingOnCanvasPublisher` emits `Void` to perform the final processing
-        subject.requestDrawingOnCanvasPublisher
+        subject.requestUpdateCanvasWithDrawingPublisher
             .sink {
                 publisherExpectation.fulfill()
             }
             .store(in: &cancellables)
 
-        subject.runDisplayLink(isCurrentlyDrawing: false)
+        subject.updateCanvasWithDrawing(isCurrentlyDrawing: false)
 
         XCTAssertEqual(subject.displayLink?.isPaused, true)
 

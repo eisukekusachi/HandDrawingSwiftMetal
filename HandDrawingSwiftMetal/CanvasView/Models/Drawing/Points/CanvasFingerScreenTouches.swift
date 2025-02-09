@@ -14,7 +14,7 @@ final class CanvasFingerScreenTouches {
     private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently in use in the finger touch dictionary
-    private var activeDictionaryKey: CanvasTouchHashValue?
+    private(set) var activeDictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
     private var activeLatestTouchPoint: CanvasTouchPoint?
@@ -31,30 +31,39 @@ extension CanvasFingerScreenTouches {
     var latestTouchPoints: [CanvasTouchPoint] {
         guard
             let activeDictionaryKey,
-            let touchPoints = touchArrayDictionary[activeDictionaryKey]
+            let touchArray = touchArrayDictionary[activeDictionaryKey]
         else { return [] }
 
-        let latestTouchPoints = touchPoints.elements(after: activeLatestTouchPoint) ?? touchPoints
-        activeLatestTouchPoint = latestTouchPoints.last
+        let latestTouchArray: [CanvasTouchPoint] = activeLatestTouchPoint.map {
+            touchArray.elements(after: $0) ?? []
+        } ?? touchArray
 
-        return latestTouchPoints
+        if let lastLatestTouchArray = latestTouchArray.last {
+            activeLatestTouchPoint = lastLatestTouchArray
+        }
+
+        return latestTouchArray
     }
 
     var isFingersOnScreen: Bool {
         !touchArrayDictionary.keys.contains { key in
+            // If the last element of the array is `ended` or `cancelled`, it means that a finger has been lifted.
             [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(
                 touchArrayDictionary[key]?.last?.phase ?? .cancelled
             )
         }
     }
 
-    func updateDictionaryKeyIfKeyIsNil() {
+    func updateActiveDictionaryKeyIfKeyIsNil() {
+        // If the gesture is determined to be drawing and `updateActiveDictionaryKeyIfKeyIsNil()` is called,
+        // `touchArrayDictionary` should contain only one element, so the first key is simply set.
         guard
-            let key = touchArrayDictionary.keys.first,
+            // The first element of the sorted key array in the Dictionary is set as the active key.
+            let firstKey = touchArrayDictionary.keys.sorted().first,
             activeDictionaryKey == nil
         else { return }
 
-        activeDictionaryKey = key
+        activeDictionaryKey = firstKey
     }
 
     func appendTouchPointToDictionary(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
@@ -68,10 +77,14 @@ extension CanvasFingerScreenTouches {
         }
     }
 
-    func removeTouchArrayFromDictionaryIfLastElementMatches(phases conditions: [UITouch.Phase]) {
+    func removeEndedTouchArrayFromDictionary() {
         touchArrayDictionary.keys
-            .filter { conditions.contains(touchArrayDictionary[$0]?.currentTouchPhase ?? .cancelled) }
-            .forEach { touchArrayDictionary.removeValue(forKey: $0) }
+            .filter {
+                [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchArrayDictionary[$0]?.currentTouchPhase ?? .cancelled)
+            }
+            .forEach {
+                touchArrayDictionary.removeValue(forKey: $0)
+            }
     }
 
     func reset() {

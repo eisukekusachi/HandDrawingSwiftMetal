@@ -1,22 +1,23 @@
 //
-//  CanvasPencilDrawingArraysTests.swift
+//  CanvasPencilScreenTouchTests.swift
 //  HandDrawingSwiftMetalTests
 //
-//  Created by Eisuke Kusachi on 2024/10/20.
+//  Created by Eisuke Kusachi on 2025/02/09.
 //
 
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class CanvasPencilDrawingArraysTests: XCTestCase {
+final class CanvasPencilScreenTouchTests: XCTestCase {
+
     /// Confirms that the creation of `actualTouchPointArray` is complete
-    func testHasProcessFinished() {
+    func testIsActualTouchPointCreationCompleted() {
         let actualTouches: [UITouch] = [
             UITouchDummy.init(phase: .began, estimationUpdateIndex: 0),
             UITouchDummy.init(phase: .moved, estimationUpdateIndex: 1)
         ]
 
-        let subject = CanvasPencilDrawingArrays(
+        let subject = CanvasPencilScreenTouch(
             estimatedTouchPointArray: [
                 .generate(phase: .began, estimationUpdateIndex: 0),
                 .generate(phase: .moved, estimationUpdateIndex: 1),
@@ -25,24 +26,24 @@ final class CanvasPencilDrawingArraysTests: XCTestCase {
         )
 
         /// `estimationUpdateIndex` of the last element in `estimatedTouchPointArray` is nil,
-        /// so `lastEstimationUpdateIndex` contains `estimationUpdateIndex` of the second-to-last element in `estimatedTouchPointArray`
-        XCTAssertEqual(subject.lastEstimationUpdateIndex, 1)
+        /// so `secondLastEstimationUpdateIndex` contains `estimationUpdateIndex` of the second-to-last element in `estimatedTouchPointArray`
+        XCTAssertEqual(subject.secondLastEstimationUpdateIndex, 1)
 
         subject.appendActualTouchToActualTouchPointArray(actualTouches[0])
         XCTAssertEqual(subject.actualTouchPointArray.last?.estimationUpdateIndex, 0)
 
-        /// Completion is not determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` does not match `lastEstimationUpdateIndex`
-        XCTAssertFalse(subject.hasProcessFinished)
+        /// Completion is not determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` does not match `secondLastEstimationUpdateIndex`
+        XCTAssertFalse(subject.isActualTouchPointCreationCompleted)
 
         subject.appendActualTouchToActualTouchPointArray(actualTouches[1])
         XCTAssertEqual(subject.actualTouchPointArray.last?.estimationUpdateIndex, 1)
 
-        /// Completion is determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` matches `lastEstimationUpdateIndex`
-        XCTAssertTrue(subject.hasProcessFinished)
+        /// Completion is determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` matches `secondLastEstimationUpdateIndex`
+        XCTAssertTrue(subject.isActualTouchPointCreationCompleted)
     }
 
     func testHasPencilLiftedOffScreen() {
-        let subject = CanvasPencilDrawingArrays()
+        let subject = CanvasPencilScreenTouch()
         XCTAssertFalse(subject.hasPencilLiftedOffScreen(.began))
         XCTAssertFalse(subject.hasPencilLiftedOffScreen(.moved))
         XCTAssertTrue(subject.hasPencilLiftedOffScreen(.ended))
@@ -59,20 +60,16 @@ final class CanvasPencilDrawingArraysTests: XCTestCase {
         ]
 
         let actualTouches: [UITouch] = [
-            UITouchDummy.init(phase: .began, force: 0.3, estimationUpdateIndex: 0),
-            UITouchDummy.init(phase: .moved, force: 0.2, estimationUpdateIndex: 1),
-            UITouchDummy.init(phase: .moved, force: 0.1, estimationUpdateIndex: 2)
+            UITouchDummy.init(phase: .began, force: 0.3, estimationUpdateIndex: 0, timestamp: 0),
+            UITouchDummy.init(phase: .moved, force: 0.2, estimationUpdateIndex: 1, timestamp: 1),
+            UITouchDummy.init(phase: .moved, force: 0.1, estimationUpdateIndex: 2, timestamp: 2)
         ]
 
-        let subject = CanvasPencilDrawingArrays(
+        let subject = CanvasPencilScreenTouch(
             estimatedTouchPointArray: estimatedTouches
         )
 
-        actualTouches
-            .sorted(by: { $0.timestamp < $1.timestamp })
-            .forEach { value in
-            subject.appendActualTouchWithEstimatedValue(value)
-        }
+        subject.appendActualTouchWithEstimatedValues(actualTouches: Set(actualTouches.shuffled()))
 
         /// Verify that the estimated value is used for `UITouch.Phase` and the actual value is used for `force`
         XCTAssertEqual(subject.actualTouchPointArray[0].phase, estimatedTouches[0].phase)
@@ -90,7 +87,7 @@ final class CanvasPencilDrawingArraysTests: XCTestCase {
     }
 
     /// Confirms that the latest actual touch points are returned from `actualTouchPointArray`
-    func testGetLatestActualTouchPoints() {
+    func testLatestActualTouchPoints() {
         let conditions: [UITouch] = [
             UITouchDummy.init(estimationUpdateIndex: 0),
             UITouchDummy.init(estimationUpdateIndex: 1),
@@ -105,7 +102,7 @@ final class CanvasPencilDrawingArraysTests: XCTestCase {
             .generate(estimationUpdateIndex: 3)
         ]
 
-        let subject = CanvasPencilDrawingArrays(
+        let subject = CanvasPencilScreenTouch(
             estimatedTouchPointArray: [
                 .generate(phase: .began, estimationUpdateIndex: 0),
                 .generate(phase: .moved, estimationUpdateIndex: 1),
@@ -115,34 +112,38 @@ final class CanvasPencilDrawingArraysTests: XCTestCase {
         )
 
         /// Confirm that it is empty at the start
-        XCTAssertEqual(subject.getLatestActualTouchPoints(), [])
+        XCTAssertEqual(subject.latestActualTouchPoints, [])
         XCTAssertEqual(subject.latestActualTouchPoint, nil)
 
         /// Add two elements to `actualTouchPointArray`
         subject.appendActualTouchToActualTouchPointArray(conditions[0])
         subject.appendActualTouchToActualTouchPointArray(conditions[1])
 
-        /// When `getLatestActualTouchPoints` is called, two elements are returned.
+        /// When `latestActualTouchPoints` is called, two elements are returned.
         /// At that point, `CanvasTouchPoint` of the last element in `actualTouchPointArray` is stored in `latestActualTouchPoint`.
-        let resultsA = subject.getLatestActualTouchPoints()
         XCTAssertEqual(
-            [resultsA[0].estimationUpdateIndex, resultsA[1].estimationUpdateIndex],
-            [expectations[0].estimationUpdateIndex, expectations[1].estimationUpdateIndex]
+            subject.latestActualTouchPoints.map { $0.estimationUpdateIndex },
+            [expectations[0], expectations[1]].map { $0.estimationUpdateIndex }
         )
-        XCTAssertEqual(subject.latestActualTouchPoint?.estimationUpdateIndex, expectations[1].estimationUpdateIndex)
+        XCTAssertEqual(
+            subject.latestActualTouchPoint?.estimationUpdateIndex,
+            expectations[1].estimationUpdateIndex
+        )
 
         /// Add two more elements to `actualTouchPointArray`
         subject.appendActualTouchToActualTouchPointArray(conditions[2])
         subject.appendActualTouchToActualTouchPointArray(conditions[3])
 
         /// Although the total number of elements in `actualTouchPointArray` is 4,
-        /// when `getLatestActualTouchPoints` is called, the two elements after `latestActualTouchPoint` are returned
-        let resultsB = subject.getLatestActualTouchPoints()
+        /// when `latestActualTouchPoints` is called, the two elements after `latestActualTouchPoint` are returned
         XCTAssertEqual(
-            [resultsB[0].estimationUpdateIndex, resultsB[1].estimationUpdateIndex],
-            [expectations[2].estimationUpdateIndex, expectations[3].estimationUpdateIndex]
+            subject.latestActualTouchPoints.map { $0.estimationUpdateIndex },
+            [expectations[2], expectations[3]].map { $0.estimationUpdateIndex }
         )
-        XCTAssertEqual(subject.latestActualTouchPoint?.estimationUpdateIndex, expectations[3].estimationUpdateIndex)
+        XCTAssertEqual(
+            subject.latestActualTouchPoint?.estimationUpdateIndex,
+            expectations[3].estimationUpdateIndex
+        )
     }
 
 }

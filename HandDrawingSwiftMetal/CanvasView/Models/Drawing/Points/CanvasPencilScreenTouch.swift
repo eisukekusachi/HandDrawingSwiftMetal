@@ -26,7 +26,7 @@ final class CanvasPencilScreenTouch {
     /// An element processed in `actualTouchPointArray`
     private(set) var latestActualTouchPoint: CanvasTouchPoint? = nil
 
-    private(set) var lastEstimationUpdateIndex: NSNumber? = nil
+    private(set) var secondLastEstimationUpdateIndex: NSNumber? = nil
 
     /// A variable used to get elements from the array starting from the next element after this point
     var latestCanvasTouchPoint: CanvasTouchPoint?
@@ -49,8 +49,8 @@ final class CanvasPencilScreenTouch {
 
 extension CanvasPencilScreenTouch {
 
-    var hasProcessFinished: Bool {
-        actualTouchPointArray.last?.estimationUpdateIndex == lastEstimationUpdateIndex
+    var isActualTouchPointCreationCompleted: Bool {
+        actualTouchPointArray.last?.estimationUpdateIndex == secondLastEstimationUpdateIndex
     }
 
     /// Use the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing
@@ -71,8 +71,8 @@ extension CanvasPencilScreenTouch {
         }
     }
 
-    func appendActualTouchWithEstimatedValues(_ actualTouches: [UITouch]) {
-        actualTouches.forEach { touch in
+    func appendActualTouchWithEstimatedValues(actualTouches: Set<UITouch>) {
+        actualTouches.sorted { $0.timestamp < $1.timestamp }.forEach { touch in
             appendActualTouchToActualTouchPointArray(touch)
             appendLastEstimatedTouchToActualTouchPointArrayAtEnd()
         }
@@ -103,16 +103,19 @@ extension CanvasPencilScreenTouch {
 
     /// Add an element with `UITouch.Phase.ended` to the end of `actualTouchPointArray`
     func appendLastEstimatedTouchToActualTouchPointArrayAtEnd() {
-        if hasProcessFinished, let point = estimatedTouchPointArray.last {
-            actualTouchPointArray.append(point)
-        }
+        guard
+            isActualTouchPointCreationCompleted,
+            let point = estimatedTouchPointArray.last
+        else { return }
+
+        actualTouchPointArray.append(point)
     }
 
     func setLastEstimationUpdateIndexIfPencilLiftedOffScreen() {
         // When the touch ends, `estimationUpdateIndex` of `UITouch` becomes nil,
         // so the `estimationUpdateIndex` of the previous `UITouch` is retained.
         if hasPencilLiftedOffScreen(estimatedTouchPointArray.last?.phase) {
-            lastEstimationUpdateIndex = estimatedTouchPointArray.dropLast().last?.estimationUpdateIndex
+            secondLastEstimationUpdateIndex = estimatedTouchPointArray.dropLast().last?.estimationUpdateIndex
         }
     }
 
@@ -121,7 +124,7 @@ extension CanvasPencilScreenTouch {
         estimatedTouchPointArray = []
         latestEstimatedTouchArrayIndex = 0
         latestActualTouchPoint = nil
-        lastEstimationUpdateIndex = nil
+        secondLastEstimationUpdateIndex = nil
         latestCanvasTouchPoint = nil
     }
 

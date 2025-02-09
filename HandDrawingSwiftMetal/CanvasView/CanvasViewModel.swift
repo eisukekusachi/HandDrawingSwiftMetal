@@ -277,7 +277,7 @@ extension CanvasViewModel {
         default: break
         }
 
-        fingerScreenTouches.removeTouchArrayFromDictionaryIfLastElementMatches(phases: [.ended, .cancelled])
+        fingerScreenTouches.removeEndedTouchArrayFromDictionary()
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
@@ -488,7 +488,7 @@ extension CanvasViewModel {
 
         // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
         pencilScreenTouch.appendActualTouchWithEstimatedValues(
-            actualTouches.sorted { $0.timestamp < $1.timestamp }
+            actualTouches: actualTouches
         )
 
         drawCurveOnCanvas(pencilScreenTouch.latestActualTouchPoints)
@@ -500,7 +500,7 @@ extension CanvasViewModel {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
-        fingerScreenTouches.updateDictionaryKeyIfKeyIsNil()
+        fingerScreenTouches.updateActiveDictionaryKeyIfKeyIsNil()
 
         drawCurveOnCanvas(fingerScreenTouches.latestTouchPoints)
     }
