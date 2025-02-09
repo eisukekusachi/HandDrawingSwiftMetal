@@ -479,10 +479,17 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    private func isPencilDrawingCurvePointsInstanceCreated(actualTouches: Set<UITouch>) -> Bool {
+        actualTouches.contains(where: { $0.phase == .began })
+    }
+    private func isFingerDrawingCurvePointsInstanceCreated() -> Bool {
+        drawingCurvePoints == nil
+    }
+
     private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>) {
         // Since the pencil takes priority, even if `drawingCurvePoints` contains an instance,
         // it will be overwritten when touchBegan occurs.
-        if actualTouches.contains(where: { $0.phase == .began }) {
+        if isPencilDrawingCurvePointsInstanceCreated(actualTouches: actualTouches) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
         }
 
@@ -496,7 +503,7 @@ extension CanvasViewModel {
 
     private func drawFingerCurveOnCanvas() {
         // If `drawingCurvePoints` is nil, an instance of `CanvasFingerDrawingCurvePoints` will be set.
-        if drawingCurvePoints == nil {
+        if isFingerDrawingCurvePointsInstanceCreated() {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
@@ -549,6 +556,10 @@ extension CanvasViewModel {
 
         updateCanvas()
     }
+
+}
+
+extension CanvasViewModel {
 
     private func updateCanvasView(allLayerUpdates: Bool = false) {
         guard
