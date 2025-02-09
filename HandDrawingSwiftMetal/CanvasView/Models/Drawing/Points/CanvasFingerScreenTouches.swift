@@ -14,10 +14,10 @@ final class CanvasFingerScreenTouches {
     private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
 
     /// A key currently in use in the finger touch dictionary
-    private var dictionaryKey: CanvasTouchHashValue?
+    private var activeDictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    private(set) var latestTouchPoint: CanvasTouchPoint?
+    private var activeLatestTouchPoint: CanvasTouchPoint?
 
     convenience init(touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
         self.init()
@@ -27,18 +27,15 @@ final class CanvasFingerScreenTouches {
 }
 
 extension CanvasFingerScreenTouches {
-    var isEmpty: Bool {
-        touchArrayDictionary.isEmpty
-    }
 
     var latestTouchPoints: [CanvasTouchPoint] {
         guard
-            let dictionaryKey,
-            let touchPoints = touchArrayDictionary[dictionaryKey]
+            let activeDictionaryKey,
+            let touchPoints = touchArrayDictionary[activeDictionaryKey]
         else { return [] }
 
-        let latestTouchPoints = touchPoints.elements(after: latestTouchPoint) ?? touchPoints
-        latestTouchPoint = latestTouchPoints.last
+        let latestTouchPoints = touchPoints.elements(after: activeLatestTouchPoint) ?? touchPoints
+        activeLatestTouchPoint = latestTouchPoints.last
 
         return latestTouchPoints
     }
@@ -54,10 +51,10 @@ extension CanvasFingerScreenTouches {
     func updateDictionaryKeyIfKeyIsNil() {
         guard
             let key = touchArrayDictionary.keys.first,
-            dictionaryKey == nil
+            activeDictionaryKey == nil
         else { return }
 
-        dictionaryKey = key
+        activeDictionaryKey = key
     }
 
     func appendTouches(_ touches: [CanvasTouchHashValue: CanvasTouchPoint]) {
@@ -79,7 +76,8 @@ extension CanvasFingerScreenTouches {
 
     func reset() {
         touchArrayDictionary = [:]
-        dictionaryKey = nil
+        activeDictionaryKey = nil
+        activeLatestTouchPoint = nil
     }
 
 }
