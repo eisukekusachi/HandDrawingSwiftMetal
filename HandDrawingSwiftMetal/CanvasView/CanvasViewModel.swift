@@ -289,29 +289,26 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        // Cancel if there is finger input
+        // Cancel finger drawing and switch to pen drawing if present
         if inputDevice.status == .finger {
-            cancelFingerInput()
+            cancelFingerDrawing()
         }
-        // Set `inputDevice` to '.pencil'
         inputDevice.update(.pencil)
 
-        // Append estimated values to the array
-        event?.allTouches?
-            .compactMap { $0.type == .pencil ? $0 : nil }
-            .sorted { $0.timestamp < $1.timestamp }
-            .forEach { [weak self] touch in
-                self?.pencilScreenTouch.appendEstimatedValues(
-                    event?.coalescedTouches(for: touch)?.map { .init(touch: $0, view: view) } ?? []
-                )
-            }
+        pencilScreenTouch.setLatestEstimatedTouchPoint(
+            estimatedTouches
+                .filter({ $0.type == .pencil })
+                .sorted(by: { $0.timestamp < $1.timestamp })
+                .last
+                .map { .init(touch: $0, view: view) }
+        )
     }
 
     func onPencilGestureDetected(
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        drawPencilCurveOnCanvas(actualTouches: actualTouches)
+        drawPencilCurveOnCanvas(actualTouches: actualTouches, view: view)
     }
 
 }
@@ -479,30 +476,32 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    // Since the pencil takes priority, even if `drawingCurvePoints` contains an instance,
+    // it will be overwritten when touchBegan occurs.
     private func isPencilDrawingCurvePointsInstanceCreated(actualTouches: Set<UITouch>) -> Bool {
         actualTouches.contains(where: { $0.phase == .began })
     }
+
+    // If `drawingCurvePoints` is nil, an instance of `CanvasFingerDrawingCurvePoints` will be set.
     private func isFingerDrawingCurvePointsInstanceCreated() -> Bool {
         drawingCurvePoints == nil
     }
 
-    private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>) {
-        // Since the pencil takes priority, even if `drawingCurvePoints` contains an instance,
-        // it will be overwritten when touchBegan occurs.
+    private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>, view: UIView) {
         if isPencilDrawingCurvePointsInstanceCreated(actualTouches: actualTouches) {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
         }
 
-        // Combine `actualTouches` with the estimated values to create actual values, and append them to an array
-        pencilScreenTouch.appendActualTouchWithEstimatedValues(
+        pencilScreenTouch.appendActualTouches(
             actualTouches: actualTouches
+                .sorted { $0.timestamp < $1.timestamp }
+                .map { CanvasTouchPoint(touch: $0, view: view) }
         )
 
         drawCurveOnCanvas(pencilScreenTouch.latestActualTouchPoints)
     }
 
     private func drawFingerCurveOnCanvas() {
-        // If `drawingCurvePoints` is nil, an instance of `CanvasFingerDrawingCurvePoints` will be set.
         if isFingerDrawingCurvePointsInstanceCreated() {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
@@ -529,7 +528,7 @@ extension CanvasViewModel {
                     diameter: CGFloat(drawingTool.diameter)
                 )
             },
-            touchPhase: screenTouchPoints.currentTouchPhase
+            touchPhase: screenTouchPoints.lastTouchPhase
         )
 
         drawingDisplayLink.updateCanvasWithDrawing(
@@ -542,7 +541,7 @@ extension CanvasViewModel {
             fingerScreenTouches.touchArrayDictionary
         )
 
-        if fingerScreenTouches.isFingersOnScreen {
+        if fingerScreenTouches.isAllFingersOnScreen {
             transformer.transformCanvas(
                 screenCenter: .init(
                     x: frameSize.width * 0.5,
@@ -631,7 +630,7 @@ extension CanvasViewModel {
         transformer.resetMatrix()
     }
 
-    private func cancelFingerInput() {
+    private func cancelFingerDrawing() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         drawingTexture?.clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()

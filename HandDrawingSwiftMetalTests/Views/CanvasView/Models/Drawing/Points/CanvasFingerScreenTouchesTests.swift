@@ -9,21 +9,19 @@ import XCTest
 @testable import HandDrawingSwiftMetal
 
 final class CanvasFingerScreenTouchesTests: XCTestCase {
-
-    /// Confirms the process of adding and removing values in `touchArrayDictionary`
-    func testTouchArrayLifecycleInDictionary() {
-        let dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] =
-        [
-            1: [
-                .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 1, y: 1))
-            ],
-            0: [
-                .generate(location: .init(x: 0, y: 0))
+    /// Confirms finger input
+    func testLatestTouchPoints() {
+        let subject = CanvasFingerScreenTouches(
+            touchArrayDictionary:[
+                1: [
+                    .generate(location: .init(x: 0, y: 0), phase: .began),
+                    .generate(location: .init(x: 1, y: 1), phase: .moved)
+                ],
+                0: [
+                    .generate(location: .init(x: 0, y: 0), phase: .began)
+                ]
             ]
-        ]
-
-        let subject = CanvasFingerScreenTouches(touchArrayDictionary: dictionary)
+        )
 
         // If no active key is set, nothing is returned.
         XCTAssertEqual(subject.latestTouchPoints, [])
@@ -31,63 +29,35 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
         // When `activeDictionaryKey` is set, the values with `activeDictionaryKey` are returned.
         subject.updateActiveDictionaryKeyIfKeyIsNil()
         XCTAssertEqual(subject.activeDictionaryKey, 0)
-        XCTAssertEqual(subject.latestTouchPoints, [
-            .generate(location: .init(x: 0, y: 0))
-        ])
-
-        // If there is no latest value, nothing is returned.
-        XCTAssertEqual(subject.latestTouchPoints, [])
-
-        // When new values are added to the array, only the new values are retrieved.
-        subject.appendTouchPointToDictionary([0: .generate(location: .init(x: 1, y: 1))])
-        subject.appendTouchPointToDictionary([0: .generate(location: .init(x: 2, y: 2))])
-        XCTAssertEqual(subject.latestTouchPoints, [
-            .generate(location: .init(x: 1, y: 1)),
-            .generate(location: .init(x: 2, y: 2))
-        ])
-
-        // If values are added with a key other than `activeDictionaryKey`, nothing is returned.
-        subject.appendTouchPointToDictionary([1: .generate(location: .init(x: 2, y: 2))])
-        subject.appendTouchPointToDictionary([1: .generate(location: .init(x: 3, y: 3))])
-        XCTAssertEqual(subject.latestTouchPoints, [])
-
-        // When `removeEndedTouchArrayFromDictionary` is called,
-        // if the array contains ended or cancelled, the array will be removed from the dictionary.
-        subject.appendTouchPointToDictionary([0: .generate(location: .init(x: 3, y: 3), phase: .ended)])
-        subject.removeEndedTouchArrayFromDictionary()
-        XCTAssertEqual(subject.latestTouchPoints, [])
-    }
-
-}
-
-extension CanvasFingerScreenTouchesTests {
-
-    func testUpdateDictionaryKeyIfKeyIsNil() {
-        let dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] =
-        [
-            2: [
-                .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 1, y: 1)),
-                .generate(location: .init(x: 2, y: 2))
-            ],
-            0: [
-                .generate(location: .init(x: 0, y: 0))
-            ],
-            1: [
-                .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 1, y: 1))
+        XCTAssertEqual(
+            subject.latestTouchPoints.map { $0.location },
+            [
+                .init(x: 0, y: 0)
             ]
-        ]
+        )
 
-        let subject = CanvasFingerScreenTouches(touchArrayDictionary: dictionary)
+        // After `latestTouchPoints` is called once, it returns empty.
+        XCTAssertEqual(subject.latestTouchPoints, [])
 
-        subject.updateActiveDictionaryKeyIfKeyIsNil()
+        // Add new values
+        subject.appendTouchPointToDictionary([0: .generate(location: .init(x: 1, y: 1), phase: .moved)])
+        subject.appendTouchPointToDictionary([0: .generate(location: .init(x: 2, y: 2), phase: .ended)])
 
-        // After sorting by key, the first element is set as `activeDictionaryKey`
-        XCTAssertEqual(subject.activeDictionaryKey, 0)
+        XCTAssertEqual(
+            subject.latestTouchPoints.map { $0.location },
+            [
+                .init(x: 1, y: 1),
+                .init(x: 2, y: 2)
+            ]
+        )
+
+        // If the phase is ended, the element is removed from the dictionary
+        subject.removeEndedTouchArrayFromDictionary()
+        XCTAssertFalse(subject.touchArrayDictionary.keys.contains(0))
     }
 
-    func testIsFingersOnScreen() {
+    /// Confirms that all fingers are on the screen
+    func testIsAllFingersOnScreen() {
         struct Condition {
             let fingers: [CanvasTouchHashValue: [CanvasTouchPoint]]
         }
@@ -218,29 +188,60 @@ extension CanvasFingerScreenTouchesTests {
                 touchArrayDictionary: condition.fingers
             )
 
-            XCTAssertEqual(subject.isFingersOnScreen, expectation.result)
+            XCTAssertEqual(subject.isAllFingersOnScreen, expectation.result)
         }
     }
 
-    func testReset() {
+    func testUpdateDictionaryKeyIfKeyIsNil() {
         let dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] =
         [
-            1: [
+            2: [
                 .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 1, y: 1))
+                .generate(location: .init(x: 1, y: 1)),
+                .generate(location: .init(x: 2, y: 2))
             ],
             0: [
                 .generate(location: .init(x: 0, y: 0))
+            ],
+            1: [
+                .generate(location: .init(x: 0, y: 0)),
+                .generate(location: .init(x: 1, y: 1))
             ]
         ]
 
         let subject = CanvasFingerScreenTouches(touchArrayDictionary: dictionary)
 
-        XCTAssertEqual(subject.touchArrayDictionary, dictionary)
+        subject.updateActiveDictionaryKeyIfKeyIsNil()
+
+        // After sorting by key, the first element is set as `activeDictionaryKey`
+        XCTAssertEqual(subject.activeDictionaryKey, 0)
+    }
+
+    func testReset() {
+        let subject = CanvasFingerScreenTouches(
+            touchArrayDictionary: [
+                1: [
+                    .generate(location: .init(x: 0, y: 0)),
+                    .generate(location: .init(x: 1, y: 1))
+                ],
+                0: [
+                    .generate(location: .init(x: 0, y: 0))
+                ]
+            ],
+            activeDictionaryKey: 0,
+            activeLatestTouchPoint: .generate(location: .init(x: 0, y: 0))
+        )
+
+        XCTAssertFalse(subject.touchArrayDictionary.isEmpty)
+        XCTAssertNotNil(subject.activeDictionaryKey)
+        XCTAssertNotNil(subject.activeLatestTouchPoint)
 
         subject.reset()
 
-        XCTAssertEqual(subject.touchArrayDictionary, [:])
+        XCTAssertTrue(subject.touchArrayDictionary.isEmpty)
+        XCTAssertNil(subject.activeDictionaryKey)
+        XCTAssertNil(subject.activeLatestTouchPoint)
+
     }
 
 }

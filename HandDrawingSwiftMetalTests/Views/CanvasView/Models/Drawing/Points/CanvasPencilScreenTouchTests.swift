@@ -9,141 +9,110 @@ import XCTest
 @testable import HandDrawingSwiftMetal
 
 final class CanvasPencilScreenTouchTests: XCTestCase {
-
-    /// Confirms that the creation of `actualTouchPointArray` is complete
-    func testIsActualTouchPointCreationCompleted() {
-        let actualTouches: [UITouch] = [
-            UITouchDummy.init(phase: .began, estimationUpdateIndex: 0),
-            UITouchDummy.init(phase: .moved, estimationUpdateIndex: 1)
-        ]
-
-        let subject = CanvasPencilScreenTouch(
-            estimatedTouchPointArray: [
-                .generate(phase: .began, estimationUpdateIndex: 0),
-                .generate(phase: .moved, estimationUpdateIndex: 1),
-                .generate(phase: .ended, estimationUpdateIndex: nil)
-            ]
-        )
-
-        /// `estimationUpdateIndex` of the last element in `estimatedTouchPointArray` is nil,
-        /// so `secondLastEstimationUpdateIndex` contains `estimationUpdateIndex` of the second-to-last element in `estimatedTouchPointArray`
-        XCTAssertEqual(subject.secondLastEstimationUpdateIndex, 1)
-
-        subject.appendActualTouchToActualTouchPointArray(actualTouches[0])
-        XCTAssertEqual(subject.actualTouchPointArray.last?.estimationUpdateIndex, 0)
-
-        /// Completion is not determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` does not match `secondLastEstimationUpdateIndex`
-        XCTAssertFalse(subject.isActualTouchPointCreationCompleted)
-
-        subject.appendActualTouchToActualTouchPointArray(actualTouches[1])
-        XCTAssertEqual(subject.actualTouchPointArray.last?.estimationUpdateIndex, 1)
-
-        /// Completion is determined when `estimationUpdateIndex` of the last element in `actualTouchPointArray` matches `secondLastEstimationUpdateIndex`
-        XCTAssertTrue(subject.isActualTouchPointCreationCompleted)
-    }
-
-    func testHasPencilLiftedOffScreen() {
+    /// Confirms pencil input
+    func testActualTouchPointArray() {
         let subject = CanvasPencilScreenTouch()
-        XCTAssertFalse(subject.hasPencilLiftedOffScreen(.began))
-        XCTAssertFalse(subject.hasPencilLiftedOffScreen(.moved))
-        XCTAssertTrue(subject.hasPencilLiftedOffScreen(.ended))
-        XCTAssertTrue(subject.hasPencilLiftedOffScreen(.cancelled))
-    }
 
-    /// Confirms that elements created by combining actual and estimated values are added to `actualTouchPointArray`
-    func testAppendActualTouchWithEstimatedValue() {
-        let estimatedTouches: [CanvasTouchPoint] = [
-            .generate(phase: .began, force: 1.0, estimationUpdateIndex: 0),
-            .generate(phase: .moved, force: 1.0, estimationUpdateIndex: 1),
-            .generate(phase: .moved, force: 1.0, estimationUpdateIndex: 2),
-            .generate(phase: .ended, force: 0.0, estimationUpdateIndex: nil)
-        ]
+        subject.appendActualTouches(actualTouches: [
+            .generate(location: .init(x: 0, y: 0), phase: .began, estimationUpdateIndex: 0)
+        ])
 
-        let actualTouches: [UITouch] = [
-            UITouchDummy.init(phase: .began, force: 0.3, estimationUpdateIndex: 0, timestamp: 0),
-            UITouchDummy.init(phase: .moved, force: 0.2, estimationUpdateIndex: 1, timestamp: 1),
-            UITouchDummy.init(phase: .moved, force: 0.1, estimationUpdateIndex: 2, timestamp: 2)
-        ]
-
-        let subject = CanvasPencilScreenTouch(
-            estimatedTouchPointArray: estimatedTouches
-        )
-
-        subject.appendActualTouchWithEstimatedValues(actualTouches: Set(actualTouches.shuffled()))
-
-        /// Verify that the estimated value is used for `UITouch.Phase` and the actual value is used for `force`
-        XCTAssertEqual(subject.actualTouchPointArray[0].phase, estimatedTouches[0].phase)
-        XCTAssertEqual(subject.actualTouchPointArray[0].force, actualTouches[0].force)
-
-        XCTAssertEqual(subject.actualTouchPointArray[1].phase, estimatedTouches[1].phase)
-        XCTAssertEqual(subject.actualTouchPointArray[1].force, actualTouches[1].force)
-
-        XCTAssertEqual(subject.actualTouchPointArray[2].phase, estimatedTouches[2].phase)
-        XCTAssertEqual(subject.actualTouchPointArray[2].force, actualTouches[2].force)
-
-        /// Confirm that the last element of `estimatedTouchPointArray` is added to the end of `actualTouchPointArray` at `.ended`
-        XCTAssertEqual(subject.actualTouchPointArray[3].phase, estimatedTouches[3].phase)
-        XCTAssertEqual(subject.actualTouchPointArray[3].force, estimatedTouches[3].force)
-    }
-
-    /// Confirms that the latest actual touch points are returned from `actualTouchPointArray`
-    func testLatestActualTouchPoints() {
-        let conditions: [UITouch] = [
-            UITouchDummy.init(estimationUpdateIndex: 0),
-            UITouchDummy.init(estimationUpdateIndex: 1),
-            UITouchDummy.init(estimationUpdateIndex: 2),
-            UITouchDummy.init(estimationUpdateIndex: 3)
-        ]
-
-        let expectations: [CanvasTouchPoint] = [
-            .generate(estimationUpdateIndex: 0),
-            .generate(estimationUpdateIndex: 1),
-            .generate(estimationUpdateIndex: 2),
-            .generate(estimationUpdateIndex: 3)
-        ]
-
-        let subject = CanvasPencilScreenTouch(
-            estimatedTouchPointArray: [
-                .generate(phase: .began, estimationUpdateIndex: 0),
-                .generate(phase: .moved, estimationUpdateIndex: 1),
-                .generate(phase: .moved, estimationUpdateIndex: 2),
-                .generate(phase: .moved, estimationUpdateIndex: 3)
+        XCTAssertEqual(
+            subject.latestActualTouchPoints.map { $0.location },
+            [
+                .init(x: 0, y: 0)
             ]
         )
 
-        /// Confirm that it is empty at the start
+        // After `latestTouchPoints` is called once, it returns empty.
         XCTAssertEqual(subject.latestActualTouchPoints, [])
-        XCTAssertEqual(subject.latestActualTouchPoint, nil)
 
-        /// Add two elements to `actualTouchPointArray`
-        subject.appendActualTouchToActualTouchPointArray(conditions[0])
-        subject.appendActualTouchToActualTouchPointArray(conditions[1])
+        subject.appendActualTouches(actualTouches: [
+            .generate(location: .init(x: 1, y: 1), phase: .moved, estimationUpdateIndex: 1),
+            .generate(location: .init(x: 2, y: 2), phase: .moved, estimationUpdateIndex: 2)
+        ])
 
-        /// When `latestActualTouchPoints` is called, two elements are returned.
-        /// At that point, `CanvasTouchPoint` of the last element in `actualTouchPointArray` is stored in `latestActualTouchPoint`.
         XCTAssertEqual(
-            subject.latestActualTouchPoints.map { $0.estimationUpdateIndex },
-            [expectations[0], expectations[1]].map { $0.estimationUpdateIndex }
-        )
-        XCTAssertEqual(
-            subject.latestActualTouchPoint?.estimationUpdateIndex,
-            expectations[1].estimationUpdateIndex
+            subject.latestActualTouchPoints.map { $0.location },
+            [
+                .init(x: 1, y: 1),
+                .init(x: 2, y: 2)
+            ]
         )
 
-        /// Add two more elements to `actualTouchPointArray`
-        subject.appendActualTouchToActualTouchPointArray(conditions[2])
-        subject.appendActualTouchToActualTouchPointArray(conditions[3])
+        // Since `estimationUpdateIndex` becomes `nil` when the phase is ended,
+        // the previous `estimationUpdateIndex` is retained
+        subject.setLatestEstimatedTouchPoint(
+            .generate(phase: .moved, estimationUpdateIndex: 3)
+        )
+        subject.setLatestEstimatedTouchPoint(
+            .generate(location: .init(x: 4, y: 4), phase: .ended, estimationUpdateIndex: nil)
+        )
+        XCTAssertEqual(subject.latestEstimationUpdateIndex, 3)
+        XCTAssertEqual(subject.latestEstimatedTouchPoint?.location, .init(x: 4, y: 4))
 
-        /// Although the total number of elements in `actualTouchPointArray` is 4,
-        /// when `latestActualTouchPoints` is called, the two elements after `latestActualTouchPoint` are returned
+        subject.appendActualTouches(actualTouches: [
+            .generate(location: .init(x: 3, y: 3), phase: .moved, estimationUpdateIndex: 3)
+        ])
+
+        // `latestEstimatedTouchPoint` is added to `actualTouchPointArray`,
+        // and the drawing termination process is executed.
         XCTAssertEqual(
-            subject.latestActualTouchPoints.map { $0.estimationUpdateIndex },
-            [expectations[2], expectations[3]].map { $0.estimationUpdateIndex }
+            subject.latestActualTouchPoints.map { $0.location },
+            [
+                .init(x: 3, y: 3),
+                .init(x: 4, y: 4)
+            ]
         )
-        XCTAssertEqual(
-            subject.latestActualTouchPoint?.estimationUpdateIndex,
-            expectations[3].estimationUpdateIndex
+    }
+
+    /// Confirms that a pen has left the screen
+    func testIsPenOffScreen() {
+        let subject = CanvasPencilScreenTouch()
+
+        let actualTouches: [CanvasTouchPoint] = [
+            .generate(phase: .moved, estimationUpdateIndex: 1)
+        ]
+
+        subject.setLatestEstimatedTouchPoint(
+            .generate(phase: .moved, estimationUpdateIndex: 1)
         )
+        XCTAssertEqual(subject.latestEstimatedTouchPoint?.phase, .moved)
+        XCTAssertEqual(subject.latestEstimationUpdateIndex, 1)
+
+        XCTAssertFalse(subject.isPenOffScreen(actualTouches: actualTouches))
+
+        // If `latestEstimatedTouchPoint?.phase` is `ended`,
+        // `latestEstimationUpdateIndex` matches the `estimationUpdateIndex` of `actualTouches`,
+        // then `isPenOffScreen` returns `true`.
+        subject.setLatestEstimatedTouchPoint(
+            .generate(phase: .ended, estimationUpdateIndex: nil)
+        )
+        XCTAssertEqual(subject.latestEstimatedTouchPoint?.phase, .ended)
+        XCTAssertEqual(subject.latestEstimationUpdateIndex, actualTouches.last?.estimationUpdateIndex)
+
+        XCTAssertTrue(subject.isPenOffScreen(actualTouches: actualTouches))
+    }
+
+    func testReset() {
+        let subject = CanvasPencilScreenTouch(
+            actualTouchPointArray: [
+                .generate(location: .init(x: 0, y: 0)),
+                .generate(location: .init(x: 1, y: 1))
+            ],
+            latestEstimatedTouchPoint: .generate(location: .init(x: 2, y: 2)),
+            latestActualTouchPoint: .generate(location: .init(x: 3, y: 3))
+        )
+
+        XCTAssertFalse(subject.actualTouchPointArray.isEmpty)
+        XCTAssertNotNil(subject.latestEstimatedTouchPoint)
+        XCTAssertNotNil(subject.latestActualTouchPoint)
+
+        subject.reset()
+
+        XCTAssertTrue(subject.actualTouchPointArray.isEmpty)
+        XCTAssertNil(subject.latestEstimatedTouchPoint)
+        XCTAssertNil(subject.latestActualTouchPoint)
     }
 
 }

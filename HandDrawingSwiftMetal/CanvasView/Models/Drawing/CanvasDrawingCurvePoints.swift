@@ -30,7 +30,7 @@ extension CanvasDrawingCurvePoints {
 
     /// Is the drawing finished
     var isDrawingFinished: Bool {
-        [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(currentTouchPhase)
+        UITouch.isTouchCompleted(currentTouchPhase)
     }
 
     var isCurrentlyDrawing: Bool {
