@@ -1,5 +1,5 @@
 //
-//  CanvasFingerInputGestureRecognizer.swift
+//  FingerInputGestureRecognizer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/31.
@@ -7,15 +7,15 @@
 
 import UIKit
 
-protocol CanvasFingerInputGestureRecognizerSender: AnyObject {
+protocol FingerInputGestureRecognizerSender: AnyObject {
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
 }
 
-final class CanvasFingerInputGestureRecognizer: UIGestureRecognizer {
+final class FingerInputGestureRecognizer: UIGestureRecognizer {
 
-    weak private var gestureDelegate: CanvasFingerInputGestureRecognizerSender?
+    weak private var gestureDelegate: FingerInputGestureRecognizerSender?
 
-    init(delegate: CanvasFingerInputGestureRecognizerSender) {
+    init(delegate: FingerInputGestureRecognizerSender) {
         super.init(target: nil, action: nil)
         allowedTouchTypes = [UITouch.TouchType.direct.rawValue as NSNumber]
 

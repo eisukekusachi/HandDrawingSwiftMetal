@@ -49,7 +49,7 @@ extension CanvasTouchPoint {
 
 extension Array where Element == CanvasTouchPoint {
 
-    var currentTouchPhase: UITouch.Phase {
+    var lastTouchPhase: UITouch.Phase {
         if self.last?.phase == .cancelled {
             .cancelled
         } else if self.last?.phase == .ended {

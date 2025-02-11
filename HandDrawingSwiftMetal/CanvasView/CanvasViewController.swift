@@ -157,10 +157,10 @@ extension CanvasViewController {
 
     private func subscribeEvents() {
         contentView.canvasView.addGestureRecognizer(
-            CanvasFingerInputGestureRecognizer(delegate: self)
+            FingerInputGestureRecognizer(delegate: self)
         )
         contentView.canvasView.addGestureRecognizer(
-            CanvasPencilInputGestureRecognizer(delegate: self)
+            PencilInputGestureRecognizer(delegate: self)
         )
 
         contentView.canvasView.updateTexturePublisher
@@ -168,7 +168,6 @@ extension CanvasViewController {
                 self?.canvasViewModel.onUpdateRenderTexture()
             }
             .store(in: &cancellables)
-
     }
 
 }
@@ -256,7 +255,7 @@ extension CanvasViewController {
 
 }
 
-extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
+extension CanvasViewController: FingerInputGestureRecognizerSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.onFingerGestureDetected(
@@ -268,7 +267,7 @@ extension CanvasViewController: CanvasFingerInputGestureRecognizerSender {
 
 }
 
-extension CanvasViewController: CanvasPencilInputGestureRecognizerSender {
+extension CanvasViewController: PencilInputGestureRecognizerSender {
 
     func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
         canvasViewModel.onPencilGestureDetected(

@@ -1,5 +1,5 @@
 //
-//  CanvasPencilInputGestureRecognizer.swift
+//  PencilInputGestureRecognizer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/31.
@@ -7,16 +7,16 @@
 
 import UIKit
 
-protocol CanvasPencilInputGestureRecognizerSender {
+protocol PencilInputGestureRecognizerSender {
     func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView)
 }
 
-final class CanvasPencilInputGestureRecognizer: UIGestureRecognizer {
+final class PencilInputGestureRecognizer: UIGestureRecognizer {
 
-    private var gestureDelegate: CanvasPencilInputGestureRecognizerSender?
+    private var gestureDelegate: PencilInputGestureRecognizerSender?
 
-    init(delegate: CanvasPencilInputGestureRecognizerSender) {
+    init(delegate: PencilInputGestureRecognizerSender) {
         super.init(target: nil, action: nil)
         allowedTouchTypes = [UITouch.TouchType.pencil.rawValue as NSNumber]
 
