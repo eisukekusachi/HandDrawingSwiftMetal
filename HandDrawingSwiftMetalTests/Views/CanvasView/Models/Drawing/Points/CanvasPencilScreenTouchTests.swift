@@ -40,21 +40,28 @@ final class CanvasPencilScreenTouchTests: XCTestCase {
             ]
         )
 
-        // Since `estimationUpdateIndex` becomes `nil` when the phase is ended,
-        // the previous `estimationUpdateIndex` is retained
         subject.setLatestEstimatedTouchPoint(
-            .generate(phase: .moved, estimationUpdateIndex: 3)
+            .generate(location: .init(x: 3, y: 3), phase: .moved, estimationUpdateIndex: 3)
         )
         subject.setLatestEstimatedTouchPoint(
             .generate(location: .init(x: 4, y: 4), phase: .ended, estimationUpdateIndex: nil)
         )
-        XCTAssertEqual(subject.latestEstimationUpdateIndex, 3)
-        XCTAssertEqual(subject.latestEstimatedTouchPoint?.location, .init(x: 4, y: 4))
 
+        // When values are sent from the Apple Pencil,
+        // when the `phase` is `ended`, `estimationUpdateIndex` becomes `nil`,
+        // so the previous `estimationUpdateIndex` is retained.
+        XCTAssertEqual(subject.latestEstimationUpdateIndex, 3)
+        XCTAssertEqual(subject.latestEstimatedTouchPoint?.phase, .ended)
+
+        // Since the phase of `actualTouches` does not become `ended`,
+        // the pen is considered to have left
+        // when `latestEstimatedTouchPoint?.phase` is `ended`,
+        // `latestEstimationUpdateIndex` matches the `estimationUpdateIndex` of `actualTouches`.
         subject.appendActualTouches(actualTouches: [
             .generate(location: .init(x: 3, y: 3), phase: .moved, estimationUpdateIndex: 3)
         ])
 
+        // When the pen leaves the screen,
         // `latestEstimatedTouchPoint` is added to `actualTouchPointArray`,
         // and the drawing termination process is executed.
         XCTAssertEqual(

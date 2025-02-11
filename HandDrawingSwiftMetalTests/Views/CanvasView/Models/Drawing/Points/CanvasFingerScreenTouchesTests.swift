@@ -54,6 +54,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
         // If the phase is ended, the element is removed from the dictionary
         subject.removeEndedTouchArrayFromDictionary()
         XCTAssertFalse(subject.touchArrayDictionary.keys.contains(0))
+        XCTAssertTrue(subject.touchArrayDictionary.keys.contains(1))
     }
 
     /// Confirms that all fingers are on the screen
