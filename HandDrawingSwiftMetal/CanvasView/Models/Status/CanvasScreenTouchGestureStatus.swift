@@ -9,17 +9,18 @@ import Foundation
 
 final class CanvasScreenTouchGestureStatus {
 
-    typealias T = CanvasScreenTouchGestureType
+    private(set) var status: CanvasScreenTouchGestureType = .undetermined
 
-    private(set) var status: T = .undetermined
-
-    func update(_ touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) -> T {
-        let newStatus: T = .init(from: touchArrayDictionary)
-        return update(newStatus)
+    func update(
+        _ touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]
+    ) -> CanvasScreenTouchGestureType {
+        update(.init(from: touchArrayDictionary))
     }
 
     /// Update the status if the status is not yet determined.
-    func update(_ newStatus: T) -> T {
+    func update(
+        _ newStatus: CanvasScreenTouchGestureType
+    ) -> CanvasScreenTouchGestureType {
         if status == .undetermined {
             status = newStatus
         }
