@@ -19,7 +19,6 @@ final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
     private(set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
 
     private var isFirstCurveHasBeenCreated: Bool = false
-
 }
 
 extension CanvasFingerDrawingCurvePoints {

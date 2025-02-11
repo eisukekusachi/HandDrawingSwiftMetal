@@ -21,6 +21,7 @@ final class CanvasPencilScreenTouch {
     /// A variable that stores the latest estimated value, used for determining touch end
     private(set) var latestEstimatedTouchPoint: CanvasTouchPoint?
 
+    /// A variable that stores the latest estimationUpdateIndex, used for determining touch end
     private(set) var latestEstimationUpdateIndex: NSNumber?
 
     init(
@@ -42,6 +43,11 @@ extension CanvasPencilScreenTouch {
         let touchPoints = actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
         latestActualTouchPoint = actualTouchPointArray.last
         return touchPoints
+    }
+
+    func isPenOffScreen(actualTouches: [CanvasTouchPoint]) -> Bool {
+        UITouch.isTouchCompleted(latestEstimatedTouchPoint?.phase ?? .cancelled) &&
+        actualTouches.contains(where: { $0.estimationUpdateIndex == latestEstimationUpdateIndex })
     }
 
     func setLatestEstimatedTouchPoint(_ estimatedTouchPoint: CanvasTouchPoint?) {
@@ -66,11 +72,6 @@ extension CanvasPencilScreenTouch {
         latestActualTouchPoint = nil
         latestEstimatedTouchPoint = nil
         latestEstimationUpdateIndex = nil
-    }
-
-    func isPenOffScreen(actualTouches: [CanvasTouchPoint]) -> Bool {
-        UITouch.isTouchCompleted(latestEstimatedTouchPoint?.phase ?? .cancelled) &&
-        actualTouches.contains(where: { $0.estimationUpdateIndex == latestEstimationUpdateIndex })
     }
 
 }
