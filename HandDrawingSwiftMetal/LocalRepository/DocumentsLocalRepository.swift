@@ -15,65 +15,54 @@ enum DocumentsLocalRepositoryError: Error {
 
 final class DocumentsLocalRepository: LocalRepository {
 
-    private var cancellables = Set<AnyCancellable>()
-
     func saveDataToDocuments(
         renderTexture: MTLTexture,
         textureLayers: TextureLayers,
         drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { promise in
-            Task { [weak self] in
-                guard let `self` else { return }
-
-                try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-
-                Publishers.CombineLatest(
-                    DocumentsLocalRepository.exportThumbnail(
-                        texture: renderTexture,
-                        fileName: URL.thumbnailPath,
-                        height: 500,
-                        to: URL.tmpFolderURL
-                    ),
-                    DocumentsLocalRepository.exportLayerData(
-                        layers: textureLayers.layers,
-                        to: URL.tmpFolderURL
-                    )
-                )
-                .compactMap { thumbnailName, layers -> CanvasEntity? in
-                    return .init(
-                        thumbnailName: thumbnailName,
-                        textureSize: renderTexture.size,
-                        layerIndex: textureLayers.index,
-                        layers: layers,
-                        drawingTool: drawingTool
-                    )
-                }
-                .tryMap { result -> Void in
-                    try FileOutputManager.saveJson(
-                        result,
-                        to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
-                    )
-                }
-                .tryMap { result in
-                    try FileOutputManager.zip(
-                        URL.tmpFolderURL,
-                        to: zipFileURL
-                    )
-                }
-                .sink { completion in
-
-                    try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
-
-                    switch completion {
-                    case .finished: promise(.success(()))
-                    case .failure(let error): promise(.failure(error))
-                    }
-                } receiveValue: { _  in }
-                .store(in: &self.cancellables)
-            }
+        do {
+            try FileManager.createNewDirectory(url: URL.tmpFolderURL)
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
         }
+
+        return Publishers.CombineLatest(
+            exportThumbnail(
+                texture: renderTexture,
+                fileName: URL.thumbnailPath,
+                height: 500,
+                to: URL.tmpFolderURL
+            ),
+            exportLayerData(
+                layers: textureLayers.layers,
+                to: URL.tmpFolderURL
+            )
+        )
+        .compactMap { thumbnailName, layers -> CanvasEntity? in
+            CanvasEntity.init(
+                thumbnailName: thumbnailName,
+                textureSize: renderTexture.size,
+                layerIndex: textureLayers.index,
+                layers: layers,
+                drawingTool: drawingTool
+            )
+        }
+        .tryMap { result -> Void in
+            try FileOutputManager.saveJson(
+                result,
+                to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+            )
+        }
+        .tryMap { result in
+            try FileOutputManager.zip(
+                URL.tmpFolderURL,
+                to: zipFileURL
+            )
+        }
+        .handleEvents(receiveCompletion: { _ in
+            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+        })
         .eraseToAnyPublisher()
     }
 
@@ -112,17 +101,16 @@ final class DocumentsLocalRepository: LocalRepository {
 }
 
 extension DocumentsLocalRepository {
-    static func exportThumbnail(
+    private func exportThumbnail(
         texture: MTLTexture,
         fileName: String,
         height: CGFloat,
         to url: URL
     ) -> AnyPublisher<String, DocumentsLocalRepositoryError> {
-        let thumbnail = texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0)
-        let publisher = Future<String, DocumentsLocalRepositoryError> { promise in
+        Future<String, DocumentsLocalRepositoryError> { promise in
             do {
                 try FileOutputManager.saveImage(
-                    image: thumbnail,
+                    image: texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0),
                     to: url.appendingPathComponent(fileName)
                 )
                 promise(.success(fileName))
@@ -130,31 +118,28 @@ extension DocumentsLocalRepository {
                 promise(.failure(.exportThumbnailError))
             }
         }
-        return publisher.eraseToAnyPublisher()
+        .eraseToAnyPublisher()
     }
 
-    static func exportLayerData(
+    private func exportLayerData(
         layers: [TextureLayer],
         to url: URL
     ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
-        let publisher = Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
+        Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
             do {
-                var layerEntities: [ImageLayerEntity] = []
-
-                for layer in layers {
+                let layerEntities = try layers.map { layer -> ImageLayerEntity in
                     let textureName = UUID().uuidString
 
                     try FileOutputManager.saveImage(
                         bytes: layer.texture?.bytes ?? [],
                         to: url.appendingPathComponent(textureName)
                     )
-                    layerEntities.append(
-                        .init(
-                            textureName: textureName,
-                            title: layer.title,
-                            alpha: layer.alpha,
-                            isVisible: layer.isVisible
-                        )
+
+                    return ImageLayerEntity(
+                        textureName: textureName,
+                        title: layer.title,
+                        alpha: layer.alpha,
+                        isVisible: layer.isVisible
                     )
                 }
                 promise(.success(layerEntities))
@@ -162,7 +147,7 @@ extension DocumentsLocalRepository {
                 promise(.failure(.exportLayerDataError))
             }
         }
-        return publisher.eraseToAnyPublisher()
+        .eraseToAnyPublisher()
     }
 
 }
