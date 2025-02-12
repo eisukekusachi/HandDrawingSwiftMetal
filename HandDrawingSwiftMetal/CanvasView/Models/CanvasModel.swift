@@ -7,7 +7,7 @@
 
 import MetalKit
 
-final class CanvasModel {
+struct CanvasModel {
     let projectName: String
 
     let textureSize: CGSize
