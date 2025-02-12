@@ -182,7 +182,7 @@ final class CanvasViewModel {
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
     }
 
-    func apply(model: CanvasModel) {
+    func initCanvas(model: CanvasModel) {
 
         projectName = model.projectName
 
@@ -190,11 +190,6 @@ final class CanvasViewModel {
             layers: model.layers,
             layerIndex: model.layerIndex
         )
-
-        // If `textureLayers` initialization has failed, perform the initialization
-        if !textureLayers.isTextureInitialized {
-            textureLayers.initLayers(size: model.textureSize)
-        }
 
         brushDrawingTexture.initTextures(model.textureSize)
         eraserDrawingTexture.initTextures(model.textureSize)
@@ -671,9 +666,7 @@ extension CanvasViewModel {
             renderTexture: canvasTexture,
             textureLayers: textureLayers,
             drawingTool: drawingTool,
-            to: URL.documents.appendingPathComponent(
-                CanvasModel.getZipFileName(projectName: projectName)
-            )
+            to: URL.getZipFileURL(projectName: projectName)
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },

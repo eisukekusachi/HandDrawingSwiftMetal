@@ -6,6 +6,11 @@
 //
 
 import MetalKit
+
+enum TextureLayerError: Error {
+    case cannotCreateTexture
+}
+
 /// A layer with a texture
 struct TextureLayer: TextureLayerProtocol {
     /// The unique identifier for the layer
@@ -32,6 +37,33 @@ extension TextureLayer {
 
         texture = newTexture
         updateThumbnail()
+    }
+
+    init(
+        from imageLayerEntity: ImageLayerEntity,
+        textureSize: CGSize,
+        folderURL: URL,
+        device: MTLDevice
+    ) throws {
+        let textureData = try Data(contentsOf: folderURL.appendingPathComponent(imageLayerEntity.textureName))
+
+        guard
+            let hexadecimalData = textureData.encodedHexadecimals,
+            let texture = MTLTextureCreator.makeTexture(
+                size: textureSize,
+                colorArray: hexadecimalData,
+                with: device
+            )
+        else {
+            throw TextureLayerError.cannotCreateTexture
+        }
+
+        self.init(
+            texture: texture,
+            title: imageLayerEntity.title,
+            alpha: imageLayerEntity.alpha,
+            isVisible: imageLayerEntity.isVisible
+        )
     }
 
     mutating func updateThumbnail() {
@@ -61,6 +93,22 @@ extension TextureLayer {
                 with: device
             )
         )
+    }
+
+    static func makeLayers(
+        from imageLayerEntities: [ImageLayerEntity],
+        textureSize: CGSize,
+        folderURL: URL,
+        device: MTLDevice
+    ) throws -> [TextureLayer] {
+        try imageLayerEntities.map { imageLayerEntity in
+            try TextureLayer.init(
+                from: imageLayerEntity,
+                textureSize: textureSize,
+                folderURL: folderURL,
+                device: device
+            )
+        }
     }
 
 }
