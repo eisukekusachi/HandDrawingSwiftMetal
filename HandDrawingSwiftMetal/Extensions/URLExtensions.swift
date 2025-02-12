@@ -53,4 +53,8 @@ extension URL {
         return []
     }
 
+    static func getZipFileURL(projectName: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
+    }
+
 }
