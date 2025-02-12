@@ -142,7 +142,7 @@ extension CanvasViewController {
         canvasViewModel.refreshCanvasPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
-                self?.canvasViewModel.apply(model: model)
+                self?.canvasViewModel.initCanvas(model: model)
             }
             .store(in: &cancellables)
 

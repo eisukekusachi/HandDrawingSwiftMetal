@@ -182,7 +182,7 @@ final class CanvasViewModel {
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
     }
 
-    func apply(model: CanvasModel) {
+    func initCanvas(model: CanvasModel) {
 
         projectName = model.projectName
 
