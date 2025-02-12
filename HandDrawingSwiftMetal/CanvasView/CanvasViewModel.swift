@@ -191,11 +191,6 @@ final class CanvasViewModel {
             layerIndex: model.layerIndex
         )
 
-        // If `textureLayers` initialization has failed, perform the initialization
-        if !textureLayers.isTextureInitialized {
-            textureLayers.initLayers(size: model.textureSize)
-        }
-
         brushDrawingTexture.initTextures(model.textureSize)
         eraserDrawingTexture.initTextures(model.textureSize)
 
