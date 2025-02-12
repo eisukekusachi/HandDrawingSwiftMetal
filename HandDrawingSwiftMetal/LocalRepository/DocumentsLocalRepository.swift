@@ -82,29 +82,28 @@ final class DocumentsLocalRepository: LocalRepository {
     ) -> AnyPublisher<CanvasModel, Error> {
         Future<CanvasModel, Error> { promise in
             Task {
-                do {
-                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
-                } catch {
-                    promise(.failure(error))
-                }
-
                 defer {
                     try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
                 }
 
-                let entity = try FileInputManager.getCanvasEntity(
-                    fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
-                )
+                do {
+                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
+                    try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
 
-                promise(.success(
-                    .init(
+                    let entity = try FileInputManager.getCanvasEntity(
+                        fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                    )
+
+                    let model = try CanvasModel.init(
                         projectName: sourceURL.fileName,
-                        device: MTLCreateSystemDefaultDevice()!,
                         entity: entity,
                         folderURL: URL.tmpFolderURL
                     )
-                ))
+
+                    promise(.success(model))
+                } catch {
+                    promise(.failure(error))
+                }
             }
         }
         .eraseToAnyPublisher()
