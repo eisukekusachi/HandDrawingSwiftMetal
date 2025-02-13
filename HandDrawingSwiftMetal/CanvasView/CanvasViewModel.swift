@@ -168,6 +168,12 @@ final class CanvasViewModel {
                 self?.textureLayers.backgroundColor = color
             }
             .store(in: &cancellables)
+
+        textureLayers.updateCanvasPublisher
+            .sink { [weak self] allLayerUpdates in
+                self?.updateCanvasWithTextureLayers(allLayerUpdates: allLayerUpdates)
+            }
+            .store(in: &cancellables)
     }
 
     func initCanvas(size: CGSize) {
@@ -206,7 +212,7 @@ final class CanvasViewModel {
 
         canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
 }
@@ -236,7 +242,7 @@ extension CanvasViewModel {
             initCanvas(size: textureSize)
         }
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     func onUpdateRenderTexture() {
@@ -248,7 +254,7 @@ extension CanvasViewModel {
         }
 
         // Redraws the canvas when the device rotates and the canvas size changes.
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     /// Manages all finger positions on the screen using a dictionary
@@ -334,7 +340,7 @@ extension CanvasViewModel {
 
         initCanvas(size: size)
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     func didTapLoadButton(filePath: String) {
@@ -347,75 +353,32 @@ extension CanvasViewModel {
 
     // MARK: Layers
     func didTapLayer(layer: TextureLayer) {
-        guard let index = textureLayers.getIndex(layer: layer)  else { return }
-
-        textureLayers.index = index
-
-        updateCanvasView(allLayerUpdates: true)
+        textureLayers.selectTextureLayer(layer: layer)
     }
     func didTapAddLayerButton() {
-        guard
-            let canvasTextureSize = canvasTexture?.size,
-            let newTexture = MTLTextureCreator.makeBlankTexture(
-                size: canvasTextureSize,
-                with: device
-            )
-        else { return }
-
-        let layer: TextureLayer = .init(
-            texture: newTexture,
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
-        )
-        let index = textureLayers.index + 1
-        textureLayers.insertLayer(
-            layer: layer,
-            at: index
-        )
-        textureLayers.setIndex(from: layer)
-
-        // Makes a thumbnail
-        textureLayers.updateThumbnail(index: index)
-
-        updateCanvasView(allLayerUpdates: true)
+        textureLayers.addTextureLayer(textureSize: canvasTexture?.size ?? .zero)
     }
     func didTapRemoveLayerButton() {
-        guard
-            textureLayers.canDeleteLayer,
-            let layer = textureLayers.selectedLayer,
-            let index = textureLayers.getIndex(layer: layer)
-        else { return }
-
-        textureLayers.removeLayer(layer)
-        textureLayers.setIndex(index - 1)
-
-        updateCanvasView(allLayerUpdates: true)
+        textureLayers.removeTextureLayer()
+    }
+    func didMoveLayers(
+        fromOffsets: IndexSet,
+        toOffset: Int
+    ) {
+        textureLayers.moveTextureLayer(fromOffsets: fromOffsets, toOffset: toOffset)
     }
     func didTapLayerVisibility(
         layer: TextureLayer,
         isVisible: Bool
     ) {
-        guard let index = textureLayers.getIndex(layer: layer) else { return }
-
-        textureLayers.updateLayer(
-            index: index,
-            isVisible: isVisible
-        )
-
-        updateCanvasView(allLayerUpdates: true)
+        textureLayers.changeVisibility(layer: layer, isVisible: isVisible)
     }
     func didStartChangingLayerAlpha(layer: TextureLayer) {}
     func didChangeLayerAlpha(
         layer: TextureLayer,
         value: Int
     ) {
-        guard let index = textureLayers.getIndex(layer: layer) else { return }
-
-        textureLayers.updateLayer(
-            index: index,
-            alpha: value
-        )
-
-        updateCanvasView()
+        textureLayers.changeAlpha(layer: layer, alpha: value)
     }
     func didFinishChangingLayerAlpha(layer: TextureLayer) {}
 
@@ -423,48 +386,7 @@ extension CanvasViewModel {
         layer: TextureLayer,
         title: String
     ) {
-        guard let index = textureLayers.getIndex(layer: layer) else { return }
-
-        textureLayers.updateLayer(
-            index: index,
-            title: title
-        )
-    }
-
-    func didMoveLayers(
-        fromOffsets: IndexSet,
-        toOffset: Int
-    ) {
-        let listFromIndex = fromOffsets.first ?? 0
-        let listToIndex = toOffset
-
-        // Convert the value received from `onMove(perform:)` into a value used in an array
-        let listSource = listFromIndex
-        let listDestination = UndoMoveData.getMoveDestination(fromIndex: listFromIndex, toIndex: listToIndex)
-
-        let textureLayerSource = TextureLayers.getReversedIndex(
-            index: listSource,
-            layerCount: textureLayers.count
-        )
-        let textureLayerDestination = TextureLayers.getReversedIndex(
-            index: listDestination,
-            layerCount: textureLayers.count
-        )
-
-        let textureLayerSelectedIndex = textureLayers.index
-        let textureLayerSelectedIndexAfterMove = UndoMoveData.makeSelectedIndexAfterMove(
-            source: textureLayerSource,
-            destination: textureLayerDestination,
-            selectedIndex: textureLayerSelectedIndex
-        )
-
-        textureLayers.moveLayer(
-            fromListOffsets: fromOffsets,
-            toListOffset: toOffset
-        )
-        textureLayers.setIndex(textureLayerSelectedIndexAfterMove)
-
-        updateCanvasView(allLayerUpdates: true)
+        textureLayers.changeTitle(layer: layer, title: title)
     }
 
 }
@@ -555,7 +477,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func updateCanvasView(allLayerUpdates: Bool = false) {
+    private func updateCanvasWithTextureLayers(allLayerUpdates: Bool = false) {
         guard
             let commandBuffer = canvasView?.commandBuffer
         else { return }
