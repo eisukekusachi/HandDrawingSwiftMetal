@@ -6,8 +6,14 @@
 //
 
 import MetalKit
+import Combine
+
 /// Manages `TextureLayer` and the textures used for rendering
 final class TextureLayers: Layers<TextureLayer> {
+
+    var updateCanvasPublisher: AnyPublisher<Bool, Never> {
+        updateCanvasSubject.eraseToAnyPublisher()
+    }
 
     var isTextureInitialized: Bool {
         unselectedBottomTexture != nil && unselectedTopTexture != nil
@@ -25,6 +31,8 @@ final class TextureLayers: Layers<TextureLayer> {
     private var unselectedTopTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers?
+
+    private let updateCanvasSubject = PassthroughSubject<Bool, Never>()
 
     init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
@@ -155,6 +163,126 @@ extension TextureLayers {
             texture: unselectedTopTexture,
             into: destinationTexture,
             with: commandBuffer
+        )
+    }
+
+}
+
+extension TextureLayers {
+
+    func selectTextureLayer(layer: TextureLayer) {
+        guard let newIndex = getIndex(layer: layer) else { return }
+        index = newIndex
+        updateCanvasSubject.send(true)
+    }
+
+    func addTextureLayer(textureSize: CGSize) {
+        guard
+            textureSize >= MTLRenderer.minimumTextureSize,
+            let newTexture = MTLTextureCreator.makeBlankTexture(
+                size: textureSize,
+                with: device
+            )
+        else { return }
+
+        let newLayer: TextureLayer = .init(
+            texture: newTexture,
+            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        )
+        let newIndex = index + 1
+        insertLayer(
+            layer: newLayer,
+            at: newIndex
+        )
+        setIndex(from: newLayer)
+
+        // Makes a thumbnail
+        updateThumbnail(index: newIndex)
+
+        updateCanvasSubject.send(true)
+    }
+
+    func moveTextureLayer(
+        fromOffsets: IndexSet,
+        toOffset: Int
+    ) {
+        let listFromIndex = fromOffsets.first ?? 0
+        let listToIndex = toOffset
+
+        // Convert the value received from `onMove(perform:)` into a value used in an array
+        let listSource = listFromIndex
+        let listDestination = UndoMoveData.getMoveDestination(fromIndex: listFromIndex, toIndex: listToIndex)
+
+        let textureLayerSource = TextureLayers.getReversedIndex(
+            index: listSource,
+            layerCount: count
+        )
+        let textureLayerDestination = TextureLayers.getReversedIndex(
+            index: listDestination,
+            layerCount: count
+        )
+
+        let textureLayerSelectedIndex = index
+        let textureLayerSelectedIndexAfterMove = UndoMoveData.makeSelectedIndexAfterMove(
+            source: textureLayerSource,
+            destination: textureLayerDestination,
+            selectedIndex: textureLayerSelectedIndex
+        )
+
+        moveLayer(
+            fromListOffsets: fromOffsets,
+            toListOffset: toOffset
+        )
+        setIndex(textureLayerSelectedIndexAfterMove)
+
+        updateCanvasSubject.send(true)
+    }
+
+    func removeTextureLayer() {
+        guard
+            canDeleteLayer,
+            let layer = selectedLayer,
+            let index = getIndex(layer: layer)
+        else { return }
+
+        removeLayer(layer)
+        setIndex(index - 1)
+
+        updateCanvasSubject.send(true)
+    }
+
+    func changeVisibility(layer: TextureLayer, isVisible: Bool) {
+        guard
+            let index = getIndex(layer: layer)
+        else { return }
+
+        updateLayer(
+            index: index,
+            isVisible: isVisible
+        )
+
+        updateCanvasSubject.send(true)
+    }
+
+    func changeAlpha(layer: TextureLayer, alpha: Int) {
+        guard
+            let index = getIndex(layer: layer)
+        else { return }
+
+        updateLayer(
+            index: index,
+            alpha: alpha
+        )
+
+        updateCanvasSubject.send(true)
+    }
+
+    func changeTitle(layer: TextureLayer, title: String) {
+        guard let index = getIndex(layer: layer) else { return }
+
+        updateLayer(
+            index: index,
+            title: title
         )
     }
 
