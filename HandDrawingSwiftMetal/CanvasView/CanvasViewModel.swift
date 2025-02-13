@@ -333,12 +333,8 @@ extension CanvasViewModel {
         else { return }
 
         projectName = Calendar.currentDate
-
         transformer.setMatrix(.identity)
-
         initCanvas(size: size)
-
-        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     func didTapLoadButton(filePath: String) {
