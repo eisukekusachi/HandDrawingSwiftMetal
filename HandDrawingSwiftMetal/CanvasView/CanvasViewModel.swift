@@ -177,40 +177,34 @@ final class CanvasViewModel {
     }
 
     func initCanvas(size: CGSize) {
-
         textureLayers.initLayers(size: size)
+        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
-        brushDrawingTexture.initTextures(size)
-        eraserDrawingTexture.initTextures(size)
-
-        currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
-
-        canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
+        updateTextures(size: size)
     }
 
     func initCanvas(model: CanvasModel) {
-
-        projectName = model.projectName
-
         textureLayers.initLayers(
             layers: model.layers,
             layerIndex: model.layerIndex
         )
+        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
-        brushDrawingTexture.initTextures(model.textureSize)
-        eraserDrawingTexture.initTextures(model.textureSize)
-
-        for i in 0 ..< textureLayers.layers.count {
-            textureLayers.layers[i].updateThumbnail()
-        }
+        projectName = model.projectName
 
         drawingTool.setBrushDiameter(model.brushDiameter)
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        currentTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
+        updateTextures(size: model.textureSize)
+    }
 
-        canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
+    private func updateTextures(size: CGSize) {
+        brushDrawingTexture.initTextures(size)
+        eraserDrawingTexture.initTextures(size)
+
+        currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
+        canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
         updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
@@ -320,7 +314,11 @@ extension CanvasViewModel {
     func didTapRedoButton() {}
 
     func didTapLayerButton() {
+        // When `TextureLayerView` is hidden, the thumbnail is not created,
+        // so update the thumbnail when `TextureLayerView` becomes visible.
         textureLayers.updateThumbnail(index: textureLayers.index)
+
+        // Toggle the visibility of `TextureLayerView`
         requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
