@@ -171,7 +171,7 @@ final class CanvasViewModel {
 
         textureLayers.updateCanvasPublisher
             .sink { [weak self] allLayerUpdates in
-                self?.updateCanvasView(allLayerUpdates: allLayerUpdates)
+                self?.updateCanvasWithTextureLayers(allLayerUpdates: allLayerUpdates)
             }
             .store(in: &cancellables)
     }
@@ -212,7 +212,7 @@ final class CanvasViewModel {
 
         canvasTexture = MTLTextureCreator.makeTexture(size: model.textureSize, with: device)
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
 }
@@ -242,7 +242,7 @@ extension CanvasViewModel {
             initCanvas(size: textureSize)
         }
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     func onUpdateRenderTexture() {
@@ -254,7 +254,7 @@ extension CanvasViewModel {
         }
 
         // Redraws the canvas when the device rotates and the canvas size changes.
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     /// Manages all finger positions on the screen using a dictionary
@@ -340,7 +340,7 @@ extension CanvasViewModel {
 
         initCanvas(size: size)
 
-        updateCanvasView(allLayerUpdates: true)
+        updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
     func didTapLoadButton(filePath: String) {
@@ -477,7 +477,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func updateCanvasView(allLayerUpdates: Bool = false) {
+    private func updateCanvasWithTextureLayers(allLayerUpdates: Bool = false) {
         guard
             let commandBuffer = canvasView?.commandBuffer
         else { return }
