@@ -314,7 +314,11 @@ extension CanvasViewModel {
     func didTapRedoButton() {}
 
     func didTapLayerButton() {
+        // When `TextureLayerView` is hidden, the thumbnail is not created,
+        // so update the thumbnail when `TextureLayerView` becomes visible.
         textureLayers.updateThumbnail(index: textureLayers.index)
+
+        // Toggle the visibility of `TextureLayerView`
         requestShowingLayerViewSubject.send(!requestShowingLayerViewSubject.value)
     }
 
