@@ -21,25 +21,32 @@ final class DocumentsLocalRepository: LocalRepository {
         drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-        do {
-            try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
+        Future<Void, Error> { promise in
+            Task {
+                do {
+                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(DocumentsLocalRepositoryError.exportLayerDataError))
+                }
+            }
         }
-
-        return Publishers.CombineLatest(
-            exportThumbnail(
-                texture: renderTexture,
-                fileName: URL.thumbnailPath,
-                height: 500,
-                to: URL.tmpFolderURL
-            ),
-            exportLayerData(
-                layers: textureLayers.layers,
-                to: URL.tmpFolderURL
+        .flatMap { _ in
+            Publishers.CombineLatest(
+                self.exportThumbnail(
+                    texture: renderTexture,
+                    fileName: URL.thumbnailPath,
+                    height: 500,
+                    to: URL.tmpFolderURL
+                ),
+                self.exportLayerData(
+                    layers: textureLayers.layers,
+                    to: URL.tmpFolderURL
+                )
             )
-        )
-        .compactMap { thumbnailName, layers -> CanvasEntity? in
+            .eraseToAnyPublisher()
+        }
+        .compactMap { thumbnailName, layers in
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
                 textureSize: renderTexture.size,
@@ -48,7 +55,7 @@ final class DocumentsLocalRepository: LocalRepository {
                 drawingTool: drawingTool
             )
         }
-        .tryMap { result -> Void in
+        .tryMap { result in
             try FileOutputManager.saveJson(
                 result,
                 to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
@@ -106,8 +113,8 @@ extension DocumentsLocalRepository {
         fileName: String,
         height: CGFloat,
         to url: URL
-    ) -> AnyPublisher<String, DocumentsLocalRepositoryError> {
-        Future<String, DocumentsLocalRepositoryError> { promise in
+    ) -> AnyPublisher<String, Error> {
+        Future<String, Error> { promise in
             do {
                 try FileOutputManager.saveImage(
                     image: texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0),
@@ -115,7 +122,7 @@ extension DocumentsLocalRepository {
                 )
                 promise(.success(fileName))
             } catch {
-                promise(.failure(.exportThumbnailError))
+                promise(.failure(DocumentsLocalRepositoryError.exportThumbnailError))
             }
         }
         .eraseToAnyPublisher()
@@ -124,8 +131,8 @@ extension DocumentsLocalRepository {
     private func exportLayerData(
         layers: [TextureLayer],
         to url: URL
-    ) -> AnyPublisher<[ImageLayerEntity], DocumentsLocalRepositoryError> {
-        Future<[ImageLayerEntity], DocumentsLocalRepositoryError> { promise in
+    ) -> AnyPublisher<[ImageLayerEntity], Error> {
+        Future<[ImageLayerEntity], Error> { promise in
             do {
                 let layerEntities = try layers.map { layer -> ImageLayerEntity in
                     let textureName = UUID().uuidString
@@ -144,7 +151,7 @@ extension DocumentsLocalRepository {
                 }
                 promise(.success(layerEntities))
             } catch {
-                promise(.failure(.exportLayerDataError))
+                promise(.failure(DocumentsLocalRepositoryError.exportLayerDataError))
             }
         }
         .eraseToAnyPublisher()
