@@ -12,7 +12,6 @@ final class CanvasContentView: UIView {
 
     @IBOutlet weak var canvasView: CanvasView!
 
-    @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
     @IBOutlet weak var layerButton: UIButton!
