@@ -570,7 +570,8 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription)
+            }
         }, receiveValue: { [weak self] response in
             self?.refreshCanvasSubject.send(response)
         })
@@ -591,7 +592,8 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription)
+            }
         }, receiveValue: {})
         .store(in: &cancellables)
     }
