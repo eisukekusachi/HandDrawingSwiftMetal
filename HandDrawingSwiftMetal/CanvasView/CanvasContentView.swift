@@ -12,9 +12,6 @@ final class CanvasContentView: UIView {
 
     @IBOutlet weak var canvasView: CanvasView!
 
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    @IBOutlet weak var activityIndicatorView: UIView!
-
     @IBOutlet weak var topStackView: UIStackView!
     @IBOutlet weak var resetTransformButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
@@ -40,13 +37,6 @@ final class CanvasContentView: UIView {
 
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
-
-    var isHiddenActivityIndicator: Bool = false {
-        didSet {
-            isHiddenActivityIndicator ? activityIndicator.stopAnimating() : activityIndicator.startAnimating()
-            activityIndicatorView.isHidden = isHiddenActivityIndicator
-        }
-    }
 
     private var cancellables = Set<AnyCancellable>()
 
