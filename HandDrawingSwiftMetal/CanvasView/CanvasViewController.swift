@@ -13,6 +13,8 @@ class CanvasViewController: UIViewController {
 
     @IBOutlet private weak var contentView: CanvasContentView!
 
+    @IBOutlet private weak var activityIndicatorView: UIView!
+
     private let canvasViewModel = CanvasViewModel()
 
     private let dialogPresenter = DialogPresenter()
@@ -112,7 +114,7 @@ extension CanvasViewController {
         canvasViewModel.requestShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
-            .assign(to: \.isHiddenActivityIndicator, on: contentView)
+            .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
         canvasViewModel.requestShowingAlertPublisher
