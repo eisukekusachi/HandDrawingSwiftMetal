@@ -1,5 +1,5 @@
 //
-//  CanvasGrayscaleDotPoint.swift
+//  CanvasGrayscaleDotPointDummy.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/10/19.
