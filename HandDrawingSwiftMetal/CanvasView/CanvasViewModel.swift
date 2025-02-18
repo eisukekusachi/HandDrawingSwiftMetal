@@ -249,7 +249,6 @@ extension CanvasViewModel {
         updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
-    /// Manages all finger positions on the screen using a dictionary
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
