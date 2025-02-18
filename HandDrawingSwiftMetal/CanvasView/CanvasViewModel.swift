@@ -113,15 +113,15 @@ final class CanvasViewModel {
 
     private func subscribe() {
 
-        drawingDisplayLink.requestUpdateCanvasWithDrawingPublisher
+        drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
                 self?.updateCanvasWithDrawing()
             }
             .store(in: &cancellables)
 
         Publishers.Merge(
-            brushDrawingTexture.drawingFinishedPublisher,
-            eraserDrawingTexture.drawingFinishedPublisher
+            brushDrawingTexture.canvasDrawFinishedPublisher,
+            eraserDrawingTexture.canvasDrawFinishedPublisher
         )
             .sink { [weak self] in
                 guard let `self` else { return }
