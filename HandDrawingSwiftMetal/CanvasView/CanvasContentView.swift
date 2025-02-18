@@ -10,23 +10,22 @@ import Combine
 
 final class CanvasContentView: UIView {
 
-    @IBOutlet weak var canvasView: CanvasView!
+    @IBOutlet private(set) weak var canvasView: CanvasView!
 
-    @IBOutlet weak var topStackView: UIStackView!
-    @IBOutlet weak var resetTransformButton: UIButton!
-    @IBOutlet weak var saveButton: UIButton!
-    @IBOutlet weak var layerButton: UIButton!
-    @IBOutlet weak var loadButton: UIButton!
-    @IBOutlet weak var exportImageButton: UIButton!
-    @IBOutlet weak var newButton: UIButton!
+    @IBOutlet private weak var resetTransformButton: UIButton!
+    @IBOutlet private weak var saveButton: UIButton!
+    @IBOutlet private weak var loadButton: UIButton!
+    @IBOutlet private weak var newButton: UIButton!
 
-    @IBOutlet weak var diameterSlider: UISlider!
+    @IBOutlet private weak var diameterSlider: UISlider!
 
-    @IBOutlet weak var blackColorButton: UIButton!
-    @IBOutlet weak var redColorButton: UIButton!
-    @IBOutlet weak var eraserButton: UIButton!
-    @IBOutlet weak var undoButton: UIButton!
-    @IBOutlet weak var redoButton: UIButton!
+    @IBOutlet private weak var blackColorButton: UIButton!
+    @IBOutlet private weak var redColorButton: UIButton!
+    @IBOutlet private weak var eraserButton: UIButton!
+    @IBOutlet private(set) weak var undoButton: UIButton!
+    @IBOutlet private(set) weak var redoButton: UIButton!
+    @IBOutlet private(set) weak var exportImageButton: UIButton!
+    @IBOutlet private(set) weak var layerButton: UIButton!
 
     var tapResetTransformButton: (() -> Void)?
     var tapSaveButton: (() -> Void)?

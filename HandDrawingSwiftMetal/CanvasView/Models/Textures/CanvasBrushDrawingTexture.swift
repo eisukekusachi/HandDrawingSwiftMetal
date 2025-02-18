@@ -11,11 +11,11 @@ import Combine
 /// A class used for real-time drawing on a texture using a brush
 final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
-    var drawingFinishedPublisher: AnyPublisher<Void, Never> {
-        drawingFinishedSubject.eraseToAnyPublisher()
+    var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
+        canvasDrawFinishedSubject.eraseToAnyPublisher()
     }
 
-    private let drawingFinishedSubject = PassthroughSubject<Void, Never>()
+    private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
 
     private var blushColor: UIColor = .black
 
@@ -139,7 +139,7 @@ extension CanvasBrushDrawingTexture {
 
             clearDrawingTextures(with: commandBuffer)
 
-            drawingFinishedSubject.send(())
+            canvasDrawFinishedSubject.send(())
         }
     }
 

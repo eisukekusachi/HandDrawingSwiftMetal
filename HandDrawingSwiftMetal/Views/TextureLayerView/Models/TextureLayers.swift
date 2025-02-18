@@ -67,6 +67,8 @@ final class TextureLayers: Layers<TextureLayer> {
             index: layerIndex,
             layers: layers
         )
+
+        self.layers.indices.forEach { self.layers[$0].updateThumbnail() }
     }
 
     func initLayers(size: CGSize) {
@@ -92,6 +94,8 @@ final class TextureLayers: Layers<TextureLayer> {
                 )
             ]
         )
+
+        self.layers.indices.forEach { self.layers[$0].updateThumbnail() }
     }
 
 }

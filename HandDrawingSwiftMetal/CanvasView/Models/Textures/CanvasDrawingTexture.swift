@@ -12,7 +12,7 @@ import Combine
 protocol CanvasDrawingTexture {
 
     /// A publisher that emits `Void` when the drawing process is finished
-    var drawingFinishedPublisher: AnyPublisher<Void, Never> { get }
+    var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> { get }
 
     /// Initializes the textures for drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)

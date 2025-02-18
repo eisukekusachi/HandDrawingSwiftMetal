@@ -24,7 +24,6 @@
                 <outlet property="redoButton" destination="UCl-eJ-tD6" id="vT8-3m-JfV"/>
                 <outlet property="resetTransformButton" destination="IVg-Dj-hIn" id="dWm-1g-ASc"/>
                 <outlet property="saveButton" destination="Ugs-EZ-K7D" id="HVF-Y2-eRP"/>
-                <outlet property="topStackView" destination="P50-DK-emi" id="aS9-iP-TOZ"/>
                 <outlet property="undoButton" destination="7Ib-t7-xwq" id="gzC-M5-8He"/>
             </connections>
         </placeholder>

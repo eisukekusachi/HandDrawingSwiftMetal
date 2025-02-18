@@ -99,8 +99,8 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
                 publisherExpectation.isInverted = true
             }
 
-            // Confirm that `drawingFinishedPublisher` emits `Void` at the end of the drawing process
-            subject.drawingFinishedPublisher
+            // Confirm that `canvasDrawFinishedPublisher` emits `Void` at the end of the drawing process
+            subject.canvasDrawFinishedPublisher
                 .sink {
                     publisherExpectation.fulfill()
                 }

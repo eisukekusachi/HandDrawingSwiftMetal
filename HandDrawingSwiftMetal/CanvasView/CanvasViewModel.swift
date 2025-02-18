@@ -113,15 +113,15 @@ final class CanvasViewModel {
 
     private func subscribe() {
 
-        drawingDisplayLink.requestUpdateCanvasWithDrawingPublisher
+        drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
                 self?.updateCanvasWithDrawing()
             }
             .store(in: &cancellables)
 
         Publishers.Merge(
-            brushDrawingTexture.drawingFinishedPublisher,
-            eraserDrawingTexture.drawingFinishedPublisher
+            brushDrawingTexture.canvasDrawFinishedPublisher,
+            eraserDrawingTexture.canvasDrawFinishedPublisher
         )
             .sink { [weak self] in
                 guard let `self` else { return }
@@ -178,7 +178,6 @@ final class CanvasViewModel {
 
     func initCanvas(size: CGSize) {
         textureLayers.initLayers(size: size)
-        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
         updateTextures(size: size)
     }
@@ -188,7 +187,6 @@ final class CanvasViewModel {
             layers: model.layers,
             layerIndex: model.layerIndex
         )
-        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
         projectName = model.projectName
 
@@ -251,7 +249,6 @@ extension CanvasViewModel {
         updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 
-    /// Manages all finger positions on the screen using a dictionary
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -314,7 +311,7 @@ extension CanvasViewModel {
     func didTapRedoButton() {}
 
     func didTapLayerButton() {
-        // When `TextureLayerView` is hidden, the thumbnail is not created,
+        // During drawing, when `TextureLayerView` is hidden, the thumbnail is not created,
         // so update the thumbnail when `TextureLayerView` becomes visible.
         textureLayers.updateThumbnail(index: textureLayers.index)
 
@@ -570,7 +567,8 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription)
+            }
         }, receiveValue: { [weak self] response in
             self?.refreshCanvasSubject.send(response)
         })
@@ -591,7 +589,8 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.requestShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription) }
+            case .failure(let error): self?.requestShowingAlertSubject.send(error.localizedDescription)
+            }
         }, receiveValue: {})
         .store(in: &cancellables)
     }

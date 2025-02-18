@@ -12,11 +12,11 @@ import Combine
 final class CanvasDrawingDisplayLink {
 
     // Requesting to draw a line on the canvas emits `Void`
-    var requestUpdateCanvasWithDrawingPublisher: AnyPublisher<Void, Never> {
-        requestUpdateCanvasWithDrawingSubject.eraseToAnyPublisher()
+    var canvasDrawingPublisher: AnyPublisher<Void, Never> {
+        canvasDrawingSubject.eraseToAnyPublisher()
     }
 
-    private let requestUpdateCanvasWithDrawingSubject = PassthroughSubject<Void, Never>()
+    private let canvasDrawingSubject = PassthroughSubject<Void, Never>()
 
     private(set) var displayLink: CADisplayLink?
 
@@ -49,7 +49,7 @@ extension CanvasDrawingDisplayLink {
     }
 
     @objc private func updateCanvasWhileDrawing() {
-        requestUpdateCanvasWithDrawingSubject.send(())
+        canvasDrawingSubject.send(())
     }
 
 }
