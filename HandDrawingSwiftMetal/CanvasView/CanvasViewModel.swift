@@ -178,7 +178,6 @@ final class CanvasViewModel {
 
     func initCanvas(size: CGSize) {
         textureLayers.initLayers(size: size)
-        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
         updateTextures(size: size)
     }
@@ -188,7 +187,6 @@ final class CanvasViewModel {
             layers: model.layers,
             layerIndex: model.layerIndex
         )
-        textureLayers.layers.indices.forEach { textureLayers.layers[$0].updateThumbnail() }
 
         projectName = model.projectName
 
