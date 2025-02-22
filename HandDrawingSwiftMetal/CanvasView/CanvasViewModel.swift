@@ -51,7 +51,7 @@ final class CanvasViewModel {
     }
 
     /// A class for handling finger input values
-    private let fingerScreenTouches = CanvasFingerScreenTouches()
+    private let fingerScreenStrokeData = FingerScreenStrokeData()
 
     /// A class for handling Apple Pencil inputs
     private let pencilScreenStrokeData = PencilScreenStrokeData()
@@ -256,20 +256,20 @@ extension CanvasViewModel {
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
-        fingerScreenTouches.appendTouchPointToDictionary(
+        fingerScreenStrokeData.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
                 $0[$1.hashValue] = .init(touch: $1, view: view)
             }
         )
 
         // determine the gesture from the dictionary
-        switch screenTouchGesture.update(fingerScreenTouches.touchArrayDictionary) {
+        switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
         case .drawing: drawFingerCurveOnCanvas()
         case .transforming: transformCanvas()
         default: break
         }
 
-        fingerScreenTouches.removeEndedTouchArrayFromDictionary()
+        fingerScreenStrokeData.removeEndedTouchArrayFromDictionary()
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
@@ -414,9 +414,9 @@ extension CanvasViewModel {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
-        fingerScreenTouches.updateActiveDictionaryKeyIfKeyIsNil()
+        fingerScreenStrokeData.updateActiveDictionaryKeyIfKeyIsNil()
 
-        drawCurveOnCanvas(fingerScreenTouches.latestTouchPoints)
+        drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
     }
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
@@ -446,16 +446,16 @@ extension CanvasViewModel {
 
     private func transformCanvas() {
         transformer.initTransformingIfNeeded(
-            fingerScreenTouches.touchArrayDictionary
+            fingerScreenStrokeData.touchArrayDictionary
         )
 
-        if fingerScreenTouches.isAllFingersOnScreen {
+        if fingerScreenStrokeData.isAllFingersOnScreen {
             transformer.transformCanvas(
                 screenCenter: .init(
                     x: frameSize.width * 0.5,
                     y: frameSize.height * 0.5
                 ),
-                fingerScreenTouches.touchArrayDictionary
+                fingerScreenStrokeData.touchArrayDictionary
             )
         } else {
             transformer.finishTransforming()
@@ -531,7 +531,7 @@ extension CanvasViewModel {
         inputDevice.reset()
         screenTouchGesture.reset()
 
-        fingerScreenTouches.reset()
+        fingerScreenStrokeData.reset()
         pencilScreenStrokeData.reset()
 
         drawingCurvePoints = nil
@@ -543,7 +543,7 @@ extension CanvasViewModel {
         drawingTexture?.clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
 
-        fingerScreenTouches.reset()
+        fingerScreenStrokeData.reset()
 
         drawingCurvePoints = nil
         transformer.resetMatrix()

@@ -1,5 +1,5 @@
 //
-//  CanvasFingerScreenTouches.swift
+//  FingerScreenStrokeData.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// A class that manages the finger position information sent from the device
-final class CanvasFingerScreenTouches {
+final class FingerScreenStrokeData {
 
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
@@ -32,7 +32,7 @@ final class CanvasFingerScreenTouches {
 
 }
 
-extension CanvasFingerScreenTouches {
+extension FingerScreenStrokeData {
 
     var isAllFingersOnScreen: Bool {
         !touchArrayDictionary.keys.contains { key in
