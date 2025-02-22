@@ -58,7 +58,7 @@ extension CanvasDrawingCurvePoints {
         var curve: [GrayscaleDotPoint] = []
 
         if iterator.array.count >= 3,
-           let points = iterator.getFirstBezierCurvePoints() {
+           let points = iterator.getBezierCurveFirstPoints() {
 
             let bezierCurvePoints = BezierCurve.makeFirstCurvePoints(
                 pointA: points.previousPoint.location,
@@ -84,7 +84,7 @@ extension CanvasDrawingCurvePoints {
     ) -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
-        let pointArray = iterator.getIntermediateBezierCurvePointsWithFixedRange4()
+        let pointArray = iterator.getBezierCurveIntermediatePointsWithFixedRange4()
 
         pointArray.enumerated().forEach { (index, points) in
             let shouldIncludeEndPoint = index == pointArray.count - 1 ? shouldIncludeEndPoint : false
@@ -113,7 +113,7 @@ extension CanvasDrawingCurvePoints {
         var curve: [GrayscaleDotPoint] = []
 
         if iterator.array.count >= 3,
-           let points = iterator.getLastBezierCurvePoints() {
+           let points = iterator.getBezierCurveLastPoints() {
 
             let bezierCurvePoints = BezierCurve.makeLastCurvePoints(
                 pointA: points.previousPoint.location,

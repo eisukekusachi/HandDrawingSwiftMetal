@@ -1,5 +1,5 @@
 //
-//  CanvasBezierCurvePoints.swift
+//  BezierCurvePoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/10/19.
@@ -8,14 +8,14 @@
 import Foundation
 
 /// A struct that defines the points needed to create a first Bézier curve
-struct CanvasFirstBezierCurvePoints {
+struct BezierCurveFirstPoints {
     let previousPoint: GrayscaleDotPoint
     let startPoint: GrayscaleDotPoint
     let endPoint: GrayscaleDotPoint
 }
 
 /// A struct that defines the points needed to create a Bézier curve
-struct CanvasIntermediateBezierCurvePoints {
+struct BezierCurveIntermediatePoints {
     let previousPoint: GrayscaleDotPoint
     let startPoint: GrayscaleDotPoint
     let endPoint: GrayscaleDotPoint
@@ -23,7 +23,7 @@ struct CanvasIntermediateBezierCurvePoints {
 }
 
 /// A struct that defines the points needed to create a last Bézier curve
-struct CanvasLastBezierCurvePoints {
+struct BezierCurveLastPoints {
     let previousPoint: GrayscaleDotPoint
     let startPoint: GrayscaleDotPoint
     let endPoint: GrayscaleDotPoint

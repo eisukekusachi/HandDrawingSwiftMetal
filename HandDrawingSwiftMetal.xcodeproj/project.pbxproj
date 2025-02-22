@@ -57,7 +57,7 @@
 		D45179F82CC347BA0047C274 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45179F72CC347BA0047C274 /* Constants.swift */; };
 		D45179FC2CC365FC0047C274 /* BezierCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45179FB2CC365FC0047C274 /* BezierCurve.swift */; };
 		D45179FF2CC367D00047C274 /* IteratorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45179FE2CC367D00047C274 /* IteratorExtensions.swift */; };
-		D4517A012CC367FA0047C274 /* CanvasBezierCurvePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A002CC367FA0047C274 /* CanvasBezierCurvePoints.swift */; };
+		D4517A012CC367FA0047C274 /* BezierCurvePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */; };
 		D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */; };
 		D4517A072CC369FD0047C274 /* GrayscaleDotPointDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A062CC369FD0047C274 /* GrayscaleDotPointDummy.swift */; };
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
@@ -201,7 +201,7 @@
 		D45179F72CC347BA0047C274 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D45179FB2CC365FC0047C274 /* BezierCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierCurve.swift; sourceTree = "<group>"; };
 		D45179FE2CC367D00047C274 /* IteratorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorExtensions.swift; sourceTree = "<group>"; };
-		D4517A002CC367FA0047C274 /* CanvasBezierCurvePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasBezierCurvePoints.swift; sourceTree = "<group>"; };
+		D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierCurvePoints.swift; sourceTree = "<group>"; };
 		D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierCurveHandlePoints.swift; sourceTree = "<group>"; };
 		D4517A062CC369FD0047C274 /* GrayscaleDotPointDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleDotPointDummy.swift; sourceTree = "<group>"; };
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
@@ -350,6 +350,7 @@
 		D4057FFC2D69972100DB8B4D /* Points */ = {
 			isa = PBXGroup;
 			children = (
+				D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */,
 				D4057FFD2D69A11600DB8B4D /* DotPoint.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleDotPoint.swift */,
 				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
@@ -502,7 +503,6 @@
 			children = (
 				D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouches.swift */,
 				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouch.swift */,
-				D4517A002CC367FA0047C274 /* CanvasBezierCurvePoints.swift */,
 			);
 			path = Points;
 			sourceTree = "<group>";
@@ -996,7 +996,7 @@
 				D481A4332C5E1E5B00279C91 /* CanvasScreenTouchGestureStatus.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,
 				D46601B92C392D3D007F1BC9 /* CanvasViewProtocol.swift in Sources */,
-				D4517A012CC367FA0047C274 /* CanvasBezierCurvePoints.swift in Sources */,
+				D4517A012CC367FA0047C274 /* BezierCurvePoints.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D469A8712C56340B00D10575 /* CanvasFingerDrawingCurvePoints.swift in Sources */,
 				D40D976B29DAB09D00A82E6A /* CanvasEraserDrawingTool.swift in Sources */,
