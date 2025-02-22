@@ -15,7 +15,7 @@ enum CanvasScreenTouchGestureType: Int {
 
     case transforming
 
-    init(from touchPointsDictionary: [CanvasTouchHashValue: [TouchPoint]]) {
+    init(from touchPointsDictionary: [TouchHashValue: [TouchPoint]]) {
         var result: CanvasScreenTouchGestureType = .undetermined
 
         if let actionState = CanvasScreenTouchGestureType.isDrawingGesture(touchPointsDictionary) {
@@ -35,7 +35,7 @@ extension CanvasScreenTouchGestureType {
     static let activatingDrawingCount: Int = 6
     static let activatingTransformingCount: Int = 2
 
-    static func isDrawingGesture(_ touchPointsDictionary: [CanvasTouchHashValue: [TouchPoint]]) -> Self? {
+    static func isDrawingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
         if touchPointsDictionary.count != 1 { return nil }
 
         if let count = touchPointsDictionary.first?.count, count > activatingDrawingCount {
@@ -43,7 +43,7 @@ extension CanvasScreenTouchGestureType {
         }
         return nil
     }
-    static func isTransformingGesture(_ touchPointsDictionary: [CanvasTouchHashValue: [TouchPoint]]) -> Self? {
+    static func isTransformingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
         if touchPointsDictionary.count != 2 { return nil }
 
         if let countA = touchPointsDictionary.first?.count, countA > activatingTransformingCount,

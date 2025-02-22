@@ -11,17 +11,17 @@ import UIKit
 final class CanvasFingerScreenTouches {
 
     /// A dictionary that manages points input from multiple fingers
-    private(set) var touchArrayDictionary: [CanvasTouchHashValue: [TouchPoint]] = [:]
+    private(set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
     /// A key currently in use in the finger touch dictionary
-    private(set) var activeDictionaryKey: CanvasTouchHashValue?
+    private(set) var activeDictionaryKey: TouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
     private(set) var activeLatestTouchPoint: TouchPoint?
 
     convenience init(
-        touchArrayDictionary: [CanvasTouchHashValue: [TouchPoint]],
-        activeDictionaryKey: CanvasTouchHashValue? = nil,
+        touchArrayDictionary: [TouchHashValue: [TouchPoint]],
+        activeDictionaryKey: TouchHashValue? = nil,
         activeLatestTouchPoint: TouchPoint? = nil
     ) {
         self.init()
@@ -74,7 +74,7 @@ extension CanvasFingerScreenTouches {
         activeDictionaryKey = firstKey
     }
 
-    func appendTouchPointToDictionary(_ touchPoints: [CanvasTouchHashValue: TouchPoint]) {
+    func appendTouchPointToDictionary(_ touchPoints: [TouchHashValue: TouchPoint]) {
         touchPoints.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {
                 touchArrayDictionary[key] = []

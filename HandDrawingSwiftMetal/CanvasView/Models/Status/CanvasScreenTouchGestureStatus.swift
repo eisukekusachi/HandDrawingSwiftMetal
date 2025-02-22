@@ -12,7 +12,7 @@ final class CanvasScreenTouchGestureStatus {
     private(set) var status: CanvasScreenTouchGestureType = .undetermined
 
     func update(
-        _ touchArrayDictionary: [CanvasTouchHashValue: [TouchPoint]]
+        _ touchArrayDictionary: [TouchHashValue: [TouchPoint]]
     ) -> CanvasScreenTouchGestureType {
         update(.init(from: touchArrayDictionary))
     }

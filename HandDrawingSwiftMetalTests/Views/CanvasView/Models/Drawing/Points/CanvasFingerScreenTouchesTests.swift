@@ -60,7 +60,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
     /// Confirms that all fingers are on the screen
     func testIsAllFingersOnScreen() {
         struct Condition {
-            let fingers: [CanvasTouchHashValue: [TouchPoint]]
+            let fingers: [TouchHashValue: [TouchPoint]]
         }
         struct Expectation {
             let result: Bool
@@ -194,7 +194,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
     }
 
     func testUpdateDictionaryKeyIfKeyIsNil() {
-        let dictionary: [CanvasTouchHashValue: [TouchPoint]] =
+        let dictionary: [TouchHashValue: [TouchPoint]] =
         [
             2: [
                 .generate(location: .init(x: 0, y: 0)),
