@@ -35,7 +35,7 @@ extension CanvasTransformer {
         keyA != nil && keyB != nil
     }
 
-    func initTransformingIfNeeded(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
+    func initTransformingIfNeeded(_ dictionary: [CanvasTouchHashValue: [TouchPoint]]) {
         guard
             !isKeysInitialized,
             dictionary.count == 2,
@@ -51,7 +51,7 @@ extension CanvasTransformer {
         self.firstTouchPointB = pointB
     }
 
-    func transformCanvas(screenCenter: CGPoint, _ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
+    func transformCanvas(screenCenter: CGPoint, _ dictionary: [CanvasTouchHashValue: [TouchPoint]]) {
         guard
             dictionary.count == 2,
             let keyA,

@@ -22,7 +22,7 @@ struct CanvasGrayscaleDotPoint: Equatable {
 extension CanvasGrayscaleDotPoint {
 
     init(
-        touchPoint: CanvasTouchPoint,
+        touchPoint: TouchPoint,
         diameter: CGFloat
     ) {
         self.location = touchPoint.location
@@ -32,7 +32,7 @@ extension CanvasGrayscaleDotPoint {
 
     init(
         matrix: CGAffineTransform,
-        touchPoint: CanvasTouchPoint,
+        touchPoint: TouchPoint,
         textureSize: CGSize,
         drawableSize: CGSize,
         frameSize: CGSize,
@@ -51,7 +51,7 @@ extension CanvasGrayscaleDotPoint {
             textureSize: textureSize
         )
 
-        let touchPoint: CanvasTouchPoint = .init(
+        let touchPoint: TouchPoint = .init(
             location: textureLocation.apply(
                 with: textureMatrix,
                 textureSize: textureSize

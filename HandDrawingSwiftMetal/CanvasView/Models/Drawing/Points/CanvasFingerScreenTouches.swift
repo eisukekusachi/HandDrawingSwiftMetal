@@ -11,18 +11,18 @@ import UIKit
 final class CanvasFingerScreenTouches {
 
     /// A dictionary that manages points input from multiple fingers
-    private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
+    private(set) var touchArrayDictionary: [CanvasTouchHashValue: [TouchPoint]] = [:]
 
     /// A key currently in use in the finger touch dictionary
     private(set) var activeDictionaryKey: CanvasTouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    private(set) var activeLatestTouchPoint: CanvasTouchPoint?
+    private(set) var activeLatestTouchPoint: TouchPoint?
 
     convenience init(
-        touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
+        touchArrayDictionary: [CanvasTouchHashValue: [TouchPoint]],
         activeDictionaryKey: CanvasTouchHashValue? = nil,
-        activeLatestTouchPoint: CanvasTouchPoint? = nil
+        activeLatestTouchPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchArrayDictionary = touchArrayDictionary
@@ -41,13 +41,13 @@ extension CanvasFingerScreenTouches {
         }
     }
 
-    var latestTouchPoints: [CanvasTouchPoint] {
+    var latestTouchPoints: [TouchPoint] {
         guard
             let activeDictionaryKey,
             let touchArray = touchArrayDictionary[activeDictionaryKey]
         else { return [] }
 
-        var latestTouchArray: [CanvasTouchPoint] = []
+        var latestTouchArray: [TouchPoint] = []
 
         if let activeLatestTouchPoint {
             latestTouchArray = touchArray.elements(after: activeLatestTouchPoint) ?? []
@@ -74,7 +74,7 @@ extension CanvasFingerScreenTouches {
         activeDictionaryKey = firstKey
     }
 
-    func appendTouchPointToDictionary(_ touchPoints: [CanvasTouchHashValue: CanvasTouchPoint]) {
+    func appendTouchPointToDictionary(_ touchPoints: [CanvasTouchHashValue: TouchPoint]) {
         touchPoints.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {
                 touchArrayDictionary[key] = []

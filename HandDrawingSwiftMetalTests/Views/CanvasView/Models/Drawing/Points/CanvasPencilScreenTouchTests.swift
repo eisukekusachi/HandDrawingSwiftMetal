@@ -77,7 +77,7 @@ final class CanvasPencilScreenTouchTests: XCTestCase {
     func testIsPenOffScreen() {
         let subject = CanvasPencilScreenTouch()
 
-        let actualTouches: [CanvasTouchPoint] = [
+        let actualTouches: [TouchPoint] = [
             .generate(phase: .moved, estimationUpdateIndex: 1)
         ]
 
