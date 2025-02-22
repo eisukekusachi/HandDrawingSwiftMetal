@@ -54,7 +54,7 @@ final class CanvasViewModel {
     private let fingerScreenTouches = CanvasFingerScreenTouches()
 
     /// A class for handling Apple Pencil inputs
-    private let pencilScreenTouch = CanvasPencilScreenTouch()
+    private let pencilScreenStrokeData = PencilScreenStrokeData()
 
     private var drawingCurvePoints: CanvasDrawingCurvePoints?
 
@@ -287,7 +287,7 @@ extension CanvasViewModel {
         }
         inputDevice.update(.pencil)
 
-        pencilScreenTouch.setLatestEstimatedTouchPoint(
+        pencilScreenStrokeData.setLatestEstimatedTouchPoint(
             estimatedTouches
                 .filter({ $0.type == .pencil })
                 .sorted(by: { $0.timestamp < $1.timestamp })
@@ -400,13 +400,13 @@ extension CanvasViewModel {
             drawingCurvePoints = CanvasPencilDrawingCurvePoints()
         }
 
-        pencilScreenTouch.appendActualTouches(
+        pencilScreenStrokeData.appendActualTouches(
             actualTouches: actualTouches
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        drawCurveOnCanvas(pencilScreenTouch.latestActualTouchPoints)
+        drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
     }
 
     private func drawFingerCurveOnCanvas() {
@@ -532,7 +532,7 @@ extension CanvasViewModel {
         screenTouchGesture.reset()
 
         fingerScreenTouches.reset()
-        pencilScreenTouch.reset()
+        pencilScreenStrokeData.reset()
 
         drawingCurvePoints = nil
         transformer.resetMatrix()

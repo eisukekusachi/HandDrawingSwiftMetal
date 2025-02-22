@@ -67,7 +67,7 @@
 		D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D45ACBE22C57C2C3000002BE /* CanvasFingerScreenTouches.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouches.swift */; };
-		D45ACBE42C57C2D9000002BE /* CanvasPencilScreenTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouch.swift */; };
+		D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */; };
 		D464FCAE2D23BC0F00BCC565 /* Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCAD2D23BC0F00BCC565 /* Layers.swift */; };
 		D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB02D23E66700BCC565 /* UndoMoveData.swift */; };
 		D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB22D23E68000BCC565 /* UndoStackObject.swift */; };
@@ -211,7 +211,7 @@
 		D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureNodes.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasFingerScreenTouches.swift; sourceTree = "<group>"; };
-		D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilScreenTouch.swift; sourceTree = "<group>"; };
+		D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilScreenStrokeData.swift; sourceTree = "<group>"; };
 		D464FCAD2D23BC0F00BCC565 /* Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layers.swift; sourceTree = "<group>"; };
 		D464FCB02D23E66700BCC565 /* UndoMoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveData.swift; sourceTree = "<group>"; };
 		D464FCB22D23E68000BCC565 /* UndoStackObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackObject.swift; sourceTree = "<group>"; };
@@ -403,6 +403,7 @@
 			children = (
 				D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */,
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
+				D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */,
 			);
 			path = Gestures;
 			sourceTree = "<group>";
@@ -502,7 +503,6 @@
 			isa = PBXGroup;
 			children = (
 				D45ACBE12C57C2C3000002BE /* CanvasFingerScreenTouches.swift */,
-				D45ACBE32C57C2D9000002BE /* CanvasPencilScreenTouch.swift */,
 			);
 			path = Points;
 			sourceTree = "<group>";
@@ -966,7 +966,7 @@
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* CanvasPencilDrawingCurvePoints.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D45ACBE42C57C2D9000002BE /* CanvasPencilScreenTouch.swift in Sources */,
+				D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */,
 				D481A42F2C5E1D6600279C91 /* CanvasInputDeviceType.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* CanvasFingerScreenTouches.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,
