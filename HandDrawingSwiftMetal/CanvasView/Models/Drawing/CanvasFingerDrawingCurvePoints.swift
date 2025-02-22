@@ -12,11 +12,11 @@ import UIKit
 ///   - tmpIterator: An iterator that stores points
 ///   - currentTouchPhase: Manages the touch phases from the beginning to the end of drawing a single line
 final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
-    var iterator = Iterator<CanvasGrayscaleDotPoint>()
+    var iterator = Iterator<GrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
 
-    private(set) var tmpIterator = Iterator<CanvasGrayscaleDotPoint>()
+    private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
 
     private var isFirstCurveHasBeenCreated: Bool = false
 }
@@ -35,7 +35,7 @@ extension CanvasFingerDrawingCurvePoints {
     }
 
     func appendToIterator(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         tmpIterator.append(points)
@@ -48,7 +48,7 @@ extension CanvasFingerDrawingCurvePoints {
         }
 
         while let subsequence = tmpIterator.next(range: 2) {
-            let dotPoint = CanvasGrayscaleDotPoint.average(
+            let dotPoint = GrayscaleDotPoint.average(
                 subsequence[0],
                 subsequence[1]
             )

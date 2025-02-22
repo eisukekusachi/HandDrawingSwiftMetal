@@ -92,7 +92,7 @@ extension CanvasEraserDrawingTexture {
 extension CanvasEraserDrawingTexture {
 
     private func drawCurvePointsOnDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         sourceTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {

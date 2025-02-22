@@ -1,5 +1,5 @@
 //
-//  CanvasGrayscaleDotPoint.swift
+//  GrayscaleDotPoint.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct CanvasGrayscaleDotPoint: Equatable {
+struct GrayscaleDotPoint: DotPoint {
 
     let location: CGPoint
     let diameter: CGFloat
@@ -19,7 +19,7 @@ struct CanvasGrayscaleDotPoint: Equatable {
 
 }
 
-extension CanvasGrayscaleDotPoint {
+extension GrayscaleDotPoint {
 
     init(
         touchPoint: TouchPoint,
@@ -65,7 +65,7 @@ extension CanvasGrayscaleDotPoint {
     }
 }
 
-extension CanvasGrayscaleDotPoint {
+extension GrayscaleDotPoint {
 
     static func average(_ left: Self, _ right: Self) -> Self {
         .init(

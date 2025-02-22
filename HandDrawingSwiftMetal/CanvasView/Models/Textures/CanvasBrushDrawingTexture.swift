@@ -88,7 +88,7 @@ extension CanvasBrushDrawingTexture {
 extension CanvasBrushDrawingTexture {
 
     private func drawCurvePointsOnDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawGrayPointBuffersWithMaxBlendMode(

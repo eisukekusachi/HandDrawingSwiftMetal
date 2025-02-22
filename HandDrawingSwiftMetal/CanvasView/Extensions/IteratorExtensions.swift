@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Iterator<CanvasGrayscaleDotPoint> {
+extension Iterator<GrayscaleDotPoint> {
 
     func getFirstBezierCurvePoints() -> CanvasFirstBezierCurvePoints? {
         guard array.count >= 3 else { return nil }

@@ -11,7 +11,7 @@ import Foundation
 
 final class MockCanvasDrawingCurvePoints: CanvasDrawingCurvePoints {
 
-    var iterator: Iterator<CanvasGrayscaleDotPoint> = .init()
+    var iterator: Iterator<GrayscaleDotPoint> = .init()
 
     var currentTouchPhase: UITouch.Phase = .began
 

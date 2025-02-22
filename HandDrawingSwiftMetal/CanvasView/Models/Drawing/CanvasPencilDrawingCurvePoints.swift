@@ -11,7 +11,7 @@ import UIKit
 ///   - iterator: An iterator that stores points
 ///   - currentTouchPhase: Manages the touch phases from the beginning to the end of drawing a single line
 final class CanvasPencilDrawingCurvePoints: CanvasDrawingCurvePoints {
-    var iterator = Iterator<CanvasGrayscaleDotPoint>()
+    var iterator = Iterator<GrayscaleDotPoint>()
 
     var currentTouchPhase: UITouch.Phase = .began
 
@@ -32,7 +32,7 @@ extension CanvasPencilDrawingCurvePoints {
     }
 
     func appendToIterator(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         iterator.append(points)
