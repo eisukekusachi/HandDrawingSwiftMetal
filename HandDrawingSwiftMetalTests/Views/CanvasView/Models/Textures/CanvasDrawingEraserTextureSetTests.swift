@@ -16,7 +16,7 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
 
-    var sourceTexture: MTLTexture!
+    var backgroundTexture: MTLTexture!
     var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
@@ -31,11 +31,11 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 
-        sourceTexture = MTLTextureCreator.makeBlankTexture(
+        backgroundTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
             with: device
         )!
-        sourceTexture.label = "sourceTexture"
+        backgroundTexture.label = "backgroundTexture"
 
         destinationTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
@@ -44,8 +44,8 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the eraser curve is drawn on the destination texture using the source texture
-    func testDrawEraserCurveUsingSelectedTexture() {
+    /// Confirms the process in which the eraser curve is drawn on the destination texture using `backgroundTexture`
+    func testDrawEraserCurvePoints() {
 
         struct Condition: Hashable {
             let touchPhase: UITouch.Phase
@@ -57,12 +57,12 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
 
         // Draw the point buffers in opaque grayscale with the max blend mode on `grayscaleTexture`.
         // Draw `grayscaleTexture` with black applied on `lineDrawnTexture`.
-        // Then, draw `sourceTexture` on `drawingTexture`.
+        // Then, draw `backgroundTexture` on `drawingTexture`.
         // Subtract `lineDrawnTexture` from `drawingTexture` in eraser mode.
         let drawingCurve: [String] = [
             "drawGrayPointBuffersWithMaxBlendMode(buffers: buffers, onGrayscaleTexture: grayscaleTexture, with: commandBuffer)",
             "drawTexture(grayscaleTexture: grayscaleTexture, color: (0, 0, 0), on: lineDrawnTexture, with: commandBuffer)",
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
             "subtractTextureWithEraseBlendMode(texture: lineDrawnTexture, buffers: buffers, from: drawingTexture, with: commandBuffer)"
         ]
 
@@ -71,14 +71,14 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
             "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)"
         ]
 
-        // Draw `sourceTexture` on `drawingTexture`.
+        // Draw `backgroundTexture` on `drawingTexture`.
         // Subtract `lineDrawnTexture` from `drawingTexture` in eraser mode.
-        // Then, draw `drawingTexture` on `sourceTexture`.
+        // Then, draw `drawingTexture` on `backgroundTexture`.
         // Clear the textures used for drawing to prepare for the next drawing.
         let drawingCompletionProcess: [String] = [
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
             "subtractTextureWithEraseBlendMode(texture: lineDrawnTexture, buffers: buffers, from: drawingTexture, with: commandBuffer)",
-            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: sourceTexture, with: commandBuffer)",
+            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: backgroundTexture, with: commandBuffer)",
             "clearTextures(textures: [drawingTexture, grayscaleTexture, lineDrawnTexture], with: commandBuffer)"
         ]
 
@@ -108,7 +108,7 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
 
             subject.drawCurvePoints(
                 drawingCurveIterator: drawingIterator,
-                withBackgroundTexture: sourceTexture,
+                withBackgroundTexture: backgroundTexture,
                 withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer

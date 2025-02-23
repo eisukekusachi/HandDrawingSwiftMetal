@@ -16,7 +16,7 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
 
-    var sourceTexture: MTLTexture!
+    var backgroundTexture: MTLTexture!
     var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
@@ -31,11 +31,11 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 
-        sourceTexture = MTLTextureCreator.makeBlankTexture(
+        backgroundTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
             with: device
         )!
-        sourceTexture.label = "sourceTexture"
+        backgroundTexture.label = "backgroundTexture"
 
         destinationTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
@@ -44,8 +44,8 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
         destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the brush curve is drawn on the destination texture using the source texture
-    func testDrawCurvePointsOnBrushDrawingTexture() {
+    /// Confirms the process in which the brush curve is drawn on the destination texture using `backgroundTexture`
+    func testDrawBrushCurvePoints() {
 
         struct Condition: Hashable {
             let touchPhase: UITouch.Phase
@@ -62,16 +62,16 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
             "drawTexture(grayscaleTexture: grayscaleTexture, color: (255, 0, 0), on: drawingTexture, with: commandBuffer)"
         ]
 
-        // `sourceTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
+        // `backgroundTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
         let drawingTexture: [String] = [
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
             "mergeTexture(texture: drawingTexture, into: destinationTexture, with: commandBuffer)"
         ]
 
-        // Merge `drawingTexture` on `sourceTexture`.
+        // Merge `drawingTexture` on `backgroundTexture`.
         // Clear the textures used for drawing to prepare for the next drawing.
         let drawingCompletionProcess: [String] = [
-            "mergeTexture(texture: drawingTexture, into: sourceTexture, with: commandBuffer)",
+            "mergeTexture(texture: drawingTexture, into: backgroundTexture, with: commandBuffer)",
             "clearTextures(textures: [drawingTexture, grayscaleTexture], with: commandBuffer)"
         ]
 
@@ -103,7 +103,7 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
 
             subject.drawCurvePoints(
                 drawingCurveIterator: drawingIterator,
-                withBackgroundTexture: sourceTexture,
+                withBackgroundTexture: backgroundTexture,
                 withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer
