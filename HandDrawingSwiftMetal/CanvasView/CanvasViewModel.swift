@@ -265,7 +265,15 @@ extension CanvasViewModel {
 
         // determine the gesture from the dictionary
         switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
-        case .drawing: drawFingerCurveOnCanvas()
+        case .drawing:
+            if shouldCreateFingerDrawingCurveIteratorInstance() {
+                drawingCurveIterator = FingerDrawingCurvePoints()
+            }
+
+            fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
+
+            drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
+
         case .transforming: transformCanvas()
         default: break
         }
@@ -301,7 +309,17 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        drawPencilCurveOnCanvas(actualTouches: actualTouches, view: view)
+        if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
+            drawingCurveIterator = PencilDrawingCurveIterator()
+        }
+
+        pencilScreenStrokeData.appendActualTouches(
+            actualTouches: actualTouches
+                .sorted { $0.timestamp < $1.timestamp }
+                .map { TouchPoint(touch: $0, view: view) }
+        )
+
+        drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
     }
 
 }
@@ -384,41 +402,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    // Since the pencil takes priority, even if `drawingCurveIterator` contains an instance,
-    // it will be overwritten when touchBegan occurs.
-    private func shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
-        actualTouches.contains(where: { $0.phase == .began })
-    }
-
-    // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
-    private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
-        drawingCurveIterator == nil
-    }
-
-    private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>, view: UIView) {
-        if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
-            drawingCurveIterator = PencilDrawingCurveIterator()
-        }
-
-        pencilScreenStrokeData.appendActualTouches(
-            actualTouches: actualTouches
-                .sorted { $0.timestamp < $1.timestamp }
-                .map { TouchPoint(touch: $0, view: view) }
-        )
-
-        drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
-    }
-
-    private func drawFingerCurveOnCanvas() {
-        if shouldCreateFingerDrawingCurveIteratorInstance() {
-            drawingCurveIterator = FingerDrawingCurvePoints()
-        }
-
-        fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
-
-        drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
-    }
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
@@ -528,6 +511,16 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    // Since the pencil takes priority, even if `drawingCurveIterator` contains an instance,
+    // it will be overwritten when touchBegan occurs.
+    private func shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
+        actualTouches.contains(where: { $0.phase == .began })
+    }
+
+    // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
+    private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
+        drawingCurveIterator == nil
+    }
 
     private func resetAllInputParameters() {
         inputDevice.reset()
