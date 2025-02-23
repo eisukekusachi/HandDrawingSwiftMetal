@@ -48,8 +48,8 @@
 		D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */; };
 		D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */; };
 		D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19732BE5DFE80069D4A9 /* ToastModel.swift */; };
-		D45037C02D58379A0039BDA2 /* CanvasFingerScreenTouchesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45037BF2D58379A0039BDA2 /* CanvasFingerScreenTouchesTests.swift */; };
-		D45037C22D58554E0039BDA2 /* CanvasPencilScreenTouchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45037C12D58554E0039BDA2 /* CanvasPencilScreenTouchTests.swift */; };
+		D45037C02D58379A0039BDA2 /* FingerScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45037BF2D58379A0039BDA2 /* FingerScreenStrokeData.swift */; };
+		D45037C22D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45037C12D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift */; };
 		D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4507C152C3E2C1300CA3974 /* CanvasModel.swift */; };
 		D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */; };
 		D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */; };
@@ -192,8 +192,8 @@
 		D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRepository.swift; sourceTree = "<group>"; };
 		D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsLocalRepository.swift; sourceTree = "<group>"; };
 		D44D19732BE5DFE80069D4A9 /* ToastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastModel.swift; sourceTree = "<group>"; };
-		D45037BF2D58379A0039BDA2 /* CanvasFingerScreenTouchesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasFingerScreenTouchesTests.swift; sourceTree = "<group>"; };
-		D45037C12D58554E0039BDA2 /* CanvasPencilScreenTouchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasPencilScreenTouchTests.swift; sourceTree = "<group>"; };
+		D45037BF2D58379A0039BDA2 /* FingerScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerScreenStrokeData.swift; sourceTree = "<group>"; };
+		D45037C12D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilScreenStrokeDataTests.swift; sourceTree = "<group>"; };
 		D4507C152C3E2C1300CA3974 /* CanvasModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasModel.swift; sourceTree = "<group>"; };
 		D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
 		D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
@@ -535,6 +535,7 @@
 		D464FCC12D23EC2400BCC565 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D4888C962D6AB15300BB922A /* Gestures */,
 				D464FCC22D23EC3300BCC565 /* Undo */,
 			);
 			path = Models;
@@ -665,19 +666,18 @@
 		D4837AEB2CC5EC3400BD25F5 /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
-				D4837AEC2CC5EC3900BD25F5 /* Points */,
 				D468FC4C2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift */,
 			);
 			path = Drawing;
 			sourceTree = "<group>";
 		};
-		D4837AEC2CC5EC3900BD25F5 /* Points */ = {
+		D4888C962D6AB15300BB922A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
-				D45037BF2D58379A0039BDA2 /* CanvasFingerScreenTouchesTests.swift */,
-				D45037C12D58554E0039BDA2 /* CanvasPencilScreenTouchTests.swift */,
+				D45037C12D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift */,
+				D45037BF2D58379A0039BDA2 /* FingerScreenStrokeData.swift */,
 			);
-			path = Points;
+			path = Gestures;
 			sourceTree = "<group>";
 		};
 		D48FECC12C5A6AD300221212 /* Shaders */ = {
@@ -1046,9 +1046,9 @@
 				D4650CAC2D447F8900E7D60E /* MockCanvasDrawingCurvePoints.swift in Sources */,
 				D400A2762C8BEA5100275138 /* TouchPointDummy.swift in Sources */,
 				D468FC4D2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift in Sources */,
-				D45037C22D58554E0039BDA2 /* CanvasPencilScreenTouchTests.swift in Sources */,
+				D45037C22D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift in Sources */,
 				D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */,
-				D45037C02D58379A0039BDA2 /* CanvasFingerScreenTouchesTests.swift in Sources */,
+				D45037C02D58379A0039BDA2 /* FingerScreenStrokeData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
