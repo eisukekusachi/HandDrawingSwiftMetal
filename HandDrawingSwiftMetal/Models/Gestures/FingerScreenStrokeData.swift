@@ -62,8 +62,8 @@ extension FingerScreenStrokeData {
         return latestTouchArray
     }
 
-    func updateActiveDictionaryKeyIfKeyIsNil() {
-        // If the gesture is determined to be drawing and `updateActiveDictionaryKeyIfKeyIsNil()` is called,
+    func setActiveDictionaryKeyIfNil() {
+        // If the gesture is determined to be drawing and `setActiveDictionaryKeyIfNil()` is called,
         // `touchArrayDictionary` should contain only one element, so the first key is simply set.
         guard
             // The first element of the sorted key array in the Dictionary is set as the active key.

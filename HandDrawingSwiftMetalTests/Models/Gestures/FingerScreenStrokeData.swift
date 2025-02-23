@@ -27,7 +27,7 @@ final class FingerScreenStrokeDataTests: XCTestCase {
         XCTAssertEqual(subject.latestTouchPoints, [])
 
         // When `activeDictionaryKey` is set, the values with `activeDictionaryKey` are returned.
-        subject.updateActiveDictionaryKeyIfKeyIsNil()
+        subject.setActiveDictionaryKeyIfNil()
         XCTAssertEqual(subject.activeDictionaryKey, 0)
         XCTAssertEqual(
             subject.latestTouchPoints.map { $0.location },
@@ -212,7 +212,7 @@ final class FingerScreenStrokeDataTests: XCTestCase {
 
         let subject = FingerScreenStrokeData(touchArrayDictionary: dictionary)
 
-        subject.updateActiveDictionaryKeyIfKeyIsNil()
+        subject.setActiveDictionaryKeyIfNil()
 
         // After sorting by key, the first element is set as `activeDictionaryKey`
         XCTAssertEqual(subject.activeDictionaryKey, 0)

@@ -414,7 +414,7 @@ extension CanvasViewModel {
             drawingCurvePoints = CanvasFingerDrawingCurvePoints()
         }
 
-        fingerScreenStrokeData.updateActiveDictionaryKeyIfKeyIsNil()
+        fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
 
         drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
     }
