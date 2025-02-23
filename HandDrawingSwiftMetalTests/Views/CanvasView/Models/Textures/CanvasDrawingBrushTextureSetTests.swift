@@ -1,5 +1,5 @@
 //
-//  CanvasBrushDrawingTextureTests.swift
+//  CanvasDrawingBrushTextureSetTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/01/25.
@@ -9,14 +9,14 @@ import XCTest
 import Combine
 @testable import HandDrawingSwiftMetal
 
-final class CanvasBrushDrawingTextureTests: XCTestCase {
+final class CanvasDrawingBrushTextureSetTests: XCTestCase {
 
-    var subject: CanvasBrushDrawingTexture!
+    var subject: CanvasDrawingBrushTextureSet!
 
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
 
-    var sourceTexture: MTLTexture!
+    var backgroundTexture: MTLTexture!
     var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
@@ -27,15 +27,15 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
         commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"
 
-        subject = CanvasBrushDrawingTexture(renderer: renderer)
+        subject = CanvasDrawingBrushTextureSet(renderer: renderer)
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 
-        sourceTexture = MTLTextureCreator.makeBlankTexture(
+        backgroundTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
             with: device
         )!
-        sourceTexture.label = "sourceTexture"
+        backgroundTexture.label = "backgroundTexture"
 
         destinationTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
@@ -44,8 +44,8 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
         destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the brush curve is drawn on the destination texture using the source texture
-    func testDrawCurvePointsOnBrushDrawingTexture() {
+    /// Confirms the process in which the brush curve is drawn on the destination texture using `backgroundTexture`
+    func testDrawBrushCurvePoints() {
 
         struct Condition: Hashable {
             let touchPhase: UITouch.Phase
@@ -62,16 +62,16 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
             "drawTexture(grayscaleTexture: grayscaleTexture, color: (255, 0, 0), on: drawingTexture, with: commandBuffer)"
         ]
 
-        // `sourceTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
+        // `backgroundTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
         let drawingTexture: [String] = [
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
             "mergeTexture(texture: drawingTexture, into: destinationTexture, with: commandBuffer)"
         ]
 
-        // Merge `drawingTexture` on `sourceTexture`.
+        // Merge `drawingTexture` on `backgroundTexture`.
         // Clear the textures used for drawing to prepare for the next drawing.
         let drawingCompletionProcess: [String] = [
-            "mergeTexture(texture: drawingTexture, into: sourceTexture, with: commandBuffer)",
+            "mergeTexture(texture: drawingTexture, into: backgroundTexture, with: commandBuffer)",
             "clearTextures(textures: [drawingTexture, grayscaleTexture], with: commandBuffer)"
         ]
 
@@ -83,9 +83,9 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
         ]
 
         testCases.forEach { testCase in
-            let drawingCurvePoints = MockCanvasDrawingCurvePoints()
+            let drawingIterator = MockDrawingCurveIterator()
 
-            drawingCurvePoints.currentTouchPhase = testCase.key.touchPhase
+            drawingIterator.touchPhase = testCase.key.touchPhase
 
             let publisherExpectation = XCTestExpectation()
             if !testCase.value.isDrawingFinished {
@@ -101,9 +101,10 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
 
             subject.setBlushColor(.red)
 
-            subject.drawCurvePointsUsingSelectedTexture(
-                drawingCurvePoints: drawingCurvePoints,
-                selectedTexture: sourceTexture,
+            subject.drawCurvePoints(
+                drawingCurveIterator: drawingIterator,
+                withBackgroundTexture: backgroundTexture,
+                withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer
             )

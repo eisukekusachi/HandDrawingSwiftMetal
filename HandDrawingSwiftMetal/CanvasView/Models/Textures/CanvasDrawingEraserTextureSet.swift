@@ -1,5 +1,5 @@
 //
-//  CanvasEraserDrawingTexture.swift
+//  CanvasDrawingEraserTextureSet.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,8 +8,8 @@
 import MetalKit
 import Combine
 
-/// A class used for real-time drawing on a texture using an eraser
-final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
+/// A set of textures for real-time eraser drawing
+final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
 
     var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
         canvasDrawFinishedSubject.eraseToAnyPublisher()
@@ -29,7 +29,7 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init(renderer: MTLRendering) {
+    required init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -40,7 +40,7 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
 }
 
-extension CanvasEraserDrawingTexture {
+extension CanvasDrawingEraserTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
@@ -56,21 +56,23 @@ extension CanvasEraserDrawingTexture {
         eraserAlpha = alpha
     }
 
-    func drawCurvePointsUsingSelectedTexture(
-        drawingCurvePoints: CanvasDrawingCurvePoints,
-        selectedTexture: MTLTexture,
+    func drawCurvePoints(
+        drawingCurveIterator: DrawingCurveIterator,
+        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundColor backgroundColor: UIColor = .clear,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurvePoints.makeCurvePointsFromIterator(),
-            sourceTexture: selectedTexture,
+            points: drawingCurveIterator.latestCurvePoints,
+            sourceTexture: backgroundTexture,
             with: commandBuffer
         )
 
-        drawDrawingTextureWithSelectedTexture(
-            selectedTexture: selectedTexture,
-            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+        drawDrawingTextureWithBackgroundTexture(
+            backgroundTexture: backgroundTexture,
+            backgroundColor: backgroundColor,
+            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -89,10 +91,10 @@ extension CanvasEraserDrawingTexture {
 
 }
 
-extension CanvasEraserDrawingTexture {
+extension CanvasDrawingEraserTextureSet {
 
     private func drawCurvePointsOnDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         sourceTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -130,23 +132,24 @@ extension CanvasEraserDrawingTexture {
         )
     }
 
-    private func drawDrawingTextureWithSelectedTexture(
-        selectedTexture: MTLTexture,
+    private func drawDrawingTextureWithBackgroundTexture(
+        backgroundTexture: MTLTexture,
+        backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
-        on targetTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: targetTexture,
+            on: destinationTexture,
             with: commandBuffer
         )
 
         if shouldUpdateSelectedTexture {
             renderer.drawTexture(
-                texture: selectedTexture,
+                texture: backgroundTexture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
                 on: drawingTexture,
@@ -164,7 +167,7 @@ extension CanvasEraserDrawingTexture {
                 texture: drawingTexture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
-                on: selectedTexture,
+                on: backgroundTexture,
                 with: commandBuffer
             )
 

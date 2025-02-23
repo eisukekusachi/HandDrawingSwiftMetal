@@ -1,5 +1,5 @@
 //
-//  CanvasFingerScreenTouchesTests.swift
+//  FingerScreenStrokeDataTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/02/09.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class CanvasFingerScreenTouchesTests: XCTestCase {
+final class FingerScreenStrokeDataTests: XCTestCase {
     /// Confirms finger input
     func testLatestTouchPoints() {
-        let subject = CanvasFingerScreenTouches(
+        let subject = FingerScreenStrokeData(
             touchArrayDictionary:[
                 1: [
                     .generate(location: .init(x: 0, y: 0), phase: .began),
@@ -27,7 +27,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
         XCTAssertEqual(subject.latestTouchPoints, [])
 
         // When `activeDictionaryKey` is set, the values with `activeDictionaryKey` are returned.
-        subject.updateActiveDictionaryKeyIfKeyIsNil()
+        subject.setActiveDictionaryKeyIfNil()
         XCTAssertEqual(subject.activeDictionaryKey, 0)
         XCTAssertEqual(
             subject.latestTouchPoints.map { $0.location },
@@ -60,7 +60,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
     /// Confirms that all fingers are on the screen
     func testIsAllFingersOnScreen() {
         struct Condition {
-            let fingers: [CanvasTouchHashValue: [CanvasTouchPoint]]
+            let fingers: [TouchHashValue: [TouchPoint]]
         }
         struct Expectation {
             let result: Bool
@@ -185,7 +185,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
             let condition = testCase.condition
             let expectation = testCase.expectation
 
-            let subject = CanvasFingerScreenTouches(
+            let subject = FingerScreenStrokeData(
                 touchArrayDictionary: condition.fingers
             )
 
@@ -194,7 +194,7 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
     }
 
     func testUpdateDictionaryKeyIfKeyIsNil() {
-        let dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] =
+        let dictionary: [TouchHashValue: [TouchPoint]] =
         [
             2: [
                 .generate(location: .init(x: 0, y: 0)),
@@ -210,16 +210,16 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
             ]
         ]
 
-        let subject = CanvasFingerScreenTouches(touchArrayDictionary: dictionary)
+        let subject = FingerScreenStrokeData(touchArrayDictionary: dictionary)
 
-        subject.updateActiveDictionaryKeyIfKeyIsNil()
+        subject.setActiveDictionaryKeyIfNil()
 
         // After sorting by key, the first element is set as `activeDictionaryKey`
         XCTAssertEqual(subject.activeDictionaryKey, 0)
     }
 
     func testReset() {
-        let subject = CanvasFingerScreenTouches(
+        let subject = FingerScreenStrokeData(
             touchArrayDictionary: [
                 1: [
                     .generate(location: .init(x: 0, y: 0)),
@@ -242,7 +242,6 @@ final class CanvasFingerScreenTouchesTests: XCTestCase {
         XCTAssertTrue(subject.touchArrayDictionary.isEmpty)
         XCTAssertNil(subject.activeDictionaryKey)
         XCTAssertNil(subject.activeLatestTouchPoint)
-
     }
 
 }

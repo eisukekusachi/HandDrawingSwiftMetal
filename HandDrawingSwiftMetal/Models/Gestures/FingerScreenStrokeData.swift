@@ -1,5 +1,5 @@
 //
-//  CanvasFingerScreenTouches.swift
+//  FingerScreenStrokeData.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -8,21 +8,21 @@
 import UIKit
 
 /// A class that manages the finger position information sent from the device
-final class CanvasFingerScreenTouches {
+final class FingerScreenStrokeData {
 
     /// A dictionary that manages points input from multiple fingers
-    private(set) var touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]] = [:]
+    private(set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
 
     /// A key currently in use in the finger touch dictionary
-    private(set) var activeDictionaryKey: CanvasTouchHashValue?
+    private(set) var activeDictionaryKey: TouchHashValue?
 
     /// A variable used to get elements from the array starting from the next element after this point
-    private(set) var activeLatestTouchPoint: CanvasTouchPoint?
+    private(set) var activeLatestTouchPoint: TouchPoint?
 
     convenience init(
-        touchArrayDictionary: [CanvasTouchHashValue: [CanvasTouchPoint]],
-        activeDictionaryKey: CanvasTouchHashValue? = nil,
-        activeLatestTouchPoint: CanvasTouchPoint? = nil
+        touchArrayDictionary: [TouchHashValue: [TouchPoint]],
+        activeDictionaryKey: TouchHashValue? = nil,
+        activeLatestTouchPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchArrayDictionary = touchArrayDictionary
@@ -32,7 +32,7 @@ final class CanvasFingerScreenTouches {
 
 }
 
-extension CanvasFingerScreenTouches {
+extension FingerScreenStrokeData {
 
     var isAllFingersOnScreen: Bool {
         !touchArrayDictionary.keys.contains { key in
@@ -41,13 +41,13 @@ extension CanvasFingerScreenTouches {
         }
     }
 
-    var latestTouchPoints: [CanvasTouchPoint] {
+    var latestTouchPoints: [TouchPoint] {
         guard
             let activeDictionaryKey,
             let touchArray = touchArrayDictionary[activeDictionaryKey]
         else { return [] }
 
-        var latestTouchArray: [CanvasTouchPoint] = []
+        var latestTouchArray: [TouchPoint] = []
 
         if let activeLatestTouchPoint {
             latestTouchArray = touchArray.elements(after: activeLatestTouchPoint) ?? []
@@ -62,8 +62,8 @@ extension CanvasFingerScreenTouches {
         return latestTouchArray
     }
 
-    func updateActiveDictionaryKeyIfKeyIsNil() {
-        // If the gesture is determined to be drawing and `updateActiveDictionaryKeyIfKeyIsNil()` is called,
+    func setActiveDictionaryKeyIfNil() {
+        // If the gesture is determined to be drawing and `setActiveDictionaryKeyIfNil()` is called,
         // `touchArrayDictionary` should contain only one element, so the first key is simply set.
         guard
             // The first element of the sorted key array in the Dictionary is set as the active key.
@@ -74,7 +74,7 @@ extension CanvasFingerScreenTouches {
         activeDictionaryKey = firstKey
     }
 
-    func appendTouchPointToDictionary(_ touchPoints: [CanvasTouchHashValue: CanvasTouchPoint]) {
+    func appendTouchPointToDictionary(_ touchPoints: [TouchHashValue: TouchPoint]) {
         touchPoints.keys.forEach { key in
             if !touchArrayDictionary.keys.contains(key) {
                 touchArrayDictionary[key] = []

@@ -1,5 +1,5 @@
 //
-//  CanvasTouchPoint.swift
+//  TouchPoint.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2022/11/19.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct CanvasTouchPoint: Equatable {
+struct TouchPoint: Equatable {
 
     let location: CGPoint
     let phase: UITouch.Phase
@@ -19,7 +19,7 @@ struct CanvasTouchPoint: Equatable {
     let timestamp: TimeInterval
 }
 
-extension CanvasTouchPoint {
+extension TouchPoint {
 
     init(
         touch: UITouch,
@@ -35,7 +35,7 @@ extension CanvasTouchPoint {
 
     init(
         location: CGPoint,
-        touch: CanvasTouchPoint
+        touch: TouchPoint
     ) {
         self.location = location
         self.phase = touch.phase
@@ -47,7 +47,7 @@ extension CanvasTouchPoint {
 
 }
 
-extension Array where Element == CanvasTouchPoint {
+extension Array where Element == TouchPoint {
 
     var lastTouchPhase: UITouch.Phase {
         if self.last?.phase == .cancelled {

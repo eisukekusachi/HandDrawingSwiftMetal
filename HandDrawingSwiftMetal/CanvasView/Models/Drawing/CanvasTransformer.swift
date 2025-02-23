@@ -22,8 +22,8 @@ final class CanvasTransformer {
 
     private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    private var keyA: CanvasTouchHashValue?
-    private var keyB: CanvasTouchHashValue?
+    private var keyA: TouchHashValue?
+    private var keyB: TouchHashValue?
     private var firstTouchPointA: CGPoint?
     private var firstTouchPointB: CGPoint?
 
@@ -35,7 +35,7 @@ extension CanvasTransformer {
         keyA != nil && keyB != nil
     }
 
-    func initTransformingIfNeeded(_ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
+    func initTransformingIfNeeded(_ dictionary: [TouchHashValue: [TouchPoint]]) {
         guard
             !isKeysInitialized,
             dictionary.count == 2,
@@ -51,7 +51,7 @@ extension CanvasTransformer {
         self.firstTouchPointB = pointB
     }
 
-    func transformCanvas(screenCenter: CGPoint, _ dictionary: [CanvasTouchHashValue: [CanvasTouchPoint]]) {
+    func transformCanvas(screenCenter: CGPoint, _ dictionary: [TouchHashValue: [TouchPoint]]) {
         guard
             dictionary.count == 2,
             let keyA,

@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurvePoints.swift
+//  DrawingCurveIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,58 +7,39 @@
 
 import UIKit
 
-/// A protocol used for real-time drawing using an iterator and a touchPhase
-protocol CanvasDrawingCurvePoints {
+/// An iterator for real-time drawing with `UITouch.Phase`
+protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
 
-    typealias T = CanvasGrayscaleDotPoint
+    var touchPhase: UITouch.Phase { get }
 
-    var iterator: Iterator<T> { get }
+    var latestCurvePoints: [GrayscaleDotPoint] { get }
 
-    var currentTouchPhase: UITouch.Phase { get }
-
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
-
-    func appendToIterator(
-        points: [T],
+    func append(
+        points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     )
 
     func reset()
+
 }
 
-extension CanvasDrawingCurvePoints {
+extension DrawingCurveIterator {
 
     /// Is the drawing finished
     var isDrawingFinished: Bool {
-        UITouch.isTouchCompleted(currentTouchPhase)
+        UITouch.isTouchCompleted(touchPhase)
     }
 
     var isCurrentlyDrawing: Bool {
         !isDrawingFinished
     }
 
-    func makeCurvePointsFromIterator() -> [CanvasGrayscaleDotPoint] {
-        var array: [CanvasGrayscaleDotPoint] = []
-
-        if hasArrayThreeElementsButNoFirstCurveCreated {
-            array.append(contentsOf: makeFirstCurvePoints())
-        }
-
-        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
-
-        if isDrawingFinished {
-            array.append(contentsOf: makeLastCurvePoints())
-        }
-
-        return array
-    }
-
     /// Makes an array of first curve points from an iterator
-    func makeFirstCurvePoints() -> [CanvasGrayscaleDotPoint] {
-        var curve: [CanvasGrayscaleDotPoint] = []
+    func makeFirstCurvePoints() -> [GrayscaleDotPoint] {
+        var curve: [GrayscaleDotPoint] = []
 
-        if iterator.array.count >= 3,
-           let points = iterator.getFirstBezierCurvePoints() {
+        if self.array.count >= 3,
+           let points = self.getBezierCurveFirstPoints() {
 
             let bezierCurvePoints = BezierCurve.makeFirstCurvePoints(
                 pointA: points.previousPoint.location,
@@ -67,7 +48,7 @@ extension CanvasDrawingCurvePoints {
                 shouldIncludeEndPoint: false
             )
             curve.append(
-                contentsOf: CanvasGrayscaleDotPoint.interpolateToMatchPointCount(
+                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
                     targetPoints: bezierCurvePoints,
                     interpolationStart: points.previousPoint,
                     interpolationEnd: points.startPoint,
@@ -81,10 +62,10 @@ extension CanvasDrawingCurvePoints {
     /// Makes an array of intermediate curve points from an iterator, setting the range to 4
     func makeIntermediateCurvePoints(
         shouldIncludeEndPoint: Bool
-    ) -> [CanvasGrayscaleDotPoint] {
-        var curve: [CanvasGrayscaleDotPoint] = []
+    ) -> [GrayscaleDotPoint] {
+        var curve: [GrayscaleDotPoint] = []
 
-        let pointArray = iterator.getIntermediateBezierCurvePointsWithFixedRange4()
+        let pointArray = self.getBezierCurveIntermediatePointsWithFixedRange4()
 
         pointArray.enumerated().forEach { (index, points) in
             let shouldIncludeEndPoint = index == pointArray.count - 1 ? shouldIncludeEndPoint : false
@@ -97,7 +78,7 @@ extension CanvasDrawingCurvePoints {
                 shouldIncludeEndPoint: shouldIncludeEndPoint
             )
             curve.append(
-                contentsOf: CanvasGrayscaleDotPoint.interpolateToMatchPointCount(
+                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
                     targetPoints: bezierCurvePoints,
                     interpolationStart: points.startPoint,
                     interpolationEnd: points.endPoint,
@@ -109,11 +90,11 @@ extension CanvasDrawingCurvePoints {
     }
 
     /// Makes an array of last curve points from an iterator
-    func makeLastCurvePoints() -> [CanvasGrayscaleDotPoint] {
-        var curve: [CanvasGrayscaleDotPoint] = []
+    func makeLastCurvePoints() -> [GrayscaleDotPoint] {
+        var curve: [GrayscaleDotPoint] = []
 
-        if iterator.array.count >= 3,
-           let points = iterator.getLastBezierCurvePoints() {
+        if self.array.count >= 3,
+           let points = self.getBezierCurveLastPoints() {
 
             let bezierCurvePoints = BezierCurve.makeLastCurvePoints(
                 pointA: points.previousPoint.location,
@@ -122,7 +103,7 @@ extension CanvasDrawingCurvePoints {
                 shouldIncludeEndPoint: true
             )
             curve.append(
-                contentsOf: CanvasGrayscaleDotPoint.interpolateToMatchPointCount(
+                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
                     targetPoints: bezierCurvePoints,
                     interpolationStart: points.startPoint,
                     interpolationEnd: points.endPoint,

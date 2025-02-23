@@ -1,5 +1,5 @@
 //
-//  CanvasBrushDrawingTexture.swift
+//  CanvasDrawingBrushTextureSet.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,8 +8,8 @@
 import MetalKit
 import Combine
 
-/// A class used for real-time drawing on a texture using a brush
-final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
+/// A set of textures for real-time brush drawing
+final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
     var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
         canvasDrawFinishedSubject.eraseToAnyPublisher()
@@ -28,7 +28,7 @@ final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init(renderer: MTLRendering) {
+    required init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -39,7 +39,7 @@ final class CanvasBrushDrawingTexture: CanvasDrawingTexture {
 
 }
 
-extension CanvasBrushDrawingTexture {
+extension CanvasDrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
@@ -54,20 +54,22 @@ extension CanvasBrushDrawingTexture {
         blushColor = color
     }
 
-    func drawCurvePointsUsingSelectedTexture(
-        drawingCurvePoints: CanvasDrawingCurvePoints,
-        selectedTexture: MTLTexture,
+    func drawCurvePoints(
+        drawingCurveIterator: DrawingCurveIterator,
+        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundColor backgroundColor: UIColor = .clear,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurvePoints.makeCurvePointsFromIterator(),
+            points: drawingCurveIterator.latestCurvePoints,
             with: commandBuffer
         )
 
-        drawDrawingTextureWithSelectedTexture(
-            selectedTexture: selectedTexture,
-            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+        drawDrawingTextureWithBackgroundTexture(
+            backgroundTexture: backgroundTexture,
+            backgroundColor: backgroundColor,
+            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -85,10 +87,10 @@ extension CanvasBrushDrawingTexture {
 
 }
 
-extension CanvasBrushDrawingTexture {
+extension CanvasDrawingBrushTextureSet {
 
     private func drawCurvePointsOnDrawingTexture(
-        points: [CanvasGrayscaleDotPoint],
+        points: [GrayscaleDotPoint],
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawGrayPointBuffersWithMaxBlendMode(
@@ -110,16 +112,17 @@ extension CanvasBrushDrawingTexture {
         )
     }
 
-    private func drawDrawingTextureWithSelectedTexture(
-        selectedTexture: MTLTexture,
+    private func drawDrawingTextureWithBackgroundTexture(
+        backgroundTexture: MTLTexture,
+        backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
-            texture: selectedTexture,
+            texture: backgroundTexture,
             buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
+            withBackgroundColor: backgroundColor,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -133,7 +136,7 @@ extension CanvasBrushDrawingTexture {
         if shouldUpdateSelectedTexture {
             renderer.mergeTexture(
                 texture: drawingTexture,
-                into: selectedTexture,
+                into: backgroundTexture,
                 with: commandBuffer
             )
 

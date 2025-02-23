@@ -1,5 +1,5 @@
 //
-//  CanvasEraserDrawingTextureTests.swift
+//  CanvasDrawingEraserTextureSetTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/01/25.
@@ -9,14 +9,14 @@ import XCTest
 import Combine
 @testable import HandDrawingSwiftMetal
 
-final class CanvasEraserDrawingTextureTests: XCTestCase {
+final class CanvasDrawingEraserTextureSetTests: XCTestCase {
 
-    var subject: CanvasEraserDrawingTexture!
+    var subject: CanvasDrawingEraserTextureSet!
 
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
 
-    var sourceTexture: MTLTexture!
+    var backgroundTexture: MTLTexture!
     var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
@@ -27,15 +27,15 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
         commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"
 
-        subject = CanvasEraserDrawingTexture(renderer: renderer)
+        subject = CanvasDrawingEraserTextureSet(renderer: renderer)
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 
-        sourceTexture = MTLTextureCreator.makeBlankTexture(
+        backgroundTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
             with: device
         )!
-        sourceTexture.label = "sourceTexture"
+        backgroundTexture.label = "backgroundTexture"
 
         destinationTexture = MTLTextureCreator.makeBlankTexture(
             size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
@@ -44,8 +44,8 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
         destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the eraser curve is drawn on the destination texture using the source texture
-    func testDrawEraserCurveUsingSelectedTexture() {
+    /// Confirms the process in which the eraser curve is drawn on the destination texture using `backgroundTexture`
+    func testDrawEraserCurvePoints() {
 
         struct Condition: Hashable {
             let touchPhase: UITouch.Phase
@@ -57,12 +57,12 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
 
         // Draw the point buffers in opaque grayscale with the max blend mode on `grayscaleTexture`.
         // Draw `grayscaleTexture` with black applied on `lineDrawnTexture`.
-        // Then, draw `sourceTexture` on `drawingTexture`.
+        // Then, draw `backgroundTexture` on `drawingTexture`.
         // Subtract `lineDrawnTexture` from `drawingTexture` in eraser mode.
         let drawingCurve: [String] = [
             "drawGrayPointBuffersWithMaxBlendMode(buffers: buffers, onGrayscaleTexture: grayscaleTexture, with: commandBuffer)",
             "drawTexture(grayscaleTexture: grayscaleTexture, color: (0, 0, 0), on: lineDrawnTexture, with: commandBuffer)",
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
             "subtractTextureWithEraseBlendMode(texture: lineDrawnTexture, buffers: buffers, from: drawingTexture, with: commandBuffer)"
         ]
 
@@ -71,14 +71,14 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
             "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)"
         ]
 
-        // Draw `sourceTexture` on `drawingTexture`.
+        // Draw `backgroundTexture` on `drawingTexture`.
         // Subtract `lineDrawnTexture` from `drawingTexture` in eraser mode.
-        // Then, draw `drawingTexture` on `sourceTexture`.
+        // Then, draw `drawingTexture` on `backgroundTexture`.
         // Clear the textures used for drawing to prepare for the next drawing.
         let drawingCompletionProcess: [String] = [
-            "drawTexture(texture: sourceTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: drawingTexture, with: commandBuffer)",
             "subtractTextureWithEraseBlendMode(texture: lineDrawnTexture, buffers: buffers, from: drawingTexture, with: commandBuffer)",
-            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: sourceTexture, with: commandBuffer)",
+            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: backgroundTexture, with: commandBuffer)",
             "clearTextures(textures: [drawingTexture, grayscaleTexture, lineDrawnTexture], with: commandBuffer)"
         ]
 
@@ -90,9 +90,9 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
         ]
 
         testCases.forEach { testCase in
-            let drawingCurvePoints = MockCanvasDrawingCurvePoints()
+            let drawingIterator = MockDrawingCurveIterator()
 
-            drawingCurvePoints.currentTouchPhase = testCase.key.touchPhase
+            drawingIterator.touchPhase = testCase.key.touchPhase
 
             let publisherExpectation = XCTestExpectation()
             if !testCase.value.isDrawingFinished {
@@ -106,9 +106,10 @@ final class CanvasEraserDrawingTextureTests: XCTestCase {
                 }
                 .store(in: &cancellables)
 
-            subject.drawCurvePointsUsingSelectedTexture(
-                drawingCurvePoints: drawingCurvePoints,
-                selectedTexture: sourceTexture,
+            subject.drawCurvePoints(
+                drawingCurveIterator: drawingIterator,
+                withBackgroundTexture: backgroundTexture,
+                withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer
             )
