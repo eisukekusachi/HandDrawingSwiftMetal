@@ -1,5 +1,5 @@
 //
-//  FingerDrawingCurveIteratorTests.swift
+//  DrawingCurveFingerIteratorTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class FingerDrawingCurveIteratorTests: XCTestCase {
+final class DrawingCurveFingerIteratorTests: XCTestCase {
 
     func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = FingerDrawingCurvePoints()
+        let subject = DrawingCurveFingerIterator()
 
         subject.appendToIterator(points: [.generate()], touchPhase: .began)
         XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
@@ -28,7 +28,7 @@ final class FingerDrawingCurveIteratorTests: XCTestCase {
     }
 
     func testAppendToIterator() {
-        let subject = FingerDrawingCurvePoints()
+        let subject = DrawingCurveFingerIterator()
 
         subject.appendToIterator(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
         subject.appendToIterator(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)

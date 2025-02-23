@@ -1,5 +1,5 @@
 //
-//  PencilDrawingCurveIterator.swift
+//  DrawingCurvePencilIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// An iterator for real-time pencil drawing with `UITouch.Phase`
-final class PencilDrawingCurveIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
+final class DrawingCurvePencilIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
 
     var currentTouchPhase: UITouch.Phase = .began
 
@@ -23,7 +23,7 @@ final class PencilDrawingCurveIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
 
 }
 
-extension PencilDrawingCurveIterator {
+extension DrawingCurvePencilIterator {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {

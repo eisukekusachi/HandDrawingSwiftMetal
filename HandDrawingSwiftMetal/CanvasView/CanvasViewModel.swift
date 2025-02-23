@@ -267,7 +267,7 @@ extension CanvasViewModel {
         switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
         case .drawing:
             if shouldCreateFingerDrawingCurveIteratorInstance() {
-                drawingCurveIterator = FingerDrawingCurvePoints()
+                drawingCurveIterator = DrawingCurveFingerIterator()
             }
 
             fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
@@ -310,7 +310,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
-            drawingCurveIterator = PencilDrawingCurveIterator()
+            drawingCurveIterator = DrawingCurvePencilIterator()
         }
 
         pencilScreenStrokeData.appendActualTouches(

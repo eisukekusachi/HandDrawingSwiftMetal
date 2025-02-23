@@ -1,5 +1,5 @@
 //
-//  PencilDrawingCurveIteratorTests.swift
+//  DrawingCurvePencilIteratorTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class PencilDrawingCurveIteratorTests: XCTestCase {
+final class DrawingCurvePencilIteratorTests: XCTestCase {
 
     func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = PencilDrawingCurveIterator()
+        let subject = DrawingCurvePencilIterator()
 
         subject.appendToIterator(points: [.generate()], touchPhase: .began)
         XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)

@@ -1,5 +1,5 @@
 //
-//  FingerDrawingCurvePoints.swift
+//  DrawingCurveFingerIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// An iterator for real-time finger drawing with `UITouch.Phase`
-final class FingerDrawingCurvePoints: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
+final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
 
     var currentTouchPhase: UITouch.Phase = .began
 
@@ -27,7 +27,7 @@ final class FingerDrawingCurvePoints: Iterator<GrayscaleDotPoint>, DrawingCurveI
 
 }
 
-extension FingerDrawingCurvePoints {
+extension DrawingCurveFingerIterator {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
@@ -52,7 +52,7 @@ extension FingerDrawingCurvePoints {
 
 }
 
-extension FingerDrawingCurvePoints {
+extension DrawingCurveFingerIterator {
 
     private func makeSmoothCurve() {
         if (tmpIterator.array.count != 0 && self.array.count == 0),
