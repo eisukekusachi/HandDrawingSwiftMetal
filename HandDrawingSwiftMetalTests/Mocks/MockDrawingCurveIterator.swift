@@ -15,9 +15,9 @@ final class MockDrawingCurveIterator: Iterator<GrayscaleDotPoint>, DrawingCurveI
 
     var touchPhase: UITouch.Phase = .began
 
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool = false
+    var latestCurvePoints: [GrayscaleDotPoint] = []
 
-    func appendToIterator(points: [GrayscaleDotPoint], touchPhase: UITouch.Phase) {}
+    func append(points: [GrayscaleDotPoint], touchPhase: UITouch.Phase) {}
 
     override func reset() {}
 

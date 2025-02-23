@@ -64,7 +64,7 @@ extension CanvasDrawingEraserTextureSet {
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.makeCurvePointsFromIterator(),
+            points: drawingCurveIterator.latestCurvePoints,
             sourceTexture: backgroundTexture,
             with: commandBuffer
         )

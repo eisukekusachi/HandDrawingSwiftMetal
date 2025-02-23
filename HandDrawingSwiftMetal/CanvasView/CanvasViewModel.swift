@@ -409,7 +409,7 @@ extension CanvasViewModel {
             let drawableSize = canvasView?.renderTexture?.size
         else { return }
 
-        drawingCurveIterator?.appendToIterator(
+        drawingCurveIterator?.append(
             points: screenTouchPoints.map {
                 .init(
                     matrix: transformer.matrix.inverted(flipY: true),

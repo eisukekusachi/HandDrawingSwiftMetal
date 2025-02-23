@@ -10,21 +10,44 @@ import XCTest
 
 final class DrawingCurvePencilIteratorTests: XCTestCase {
 
-    func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = DrawingCurvePencilIterator()
+    func testIsDrawingFinished() {
+        let subject = DrawingCurveFingerIterator()
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .began)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .began
+        XCTAssertFalse(subject.isDrawingFinished)
+        XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .moved
+        XCTAssertFalse(subject.isDrawingFinished)
+        XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        /// Return true only once when 3 points are stored
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertTrue(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .ended
+        XCTAssertTrue(subject.isDrawingFinished)
+        XCTAssertFalse(subject.isCurrentlyDrawing)
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .cancelled
+        XCTAssertTrue(subject.isDrawingFinished)
+        XCTAssertFalse(subject.isCurrentlyDrawing)
+    }
+
+    func testShouldGetFirstCurve() {
+        let subject = DrawingCurveFingerIterator()
+
+        subject.append([
+            .generate(),
+            .generate()
+        ])
+        XCTAssertFalse(subject.shouldGetFirstCurve)
+
+        // After creating the instance, it becomes `true` when three elements are stored in the array.
+        subject.append([
+            .generate()
+        ])
+        XCTAssertTrue(subject.shouldGetFirstCurve)
+
+        // The value of the first curve is retrieved only once
+        _ = subject.latestCurvePoints
+        XCTAssertFalse(subject.shouldGetFirstCurve)
     }
 
 }

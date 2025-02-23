@@ -12,36 +12,51 @@ final class DrawingCurvePencilIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
 
     var touchPhase: UITouch.Phase = .began
 
-    private var isFirstCurveHasBeenCreated: Bool = false
+    private var hasFirstCurveBeenCreated: Bool = false
+
+    var latestCurvePoints: [GrayscaleDotPoint] {
+        var array: [GrayscaleDotPoint] = []
+
+        if shouldGetFirstCurve {
+            array.append(contentsOf: makeFirstCurvePoints())
+        }
+
+        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
+
+        if isDrawingFinished {
+            array.append(contentsOf: makeLastCurvePoints())
+        }
+
+        return array
+    }
+
+    func append(
+        points: [GrayscaleDotPoint],
+        touchPhase: UITouch.Phase
+    ) {
+        self.append(points)
+        self.touchPhase = touchPhase
+    }
 
     override func reset() {
         super.reset()
 
         touchPhase = .began
-        isFirstCurveHasBeenCreated = false
+        hasFirstCurveBeenCreated = false
     }
 
 }
 
 extension DrawingCurvePencilIterator {
 
-    /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
-        let isFirstCurveToBeCreated = self.array.count >= 3 && !isFirstCurveHasBeenCreated
+    var shouldGetFirstCurve: Bool {
+        let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
 
         if isFirstCurveToBeCreated {
-            isFirstCurveHasBeenCreated = true
+            hasFirstCurveBeenCreated = true
         }
 
         return isFirstCurveToBeCreated
-    }
-
-    func appendToIterator(
-        points: [GrayscaleDotPoint],
-        touchPhase: UITouch.Phase
-    ) {
-        self.append(points)
-        self.touchPhase = touchPhase
     }
 
 }

@@ -12,14 +12,15 @@ protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
 
     var touchPhase: UITouch.Phase { get }
 
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
+    var latestCurvePoints: [GrayscaleDotPoint] { get }
 
-    func appendToIterator(
+    func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     )
 
     func reset()
+
 }
 
 extension DrawingCurveIterator {
@@ -31,22 +32,6 @@ extension DrawingCurveIterator {
 
     var isCurrentlyDrawing: Bool {
         !isDrawingFinished
-    }
-
-    func makeCurvePointsFromIterator() -> [GrayscaleDotPoint] {
-        var array: [GrayscaleDotPoint] = []
-
-        if hasArrayThreeElementsButNoFirstCurveCreated {
-            array.append(contentsOf: makeFirstCurvePoints())
-        }
-
-        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
-
-        if isDrawingFinished {
-            array.append(contentsOf: makeLastCurvePoints())
-        }
-
-        return array
     }
 
     /// Makes an array of first curve points from an iterator

@@ -62,7 +62,7 @@ extension CanvasDrawingBrushTextureSet {
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.makeCurvePointsFromIterator(),
+            points: drawingCurveIterator.latestCurvePoints,
             with: commandBuffer
         )
 

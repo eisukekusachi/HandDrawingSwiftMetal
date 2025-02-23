@@ -10,30 +10,53 @@ import XCTest
 
 final class DrawingCurveFingerIteratorTests: XCTestCase {
 
-    func testHasArrayThreeElementsButNoFirstCurveCreated() {
+    func testIsDrawingFinished() {
         let subject = DrawingCurveFingerIterator()
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .began)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .began
+        XCTAssertFalse(subject.isDrawingFinished)
+        XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .moved
+        XCTAssertFalse(subject.isDrawingFinished)
+        XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        /// Return true only once when 3 points are stored
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertTrue(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .ended
+        XCTAssertTrue(subject.isDrawingFinished)
+        XCTAssertFalse(subject.isCurrentlyDrawing)
 
-        subject.appendToIterator(points: [.generate()], touchPhase: .moved)
-        XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
+        subject.touchPhase = .cancelled
+        XCTAssertTrue(subject.isDrawingFinished)
+        XCTAssertFalse(subject.isCurrentlyDrawing)
+    }
+
+    func testShouldGetFirstCurve() {
+        let subject = DrawingCurveFingerIterator()
+
+        subject.append([
+            .generate(),
+            .generate()
+        ])
+        XCTAssertFalse(subject.shouldGetFirstCurve)
+
+        // After creating the instance, it becomes `true` when three elements are stored in the array.
+        subject.append([
+            .generate()
+        ])
+        XCTAssertTrue(subject.shouldGetFirstCurve)
+
+        // The value of the first curve is retrieved only once
+        _ = subject.latestCurvePoints
+        XCTAssertFalse(subject.shouldGetFirstCurve)
     }
 
     func testAppendToIterator() {
         let subject = DrawingCurveFingerIterator()
 
-        subject.appendToIterator(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
-        subject.appendToIterator(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)
-        subject.appendToIterator(points: [.generate(location: .init(x: 4, y: 4))], touchPhase: .moved)
-        subject.appendToIterator(points: [.generate(location: .init(x: 6, y: 6))], touchPhase: .ended)
+        subject.append(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
+        subject.append(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)
+        subject.append(points: [.generate(location: .init(x: 4, y: 4))], touchPhase: .moved)
+        subject.append(points: [.generate(location: .init(x: 6, y: 6))], touchPhase: .ended)
 
         XCTAssertEqual(subject.tmpIterator.array[0].location, .init(x: 0, y: 0))
         XCTAssertEqual(subject.tmpIterator.array[1].location, .init(x: 2, y: 2))

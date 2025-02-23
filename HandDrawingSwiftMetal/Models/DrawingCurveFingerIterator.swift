@@ -14,33 +14,25 @@ final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
 
     private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
 
-    private var isFirstCurveHasBeenCreated: Bool = false
+    private var hasFirstCurveBeenCreated: Bool = false
 
-    override func reset() {
-        super.reset()
+    var latestCurvePoints: [GrayscaleDotPoint] {
+        var array: [GrayscaleDotPoint] = []
 
-        tmpIterator.reset()
-
-        touchPhase = .began
-        isFirstCurveHasBeenCreated = false
-    }
-
-}
-
-extension DrawingCurveFingerIterator {
-
-    /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
-    var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
-        let isFirstCurveToBeCreated = self.array.count >= 3 && !isFirstCurveHasBeenCreated
-
-        if isFirstCurveToBeCreated {
-            isFirstCurveHasBeenCreated = true
+        if shouldGetFirstCurve {
+            array.append(contentsOf: makeFirstCurvePoints())
         }
 
-        return isFirstCurveToBeCreated
+        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
+
+        if isDrawingFinished {
+            array.append(contentsOf: makeLastCurvePoints())
+        }
+
+        return array
     }
 
-    func appendToIterator(
+    func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
@@ -50,9 +42,28 @@ extension DrawingCurveFingerIterator {
         makeSmoothCurve()
     }
 
+    override func reset() {
+        super.reset()
+
+        tmpIterator.reset()
+
+        touchPhase = .began
+        hasFirstCurveBeenCreated = false
+    }
+
 }
 
 extension DrawingCurveFingerIterator {
+
+    var shouldGetFirstCurve: Bool {
+        let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
+
+        if isFirstCurveToBeCreated {
+            hasFirstCurveBeenCreated = true
+        }
+
+        return isFirstCurveToBeCreated
+    }
 
     private func makeSmoothCurve() {
         if (tmpIterator.array.count != 0 && self.array.count == 0),
