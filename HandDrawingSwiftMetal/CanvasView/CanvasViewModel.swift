@@ -52,11 +52,27 @@ final class CanvasViewModel {
 
     /// A class for handling finger input values
     private let fingerScreenStrokeData = FingerScreenStrokeData()
-
     /// A class for handling Apple Pencil inputs
     private let pencilScreenStrokeData = PencilScreenStrokeData()
 
+    /// An iterator for real-time drawing
     private var drawingCurveIterator: DrawingCurveIterator?
+
+    /// A texture set for real-time drawing
+    private var drawingTextureSet: CanvasDrawingTextureSet?
+    /// A brush texture set for real-time drawing
+    private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
+    /// An eraser texture set for real-time drawing
+    private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
+
+    /// A display link for real-time drawing
+    private var drawingDisplayLink = CanvasDrawingDisplayLink()
+
+    /// A texture that combines the texture of the currently selected layer and the texture of `drawingTextureSet`
+    private var currentTexture: MTLTexture?
+
+    /// A texture that combines the background color, the texture of `TextureLayers` and `currentTexture`
+    private var canvasTexture: MTLTexture?
 
     private let transformer = CanvasTransformer()
 
@@ -66,22 +82,7 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository?
 
-    private var drawingDisplayLink = CanvasDrawingDisplayLink()
-
     private var canvasView: CanvasViewProtocol?
-
-    /// A protocol for real-time drawing on a texture
-    private var drawingTextureSet: CanvasDrawingTextureSet?
-    /// A drawing texture with a brush
-    private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
-    /// A drawing texture with an eraser
-    private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
-
-    /// A texture that combines the texture of the currently selected layer and the `drawingTexture`
-    private var currentTexture: MTLTexture?
-
-    /// A texture that combines the background color, the texture of `TextureLayers` and `currentTexture`
-    private var canvasTexture: MTLTexture?
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -384,19 +385,19 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    // Since the pencil takes priority, even if `drawingCurvePoints` contains an instance,
+    // Since the pencil takes priority, even if `drawingCurveIterator` contains an instance,
     // it will be overwritten when touchBegan occurs.
-    private func isPencilDrawingCurvePointsInstanceCreated(actualTouches: Set<UITouch>) -> Bool {
+    private func shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
         actualTouches.contains(where: { $0.phase == .began })
     }
 
-    // If `drawingCurvePoints` is nil, an instance of `FingerDrawingCurvePoints` will be set.
-    private func isFingerDrawingCurvePointsInstanceCreated() -> Bool {
+    // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
+    private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
         drawingCurveIterator == nil
     }
 
     private func drawPencilCurveOnCanvas(actualTouches: Set<UITouch>, view: UIView) {
-        if isPencilDrawingCurvePointsInstanceCreated(actualTouches: actualTouches) {
+        if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
             drawingCurveIterator = PencilDrawingCurveIterator()
         }
 
@@ -410,7 +411,7 @@ extension CanvasViewModel {
     }
 
     private func drawFingerCurveOnCanvas() {
-        if isFingerDrawingCurvePointsInstanceCreated() {
+        if shouldCreateFingerDrawingCurveIteratorInstance() {
             drawingCurveIterator = FingerDrawingCurvePoints()
         }
 
