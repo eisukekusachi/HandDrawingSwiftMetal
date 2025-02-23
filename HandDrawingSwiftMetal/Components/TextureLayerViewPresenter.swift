@@ -27,7 +27,7 @@ final class TextureLayerViewPresenter {
         didFinishChangingAlpha: @escaping (TextureLayer) -> Void,
         didEditTitle: @escaping (TextureLayer, String) -> Void,
         didMove: @escaping (IndexSet, Int) -> Void,
-        on viewController: UIViewController
+        on destinationView: UIView
     ) {
         layerView = TextureLayerView(
             textureLayers: textureLayers,
@@ -64,7 +64,7 @@ final class TextureLayerViewPresenter {
         guard let layerView else { return }
 
         layerViewController = UIHostingController<TextureLayerView>(rootView: layerView)
-        viewController.view.addSubview(layerViewController!.view)
+        destinationView.addSubview(layerViewController!.view)
 
         layerViewController?.view.backgroundColor = .clear
         layerViewController?.view.isHidden = true
@@ -72,7 +72,7 @@ final class TextureLayerViewPresenter {
         addConstraints(
             targetView: targetView,
             roundedRectangleWithArrow: roundedRectangleWithArrow,
-            on: viewController
+            on: destinationView
         )
     }
     func showView(_ isShown: Bool) {
@@ -82,7 +82,7 @@ final class TextureLayerViewPresenter {
     private func addConstraints(
         targetView: UIView,
         roundedRectangleWithArrow: RoundedRectangleWithArrow,
-        on viewController: UIViewController
+        on destinationView: UIView
     ) {
         let viewWidth: CGFloat = 300.0
         let viewHeight: CGFloat = 300.0
@@ -96,7 +96,7 @@ final class TextureLayerViewPresenter {
 
         layerViewController?.view.setNeedsLayout()
 
-        let targetViewCenterX = targetView.convert(targetView.bounds, to: viewController.view).midX
+        let targetViewCenterX = targetView.convert(targetView.bounds, to: destinationView).midX
         let layerViewX = targetViewCenterX - viewWidth * 0.5
         let centerX = targetViewCenterX - layerViewX
 
