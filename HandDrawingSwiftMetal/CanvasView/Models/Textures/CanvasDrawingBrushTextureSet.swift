@@ -54,20 +54,22 @@ extension CanvasDrawingBrushTextureSet {
         blushColor = color
     }
 
-    func drawCurvePointsUsingSelectedTexture(
-        drawingCurvePoints: DrawingCurveIterator,
-        selectedTexture: MTLTexture,
+    func drawCurvePoints(
+        drawingCurveIterator: DrawingCurveIterator,
+        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundColor backgroundColor: UIColor = .clear,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurvePoints.makeCurvePointsFromIterator(),
+            points: drawingCurveIterator.makeCurvePointsFromIterator(),
             with: commandBuffer
         )
 
-        drawDrawingTextureWithSelectedTexture(
-            selectedTexture: selectedTexture,
-            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+        drawDrawingTextureWithBackgroundTexture(
+            backgroundTexture: backgroundTexture,
+            backgroundColor: backgroundColor,
+            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -110,16 +112,17 @@ extension CanvasDrawingBrushTextureSet {
         )
     }
 
-    private func drawDrawingTextureWithSelectedTexture(
-        selectedTexture: MTLTexture,
+    private func drawDrawingTextureWithBackgroundTexture(
+        backgroundTexture: MTLTexture,
+        backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
-            texture: selectedTexture,
+            texture: backgroundTexture,
             buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
+            withBackgroundColor: backgroundColor,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -133,7 +136,7 @@ extension CanvasDrawingBrushTextureSet {
         if shouldUpdateSelectedTexture {
             renderer.mergeTexture(
                 texture: drawingTexture,
-                into: selectedTexture,
+                into: backgroundTexture,
                 with: commandBuffer
             )
 

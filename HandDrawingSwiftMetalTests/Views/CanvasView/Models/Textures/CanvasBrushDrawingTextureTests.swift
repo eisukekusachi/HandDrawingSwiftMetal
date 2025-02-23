@@ -101,9 +101,10 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
 
             subject.setBlushColor(.red)
 
-            subject.drawCurvePointsUsingSelectedTexture(
-                drawingCurvePoints: drawingIterator,
-                selectedTexture: sourceTexture,
+            subject.drawCurvePoints(
+                drawingCurveIterator: drawingIterator,
+                withBackgroundTexture: sourceTexture,
+                withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer
             )

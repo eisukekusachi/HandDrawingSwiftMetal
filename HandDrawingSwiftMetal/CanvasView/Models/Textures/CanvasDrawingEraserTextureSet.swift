@@ -56,21 +56,23 @@ extension CanvasDrawingEraserTextureSet {
         eraserAlpha = alpha
     }
 
-    func drawCurvePointsUsingSelectedTexture(
-        drawingCurvePoints: DrawingCurveIterator,
-        selectedTexture: MTLTexture,
+    func drawCurvePoints(
+        drawingCurveIterator: DrawingCurveIterator,
+        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundColor backgroundColor: UIColor = .clear,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurvePoints.makeCurvePointsFromIterator(),
-            sourceTexture: selectedTexture,
+            points: drawingCurveIterator.makeCurvePointsFromIterator(),
+            sourceTexture: backgroundTexture,
             with: commandBuffer
         )
 
-        drawDrawingTextureWithSelectedTexture(
-            selectedTexture: selectedTexture,
-            shouldUpdateSelectedTexture: drawingCurvePoints.isDrawingFinished,
+        drawDrawingTextureWithBackgroundTexture(
+            backgroundTexture: backgroundTexture,
+            backgroundColor: backgroundColor,
+            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
             on: destinationTexture,
             with: commandBuffer
         )
@@ -130,23 +132,24 @@ extension CanvasDrawingEraserTextureSet {
         )
     }
 
-    private func drawDrawingTextureWithSelectedTexture(
-        selectedTexture: MTLTexture,
+    private func drawDrawingTextureWithBackgroundTexture(
+        backgroundTexture: MTLTexture,
+        backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
-        on targetTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: targetTexture,
+            on: destinationTexture,
             with: commandBuffer
         )
 
         if shouldUpdateSelectedTexture {
             renderer.drawTexture(
-                texture: selectedTexture,
+                texture: backgroundTexture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
                 on: drawingTexture,
@@ -164,7 +167,7 @@ extension CanvasDrawingEraserTextureSet {
                 texture: drawingTexture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
-                on: selectedTexture,
+                on: backgroundTexture,
                 with: commandBuffer
             )
 

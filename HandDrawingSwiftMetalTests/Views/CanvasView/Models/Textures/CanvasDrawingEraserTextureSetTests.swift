@@ -106,9 +106,10 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
                 }
                 .store(in: &cancellables)
 
-            subject.drawCurvePointsUsingSelectedTexture(
-                drawingCurvePoints: drawingIterator,
-                selectedTexture: sourceTexture,
+            subject.drawCurvePoints(
+                drawingCurveIterator: drawingIterator,
+                withBackgroundTexture: sourceTexture,
+                withBackgroundColor: .clear,
                 on: destinationTexture,
                 with: commandBuffer
             )
