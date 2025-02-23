@@ -71,11 +71,11 @@ final class CanvasViewModel {
     private var canvasView: CanvasViewProtocol?
 
     /// A protocol for real-time drawing on a texture
-    private var drawingTexture: CanvasDrawingTextureSet?
+    private var drawingTextureSet: CanvasDrawingTextureSet?
     /// A drawing texture with a brush
-    private let brushDrawingTexture = CanvasDrawingBrushTextureSet()
+    private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
     /// A drawing texture with an eraser
-    private let eraserDrawingTexture = CanvasDrawingEraserTextureSet()
+    private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
 
     /// A texture that combines the texture of the currently selected layer and the `drawingTexture`
     private var currentTexture: MTLTexture?
@@ -120,8 +120,8 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         Publishers.Merge(
-            brushDrawingTexture.canvasDrawFinishedPublisher,
-            eraserDrawingTexture.canvasDrawFinishedPublisher
+            drawingBrushTextureSet.canvasDrawFinishedPublisher,
+            drawingEraserTextureSet.canvasDrawFinishedPublisher
         )
             .sink { [weak self] in
                 guard let `self` else { return }
@@ -144,22 +144,22 @@ final class CanvasViewModel {
                 guard let `self` else { return }
                 switch tool {
                 case .brush:
-                    self.drawingTexture = self.brushDrawingTexture
+                    self.drawingTextureSet = self.drawingBrushTextureSet
                 case .eraser:
-                    self.drawingTexture = self.eraserDrawingTexture
+                    self.drawingTextureSet = self.drawingEraserTextureSet
                 }
             }
             .store(in: &cancellables)
 
         drawingTool.brushColorPublisher
             .sink { [weak self] color in
-                self?.brushDrawingTexture.setBlushColor(color)
+                self?.drawingBrushTextureSet.setBlushColor(color)
             }
             .store(in: &cancellables)
 
         drawingTool.eraserAlphaPublisher
             .sink { [weak self] alpha in
-                self?.eraserDrawingTexture.setEraserAlpha(alpha)
+                self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
 
@@ -198,8 +198,8 @@ final class CanvasViewModel {
     }
 
     private func updateTextures(size: CGSize) {
-        brushDrawingTexture.initTextures(size)
-        eraserDrawingTexture.initTextures(size)
+        drawingBrushTextureSet.initTextures(size)
+        drawingEraserTextureSet.initTextures(size)
 
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
@@ -490,7 +490,7 @@ extension CanvasViewModel {
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
-        drawingTexture?.drawCurvePoints(
+        drawingTextureSet?.drawCurvePoints(
             drawingCurveIterator: drawingCurveIterator,
             withBackgroundTexture: selectedTexture,
             withBackgroundColor: .clear,
@@ -541,7 +541,7 @@ extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        drawingTexture?.clearDrawingTextures(with: commandBuffer)
+        drawingTextureSet?.clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
 
         fingerScreenStrokeData.reset()
