@@ -1,5 +1,5 @@
 //
-//  CanvasFingerDrawingCurvePointsTests.swift
+//  FingerDrawingCurveIteratorTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class CanvasFingerDrawingCurvePointsTests: XCTestCase {
+final class FingerDrawingCurveIteratorTests: XCTestCase {
 
     func testHasArrayThreeElementsButNoFirstCurveCreated() {
-        let subject = CanvasFingerDrawingCurvePoints()
+        let subject = FingerDrawingCurvePoints()
 
         subject.appendToIterator(points: [.generate()], touchPhase: .began)
         XCTAssertFalse(subject.hasArrayThreeElementsButNoFirstCurveCreated)
@@ -28,7 +28,7 @@ final class CanvasFingerDrawingCurvePointsTests: XCTestCase {
     }
 
     func testAppendToIterator() {
-        let subject = CanvasFingerDrawingCurvePoints()
+        let subject = FingerDrawingCurvePoints()
 
         subject.appendToIterator(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
         subject.appendToIterator(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)
@@ -41,15 +41,15 @@ final class CanvasFingerDrawingCurvePointsTests: XCTestCase {
         XCTAssertEqual(subject.tmpIterator.array[3].location, .init(x: 6, y: 6))
 
         /// The first point is added as it is
-        XCTAssertEqual(subject.iterator.array[0].location, .init(x: 0, y: 0))
+        XCTAssertEqual(subject.array[0].location, .init(x: 0, y: 0))
 
         /// The average of the two points is added for all other points
-        XCTAssertEqual(subject.iterator.array[1].location, .init(x: 1, y: 1))
-        XCTAssertEqual(subject.iterator.array[2].location, .init(x: 3, y: 3))
-        XCTAssertEqual(subject.iterator.array[3].location, .init(x: 5, y: 5))
+        XCTAssertEqual(subject.array[1].location, .init(x: 1, y: 1))
+        XCTAssertEqual(subject.array[2].location, .init(x: 3, y: 3))
+        XCTAssertEqual(subject.array[3].location, .init(x: 5, y: 5))
 
         /// The last point is added as it is
-        XCTAssertEqual(subject.iterator.array[4].location, .init(x: 6, y: 6))
+        XCTAssertEqual(subject.array[4].location, .init(x: 6, y: 6))
     }
 
 }

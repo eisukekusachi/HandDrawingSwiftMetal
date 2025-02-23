@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingCurvePoints.swift
+//  DrawingCurveIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -7,26 +7,22 @@
 
 import UIKit
 
-/// A protocol used for real-time drawing using an iterator and a touchPhase
-protocol CanvasDrawingCurvePoints {
-
-    typealias T = GrayscaleDotPoint
-
-    var iterator: Iterator<T> { get }
+/// An iterator for real-time drawing with `UITouch.Phase`
+protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
 
     var currentTouchPhase: UITouch.Phase { get }
 
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
 
     func appendToIterator(
-        points: [T],
+        points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     )
 
     func reset()
 }
 
-extension CanvasDrawingCurvePoints {
+extension DrawingCurveIterator {
 
     /// Is the drawing finished
     var isDrawingFinished: Bool {
@@ -57,8 +53,8 @@ extension CanvasDrawingCurvePoints {
     func makeFirstCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
-        if iterator.array.count >= 3,
-           let points = iterator.getBezierCurveFirstPoints() {
+        if self.array.count >= 3,
+           let points = self.getBezierCurveFirstPoints() {
 
             let bezierCurvePoints = BezierCurve.makeFirstCurvePoints(
                 pointA: points.previousPoint.location,
@@ -84,7 +80,7 @@ extension CanvasDrawingCurvePoints {
     ) -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
-        let pointArray = iterator.getBezierCurveIntermediatePointsWithFixedRange4()
+        let pointArray = self.getBezierCurveIntermediatePointsWithFixedRange4()
 
         pointArray.enumerated().forEach { (index, points) in
             let shouldIncludeEndPoint = index == pointArray.count - 1 ? shouldIncludeEndPoint : false
@@ -112,8 +108,8 @@ extension CanvasDrawingCurvePoints {
     func makeLastCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
-        if iterator.array.count >= 3,
-           let points = iterator.getBezierCurveLastPoints() {
+        if self.array.count >= 3,
+           let points = self.getBezierCurveLastPoints() {
 
             let bezierCurvePoints = BezierCurve.makeLastCurvePoints(
                 pointA: points.previousPoint.location,

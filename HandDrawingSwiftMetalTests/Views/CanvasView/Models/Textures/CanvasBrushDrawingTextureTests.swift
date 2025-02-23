@@ -83,9 +83,9 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
         ]
 
         testCases.forEach { testCase in
-            let drawingCurvePoints = MockCanvasDrawingCurvePoints()
+            let drawingIterator = MockDrawingCurveIterator()
 
-            drawingCurvePoints.currentTouchPhase = testCase.key.touchPhase
+            drawingIterator.currentTouchPhase = testCase.key.touchPhase
 
             let publisherExpectation = XCTestExpectation()
             if !testCase.value.isDrawingFinished {
@@ -102,7 +102,7 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
             subject.setBlushColor(.red)
 
             subject.drawCurvePointsUsingSelectedTexture(
-                drawingCurvePoints: drawingCurvePoints,
+                drawingCurvePoints: drawingIterator,
                 selectedTexture: sourceTexture,
                 on: destinationTexture,
                 with: commandBuffer

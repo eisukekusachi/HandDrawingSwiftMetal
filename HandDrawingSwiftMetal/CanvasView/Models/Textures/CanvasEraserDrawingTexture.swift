@@ -57,7 +57,7 @@ extension CanvasEraserDrawingTexture {
     }
 
     func drawCurvePointsUsingSelectedTexture(
-        drawingCurvePoints: CanvasDrawingCurvePoints,
+        drawingCurvePoints: DrawingCurveIterator,
         selectedTexture: MTLTexture,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer

@@ -1,31 +1,37 @@
 //
-//  CanvasFingerDrawingCurvePoints.swift
+//  FingerDrawingCurvePoints.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
 import UIKit
-/// A class that saves points in real-time to an iterator, then generates a smooth curve based on those points
-/// - Parameters:
-///   - iterator: An iterator that stores the average position of `tmpIterator`
-///   - tmpIterator: An iterator that stores points
-///   - currentTouchPhase: Manages the touch phases from the beginning to the end of drawing a single line
-final class CanvasFingerDrawingCurvePoints: CanvasDrawingCurvePoints {
-    var iterator = Iterator<GrayscaleDotPoint>()
+
+/// An iterator for real-time finger drawing with `UITouch.Phase`
+final class FingerDrawingCurvePoints: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
 
     var currentTouchPhase: UITouch.Phase = .began
 
     private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
 
     private var isFirstCurveHasBeenCreated: Bool = false
+
+    override func reset() {
+        super.reset()
+
+        tmpIterator.reset()
+
+        currentTouchPhase = .began
+        isFirstCurveHasBeenCreated = false
+    }
+
 }
 
-extension CanvasFingerDrawingCurvePoints {
+extension FingerDrawingCurvePoints {
 
     /// Returns `true` if three elements are added to the array and `isFirstCurveHasBeenCreated` is `false`
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool {
-        let isFirstCurveToBeCreated = iterator.array.count >= 3 && !isFirstCurveHasBeenCreated
+        let isFirstCurveToBeCreated = self.array.count >= 3 && !isFirstCurveHasBeenCreated
 
         if isFirstCurveToBeCreated {
             isFirstCurveHasBeenCreated = true
@@ -41,10 +47,17 @@ extension CanvasFingerDrawingCurvePoints {
         tmpIterator.append(points)
         currentTouchPhase = touchPhase
 
-        // Add the first point.
-        if (tmpIterator.array.count != 0 && iterator.array.count == 0),
+        makeSmoothCurve()
+    }
+
+}
+
+extension FingerDrawingCurvePoints {
+
+    private func makeSmoothCurve() {
+        if (tmpIterator.array.count != 0 && self.array.count == 0),
            let firstElement = tmpIterator.array.first {
-            iterator.append(firstElement)
+            self.append(firstElement)
         }
 
         while let subsequence = tmpIterator.next(range: 2) {
@@ -52,21 +65,13 @@ extension CanvasFingerDrawingCurvePoints {
                 subsequence[0],
                 subsequence[1]
             )
-            iterator.append(dotPoint)
+            self.append(dotPoint)
         }
 
-        if touchPhase == .ended,
+        if currentTouchPhase == .ended,
             let lastElement = tmpIterator.array.last {
-            iterator.append(lastElement)
+            self.append(lastElement)
         }
-    }
-
-    func reset() {
-        tmpIterator.reset()
-        iterator.reset()
-
-        currentTouchPhase = .began
-        isFirstCurveHasBeenCreated = false
     }
 
 }
