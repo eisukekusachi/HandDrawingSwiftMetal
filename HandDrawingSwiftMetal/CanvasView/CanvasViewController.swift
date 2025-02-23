@@ -225,7 +225,7 @@ extension CanvasViewController {
                     toOffset: toOffset
                 )
             },
-            on: self
+            on: self.contentView
         )
     }
 
