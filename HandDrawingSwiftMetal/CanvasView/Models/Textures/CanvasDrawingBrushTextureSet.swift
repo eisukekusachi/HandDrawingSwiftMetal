@@ -1,5 +1,5 @@
 //
-//  CanvasEraserDrawingTexture.swift
+//  CanvasDrawingBrushTextureSet.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,8 +8,8 @@
 import MetalKit
 import Combine
 
-/// A class used for real-time drawing on a texture using an eraser
-final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
+/// A set of textures for real-time brush drawing
+final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
     var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
         canvasDrawFinishedSubject.eraseToAnyPublisher()
@@ -17,11 +17,10 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
 
-    private var eraserAlpha: Int = 255
+    private var blushColor: UIColor = .black
 
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
-    private var lineDrawnTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -29,7 +28,7 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init(renderer: MTLRendering) {
+    required init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -40,20 +39,19 @@ final class CanvasEraserDrawingTexture: CanvasDrawingTexture {
 
 }
 
-extension CanvasEraserDrawingTexture {
+extension CanvasDrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
-        self.lineDrawnTexture = MTLTextureCreator.makeTexture(label: "lineDrawnTexture", size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)
         commandBuffer.commit()
     }
 
-    func setEraserAlpha(_ alpha: Int) {
-        eraserAlpha = alpha
+    func setBlushColor(_ color: UIColor) {
+        blushColor = color
     }
 
     func drawCurvePointsUsingSelectedTexture(
@@ -64,7 +62,6 @@ extension CanvasEraserDrawingTexture {
     ) {
         drawCurvePointsOnDrawingTexture(
             points: drawingCurvePoints.makeCurvePointsFromIterator(),
-            sourceTexture: selectedTexture,
             with: commandBuffer
         )
 
@@ -80,8 +77,7 @@ extension CanvasEraserDrawingTexture {
         renderer.clearTextures(
             textures: [
                 drawingTexture,
-                grayscaleTexture,
-                lineDrawnTexture
+                grayscaleTexture
             ],
             with: commandBuffer
         )
@@ -89,18 +85,17 @@ extension CanvasEraserDrawingTexture {
 
 }
 
-extension CanvasEraserDrawingTexture {
+extension CanvasDrawingBrushTextureSet {
 
     private func drawCurvePointsOnDrawingTexture(
         points: [GrayscaleDotPoint],
-        sourceTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: points,
-                alpha: eraserAlpha,
-                textureSize: lineDrawnTexture.size,
+                alpha: blushColor.alpha,
+                textureSize: drawingTexture.size,
                 with: device
             ),
             onGrayscaleTexture: grayscaleTexture,
@@ -109,23 +104,8 @@ extension CanvasEraserDrawingTexture {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: (0, 0, 0),
-            on: lineDrawnTexture,
-            with: commandBuffer
-        )
-
-        renderer.drawTexture(
-            texture: sourceTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
+            color: blushColor.rgb,
             on: drawingTexture,
-            with: commandBuffer
-        )
-
-        renderer.subtractTextureWithEraseBlendMode(
-            texture: lineDrawnTexture,
-            buffers: flippedTextureBuffers,
-            from: drawingTexture,
             with: commandBuffer
         )
     }
@@ -133,38 +113,27 @@ extension CanvasEraserDrawingTexture {
     private func drawDrawingTextureWithSelectedTexture(
         selectedTexture: MTLTexture,
         shouldUpdateSelectedTexture: Bool,
-        on targetTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
-            texture: drawingTexture,
+            texture: selectedTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: targetTexture,
+            on: destinationTexture,
+            with: commandBuffer
+        )
+
+        renderer.mergeTexture(
+            texture: drawingTexture,
+            into: destinationTexture,
             with: commandBuffer
         )
 
         if shouldUpdateSelectedTexture {
-            renderer.drawTexture(
-                texture: selectedTexture,
-                buffers: flippedTextureBuffers,
-                withBackgroundColor: .clear,
-                on: drawingTexture,
-                with: commandBuffer
-            )
-
-            renderer.subtractTextureWithEraseBlendMode(
-                texture: lineDrawnTexture,
-                buffers: flippedTextureBuffers,
-                from: drawingTexture,
-                with: commandBuffer
-            )
-
-            renderer.drawTexture(
+            renderer.mergeTexture(
                 texture: drawingTexture,
-                buffers: flippedTextureBuffers,
-                withBackgroundColor: .clear,
-                on: selectedTexture,
+                into: selectedTexture,
                 with: commandBuffer
             )
 

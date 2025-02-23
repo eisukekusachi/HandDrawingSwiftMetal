@@ -71,11 +71,11 @@ final class CanvasViewModel {
     private var canvasView: CanvasViewProtocol?
 
     /// A protocol for real-time drawing on a texture
-    private var drawingTexture: CanvasDrawingTexture?
+    private var drawingTexture: CanvasDrawingTextureSet?
     /// A drawing texture with a brush
-    private let brushDrawingTexture = CanvasBrushDrawingTexture(renderer: MTLRenderer.shared)
+    private let brushDrawingTexture = CanvasDrawingBrushTextureSet()
     /// A drawing texture with an eraser
-    private let eraserDrawingTexture = CanvasEraserDrawingTexture(renderer: MTLRenderer.shared)
+    private let eraserDrawingTexture = CanvasDrawingEraserTextureSet()
 
     /// A texture that combines the texture of the currently selected layer and the `drawingTexture`
     private var currentTexture: MTLTexture?

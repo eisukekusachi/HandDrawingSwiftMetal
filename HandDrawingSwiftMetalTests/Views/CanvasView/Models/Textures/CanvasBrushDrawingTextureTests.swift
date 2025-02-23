@@ -1,5 +1,5 @@
 //
-//  CanvasBrushDrawingTextureTests.swift
+//  CanvasDrawingBrushTextureSetTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/01/25.
@@ -9,9 +9,9 @@ import XCTest
 import Combine
 @testable import HandDrawingSwiftMetal
 
-final class CanvasBrushDrawingTextureTests: XCTestCase {
+final class CanvasDrawingBrushTextureSetTests: XCTestCase {
 
-    var subject: CanvasBrushDrawingTexture!
+    var subject: CanvasDrawingBrushTextureSet!
 
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
@@ -27,7 +27,7 @@ final class CanvasBrushDrawingTextureTests: XCTestCase {
         commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"
 
-        subject = CanvasBrushDrawingTexture(renderer: renderer)
+        subject = CanvasDrawingBrushTextureSet(renderer: renderer)
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 

@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingTexture.swift
+//  CanvasDrawingTextureSet.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/10.
@@ -8,8 +8,8 @@
 import MetalKit
 import Combine
 
-/// A protocol used for real-time drawing on a texture
-protocol CanvasDrawingTexture {
+/// A protocol for a set of textures for real-time drawing
+protocol CanvasDrawingTextureSet {
 
     /// A publisher that emits `Void` when the drawing process is finished
     var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> { get }
