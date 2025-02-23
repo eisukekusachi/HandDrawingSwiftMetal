@@ -345,14 +345,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D4057FFC2D69972100DB8B4D /* Point */ = {
+		D4057FFC2D69972100DB8B4D /* Points */ = {
 			isa = PBXGroup;
 			children = (
 				D4057FFD2D69A11600DB8B4D /* DotPoint.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleDotPoint.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 			);
-			path = Point;
+			path = Points;
 			sourceTree = "<group>";
 		};
 		D40D975029DAB00100A82E6A /* CanvasView */ = {
@@ -643,7 +643,7 @@
 				D469A8722C56342700D10575 /* DrawingCurveIterator.swift */,
 				D469A8702C56340B00D10575 /* DrawingCurveFingerIterator.swift */,
 				D469A86E2C5633FC00D10575 /* DrawingCurvePencilIterator.swift */,
-				D4057FFC2D69972100DB8B4D /* Point */,
+				D4057FFC2D69972100DB8B4D /* Points */,
 				D40D975629DAB04700A82E6A /* Gestures */,
 				D464FCAF2D23E65300BCC565 /* Undo */,
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
