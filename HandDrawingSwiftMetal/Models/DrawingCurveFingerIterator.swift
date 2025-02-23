@@ -10,7 +10,7 @@ import UIKit
 /// An iterator for real-time finger drawing with `UITouch.Phase`
 final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
 
-    var currentTouchPhase: UITouch.Phase = .began
+    var touchPhase: UITouch.Phase = .began
 
     private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
 
@@ -21,7 +21,7 @@ final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
 
         tmpIterator.reset()
 
-        currentTouchPhase = .began
+        touchPhase = .began
         isFirstCurveHasBeenCreated = false
     }
 
@@ -45,7 +45,7 @@ extension DrawingCurveFingerIterator {
         touchPhase: UITouch.Phase
     ) {
         tmpIterator.append(points)
-        currentTouchPhase = touchPhase
+        self.touchPhase = touchPhase
 
         makeSmoothCurve()
     }
@@ -68,7 +68,7 @@ extension DrawingCurveFingerIterator {
             self.append(dotPoint)
         }
 
-        if currentTouchPhase == .ended,
+        if touchPhase == .ended,
             let lastElement = tmpIterator.array.last {
             self.append(lastElement)
         }

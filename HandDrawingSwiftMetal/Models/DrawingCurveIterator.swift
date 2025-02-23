@@ -10,7 +10,7 @@ import UIKit
 /// An iterator for real-time drawing with `UITouch.Phase`
 protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
 
-    var currentTouchPhase: UITouch.Phase { get }
+    var touchPhase: UITouch.Phase { get }
 
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool { get }
 
@@ -26,7 +26,7 @@ extension DrawingCurveIterator {
 
     /// Is the drawing finished
     var isDrawingFinished: Bool {
-        UITouch.isTouchCompleted(currentTouchPhase)
+        UITouch.isTouchCompleted(touchPhase)
     }
 
     var isCurrentlyDrawing: Bool {

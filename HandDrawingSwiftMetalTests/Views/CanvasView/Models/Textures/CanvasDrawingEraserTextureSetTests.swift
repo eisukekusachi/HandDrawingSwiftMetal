@@ -92,7 +92,7 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         testCases.forEach { testCase in
             let drawingIterator = MockDrawingCurveIterator()
 
-            drawingIterator.currentTouchPhase = testCase.key.touchPhase
+            drawingIterator.touchPhase = testCase.key.touchPhase
 
             let publisherExpectation = XCTestExpectation()
             if !testCase.value.isDrawingFinished {

@@ -10,14 +10,14 @@ import UIKit
 /// An iterator for real-time pencil drawing with `UITouch.Phase`
 final class DrawingCurvePencilIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
 
-    var currentTouchPhase: UITouch.Phase = .began
+    var touchPhase: UITouch.Phase = .began
 
     private var isFirstCurveHasBeenCreated: Bool = false
 
     override func reset() {
         super.reset()
 
-        currentTouchPhase = .began
+        touchPhase = .began
         isFirstCurveHasBeenCreated = false
     }
 
@@ -41,7 +41,7 @@ extension DrawingCurvePencilIterator {
         touchPhase: UITouch.Phase
     ) {
         self.append(points)
-        currentTouchPhase = touchPhase
+        self.touchPhase = touchPhase
     }
 
 }

@@ -13,7 +13,7 @@ final class MockDrawingCurveIterator: Iterator<GrayscaleDotPoint>, DrawingCurveI
 
     var iterator: Iterator<GrayscaleDotPoint> = .init()
 
-    var currentTouchPhase: UITouch.Phase = .began
+    var touchPhase: UITouch.Phase = .began
 
     var hasArrayThreeElementsButNoFirstCurveCreated: Bool = false
 
