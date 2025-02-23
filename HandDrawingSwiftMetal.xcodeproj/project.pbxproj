@@ -78,7 +78,7 @@
 		D464FCC02D23E73200BCC565 /* TextureLayersUndoOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCBF2D23E73200BCC565 /* TextureLayersUndoOperations.swift */; };
 		D464FCC42D23EC4300BCC565 /* UndoMoveDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCC32D23EC4300BCC565 /* UndoMoveDataTests.swift */; };
 		D464FCC62D23EC6F00BCC565 /* TextureLayerDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCC52D23EC6F00BCC565 /* TextureLayerDummy.swift */; };
-		D4650CA72D447E2A00E7D60E /* CanvasBrushDrawingTextureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA62D447E2A00E7D60E /* CanvasBrushDrawingTextureTests.swift */; };
+		D4650CA72D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */; };
 		D4650CAA2D447ED900E7D60E /* MockMTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */; };
 		D4650CAC2D447F8900E7D60E /* MockDrawingCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */; };
 		D4650CAE2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CAD2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift */; };
@@ -222,7 +222,7 @@
 		D464FCBF2D23E73200BCC565 /* TextureLayersUndoOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersUndoOperations.swift; sourceTree = "<group>"; };
 		D464FCC32D23EC4300BCC565 /* UndoMoveDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveDataTests.swift; sourceTree = "<group>"; };
 		D464FCC52D23EC6F00BCC565 /* TextureLayerDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerDummy.swift; sourceTree = "<group>"; };
-		D4650CA62D447E2A00E7D60E /* CanvasBrushDrawingTextureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasBrushDrawingTextureTests.swift; sourceTree = "<group>"; };
+		D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingBrushTextureSetTests.swift; sourceTree = "<group>"; };
 		D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockMTLRenderer.swift; sourceTree = "<group>"; };
 		D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDrawingCurveIterator.swift; sourceTree = "<group>"; };
 		D4650CAD2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingEraserTextureSetTests.swift; sourceTree = "<group>"; };
@@ -345,16 +345,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D4057FFC2D69972100DB8B4D /* Points */ = {
+		D4057FFC2D69972100DB8B4D /* Point */ = {
 			isa = PBXGroup;
 			children = (
-				D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */,
 				D4057FFD2D69A11600DB8B4D /* DotPoint.swift */,
 				D469A85E2C5620FB00D10575 /* GrayscaleDotPoint.swift */,
-				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 			);
-			path = Points;
+			path = Point;
 			sourceTree = "<group>";
 		};
 		D40D975029DAB00100A82E6A /* CanvasView */ = {
@@ -403,6 +401,7 @@
 				D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */,
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
 				D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */,
+				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 			);
 			path = Gestures;
 			sourceTree = "<group>";
@@ -552,7 +551,7 @@
 		D4650CA32D447DD700E7D60E /* Textures */ = {
 			isa = PBXGroup;
 			children = (
-				D4650CA62D447E2A00E7D60E /* CanvasBrushDrawingTextureTests.swift */,
+				D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */,
 				D4650CAD2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift */,
 			);
 			path = Textures;
@@ -640,10 +639,11 @@
 		D4784EF42C848A0A00A02E11 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */,
 				D469A8722C56342700D10575 /* DrawingCurveIterator.swift */,
 				D469A8702C56340B00D10575 /* FingerDrawingCurvePoints.swift */,
 				D469A86E2C5633FC00D10575 /* PencilDrawingCurveIterator.swift */,
-				D4057FFC2D69972100DB8B4D /* Points */,
+				D4057FFC2D69972100DB8B4D /* Point */,
 				D40D975629DAB04700A82E6A /* Gestures */,
 				D464FCAF2D23E65300BCC565 /* Undo */,
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
@@ -1042,7 +1042,7 @@
 				D4650CAA2D447ED900E7D60E /* MockMTLRenderer.swift in Sources */,
 				D4517A072CC369FD0047C274 /* GrayscaleDotPointDummy.swift in Sources */,
 				D400A27C2C8BEA8800275138 /* PencilDrawingCurveIteratorTests.swift in Sources */,
-				D4650CA72D447E2A00E7D60E /* CanvasBrushDrawingTextureTests.swift in Sources */,
+				D4650CA72D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift in Sources */,
 				D4650CAC2D447F8900E7D60E /* MockDrawingCurveIterator.swift in Sources */,
 				D400A2762C8BEA5100275138 /* TouchPointDummy.swift in Sources */,
 				D468FC4D2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift in Sources */,
