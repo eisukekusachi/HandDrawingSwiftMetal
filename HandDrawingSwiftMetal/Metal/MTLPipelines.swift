@@ -13,6 +13,7 @@ final class MTLPipelines {
     private(set) var drawTexture: MTLRenderPipelineState
     private(set) var eraseTexture: MTLRenderPipelineState
     private(set) var colorize: MTLComputePipelineState
+    private(set) var colorizeWithMask: MTLComputePipelineState
     private(set) var mergeTextures: MTLComputePipelineState
     private(set) var fillColor: MTLComputePipelineState
 
@@ -99,6 +100,13 @@ final class MTLPipelines {
             label: "Colorize",
             shaderName: "colorize_grayscale_texture"
         )
+        self.colorizeWithMask = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Colorize",
+            shaderName: "colorize_grayscale_texture_mask"
+        )
+
         self.mergeTextures = makeComputePipeline(
             device: device,
             library: library,

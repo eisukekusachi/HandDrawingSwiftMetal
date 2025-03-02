@@ -205,6 +205,16 @@ final class CanvasViewModel {
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
+        if let image = UIImage(named: "CheckeredPattern"),
+           let textureImage = MTLTextureCreator.makeTexture(
+            image: image,
+            with: device
+           ) {
+            drawingBrushTextureSet.drawImageOnMaskTexture(
+                texture: textureImage
+            )
+        }
+
         updateCanvasWithTextureLayers(allLayerUpdates: true)
     }
 

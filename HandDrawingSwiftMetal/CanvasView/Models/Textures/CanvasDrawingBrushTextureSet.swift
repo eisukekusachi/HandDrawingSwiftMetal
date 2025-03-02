@@ -21,6 +21,7 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
+    private var maskTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -41,9 +42,24 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
 extension CanvasDrawingBrushTextureSet {
 
+    func drawImageOnMaskTexture(
+        texture: MTLTexture
+    ) {
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        MTLRenderer.shared.drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: maskTexture,
+            with: commandBuffer
+        )
+        commandBuffer.commit()
+    }
+
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
+        self.maskTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)
@@ -106,6 +122,7 @@ extension CanvasDrawingBrushTextureSet {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
+            maskTexture: maskTexture,
             color: blushColor.rgb,
             on: drawingTexture,
             with: commandBuffer
