@@ -334,41 +334,6 @@ final class MTLRenderer: MTLRendering {
         encoder?.endEncoding()
     }
 
-    func drawTexture(
-        grayscaleTexture: MTLTexture,
-        maskTexture: MTLTexture,
-        color rgb: (Int, Int, Int),
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / MTLRenderer.threadGroupLength),
-            height: Int(grayscaleTexture.height / MTLRenderer.threadGroupLength),
-            depth: 1
-        )
-        let threadGroupCount = MTLSize(
-            width: (grayscaleTexture.width  + threadGroupSize.width - 1) / threadGroupSize.width,
-            height: (grayscaleTexture.height + threadGroupSize.height - 1) / threadGroupSize.height,
-            depth: 1
-        )
-
-        var rgba: [Float] = [
-            Float(rgb.0) / 255.0,
-            Float(rgb.1) / 255.0,
-            Float(rgb.2) / 255.0,
-            1.0
-        ]
-
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder?.setComputePipelineState(pipelines.colorizeWithMask)
-        encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
-        encoder?.setTexture(grayscaleTexture, index: 0)
-        encoder?.setTexture(maskTexture, index: 1)
-        encoder?.setTexture(destinationTexture, index: 2)
-        encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
-        encoder?.endEncoding()
-    }
-
     func fillTexture(
         texture: MTLTexture,
         withRGB rgb: (Int, Int, Int),

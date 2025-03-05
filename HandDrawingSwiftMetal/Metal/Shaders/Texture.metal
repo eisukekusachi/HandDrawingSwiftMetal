@@ -31,28 +31,6 @@ fragment float4 draw_texture_fragment(TextureData data [[ stage_in ]],
     return float4(r, g, b, a);
 }
 
-kernel void colorize_grayscale_texture_mask(uint2 gid [[ thread_position_in_grid ]],
-                                            constant float4 &rgba [[ buffer(0) ]],
-                                            texture2d<float, access::read> srcTexture [[ texture(0) ]],
-                                            texture2d<float, access::read> maskingTexture [[ texture(1) ]],
-                                            texture2d<float, access::write> resultTexture [[ texture(2) ]]
-                                            ) {
-    float4 src = srcTexture.read(gid);
-    float4 maskingTexturePixel = maskingTexture.read(gid);
-
-    // The grayscale value is used as the alpha value. The array index can be any of 0 to 2.
-    float a = src[0];
-
-    if (maskingTexturePixel[0] == 0.0 && maskingTexturePixel[1] == 0.0 && maskingTexturePixel[2] == 0.0) {
-        a = 0.0;
-    }
-
-    float r = rgba[0] * a;
-    float g = rgba[1] * a;
-    float b = rgba[2] * a;
-
-    resultTexture.write(float4(r, g, b, a), gid);
-}
 kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
                                        constant float4 &rgba [[ buffer(0) ]],
                                        texture2d<float, access::read> srcTexture [[ texture(0) ]],
