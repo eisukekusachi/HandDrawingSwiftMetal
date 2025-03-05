@@ -92,6 +92,40 @@ kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
 
     resultTexture.write(float4(r, g, b, a), gid);
 }
+
+kernel void merge_textures_using_masking(uint2 gid [[ thread_position_in_grid ]],
+                                         texture2d<float, access::read> srcTexture [[ texture(0) ]],
+                                         texture2d<float, access::read> maskingTexture [[ texture(1) ]],
+                                         texture2d<float, access::read> dstTexture [[ texture(2) ]],
+                                         texture2d<float, access::write> resultTexture [[ texture(3) ]],
+                                         constant float &alpha [[ buffer(3) ]]
+                                         ) {
+    float4 src = srcTexture.read(gid);
+    float4 dst = dstTexture.read(gid);
+    float4 maskingTexturePixel = maskingTexture.read(gid);
+
+    float srcAlpha = alpha;
+
+    if (maskingTexturePixel[0] == 0.0 && maskingTexturePixel[1] == 0.0 && maskingTexturePixel[2] == 0.0) {
+        srcAlpha = 0.0;
+    }
+
+    float srcA = src[3] * srcAlpha;
+    float srcB = src[2] * srcAlpha;
+    float srcG = src[1] * srcAlpha;
+    float srcR = src[0] * srcAlpha;
+    float dstA = dst[3];
+    float dstB = dst[2];
+    float dstG = dst[1];
+    float dstR = dst[0];
+    float r = srcR + dstR * (1 - srcA);
+    float g = srcG + dstG * (1 - srcA);
+    float b = srcB + dstB * (1 - srcA);
+    float a = srcA + dstA * (1 - srcA);
+
+    resultTexture.write(float4(r, g, b, a), gid);
+}
+
 kernel void add_color_to_texture(uint2 gid [[ thread_position_in_grid ]],
                                  constant float4 &color [[ buffer(0) ]],
                                  texture2d<float, access::write> resultTexture [[ texture(0) ]]) {

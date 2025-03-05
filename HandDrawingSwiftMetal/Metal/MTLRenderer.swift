@@ -30,14 +30,6 @@ protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
-    func drawTexture(
-        grayscaleTexture: MTLTexture,
-        maskTexture: MTLTexture,
-        color rgb: (Int, Int, Int),
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
     func subtractTextureWithEraseBlendMode(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
@@ -54,6 +46,14 @@ protocol MTLRendering {
     func mergeTexture(
         texture: MTLTexture,
         alpha: Int,
+        into destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    )
+
+    func mergeTexture(
+        texture: MTLTexture,
+        alpha: Int,
+        maskTexture: MTLTexture,
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
@@ -258,6 +258,44 @@ final class MTLRenderer: MTLRendering {
         encoder?.setTexture(texture, index: 0)
         encoder?.setTexture(destinationTexture, index: 1)
         encoder?.setTexture(destinationTexture, index: 2)
+        encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
+        encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
+        encoder?.endEncoding()
+    }
+
+    func mergeTexture(
+        texture: MTLTexture,
+        alpha: Int = 255,
+        maskTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            texture.size == destinationTexture.size
+        else {
+            Logger.standard.error("Texture size mismatch")
+            return
+        }
+
+        let threadGroupSize = MTLSize(
+            width: Int(destinationTexture.width / MTLRenderer.threadGroupLength),
+            height: Int(destinationTexture.height / MTLRenderer.threadGroupLength),
+            depth: 1
+        )
+        let threadGroupCount = MTLSize(
+            width: (destinationTexture.width  + threadGroupSize.width - 1) / threadGroupSize.width,
+            height: (destinationTexture.height + threadGroupSize.height - 1) / threadGroupSize.height,
+            depth: 1
+        )
+
+        var alpha: Float = max(0.0, min(Float(alpha) / 255.0, 1.0))
+
+        let encoder = commandBuffer.makeComputeCommandEncoder()
+        encoder?.setComputePipelineState(pipelines.mergeTexturesUsingMasking)
+        encoder?.setTexture(texture, index: 0)
+        encoder?.setTexture(maskTexture, index: 1)
+        encoder?.setTexture(destinationTexture, index: 2)
+        encoder?.setTexture(destinationTexture, index: 3)
         encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()

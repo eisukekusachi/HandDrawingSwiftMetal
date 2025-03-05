@@ -59,7 +59,7 @@ extension CanvasDrawingBrushTextureSet {
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
-        self.maskTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+        self.maskTexture = MTLTextureCreator.makeTexture(label: "maskTexture", size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)
@@ -122,7 +122,6 @@ extension CanvasDrawingBrushTextureSet {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            maskTexture: maskTexture,
             color: blushColor.rgb,
             on: drawingTexture,
             with: commandBuffer
@@ -146,6 +145,8 @@ extension CanvasDrawingBrushTextureSet {
 
         renderer.mergeTexture(
             texture: drawingTexture,
+            alpha: 255,
+            maskTexture: maskTexture,
             into: destinationTexture,
             with: commandBuffer
         )
@@ -153,6 +154,8 @@ extension CanvasDrawingBrushTextureSet {
         if shouldUpdateSelectedTexture {
             renderer.mergeTexture(
                 texture: drawingTexture,
+                alpha: 255,
+                maskTexture: maskTexture,
                 into: backgroundTexture,
                 with: commandBuffer
             )
