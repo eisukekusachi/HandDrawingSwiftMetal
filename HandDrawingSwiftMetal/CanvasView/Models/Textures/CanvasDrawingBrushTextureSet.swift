@@ -45,10 +45,18 @@ extension CanvasDrawingBrushTextureSet {
     func drawImageOnMaskTexture(
         texture: MTLTexture
     ) {
+        guard let textureBuffer = MTLBuffers.makeTextureBuffers(
+            vertices: MTLTextureVertices.makeTextureVertices(
+                sourceSize: texture.size,
+                destinationSize: drawingTexture.size
+            ),
+            with: device
+        ) else { return }
+
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         MTLRenderer.shared.drawTexture(
             texture: texture,
-            buffers: flippedTextureBuffers,
+            buffers: textureBuffer,
             withBackgroundColor: .clear,
             on: maskTexture,
             with: commandBuffer

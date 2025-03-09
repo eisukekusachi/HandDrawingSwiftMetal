@@ -205,7 +205,7 @@ final class CanvasViewModel {
         currentTexture = MTLTextureCreator.makeTexture(size: size, with: device)
         canvasTexture = MTLTextureCreator.makeTexture(size: size, with: device)
 
-        if let image = UIImage(named: "CheckeredPattern"),
+        if let image = UIImage(named: "Lenna"),
            let textureImage = MTLTextureCreator.makeTexture(
             image: image,
             with: device

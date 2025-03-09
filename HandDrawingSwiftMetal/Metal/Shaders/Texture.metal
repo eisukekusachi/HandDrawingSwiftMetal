@@ -84,7 +84,7 @@ kernel void merge_textures_using_masking(uint2 gid [[ thread_position_in_grid ]]
 
     float srcAlpha = alpha;
 
-    if (maskingTexturePixel[0] == 0.0 && maskingTexturePixel[1] == 0.0 && maskingTexturePixel[2] == 0.0) {
+    if ((maskingTexturePixel[0] > 0.8 && maskingTexturePixel[1] > 0.8 && maskingTexturePixel[2] > 0.8) || maskingTexturePixel[3] == 0.0) {
         srcAlpha = 0.0;
     }
 
