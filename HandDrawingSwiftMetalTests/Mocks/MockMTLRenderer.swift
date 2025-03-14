@@ -172,6 +172,30 @@ final class MockMTLRenderer: MTLRendering {
         )
     }
 
+    func mergeTexture(
+        texture: MTLTexture,
+        alpha: Int = 255,
+        maskTexture: MTLTexture,
+        into destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        let sourceTexture = texture.label ?? ""
+        let maskTextureLabel = maskTexture.label ?? ""
+        let destinationTextureLabel = destinationTexture.label ?? ""
+        let commandBufferLabel = commandBuffer.label ?? ""
+        callHistory.append(
+            [
+                "mergeTexture(",
+                "texture: \(sourceTexture), ",
+                "alpha: \(alpha), ",
+                "maskTexture: \(maskTextureLabel), ",
+                "into: \(destinationTextureLabel), ",
+                "with: \(commandBufferLabel)",
+                ")"
+            ].joined()
+        )
+    }
+
     func clearTextures(
         textures: [(any MTLTexture)?],
         with commandBuffer: any MTLCommandBuffer

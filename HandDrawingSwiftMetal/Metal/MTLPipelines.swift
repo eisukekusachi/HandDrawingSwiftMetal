@@ -14,6 +14,7 @@ final class MTLPipelines {
     private(set) var eraseTexture: MTLRenderPipelineState
     private(set) var colorize: MTLComputePipelineState
     private(set) var mergeTextures: MTLComputePipelineState
+    private(set) var mergeTexturesUsingMasking: MTLComputePipelineState
     private(set) var fillColor: MTLComputePipelineState
 
     init() {
@@ -99,12 +100,21 @@ final class MTLPipelines {
             label: "Colorize",
             shaderName: "colorize_grayscale_texture"
         )
+
         self.mergeTextures = makeComputePipeline(
             device: device,
             library: library,
             label: "Marge textures",
             shaderName: "merge_textures"
         )
+
+        self.mergeTexturesUsingMasking = makeComputePipeline(
+            device: device,
+            library: library,
+            label: "Marge textures using masking",
+            shaderName: "merge_textures_using_masking"
+        )
+
         self.fillColor = makeComputePipeline(
             device: device,
             library: library,

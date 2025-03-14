@@ -65,13 +65,13 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
         // `backgroundTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
         let drawingTexture: [String] = [
             "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
-            "mergeTexture(texture: drawingTexture, into: destinationTexture, with: commandBuffer)"
+            "mergeTexture(texture: drawingTexture, alpha: 255, maskTexture: maskTexture, into: destinationTexture, with: commandBuffer)"
         ]
 
         // Merge `drawingTexture` on `backgroundTexture`.
         // Clear the textures used for drawing to prepare for the next drawing.
         let drawingCompletionProcess: [String] = [
-            "mergeTexture(texture: drawingTexture, into: backgroundTexture, with: commandBuffer)",
+            "mergeTexture(texture: drawingTexture, alpha: 255, maskTexture: maskTexture, into: backgroundTexture, with: commandBuffer)",
             "clearTextures(textures: [drawingTexture, grayscaleTexture], with: commandBuffer)"
         ]
 

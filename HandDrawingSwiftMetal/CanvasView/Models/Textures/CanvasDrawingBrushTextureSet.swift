@@ -21,6 +21,7 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
+    private var maskTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -41,9 +42,32 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
 extension CanvasDrawingBrushTextureSet {
 
+    func drawImageOnMaskTexture(
+        texture: MTLTexture
+    ) {
+        guard let textureBuffer = MTLBuffers.makeTextureBuffers(
+            vertices: MTLTextureVertices.makeTextureVertices(
+                sourceSize: texture.size,
+                destinationSize: drawingTexture.size
+            ),
+            with: device
+        ) else { return }
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        MTLRenderer.shared.drawTexture(
+            texture: texture,
+            buffers: textureBuffer,
+            withBackgroundColor: .clear,
+            on: maskTexture,
+            with: commandBuffer
+        )
+        commandBuffer.commit()
+    }
+
     func initTextures(_ textureSize: CGSize) {
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
+        self.maskTexture = MTLTextureCreator.makeTexture(label: "maskTexture", size: textureSize, with: device)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearDrawingTextures(with: commandBuffer)
@@ -129,6 +153,8 @@ extension CanvasDrawingBrushTextureSet {
 
         renderer.mergeTexture(
             texture: drawingTexture,
+            alpha: 255,
+            maskTexture: maskTexture,
             into: destinationTexture,
             with: commandBuffer
         )
@@ -136,6 +162,8 @@ extension CanvasDrawingBrushTextureSet {
         if shouldUpdateSelectedTexture {
             renderer.mergeTexture(
                 texture: drawingTexture,
+                alpha: 255,
+                maskTexture: maskTexture,
                 into: backgroundTexture,
                 with: commandBuffer
             )

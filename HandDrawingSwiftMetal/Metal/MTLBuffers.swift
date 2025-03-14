@@ -88,6 +88,31 @@ enum MTLBuffers {
         )
     }
 
+    static func makeTextureBuffers(
+        vertices: MTLTextureVertices = MTLTextureVertices(),
+        texCoords: MTLTextureCoordinates = .screenTextureCoordinates,
+        indices: MTLTextureIndices = MTLTextureIndices(),
+        with device: MTLDevice?
+    ) -> MTLTextureBuffers? {
+        let vertices = vertices.getValues()
+        let texCoords = texCoords.getValues()
+        let indices = indices.getValues()
+
+        guard
+            let device,
+            let vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size),
+            let texCoordsBuffer = device.makeBuffer(bytes: texCoords, length: texCoords.count * MemoryLayout<Float>.size),
+            let indexBuffer = device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size)
+        else { return nil }
+
+        return .init(
+            vertexBuffer: vertexBuffer,
+            texCoordsBuffer: texCoordsBuffer,
+            indexBuffer: indexBuffer,
+            indicesCount: indices.count
+        )
+    }
+
     static func makeCanvasTextureBuffers(
         matrix: CGAffineTransform?,
         frameSize: CGSize,

@@ -140,6 +140,37 @@ struct MTLTextureVertices {
     }
 
     static func makeTextureVertices(
+        sourceSize: CGSize,
+        destinationSize: CGSize
+    ) -> Self {
+
+        let ratio = min(destinationSize.width / sourceSize.width, destinationSize.height / sourceSize.height)
+        let scaledSourceSize = CGSize(
+            width: sourceSize.width * ratio,
+            height: sourceSize.height * ratio
+        )
+
+        return .init(
+            LT: .init(
+                x: (scaledSourceSize.width / destinationSize.width) * -1.0,
+                y: (scaledSourceSize.height / destinationSize.height) * -1.0
+            ),
+            RT: .init(
+                x: (scaledSourceSize.width / destinationSize.width) * 1.0,
+                y: (scaledSourceSize.height / destinationSize.height) * -1.0
+            ),
+            RB: .init(
+                x: (scaledSourceSize.width / destinationSize.width) * 1.0,
+                y: (scaledSourceSize.height / destinationSize.height) * 1.0
+            ),
+            LB: .init(
+                x: (scaledSourceSize.width / destinationSize.width) * -1.0,
+                y: (scaledSourceSize.height / destinationSize.height) * 1.0
+            )
+        )
+    }
+
+    static func makeTextureVertices(
         sourceFrame: CGRect,
         destinationSize: CGSize
     ) -> Self {
