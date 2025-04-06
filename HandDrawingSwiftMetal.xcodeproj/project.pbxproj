@@ -105,6 +105,8 @@
 		D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */; };
 		D4837AEE2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AED2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
+		D48F763B2DA209190001C80F /* TextureLayerEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763A2DA209190001C80F /* TextureLayerEntity.swift */; };
+		D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */; };
 		D4934F422ADA36C500C52B76 /* CanvasDrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
@@ -249,6 +251,8 @@
 		D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchExtensions.swift; sourceTree = "<group>"; };
 		D4837AED2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurveFingerIteratorTests.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		D48F763A2DA209190001C80F /* TextureLayerEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerEntity.swift; sourceTree = "<group>"; };
+		D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModel.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingToolType.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
@@ -442,6 +446,7 @@
 				D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */,
 				D42F40A02B45052B00B32707 /* ImageLayerEntity.swift */,
 				D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */,
+				D48F763A2DA209190001C80F /* TextureLayerEntity.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -502,6 +507,7 @@
 			children = (
 				D464FCB82D23E6E200BCC565 /* Undo */,
 				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
+				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */,
 				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
 			);
@@ -959,6 +965,7 @@
 				D469A86F2C5633FC00D10575 /* DrawingCurvePencilIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */,
+				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
 				D481A42F2C5E1D6600279C91 /* CanvasInputDeviceType.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,
@@ -1009,6 +1016,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4057FFE2D69A11600DB8B4D /* DotPoint.swift in Sources */,
 				D46C036D2C96B22D001658C5 /* MTLCommandManager.swift in Sources */,
+				D48F763B2DA209190001C80F /* TextureLayerEntity.swift in Sources */,
 				D40D979329DAB0D700A82E6A /* Calculate.swift in Sources */,
 				D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */,
 				D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */,
