@@ -87,16 +87,16 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private var textureRepository: TextureRepository?
+    private var textureRepository: TextureRepository!
 
-    private var localRepository: LocalRepository?
+    private var localRepository: LocalRepository!
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository? = SingletonTextureInMemoryRepository.shared,
+        textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.textureRepository = textureRepository
@@ -511,11 +511,6 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func loadFile(from filePath: String) {
-        guard
-            let localRepository,
-            let textureRepository
-        else { return }
-
         localRepository.loadDataFromDocuments(
             sourceURL: URL.documents.appendingPathComponent(filePath),
             textureRepository: textureRepository
@@ -536,11 +531,6 @@ extension CanvasViewModel {
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
-        guard
-            let localRepository,
-            let textureRepository
-        else { return }
-
         localRepository.saveDataToDocuments(
             renderTexture: canvasTexture,
             textureLayers: textureLayers,
