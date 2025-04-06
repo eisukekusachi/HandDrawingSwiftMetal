@@ -12,6 +12,13 @@ final class DocumentsLocalRepository: LocalRepository {
 
     private static let thumbnailName: String = "thumbnail.png"
 
+    private var saveDataTask: Task<Void, Error>?
+    private var loadDataTask: Task<Void, Error>?
+
+    deinit {
+        saveDataTask?.cancel()
+        loadDataTask?.cancel()
+    }
     func saveDataToDocuments(
         renderTexture: MTLTexture,
         textureLayers: TextureLayers,
@@ -19,8 +26,9 @@ final class DocumentsLocalRepository: LocalRepository {
         drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-        Future<URL, Error> { promise in
-            Task {
+        Future<URL, Error> { [weak self] promise in
+            self?.saveDataTask?.cancel()
+            self?.saveDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
                     promise(.success(URL.tmpFolderURL))
@@ -76,8 +84,9 @@ final class DocumentsLocalRepository: LocalRepository {
         sourceURL: URL,
         textureRepository: any TextureRepository
     ) -> AnyPublisher<CanvasModel, Error> {
-        Future<CanvasEntity, Error> { promise in
-            Task {
+        Future<CanvasEntity, Error> { [weak self] promise in
+            self?.loadDataTask?.cancel()
+            self?.loadDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
                     try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
