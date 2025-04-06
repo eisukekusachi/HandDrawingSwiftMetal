@@ -397,4 +397,10 @@ extension TextureLayers {
         }
     }
 
+    static func getReversedIndex(index: Int, layerCount: Int) -> Int {
+        // In drawing applications, textures are stacked on top of each other,
+        // so TextureLayers are arranged in the reverse order of SwiftUI's List.
+        (layerCount - 1) - index
+    }
+
 }
