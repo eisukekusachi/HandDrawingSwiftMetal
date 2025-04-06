@@ -21,6 +21,10 @@ final class DocumentsLocalRepository: LocalRepository {
         drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+        /*
         Future<Void, Error> { promise in
             Task {
                 do {
@@ -71,11 +75,16 @@ final class DocumentsLocalRepository: LocalRepository {
             try? FileManager.default.removeItem(at: URL.tmpFolderURL)
         })
         .eraseToAnyPublisher()
+         */
     }
 
     func loadDataFromDocuments(
         sourceURL: URL
     ) -> AnyPublisher<CanvasModel, Error> {
+        return Just(.init())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+        /*
         Future<CanvasModel, Error> { promise in
             Task {
                 defer {
@@ -103,6 +112,7 @@ final class DocumentsLocalRepository: LocalRepository {
             }
         }
         .eraseToAnyPublisher()
+        */
     }
 
 }
@@ -128,6 +138,7 @@ extension DocumentsLocalRepository {
         .eraseToAnyPublisher()
     }
 
+    /*
     private func exportLayerData(
         layers: [TextureLayer],
         to url: URL
@@ -156,5 +167,5 @@ extension DocumentsLocalRepository {
         }
         .eraseToAnyPublisher()
     }
-
+    */
 }

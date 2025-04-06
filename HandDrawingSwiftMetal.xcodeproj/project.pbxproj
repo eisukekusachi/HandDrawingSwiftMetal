@@ -114,7 +114,6 @@
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4B4AAA02B3FBEA700298CFB /* MTLTextureCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */; };
-		D4B4AAA22B3FF44100298CFB /* TextureLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */; };
 		D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */; };
 		D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */; };
 		D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */; };
@@ -263,7 +262,6 @@
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureCreator.swift; sourceTree = "<group>"; };
-		D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayer.swift; sourceTree = "<group>"; };
 		D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerInputGestureRecognizer.swift; sourceTree = "<group>"; };
 		D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilInputGestureRecognizer.swift; sourceTree = "<group>"; };
@@ -518,7 +516,6 @@
 		D463A5F02C6E346500D102AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D4B4AAA12B3FF44100298CFB /* TextureLayer.swift */,
 				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */,
 				D46A30402BF841270057DB69 /* TextureLayerProtocol.swift */,
@@ -995,7 +992,6 @@
 				D40D976B29DAB09D00A82E6A /* CanvasEraserDrawingTool.swift in Sources */,
 				D4C8EE9E2B255108005947EC /* CanvasViewModel.swift in Sources */,
 				D48F76472DA2149B0001C80F /* CanvasRenderer.swift in Sources */,
-				D4B4AAA22B3FF44100298CFB /* TextureLayer.swift in Sources */,
 				D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,

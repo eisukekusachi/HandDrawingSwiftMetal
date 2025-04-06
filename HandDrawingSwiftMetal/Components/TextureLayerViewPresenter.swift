@@ -10,22 +10,22 @@ import SwiftUI
 
 final class TextureLayerViewPresenter {
 
-    private var layerViewController: UIHostingController<TextureLayerView<TextureLayer>>?
-    private var layerView: TextureLayerView<TextureLayer>?
+    private var layerViewController: UIHostingController<TextureLayerView>!
+    private var layerView: TextureLayerView!
 
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
         textureLayers: TextureLayers,
         targetView: UIView,
-        didTapLayer: @escaping (TextureLayer) -> Void,
+        didTapLayer: @escaping (TextureLayerModel) -> Void,
         didTapAddButton: @escaping () -> Void,
         didTapRemoveButton: @escaping () -> Void,
-        didTapVisibility: @escaping (TextureLayer, Bool) -> Void,
-        didStartChangingAlpha: @escaping (TextureLayer) -> Void,
-        didChangeAlpha: @escaping (TextureLayer, Int) -> Void,
-        didFinishChangingAlpha: @escaping (TextureLayer) -> Void,
-        didEditTitle: @escaping (TextureLayer, String) -> Void,
+        didTapVisibility: @escaping (TextureLayerModel, Bool) -> Void,
+        didStartChangingAlpha: @escaping (TextureLayerModel) -> Void,
+        didChangeAlpha: @escaping (TextureLayerModel, Int) -> Void,
+        didFinishChangingAlpha: @escaping (TextureLayerModel) -> Void,
+        didEditTitle: @escaping (TextureLayerModel, String) -> Void,
         didMove: @escaping (IndexSet, Int) -> Void,
         on destinationView: UIView
     ) {
@@ -64,10 +64,10 @@ final class TextureLayerViewPresenter {
         guard let layerView else { return }
 
         layerViewController = UIHostingController<TextureLayerView>(rootView: layerView)
-        destinationView.addSubview(layerViewController!.view)
+        destinationView.addSubview(layerViewController.view)
 
-        layerViewController?.view.backgroundColor = .clear
-        layerViewController?.view.isHidden = true
+        layerViewController.view.backgroundColor = .clear
+        layerViewController.view.isHidden = true
 
         addConstraints(
             targetView: targetView,
@@ -76,7 +76,7 @@ final class TextureLayerViewPresenter {
         )
     }
     func showView(_ isShown: Bool) {
-        layerViewController?.view.isHidden = !isShown
+        layerViewController.view.isHidden = !isShown
     }
 
     private func addConstraints(
@@ -87,14 +87,14 @@ final class TextureLayerViewPresenter {
         let viewWidth: CGFloat = 300.0
         let viewHeight: CGFloat = 300.0
 
-        layerViewController?.view.translatesAutoresizingMaskIntoConstraints = false
+        layerViewController.view.translatesAutoresizingMaskIntoConstraints = false
 
-        layerViewController?.view.topAnchor.constraint(equalTo: targetView.bottomAnchor).isActive = true
-        layerViewController?.view.centerXAnchor.constraint(equalTo: targetView.centerXAnchor).isActive = true
-        layerViewController?.view.widthAnchor.constraint(equalToConstant: viewWidth).isActive = true
-        layerViewController?.view.heightAnchor.constraint(equalToConstant: viewHeight).isActive = true
+        layerViewController.view.topAnchor.constraint(equalTo: targetView.bottomAnchor).isActive = true
+        layerViewController.view.centerXAnchor.constraint(equalTo: targetView.centerXAnchor).isActive = true
+        layerViewController.view.widthAnchor.constraint(equalToConstant: viewWidth).isActive = true
+        layerViewController.view.heightAnchor.constraint(equalToConstant: viewHeight).isActive = true
 
-        layerViewController?.view.setNeedsLayout()
+        layerViewController.view.setNeedsLayout()
 
         let targetViewCenterX = targetView.convert(targetView.bounds, to: destinationView).midX
         let layerViewX = targetViewCenterX - viewWidth * 0.5

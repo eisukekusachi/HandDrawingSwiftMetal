@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
-import MetalKit
 import Combine
+import MetalKit
 
 /// A set of textures for real-time brush drawing
 final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
@@ -15,10 +15,15 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
         canvasDrawFinishedSubject.eraseToAnyPublisher()
     }
 
+    var drawingSelectedTexture: MTLTexture {
+        resultTexture
+    }
+
     private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
 
     private var blushColor: UIColor = .black
 
+    private var resultTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
 
@@ -42,12 +47,13 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 extension CanvasDrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
+        self.resultTexture = MTLTextureCreator.makeTexture(label: "resultTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(with: commandBuffer)
-        commandBuffer.commit()
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        temporaryRenderCommandBuffer.commit()
     }
 
     func setBlushColor(_ color: UIColor) {
@@ -56,11 +62,12 @@ extension CanvasDrawingBrushTextureSet {
 
     func drawCurvePoints(
         drawingCurveIterator: DrawingCurveIterator,
-        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundTexture backgroundTexture: MTLTexture?,
         withBackgroundColor backgroundColor: UIColor = .clear,
-        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let backgroundTexture else { return }
+
         drawCurvePointsOnDrawingTexture(
             points: drawingCurveIterator.latestCurvePoints,
             with: commandBuffer
@@ -70,7 +77,6 @@ extension CanvasDrawingBrushTextureSet {
             backgroundTexture: backgroundTexture,
             backgroundColor: backgroundColor,
             shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
-            on: destinationTexture,
             with: commandBuffer
         )
     }
@@ -116,20 +122,19 @@ extension CanvasDrawingBrushTextureSet {
         backgroundTexture: MTLTexture,
         backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
-        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
             texture: backgroundTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: backgroundColor,
-            on: destinationTexture,
+            on: resultTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: destinationTexture,
+            into: resultTexture,
             with: commandBuffer
         )
 

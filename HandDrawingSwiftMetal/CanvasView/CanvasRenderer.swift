@@ -109,6 +109,51 @@ final class CanvasRenderer: ObservableObject {
         canvasView?.resetCommandBuffer()
     }
 
+    /// Updates the canvas after updating all textures.
+    /// This helps maintain high drawing performance even as the number of layers increases.
+    func updateCanvasAfterUpdatingAllTextures(
+        textureLayers: TextureLayers,
+        commandBuffer: MTLCommandBuffer?
+    ) {
+        guard
+            let commandBuffer,
+            let selectedLayer = textureLayers.selectedLayer,
+            let selectedIndex = textureLayers.selectedIndex
+        else { return }
+
+        Publishers.Zip(
+            Publishers.Zip(
+                renderTexturesFromRepositoryToTexturePublisher(
+                    layers: getBottomLayers(selectedIndex: selectedIndex, layers: textureLayers.layers),
+                    into: unselectedBottomTexture,
+                    with: commandBuffer
+                ),
+                renderTexturesFromRepositoryToTexturePublisher(
+                    layers: getTopLayers(selectedIndex: selectedIndex, layers: textureLayers.layers),
+                    into: unselectedTopTexture,
+                    with: commandBuffer
+                )
+            ),
+            renderTextureFromRepositoryToTexturePublisher(
+                layer: selectedLayer,
+                into: selectedTexture,
+                with: commandBuffer
+            )
+        )
+        .sink(receiveCompletion: { completion in
+            switch completion {
+            case .finished: break
+            case .failure: break
+            }
+        }, receiveValue: { [weak self] _ in
+            self?.updateCanvas(
+                selectedLayer: selectedLayer,
+                with: commandBuffer
+            )
+        })
+        .store(in: &cancellables)
+    }
+
     /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
     func updateCanvas(
         realtimeDrawingTexture: MTLTexture? = nil,
