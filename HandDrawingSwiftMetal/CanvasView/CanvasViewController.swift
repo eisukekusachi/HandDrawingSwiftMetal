@@ -39,6 +39,9 @@ class CanvasViewController: UIViewController {
         canvasViewModel.onViewDidLoad(
             canvasView: contentView.canvasView
         )
+
+        contentView.alpha = 0.0
+        view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -47,6 +50,10 @@ class CanvasViewController: UIViewController {
             model: canvasModel,
             drawableTextureSize: contentView.canvasView.drawableSize
         )
+
+        UIView.animate(withDuration: 0.05) { [weak self] in
+            self?.contentView.alpha = 1.0
+        }
     }
 
     override func viewDidLayoutSubviews() {
