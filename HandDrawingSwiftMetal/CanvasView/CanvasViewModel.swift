@@ -10,15 +10,16 @@ import MetalKit
 import SwiftUI
 
 final class CanvasViewModel {
+
+    let textureLayers = TextureLayers()
+
+    let drawingTool = CanvasDrawingToolStatus()
+
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
         }
     }
-
-    let textureLayers = TextureLayers()
-
-    let drawingTool = CanvasDrawingToolStatus()
 
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
@@ -26,27 +27,22 @@ final class CanvasViewModel {
     var requestShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
         requestShowingActivityIndicatorSubject.eraseToAnyPublisher()
     }
-    private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
     var requestShowingAlertPublisher: AnyPublisher<String, Never> {
         requestShowingAlertSubject.eraseToAnyPublisher()
     }
-    private let requestShowingAlertSubject = PassthroughSubject<String, Never>()
 
     var requestShowingToastPublisher: AnyPublisher<ToastModel, Never> {
         requestShowingToastSubject.eraseToAnyPublisher()
     }
-    private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
     var requestShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
         requestShowingLayerViewSubject.eraseToAnyPublisher()
     }
-    private let requestShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
     var refreshCanvasPublisher: AnyPublisher<CanvasModel, Never> {
         refreshCanvasSubject.eraseToAnyPublisher()
     }
-    private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
 
     var updateUndoButtonIsEnabledState: AnyPublisher<Bool, Never> {
         updateUndoButtonIsEnabledStateSubject.eraseToAnyPublisher()
@@ -54,8 +50,6 @@ final class CanvasViewModel {
     var updateRedoButtonIsEnabledState: AnyPublisher<Bool, Never> {
         updateRedoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
-    private let updateUndoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
-    private let updateRedoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
 
     var isLayerViewVisible: Bool {
         requestShowingLayerViewSubject.value
@@ -87,9 +81,23 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private var textureRepository: TextureRepository!
+    private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
+
+    private let requestShowingAlertSubject = PassthroughSubject<String, Never>()
+
+    private let requestShowingToastSubject = PassthroughSubject<ToastModel, Never>()
+
+    private let requestShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
+
+    private let refreshCanvasSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let updateUndoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
+
+    private let updateRedoButtonIsEnabledStateSubject = PassthroughSubject<Bool, Never>()
 
     private var localRepository: LocalRepository!
+
+    private var textureRepository: TextureRepository!
 
     private var cancellables = Set<AnyCancellable>()
 
