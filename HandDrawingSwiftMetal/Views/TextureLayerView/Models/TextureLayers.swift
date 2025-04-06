@@ -5,322 +5,226 @@
 //  Created by Eisuke Kusachi on 2023/12/16.
 //
 
-import MetalKit
 import Combine
+import MetalKit
 
-/// Manages `TextureLayer` and the textures used for rendering
-final class TextureLayers: Layers<TextureLayer> {
+/// Manages the textures used for rendering
+final class TextureLayers: ObservableObject {
 
-    var updateCanvasPublisher: AnyPublisher<Bool, Never> {
+    @Published var layers: [TextureLayerModel] = []
+
+    @Published private var selectedLayerId: UUID?
+
+    var selectedLayer: TextureLayerModel? {
+        guard let selectedLayerId else { return nil }
+        return layers.first(where: { $0.id == selectedLayerId })
+    }
+
+    var selectedIndex: Int? {
+        guard let selectedLayerId else { return nil }
+        return layers.firstIndex(where: { $0.id == selectedLayerId })
+    }
+
+    var didFinishInitializationPublisher: AnyPublisher<CGSize, Never> {
+        didFinishInitializationSubject.eraseToAnyPublisher()
+    }
+    private let didFinishInitializationSubject = PassthroughSubject<CGSize, Never>()
+
+    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
+        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
+    }
+    var updateCanvasPublisher: AnyPublisher<Void, Never> {
         updateCanvasSubject.eraseToAnyPublisher()
     }
+    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
 
-    var isTextureInitialized: Bool {
-        unselectedBottomTexture != nil && unselectedTopTexture != nil
+    let initializeWithModelSubject = PassthroughSubject<CanvasModel, Never>()
+    let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
+
+    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
+        didSet {
+            if drawableTextureSize < MTLRenderer.minimumTextureSize {
+                drawableTextureSize = MTLRenderer.minimumTextureSize
+            }
+        }
     }
 
-    var backgroundColor: UIColor = .white
+    private var textureRepository: (any TextureRepository)!
 
-    let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    private let renderer: MTLRendering!
+    private var cancellables = Set<AnyCancellable>()
 
-    /// A texture that combines the textures of all layers below the selected layer
-    private var unselectedBottomTexture: MTLTexture?
-    /// A texture that combines the textures of all layers above the selected layer
-    private var unselectedTopTexture: MTLTexture?
-
-    private var flippedTextureBuffers: MTLTextureBuffers?
-
-    private let updateCanvasSubject = PassthroughSubject<Bool, Never>()
-
-    init(renderer: MTLRendering = MTLRenderer.shared) {
-        self.renderer = renderer
-
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: .flippedTextureNodes,
-            with: device
-        )
-    }
-
-    func initLayers(
-        layers: [TextureLayer] = [],
-        layerIndex: Int = 0
+    init(
+        layers: [TextureLayerModel] = [],
+        textureRepository: (any TextureRepository) = SingletonTextureInMemoryRepository.shared
     ) {
-        guard
-            let size = layers.first?.texture?.size,
-            let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
-            let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        else {
-            unselectedBottomTexture = nil
-            unselectedTopTexture = nil
-            return
-        }
+        self.layers = layers
 
-        self.unselectedBottomTexture = bottomTexture
-        self.unselectedTopTexture = topTexture
+        self.textureRepository = textureRepository
 
-        self.unselectedBottomTexture?.label = "unselectedBottomTexture"
-        self.unselectedTopTexture?.label = "unselectedTopTexture"
+        initializeWithModelSubject
+            .sink { [weak self] model in
+                self?.initializeWithModel(model)
+            }
+            .store(in: &cancellables)
 
-        initLayers(
-            index: layerIndex,
-            layers: layers
-        )
-
-        self.layers.indices.forEach { self.layers[$0].updateThumbnail() }
+        initializeWithTextureSizeSubject
+            .sink { [weak self] textureSize in
+                self?.initializeWithTextureSize(textureSize)
+            }
+            .store(in: &cancellables)
     }
 
-    func initLayers(size: CGSize) {
+    /// Attempts to restore layers from a given `CanvasModel`
+    /// If the model is invalid, initialization is performed using the given texture size
+    func restoreLayers(from model: CanvasModel, drawableSize: CGSize) {
+        drawableTextureSize = drawableSize
+
+        textureRepository?.hasAllTextures(for: model.layers.map { $0.id })
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure: break
+                }
+            }, receiveValue: { [weak self] allExist in
+                guard let `self` else { return }
+                if allExist {
+                    self.initializeWithModelSubject.send(model)
+                } else {
+                    self.initializeWithTextureSizeSubject.send(
+                        model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
+                    )
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    private func initializeWithModel(_ model: CanvasModel) {
         guard
-            size >= MTLRenderer.minimumTextureSize,
-            let bottomTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
-            let topTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device),
-            let texture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
-        else {
-            assert(false, "Failed to generate texture")
-            return
-        }
+            let textureSize = model.textureSize,
+            textureSize > MTLRenderer.minimumTextureSize
+        else { return }
 
-        self.unselectedBottomTexture = bottomTexture
-        self.unselectedTopTexture = topTexture
+        layers.removeAll()
+        layers = model.layers
+        selectedLayerId = layers[model.layerIndex].id
 
-        initLayers(
-            index: 0,
-            layers: [
-                .init(
-                    texture: texture,
-                    title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        didFinishInitializationSubject.send(textureSize)
+    }
+
+    private func initializeWithTextureSize(_ textureSize: CGSize) {
+        guard textureSize > MTLRenderer.minimumTextureSize else { return }
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate
+        )
+
+        layers.removeAll()
+        layers.insert(layer, at: 0)
+        selectedLayerId = layer.id
+
+        textureRepository?.initTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .sink(receiveCompletion: { completion in
+            switch completion {
+            case .finished: break
+            case .failure: break
+            }
+        }, receiveValue: { [weak self] in
+            self?.didFinishInitializationSubject.send(textureSize)
+        })
+        .store(in: &cancellables)
+    }
+
+}
+
+extension TextureLayers {
+
+    func insertLayer(textureSize: CGSize, at index: Int) {
+        guard let textureRepository else { return }
+        let device = self.device
+
+        addNewLayerPublisher(at: index)
+            .flatMap { textureLayerId in
+                textureRepository.updateTexture(
+                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
+                    for: textureLayerId
                 )
-            ]
-        )
+            }
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure: break
+                }
+            }, receiveValue: { [weak self] newLayerTextureId in
+                self?.selectedLayerId = newLayerTextureId
+                self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+            })
+            .store(in: &cancellables)
+    }
 
-        self.layers.indices.forEach { self.layers[$0].updateThumbnail() }
+    func removeLayer() {
+        guard
+            let textureRepository,
+            let selectedLayerId = selectedLayer?.id,
+            let index = layers.firstIndex(where: { $0.id == selectedLayerId })
+        else { return }
+
+        let newSelectedLayerId = layers[max(index - 1, 0)].id
+
+        removeLayerPublisher(from: index)
+            .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
+                textureRepository.removeTexture(removedTextureId)
+            }
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure: break
+                }
+            }, receiveValue: { [weak self] _ in
+                self?.selectedLayerId = newSelectedLayerId
+                self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+            })
+            .store(in: &cancellables)
+    }
+
+    func getThumbnail(_ uuid: UUID) -> UIImage? {
+        textureRepository?.getThumbnail(uuid)
+    }
+
+    func selectLayer(_ uuid: UUID) {
+        selectedLayerId = uuid
+        updateCanvasAfterTextureLayerUpdatesSubject.send(())
     }
 
 }
 
-extension TextureLayers {
-    /// Merges the textures of layers into `destinationTexture` with the backgroundColor
-    func mergeAllTextures(
-        usingCurrentTexture currentTexture: MTLTexture? = nil,
-        allLayerUpdates: Bool = false,
-        into destinationTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let destinationTexture else { return }
-
-        // Combine the textures of unselected layers into `unselectedTopTexture` and `unselectedBottomTexture`
-        // Even if the number of layers increases, performance will not be affected.
-        // It is not necessary to update the texture of the unselected layers every time.
-        if allLayerUpdates {
-            updateUnselectedTexturesIfNeeded(commandBuffer: commandBuffer)
-        }
-
-        makeTextureFromUnselectedTextures(
-            usingCurrentTexture: currentTexture,
-            to: destinationTexture,
-            with: commandBuffer
-        )
-    }
-
-    func updateUnselectedTexturesIfNeeded(
-        commandBuffer: MTLCommandBuffer
-    ) {
-        updateUnselectedBottomTextureIfNeeded(commandBuffer: commandBuffer)
-        updateUnselectedTopTextureIfNeeded(commandBuffer: commandBuffer)
-    }
-
-    func makeTextureFromUnselectedTextures(
-        usingCurrentTexture currentTexture: MTLTexture? = nil,
-        to destinationTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let unselectedBottomTexture,
-            let unselectedTopTexture,
-            let destinationTexture
-        else { return }
-
-        renderer.fillTexture(
-            texture: destinationTexture,
-            withRGB: backgroundColor.rgb,
-            with: commandBuffer
-        )
-
-        renderer.mergeTexture(
-            texture: unselectedBottomTexture,
-            into: destinationTexture,
-            with: commandBuffer
-        )
-
-        if layers[index].isVisible, let texture = currentTexture ?? layers[index].texture {
-            renderer.mergeTexture(
-                texture: texture,
-                alpha: layers[index].alpha,
-                into: destinationTexture,
-                with: commandBuffer
-            )
-        }
-
-        renderer.mergeTexture(
-            texture: unselectedTopTexture,
-            into: destinationTexture,
-            with: commandBuffer
-        )
-    }
-
-}
-
+// MARK: CRUD
 extension TextureLayers {
 
-    func selectTextureLayer(layer: TextureLayer) {
-        guard let newIndex = getIndex(layer: layer) else { return }
-        index = newIndex
-        updateCanvasSubject.send(true)
+    var newIndex: Int {
+        (selectedIndex ?? 0) + 1
     }
 
-    func addTextureLayer(textureSize: CGSize) {
-        guard
-            textureSize >= MTLRenderer.minimumTextureSize,
-            let newTexture = MTLTextureCreator.makeBlankTexture(
-                size: textureSize,
-                with: device
-            )
-        else { return }
+    func addLayer(at index: Int) -> UUID? {
+        guard index >= 0 && index <= layers.count else { return nil }
 
-        let newLayer: TextureLayer = .init(
-            texture: newTexture,
-            title: TimeStampFormatter.current(template: "MMM dd HH mm ss")
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate
         )
-        let newIndex = index + 1
-        insertLayer(
-            layer: newLayer,
-            at: newIndex
-        )
-        setIndex(from: newLayer)
-
-        // Makes a thumbnail
-        updateThumbnail(index: newIndex)
-
-        updateCanvasSubject.send(true)
+        layers.insert(layer, at: index)
+        return layer.id
     }
+    func removeLayer(from index: Int) -> UUID? {
+        guard layers.count > 1, layers.indices.contains(index) else { return nil }
 
-    func moveTextureLayer(
-        fromOffsets: IndexSet,
-        toOffset: Int
-    ) {
-        let listFromIndex = fromOffsets.first ?? 0
-        let listToIndex = toOffset
-
-        // Convert the value received from `onMove(perform:)` into a value used in an array
-        let listSource = listFromIndex
-        let listDestination = UndoMoveData.getMoveDestination(fromIndex: listFromIndex, toIndex: listToIndex)
-
-        let textureLayerSource = TextureLayers.getReversedIndex(
-            index: listSource,
-            layerCount: count
-        )
-        let textureLayerDestination = TextureLayers.getReversedIndex(
-            index: listDestination,
-            layerCount: count
-        )
-
-        let textureLayerSelectedIndex = index
-        let textureLayerSelectedIndexAfterMove = UndoMoveData.makeSelectedIndexAfterMove(
-            source: textureLayerSource,
-            destination: textureLayerDestination,
-            selectedIndex: textureLayerSelectedIndex
-        )
-
-        moveLayer(
-            fromListOffsets: fromOffsets,
-            toListOffset: toOffset
-        )
-        setIndex(textureLayerSelectedIndexAfterMove)
-
-        updateCanvasSubject.send(true)
-    }
-
-    func removeTextureLayer() {
-        guard
-            canDeleteLayer,
-            let layer = selectedLayer,
-            let index = getIndex(layer: layer)
-        else { return }
-
-        removeLayer(layer)
-        setIndex(index - 1)
-
-        updateCanvasSubject.send(true)
-    }
-
-    func changeVisibility(layer: TextureLayer, isVisible: Bool) {
-        guard
-            let index = getIndex(layer: layer)
-        else { return }
-
-        updateLayer(
-            index: index,
-            isVisible: isVisible
-        )
-
-        updateCanvasSubject.send(true)
-    }
-
-    func changeAlpha(layer: TextureLayer, alpha: Int) {
-        guard
-            let index = getIndex(layer: layer)
-        else { return }
-
-        updateLayer(
-            index: index,
-            alpha: alpha
-        )
-
-        updateCanvasSubject.send(true)
-    }
-
-    func changeTitle(layer: TextureLayer, title: String) {
-        guard let index = getIndex(layer: layer) else { return }
-
-        updateLayer(
-            index: index,
-            title: title
-        )
-    }
-
-}
-
-extension TextureLayers {
-
-    func updateLayer(
-        index: Int,
-        title: String? = nil,
-        isVisible: Bool? = nil,
-        alpha: Int? = nil
-    ) {
-        guard layers.indices.contains(index) else { return }
-
-        if let title {
-            layers[index].title = title
-        }
-        if let isVisible {
-            layers[index].isVisible = isVisible
-        }
-        if let alpha {
-            layers[index].alpha = alpha
-        }
-    }
-
-    func updateThumbnail(index: Int) {
-        guard layers.indices.contains(index) else { return }
-        layers[index].updateThumbnail()
-    }
-
-    func updateIndex(_ layer: TextureLayer?) {
-        guard let layer, let layerIndex = layers.firstIndex(of: layer) else { return }
-        index = layerIndex
+        let removedLayerId = layers[index].id
+        layers.remove(at: index)
+        return removedLayerId
     }
 
     /// Sort TextureLayers's `layers` based on the values received from `List`
@@ -330,71 +234,82 @@ extension TextureLayers {
     ) {
         // Since `textureLayers` and `List` have reversed orders,
         // reverse the array, perform move operations, and then reverse it back
-        reverseLayers()
-        moveLayer(
+        layers.reverse()
+        layers.move(
             fromOffsets: fromListOffsets,
             toOffset: toListOffset
         )
-        reverseLayers()
+        layers.reverse()
+
+        updateCanvasAfterTextureLayerUpdatesSubject.send(())
+    }
+
+    func updateLayer(
+        id: UUID,
+        title: String? = nil,
+        isVisible: Bool? = nil,
+        alpha: Int? = nil
+    ) {
+        guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
+
+        if let title {
+            layers[index].title = title
+        }
+        if let isVisible {
+            layers[index].isVisible = isVisible
+
+            // The visibility of the layers can be changed, so other layers will be updated
+            updateCanvasAfterTextureLayerUpdatesSubject.send(())
+        }
+        if let alpha {
+            layers[index].alpha = alpha
+
+            // Only the alpha of the selected layer can be changed, so other layers will not be updated
+            updateCanvasSubject.send(())
+        }
+    }
+
+    func updateThumbnail(_ selectedTexture: MTLTexture) {
+        guard let selectedLayerId else { return }
+
+        textureRepository?.setThumbnail(
+            texture: selectedTexture,
+            for: selectedLayerId
+        )
+
+        objectWillChange.send()
     }
 
 }
 
+// MARK: Publishers
 extension TextureLayers {
 
-    private func mergeLayerTextures(
-        range: ClosedRange<Int>,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        layers[range]
-            .filter { $0.isVisible }
-            .compactMap { layer -> (MTLTexture, Int)? in
-                guard let texture: MTLTexture = layer.texture else { return nil }
-                return (texture, layer.alpha)
+    private func addNewLayerPublisher(at index: Int) -> AnyPublisher<UUID, Error> {
+        Just(index)
+            .tryMap { [weak self] index in
+                guard let newLayerId = self?.addLayer(at: index) else {
+                    throw TextureLayerError.indexOutOfBounds
+                }
+                return newLayerId
             }
-            .forEach { result in
-                renderer.mergeTexture(
-                    texture: result.0,
-                    alpha: result.1,
-                    into: destinationTexture,
-                    with: commandBuffer
-                )
+            .eraseToAnyPublisher()
+    }
+    func removeLayerPublisher(from index: Int) -> AnyPublisher<UUID, Error> {
+        Just(index)
+            .tryMap { [weak self] index in
+                guard let removeLayerId = self?.removeLayer(from: index) else {
+                    throw TextureLayerError.minimumLayerRequired
+                }
+                return removeLayerId
             }
+            .eraseToAnyPublisher()
     }
 
-    /// Merges the textures of layers below the selected layer into `unselectedBottomTexture`
-    private func updateUnselectedBottomTextureIfNeeded(
-        commandBuffer: MTLCommandBuffer
-    ) {
-        guard let unselectedBottomTexture else {
-            Logger.standard.error("unselectedBottomTexture is nil")
-            return
-        }
+}
 
-        renderer.clearTexture(texture: unselectedBottomTexture, with: commandBuffer)
-
-        // The textures of the layers below the selected layer are drawn into `unselectedBottomTexture`
-        if index > 0 {
-            mergeLayerTextures(range: 0 ... index - 1, into: unselectedBottomTexture, with: commandBuffer)
-        }
-    }
-
-    /// Merges the textures of layers above the selected layer into `unselectedTopTexture`
-    private func updateUnselectedTopTextureIfNeeded(
-        commandBuffer: MTLCommandBuffer
-    ) {
-        guard let unselectedTopTexture else {
-            Logger.standard.error("unselectedTopTexture is nil")
-            return
-        }
-
-        renderer.clearTexture(texture: unselectedTopTexture, with: commandBuffer)
-
-        // The textures of the layers above the selected layer are drawn into `unselectedTopTexture`
-        if index < layers.count - 1 {
-            mergeLayerTextures(range: index + 1 ... layers.count - 1, into: unselectedTopTexture, with: commandBuffer)
-        }
-    }
-
+enum TextureLayerError: Error {
+    case indexOutOfBounds
+    case minimumLayerRequired
+    case failedToUnwrap
 }

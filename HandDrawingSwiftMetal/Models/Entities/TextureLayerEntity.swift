@@ -1,13 +1,13 @@
 //
-//  ImageLayerEntity.swift
+//  TextureLayerEntity.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2024/01/03.
+//  Created by Eisuke Kusachi on 2025/04/06.
 //
 
-import MetalKit
+import Foundation
 
-struct ImageLayerEntity: Codable, Equatable {
+struct TextureLayerEntity: Codable, Equatable {
     /// The filename of the texture
     /// MTLTexture cannot be encoded into JSON,
     /// the texture is saved as a file, and this struct holds the `textureName` of the texture.
@@ -18,5 +18,16 @@ struct ImageLayerEntity: Codable, Equatable {
     let alpha: Int
     /// Whether the layer is visible or not
     let isVisible: Bool
+
+}
+
+extension TextureLayerEntity {
+
+    init(from model: TextureLayerModel) {
+        self.textureName = model.id.uuidString
+        self.title = model.title
+        self.alpha = model.alpha
+        self.isVisible = model.isVisible
+    }
 
 }

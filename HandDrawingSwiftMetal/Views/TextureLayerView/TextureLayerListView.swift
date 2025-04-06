@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct TextureLayerListView<T: TextureLayerProtocol>: View {
+struct TextureLayerListView: View {
 
-    @ObservedObject var textureLayers: Layers<T>
+    @ObservedObject var textureLayers: TextureLayers
 
-    var didTapLayer: (T) -> Void
-    var didTapVisibility: (T, Bool) -> Void
-    var didMove: (IndexSet, Int) -> Void
+    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
+    var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
+    var didMove: ((IndexSet, Int) -> Void)? = nil
 
     var body: some View {
         List {
@@ -23,19 +23,20 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
             ) { layer in
                 layerRow(
                     layer: layer,
-                    selected: textureLayers.selectedLayer == layer,
+                    thumbnail: textureLayers.getThumbnail(layer.id),
+                    selected: textureLayers.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
-                        didTapLayer(targetLayer)
+                        didTapLayer?(targetLayer)
                     },
                     didTapVisibleButton: { targetLayer in
-                        didTapVisibility(targetLayer, !targetLayer.isVisible)
+                        didTapVisibility?(targetLayer, !targetLayer.isVisible)
                     }
                 )
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                didMove(source, destination)
+                didMove?(source, destination)
             })
             .listRowSeparator(.hidden)
         }
@@ -47,10 +48,11 @@ struct TextureLayerListView<T: TextureLayerProtocol>: View {
 extension TextureLayerListView {
 
     private func layerRow(
-        layer: T,
+        layer: TextureLayerModel,
+        thumbnail: UIImage?,
         selected: Bool,
-        didTapRow: @escaping ((T) -> Void),
-        didTapVisibleButton: @escaping ((T) -> Void)
+        didTapRow: @escaping ((TextureLayerModel) -> Void),
+        didTapVisibleButton: @escaping ((TextureLayerModel) -> Void)
     ) -> some View {
         ZStack {
             Color(backgroundColor(selected))
@@ -59,8 +61,8 @@ extension TextureLayerListView {
                 Spacer()
                     .frame(width: 8)
 
-                if let image = layer.thumbnail {
-                    Image(uiImage: image)
+                if let thumbnail {
+                    Image(uiImage: thumbnail)
                         .resizable()
                         .frame(width: 32, height: 32)
                         .scaledToFit()
@@ -117,7 +119,7 @@ extension TextureLayerListView {
             return UIColor(named: "component") ?? .clear
         }
     }
-    private func iconColor(layer: T, _ selected: Bool) -> UIColor {
+    private func iconColor(layer: TextureLayerModel, _ selected: Bool) -> UIColor {
         if selected {
             if layer.isVisible {
                 return .white
@@ -132,21 +134,22 @@ extension TextureLayerListView {
             }
         }
     }
+
 }
 
 #Preview {
 
-    TextureLayerListView<TextureLayer>(
-        textureLayers: TextureLayers(),
-        didTapLayer: { layer in
-            print("Tap layer")
-        },
-        didTapVisibility: { layer, isVisible in
-            print("Tap visibility")
-        },
-        didMove: { source, destination in
-            print("Moved")
-        }
+    TextureLayerListView(
+        textureLayers: TextureLayers(
+            layers: [
+                .init(title: "Layer0"),
+                .init(title: "Layer1"),
+                .init(title: "Layer2"),
+                .init(title: "Layer3"),
+                .init(title: "Layer4")
+            ]
+        )
     )
+    .padding(.horizontal, 44)
 
 }

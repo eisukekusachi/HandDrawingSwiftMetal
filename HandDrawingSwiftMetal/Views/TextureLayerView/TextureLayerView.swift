@@ -7,23 +7,24 @@
 
 import SwiftUI
 
-struct TextureLayerView<T: TextureLayerProtocol>: View {
+struct TextureLayerView: View {
 
-    @ObservedObject var textureLayers: Layers<T>
-    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
+    @ObservedObject var textureLayers: TextureLayers
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
 
-    var didTapLayer: (T) -> Void
-    var didTapAddButton: () -> Void
-    var didTapRemoveButton: () -> Void
-    var didTapVisibility: (T, Bool) -> Void
-    var didStartChangingAlpha: (T) -> Void
-    var didChangeAlpha: (T, Int) -> Void
-    var didFinishChangingAlpha: (T) -> Void
-    var didEditTitle: (T, String) -> Void
-    var didMove: (IndexSet, Int) -> Void
+    var roundedRectangleWithArrow: RoundedRectangleWithArrow
+
+    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
+    var didTapAddButton: (() -> Void)? = nil
+    var didTapRemoveButton: (() -> Void)? = nil
+    var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
+    var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
+    var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
+    var didFinishChangingAlpha: ((TextureLayerModel) -> Void)? = nil
+    var didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
+    var didMove: ((IndexSet, Int) -> Void)? = nil
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -44,16 +45,16 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
                     didEditTitle: didEditTitle
                 )
 
-                TextureLayerListView<T>(
+                TextureLayerListView(
                     textureLayers: textureLayers,
                     didTapLayer: { layer in
-                        didTapLayer(layer)
+                        didTapLayer?(layer)
                     },
                     didTapVisibility: { layer, isVisibility in
-                        didTapVisibility(layer, isVisibility)
+                        didTapVisibility?(layer, isVisibility)
                     },
                     didMove: { source, destination in
-                        didMove(source, destination)
+                        didMove?(source, destination)
                     }
                 )
 
@@ -64,15 +65,15 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
                     range: range,
                     didStartChanging: {
                         guard let selectedLayer = textureLayers.selectedLayer else { return }
-                        didStartChangingAlpha(selectedLayer)
+                        didStartChangingAlpha?(selectedLayer)
                     },
                     didChange: { value in
                         guard let selectedLayer = textureLayers.selectedLayer else { return }
-                        didChangeAlpha(selectedLayer, value)
+                        didChangeAlpha?(selectedLayer, value)
                     },
                     didFinishChanging: {
                         guard let selectedLayer = textureLayers.selectedLayer else { return }
-                        didFinishChangingAlpha(selectedLayer)
+                        didFinishChangingAlpha?(selectedLayer)
                     }
                 )
                 .padding(.top, 4)
@@ -87,17 +88,17 @@ struct TextureLayerView<T: TextureLayerProtocol>: View {
 extension TextureLayerView {
 
     func toolbar(
-        textureLayers: Layers<T>,
-        didTapAddButton: @escaping () -> Void,
-        didTapRemoveButton: @escaping () -> Void,
-        didEditTitle: @escaping (T, String) -> Void
+        textureLayers: TextureLayers,
+        didTapAddButton: (() -> Void)? = nil,
+        didTapRemoveButton: (() -> Void)? = nil,
+        didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
     ) -> some View {
         let buttonSize: CGFloat = 20
 
         return HStack {
             Button(
                 action: {
-                    didTapAddButton()
+                    didTapAddButton?()
                 },
                 label: {
                     Image(systemName: "plus.circle").buttonModifier(diameter: buttonSize)
@@ -108,7 +109,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    didTapRemoveButton()
+                    didTapRemoveButton?()
                 },
                 label: {
                     Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
@@ -131,7 +132,7 @@ extension TextureLayerView {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = textureLayers.selectedLayer else { return }
-                    didEditTitle(selectedLayer, textFieldTitle)
+                    didEditTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }
@@ -145,35 +146,16 @@ extension TextureLayerView {
 #Preview {
 
     TextureLayerView(
-        textureLayers: TextureLayers(),
-        roundedRectangleWithArrow: RoundedRectangleWithArrow(),
-        didTapLayer: { layer in
-            print("Tap layer")
-        },
-        didTapAddButton: {
-            print("Add")
-        },
-        didTapRemoveButton: {
-            print("Remove")
-        },
-        didTapVisibility: { layer, value in
-            print("Change visibility")
-        },
-        didStartChangingAlpha: { layer in
-            print("Start changing alpha")
-        },
-        didChangeAlpha: { layer, value in
-            print("Change alpha")
-        },
-        didFinishChangingAlpha: { layer in
-            print("Finish changing alpha")
-        },
-        didEditTitle: { layer, value in
-            print("Change title")
-        },
-        didMove: { source, destination in
-            print("Moved")
-        }
+        textureLayers: .init(
+            layers: [
+                .init(title: "Layer0", alpha: 255, isVisible: true),
+                .init(title: "Layer1", alpha: 155, isVisible: false),
+                .init(title: "Layer2", alpha: 55, isVisible: true),
+                .init(title: "Layer3", alpha: 0, isVisible: false)
+            ]
+        ),
+        roundedRectangleWithArrow: RoundedRectangleWithArrow()
     )
+    .frame(width: 256, height: 300)
 
 }

@@ -8,13 +8,9 @@
 import UIKit
 import ZipArchive
 
-enum FileOutputError: Error {
-    case failedToZip
-}
-
 enum FileOutputManager {
 
-    static func saveImage(
+    static func saveTextureAsData(
         bytes: [UInt8],
         to url: URL
     ) throws {
@@ -55,4 +51,8 @@ enum FileOutputManager {
         }
     }
 
+}
+
+enum FileOutputError: Error {
+    case failedToZip
 }

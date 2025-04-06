@@ -5,37 +5,35 @@
 //  Created by Eisuke Kusachi on 2024/07/10.
 //
 
-import MetalKit
+import Foundation
 
 struct CanvasModel {
-    let projectName: String
 
-    let textureSize: CGSize
+    var projectName: String = Calendar.currentDate
 
-    let layerIndex: Int
-    let layers: [TextureLayer]
+    var textureSize: CGSize?
 
-    let drawingTool: Int
+    var layerIndex: Int = 0
+    var layers: [TextureLayerModel] = []
 
-    let brushDiameter: Int
-    let eraserDiameter: Int
+    var drawingTool: Int = 0
 
-    private let device = MTLCreateSystemDefaultDevice()!
+    var brushDiameter: Int = 8
+    var eraserDiameter: Int = 8
+
+}
+
+extension CanvasModel {
 
     init(
         projectName: String,
-        entity: CanvasEntity,
-        folderURL: URL
-    ) throws {
-        self.layers = try TextureLayer.makeLayers(
-            from: entity.layers,
-            textureSize: entity.textureSize,
-            folderURL: folderURL,
-            device: device
-        )
-        self.layerIndex = entity.layerIndex
-
+        entity: CanvasEntity
+    ) {
+        // Since the project name is the same as the folder name, it will not be managed in `CanvasEntity`
         self.projectName = projectName
+
+        self.layerIndex = entity.layerIndex
+        self.layers = entity.layers.map { .init(from: $0) }
 
         self.textureSize = entity.textureSize
 
@@ -43,6 +41,10 @@ struct CanvasModel {
 
         self.brushDiameter = entity.brushDiameter
         self.eraserDiameter = entity.eraserDiameter
+    }
+
+    func getTextureSize(drawableTextureSize: CGSize) -> CGSize {
+        textureSize ?? drawableTextureSize
     }
 
 }

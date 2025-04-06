@@ -17,7 +17,6 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
     let device = MTLCreateSystemDefaultDevice()!
 
     var backgroundTexture: MTLTexture!
-    var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
 
@@ -36,15 +35,9 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
             with: device
         )!
         backgroundTexture.label = "backgroundTexture"
-
-        destinationTexture = MTLTextureCreator.makeBlankTexture(
-            size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
-            with: device
-        )!
-        destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the brush curve is drawn on the destination texture using `backgroundTexture`
+    /// Confirms the process in which the brush curve is drawn on `resultTexture` using `backgroundTexture`
     func testDrawBrushCurvePoints() {
 
         struct Condition: Hashable {
@@ -62,10 +55,10 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
             "drawTexture(grayscaleTexture: grayscaleTexture, color: (255, 0, 0), on: drawingTexture, with: commandBuffer)"
         ]
 
-        // `backgroundTexture` and `drawingTexture` are layered and drawn on `destinationTexture`.
+        // `backgroundTexture` and `drawingTexture` are layered and drawn on `resultTexture`.
         let drawingTexture: [String] = [
-            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)",
-            "mergeTexture(texture: drawingTexture, into: destinationTexture, with: commandBuffer)"
+            "drawTexture(texture: backgroundTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: resultTexture, with: commandBuffer)",
+            "mergeTexture(texture: drawingTexture, into: resultTexture, with: commandBuffer)"
         ]
 
         // Merge `drawingTexture` on `backgroundTexture`.
@@ -105,7 +98,6 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
                 drawingCurveIterator: drawingIterator,
                 withBackgroundTexture: backgroundTexture,
                 withBackgroundColor: .clear,
-                on: destinationTexture,
                 with: commandBuffer
             )
 

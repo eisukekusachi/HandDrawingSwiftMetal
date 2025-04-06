@@ -15,6 +15,8 @@ class CanvasViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
+    private var canvasModel = CanvasModel()
+
     private let canvasViewModel = CanvasViewModel()
 
     private let dialogPresenter = DialogPresenter()
@@ -35,18 +37,15 @@ class CanvasViewController: UIViewController {
         bindViewModel()
 
         canvasViewModel.onViewDidLoad(
-            canvasView: contentView.canvasView//,
-            // Initialize the canvas with `CGSize`,
-            // if not initialized here, it will be initialized with the screen size
-            // when `func viewDidAppear` is called.
-            //textureSize: .init(width: 768, height: 1024)
+            canvasView: contentView.canvasView
         )
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
-            contentView.canvasView.drawableSize
+            model: canvasModel,
+            drawableTextureSize: contentView.canvasView.drawableSize
         )
     }
 
@@ -76,7 +75,7 @@ extension CanvasViewController {
         }
         contentView.tapLoadButton = { [weak self] in
             guard let `self` else { return }
-            
+
             let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
                 $0.lastPathComponent
             }
@@ -144,7 +143,7 @@ extension CanvasViewController {
         canvasViewModel.refreshCanvasPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
-                self?.canvasViewModel.initCanvas(model: model)
+                self?.canvasViewModel.initCanvas(using: model)
             }
             .store(in: &cancellables)
 

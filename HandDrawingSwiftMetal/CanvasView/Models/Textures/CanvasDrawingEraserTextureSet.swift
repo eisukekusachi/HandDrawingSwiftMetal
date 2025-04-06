@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
-import MetalKit
 import Combine
+import MetalKit
 
 /// A set of textures for real-time eraser drawing
 final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
@@ -15,10 +15,15 @@ final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
         canvasDrawFinishedSubject.eraseToAnyPublisher()
     }
 
+    var drawingSelectedTexture: MTLTexture {
+        resultTexture
+    }
+
     private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
 
     private var eraserAlpha: Int = 255
 
+    private var resultTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     private var lineDrawnTexture: MTLTexture!
@@ -43,13 +48,14 @@ final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
 extension CanvasDrawingEraserTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
+        self.resultTexture = MTLTextureCreator.makeTexture(label: "resultTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
         self.lineDrawnTexture = MTLTextureCreator.makeTexture(label: "lineDrawnTexture", size: textureSize, with: device)
 
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(with: commandBuffer)
-        commandBuffer.commit()
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        temporaryRenderCommandBuffer.commit()
     }
 
     func setEraserAlpha(_ alpha: Int) {
@@ -58,11 +64,14 @@ extension CanvasDrawingEraserTextureSet {
 
     func drawCurvePoints(
         drawingCurveIterator: DrawingCurveIterator,
-        withBackgroundTexture backgroundTexture: MTLTexture,
+        withBackgroundTexture backgroundTexture: MTLTexture?,
         withBackgroundColor backgroundColor: UIColor = .clear,
-        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard
+            let backgroundTexture
+        else { return }
+
         drawCurvePointsOnDrawingTexture(
             points: drawingCurveIterator.latestCurvePoints,
             sourceTexture: backgroundTexture,
@@ -73,7 +82,6 @@ extension CanvasDrawingEraserTextureSet {
             backgroundTexture: backgroundTexture,
             backgroundColor: backgroundColor,
             shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
-            on: destinationTexture,
             with: commandBuffer
         )
     }
@@ -136,14 +144,13 @@ extension CanvasDrawingEraserTextureSet {
         backgroundTexture: MTLTexture,
         backgroundColor: UIColor = .clear,
         shouldUpdateSelectedTexture: Bool,
-        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         renderer.drawTexture(
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: destinationTexture,
+            on: resultTexture,
             with: commandBuffer
         )
 

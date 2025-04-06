@@ -122,7 +122,7 @@ enum MTLTextureCreator {
 
     static func makeBlankTexture(
         label: String? = nil,
-        size: CGSize,
+        size: CGSize = MTLRenderer.minimumTextureSize,
         with device: MTLDevice
     ) -> MTLTexture? {
         guard
