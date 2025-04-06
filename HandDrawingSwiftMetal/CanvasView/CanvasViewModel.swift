@@ -118,7 +118,7 @@ final class CanvasViewModel {
     private func subscribe() {
         drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
-                self?.updateCanvasWithLine()
+                self?.updateCanvasWithDrawing()
             }
             .store(in: &cancellables)
 
@@ -127,7 +127,7 @@ final class CanvasViewModel {
             drawingEraserTextureSet.canvasDrawFinishedPublisher
         )
         .sink { [weak self] in
-            self?.completeCanvasUpdateWithLine()
+            self?.completeCanvasUpdateWithDrawing()
         }
         .store(in: &cancellables)
 
@@ -474,7 +474,7 @@ extension CanvasViewModel {
         )
     }
 
-    private func updateCanvasWithLine() {
+    private func updateCanvasWithDrawing() {
         guard
             let drawingCurveIterator,
             let selectedLayer = textureLayers.selectedLayer,
@@ -494,7 +494,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
-    private func completeCanvasUpdateWithLine() {
+    private func completeCanvasUpdateWithDrawing() {
         resetAllInputParameters()
 
         renderer.commandBuffer?.addCompletedHandler { _ in
