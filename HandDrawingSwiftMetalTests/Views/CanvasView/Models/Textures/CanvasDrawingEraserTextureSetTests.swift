@@ -17,7 +17,6 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
     let device = MTLCreateSystemDefaultDevice()!
 
     var backgroundTexture: MTLTexture!
-    var destinationTexture: MTLTexture!
 
     var renderer = MockMTLRenderer()
 
@@ -36,15 +35,9 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
             with: device
         )!
         backgroundTexture.label = "backgroundTexture"
-
-        destinationTexture = MTLTextureCreator.makeBlankTexture(
-            size: .init(width: MTLRenderer.threadGroupLength, height: MTLRenderer.threadGroupLength),
-            with: device
-        )!
-        destinationTexture.label = "destinationTexture"
     }
 
-    /// Confirms the process in which the eraser curve is drawn on the destination texture using `backgroundTexture`
+    /// Confirms the process in which the eraser curve is drawn on `resultTexture` using `backgroundTexture`
     func testDrawEraserCurvePoints() {
 
         struct Condition: Hashable {
@@ -66,9 +59,9 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
             "subtractTextureWithEraseBlendMode(texture: lineDrawnTexture, buffers: buffers, from: drawingTexture, with: commandBuffer)"
         ]
 
-        // Draw `drawingTexture` on `destinationTexture`
+        // Draw `drawingTexture` on `resultTexture`
         let drawingTexture: [String] = [
-            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)"
+            "drawTexture(texture: drawingTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: resultTexture, with: commandBuffer)"
         ]
 
         // Draw `backgroundTexture` on `drawingTexture`.
@@ -110,7 +103,6 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
                 drawingCurveIterator: drawingIterator,
                 withBackgroundTexture: backgroundTexture,
                 withBackgroundColor: .clear,
-                on: destinationTexture,
                 with: commandBuffer
             )
 
