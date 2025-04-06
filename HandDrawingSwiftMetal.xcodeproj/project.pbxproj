@@ -460,7 +460,7 @@
 			path = FileManager;
 			sourceTree = "<group>";
 		};
-		D44D196A2BE5DAEB0069D4A9 /* LocalRepository */ = {
+		D44D196A2BE5DAEB0069D4A9 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
 				D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */,
@@ -469,7 +469,7 @@
 				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
 				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
 			);
-			path = LocalRepository;
+			path = Repositories;
 			sourceTree = "<group>";
 		};
 		D4513AAF2AF63A3C00CA4438 /* FileView */ = {
@@ -725,11 +725,11 @@
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
-				D44D196A2BE5DAEB0069D4A9 /* LocalRepository */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D4784EF42C848A0A00A02E11 /* Models */,
 				D46A30482BF858760057DB69 /* Views */,
 				D42F40992B4402EC00B32707 /* Components */,
+				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
