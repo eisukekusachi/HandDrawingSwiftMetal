@@ -10,7 +10,7 @@ import MetalKit
 struct CanvasModel {
     let projectName: String
 
-    let textureSize: CGSize
+    let textureSize: CGSize?
 
     let layerIndex: Int
     let layers: [TextureLayer]
@@ -43,6 +43,10 @@ struct CanvasModel {
 
         self.brushDiameter = entity.brushDiameter
         self.eraserDiameter = entity.eraserDiameter
+    }
+
+    func getTextureSize(drawableTextureSize: CGSize) -> CGSize {
+        textureSize ?? drawableTextureSize
     }
 
 }

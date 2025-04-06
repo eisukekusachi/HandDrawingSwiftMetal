@@ -184,6 +184,8 @@ final class CanvasViewModel {
     }
 
     func initCanvas(model: CanvasModel) {
+        guard let textureSize = model.textureSize else { return }
+
         textureLayers.initLayers(
             layers: model.layers,
             layerIndex: model.layerIndex
@@ -195,7 +197,7 @@ final class CanvasViewModel {
         drawingTool.setEraserDiameter(model.eraserDiameter)
         drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
 
-        updateTextures(size: model.textureSize)
+        updateTextures(size: textureSize)
     }
 
     private func updateTextures(size: CGSize) {
