@@ -286,3 +286,15 @@ extension CanvasViewController: PencilInputGestureRecognizerSender {
     }
 
 }
+
+extension CanvasViewController {
+
+    static func create(
+        canvasModel: CanvasModel = .init()
+    ) -> Self {
+        let viewController = Self()
+        viewController.canvasModel = canvasModel
+        return viewController
+    }
+
+}

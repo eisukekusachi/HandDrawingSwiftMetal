@@ -37,6 +37,7 @@
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
 		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
 		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
+		D434FAB12DA24BC5004400D0 /* CanvasViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D434FAB02DA24BC5004400D0 /* CanvasViewController.xib */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D440DF712ADA9E5100A4E425 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF702ADA9E5100A4E425 /* CanvasView.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
@@ -124,7 +125,6 @@
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
 		D4E1ECE12752388C00D4A23D /* CanvasViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */; };
-		D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE22752388C00D4A23D /* Main.storyboard */; };
 		D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE52752388E00D4A23D /* Assets.xcassets */; };
 		D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */; };
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
@@ -181,6 +181,7 @@
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
 		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
 		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
+		D434FAB02DA24BC5004400D0 /* CanvasViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CanvasViewController.xib; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D440DF702ADA9E5100A4E425 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
@@ -269,7 +270,6 @@
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewController.swift; sourceTree = "<group>"; };
-		D4E1ECE32752388C00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D4E1ECE52752388E00D4A23D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4E1ECE82752388E00D4A23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4E1ECEA2752388E00D4A23D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -366,6 +366,7 @@
 				D48F76462DA2149B0001C80F /* CanvasRenderer.swift */,
 				D440DF702ADA9E5100A4E425 /* CanvasView.swift */,
 				D4E1ECE02752388C00D4A23D /* CanvasViewController.swift */,
+				D434FAB02DA24BC5004400D0 /* CanvasViewController.xib */,
 				D4C8EE9D2B255108005947EC /* CanvasViewModel.swift */,
 				D46601B82C392D3D007F1BC9 /* CanvasViewProtocol.swift */,
 			);
@@ -717,7 +718,6 @@
 				D42F40992B4402EC00B32707 /* Components */,
 				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
 				D46D07D92ADBEB160093D861 /* Utils */,
-				D4E1ECE22752388C00D4A23D /* Main.storyboard */,
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
 				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
@@ -858,11 +858,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D434FAB12DA24BC5004400D0 /* CanvasViewController.xib in Resources */,
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
 				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,
 				D41CACE22B9C01F200B8C7C5 /* CanvasContentView.xib in Resources */,
-				D4E1ECE42752388C00D4A23D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1061,14 +1061,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		D4E1ECE22752388C00D4A23D /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D4E1ECE32752388C00D4A23D /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1210,7 +1202,6 @@
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Photo saving.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1242,7 +1233,6 @@
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Photo saving.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
