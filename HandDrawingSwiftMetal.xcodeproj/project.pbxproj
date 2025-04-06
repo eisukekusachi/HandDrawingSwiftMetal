@@ -312,9 +312,9 @@
 			isa = PBXGroup;
 			children = (
 				D4517A062CC369FD0047C274 /* GrayscaleDotPointDummy.swift */,
+				D48F764C2DA215E60001C80F /* TextureLayerModelDummy.swift */,
 				D400A2752C8BEA5100275138 /* TouchPointDummy.swift */,
 				D400A2772C8BEA5E00275138 /* UITouchDummy.swift */,
-				D48F764C2DA215E60001C80F /* TextureLayerModelDummy.swift */,
 			);
 			path = Dummies;
 			sourceTree = "<group>";
@@ -371,7 +371,7 @@
 				D46601B82C392D3D007F1BC9 /* CanvasViewProtocol.swift */,
 			);
 			name = CanvasView;
-			path = ../CanvasView;
+			path = ../../CanvasView;
 			sourceTree = "<group>";
 		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
@@ -379,21 +379,21 @@
 			children = (
 				D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */,
 				D4513AA72AF5DAA600CA4438 /* CalendarExtensions.swift */,
+				D48F76482DA214E10001C80F /* CollectionExtensions.swift */,
 				D40D977029DAB0AD00A82E6A /* CGAffineTransformExtensions.swift */,
 				D4541E932BBC167200C96741 /* CGPointExtensions.swift */,
 				D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */,
 				D4BCB3022AF7383B00EA650D /* DataExtensions.swift */,
 				D40D977229DAB0AD00A82E6A /* DictionaryExtensions.swift */,
 				D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */,
+				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
 				D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */,
+				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
 				D40D977129DAB0AD00A82E6A /* UIColorExtensions.swift */,
 				D4B65E5E29DD34A000A0542F /* UIImageExtensions.swift */,
 				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
 				D4513AA12AF5D4AC00CA4438 /* URLExtensions.swift */,
-				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
-				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
 				D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */,
-				D48F76482DA214E10001C80F /* CollectionExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -428,13 +428,13 @@
 		D42F40992B4402EC00B32707 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				D42F409E2B44035A00B32707 /* IntSlider.swift */,
-				D42F409C2B44033300B32707 /* SliderStyle.swift */,
-				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
+				D42F409E2B44035A00B32707 /* IntSlider.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
+				D42F409C2B44033300B32707 /* SliderStyle.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
+				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -544,8 +544,8 @@
 		D4650CA82D447EC400E7D60E /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
-				D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */,
 				D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */,
+				D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */,
 				D48F76442DA20FF20001C80F /* MockTextureRepository.swift */,
 			);
 			path = Mocks;
@@ -596,9 +596,10 @@
 		D46D07D92ADBEB160093D861 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				D40D979029DAB0D700A82E6A /* Calculate.swift */,
 				D45179FB2CC365FC0047C274 /* BezierCurve.swift */,
 				D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */,
+				D40D979029DAB0D700A82E6A /* Calculate.swift */,
+				D45179F72CC347BA0047C274 /* Constants.swift */,
 				D40D979229DAB0D700A82E6A /* Interpolator.swift */,
 				D40D975C29DAB09400A82E6A /* Iterator.swift */,
 				D4812E462D1643F400F47DC7 /* Logger.swift */,
@@ -607,7 +608,6 @@
 				D44D19732BE5DFE80069D4A9 /* ToastModel.swift */,
 				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
 				D4CE840F2C8B42BF00DEABC5 /* ViewSize.swift */,
-				D45179F72CC347BA0047C274 /* Constants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -659,8 +659,8 @@
 		D4888C962D6AB15300BB922A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
-				D45037C12D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift */,
 				D45037BF2D58379A0039BDA2 /* FingerScreenStrokeData.swift */,
+				D45037C12D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift */,
 			);
 			path = Gestures;
 			sourceTree = "<group>";
@@ -672,6 +672,22 @@
 				D40D979629DAB0DE00A82E6A /* Texture.metal */,
 			);
 			path = Shaders;
+			sourceTree = "<group>";
+		};
+		D4A60C712DA257B8008CBD20 /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
+				D42F40992B4402EC00B32707 /* Components */,
+				D40D975529DAB03E00A82E6A /* Extensions */,
+				D40D975829DAB05F00A82E6A /* Metal */,
+				D4784EF42C848A0A00A02E11 /* Models */,
+				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
+				D46D07D92ADBEB160093D861 /* Utils */,
+				D46A30482BF858760057DB69 /* Views */,
+			);
+			path = Canvas;
 			sourceTree = "<group>";
 		};
 		D4AEFE272B09B26500EE3EEF /* Tools */ = {
@@ -711,15 +727,7 @@
 			children = (
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
-				D40D975529DAB03E00A82E6A /* Extensions */,
-				D40D975829DAB05F00A82E6A /* Metal */,
-				D4784EF42C848A0A00A02E11 /* Models */,
-				D46A30482BF858760057DB69 /* Views */,
-				D42F40992B4402EC00B32707 /* Components */,
-				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
-				D46D07D92ADBEB160093D861 /* Utils */,
-				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
-				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
+				D4A60C712DA257B8008CBD20 /* Canvas */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
 			);
