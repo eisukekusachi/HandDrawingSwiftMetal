@@ -103,6 +103,10 @@
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48F763B2DA209190001C80F /* TextureLayerEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763A2DA209190001C80F /* TextureLayerEntity.swift */; };
 		D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */; };
+		D48F763F2DA20B3D0001C80F /* TextureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763E2DA20B3D0001C80F /* TextureRepository.swift */; };
+		D48F76412DA20B610001C80F /* SingletonTextureInMemoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F76402DA20B610001C80F /* SingletonTextureInMemoryRepository.swift */; };
+		D48F76432DA20B800001C80F /* TextureInMemoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */; };
+		D48F76452DA20FF20001C80F /* MockTextureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F76442DA20FF20001C80F /* MockTextureRepository.swift */; };
 		D4934F422ADA36C500C52B76 /* CanvasDrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
@@ -245,6 +249,10 @@
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48F763A2DA209190001C80F /* TextureLayerEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerEntity.swift; sourceTree = "<group>"; };
 		D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModel.swift; sourceTree = "<group>"; };
+		D48F763E2DA20B3D0001C80F /* TextureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureRepository.swift; sourceTree = "<group>"; };
+		D48F76402DA20B610001C80F /* SingletonTextureInMemoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingletonTextureInMemoryRepository.swift; sourceTree = "<group>"; };
+		D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureInMemoryRepository.swift; sourceTree = "<group>"; };
+		D48F76442DA20FF20001C80F /* MockTextureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureRepository.swift; sourceTree = "<group>"; };
 		D4934F412ADA36C500C52B76 /* CanvasDrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingToolType.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
@@ -457,6 +465,9 @@
 			children = (
 				D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */,
 				D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */,
+				D48F76402DA20B610001C80F /* SingletonTextureInMemoryRepository.swift */,
+				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
+				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
 			);
 			path = LocalRepository;
 			sourceTree = "<group>";
@@ -548,6 +559,7 @@
 			children = (
 				D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */,
 				D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */,
+				D48F76442DA20FF20001C80F /* MockTextureRepository.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -929,6 +941,7 @@
 				D469A85F2C5620FB00D10575 /* GrayscaleDotPoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
 				D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */,
+				D48F76412DA20B610001C80F /* SingletonTextureInMemoryRepository.swift in Sources */,
 				D45941582B08B5CF00A18653 /* CanvasDrawingTool.swift in Sources */,
 				D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */,
 				D4507C162C3E2C1300CA3974 /* CanvasModel.swift in Sources */,
@@ -939,6 +952,7 @@
 				D4E1ECE12752388C00D4A23D /* CanvasViewController.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */,
+				D48F76432DA20B800001C80F /* TextureInMemoryRepository.swift in Sources */,
 				D45179FC2CC365FC0047C274 /* BezierCurve.swift in Sources */,
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
@@ -962,6 +976,7 @@
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,
 				D464FCAE2D23BC0F00BCC565 /* Layers.swift in Sources */,
+				D48F763F2DA20B3D0001C80F /* TextureRepository.swift in Sources */,
 				D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */,
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
@@ -1020,6 +1035,7 @@
 				D4650CAE2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift in Sources */,
 				D464FCC62D23EC6F00BCC565 /* TextureLayerDummy.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
+				D48F76452DA20FF20001C80F /* MockTextureRepository.swift in Sources */,
 				D464FCC42D23EC4300BCC565 /* UndoMoveDataTests.swift in Sources */,
 				D4837AEE2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift in Sources */,
 				D458C7372D563B870004D9E6 /* TextureLayersTests.swift in Sources */,
