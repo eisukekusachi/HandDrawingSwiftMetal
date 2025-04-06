@@ -145,10 +145,6 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingTool.backgroundColorPublisher
-            .assign(to: \.backgroundColor, on: renderer)
-            .store(in: &cancellables)
-
         textureLayers.didFinishInitializationPublisher
             .sink { [weak self] textureSize in
                 self?.initTextures(textureSize: textureSize)
@@ -170,6 +166,8 @@ final class CanvasViewModel {
                 self?.updateCanvas()
             }
             .store(in: &cancellables)
+
+        drawingTool.backgroundColorPublisher.assign(to: \.backgroundColor, on: renderer).store(in: &cancellables)
 
         transformer.matrixPublisher.assign(to: \.matrix, on: renderer) .store(in: &cancellables)
     }
