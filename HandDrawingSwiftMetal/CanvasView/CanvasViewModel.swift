@@ -5,9 +5,9 @@
 //  Created by Eisuke Kusachi on 2023/12/10.
 //
 
+import Combine
 import MetalKit
 import SwiftUI
-import Combine
 
 final class CanvasViewModel {
     var frameSize: CGSize = .zero {
