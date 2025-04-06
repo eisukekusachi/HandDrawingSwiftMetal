@@ -795,7 +795,6 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func loadFile(from filePath: String) {
-        /*
         guard
             let localRepository,
             let textureRepository
@@ -818,11 +817,9 @@ extension CanvasViewModel {
             self?.refreshCanvasSubject.send(canvasModel)
         })
         .store(in: &cancellables)
-        */
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
-        /*
         guard
             let localRepository,
             let textureRepository
@@ -846,7 +843,6 @@ extension CanvasViewModel {
             }
         }, receiveValue: {})
         .store(in: &cancellables)
-        */
     }
 
 }

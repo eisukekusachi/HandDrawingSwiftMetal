@@ -5,57 +5,52 @@
 //  Created by Eisuke Kusachi on 2024/05/04.
 //
 
-import MetalKit
 import Combine
-
-enum DocumentsLocalRepositoryError: Error {
-    case exportThumbnailError
-    case exportLayerDataError
-}
+import MetalKit
 
 final class DocumentsLocalRepository: LocalRepository {
+
+    private static let thumbnailName: String = "thumbnail.png"
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,
         textureLayers: TextureLayers,
+        textureRepository: any TextureRepository,
         drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-        return Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-        /*
-        Future<Void, Error> { promise in
+        Future<URL, Error> { promise in
             Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    promise(.success(()))
+                    promise(.success(URL.tmpFolderURL))
                 } catch {
-                    promise(.failure(DocumentsLocalRepositoryError.exportLayerDataError))
+                    promise(.failure(DocumentsLocalRepositoryError.exportLayerData))
                 }
             }
         }
-        .flatMap { _ in
+        .flatMap { url in
             Publishers.CombineLatest(
                 self.exportThumbnail(
                     texture: renderTexture,
-                    fileName: URL.thumbnailPath,
+                    fileName: DocumentsLocalRepository.thumbnailName,
                     height: 500,
-                    to: URL.tmpFolderURL
+                    to: url
                 ),
-                self.exportLayerData(
-                    layers: textureLayers.layers,
-                    to: URL.tmpFolderURL
+                self.exportTextures(
+                    textureIds: textureLayers.layers.map { $0.id },
+                    textureRepository: textureRepository,
+                    to: url
                 )
             )
             .eraseToAnyPublisher()
         }
-        .compactMap { thumbnailName, layers in
+        .compactMap { thumbnailName, _ in
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
                 textureSize: renderTexture.size,
-                layerIndex: textureLayers.index,
-                layers: layers,
+                layerIndex: textureLayers.selectedIndex ?? 0,
+                layers: textureLayers.layers.map { .init(from: $0) },
                 drawingTool: drawingTool
             )
         }
@@ -75,22 +70,14 @@ final class DocumentsLocalRepository: LocalRepository {
             try? FileManager.default.removeItem(at: URL.tmpFolderURL)
         })
         .eraseToAnyPublisher()
-         */
     }
 
     func loadDataFromDocuments(
-        sourceURL: URL
+        sourceURL: URL,
+        textureRepository: any TextureRepository
     ) -> AnyPublisher<CanvasModel, Error> {
-        return Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-        /*
-        Future<CanvasModel, Error> { promise in
+        Future<CanvasEntity, Error> { promise in
             Task {
-                defer {
-                    try? FileManager.default.removeItem(atPath: URL.tmpFolderURL.path)
-                }
-
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
                     try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
@@ -98,21 +85,38 @@ final class DocumentsLocalRepository: LocalRepository {
                     let entity = try FileInputManager.getCanvasEntity(
                         fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
                     )
-
-                    let model = try CanvasModel.init(
-                        projectName: sourceURL.fileName,
-                        entity: entity,
-                        folderURL: URL.tmpFolderURL
-                    )
-
-                    promise(.success(model))
+                    promise(.success(entity))
                 } catch {
                     promise(.failure(error))
                 }
             }
         }
+        .flatMap { entity -> AnyPublisher<CanvasModel, Never> in
+            Just(
+                CanvasModel(
+                    projectName: sourceURL.fileName,
+                    entity: entity
+                )
+            )
+            .eraseToAnyPublisher()
+        }
+        .flatMap { model -> AnyPublisher<CanvasModel, Error> in
+            guard let textureSize = model.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
+                return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
+                    .eraseToAnyPublisher()
+            }
+            return textureRepository.initTextures(
+                layers: model.layers,
+                textureSize: textureSize,
+                folderURL: URL.tmpFolderURL
+            )
+            .map { _ in model }
+            .eraseToAnyPublisher()
+        }
+        .handleEvents(receiveCompletion: { _ in
+            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+        })
         .eraseToAnyPublisher()
-        */
     }
 
 }
@@ -132,40 +136,44 @@ extension DocumentsLocalRepository {
                 )
                 promise(.success(fileName))
             } catch {
-                promise(.failure(DocumentsLocalRepositoryError.exportThumbnailError))
+                promise(.failure(DocumentsLocalRepositoryError.exportThumbnail))
             }
         }
         .eraseToAnyPublisher()
     }
 
-    /*
-    private func exportLayerData(
-        layers: [TextureLayer],
+    private func exportTextures(
+        textureIds: [UUID],
+        textureRepository: any TextureRepository,
         to url: URL
-    ) -> AnyPublisher<[ImageLayerEntity], Error> {
-        Future<[ImageLayerEntity], Error> { promise in
-            do {
-                let layerEntities = try layers.map { layer -> ImageLayerEntity in
-                    let textureName = UUID().uuidString
+    ) -> AnyPublisher<Void, Error> {
+        textureRepository.loadTextures(textureIds)
+            .tryMap { textureDict in
+                guard textureDict.count == textureIds.count else {
+                    throw DocumentsLocalRepositoryError.exportLayerData
+                }
 
-                    try FileOutputManager.saveImage(
-                        bytes: layer.texture?.bytes ?? [],
-                        to: url.appendingPathComponent(textureName)
-                    )
-
-                    return ImageLayerEntity(
-                        textureName: textureName,
-                        title: layer.title,
-                        alpha: layer.alpha,
-                        isVisible: layer.isVisible
+                try textureIds.forEach { id in
+                    guard let texture = textureDict[id].flatMap({ $0 }) else {
+                        throw DocumentsLocalRepositoryError.exportLayerData
+                    }
+                    let fileURL = url.appendingPathComponent(id.uuidString)
+                    try FileOutputManager.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: fileURL
                     )
                 }
-                promise(.success(layerEntities))
-            } catch {
-                promise(.failure(DocumentsLocalRepositoryError.exportLayerDataError))
+
+                return ()
             }
-        }
-        .eraseToAnyPublisher()
+            .mapError { _ in DocumentsLocalRepositoryError.exportLayerData }
+            .eraseToAnyPublisher()
     }
-    */
+
+}
+
+enum DocumentsLocalRepositoryError: Error {
+    case exportThumbnail
+    case exportLayerData
+    case invalidTextureSize
 }
