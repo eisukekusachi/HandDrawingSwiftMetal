@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// Manage the state of drawing tools
 final class CanvasDrawingState: ObservableObject {
 
     @Published var drawingToolType: DrawingToolType = .brush {
@@ -18,21 +19,37 @@ final class CanvasDrawingState: ObservableObject {
         }
     }
 
-    private(set) var brush = DrawingBrushTool()
+    private(set) lazy var brush = DrawingBrushTool()
 
-    private(set) var eraser = DrawingEraserTool()
+    private(set) lazy var eraser = DrawingEraserTool()
 
     private(set) var currentDrawingTool: DrawingToolProtocol!
+
+    init(
+        brushColor: UIColor,
+        brushDiameter: Int,
+        eraserAlpha: Int,
+        eraserDiameter: Int,
+        drawingToolType: DrawingToolType
+    ) {
+        self.brush.color = brushColor
+        self.brush.setDiameter(brushDiameter)
+
+        self.eraser.alpha = eraserAlpha
+        self.eraser.setDiameter(eraserDiameter)
+
+        self.drawingToolType = drawingToolType
+    }
 
 }
 
 extension CanvasDrawingState {
 
-    convenience init(model: CanvasModel) {
-        self.init()
+    func setData(_ model: CanvasModel) {
 
         brush.setDiameter(model.brushDiameter)
         eraser.setDiameter(model.eraserDiameter)
+
         drawingToolType = .init(rawValue: model.drawingTool)
     }
 

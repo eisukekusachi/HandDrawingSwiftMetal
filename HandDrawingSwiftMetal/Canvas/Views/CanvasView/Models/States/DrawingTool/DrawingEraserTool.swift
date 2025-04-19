@@ -8,9 +8,10 @@
 import UIKit
 
 final class DrawingEraserTool: ObservableObject, DrawingToolProtocol {
-    @Published var diameter: Int = 8
 
-    @Published var alpha: Int = 155 {
+    @Published var diameter: Int = 0
+
+    @Published var alpha: Int = 0 {
         didSet {
             let clamped = max(0, min(alpha, 255))
             if alpha != clamped {
@@ -18,6 +19,7 @@ final class DrawingEraserTool: ObservableObject, DrawingToolProtocol {
             }
         }
     }
+
 }
 
 extension DrawingEraserTool {

@@ -13,7 +13,7 @@ final class CanvasViewModel {
 
     let textureLayers = TextureLayers()
 
-    let drawingTool = CanvasDrawingToolStatus()
+    let canvasState: CanvasState
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -107,12 +107,12 @@ final class CanvasViewModel {
         textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
+        self.canvasState = CanvasState.init(CanvasModel())
+
         self.textureRepository = textureRepository
         self.localRepository = localRepository
 
-        drawingTool.setDrawingTool(.brush)
-
-        subscribe()
+        textureLayers.setCanvasState(canvasState)
     }
 
     private func subscribe() {
@@ -131,7 +131,7 @@ final class CanvasViewModel {
         }
         .store(in: &cancellables)
 
-        drawingTool.drawingToolPublisher
+        canvasState.drawingToolState.$drawingToolType
             .sink { [weak self] tool in
                 guard let `self` else { return }
                 switch tool {
@@ -141,20 +141,22 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingTool.brushColorPublisher
+        canvasState.drawingToolState.brush.$color
             .sink { [weak self] color in
                 self?.drawingBrushTextureSet.setBlushColor(color)
             }
             .store(in: &cancellables)
 
-        drawingTool.eraserAlphaPublisher
+        canvasState.drawingToolState.eraser.$alpha
             .sink { [weak self] alpha in
                 self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
 
         textureLayers.didFinishInitializationPublisher
-            .sink { [weak self] textureSize in
+            .sink { [weak self] canvasModel in
+                guard let textureSize = canvasModel.textureSize else { return }
+                self?.canvasState.setData(canvasModel)
                 self?.initTextures(textureSize: textureSize)
             }
             .store(in: &cancellables)
@@ -163,6 +165,7 @@ final class CanvasViewModel {
             .sink { [weak self] _ in
                 guard let `self` else { return }
                 self.renderer.updateCanvasAfterUpdatingAllTextures(
+                    canvasState: self.canvasState,
                     textureLayers: self.textureLayers,
                     commandBuffer: self.renderer.commandBuffer
                 )
@@ -175,19 +178,13 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        drawingTool.backgroundColorPublisher.assign(to: \.backgroundColor, on: renderer).store(in: &cancellables)
+        canvasState.$backgroundColor.assign(to: \.backgroundColor, on: renderer).store(in: &cancellables)
 
         transformer.matrixPublisher.assign(to: \.matrix, on: renderer) .store(in: &cancellables)
     }
 
     func initCanvas(using model: CanvasModel) {
         guard let drawableSize = renderer.renderTextureSize else { return }
-
-        projectName = model.projectName
-        drawingTool.setBrushDiameter(model.brushDiameter)
-        drawingTool.setEraserDiameter(model.eraserDiameter)
-        drawingTool.setDrawingTool(.init(rawValue: model.drawingTool))
-
         textureLayers.restoreLayers(from: model, drawableSize: drawableSize)
     }
 
@@ -199,6 +196,7 @@ final class CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
         renderer.updateCanvasAfterUpdatingAllTextures(
+            canvasState: canvasState,
             textureLayers: textureLayers,
             commandBuffer: commandBuffer
         )
@@ -212,6 +210,8 @@ extension CanvasViewModel {
         canvasView: CanvasViewProtocol
     ) {
         renderer.setCanvas(canvasView)
+
+        subscribe()
     }
 
     func onViewDidAppear(
@@ -226,7 +226,7 @@ extension CanvasViewModel {
     func onUpdateRenderTexture() {
         // Redraws the canvas when the device rotates and the canvas size changes.
         guard
-            let selectedLayer = textureLayers.selectedLayer,
+            let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = renderer.commandBuffer
         else { return }
 
@@ -377,7 +377,10 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
-        guard let drawableSize = renderer.renderTextureSize else { return }
+        guard
+            let drawableSize = renderer.renderTextureSize,
+            let diameter = canvasState.drawingToolDiameter
+        else { return }
 
         drawingCurveIterator?.append(
             points: screenTouchPoints.map {
@@ -387,7 +390,7 @@ extension CanvasViewModel {
                     textureSize: renderer.textureSize,
                     drawableSize: drawableSize,
                     frameSize: renderer.frameSize,
-                    diameter: CGFloat(drawingTool.diameter)
+                    diameter: CGFloat(diameter)
                 )
             },
             touchPhase: screenTouchPoints.lastTouchPhase
@@ -464,7 +467,7 @@ extension CanvasViewModel {
 
     private func updateCanvas() {
         guard
-            let selectedLayer = textureLayers.selectedLayer,
+            let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = renderer.commandBuffer
         else { return }
 
@@ -477,7 +480,7 @@ extension CanvasViewModel {
     private func updateCanvasWithDrawing() {
         guard
             let drawingCurveIterator,
-            let selectedLayer = textureLayers.selectedLayer,
+            let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = renderer.commandBuffer
         else { return }
 
@@ -501,7 +504,7 @@ extension CanvasViewModel {
             DispatchQueue.main.async { [weak self] in
                 guard
                     let selectedTexture = self?.renderer.selectedTexture,
-                    let selectedTextureId = self?.textureLayers.selectedLayer?.id
+                    let selectedTextureId = self?.canvasState.selectedLayer?.id
                 else { return }
 
                 self?.renderer.renderTextureToLayerInRepository(
@@ -541,9 +544,9 @@ extension CanvasViewModel {
     private func saveFile(canvasTexture: MTLTexture) {
         localRepository.saveDataToDocuments(
             renderTexture: canvasTexture,
+            canvasState: canvasState,
             textureLayers: textureLayers,
             textureRepository: textureRepository,
-            drawingTool: drawingTool,
             to: URL.getZipFileURL(projectName: projectName)
         )
         .handleEvents(

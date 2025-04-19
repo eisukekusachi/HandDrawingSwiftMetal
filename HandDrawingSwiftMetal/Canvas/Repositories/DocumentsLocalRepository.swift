@@ -21,9 +21,9 @@ final class DocumentsLocalRepository: LocalRepository {
     }
     func saveDataToDocuments(
         renderTexture: MTLTexture,
+        canvasState: CanvasState,
         textureLayers: TextureLayers,
         textureRepository: any TextureRepository,
-        drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
         Future<URL, Error> { [weak self] promise in
@@ -46,7 +46,7 @@ final class DocumentsLocalRepository: LocalRepository {
                     to: url
                 ),
                 self.exportTextures(
-                    textureIds: textureLayers.layers.map { $0.id },
+                    textureIds: canvasState.layers.map { $0.id },
                     textureRepository: textureRepository,
                     to: url
                 )
@@ -57,9 +57,9 @@ final class DocumentsLocalRepository: LocalRepository {
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
                 textureSize: renderTexture.size,
-                layerIndex: textureLayers.selectedIndex ?? 0,
-                layers: textureLayers.layers.map { .init(from: $0) },
-                drawingTool: drawingTool
+                layerIndex: canvasState.selectedIndex ?? 0,
+                layers: canvasState.layers.map { .init(from: $0) },
+                canvasState: canvasState
             )
         }
         .tryMap { result in

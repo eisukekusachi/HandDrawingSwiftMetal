@@ -66,7 +66,7 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func setupContentView() {
-        contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+        contentView.applyDrawingParameters(canvasViewModel.canvasState)
 
         subscribeEvents()
 
@@ -190,6 +190,7 @@ extension CanvasViewController {
 
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
+            canvasState: canvasViewModel.canvasState,
             textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in

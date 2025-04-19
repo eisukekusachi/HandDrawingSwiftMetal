@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TextureLayerView: View {
 
+    @ObservedObject var canvasState: CanvasState
     @ObservedObject var textureLayers: TextureLayers
 
     @State var isTextFieldPresented: Bool = false
@@ -46,6 +47,7 @@ struct TextureLayerView: View {
                 )
 
                 TextureLayerListView(
+                    canvasState: canvasState,
                     textureLayers: textureLayers,
                     didTapLayer: { layer in
                         didTapLayer?(layer)
@@ -60,19 +62,19 @@ struct TextureLayerView: View {
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: textureLayers.selectedLayer?.alpha ?? 0,
+                    value: canvasState.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didStartChanging: {
-                        guard let selectedLayer = textureLayers.selectedLayer else { return }
+                        guard let selectedLayer = canvasState.selectedLayer else { return }
                         didStartChangingAlpha?(selectedLayer)
                     },
                     didChange: { value in
-                        guard let selectedLayer = textureLayers.selectedLayer else { return }
+                        guard let selectedLayer = canvasState.selectedLayer else { return }
                         didChangeAlpha?(selectedLayer, value)
                     },
                     didFinishChanging: {
-                        guard let selectedLayer = textureLayers.selectedLayer else { return }
+                        guard let selectedLayer = canvasState.selectedLayer else { return }
                         didFinishChangingAlpha?(selectedLayer)
                     }
                 )
@@ -120,7 +122,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textFieldTitle = textureLayers.selectedLayer?.title ?? ""
+                    textFieldTitle = canvasState.selectedLayer?.title ?? ""
                     isTextFieldPresented = true
                 },
                 label: {
@@ -131,7 +133,7 @@ extension TextureLayerView {
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let selectedLayer = textureLayers.selectedLayer else { return }
+                    guard let selectedLayer = canvasState.selectedLayer else { return }
                     didEditTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
@@ -140,22 +142,5 @@ extension TextureLayerView {
         }
         .padding(8)
     }
-
-}
-
-#Preview {
-
-    TextureLayerView(
-        textureLayers: .init(
-            layers: [
-                .init(title: "Layer0", alpha: 255, isVisible: true),
-                .init(title: "Layer1", alpha: 155, isVisible: false),
-                .init(title: "Layer2", alpha: 55, isVisible: true),
-                .init(title: "Layer3", alpha: 0, isVisible: false)
-            ]
-        ),
-        roundedRectangleWithArrow: RoundedRectangleWithArrow()
-    )
-    .frame(width: 256, height: 300)
 
 }

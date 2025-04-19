@@ -8,9 +8,11 @@
 import UIKit
 
 final class DrawingBrushTool: ObservableObject, DrawingToolProtocol {
-    @Published var diameter: Int = 8
 
-    @Published var color: UIColor = .black
+    @Published var diameter: Int = 0
+
+    @Published var color: UIColor = .clear
+
 }
 
 extension DrawingBrushTool {
