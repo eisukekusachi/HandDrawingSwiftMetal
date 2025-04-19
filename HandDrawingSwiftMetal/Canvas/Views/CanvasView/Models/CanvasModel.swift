@@ -19,7 +19,7 @@ struct CanvasModel {
     var drawingTool: Int = 0
 
     var brushDiameter: Int = 8
-    var eraserDiameter: Int = 8
+    var eraserDiameter: Int = 44
 
 }
 

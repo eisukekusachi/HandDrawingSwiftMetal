@@ -17,7 +17,8 @@ final class CanvasContentView: UIView {
     @IBOutlet private weak var loadButton: UIButton!
     @IBOutlet private weak var newButton: UIButton!
 
-    @IBOutlet private weak var diameterSlider: UISlider!
+    @IBOutlet private weak var brushDiameterSlider: UISlider!
+    @IBOutlet private weak var eraserDiameterSlider: UISlider!
 
     @IBOutlet private weak var blackColorButton: UIButton!
     @IBOutlet private weak var redColorButton: UIButton!
@@ -53,7 +54,8 @@ final class CanvasContentView: UIView {
     private func commonInit() {
         backgroundColor = .white
 
-        diameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+        brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+        eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
 
         undoButton.isHidden = true
         redoButton.isHidden = true
@@ -66,6 +68,7 @@ extension CanvasContentView {
     func applyDrawingParameters(_ drawingTool: CanvasDrawingToolStatus) {
         bindInputs(drawingTool)
         bindModels(drawingTool)
+        showSlider(drawingTool.drawingTool)
     }
 
     private func bindInputs(_ drawingTool: CanvasDrawingToolStatus) {
@@ -94,18 +97,21 @@ extension CanvasContentView {
             self?.tapNewButton?()
         }, for: .touchUpInside)
 
-        blackColorButton.addAction(.init { _ in
+        blackColorButton.addAction(.init { [weak self] _ in
             drawingTool.setDrawingTool(.brush)
             drawingTool.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+            self?.showSlider(.brush)
         }, for: .touchUpInside)
 
-        redColorButton.addAction(.init { _ in
+        redColorButton.addAction(.init { [weak self] _ in
             drawingTool.setDrawingTool(.brush)
             drawingTool.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+            self?.showSlider(.brush)
         }, for: .touchUpInside)
 
-        eraserButton.addAction(.init { _ in
+        eraserButton.addAction(.init { [weak self] _ in
             drawingTool.setDrawingTool(.eraser)
+            self?.showSlider(.eraser)
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
@@ -116,22 +122,37 @@ extension CanvasContentView {
             self?.tapRedoButton?()
         }, for: .touchUpInside)
 
-        diameterSlider.addTarget(
+        brushDiameterSlider.addTarget(
             drawingTool,
             action:#selector(drawingTool.handleDiameterSlider),
-            for: .valueChanged)
+            for: .valueChanged
+        )
+        eraserDiameterSlider.addTarget(
+            drawingTool,
+            action:#selector(drawingTool.handleDiameterSlider),
+            for: .valueChanged
+        )
     }
 
     private func bindModels(_ drawingTool: CanvasDrawingToolStatus) {
 
-        drawingTool.diameterPublisher
-            .assign(to: \.value, on: diameterSlider)
+        drawingTool.brushDiameterPublisher
+            .assign(to: \.value, on: brushDiameterSlider)
+            .store(in: &cancellables)
+
+        drawingTool.eraserDiameterPublisher
+            .assign(to: \.value, on: eraserDiameterSlider)
             .store(in: &cancellables)
 
         drawingTool.backgroundColorPublisher
             .compactMap { $0 }
             .assign(to: \.backgroundColor, on: canvasView)
             .store(in: &cancellables)
+    }
+
+    private func showSlider(_ tool: CanvasDrawingToolType) {
+        brushDiameterSlider.isHidden = tool != .brush
+        eraserDiameterSlider.isHidden = tool != .eraser
     }
 
 }
