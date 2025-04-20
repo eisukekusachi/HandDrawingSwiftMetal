@@ -127,14 +127,14 @@ extension CanvasContentView {
             guard
                 let slider = action.sender as? UISlider
             else { return }
-            drawingToolState.brush.diameter = DrawingBrushTool.diameterIntValue(slider.value)
+            drawingToolState.brush.setDiameter(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { action in
             guard
                 let slider = action.sender as? UISlider
             else { return }
-            drawingToolState.eraser.diameter = DrawingEraserTool.diameterIntValue(slider.value)
+            drawingToolState.eraser.setDiameter(slider.value)
         }, for: .valueChanged)
     }
 
