@@ -81,15 +81,6 @@ final class TextureLayers: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func initializeWithModel(_ model: CanvasModel) {
-        guard
-            let textureSize = model.textureSize,
-            textureSize > MTLRenderer.minimumTextureSize
-        else { return }
-
-        initializeCanvasWithModelSubject.send(model)
-    }
-
     private func initializeWithTextureSize(_ textureSize: CGSize) {
         guard textureSize > MTLRenderer.minimumTextureSize else { return }
 
