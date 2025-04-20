@@ -189,6 +189,10 @@ final class CanvasViewModel {
             .store(in: &cancellables)
     }
 
+}
+
+extension CanvasViewModel {
+
     func initCanvas(using model: CanvasModel) {
         guard let drawableSize = renderer.renderTextureSize else { return }
         textureLayers.restoreLayers(from: model, drawableSize: drawableSize)
