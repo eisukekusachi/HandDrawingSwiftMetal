@@ -133,7 +133,7 @@ final class CanvasViewModel {
         .store(in: &cancellables)
 
         // Update drawingTextureSet when the tool is switched
-        canvasState.drawingToolState.$drawingToolType
+        canvasState.drawingToolState.$drawingTool
             .sink { [weak self] tool in
                 guard let `self` else { return }
                 switch tool {

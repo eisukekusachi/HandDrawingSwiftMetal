@@ -11,11 +11,9 @@ import UIKit
 final class CanvasState: ObservableObject {
 
     let drawingToolState = DrawingToolState(
-        brushColor: UIColor(.black).withAlphaComponent(0.75),
-        brushDiameter: 8,
+        brushColor: UIColor.black.withAlphaComponent(0.75),
         eraserAlpha: 155,
-        eraserDiameter: 44,
-        drawingToolType: .brush
+        canvasModel: CanvasModel()
     )
 
     /// A name of the file to be saved

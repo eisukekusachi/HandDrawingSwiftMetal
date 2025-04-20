@@ -34,7 +34,7 @@ struct CanvasEntity: Codable, Equatable {
         self.layerIndex = layerIndex
         self.layers = layers
 
-        self.drawingTool = canvasState.drawingToolState.drawingToolType.rawValue
+        self.drawingTool = canvasState.drawingToolState.drawingTool.rawValue
         self.brushDiameter = canvasState.drawingToolState.brush.diameter
         self.eraserDiameter = canvasState.drawingToolState.eraser.diameter
     }

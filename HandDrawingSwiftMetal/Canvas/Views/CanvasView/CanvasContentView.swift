@@ -98,17 +98,17 @@ extension CanvasContentView {
         }, for: .touchUpInside)
 
         blackColorButton.addAction(.init { _ in
-            drawingToolState.drawingToolType = .brush
+            drawingToolState.drawingTool = .brush
             drawingToolState.brush.color = UIColor.black.withAlphaComponent(0.75)
         }, for: .touchUpInside)
 
         redColorButton.addAction(.init { _ in
-            drawingToolState.drawingToolType = .brush
+            drawingToolState.drawingTool = .brush
             drawingToolState.brush.color = UIColor.red.withAlphaComponent(0.75)
         }, for: .touchUpInside)
 
         eraserButton.addAction(.init { _ in
-            drawingToolState.drawingToolType = .eraser
+            drawingToolState.drawingTool = .eraser
 
         }, for: .touchUpInside)
 
@@ -133,7 +133,7 @@ extension CanvasContentView {
 
     private func bindData(_ canvasState: CanvasState) {
 
-        canvasState.drawingToolState.$drawingToolType
+        canvasState.drawingToolState.$drawingTool
             .sink { [weak self] type in
                 self?.showSlider(type)
             }
