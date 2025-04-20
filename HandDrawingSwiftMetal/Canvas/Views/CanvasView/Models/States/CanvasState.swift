@@ -10,7 +10,7 @@ import UIKit
 /// Manage the state of the canvas
 final class CanvasState: ObservableObject {
 
-    let drawingToolState = CanvasDrawingState(
+    let drawingToolState = CanvasDrawingToolState(
         brushColor: UIColor(.black).withAlphaComponent(0.75),
         brushDiameter: 8,
         eraserAlpha: 155,

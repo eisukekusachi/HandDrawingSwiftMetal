@@ -1,5 +1,5 @@
 //
-//  DrawingBrushTool.swift
+//  DrawingBrushToolState.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/19.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DrawingBrushTool: ObservableObject, DrawingToolProtocol {
+final class DrawingBrushToolState: ObservableObject, DrawingToolProtocol {
 
     @Published var diameter: Int = 0
 
@@ -15,10 +15,10 @@ final class DrawingBrushTool: ObservableObject, DrawingToolProtocol {
 
 }
 
-extension DrawingBrushTool {
+extension DrawingBrushToolState {
 
     func sliderValue() -> Float {
-        DrawingBrushTool.diameterFloatValue(diameter)
+        DrawingBrushToolState.diameterFloatValue(diameter)
     }
 
     func setData(color: UIColor, diameter: Int) {
@@ -27,7 +27,7 @@ extension DrawingBrushTool {
     }
 
     func setDiameter(_ value: Float) {
-        diameter = DrawingBrushTool.diameterIntValue(value)
+        diameter = DrawingBrushToolState.diameterIntValue(value)
     }
     func setDiameter(_ value: Int) {
         diameter = value
@@ -35,7 +35,7 @@ extension DrawingBrushTool {
 
 }
 
-extension DrawingBrushTool {
+extension DrawingBrushToolState {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 

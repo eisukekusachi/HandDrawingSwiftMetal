@@ -1,5 +1,5 @@
 //
-//  DrawingEraserTool.swift
+//  DrawingEraserToolState.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/19.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DrawingEraserTool: ObservableObject, DrawingToolProtocol {
+final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol {
 
     @Published var diameter: Int = 0
 
@@ -22,7 +22,7 @@ final class DrawingEraserTool: ObservableObject, DrawingToolProtocol {
 
 }
 
-extension DrawingEraserTool {
+extension DrawingEraserToolState {
 
     func setData(alpha: Int, diameter: Int) {
         self.alpha = alpha
@@ -30,11 +30,11 @@ extension DrawingEraserTool {
     }
 
     func sliderValue() -> Float {
-        DrawingEraserTool.diameterFloatValue(diameter)
+        DrawingEraserToolState.diameterFloatValue(diameter)
     }
 
     func setDiameter(_ value: Float) {
-        diameter = DrawingEraserTool.diameterIntValue(value)
+        diameter = DrawingEraserToolState.diameterIntValue(value)
     }
     func setDiameter(_ value: Int) {
         diameter = value
@@ -42,7 +42,7 @@ extension DrawingEraserTool {
 
 }
 
-extension DrawingEraserTool {
+extension DrawingEraserToolState {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 
