@@ -35,7 +35,7 @@ final class TextureLayers: ObservableObject {
         }
     }
 
-    private var canvasState: CanvasState!
+    private var canvasState: CanvasState
 
     private var textureRepository: (any TextureRepository)!
 
@@ -44,8 +44,10 @@ final class TextureLayers: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(
+        canvasState: CanvasState,
         textureRepository: (any TextureRepository) = SingletonTextureInMemoryRepository.shared
     ) {
+        self.canvasState = canvasState
         self.textureRepository = textureRepository
 
         initializeWithTextureSizeSubject
@@ -53,10 +55,6 @@ final class TextureLayers: ObservableObject {
                 self?.initializeWithTextureSize(textureSize)
             }
             .store(in: &cancellables)
-    }
-
-    func setCanvasState(_ canvasState: CanvasState) {
-        self.canvasState = canvasState
     }
 
     /// Attempts to restore layers from a given `CanvasModel`

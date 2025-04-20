@@ -11,10 +11,12 @@ import SwiftUI
 
 final class CanvasViewModel {
 
-    let textureLayers = TextureLayers()
-
     let canvasState: CanvasState = .init(
         CanvasModel()
+    )
+
+    private(set) lazy var textureLayers = TextureLayers(
+        canvasState: canvasState
     )
 
     var frameSize: CGSize = .zero {
@@ -111,8 +113,6 @@ final class CanvasViewModel {
     ) {
         self.textureRepository = textureRepository
         self.localRepository = localRepository
-
-        textureLayers.setCanvasState(canvasState)
 
         bindData()
     }
