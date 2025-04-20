@@ -25,9 +25,6 @@ final class CanvasViewModel {
         }
     }
 
-    /// A name of the file to be saved
-    var projectName: String = Calendar.currentDate
-
     var requestShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
         requestShowingActivityIndicatorSubject.eraseToAnyPublisher()
     }
@@ -563,7 +560,7 @@ extension CanvasViewModel {
             canvasState: canvasState,
             textureLayers: textureLayers,
             textureRepository: textureRepository,
-            to: URL.getZipFileURL(projectName: projectName)
+            to: URL.getZipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.requestShowingActivityIndicatorSubject.send(true) },
