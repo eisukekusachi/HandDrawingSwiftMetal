@@ -136,6 +136,16 @@ extension CanvasContentView {
     }
 
     private func bindData(_ canvasState: CanvasState) {
+        canvasState.drawingToolState.brush.$diameter
+            .map { DrawingBrushToolState.diameterFloatValue($0) }
+            .assign(to: \.value, on: brushDiameterSlider)
+            .store(in: &cancellables)
+
+        canvasState.drawingToolState.eraser.$diameter
+            .map { DrawingEraserToolState.diameterFloatValue($0) }
+            .assign(to: \.value, on: eraserDiameterSlider)
+            .store(in: &cancellables)
+
         canvasState.$backgroundColor
             .compactMap { $0 }
             .assign(to: \.backgroundColor, on: canvasView)
