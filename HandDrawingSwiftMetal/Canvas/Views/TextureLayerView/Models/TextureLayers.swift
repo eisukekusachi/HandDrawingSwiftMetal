@@ -19,13 +19,17 @@ final class TextureLayers: ObservableObject {
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
         updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
     }
+    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+
     var updateCanvasPublisher: AnyPublisher<Void, Never> {
         updateCanvasSubject.eraseToAnyPublisher()
     }
-    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
     private let updateCanvasSubject = PassthroughSubject<Void, Never>()
 
-    let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
+    var initializeWithTextureSizePublisher: AnyPublisher<CGSize, Never> {
+        initializeWithTextureSizeSubject.eraseToAnyPublisher()
+    }
+    private let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
         didSet {
@@ -50,7 +54,7 @@ final class TextureLayers: ObservableObject {
         self.canvasState = canvasState
         self.textureRepository = textureRepository
 
-        initializeWithTextureSizeSubject
+        initializeWithTextureSizePublisher
             .sink { [weak self] textureSize in
                 self?.initializeWithTextureSize(textureSize)
             }
