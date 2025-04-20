@@ -13,7 +13,9 @@ final class CanvasViewModel {
 
     let textureLayers = TextureLayers()
 
-    let canvasState: CanvasState
+    let canvasState: CanvasState = .init(
+        CanvasModel()
+    )
 
     var frameSize: CGSize = .zero {
         didSet {
@@ -107,8 +109,6 @@ final class CanvasViewModel {
         textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
-        self.canvasState = CanvasState.init(CanvasModel())
-
         self.textureRepository = textureRepository
         self.localRepository = localRepository
 
