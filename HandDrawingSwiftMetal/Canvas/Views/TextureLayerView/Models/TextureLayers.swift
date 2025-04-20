@@ -140,12 +140,10 @@ extension TextureLayers {
         guard
             let textureRepository,
             let selectedLayerId = canvasState.selectedLayer?.id,
-            let index = canvasState.layers.firstIndex(where: { $0.id == selectedLayerId })
+            let selectedIndex = canvasState.layers.firstIndex(where: { $0.id == selectedLayerId })
         else { return }
 
-        let newSelectedLayerId = canvasState.layers[max(index - 1, 0)].id
-
-        removeLayerPublisher(from: index)
+        removeLayerPublisher(from: selectedIndex)
             .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
                 textureRepository.removeTexture(removedTextureId)
             }
@@ -155,8 +153,9 @@ extension TextureLayers {
                 case .failure: break
                 }
             }, receiveValue: { [weak self] _ in
-                self?.canvasState.selectedLayerId = newSelectedLayerId
-                self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+                guard let `self` else { return }
+                self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
+                self.updateCanvasAfterTextureLayerUpdatesSubject.send(())
             })
             .store(in: &cancellables)
     }
