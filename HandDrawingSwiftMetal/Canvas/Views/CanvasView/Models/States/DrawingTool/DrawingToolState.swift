@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingToolState.swift
+//  DrawingToolState.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/09.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// Manage the state of drawing tools
-final class CanvasDrawingToolState: ObservableObject {
+final class DrawingToolState: ObservableObject {
 
     @Published var drawingToolType: DrawingToolType = .brush {
         didSet {
@@ -43,7 +43,7 @@ final class CanvasDrawingToolState: ObservableObject {
 
 }
 
-extension CanvasDrawingToolState {
+extension DrawingToolState {
 
     func setData(_ model: CanvasModel) {
 
