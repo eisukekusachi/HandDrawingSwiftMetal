@@ -50,7 +50,7 @@ extension CanvasDrawingToolState {
         brush.setDiameter(model.brushDiameter)
         eraser.setDiameter(model.eraserDiameter)
 
-        drawingToolType = .init(rawValue: model.drawingTool)
+        drawingToolType = model.drawingTool
     }
 
 }
