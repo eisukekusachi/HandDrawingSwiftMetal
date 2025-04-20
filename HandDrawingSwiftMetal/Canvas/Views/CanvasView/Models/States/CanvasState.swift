@@ -10,14 +10,14 @@ import UIKit
 /// Manage the state of the canvas
 final class CanvasState: ObservableObject {
 
+    /// A name of the file to be saved
+    var projectName: String = Calendar.currentDate
+
     let drawingToolState = DrawingToolState(
         brushColor: UIColor.black.withAlphaComponent(0.75),
         eraserAlpha: 155,
         canvasModel: CanvasModel()
     )
-
-    /// A name of the file to be saved
-    var projectName: String = Calendar.currentDate
 
     /// If `layers` is empty, a new layer is created and added to `layers`
     /// when `restoreLayers(from:model, drawableSize:)` is called in `TextureLayers`.
