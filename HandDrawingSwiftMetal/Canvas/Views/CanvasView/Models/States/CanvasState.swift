@@ -14,8 +14,6 @@ final class CanvasState: ObservableObject {
     var projectName: String = Calendar.currentDate
 
     let drawingToolState = DrawingToolState(
-        brushColor: UIColor.black.withAlphaComponent(0.75),
-        eraserAlpha: 155,
         canvasModel: CanvasModel()
     )
 

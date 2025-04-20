@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2024/07/10.
 //
 
-import Foundation
+import UIKit
 
 struct CanvasModel {
 
@@ -18,7 +18,10 @@ struct CanvasModel {
 
     var drawingTool: DrawingToolType = .brush
 
+    var brushColor: UIColor = UIColor.black.withAlphaComponent(0.75)
     var brushDiameter: Int = 8
+
+    var eraserAlpha: Int = 155
     var eraserDiameter: Int = 44
 
 }

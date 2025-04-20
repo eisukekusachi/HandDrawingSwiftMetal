@@ -26,16 +26,14 @@ final class DrawingToolState: ObservableObject {
     private(set) var currentDrawingTool: DrawingToolProtocol!
 
     convenience init(
-        brushColor: UIColor,
-        eraserAlpha: Int,
         canvasModel: CanvasModel
     ) {
         self.init()
 
-        self.brush.color = brushColor
+        self.brush.color = canvasModel.brushColor
         self.brush.setDiameter(canvasModel.brushDiameter)
 
-        self.eraser.alpha = eraserAlpha
+        self.eraser.alpha = canvasModel.eraserAlpha
         self.eraser.setDiameter(canvasModel.eraserDiameter)
 
         self.drawingTool = canvasModel.drawingTool
