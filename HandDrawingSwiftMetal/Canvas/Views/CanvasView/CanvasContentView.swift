@@ -65,13 +65,14 @@ final class CanvasContentView: UIView {
 
 extension CanvasContentView {
 
-    func bindData(_ canvasState: CanvasState) {
-        bindInputs(canvasState)
-        bindModels(canvasState)
+    func setup(_ canvasState: CanvasState) {
+        addEvents(canvasState)
+        bindData(canvasState)
+
         showSlider(canvasState.drawingToolState.drawingToolType)
     }
 
-    private func bindInputs(_ canvasState: CanvasState) {
+    private func addEvents(_ canvasState: CanvasState) {
         let drawingToolState = canvasState.drawingToolState
 
         resetTransformButton.addAction(.init { [weak self] _ in
@@ -124,21 +125,17 @@ extension CanvasContentView {
         }, for: .touchUpInside)
 
         brushDiameterSlider.addAction(UIAction { action in
-            guard
-                let slider = action.sender as? UISlider
-            else { return }
+            guard let slider = action.sender as? UISlider else { return }
             drawingToolState.brush.setDiameter(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { action in
-            guard
-                let slider = action.sender as? UISlider
-            else { return }
+            guard let slider = action.sender as? UISlider else { return }
             drawingToolState.eraser.setDiameter(slider.value)
         }, for: .valueChanged)
     }
 
-    private func bindModels(_ canvasState: CanvasState) {
+    private func bindData(_ canvasState: CanvasState) {
         canvasState.$backgroundColor
             .compactMap { $0 }
             .assign(to: \.backgroundColor, on: canvasView)

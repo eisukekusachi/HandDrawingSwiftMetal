@@ -69,7 +69,7 @@ extension CanvasViewController {
         addEvents()
         bindData()
 
-        contentView.bindData(
+        contentView.setup(
             canvasViewModel.canvasState
         )
     }
