@@ -140,7 +140,7 @@ extension TextureLayers {
         guard
             let textureRepository,
             let selectedLayerId = canvasState.selectedLayer?.id,
-            let selectedIndex = canvasState.layers.firstIndex(where: { $0.id == selectedLayerId })
+            let selectedIndex = canvasState.selectedIndex
         else { return }
 
         removeLayerPublisher(from: selectedIndex)
@@ -218,19 +218,19 @@ extension TextureLayers {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let index = canvasState.layers.firstIndex(where: { $0.id == id }) else { return }
+        guard let selectedIndex = canvasState.selectedIndex else { return }
 
         if let title {
-            canvasState.layers[index].title = title
+            canvasState.layers[selectedIndex].title = title
         }
         if let isVisible {
-            canvasState.layers[index].isVisible = isVisible
+            canvasState.layers[selectedIndex].isVisible = isVisible
 
             // The visibility of the layers can be changed, so other layers will be updated
             updateCanvasAfterTextureLayerUpdatesSubject.send(())
         }
         if let alpha {
-            canvasState.layers[index].alpha = alpha
+            canvasState.layers[selectedIndex].alpha = alpha
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
             updateCanvasSubject.send(())
