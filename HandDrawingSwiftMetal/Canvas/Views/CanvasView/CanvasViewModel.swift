@@ -118,12 +118,14 @@ final class CanvasViewModel {
     }
 
     private func bindData() {
+        // The canvas is updated every frame during drawing
         drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
                 self?.updateCanvasWithDrawing()
             }
             .store(in: &cancellables)
 
+        // The canvas is updated when drawing ends
         Publishers.Merge(
             drawingBrushTextureSet.canvasDrawFinishedPublisher,
             drawingEraserTextureSet.canvasDrawFinishedPublisher
@@ -133,6 +135,7 @@ final class CanvasViewModel {
         }
         .store(in: &cancellables)
 
+        // Update drawingTextureSet when the tool is switched
         canvasState.drawingToolState.$drawingToolType
             .sink { [weak self] tool in
                 guard let `self` else { return }
@@ -143,18 +146,21 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the color of drawingBrushTextureSet when the brush color changes
         canvasState.drawingToolState.brush.$color
             .sink { [weak self] color in
                 self?.drawingBrushTextureSet.setBlushColor(color)
             }
             .store(in: &cancellables)
 
+        // Update the alpha of drawingEraserTextureSet when the eraser alpha changes
         canvasState.drawingToolState.eraser.$alpha
             .sink { [weak self] alpha in
                 self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
 
+        // Initialize the canvas from textureLayers using CanvasModel
         textureLayers.initializeCanvasWithModelPublisher
             .sink { [weak self] canvasModel in
                 guard let textureSize = canvasModel.textureSize else { return }
@@ -163,6 +169,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the canvas after updating the layers from textureLayers
         textureLayers.updateCanvasAfterTextureLayerUpdatesPublisher
             .sink { [weak self] _ in
                 guard let `self` else { return }
@@ -174,6 +181,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the canvas from textureLayers
         textureLayers.updateCanvasPublisher
             .sink { [weak self] in
                 self?.updateCanvas()
