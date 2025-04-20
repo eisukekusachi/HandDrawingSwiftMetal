@@ -65,7 +65,7 @@ final class CanvasContentView: UIView {
 
 extension CanvasContentView {
 
-    func applyDrawingParameters(_ canvasState: CanvasState) {
+    func bindData(_ canvasState: CanvasState) {
         bindInputs(canvasState)
         bindModels(canvasState)
         showSlider(canvasState.drawingToolState.drawingToolType)
