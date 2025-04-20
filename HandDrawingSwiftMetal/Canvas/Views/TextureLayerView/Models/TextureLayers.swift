@@ -11,10 +11,10 @@ import MetalKit
 /// Manages the textures used for rendering
 final class TextureLayers: ObservableObject {
 
-    var didFinishInitializationPublisher: AnyPublisher<CanvasModel, Never> {
-        didFinishInitializationSubject.eraseToAnyPublisher()
+    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
+        initializeCanvasWithModelSubject.eraseToAnyPublisher()
     }
-    private let didFinishInitializationSubject = PassthroughSubject<CanvasModel, Never>()
+    private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
 
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
         updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
@@ -71,7 +71,7 @@ final class TextureLayers: ObservableObject {
             }, receiveValue: { [weak self] allExist in
                 guard let `self` else { return }
                 if allExist {
-                    self.didFinishInitializationSubject.send(model)
+                    self.initializeCanvasWithModelSubject.send(model)
                 } else {
                     self.initializeWithTextureSizeSubject.send(
                         model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
@@ -87,7 +87,7 @@ final class TextureLayers: ObservableObject {
             textureSize > MTLRenderer.minimumTextureSize
         else { return }
 
-        didFinishInitializationSubject.send(model)
+        initializeCanvasWithModelSubject.send(model)
     }
 
     private func initializeWithTextureSize(_ textureSize: CGSize) {
@@ -107,7 +107,7 @@ final class TextureLayers: ObservableObject {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.didFinishInitializationSubject.send(
+            self?.initializeCanvasWithModelSubject.send(
                 CanvasModel(textureSize: textureSize, layers: [layer])
             )
         })

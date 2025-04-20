@@ -155,7 +155,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        textureLayers.didFinishInitializationPublisher
+        textureLayers.initializeCanvasWithModelPublisher
             .sink { [weak self] canvasModel in
                 guard let textureSize = canvasModel.textureSize else { return }
                 self?.canvasState.setData(canvasModel)
