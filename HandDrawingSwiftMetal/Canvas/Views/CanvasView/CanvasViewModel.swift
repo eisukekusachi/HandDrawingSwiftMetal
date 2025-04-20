@@ -558,7 +558,6 @@ extension CanvasViewModel {
         localRepository.saveDataToDocuments(
             renderTexture: canvasTexture,
             canvasState: canvasState,
-            textureLayers: textureLayers,
             textureRepository: textureRepository,
             to: URL.getZipFileURL(projectName: canvasState.projectName)
         )
