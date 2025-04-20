@@ -111,6 +111,7 @@ final class DocumentsLocalRepository: LocalRepository {
         }
         .flatMap { model -> AnyPublisher<CanvasModel, Error> in
             guard let textureSize = model.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
+                Logger.standard.error("Failed to load texture.")
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
@@ -145,6 +146,7 @@ extension DocumentsLocalRepository {
                 )
                 promise(.success(fileName))
             } catch {
+                Logger.standard.error("Failed to export thumbnail: \(error)")
                 promise(.failure(DocumentsLocalRepositoryError.exportThumbnail))
             }
         }
@@ -159,6 +161,7 @@ extension DocumentsLocalRepository {
         textureRepository.loadTextures(textureIds)
             .tryMap { textureDict in
                 guard textureDict.count == textureIds.count else {
+                    Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
                     throw DocumentsLocalRepositoryError.exportLayerData
                 }
 
