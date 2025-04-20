@@ -25,7 +25,7 @@ struct CanvasEntity: Codable, Equatable {
         textureSize: CGSize,
         layerIndex: Int,
         layers: [TextureLayerEntity],
-        drawingTool: CanvasDrawingToolStatus
+        canvasState: CanvasState
     ) {
         self.thumbnailName = thumbnailName
 
@@ -34,9 +34,9 @@ struct CanvasEntity: Codable, Equatable {
         self.layerIndex = layerIndex
         self.layers = layers
 
-        self.drawingTool = drawingTool.drawingTool.rawValue
-        self.brushDiameter = drawingTool.brushDiameter
-        self.eraserDiameter = drawingTool.eraserDiameter
+        self.drawingTool = canvasState.drawingToolState.drawingTool.rawValue
+        self.brushDiameter = canvasState.drawingToolState.brush.diameter
+        self.eraserDiameter = canvasState.drawingToolState.eraser.diameter
     }
 
     init(entity: OldCanvasEntity) {

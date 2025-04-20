@@ -61,6 +61,7 @@ final class TextureLayersTests: XCTestCase {
             let result = testCase.1
 
             let subject = TextureLayers(
+                canvasState: .init(CanvasModel()),
                 textureRepository: TextureInMemoryRepository(
                     textures: [
                         UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!: nil,
@@ -69,23 +70,23 @@ final class TextureLayersTests: XCTestCase {
                 )
             )
 
-            var usingCanvasModelSubjectCalled = false
-            var usingTextureSizeSubjectCalled = false
+            var usingCanvasModelPublisherCalled = false
+            var usingTextureSizePublisherCalled = false
 
             let expectation = XCTestExpectation()
 
             var cancellables = Set<AnyCancellable>()
 
-            subject.initializeWithModelSubject
+            subject.initializeCanvasWithModelPublisher
                 .sink { _ in
-                    usingCanvasModelSubjectCalled = true
+                    usingCanvasModelPublisherCalled = true
                     expectation.fulfill()
                 }
                 .store(in: &cancellables)
 
-            subject.initializeWithTextureSizeSubject
+            subject.initializeWithTextureSizePublisher
                 .sink { _ in
-                    usingTextureSizeSubjectCalled = true
+                    usingTextureSizePublisherCalled = true
                     expectation.fulfill()
                 }
                 .store(in: &cancellables)
@@ -97,8 +98,8 @@ final class TextureLayersTests: XCTestCase {
 
             await fulfillment(of: [expectation], timeout: 1.0)
 
-            XCTAssertEqual(usingCanvasModelSubjectCalled, result.isInitializedUsingModel)
-            XCTAssertEqual(usingTextureSizeSubjectCalled, !result.isInitializedUsingModel)
+            XCTAssertEqual(usingCanvasModelPublisherCalled, result.isInitializedUsingModel)
+            XCTAssertEqual(usingTextureSizePublisherCalled, !result.isInitializedUsingModel)
         }
     }
 

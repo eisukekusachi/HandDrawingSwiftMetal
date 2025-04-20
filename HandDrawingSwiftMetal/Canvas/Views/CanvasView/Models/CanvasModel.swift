@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2024/07/10.
 //
 
-import Foundation
+import UIKit
 
 struct CanvasModel {
 
@@ -16,10 +16,13 @@ struct CanvasModel {
     var layerIndex: Int = 0
     var layers: [TextureLayerModel] = []
 
-    var drawingTool: Int = 0
+    var drawingTool: DrawingToolType = .brush
 
+    var brushColor: UIColor = UIColor.black.withAlphaComponent(0.75)
     var brushDiameter: Int = 8
-    var eraserDiameter: Int = 8
+
+    var eraserAlpha: Int = 155
+    var eraserDiameter: Int = 44
 
 }
 
@@ -37,7 +40,7 @@ extension CanvasModel {
 
         self.textureSize = entity.textureSize
 
-        self.drawingTool = entity.drawingTool
+        self.drawingTool = .init(rawValue: entity.drawingTool)
 
         self.brushDiameter = entity.brushDiameter
         self.eraserDiameter = entity.eraserDiameter

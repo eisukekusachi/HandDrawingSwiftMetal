@@ -8,39 +8,28 @@
 import Combine
 import MetalKit
 
-/// Manages the textures used for rendering
+/// Manage texture layers using `CanvasState` and `TextureRepository`
 final class TextureLayers: ObservableObject {
 
-    @Published var layers: [TextureLayerModel] = []
-
-    @Published private var selectedLayerId: UUID?
-
-    var selectedLayer: TextureLayerModel? {
-        guard let selectedLayerId else { return nil }
-        return layers.first(where: { $0.id == selectedLayerId })
+    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
+        initializeCanvasWithModelSubject.eraseToAnyPublisher()
     }
-
-    var selectedIndex: Int? {
-        guard let selectedLayerId else { return nil }
-        return layers.firstIndex(where: { $0.id == selectedLayerId })
-    }
-
-    var didFinishInitializationPublisher: AnyPublisher<CGSize, Never> {
-        didFinishInitializationSubject.eraseToAnyPublisher()
-    }
-    private let didFinishInitializationSubject = PassthroughSubject<CGSize, Never>()
+    private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
 
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
         updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
     }
+    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+
     var updateCanvasPublisher: AnyPublisher<Void, Never> {
         updateCanvasSubject.eraseToAnyPublisher()
     }
-    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
     private let updateCanvasSubject = PassthroughSubject<Void, Never>()
 
-    let initializeWithModelSubject = PassthroughSubject<CanvasModel, Never>()
-    let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
+    var initializeWithTextureSizePublisher: AnyPublisher<CGSize, Never> {
+        initializeWithTextureSizeSubject.eraseToAnyPublisher()
+    }
+    private let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
         didSet {
@@ -50,6 +39,8 @@ final class TextureLayers: ObservableObject {
         }
     }
 
+    private var canvasState: CanvasState
+
     private var textureRepository: (any TextureRepository)!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -57,20 +48,13 @@ final class TextureLayers: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        layers: [TextureLayerModel] = [],
+        canvasState: CanvasState,
         textureRepository: (any TextureRepository) = SingletonTextureInMemoryRepository.shared
     ) {
-        self.layers = layers
-
+        self.canvasState = canvasState
         self.textureRepository = textureRepository
 
-        initializeWithModelSubject
-            .sink { [weak self] model in
-                self?.initializeWithModel(model)
-            }
-            .store(in: &cancellables)
-
-        initializeWithTextureSizeSubject
+        initializeWithTextureSizePublisher
             .sink { [weak self] textureSize in
                 self?.initializeWithTextureSize(textureSize)
             }
@@ -91,7 +75,7 @@ final class TextureLayers: ObservableObject {
             }, receiveValue: { [weak self] allExist in
                 guard let `self` else { return }
                 if allExist {
-                    self.initializeWithModelSubject.send(model)
+                    self.initializeCanvasWithModelSubject.send(model)
                 } else {
                     self.initializeWithTextureSizeSubject.send(
                         model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
@@ -101,29 +85,12 @@ final class TextureLayers: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func initializeWithModel(_ model: CanvasModel) {
-        guard
-            let textureSize = model.textureSize,
-            textureSize > MTLRenderer.minimumTextureSize
-        else { return }
-
-        layers.removeAll()
-        layers = model.layers
-        selectedLayerId = layers[model.layerIndex].id
-
-        didFinishInitializationSubject.send(textureSize)
-    }
-
     private func initializeWithTextureSize(_ textureSize: CGSize) {
         guard textureSize > MTLRenderer.minimumTextureSize else { return }
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
         )
-
-        layers.removeAll()
-        layers.insert(layer, at: 0)
-        selectedLayerId = layer.id
 
         textureRepository?.initTexture(
             uuid: layer.id,
@@ -135,7 +102,9 @@ final class TextureLayers: ObservableObject {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.didFinishInitializationSubject.send(textureSize)
+            self?.initializeCanvasWithModelSubject.send(
+                CanvasModel(textureSize: textureSize, layers: [layer])
+            )
         })
         .store(in: &cancellables)
     }
@@ -161,7 +130,7 @@ extension TextureLayers {
                 case .failure: break
                 }
             }, receiveValue: { [weak self] newLayerTextureId in
-                self?.selectedLayerId = newLayerTextureId
+                self?.canvasState.selectedLayerId = newLayerTextureId
                 self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
             })
             .store(in: &cancellables)
@@ -170,13 +139,11 @@ extension TextureLayers {
     func removeLayer() {
         guard
             let textureRepository,
-            let selectedLayerId = selectedLayer?.id,
-            let index = layers.firstIndex(where: { $0.id == selectedLayerId })
+            let selectedLayerId = canvasState.selectedLayer?.id,
+            let selectedIndex = canvasState.selectedIndex
         else { return }
 
-        let newSelectedLayerId = layers[max(index - 1, 0)].id
-
-        removeLayerPublisher(from: index)
+        removeLayerPublisher(from: selectedIndex)
             .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
                 textureRepository.removeTexture(removedTextureId)
             }
@@ -186,8 +153,9 @@ extension TextureLayers {
                 case .failure: break
                 }
             }, receiveValue: { [weak self] _ in
-                self?.selectedLayerId = newSelectedLayerId
-                self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+                guard let `self` else { return }
+                self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
+                self.updateCanvasAfterTextureLayerUpdatesSubject.send(())
             })
             .store(in: &cancellables)
     }
@@ -197,7 +165,7 @@ extension TextureLayers {
     }
 
     func selectLayer(_ uuid: UUID) {
-        selectedLayerId = uuid
+        canvasState.selectedLayerId = uuid
         updateCanvasAfterTextureLayerUpdatesSubject.send(())
     }
 
@@ -207,23 +175,23 @@ extension TextureLayers {
 extension TextureLayers {
 
     var newIndex: Int {
-        (selectedIndex ?? 0) + 1
+        (canvasState.selectedIndex ?? 0) + 1
     }
 
     func addLayer(at index: Int) -> UUID? {
-        guard index >= 0 && index <= layers.count else { return nil }
+        guard index >= 0 && index <= canvasState.layers.count else { return nil }
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
         )
-        layers.insert(layer, at: index)
+        canvasState.layers.insert(layer, at: index)
         return layer.id
     }
     func removeLayer(from index: Int) -> UUID? {
-        guard layers.count > 1, layers.indices.contains(index) else { return nil }
+        guard canvasState.layers.count > 1, canvasState.layers.indices.contains(index) else { return nil }
 
-        let removedLayerId = layers[index].id
-        layers.remove(at: index)
+        let removedLayerId = canvasState.layers[index].id
+        canvasState.layers.remove(at: index)
         return removedLayerId
     }
 
@@ -234,12 +202,12 @@ extension TextureLayers {
     ) {
         // Since `textureLayers` and `List` have reversed orders,
         // reverse the array, perform move operations, and then reverse it back
-        layers.reverse()
-        layers.move(
+        canvasState.layers.reverse()
+        canvasState.layers.move(
             fromOffsets: fromListOffsets,
             toOffset: toListOffset
         )
-        layers.reverse()
+        canvasState.layers.reverse()
 
         updateCanvasAfterTextureLayerUpdatesSubject.send(())
     }
@@ -250,19 +218,19 @@ extension TextureLayers {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
+        guard let selectedIndex = canvasState.selectedIndex else { return }
 
         if let title {
-            layers[index].title = title
+            canvasState.layers[selectedIndex].title = title
         }
         if let isVisible {
-            layers[index].isVisible = isVisible
+            canvasState.layers[selectedIndex].isVisible = isVisible
 
             // The visibility of the layers can be changed, so other layers will be updated
             updateCanvasAfterTextureLayerUpdatesSubject.send(())
         }
         if let alpha {
-            layers[index].alpha = alpha
+            canvasState.layers[selectedIndex].alpha = alpha
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
             updateCanvasSubject.send(())
@@ -270,7 +238,7 @@ extension TextureLayers {
     }
 
     func updateThumbnail(_ selectedTexture: MTLTexture) {
-        guard let selectedLayerId else { return }
+        guard let selectedLayerId = canvasState.selectedLayerId else { return }
 
         textureRepository?.setThumbnail(
             texture: selectedTexture,

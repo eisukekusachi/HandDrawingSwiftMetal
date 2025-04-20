@@ -21,9 +21,8 @@ final class DocumentsLocalRepository: LocalRepository {
     }
     func saveDataToDocuments(
         renderTexture: MTLTexture,
-        textureLayers: TextureLayers,
+        canvasState: CanvasState,
         textureRepository: any TextureRepository,
-        drawingTool: CanvasDrawingToolStatus,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
         Future<URL, Error> { [weak self] promise in
@@ -46,7 +45,7 @@ final class DocumentsLocalRepository: LocalRepository {
                     to: url
                 ),
                 self.exportTextures(
-                    textureIds: textureLayers.layers.map { $0.id },
+                    textureIds: canvasState.layers.map { $0.id },
                     textureRepository: textureRepository,
                     to: url
                 )
@@ -57,9 +56,9 @@ final class DocumentsLocalRepository: LocalRepository {
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
                 textureSize: renderTexture.size,
-                layerIndex: textureLayers.selectedIndex ?? 0,
-                layers: textureLayers.layers.map { .init(from: $0) },
-                drawingTool: drawingTool
+                layerIndex: canvasState.selectedIndex ?? 0,
+                layers: canvasState.layers.map { .init(from: $0) },
+                canvasState: canvasState
             )
         }
         .tryMap { result in
@@ -111,6 +110,7 @@ final class DocumentsLocalRepository: LocalRepository {
         }
         .flatMap { model -> AnyPublisher<CanvasModel, Error> in
             guard let textureSize = model.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
+                Logger.standard.error("Failed to load texture.")
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
@@ -145,6 +145,7 @@ extension DocumentsLocalRepository {
                 )
                 promise(.success(fileName))
             } catch {
+                Logger.standard.error("Failed to export thumbnail: \(error)")
                 promise(.failure(DocumentsLocalRepositoryError.exportThumbnail))
             }
         }
@@ -159,6 +160,7 @@ extension DocumentsLocalRepository {
         textureRepository.loadTextures(textureIds)
             .tryMap { textureDict in
                 guard textureDict.count == textureIds.count else {
+                    Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
                     throw DocumentsLocalRepositoryError.exportLayerData
                 }
 

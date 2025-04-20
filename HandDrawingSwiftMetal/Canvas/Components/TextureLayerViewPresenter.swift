@@ -16,6 +16,7 @@ final class TextureLayerViewPresenter {
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
     func setupLayerViewPresenter(
+        canvasState: CanvasState,
         textureLayers: TextureLayers,
         targetView: UIView,
         didTapLayer: @escaping (TextureLayerModel) -> Void,
@@ -30,6 +31,7 @@ final class TextureLayerViewPresenter {
         on destinationView: UIView
     ) {
         layerView = TextureLayerView(
+            canvasState: canvasState,
             textureLayers: textureLayers,
             roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in

@@ -66,10 +66,61 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func setupContentView() {
-        contentView.applyDrawingParameters(canvasViewModel.drawingTool)
+        addEvents()
+        bindData()
 
-        subscribeEvents()
+        contentView.setup(
+            canvasViewModel.canvasState
+        )
+    }
 
+    private func bindData() {
+        canvasViewModel.requestShowingActivityIndicatorPublisher
+            .map { !$0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isHidden, on: activityIndicatorView)
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingAlertPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.showAlert(
+                    title: "Alert",
+                    message: message
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingToastPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.showToast(model)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.requestShowingLayerViewPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isShown in
+                self?.textureLayerViewPresenter.showView(isShown)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.refreshCanvasPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.canvasViewModel.initCanvas(using: model)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.updateUndoButtonIsEnabledState
+            .assign(to: \.isEnabled, on: contentView.undoButton)
+            .store(in: &cancellables)
+
+        canvasViewModel.updateRedoButtonIsEnabledState
+            .assign(to: \.isEnabled, on: contentView.redoButton)
+            .store(in: &cancellables)
+    }
+    private func bindViewModel() {
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
         }
@@ -116,54 +167,7 @@ extension CanvasViewController {
         }
     }
 
-    private func bindViewModel() {
-        canvasViewModel.requestShowingActivityIndicatorPublisher
-            .map { !$0 }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.isHidden, on: activityIndicatorView)
-            .store(in: &cancellables)
-
-        canvasViewModel.requestShowingAlertPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
-                self?.showAlert(
-                    title: "Alert",
-                    message: message
-                )
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.requestShowingToastPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.showToast(model)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.requestShowingLayerViewPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isShown in
-                self?.textureLayerViewPresenter.showView(isShown)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.refreshCanvasPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.canvasViewModel.initCanvas(using: model)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.updateUndoButtonIsEnabledState
-            .assign(to: \.isEnabled, on: contentView.undoButton)
-            .store(in: &cancellables)
-
-        canvasViewModel.updateRedoButtonIsEnabledState
-            .assign(to: \.isEnabled, on: contentView.redoButton)
-            .store(in: &cancellables)
-    }
-
-    private func subscribeEvents() {
+    private func addEvents() {
         contentView.canvasView.addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
@@ -190,6 +194,7 @@ extension CanvasViewController {
 
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
+            canvasState: canvasViewModel.canvasState,
             textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             didTapLayer: { [weak self] layer in

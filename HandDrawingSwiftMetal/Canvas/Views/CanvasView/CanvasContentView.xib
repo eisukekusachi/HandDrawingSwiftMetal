@@ -13,9 +13,10 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
                 <outlet property="blackColorButton" destination="dMS-qm-Xjc" id="I8s-nR-HYr"/>
+                <outlet property="brushDiameterSlider" destination="UxJ-dV-AbQ" id="bsG-sU-Tdc"/>
                 <outlet property="canvasView" destination="Rri-Cz-Fww" id="y6k-tJ-gCc"/>
-                <outlet property="diameterSlider" destination="s4f-db-5LA" id="Lec-ZW-hmI"/>
                 <outlet property="eraserButton" destination="Ydn-J6-zrX" id="6fj-Bu-pwF"/>
+                <outlet property="eraserDiameterSlider" destination="s4f-db-5LA" id="moF-b6-DPQ"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
@@ -81,6 +82,15 @@
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="256" id="vdA-wW-HVt"/>
                     </constraints>
                 </slider>
+                <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="UxJ-dV-AbQ">
+                    <rect key="frame" x="-108" y="416.66666666666669" width="260" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="256" id="EjT-Zw-FHw"/>
+                        <constraint firstAttribute="height" constant="44" id="JIs-6H-wzL"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="Kdr-FQ-zuq"/>
+                        <constraint firstAttribute="width" constant="256" id="eVt-lc-xIh"/>
+                    </constraints>
+                </slider>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qtN-lB-os6">
                     <rect key="frame" x="76" y="784.33333333333337" width="241" height="33.666666666666629"/>
                     <subviews>
@@ -126,8 +136,10 @@
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
+                <constraint firstItem="UxJ-dV-AbQ" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="1ki-Ki-Gw5"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="qtN-lB-os6" secondAttribute="bottom" id="2wt-Bs-phB"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3hA-PR-FpI"/>
+                <constraint firstItem="UxJ-dV-AbQ" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="4lu-2J-etw"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="Epa-wm-YYq"/>
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GzD-nN-Z2I"/>

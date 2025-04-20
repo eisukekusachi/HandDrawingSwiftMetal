@@ -112,24 +112,25 @@ final class CanvasRenderer: ObservableObject {
     /// Updates the canvas after updating all textures.
     /// This helps maintain high drawing performance even as the number of layers increases.
     func updateCanvasAfterUpdatingAllTextures(
+        canvasState: CanvasState,
         textureLayers: TextureLayers,
         commandBuffer: MTLCommandBuffer?
     ) {
         guard
             let commandBuffer,
-            let selectedLayer = textureLayers.selectedLayer,
-            let selectedIndex = textureLayers.selectedIndex
+            let selectedLayer = canvasState.selectedLayer,
+            let selectedIndex = canvasState.selectedIndex
         else { return }
 
         Publishers.Zip(
             Publishers.Zip(
                 renderTexturesFromRepositoryToTexturePublisher(
-                    layers: getBottomLayers(selectedIndex: selectedIndex, layers: textureLayers.layers),
+                    layers: getBottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
                     into: unselectedBottomTexture,
                     with: commandBuffer
                 ),
                 renderTexturesFromRepositoryToTexturePublisher(
-                    layers: getTopLayers(selectedIndex: selectedIndex, layers: textureLayers.layers),
+                    layers: getTopLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
                     into: unselectedTopTexture,
                     with: commandBuffer
                 )

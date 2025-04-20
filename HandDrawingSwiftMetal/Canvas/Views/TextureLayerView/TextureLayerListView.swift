@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TextureLayerListView: View {
 
+    @ObservedObject var canvasState: CanvasState
     @ObservedObject var textureLayers: TextureLayers
 
     var didTapLayer: ((TextureLayerModel) -> Void)? = nil
@@ -18,13 +19,13 @@ struct TextureLayerListView: View {
     var body: some View {
         List {
             ForEach(
-                Array(textureLayers.layers.reversed()),
+                Array(canvasState.layers.reversed()),
                 id: \.id
             ) { layer in
                 layerRow(
                     layer: layer,
                     thumbnail: textureLayers.getThumbnail(layer.id),
-                    selected: textureLayers.selectedLayer?.id == layer.id,
+                    selected: canvasState.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
                         didTapLayer?(targetLayer)
                     },
@@ -138,18 +139,32 @@ extension TextureLayerListView {
 }
 
 #Preview {
+    PreviewView()
+}
 
-    TextureLayerListView(
-        textureLayers: TextureLayers(
+private struct PreviewView: View {
+    let canvasState = CanvasState(
+        CanvasModel(
             layers: [
-                .init(title: "Layer0"),
-                .init(title: "Layer1"),
-                .init(title: "Layer2"),
-                .init(title: "Layer3"),
-                .init(title: "Layer4")
+                .init(title: "Layer0", alpha: 255),
+                .init(title: "Layer1", alpha: 200),
+                .init(title: "Layer2", alpha: 150),
+                .init(title: "Layer3", alpha: 100),
+                .init(title: "Layer4", alpha: 50),
             ]
         )
     )
-    .padding(.horizontal, 44)
+    let textureLayers: TextureLayers
+
+    init() {
+        textureLayers = .init(canvasState: canvasState)
+    }
+    var body: some View {
+        TextureLayerListView(
+            canvasState: canvasState,
+            textureLayers: textureLayers
+        )
+        .frame(width: 256, height: 300)
+    }
 
 }
