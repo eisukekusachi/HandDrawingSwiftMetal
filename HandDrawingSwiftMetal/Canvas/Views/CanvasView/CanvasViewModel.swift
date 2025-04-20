@@ -114,10 +114,10 @@ final class CanvasViewModel {
 
         textureLayers.setCanvasState(canvasState)
 
-        subscribe()
+        bindData()
     }
 
-    private func subscribe() {
+    private func bindData() {
         drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
                 self?.updateCanvasWithDrawing()
@@ -180,9 +180,13 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        canvasState.$backgroundColor.assign(to: \.backgroundColor, on: renderer).store(in: &cancellables)
+        canvasState.$backgroundColor
+            .assign(to: \.backgroundColor, on: renderer)
+            .store(in: &cancellables)
 
-        transformer.matrixPublisher.assign(to: \.matrix, on: renderer) .store(in: &cancellables)
+        transformer.matrixPublisher
+            .assign(to: \.matrix, on: renderer)
+            .store(in: &cancellables)
     }
 
     func initCanvas(using model: CanvasModel) {
