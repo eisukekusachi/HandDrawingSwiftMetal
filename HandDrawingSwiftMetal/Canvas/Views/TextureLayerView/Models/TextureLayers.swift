@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// Manages the textures used for rendering
+/// Manage texture layers using `CanvasState` and `TextureRepository`
 final class TextureLayers: ObservableObject {
 
     var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
