@@ -113,6 +113,8 @@ final class CanvasViewModel {
         self.localRepository = localRepository
 
         textureLayers.setCanvasState(canvasState)
+
+        subscribe()
     }
 
     private func subscribe() {
@@ -210,8 +212,6 @@ extension CanvasViewModel {
         canvasView: CanvasViewProtocol
     ) {
         renderer.setCanvas(canvasView)
-
-        subscribe()
     }
 
     func onViewDidAppear(
