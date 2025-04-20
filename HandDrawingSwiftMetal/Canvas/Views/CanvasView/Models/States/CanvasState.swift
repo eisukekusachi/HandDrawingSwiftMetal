@@ -30,6 +30,9 @@ final class CanvasState: ObservableObject {
     @Published var backgroundColor: UIColor = .white
 
     init(_ model: CanvasModel) {
+        projectName = model.projectName
+        layers = model.layers
+        selectedLayerId = layers.isEmpty ? nil : layers[model.layerIndex].id
         drawingToolState.setData(model)
     }
 

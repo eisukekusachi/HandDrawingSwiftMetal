@@ -144,3 +144,36 @@ extension TextureLayerView {
     }
 
 }
+
+#Preview {
+    PreviewView()
+}
+
+private struct PreviewView: View {
+    let canvasState = CanvasState(
+        CanvasModel(
+            layerIndex: 1,
+            layers: [
+                .init(title: "Layer0", alpha: 255),
+                .init(title: "Layer1", alpha: 200),
+                .init(title: "Layer2", alpha: 150),
+                .init(title: "Layer3", alpha: 100),
+                .init(title: "Layer4", alpha: 50),
+            ]
+        )
+    )
+    let textureLayers: TextureLayers
+
+    init() {
+        textureLayers = .init(canvasState: canvasState)
+    }
+    var body: some View {
+        TextureLayerView(
+            canvasState: canvasState,
+            textureLayers: textureLayers,
+            roundedRectangleWithArrow: RoundedRectangleWithArrow()
+        )
+        .frame(width: 256, height: 300)
+    }
+
+}
