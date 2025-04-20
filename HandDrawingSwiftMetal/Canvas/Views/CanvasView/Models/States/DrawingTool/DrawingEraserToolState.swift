@@ -24,11 +24,6 @@ final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol {
 
 extension DrawingEraserToolState {
 
-    func setData(alpha: Int, diameter: Int) {
-        self.alpha = alpha
-        self.diameter = diameter
-    }
-
     func sliderValue() -> Float {
         DrawingEraserToolState.diameterFloatValue(diameter)
     }

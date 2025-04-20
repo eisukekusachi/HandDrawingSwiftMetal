@@ -21,11 +21,6 @@ extension DrawingBrushToolState {
         DrawingBrushToolState.diameterFloatValue(diameter)
     }
 
-    func setData(color: UIColor, diameter: Int) {
-        self.color = color
-        self.diameter = diameter
-    }
-
     func setDiameter(_ value: Float) {
         diameter = DrawingBrushToolState.diameterIntValue(value)
     }
