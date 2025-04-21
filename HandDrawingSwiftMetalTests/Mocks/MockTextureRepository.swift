@@ -16,6 +16,8 @@ final class MockTextureRepository: TextureRepository {
 
     var callHistory: [String] = []
 
+    var textureSize: CGSize? = nil
+
     var textureNum: Int = 0
 
     init(textures: [UUID : MTLTexture?] = [:]) {
