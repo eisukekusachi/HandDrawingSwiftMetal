@@ -144,6 +144,7 @@ extension TextureLayerView {
 private struct PreviewView: View {
     let canvasState = CanvasState(
         CanvasModel(
+            textureSize: .init(width: 44, height: 44),
             layerIndex: 1,
             layers: [
                 .init(title: "Layer0", alpha: 255),
@@ -159,7 +160,8 @@ private struct PreviewView: View {
     init() {
         textureLayers = .init(
             canvasState: canvasState,
-            textureRepository: TextureInMemoryRepository())
+            textureRepository: TextureMockRepository()
+        )
     }
     var body: some View {
         TextureLayerView(
@@ -167,7 +169,7 @@ private struct PreviewView: View {
             textureLayers: textureLayers,
             roundedRectangleWithArrow: RoundedRectangleWithArrow()
         )
-        .frame(width: 256, height: 300)
+        .frame(width: 320, height: 300)
     }
 
 }

@@ -33,6 +33,8 @@ final class CanvasState: ObservableObject {
         layers = model.layers
         selectedLayerId = layers.isEmpty ? nil : layers[model.layerIndex].id
         drawingToolState.setData(model)
+
+        currentTextureSize = model.textureSize
     }
 
 }
