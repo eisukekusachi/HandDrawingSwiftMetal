@@ -358,9 +358,6 @@ extension CanvasViewModel {
     func didMoveLayers(fromOffsets: IndexSet, toOffset: Int) {
         textureLayers.moveLayer(fromListOffsets: fromOffsets, toListOffset: toOffset)
     }
-    func didTapLayerVisibility(layer: TextureLayerModel, isVisible: Bool) {
-        textureLayers.updateLayer(id: layer.id, isVisible: isVisible)
-    }
 
     func didStartChangingLayerAlpha(layer: TextureLayerModel) {}
 
