@@ -222,7 +222,7 @@ extension TextureLayers {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let selectedIndex = canvasState.selectedIndex else { return }
+        guard let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id) else { return }
 
         if let title {
             canvasState.layers[selectedIndex].title = title
