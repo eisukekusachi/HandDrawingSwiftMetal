@@ -89,7 +89,7 @@ final class TextureLayers: ObservableObject {
         guard textureSize > MTLRenderer.minimumTextureSize else { return }
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
+            title: TimeStampFormatter.currentDate()
         )
 
         textureRepository?.initTexture(
@@ -182,7 +182,7 @@ extension TextureLayers {
         guard index >= 0 && index <= canvasState.layers.count else { return nil }
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
+            title: TimeStampFormatter.currentDate()
         )
         canvasState.layers.insert(layer, at: index)
         return layer.id
