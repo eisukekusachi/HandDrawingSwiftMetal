@@ -17,7 +17,6 @@ struct TextureLayerView: View {
 
     var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
-    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
     var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
     var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
     var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
@@ -43,7 +42,7 @@ struct TextureLayerView: View {
                     canvasState: canvasState,
                     textureLayers: textureLayers,
                     didTapLayer: { layer in
-                        didTapLayer?(layer)
+                        textureLayers.selectLayer(layer.id)
                     },
                     didTapVisibility: { layer, isVisibility in
                         didTapVisibility?(layer, isVisibility)

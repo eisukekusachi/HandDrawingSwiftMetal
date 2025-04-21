@@ -197,9 +197,6 @@ extension CanvasViewController {
             canvasState: canvasViewModel.canvasState,
             textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
-            didTapLayer: { [weak self] layer in
-                self?.canvasViewModel.didTapLayer(layer: layer)
-            },
             didTapVisibility: { [weak self] layer, value in
                 self?.canvasViewModel.didTapLayerVisibility(
                     layer: layer,

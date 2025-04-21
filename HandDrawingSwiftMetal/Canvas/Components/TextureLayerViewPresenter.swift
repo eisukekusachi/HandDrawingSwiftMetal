@@ -19,7 +19,6 @@ final class TextureLayerViewPresenter {
         canvasState: CanvasState,
         textureLayers: TextureLayers,
         targetView: UIView,
-        didTapLayer: @escaping (TextureLayerModel) -> Void,
         didTapVisibility: @escaping (TextureLayerModel, Bool) -> Void,
         didStartChangingAlpha: @escaping (TextureLayerModel) -> Void,
         didChangeAlpha: @escaping (TextureLayerModel, Int) -> Void,
@@ -32,9 +31,6 @@ final class TextureLayerViewPresenter {
             canvasState: canvasState,
             textureLayers: textureLayers,
             roundedRectangleWithArrow: roundedRectangleWithArrow,
-            didTapLayer: { layer in
-                didTapLayer(layer)
-            },
             didTapVisibility: { entity, value in
                 didTapVisibility(entity, value)
             },
