@@ -14,6 +14,8 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
+    private var _textureSize: CGSize?
+
     private let flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
@@ -37,6 +39,9 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
+    var textureSize: CGSize? {
+        _textureSize
+    }
     var textureNum: Int {
         thumbnails.count
     }
@@ -73,6 +78,8 @@ extension TextureInMemoryRepository: TextureRepository {
             self.textures[uuid] = texture
             self.setThumbnail(texture: texture, for: uuid)
 
+            self._textureSize = textureSize
+
             promise(.success(()))
         }
         .eraseToAnyPublisher()
@@ -101,6 +108,8 @@ extension TextureInMemoryRepository: TextureRepository {
 
                     self?.textures[layer.id] = texture
                     self?.setThumbnail(texture: texture, for: layer.id)
+
+                    self?._textureSize = textureSize
                 }
                 promise(.success(()))
             } catch {

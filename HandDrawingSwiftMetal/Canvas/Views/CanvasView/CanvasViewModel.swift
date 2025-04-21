@@ -358,12 +358,6 @@ extension CanvasViewModel {
     func didTapLayer(layer: TextureLayerModel) {
         textureLayers.selectLayer(layer.id)
     }
-    func didTapAddLayerButton() {
-        textureLayers.insertLayer(
-            textureSize: renderer.textureSize,
-            at: textureLayers.newIndex
-        )
-    }
     func didTapRemoveLayerButton() {
         textureLayers.removeLayer()
     }

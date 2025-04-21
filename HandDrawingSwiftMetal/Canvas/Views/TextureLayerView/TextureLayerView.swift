@@ -18,7 +18,6 @@ struct TextureLayerView: View {
     var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     var didTapLayer: ((TextureLayerModel) -> Void)? = nil
-    var didTapAddButton: (() -> Void)? = nil
     var didTapRemoveButton: (() -> Void)? = nil
     var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
     var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
@@ -39,12 +38,7 @@ struct TextureLayerView: View {
             )
 
             VStack {
-                toolbar(
-                    textureLayers: textureLayers,
-                    didTapAddButton: didTapAddButton,
-                    didTapRemoveButton: didTapRemoveButton,
-                    didEditTitle: didEditTitle
-                )
+                toolbar(textureLayers)
 
                 TextureLayerListView(
                     canvasState: canvasState,
@@ -90,17 +84,16 @@ struct TextureLayerView: View {
 extension TextureLayerView {
 
     func toolbar(
-        textureLayers: TextureLayers,
-        didTapAddButton: (() -> Void)? = nil,
-        didTapRemoveButton: (() -> Void)? = nil,
-        didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
+        _ textureLayers: TextureLayers
     ) -> some View {
         let buttonSize: CGFloat = 20
 
         return HStack {
             Button(
                 action: {
-                    didTapAddButton?()
+                    textureLayers.insertLayer(
+                        at: textureLayers.newIndex
+                    )
                 },
                 label: {
                     Image(systemName: "plus.circle").buttonModifier(diameter: buttonSize)
