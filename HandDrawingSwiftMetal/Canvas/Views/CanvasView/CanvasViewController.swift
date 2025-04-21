@@ -200,9 +200,6 @@ extension CanvasViewController {
             didTapLayer: { [weak self] layer in
                 self?.canvasViewModel.didTapLayer(layer: layer)
             },
-            didTapRemoveButton: { [weak self] in
-                self?.canvasViewModel.didTapRemoveLayerButton()
-            },
             didTapVisibility: { [weak self] layer, value in
                 self?.canvasViewModel.didTapLayerVisibility(
                     layer: layer,

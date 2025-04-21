@@ -20,7 +20,6 @@ final class TextureLayerViewPresenter {
         textureLayers: TextureLayers,
         targetView: UIView,
         didTapLayer: @escaping (TextureLayerModel) -> Void,
-        didTapRemoveButton: @escaping () -> Void,
         didTapVisibility: @escaping (TextureLayerModel, Bool) -> Void,
         didStartChangingAlpha: @escaping (TextureLayerModel) -> Void,
         didChangeAlpha: @escaping (TextureLayerModel, Int) -> Void,
@@ -35,9 +34,6 @@ final class TextureLayerViewPresenter {
             roundedRectangleWithArrow: roundedRectangleWithArrow,
             didTapLayer: { layer in
                 didTapLayer(layer)
-            },
-            didTapRemoveButton: {
-                didTapRemoveButton()
             },
             didTapVisibility: { entity, value in
                 didTapVisibility(entity, value)

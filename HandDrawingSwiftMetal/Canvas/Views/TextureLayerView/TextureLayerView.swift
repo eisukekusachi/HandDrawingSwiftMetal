@@ -18,7 +18,6 @@ struct TextureLayerView: View {
     var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     var didTapLayer: ((TextureLayerModel) -> Void)? = nil
-    var didTapRemoveButton: (() -> Void)? = nil
     var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
     var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
     var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
@@ -104,7 +103,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    didTapRemoveButton?()
+                    textureLayers.removeLayer()
                 },
                 label: {
                     Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
