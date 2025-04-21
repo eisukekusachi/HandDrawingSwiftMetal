@@ -10,7 +10,6 @@ import Foundation
 import MetalKit
 
 protocol TextureRepository {
-    var textureSize: CGSize? { get }
 
     var textureNum: Int { get }
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>

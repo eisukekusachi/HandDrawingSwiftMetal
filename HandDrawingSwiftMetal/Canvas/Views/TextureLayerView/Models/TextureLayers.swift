@@ -114,12 +114,10 @@ final class TextureLayers: ObservableObject {
 extension TextureLayers {
 
     func insertLayer(at index: Int) {
-        guard let textureRepository else { return }
-
-        guard let textureSize = textureRepository.textureSize else {
-            Logger.standard.error("insertLayer(:) textureSize is nil")
-            return
-        }
+        guard
+            let textureRepository,
+            let textureSize = canvasState.currentTextureSize
+        else { return }
 
         let device = self.device
 

@@ -23,10 +23,6 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
         repository.textureNum
     }
 
-    var textureSize: CGSize? {
-        repository.textureSize
-    }
-
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
         repository.hasAllTextures(for: uuids)
     }

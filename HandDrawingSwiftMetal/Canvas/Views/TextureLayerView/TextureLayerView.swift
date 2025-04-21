@@ -157,7 +157,9 @@ private struct PreviewView: View {
     let textureLayers: TextureLayers
 
     init() {
-        textureLayers = .init(canvasState: canvasState)
+        textureLayers = .init(
+            canvasState: canvasState,
+            textureRepository: TextureInMemoryRepository())
     }
     var body: some View {
         TextureLayerView(
