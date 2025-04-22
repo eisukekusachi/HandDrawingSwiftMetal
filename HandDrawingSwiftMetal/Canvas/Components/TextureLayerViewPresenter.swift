@@ -22,7 +22,6 @@ final class TextureLayerViewPresenter {
         on destinationView: UIView
     ) {
         layerView = TextureLayerView(
-            canvasState: canvasState,
             textureLayers: textureLayers,
             roundedRectangleWithArrow: roundedRectangleWithArrow
         )

@@ -39,6 +39,10 @@ final class TextureLayers: ObservableObject {
         }
     }
 
+    @Published private(set) var layers: [TextureLayerModel] = []
+
+    @Published private(set) var selectedLayerId: UUID?
+
     private var canvasState: CanvasState
 
     private var textureRepository: (any TextureRepository)!
@@ -59,6 +63,20 @@ final class TextureLayers: ObservableObject {
                 self?.initializeWithTextureSize(textureSize)
             }
             .store(in: &cancellables)
+
+        canvasState.$layers.assign(to: \.layers, on: self)
+            .store(in: &cancellables)
+
+        canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
+            .store(in: &cancellables)
+    }
+
+    var selectedLayer: TextureLayerModel? {
+        canvasState.selectedLayer
+    }
+
+    var selectedIndex: Int? {
+        canvasState.selectedIndex
     }
 
     /// Attempts to restore layers from a given `CanvasModel`

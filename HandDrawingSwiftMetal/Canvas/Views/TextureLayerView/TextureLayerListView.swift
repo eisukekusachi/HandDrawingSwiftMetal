@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TextureLayerListView: View {
 
-    @ObservedObject var canvasState: CanvasState
     @ObservedObject var textureLayers: TextureLayers
 
     var didTapLayer: ((TextureLayerModel) -> Void)? = nil
@@ -19,13 +18,13 @@ struct TextureLayerListView: View {
     var body: some View {
         List {
             ForEach(
-                Array(canvasState.layers.reversed()),
+                Array(textureLayers.layers.reversed()),
                 id: \.id
             ) { layer in
                 layerRow(
                     layer: layer,
                     thumbnail: textureLayers.getThumbnail(layer.id),
-                    selected: canvasState.selectedLayer?.id == layer.id,
+                    selected: textureLayers.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
                         didTapLayer?(targetLayer)
                     },
@@ -161,7 +160,6 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerListView(
-            canvasState: canvasState,
             textureLayers: textureLayers
         )
         .frame(width: 256, height: 300)

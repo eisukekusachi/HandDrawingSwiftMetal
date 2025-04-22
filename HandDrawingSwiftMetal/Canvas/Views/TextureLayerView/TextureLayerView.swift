@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TextureLayerView: View {
 
-    @ObservedObject var canvasState: CanvasState
     @ObservedObject var textureLayers: TextureLayers
 
     @State var isTextFieldPresented: Bool = false
@@ -37,7 +36,6 @@ struct TextureLayerView: View {
                 )
 
                 TextureLayerListView(
-                    canvasState: canvasState,
                     textureLayers: textureLayers,
                     didTapLayer: { layer in
                         textureLayers.selectLayer(layer.id)
@@ -52,11 +50,11 @@ struct TextureLayerView: View {
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: canvasState.selectedLayer?.alpha ?? 0,
+                    value: textureLayers.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didChange: { value in
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
+                        guard let selectedLayer = textureLayers.selectedLayer else { return }
                         textureLayers.updateLayer(id: selectedLayer.id, alpha: value)
                     }
                 )
@@ -104,7 +102,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textFieldTitle = canvasState.selectedLayer?.title ?? ""
+                    textFieldTitle = textureLayers.selectedLayer?.title ?? ""
                     isTextFieldPresented = true
                 },
                 label: {
@@ -115,7 +113,7 @@ extension TextureLayerView {
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let selectedLayer = canvasState.selectedLayer else { return }
+                    guard let selectedLayer = textureLayers.selectedLayer else { return }
                     changeTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
@@ -155,7 +153,6 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerView(
-            canvasState: canvasState,
             textureLayers: textureLayers,
             roundedRectangleWithArrow: RoundedRectangleWithArrow()
         )
