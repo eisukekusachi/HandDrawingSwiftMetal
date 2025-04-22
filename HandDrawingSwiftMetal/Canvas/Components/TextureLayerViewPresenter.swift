@@ -22,7 +22,6 @@ final class TextureLayerViewPresenter {
         didStartChangingAlpha: @escaping (TextureLayerModel) -> Void,
         didChangeAlpha: @escaping (TextureLayerModel, Int) -> Void,
         didFinishChangingAlpha: @escaping (TextureLayerModel) -> Void,
-        didEditTitle: @escaping (TextureLayerModel, String) -> Void,
         on destinationView: UIView
     ) {
         layerView = TextureLayerView(
@@ -37,9 +36,6 @@ final class TextureLayerViewPresenter {
             },
             didFinishChangingAlpha: { value in
                 didFinishChangingAlpha(value)
-            },
-            didEditTitle: { entity, value in
-                didEditTitle(entity, value)
             }
         )
 

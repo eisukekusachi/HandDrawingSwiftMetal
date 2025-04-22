@@ -209,12 +209,6 @@ extension CanvasViewController {
             didFinishChangingAlpha: { [weak self] layer in
                 self?.canvasViewModel.didFinishChangingLayerAlpha(layer: layer)
             },
-            didEditTitle: { [weak self] layer, value in
-                self?.canvasViewModel.didEditLayerTitle(
-                    layer: layer,
-                    title: value
-                )
-            },
             on: self.contentView
         )
     }

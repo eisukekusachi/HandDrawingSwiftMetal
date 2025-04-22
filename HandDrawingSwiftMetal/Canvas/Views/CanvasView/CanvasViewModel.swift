@@ -361,10 +361,6 @@ extension CanvasViewModel {
     }
     func didFinishChangingLayerAlpha(layer: TextureLayerModel) {}
 
-    func didEditLayerTitle(layer: TextureLayerModel, title: String) {
-        textureLayers.updateLayer(id: layer.id, title: title)
-    }
-
 }
 
 extension CanvasViewModel {

@@ -20,7 +20,6 @@ struct TextureLayerView: View {
     var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
     var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
     var didFinishChangingAlpha: ((TextureLayerModel) -> Void)? = nil
-    var didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -34,7 +33,12 @@ struct TextureLayerView: View {
             )
 
             VStack {
-                toolbar(textureLayers)
+                toolbar(
+                    textureLayers,
+                    changeTitle: { layer, title in
+                        textureLayers.updateLayer(id: layer.id, title: title)
+                    }
+                )
 
                 TextureLayerListView(
                     canvasState: canvasState,
@@ -80,7 +84,8 @@ struct TextureLayerView: View {
 extension TextureLayerView {
 
     func toolbar(
-        _ textureLayers: TextureLayers
+        _ textureLayers: TextureLayers,
+        changeTitle: ((TextureLayerModel, String) -> Void)? = nil
     ) -> some View {
         let buttonSize: CGFloat = 20
 
@@ -123,7 +128,7 @@ extension TextureLayerView {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = canvasState.selectedLayer else { return }
-                    didEditTitle?(selectedLayer, textFieldTitle)
+                    changeTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }
