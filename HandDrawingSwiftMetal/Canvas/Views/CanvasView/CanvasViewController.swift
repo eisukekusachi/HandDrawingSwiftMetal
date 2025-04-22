@@ -197,18 +197,6 @@ extension CanvasViewController {
             canvasState: canvasViewModel.canvasState,
             textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
-            didStartChangingAlpha: { [weak self] layer in
-                self?.canvasViewModel.didStartChangingLayerAlpha(layer: layer)
-            },
-            didChangeAlpha: { [weak self] layer, value in
-                self?.canvasViewModel.didChangeLayerAlpha(
-                    layer: layer,
-                    value: value
-                )
-            },
-            didFinishChangingAlpha: { [weak self] layer in
-                self?.canvasViewModel.didFinishChangingLayerAlpha(layer: layer)
-            },
             on: self.contentView
         )
     }

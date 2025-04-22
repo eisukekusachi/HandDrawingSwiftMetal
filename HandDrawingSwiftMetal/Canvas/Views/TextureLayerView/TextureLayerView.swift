@@ -17,10 +17,6 @@ struct TextureLayerView: View {
 
     var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
-    var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
-    var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
-    var didFinishChangingAlpha: ((TextureLayerModel) -> Void)? = nil
-
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
     let range = 0 ... 255
@@ -59,17 +55,9 @@ struct TextureLayerView: View {
                     value: canvasState.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
-                    didStartChanging: {
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didStartChangingAlpha?(selectedLayer)
-                    },
                     didChange: { value in
                         guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didChangeAlpha?(selectedLayer, value)
-                    },
-                    didFinishChanging: {
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didFinishChangingAlpha?(selectedLayer)
+                        textureLayers.updateLayer(id: selectedLayer.id, alpha: value)
                     }
                 )
                 .padding(.top, 4)

@@ -19,24 +19,12 @@ final class TextureLayerViewPresenter {
         canvasState: CanvasState,
         textureLayers: TextureLayers,
         targetView: UIView,
-        didStartChangingAlpha: @escaping (TextureLayerModel) -> Void,
-        didChangeAlpha: @escaping (TextureLayerModel, Int) -> Void,
-        didFinishChangingAlpha: @escaping (TextureLayerModel) -> Void,
         on destinationView: UIView
     ) {
         layerView = TextureLayerView(
             canvasState: canvasState,
             textureLayers: textureLayers,
-            roundedRectangleWithArrow: roundedRectangleWithArrow,
-            didStartChangingAlpha: { value in
-                didStartChangingAlpha(value)
-            },
-            didChangeAlpha: { entity, value in
-                didChangeAlpha(entity, value)
-            },
-            didFinishChangingAlpha: { value in
-                didFinishChangingAlpha(value)
-            }
+            roundedRectangleWithArrow: roundedRectangleWithArrow
         )
 
         guard let layerView else { return }

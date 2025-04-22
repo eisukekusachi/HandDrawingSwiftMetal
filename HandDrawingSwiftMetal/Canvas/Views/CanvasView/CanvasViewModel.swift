@@ -354,13 +354,6 @@ extension CanvasViewModel {
         saveFile(canvasTexture: canvasTexture)
     }
 
-    func didStartChangingLayerAlpha(layer: TextureLayerModel) {}
-
-    func didChangeLayerAlpha(layer: TextureLayerModel, value: Int) {
-        textureLayers.updateLayer(id: layer.id, alpha: value)
-    }
-    func didFinishChangingLayerAlpha(layer: TextureLayerModel) {}
-
 }
 
 extension CanvasViewModel {
