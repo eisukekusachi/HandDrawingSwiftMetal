@@ -21,7 +21,6 @@ struct TextureLayerView: View {
     var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
     var didFinishChangingAlpha: ((TextureLayerModel) -> Void)? = nil
     var didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
-    var didMove: ((IndexSet, Int) -> Void)? = nil
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -47,7 +46,7 @@ struct TextureLayerView: View {
                         textureLayers.updateLayer(id: layer.id, isVisible: isVisible)
                     },
                     didMove: { source, destination in
-                        didMove?(source, destination)
+                        textureLayers.moveLayer(fromListOffsets: source, toListOffset: destination)
                     }
                 )
 

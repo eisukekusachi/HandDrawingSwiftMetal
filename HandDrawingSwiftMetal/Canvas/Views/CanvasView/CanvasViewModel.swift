@@ -354,11 +354,6 @@ extension CanvasViewModel {
         saveFile(canvasTexture: canvasTexture)
     }
 
-    // MARK: Layers
-    func didMoveLayers(fromOffsets: IndexSet, toOffset: Int) {
-        textureLayers.moveLayer(fromListOffsets: fromOffsets, toListOffset: toOffset)
-    }
-
     func didStartChangingLayerAlpha(layer: TextureLayerModel) {}
 
     func didChangeLayerAlpha(layer: TextureLayerModel, value: Int) {

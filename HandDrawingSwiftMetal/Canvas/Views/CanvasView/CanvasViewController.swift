@@ -215,12 +215,6 @@ extension CanvasViewController {
                     title: value
                 )
             },
-            didMove: { [weak self] fromOffsets, toOffset in
-                self?.canvasViewModel.didMoveLayers(
-                    fromOffsets: fromOffsets,
-                    toOffset: toOffset
-                )
-            },
             on: self.contentView
         )
     }
