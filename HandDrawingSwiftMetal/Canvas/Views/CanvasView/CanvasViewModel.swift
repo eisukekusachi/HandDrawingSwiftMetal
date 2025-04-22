@@ -172,7 +172,6 @@ final class CanvasViewModel {
                 guard let `self` else { return }
                 self.renderer.updateCanvasAfterUpdatingAllTextures(
                     canvasState: self.canvasState,
-                    textureLayers: self.textureLayers,
                     commandBuffer: self.renderer.commandBuffer
                 )
             }
@@ -212,7 +211,6 @@ extension CanvasViewModel {
         renderer.initTextures(textureSize: textureSize)
         renderer.updateCanvasAfterUpdatingAllTextures(
             canvasState: canvasState,
-            textureLayers: textureLayers,
             commandBuffer: commandBuffer
         )
     }

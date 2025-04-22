@@ -113,7 +113,6 @@ final class CanvasRenderer: ObservableObject {
     /// This helps maintain high drawing performance even as the number of layers increases.
     func updateCanvasAfterUpdatingAllTextures(
         canvasState: CanvasState,
-        textureLayers: TextureLayers,
         commandBuffer: MTLCommandBuffer?
     ) {
         guard
