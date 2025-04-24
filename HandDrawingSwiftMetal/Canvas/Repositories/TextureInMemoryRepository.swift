@@ -16,6 +16,8 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private var _textureSize: CGSize?
 
+    private let triggerViewUpdateSubject: PassthroughSubject<Void, Never> = .init()
+
     private let flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
@@ -38,6 +40,9 @@ final class TextureInMemoryRepository: ObservableObject {
 }
 
 extension TextureInMemoryRepository: TextureRepository {
+    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
+        triggerViewUpdateSubject.eraseToAnyPublisher()
+    }
 
     var textureSize: CGSize? {
         _textureSize
@@ -119,6 +124,10 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    func triggerViewUpdate() {
+        triggerViewUpdateSubject.send()
+    }
+
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -166,8 +175,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-
-        objectWillChange.send()
+        triggerViewUpdateSubject.send()
     }
 
     func setAllThumbnails() {

@@ -69,6 +69,12 @@ final class TextureLayers: ObservableObject {
 
         canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
+
+        textureRepository.triggerViewUpdatePublisher
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     var selectedLayer: TextureLayerModel? {
@@ -257,17 +263,6 @@ extension TextureLayers {
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
             updateCanvasSubject.send(())
         }
-    }
-
-    func updateThumbnail(_ selectedTexture: MTLTexture) {
-        guard let selectedLayerId = canvasState.selectedLayerId else { return }
-
-        textureRepository?.setThumbnail(
-            texture: selectedTexture,
-            for: selectedLayerId
-        )
-
-        objectWillChange.send()
     }
 
 }

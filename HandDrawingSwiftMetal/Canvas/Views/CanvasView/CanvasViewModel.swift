@@ -491,7 +491,10 @@ extension CanvasViewModel {
                     texture: selectedTexture,
                     targetTextureId: selectedTextureId
                 ) { [weak self] texture in
-                    self?.textureLayers.updateThumbnail(texture)
+                    self?.textureRepository?.setThumbnail(
+                        texture: selectedTexture,
+                        for: selectedTextureId
+                    )
                 }
             }
         }

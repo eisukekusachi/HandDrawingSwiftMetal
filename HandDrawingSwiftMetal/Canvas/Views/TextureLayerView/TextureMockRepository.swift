@@ -10,6 +10,12 @@ import UIKit
 import Metal
 
 final class TextureMockRepository: TextureRepository {
+    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
+        triggerViewUpdateSubject.eraseToAnyPublisher()
+    }
+
+    private let triggerViewUpdateSubject: PassthroughSubject<Void, Never> = .init()
+
     var textureNum: Int = 0
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {

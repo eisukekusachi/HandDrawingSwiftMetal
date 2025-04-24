@@ -11,6 +11,8 @@ import MetalKit
 
 protocol TextureRepository {
 
+    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> { get }
+
     var textureNum: Int { get }
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>
 

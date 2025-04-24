@@ -19,6 +19,10 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
         self.repository = repository
     }
 
+    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
+        repository.triggerViewUpdatePublisher
+    }
+
     var textureNum: Int {
         repository.textureNum
     }
