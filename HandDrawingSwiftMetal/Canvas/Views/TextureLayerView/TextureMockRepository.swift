@@ -10,13 +10,32 @@ import UIKit
 import Metal
 
 final class TextureMockRepository: TextureRepository {
+
+    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
+        initializeCanvasWithModelSubject.eraseToAnyPublisher()
+    }
+    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
+        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
+    }
+    var updateCanvasPublisher: AnyPublisher<Void, Never> {
+        updateCanvasSubject.eraseToAnyPublisher()
+    }
+
     var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
         triggerViewUpdateSubject.eraseToAnyPublisher()
     }
 
+    private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+
+    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
+
     private let triggerViewUpdateSubject: PassthroughSubject<Void, Never> = .init()
 
     var textureNum: Int = 0
+
+    func restoreLayers(from model: CanvasModel, drawableSize: CGSize) {}
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
         Just(true)
@@ -69,4 +88,13 @@ final class TextureMockRepository: TextureRepository {
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+
+    func updateCanvasAfterTextureLayerUpdates() {
+        updateCanvasAfterTextureLayerUpdatesSubject.send()
+    }
+
+    func updateCanvas() {
+        updateCanvasSubject.send()
+    }
+
 }

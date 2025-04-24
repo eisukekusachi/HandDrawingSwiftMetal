@@ -11,34 +11,6 @@ import MetalKit
 /// Manage texture layers using `CanvasState` and `TextureRepository`
 final class TextureLayers: ObservableObject {
 
-    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
-        initializeCanvasWithModelSubject.eraseToAnyPublisher()
-    }
-    private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
-
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
-        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
-    }
-    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
-
-    var updateCanvasPublisher: AnyPublisher<Void, Never> {
-        updateCanvasSubject.eraseToAnyPublisher()
-    }
-    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
-
-    var initializeWithTextureSizePublisher: AnyPublisher<CGSize, Never> {
-        initializeWithTextureSizeSubject.eraseToAnyPublisher()
-    }
-    private let initializeWithTextureSizeSubject = PassthroughSubject<CGSize, Never>()
-
-    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
-        didSet {
-            if drawableTextureSize < MTLRenderer.minimumTextureSize {
-                drawableTextureSize = MTLRenderer.minimumTextureSize
-            }
-        }
-    }
-
     @Published private(set) var layers: [TextureLayerModel] = []
 
     @Published private(set) var selectedLayerId: UUID?
@@ -58,12 +30,6 @@ final class TextureLayers: ObservableObject {
         self.canvasState = canvasState
         self.textureRepository = textureRepository
 
-        initializeWithTextureSizePublisher
-            .sink { [weak self] textureSize in
-                self?.initializeWithTextureSize(textureSize)
-            }
-            .store(in: &cancellables)
-
         canvasState.$layers.assign(to: \.layers, on: self)
             .store(in: &cancellables)
 
@@ -71,6 +37,7 @@ final class TextureLayers: ObservableObject {
             .store(in: &cancellables)
 
         textureRepository.triggerViewUpdatePublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -83,54 +50,6 @@ final class TextureLayers: ObservableObject {
 
     var selectedIndex: Int? {
         canvasState.selectedIndex
-    }
-
-    /// Attempts to restore layers from a given `CanvasModel`
-    /// If the model is invalid, initialization is performed using the given texture size
-    func restoreLayers(from model: CanvasModel, drawableSize: CGSize) {
-        drawableTextureSize = drawableSize
-
-        textureRepository?.hasAllTextures(for: model.layers.map { $0.id })
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] allExist in
-                guard let `self` else { return }
-                if allExist {
-                    self.initializeCanvasWithModelSubject.send(model)
-                } else {
-                    self.initializeWithTextureSizeSubject.send(
-                        model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
-                    )
-                }
-            })
-            .store(in: &cancellables)
-    }
-
-    private func initializeWithTextureSize(_ textureSize: CGSize) {
-        guard textureSize > MTLRenderer.minimumTextureSize else { return }
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
-        )
-
-        textureRepository?.initTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .sink(receiveCompletion: { completion in
-            switch completion {
-            case .finished: break
-            case .failure: break
-            }
-        }, receiveValue: { [weak self] in
-            self?.initializeCanvasWithModelSubject.send(
-                CanvasModel(textureSize: textureSize, layers: [layer])
-            )
-        })
-        .store(in: &cancellables)
     }
 
 }
@@ -159,7 +78,7 @@ extension TextureLayers {
                 }
             }, receiveValue: { [weak self] newLayerTextureId in
                 self?.canvasState.selectedLayerId = newLayerTextureId
-                self?.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+                self?.textureRepository.updateCanvasAfterTextureLayerUpdates()
             })
             .store(in: &cancellables)
     }
@@ -183,7 +102,7 @@ extension TextureLayers {
             }, receiveValue: { [weak self] _ in
                 guard let `self` else { return }
                 self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
-                self.updateCanvasAfterTextureLayerUpdatesSubject.send(())
+                self.textureRepository.updateCanvasAfterTextureLayerUpdates()
             })
             .store(in: &cancellables)
     }
@@ -194,7 +113,7 @@ extension TextureLayers {
 
     func selectLayer(_ uuid: UUID) {
         canvasState.selectedLayerId = uuid
-        updateCanvasAfterTextureLayerUpdatesSubject.send(())
+        textureRepository.updateCanvasAfterTextureLayerUpdates()
     }
 
 }
@@ -237,7 +156,7 @@ extension TextureLayers {
         )
         canvasState.layers.reverse()
 
-        updateCanvasAfterTextureLayerUpdatesSubject.send(())
+        textureRepository.updateCanvasAfterTextureLayerUpdates()
     }
 
     func updateLayer(
@@ -255,13 +174,13 @@ extension TextureLayers {
             canvasState.layers[selectedIndex].isVisible = isVisible
 
             // The visibility of the layers can be changed, so other layers will be updated
-            updateCanvasAfterTextureLayerUpdatesSubject.send(())
+            textureRepository.updateCanvasAfterTextureLayerUpdates()
         }
         if let alpha {
             canvasState.layers[selectedIndex].alpha = alpha
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
-            updateCanvasSubject.send(())
+            textureRepository.updateCanvas()
         }
     }
 
