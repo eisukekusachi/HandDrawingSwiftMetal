@@ -133,7 +133,7 @@
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
 		D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */; };
-		D4F1BB3E2B2D436F006EA102 /* TextureLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */; };
+		D4F1BB3E2B2D436F006EA102 /* TextureLayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -283,7 +283,7 @@
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchHashValue.swift; sourceTree = "<group>"; };
-		D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayers.swift; sourceTree = "<group>"; };
+		D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -573,7 +573,6 @@
 			isa = PBXGroup;
 			children = (
 				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
-				D4F1BB3D2B2D436F006EA102 /* TextureLayers.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -633,6 +632,7 @@
 				D463A5F02C6E346500D102AD /* Models */,
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
+				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
 				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
 			);
 			path = TextureLayerView;
@@ -1001,7 +1001,7 @@
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4812E472D1643F400F47DC7 /* Logger.swift in Sources */,
 				D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */,
-				D4F1BB3E2B2D436F006EA102 /* TextureLayers.swift in Sources */,
+				D4F1BB3E2B2D436F006EA102 /* TextureLayerViewModel.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */,
 				D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */,

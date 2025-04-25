@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextureLayerView: View {
 
-    @ObservedObject var textureLayers: TextureLayers
+    @ObservedObject var viewModel: TextureLayerViewModel
 
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
@@ -29,33 +29,33 @@ struct TextureLayerView: View {
 
             VStack {
                 toolbar(
-                    textureLayers,
+                    viewModel,
                     changeTitle: { layer, title in
-                        textureLayers.updateLayer(id: layer.id, title: title)
+                        viewModel.updateLayer(id: layer.id, title: title)
                     }
                 )
 
                 TextureLayerListView(
-                    textureLayers: textureLayers,
+                    viewModel: viewModel,
                     didTapLayer: { layer in
-                        textureLayers.selectLayer(layer.id)
+                        viewModel.selectLayer(layer.id)
                     },
                     didTapVisibility: { layer, isVisible in
-                        textureLayers.updateLayer(id: layer.id, isVisible: isVisible)
+                        viewModel.updateLayer(id: layer.id, isVisible: isVisible)
                     },
                     didMove: { source, destination in
-                        textureLayers.moveLayer(fromListOffsets: source, toListOffset: destination)
+                        viewModel.moveLayer(fromListOffsets: source, toListOffset: destination)
                     }
                 )
 
                 TwoRowsSliderView(
                     title: "Alpha",
-                    value: textureLayers.selectedLayer?.alpha ?? 0,
+                    value: viewModel.selectedLayer?.alpha ?? 0,
                     style: sliderStyle,
                     range: range,
                     didChange: { value in
-                        guard let selectedLayer = textureLayers.selectedLayer else { return }
-                        textureLayers.updateLayer(id: selectedLayer.id, alpha: value)
+                        guard let selectedLayer = viewModel.selectedLayer else { return }
+                        viewModel.updateLayer(id: selectedLayer.id, alpha: value)
                     }
                 )
                 .padding(.top, 4)
@@ -70,7 +70,7 @@ struct TextureLayerView: View {
 extension TextureLayerView {
 
     func toolbar(
-        _ textureLayers: TextureLayers,
+        _ viewModel: TextureLayerViewModel,
         changeTitle: ((TextureLayerModel, String) -> Void)? = nil
     ) -> some View {
         let buttonSize: CGFloat = 20
@@ -78,8 +78,8 @@ extension TextureLayerView {
         return HStack {
             Button(
                 action: {
-                    textureLayers.insertLayer(
-                        at: textureLayers.newIndex
+                    viewModel.insertLayer(
+                        at: viewModel.newIndex
                     )
                 },
                 label: {
@@ -91,7 +91,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textureLayers.removeLayer()
+                    viewModel.removeLayer()
                 },
                 label: {
                     Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
@@ -102,7 +102,7 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textFieldTitle = textureLayers.selectedLayer?.title ?? ""
+                    textFieldTitle = viewModel.selectedLayer?.title ?? ""
                     isTextFieldPresented = true
                 },
                 label: {
@@ -113,7 +113,7 @@ extension TextureLayerView {
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let selectedLayer = textureLayers.selectedLayer else { return }
+                    guard let selectedLayer = viewModel.selectedLayer else { return }
                     changeTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
@@ -143,17 +143,17 @@ private struct PreviewView: View {
             ]
         )
     )
-    let textureLayers: TextureLayers
+    let viewModel: TextureLayerViewModel
 
     init() {
-        textureLayers = .init(
+        viewModel = .init(
             canvasState: canvasState,
             textureRepository: TextureMockRepository()
         )
     }
     var body: some View {
         TextureLayerView(
-            textureLayers: textureLayers,
+            viewModel: viewModel,
             roundedRectangleWithArrow: RoundedRectangleWithArrow()
         )
         .frame(width: 320, height: 300)

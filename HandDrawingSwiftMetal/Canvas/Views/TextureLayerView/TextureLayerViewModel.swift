@@ -1,5 +1,5 @@
 //
-//  TextureLayers.swift
+//  TextureLayerViewModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/16.
@@ -9,7 +9,7 @@ import Combine
 import MetalKit
 
 /// Manage texture layers using `CanvasState` and `TextureRepository`
-final class TextureLayers: ObservableObject {
+final class TextureLayerViewModel: ObservableObject {
 
     @Published private(set) var layers: [TextureLayerModel] = []
 
@@ -54,7 +54,7 @@ final class TextureLayers: ObservableObject {
 
 }
 
-extension TextureLayers {
+extension TextureLayerViewModel {
 
     func insertLayer(at index: Int) {
         guard
@@ -118,7 +118,7 @@ extension TextureLayers {
 }
 
 // MARK: CRUD
-extension TextureLayers {
+extension TextureLayerViewModel {
 
     var newIndex: Int {
         (canvasState.selectedIndex ?? 0) + 1
@@ -186,7 +186,7 @@ extension TextureLayers {
 }
 
 // MARK: Publishers
-extension TextureLayers {
+extension TextureLayerViewModel {
 
     private func addNewLayerPublisher(at index: Int) -> AnyPublisher<UUID, Error> {
         Just(index)
