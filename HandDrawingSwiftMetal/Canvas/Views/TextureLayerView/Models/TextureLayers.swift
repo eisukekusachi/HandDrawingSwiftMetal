@@ -86,7 +86,6 @@ extension TextureLayers {
     func removeLayer() {
         guard
             let textureRepository,
-            let selectedLayerId = canvasState.selectedLayer?.id,
             let selectedIndex = canvasState.selectedIndex
         else { return }
 

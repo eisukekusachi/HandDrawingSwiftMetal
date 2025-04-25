@@ -17,12 +17,13 @@ final class TextureLayerViewPresenter {
 
     func setupLayerViewPresenter(
         canvasState: CanvasState,
-        textureLayers: TextureLayers,
         targetView: UIView,
         on destinationView: UIView
     ) {
         layerView = TextureLayerView(
-            textureLayers: textureLayers,
+            textureLayers: .init(
+                canvasState: canvasState
+            ),
             roundedRectangleWithArrow: roundedRectangleWithArrow
         )
 

@@ -195,7 +195,6 @@ extension CanvasViewController {
     func setupLayerViewPresenter() {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasViewModel.canvasState,
-            textureLayers: canvasViewModel.textureLayers,
             targetView: contentView.layerButton,
             on: self.contentView
         )

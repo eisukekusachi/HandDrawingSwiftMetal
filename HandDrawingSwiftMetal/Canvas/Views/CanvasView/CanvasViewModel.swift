@@ -15,10 +15,6 @@ final class CanvasViewModel {
         CanvasModel()
     )
 
-    private(set) lazy var textureLayers = TextureLayers(
-        canvasState: canvasState
-    )
-
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
