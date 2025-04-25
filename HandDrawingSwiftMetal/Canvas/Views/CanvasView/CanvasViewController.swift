@@ -29,10 +29,10 @@ class CanvasViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupContentView()
+        addEvents()
+        bindData()
 
         setupNewCanvasDialogPresenter()
-        setupLayerViewPresenter()
 
         bindViewModel()
 
@@ -65,16 +65,16 @@ class CanvasViewController: UIViewController {
 
 extension CanvasViewController {
 
-    private func setupContentView() {
-        addEvents()
-        bindData()
-
-        contentView.setup(
-            canvasViewModel.canvasState
-        )
-    }
-
     private func bindData() {
+        canvasViewModel.requestSetupViewsPublisher
+            .sink { [weak self] canvasState in
+                self?.setupLayerViewPresenter(canvasState: canvasState)
+                self?.contentView.setup(
+                    canvasState
+                )
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.requestShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
@@ -192,9 +192,9 @@ extension CanvasViewController {
         }
     }
 
-    func setupLayerViewPresenter() {
+    func setupLayerViewPresenter(canvasState: CanvasState) {
         textureLayerViewPresenter.setupLayerViewPresenter(
-            canvasState: canvasViewModel.canvasState,
+            canvasState: canvasState,
             targetView: contentView.layerButton,
             on: self.contentView
         )

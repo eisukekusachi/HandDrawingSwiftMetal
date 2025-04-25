@@ -11,14 +11,14 @@ import SwiftUI
 
 final class CanvasViewModel {
 
-    let canvasState: CanvasState = .init(
-        CanvasModel()
-    )
-
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
         }
+    }
+
+    var requestSetupViewsPublisher: AnyPublisher<CanvasState, Never> {
+        requestSetupViewsSubject.eraseToAnyPublisher()
     }
 
     var requestShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
@@ -52,6 +52,10 @@ final class CanvasViewModel {
         requestShowingLayerViewSubject.value
     }
 
+    private let canvasState: CanvasState = .init(
+        CanvasModel()
+    )
+
     /// A class for handling finger input values
     private let fingerScreenStrokeData = FingerScreenStrokeData()
     /// A class for handling Apple Pencil inputs
@@ -77,6 +81,8 @@ final class CanvasViewModel {
     private let inputDevice = CanvasInputDeviceStatus()
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
+
+    private var requestSetupViewsSubject: PassthroughSubject<CanvasState, Never> = .init()
 
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -222,6 +228,8 @@ extension CanvasViewModel {
         canvasView: CanvasViewProtocol
     ) {
         renderer.setCanvas(canvasView)
+
+        requestSetupViewsSubject.send(canvasState)
     }
 
     func onViewDidAppear(
