@@ -48,10 +48,6 @@ final class CanvasViewModel {
         updateRedoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
 
-    var isLayerViewVisible: Bool {
-        requestShowingLayerViewSubject.value
-    }
-
     private let canvasState: CanvasState = .init(
         CanvasModel()
     )
