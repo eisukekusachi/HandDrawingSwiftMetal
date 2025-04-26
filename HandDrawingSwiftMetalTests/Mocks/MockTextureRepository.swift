@@ -11,6 +11,26 @@ import UIKit
 @testable import HandDrawingSwiftMetal
 
 final class MockTextureRepository: TextureRepository {
+    private let initializeCanvasWithModelSubject = PassthroughSubject<HandDrawingSwiftMetal.CanvasModel, Never>()
+    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
+    private let thumbnailWillChangeSubject = PassthroughSubject<UUID, Never>()
+
+    var initializeCanvasWithModelPublisher: AnyPublisher<HandDrawingSwiftMetal.CanvasModel, Never> {
+        initializeCanvasWithModelSubject.eraseToAnyPublisher()
+    }
+
+    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
+        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
+    }
+
+    var updateCanvasPublisher: AnyPublisher<Void, Never> {
+        updateCanvasSubject.eraseToAnyPublisher()
+    }
+
+    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
+        thumbnailWillChangeSubject.eraseToAnyPublisher()
+    }
 
     var textures: [UUID: MTLTexture?] = [:]
 
@@ -22,6 +42,20 @@ final class MockTextureRepository: TextureRepository {
 
     init(textures: [UUID : MTLTexture?] = [:]) {
         self.textures = textures
+    }
+
+    func restoreLayers(from model: HandDrawingSwiftMetal.CanvasModel, drawableSize: CGSize) {
+        callHistory.append("restoreLayers(from: \(model), drawableSize: \(drawableSize))")
+    }
+
+    func updateCanvasAfterTextureLayerUpdates() {
+        callHistory.append("updateCanvasAfterTextureLayerUpdates()")
+        updateCanvasAfterTextureLayerUpdatesSubject.send(())
+    }
+
+    func updateCanvas() {
+        callHistory.append("updateCanvas()")
+        updateCanvasSubject.send(())
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
