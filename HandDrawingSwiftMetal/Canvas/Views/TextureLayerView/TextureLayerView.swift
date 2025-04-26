@@ -11,10 +11,10 @@ struct TextureLayerView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
+    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
+
     @State var isTextFieldPresented: Bool = false
     @State var textFieldTitle: String = ""
-
-    var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
@@ -145,6 +145,8 @@ private struct PreviewView: View {
     )
     let viewModel: TextureLayerViewModel
 
+    @StateObject var roundedRectangle = RoundedRectangleWithArrow()
+
     init() {
         viewModel = .init(
             canvasState: canvasState,
@@ -154,7 +156,7 @@ private struct PreviewView: View {
     var body: some View {
         TextureLayerView(
             viewModel: viewModel,
-            roundedRectangleWithArrow: RoundedRectangleWithArrow()
+            roundedRectangleWithArrow: roundedRectangle
         )
         .frame(width: 320, height: 300)
     }
