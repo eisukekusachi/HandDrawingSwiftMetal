@@ -21,7 +21,7 @@ final class CanvasState: ObservableObject {
     )
 
     /// If `layers` is empty, a new layer is created and added to `layers`
-    /// when `restoreLayers(from:model, drawableSize:)` is called in `TextureLayers`.
+    /// when `resolveCanvasView(from:model, drawableSize:)` is called in `TextureRepository`
     @Published var layers: [TextureLayerModel] = []
 
     @Published var selectedLayerId: UUID?

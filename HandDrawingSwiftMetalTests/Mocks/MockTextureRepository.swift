@@ -11,13 +11,20 @@ import UIKit
 @testable import HandDrawingSwiftMetal
 
 final class MockTextureRepository: TextureRepository {
-    private let initializeCanvasWithModelSubject = PassthroughSubject<HandDrawingSwiftMetal.CanvasModel, Never>()
+
+    private let initializeCanvasAfterCreatingNewTextureSubject = PassthroughSubject<CGSize, Never>()
+
+    private let restoreCanvasFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+
     private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
     private let updateCanvasSubject = PassthroughSubject<Void, Never>()
     private let thumbnailWillChangeSubject = PassthroughSubject<UUID, Never>()
 
-    var initializeCanvasWithModelPublisher: AnyPublisher<HandDrawingSwiftMetal.CanvasModel, Never> {
-        initializeCanvasWithModelSubject.eraseToAnyPublisher()
+    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
+        initializeCanvasAfterCreatingNewTextureSubject.eraseToAnyPublisher()
+    }
+    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        restoreCanvasFromModelSubject.eraseToAnyPublisher()
     }
 
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
@@ -44,8 +51,8 @@ final class MockTextureRepository: TextureRepository {
         self.textures = textures
     }
 
-    func restoreLayers(from model: HandDrawingSwiftMetal.CanvasModel, drawableSize: CGSize) {
-        callHistory.append("restoreLayers(from: \(model), drawableSize: \(drawableSize))")
+    func resolveCanvasView(from model: HandDrawingSwiftMetal.CanvasModel, drawableSize: CGSize) {
+        callHistory.append("resolveCanvasView(from: \(model), drawableSize: \(drawableSize))")
     }
 
     func updateCanvasAfterTextureLayerUpdates() {
@@ -63,6 +70,10 @@ final class MockTextureRepository: TextureRepository {
         return Just(true)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
+    }
+
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+        callHistory.append("initializeCanvasAfterCreatingNewTexture(\(textureSize)")
     }
 
     func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {

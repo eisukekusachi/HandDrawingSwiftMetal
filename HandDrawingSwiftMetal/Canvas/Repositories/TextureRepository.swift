@@ -11,20 +11,29 @@ import MetalKit
 
 protocol TextureRepository {
 
-    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> { get }
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> { get }
-    var updateCanvasPublisher: AnyPublisher<Void, Never> { get }
+    var textureNum: Int { get }
+
+    /// Create a new texture and initialize the canvas
+    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> { get }
+
+    /// Restore the canvas from the model
+    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
 
     /// Emit `UUID` when the thumbnail is updated
     var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> { get }
 
-    var textureNum: Int { get }
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>
+    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> { get }
+    var updateCanvasPublisher: AnyPublisher<Void, Never> { get }
 
-    func restoreLayers(from model: CanvasModel, drawableSize: CGSize)
+    /// Resolve the state of the CanvasView
+    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize)
+
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize)
 
     func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
     func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
+
+    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>
 
     func getThumbnail(_ uuid: UUID) -> UIImage?
 

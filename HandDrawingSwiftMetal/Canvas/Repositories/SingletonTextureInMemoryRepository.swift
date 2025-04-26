@@ -19,9 +19,13 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
         self.repository = repository
     }
 
-    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
-        repository.initializeCanvasWithModelPublisher
+    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
+        repository.initializeCanvasAfterCreatingNewTexturePublisher
     }
+    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        repository.restoreCanvasFromModelPublisher
+    }
+
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
         repository.updateCanvasAfterTextureLayerUpdatesPublisher
     }
@@ -37,12 +41,16 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
         repository.textureNum
     }
 
-    func restoreLayers(from model: CanvasModel, drawableSize: CGSize) {
-        repository.restoreLayers(from: model, drawableSize: drawableSize)
+    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
+        repository.resolveCanvasView(from: model, drawableSize: drawableSize)
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
         repository.hasAllTextures(for: uuids)
+    }
+
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+        repository.initializeCanvasAfterCreatingNewTexture(textureSize)
     }
 
     func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {

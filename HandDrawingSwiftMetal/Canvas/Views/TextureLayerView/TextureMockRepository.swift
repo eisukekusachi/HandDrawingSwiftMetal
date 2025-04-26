@@ -11,9 +11,13 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
-    var initializeCanvasWithModelPublisher: AnyPublisher<CanvasModel, Never> {
-        initializeCanvasWithModelSubject.eraseToAnyPublisher()
+    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
+        initializeCanvasAfterCreatingNewTextureSubject.eraseToAnyPublisher()
     }
+    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        restoreCanvasFromModelSubject.eraseToAnyPublisher()
+    }
+
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
         updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
     }
@@ -26,7 +30,9 @@ final class TextureMockRepository: TextureRepository {
         thumbnailWillChangeSubject.eraseToAnyPublisher()
     }
 
-    private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let initializeCanvasAfterCreatingNewTextureSubject = PassthroughSubject<CGSize, Never>()
+
+    private let restoreCanvasFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
     private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
 
@@ -36,12 +42,16 @@ final class TextureMockRepository: TextureRepository {
 
     var textureNum: Int = 0
 
-    func restoreLayers(from model: CanvasModel, drawableSize: CGSize) {}
+    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {}
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
         Just(true)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
+    }
+
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+        
     }
 
     func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {

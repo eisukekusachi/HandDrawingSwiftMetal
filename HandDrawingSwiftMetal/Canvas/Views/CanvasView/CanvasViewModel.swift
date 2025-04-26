@@ -156,12 +156,18 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Initialize the canvas from textureLayers using CanvasModel
-        textureRepository.initializeCanvasWithModelPublisher
+        textureRepository.restoreCanvasFromModelPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] canvasModel in
                 guard let textureSize = canvasModel.textureSize else { return }
                 self?.canvasState.setData(canvasModel)
                 self?.initTextures(textureSize: textureSize)
+            }
+            .store(in: &cancellables)
+
+        textureRepository.initializeCanvasAfterCreatingNewTexturePublisher
+            .sink { [weak self] textureSize in
+                self?.textureRepository.initializeCanvasAfterCreatingNewTexture(textureSize)
             }
             .store(in: &cancellables)
 
@@ -200,7 +206,7 @@ extension CanvasViewModel {
 
     func initCanvas(using model: CanvasModel) {
         guard let drawableSize = renderer.renderTextureSize else { return }
-        textureRepository.restoreLayers(from: model, drawableSize: drawableSize)
+        textureRepository.resolveCanvasView(from: model, drawableSize: drawableSize)
     }
 
     private func initTextures(textureSize: CGSize) {
