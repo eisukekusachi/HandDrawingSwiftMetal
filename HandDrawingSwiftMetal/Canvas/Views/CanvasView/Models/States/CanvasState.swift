@@ -28,6 +28,8 @@ final class CanvasState: ObservableObject {
 
     @Published var backgroundColor: UIColor = .white
 
+    @Published var isInitialized = false
+
     init(_ model: CanvasModel) {
         projectName = model.projectName
         layers = model.layers
@@ -55,6 +57,10 @@ extension CanvasState {
         drawingToolState.currentDrawingTool.diameter
     }
 
+    func getLayer(_ selectedLayerId: UUID) -> TextureLayerModel? {
+        layers.first(where: { $0.id == selectedLayerId })
+    }
+
     func setData(_ model: CanvasModel) {
         layers.removeAll()
         layers = model.layers
@@ -65,6 +71,8 @@ extension CanvasState {
         drawingToolState.setData(model)
 
         currentTextureSize = model.textureSize
+
+        isInitialized = true
     }
 
 }

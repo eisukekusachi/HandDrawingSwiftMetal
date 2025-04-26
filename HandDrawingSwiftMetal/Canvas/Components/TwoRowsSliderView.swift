@@ -9,14 +9,11 @@ import SwiftUI
 
 struct TwoRowsSliderView: View {
 
-    let title: String
-    var value: Int
-    let style: SliderStyle
-    var range = 0 ... 255
+    @Binding var value: Int
+    @Binding var isPressed: Bool
 
-    var didStartChanging: (() -> Void)?
-    var didChange: ((Int) -> Void)?
-    var didFinishChanging: (() -> Void)?
+    let title: String
+    let range: ClosedRange<Int>
 
     var buttonSize: CGFloat = 20
     var valueLabelWidth: CGFloat = 64
@@ -25,18 +22,15 @@ struct TwoRowsSliderView: View {
         VStack(spacing: 4) {
             buttons
             IntSlider(
-                value: value,
-                in: range,
-                didStart: didStartChanging,
-                didChange: didChange,
-                didEnded: didFinishChanging
+                value: $value,
+                isPressed: $isPressed,
+                in: range
             )
-            .environment(\.sliderStyle, style)
         }
     }
 
     private var buttons: some View {
-        HStack(spacing: 0) {
+        HStack {
             minusButton
             Spacer()
             valueLabel
@@ -46,25 +40,16 @@ struct TwoRowsSliderView: View {
     }
 
     private var minusButton: some View {
-        Button(action: {
-            didChange?(max(value - 1, range.lowerBound))
-        },
-               label: {
-            Image(systemName: "minus")
-                .frame(width: buttonSize, height: buttonSize)
-                .foregroundColor(Color(uiColor: .systemBlue))
-        })
-    }
-
-    private var plusButton: some View {
-        Button(action: {
-            didChange?(min(value + 1, range.upperBound))
-        },
-               label: {
-            Image(systemName: "plus")
-                .frame(width: buttonSize, height: buttonSize)
-                .foregroundColor(Color(uiColor: .systemBlue))
-        })
+        Button(
+            action: {
+                value = (max(value - 1, range.lowerBound))
+            },
+            label: {
+                Image(systemName: "minus")
+                    .frame(width: buttonSize, height: buttonSize)
+                    .foregroundColor(Color(uiColor: .systemBlue))
+            }
+        )
     }
 
     private var valueLabel: some View {
@@ -76,7 +61,7 @@ struct TwoRowsSliderView: View {
                 .frame(width: valueLabelWidth, alignment: .trailing)
 
             Spacer()
-                .frame(width: 12)
+                .frame(width: 8)
 
             Text("\(value)")
                 .font(.footnote)
@@ -85,18 +70,47 @@ struct TwoRowsSliderView: View {
             Spacer()
         }
     }
+
+    private var plusButton: some View {
+        Button(
+            action: {
+                value = (min(value + 1, range.upperBound))
+            },
+            label: {
+                Image(systemName: "plus")
+                    .frame(width: buttonSize, height: buttonSize)
+                    .foregroundColor(Color(uiColor: .systemBlue))
+            }
+        )
+    }
 }
 
 #Preview {
+    PreviewView()
+}
 
-    let alpha: Int = 125
-    let sliderStyle = SliderStyleImpl(
-        trackLeftColor: UIColor(named: "trackColor")!)
+private struct PreviewView: View {
 
-    return TwoRowsSliderView(
-        title: "Alpha",
-        value: alpha,
-        style: sliderStyle
+    @State var alpha: Int = 125
+    @State var isPressed: Bool = false
+
+    @State var alphaArray: [Int] = [25, 125, 225]
+    @State var isPressedArray: [Bool] = [false, false, false]
+
+    let sliderStyle = DefaultSliderStyle(
+        trackLeftColor: UIColor(named: "trackColor")
     )
 
+    var body: some View {
+        ForEach(alphaArray.indices, id: \.self) { index in
+            TwoRowsSliderView(
+                value: $alphaArray[index],
+                isPressed: $isPressedArray[index],
+                title: "Alpha",
+                range: 0 ... 255
+            )
+            .padding()
+        }
+
+    }
 }

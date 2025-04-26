@@ -16,8 +16,6 @@ struct TextureLayerView: View {
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
-    private let sliderStyle = SliderStyleImpl(
-        trackLeftColor: UIColor(named: "trackColor")!)
     private let range = 0 ... 255
 
     var body: some View {
@@ -49,14 +47,10 @@ struct TextureLayerView: View {
                 )
 
                 TwoRowsSliderView(
+                    value: $viewModel.currentSelectedAlpha,
+                    isPressed: $viewModel.isSliderHandleDragging,
                     title: "Alpha",
-                    value: viewModel.selectedLayer?.alpha ?? 0,
-                    style: sliderStyle,
-                    range: range,
-                    didChange: { value in
-                        guard let selectedLayer = viewModel.selectedLayer else { return }
-                        viewModel.updateLayer(id: selectedLayer.id, alpha: value)
-                    }
+                    range: range
                 )
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)

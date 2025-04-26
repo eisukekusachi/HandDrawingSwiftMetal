@@ -8,36 +8,45 @@
 import SwiftUI
 
 struct IntSlider: View {
-    @Environment(\.sliderStyle) var style
+
+    @Binding var value: Int
+    @Binding var isPressed: Bool
+
     @State private var knobOffsetX: CGFloat?
     @State private var isDragging: Bool = false
 
-    private var value: Int
     private let closedRange: ClosedRange<Int>
 
-    private let didStart: (() -> Void)?
-    private let didChange: ((Int) -> Void)?
-    private let didEnded: (() -> Void)?
+    private let style: SliderStyleProtocol
 
     init(
-        value: Int,
+        value: Binding<Int>,
+        isPressed: Binding<Bool>,
         in range: ClosedRange<Int>,
-        didStart: (() -> Void)? = nil,
-        didChange: ((Int) -> Void)? = nil,
-        didEnded: (() -> Void)? = nil
+        style: SliderStyleProtocol = DefaultSliderStyle(
+            trackLeftColor: UIColor(named: "trackColor")
+        )
     ) {
-        self.value = value
+        self._value = value
+        self._isPressed = isPressed
         self.closedRange = range
-        self.didStart = didStart
-        self.didChange = didChange
-        self.didEnded = didEnded
+        self.style = style
     }
 
     var body: some View {
         GeometryReader { geometry in
             let geometryWidth = geometry.size.width
-            let leftWidth = getTrackLeftWidth(sliderValue: value, trackWidth: geometryWidth, range: closedRange)
-            let rightWidth = getTrackRightWidth(sliderValue: value, trackWidth: geometryWidth, range: closedRange)
+
+            let leftWidth = getTrackLeftWidth(
+                sliderValue: value,
+                trackWidth: geometryWidth,
+                range: closedRange
+            )
+            let rightWidth = getTrackRightWidth(
+                sliderValue: value,
+                trackWidth: geometryWidth,
+                range: closedRange
+            )
 
             ZStack(alignment: .leading) {
                 ZStack(alignment: .leading) {
@@ -55,46 +64,55 @@ struct IntSlider: View {
                 .frame(height: style.trackThickness)
                 .cornerRadius(style.trackCornerRadius)
                 .overlay(
-                    RoundedRectangle(cornerRadius: style.trackCornerRadius)
-                        .strokeBorder(style.trackBorderColor, lineWidth: style.trackBorderWidth)
-                        .foregroundColor(.clear)
+                    RoundedRectangle(
+                        cornerRadius: style.trackCornerRadius
+                    )
+                    .strokeBorder(style.trackBorderColor, lineWidth: style.trackBorderWidth)
+                    .foregroundColor(.clear)
                 )
 
                 style.thumb
                     .frame(width: style.thumbThickness, height: style.thumbThickness)
                     .cornerRadius(style.thumbCornerRadius)
                     .foregroundColor(style.thumbColor)
-                    .shadow(color: style.thumbShadowColor,
-                            radius: style.thumbShadowRadius,
-                            x: style.thumbShadowX,
-                            y: style.thumbShadowY)
+                    .shadow(
+                        color: style.thumbShadowColor,
+                        radius: style.thumbShadowRadius,
+                        x: style.thumbShadowX,
+                        y: style.thumbShadowY
+                    )
                     .overlay(
                         RoundedRectangle(cornerRadius: style.thumbCornerRadius)
-                            .strokeBorder(style.thumbBorderColor, lineWidth: style.thumbBorderWidth)
+                            .strokeBorder(
+                                style.thumbBorderColor,
+                                lineWidth: style.thumbBorderWidth
+                            )
                     )
-                    .offset(x: convertToPositionX(sliderValue: value,
-                                                  width: geometryWidth,
-                                                  range: closedRange))
+                    .offset(x: convertToPositionX(
+                        sliderValue: value,
+                        width: geometryWidth,
+                        range: closedRange
+                    ))
                     .gesture(
                         DragGesture()
                             .onChanged { dragGestureValue in
                                 if !isDragging {
                                     isDragging = true
-                                    didStart?()
+                                    isPressed = true
                                 }
                                 dragging(
                                     geometry: geometry,
                                     dragGestureValue: dragGestureValue,
                                     sliderValue: value,
-                                    didChange: { value in
-                                        didChange?(Int(value))
+                                    didChange: { resultValue in
+                                        value = resultValue
                                     }
                                 )
                             }
                             .onEnded { _ in
                                 isDragging = false
                                 knobOffsetX = nil
-                                didEnded?()
+                                isPressed = false
                             }
                     )
             }
@@ -111,29 +129,52 @@ extension IntSlider {
         didChange: (Int) -> Void
     ) {
         if knobOffsetX == nil {
-            let positionX = convertToPositionX(sliderValue: sliderValue,
-                                               width: geometry.size.width,
-                                               range: closedRange)
+            let positionX = convertToPositionX(
+                sliderValue: sliderValue,
+                width: geometry.size.width,
+                range: closedRange
+            )
             knobOffsetX = dragGestureValue.startLocation.x - positionX
         }
 
-        let relativeValue: CGFloat = (dragGestureValue.location.x - (knobOffsetX ?? 0)) / (geometry.size.width - style.thumbThickness)
-        let newValue = Int(CGFloat(closedRange.lowerBound) + (relativeValue * CGFloat(closedRange.upperBound - closedRange.lowerBound)))
+        guard let knobOffsetX else { return }
 
-        didChange(min(closedRange.upperBound, max(closedRange.lowerBound, newValue)))
+        let availableWidth = geometry.size.width - style.thumbThickness
+        let adjustedLocationX = dragGestureValue.location.x - knobOffsetX
+        let relativePosition = adjustedLocationX / availableWidth
+
+        let rangeSpan = CGFloat(closedRange.upperBound - closedRange.lowerBound)
+        let calculatedValue = CGFloat(closedRange.lowerBound) + (relativePosition * rangeSpan)
+        let clampedValue = min(closedRange.upperBound, max(closedRange.lowerBound, Int(calculatedValue)))
+
+        didChange(clampedValue)
     }
 
-    private func getTrackLeftWidth(sliderValue: Int, trackWidth: CGFloat, range: ClosedRange<Int>) -> CGFloat {
-        convertToPositionX(sliderValue: sliderValue,
-                           width: trackWidth,
-                           range: range) + style.trackThickness * 0.5
+    private func getTrackLeftWidth(
+        sliderValue: Int,
+        trackWidth: CGFloat,
+        range: ClosedRange<Int>
+    ) -> CGFloat {
+        convertToPositionX(
+            sliderValue: sliderValue,
+            width: trackWidth,
+            range: range
+        ) + style.trackThickness * 0.5
     }
 
-    private func getTrackRightWidth(sliderValue: Int, trackWidth: CGFloat, range: ClosedRange<Int>) -> CGFloat {
+    private func getTrackRightWidth(
+        sliderValue: Int,
+        trackWidth: CGFloat,
+        range: ClosedRange<Int>
+    ) -> CGFloat {
         trackWidth - getTrackLeftWidth(sliderValue: sliderValue, trackWidth: trackWidth, range: range)
     }
 
-    private func convertToPositionX(sliderValue: Int, width: CGFloat, range: ClosedRange<Int>) -> CGFloat {
+    private func convertToPositionX(
+        sliderValue: Int,
+        width: CGFloat,
+        range: ClosedRange<Int>
+    ) -> CGFloat {
         let upperBound: CGFloat = CGFloat(range.upperBound)
         let lowerBound: CGFloat = CGFloat(range.lowerBound)
         let value: CGFloat = CGFloat(sliderValue)
@@ -143,8 +184,22 @@ extension IntSlider {
 }
 
 #Preview {
+    PreviewView()
+}
 
-    let alpha: Int = 125
-    return IntSlider(value: alpha, in: 0 ... 255)
+private struct PreviewView: View {
 
+    @State var alphaArray: [Int] = [25, 125, 225]
+    @State var isPressedArray: [Bool] = [false, false, false]
+
+    var body: some View {
+        ForEach(alphaArray.indices, id: \.self) { index in
+            IntSlider(
+                value: $alphaArray[index],
+                isPressed: $isPressedArray[index],
+                in: 0...255
+            )
+            .padding()
+        }
+    }
 }

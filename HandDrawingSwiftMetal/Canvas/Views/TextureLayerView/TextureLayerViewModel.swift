@@ -11,9 +11,19 @@ import MetalKit
 /// Manage texture layers using `CanvasState` and `TextureRepository`
 final class TextureLayerViewModel: ObservableObject {
 
+    @Published var currentSelectedAlpha: Int = 0
+
+    @Published var isSliderHandleDragging: Bool = false
+
     @Published private(set) var layers: [TextureLayerModel] = []
 
-    @Published private(set) var selectedLayerId: UUID?
+    @Published private(set) var selectedLayerId: UUID? {
+        didSet {
+            if let uuid = selectedLayerId {
+                updateSliderHandlePosition(uuid)
+            }
+        }
+    }
 
     private var canvasState: CanvasState
 
@@ -42,6 +52,24 @@ final class TextureLayerViewModel: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        $currentSelectedAlpha
+            .sink { [weak self] value in
+                guard
+                    let `self`,
+                    let selectedLayerId = self.selectedLayerId
+                else { return }
+
+                self.updateLayer(
+                    id: selectedLayerId,
+                    alpha: value
+                )
+            }
+            .store(in: &cancellables)
+
+        $isSliderHandleDragging
+            .sink { _ in }
+            .store(in: &cancellables)
     }
 
     var selectedLayer: TextureLayerModel? {
@@ -55,6 +83,11 @@ final class TextureLayerViewModel: ObservableObject {
 }
 
 extension TextureLayerViewModel {
+
+    private func updateSliderHandlePosition(_ uuid: UUID) {
+        guard let layer = canvasState.getLayer(uuid) else { return }
+        currentSelectedAlpha = layer.alpha
+    }
 
     func insertLayer(at index: Int) {
         guard

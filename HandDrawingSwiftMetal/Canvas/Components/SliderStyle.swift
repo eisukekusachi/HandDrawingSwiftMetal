@@ -7,21 +7,7 @@
 
 import SwiftUI
 
-struct SliderEnvironmentKey: EnvironmentKey {
-    static var defaultValue: SliderStyle = SliderStyleImpl()
-}
-extension EnvironmentValues {
-    var sliderStyle: SliderStyle {
-        get {
-            return self[SliderEnvironmentKey.self]
-        }
-        set {
-            self[SliderEnvironmentKey.self] = newValue
-        }
-    }
-}
-
-protocol SliderStyle {
+protocol SliderStyleProtocol {
     var height: CGFloat { get }
 
     var track: AnyView { get }
@@ -31,10 +17,10 @@ protocol SliderStyle {
     var trackCornerRadius: CGFloat { get }
 
     var trackLeft: AnyView { get }
-    var trackLeftColor: Color { get }
+    var trackLeftColor: Color? { get }
 
     var trackRight: AnyView { get }
-    var trackRightColor: Color { get }
+    var trackRightColor: Color? { get }
 
     var thumb: AnyView { get }
     var thumbThickness: CGFloat { get }
@@ -48,7 +34,7 @@ protocol SliderStyle {
     var thumbShadowY: CGFloat { get }
 }
 
-struct SliderStyleImpl: SliderStyle {
+struct DefaultSliderStyle: SliderStyleProtocol {
     var height: CGFloat
 
     var track: AnyView
@@ -58,10 +44,10 @@ struct SliderStyleImpl: SliderStyle {
     var trackCornerRadius: CGFloat
 
     var trackLeft: AnyView
-    var trackLeftColor: Color = .clear
+    var trackLeftColor: Color? = .clear
 
     var trackRight: AnyView
-    var trackRightColor: Color = .clear
+    var trackRightColor: Color? = .clear
 
     var thumb: AnyView
     var thumbColor: Color
@@ -83,10 +69,10 @@ struct SliderStyleImpl: SliderStyle {
          trackCornerRadius: CGFloat? = nil,
 
          trackLeft: AnyView = AnyView(Rectangle()),
-         trackLeftColor: UIColor = .clear,
+         trackLeftColor: UIColor? = .clear,
 
          trackRight: AnyView = AnyView(Rectangle()),
-         trackRightColor: UIColor = .clear,
+         trackRightColor: UIColor? = .clear,
 
          thumb: AnyView = AnyView(Rectangle()),
          thumbThickness: CGFloat = 16,
@@ -109,10 +95,10 @@ struct SliderStyleImpl: SliderStyle {
         self.trackCornerRadius = trackCornerRadius ?? trackThickness * 0.5
 
         self.trackLeft = trackLeft
-        self.trackLeftColor = Color(uiColor: trackLeftColor)
+        self.trackLeftColor = Color(uiColor: trackLeftColor ?? .clear)
 
         self.trackRight = trackRight
-        self.trackRightColor = Color(uiColor: trackRightColor)
+        self.trackRightColor = Color(uiColor: trackRightColor ?? .clear)
 
         self.thumb = thumb
         self.thumbThickness = thumbThickness
