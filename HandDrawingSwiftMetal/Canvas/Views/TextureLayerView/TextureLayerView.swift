@@ -61,7 +61,7 @@ struct TextureLayerView: View {
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)
             }
-            .padding(roundedRectangleWithArrow.edgeInsets)
+            .padding(roundedRectangleWithArrow.edgeInsets())
         }
     }
 

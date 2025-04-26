@@ -6,15 +6,17 @@
 //
 
 import SwiftUI
+
 /// A rounded rectangle model with an arrow at the top
 class RoundedRectangleWithArrow: ObservableObject {
+
+    @Published
+    var arrowPointX: CGFloat = 0.0
 
     let arrowSize: CGSize = .init(width: 18, height: 14)
     let roundedCorner: CGFloat = 12
 
-    var arrowPointX: CGFloat = 0.0
-
-    var edgeInsets: EdgeInsets {
+    func edgeInsets() -> EdgeInsets {
         .init(
             top: roundedCorner + arrowSize.height,
             leading: roundedCorner,

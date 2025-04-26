@@ -77,6 +77,7 @@
 		D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */; };
 		D4517A072CC369FD0047C274 /* GrayscaleDotPointDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4517A062CC369FD0047C274 /* GrayscaleDotPointDummy.swift */; };
 		D4541E942BBC167200C96741 /* CGPointExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4541E932BBC167200C96741 /* CGPointExtensions.swift */; };
+		D45478CB2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */; };
 		D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */; };
 		D458C7372D563B870004D9E6 /* TextureLayersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D458C7362D563B870004D9E6 /* TextureLayersTests.swift */; };
 		D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */; };
@@ -223,6 +224,7 @@
 		D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierCurveHandlePoints.swift; sourceTree = "<group>"; };
 		D4517A062CC369FD0047C274 /* GrayscaleDotPointDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleDotPointDummy.swift; sourceTree = "<group>"; };
 		D4541E932BBC167200C96741 /* CGPointExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtensions.swift; sourceTree = "<group>"; };
+		D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewSettings.swift; sourceTree = "<group>"; };
 		D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSizeExtensions.swift; sourceTree = "<group>"; };
 		D458C7362D563B870004D9E6 /* TextureLayersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersTests.swift; sourceTree = "<group>"; };
 		D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureNodes.swift; sourceTree = "<group>"; };
@@ -634,6 +636,7 @@
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
 				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
+				D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */,
 			);
 			path = TextureLayerView;
 			sourceTree = "<group>";
@@ -947,6 +950,7 @@
 				D44B52D92DB3ACA500EE213C /* DrawingToolState.swift in Sources */,
 				D44B52DA2DB3ACA500EE213C /* DrawingToolProtocol.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* CanvasContentView.swift in Sources */,
+				D45478CB2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift in Sources */,
 				D44B52BC2DB3928000EE213C /* CanvasScreenTouchGestureStatus.swift in Sources */,
 				D44B52BE2DB3928000EE213C /* CanvasScreenTouchGestureType.swift in Sources */,
 				D44B52BF2DB3928000EE213C /* CanvasDrawingTextureSet.swift in Sources */,

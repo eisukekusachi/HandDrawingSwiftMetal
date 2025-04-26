@@ -17,7 +17,7 @@ final class CanvasViewModel {
         }
     }
 
-    var requestSetupViewsPublisher: AnyPublisher<CanvasState, Never> {
+    var setupCanvasRequestPublisher: AnyPublisher<CanvasState, Never> {
         requestSetupViewsSubject.eraseToAnyPublisher()
     }
 
