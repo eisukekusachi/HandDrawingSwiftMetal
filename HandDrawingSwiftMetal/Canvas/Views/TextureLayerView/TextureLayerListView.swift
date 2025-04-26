@@ -11,10 +11,6 @@ struct TextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
-    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
-    var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
-    var didMove: ((IndexSet, Int) -> Void)? = nil
-
     var body: some View {
         List {
             ForEach(
@@ -26,17 +22,23 @@ struct TextureLayerListView: View {
                     thumbnail: viewModel.getThumbnail(layer.id),
                     selected: viewModel.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
-                        didTapLayer?(targetLayer)
+                        viewModel.selectLayer(targetLayer.id)
                     },
                     didTapVisibleButton: { targetLayer in
-                        didTapVisibility?(targetLayer, !targetLayer.isVisible)
+                        viewModel.updateLayer(
+                            id: targetLayer.id,
+                            isVisible: !targetLayer.isVisible
+                        )
                     }
                 )
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                didMove?(source, destination)
+                viewModel.moveLayer(
+                    fromListOffsets: source,
+                    toListOffset: destination
+                )
             })
             .listRowSeparator(.hidden)
         }

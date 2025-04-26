@@ -34,16 +34,7 @@ struct TextureLayerView: View {
                 )
 
                 TextureLayerListView(
-                    viewModel: viewModel,
-                    didTapLayer: { layer in
-                        viewModel.selectLayer(layer.id)
-                    },
-                    didTapVisibility: { layer, isVisible in
-                        viewModel.updateLayer(id: layer.id, isVisible: isVisible)
-                    },
-                    didMove: { source, destination in
-                        viewModel.moveLayer(fromListOffsets: source, toListOffset: destination)
-                    }
+                    viewModel: viewModel
                 )
 
                 TwoRowsSliderView(
@@ -63,7 +54,7 @@ struct TextureLayerView: View {
 
 extension TextureLayerView {
 
-    func toolbar(
+    private func toolbar(
         _ viewModel: TextureLayerViewModel,
         changeTitle: ((TextureLayerModel, String) -> Void)? = nil
     ) -> some View {
@@ -77,7 +68,8 @@ extension TextureLayerView {
                     )
                 },
                 label: {
-                    Image(systemName: "plus.circle").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "plus.circle")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
 
@@ -88,7 +80,8 @@ extension TextureLayerView {
                     viewModel.removeLayer()
                 },
                 label: {
-                    Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "minus.circle")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
 
@@ -100,7 +93,8 @@ extension TextureLayerView {
                     isTextFieldPresented = true
                 },
                 label: {
-                    Image(systemName: "pencil").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "pencil")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
             .hidden()
