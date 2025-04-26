@@ -64,7 +64,7 @@ extension TextureLayerView {
             Button(
                 action: {
                     viewModel.insertLayer(
-                        at: viewModel.newIndex
+                        at: viewModel.newInsertIndex
                     )
                 },
                 label: {

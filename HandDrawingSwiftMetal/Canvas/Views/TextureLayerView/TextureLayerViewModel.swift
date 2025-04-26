@@ -19,8 +19,8 @@ final class TextureLayerViewModel: ObservableObject {
 
     @Published private(set) var selectedLayerId: UUID? {
         didSet {
-            if let uuid = selectedLayerId {
-                updateSliderHandlePosition(uuid)
+            if let selectedLayerId {
+                updateSliderHandlePosition(selectedLayerId)
             }
         }
     }
@@ -56,11 +56,10 @@ final class TextureLayerViewModel: ObservableObject {
         $currentSelectedAlpha
             .sink { [weak self] value in
                 guard
-                    let `self`,
-                    let selectedLayerId = self.selectedLayerId
+                    let selectedLayerId = self?.selectedLayerId
                 else { return }
 
-                self.updateLayer(
+                self?.updateLayer(
                     id: selectedLayerId,
                     alpha: value
                 )
@@ -72,21 +71,16 @@ final class TextureLayerViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+}
+
+extension TextureLayerViewModel {
+
     var selectedLayer: TextureLayerModel? {
         canvasState.selectedLayer
     }
 
     var selectedIndex: Int? {
         canvasState.selectedIndex
-    }
-
-}
-
-extension TextureLayerViewModel {
-
-    private func updateSliderHandlePosition(_ uuid: UUID) {
-        guard let layer = canvasState.getLayer(uuid) else { return }
-        currentSelectedAlpha = layer.alpha
     }
 
     func insertLayer(at index: Int) {
@@ -153,7 +147,7 @@ extension TextureLayerViewModel {
 // MARK: CRUD
 extension TextureLayerViewModel {
 
-    var newIndex: Int {
+    var newInsertIndex: Int {
         (canvasState.selectedIndex ?? 0) + 1
     }
 
@@ -240,6 +234,11 @@ extension TextureLayerViewModel {
                 return removeLayerId
             }
             .eraseToAnyPublisher()
+    }
+
+    private func updateSliderHandlePosition(_ selectedLayerId: UUID) {
+        guard let layer = canvasState.getLayer(selectedLayerId) else { return }
+        currentSelectedAlpha = layer.alpha
     }
 
 }
