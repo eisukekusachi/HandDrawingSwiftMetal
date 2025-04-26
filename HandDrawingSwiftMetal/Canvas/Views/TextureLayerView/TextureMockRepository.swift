@@ -21,8 +21,9 @@ final class TextureMockRepository: TextureRepository {
         updateCanvasSubject.eraseToAnyPublisher()
     }
 
-    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
-        triggerViewUpdateSubject.eraseToAnyPublisher()
+    /// Emit `UUID` when the thumbnail is updated
+    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
+        thumbnailWillChangeSubject.eraseToAnyPublisher()
     }
 
     private let initializeCanvasWithModelSubject = PassthroughSubject<CanvasModel, Never>()
@@ -31,7 +32,7 @@ final class TextureMockRepository: TextureRepository {
 
     private let updateCanvasSubject = PassthroughSubject<Void, Never>()
 
-    private let triggerViewUpdateSubject: PassthroughSubject<Void, Never> = .init()
+    private let thumbnailWillChangeSubject: PassthroughSubject<UUID, Never> = .init()
 
     var textureNum: Int = 0
 

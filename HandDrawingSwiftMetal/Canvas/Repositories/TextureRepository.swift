@@ -15,7 +15,8 @@ protocol TextureRepository {
     var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> { get }
     var updateCanvasPublisher: AnyPublisher<Void, Never> { get }
 
-    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> { get }
+    /// Emit `UUID` when the thumbnail is updated
+    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> { get }
 
     var textureNum: Int { get }
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>

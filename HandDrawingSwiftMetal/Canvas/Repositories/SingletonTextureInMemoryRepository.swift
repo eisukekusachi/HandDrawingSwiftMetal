@@ -29,8 +29,8 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
         repository.updateCanvasPublisher
     }
 
-    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
-        repository.triggerViewUpdatePublisher
+    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
+        repository.thumbnailWillChangePublisher
     }
 
     var textureNum: Int {

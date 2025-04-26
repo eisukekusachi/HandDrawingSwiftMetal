@@ -24,7 +24,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private var _textureSize: CGSize?
 
-    private let triggerViewUpdateSubject: PassthroughSubject<Void, Never> = .init()
+    private let thumbnailWillChangeSubject: PassthroughSubject<UUID, Never> = .init()
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
         didSet {
@@ -79,8 +79,8 @@ extension TextureInMemoryRepository: TextureRepository {
         updateCanvasSubject.eraseToAnyPublisher()
     }
 
-    var triggerViewUpdatePublisher: AnyPublisher<Void, Never> {
-        triggerViewUpdateSubject.eraseToAnyPublisher()
+    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
+        thumbnailWillChangeSubject.eraseToAnyPublisher()
     }
 
     var textureSize: CGSize? {
@@ -212,10 +212,6 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func triggerViewUpdate() {
-        triggerViewUpdateSubject.send()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -263,7 +259,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-        triggerViewUpdateSubject.send()
+        thumbnailWillChangeSubject.send(uuid)
     }
 
     func setAllThumbnails() {
