@@ -13,12 +13,12 @@ struct TextureLayerView: View {
 
     @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
-    @State var isTextFieldPresented: Bool = false
-    @State var textFieldTitle: String = ""
+    @State private var isTextFieldPresented: Bool = false
+    @State private var textFieldTitle: String = ""
 
-    let sliderStyle = SliderStyleImpl(
+    private let sliderStyle = SliderStyleImpl(
         trackLeftColor: UIColor(named: "trackColor")!)
-    let range = 0 ... 255
+    private let range = 0 ... 255
 
     var body: some View {
         ZStack {
