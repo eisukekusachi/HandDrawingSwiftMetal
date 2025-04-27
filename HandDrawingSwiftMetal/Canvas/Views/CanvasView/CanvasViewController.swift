@@ -168,13 +168,13 @@ extension CanvasViewController {
 
 extension CanvasViewController {
 
-    func setupNewCanvasDialogPresenter() {
+    private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             self?.canvasViewModel.didTapNewCanvasButton()
         }
     }
 
-    func setupLayerView(_ canvasState: CanvasState) {
+    private func setupLayerView(_ canvasState: CanvasState) {
         self.textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
             using: .init(
@@ -185,8 +185,7 @@ extension CanvasViewController {
         )
     }
 
-    func setupFileView() {
-
+    private func setupFileView() {
         let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
             $0.lastPathComponent
         }
@@ -205,7 +204,7 @@ extension CanvasViewController {
         )
     }
 
-    func showAlert(title: String, message: String) {
+    private func showAlert(title: String, message: String) {
         dialogPresenter.configuration = .init(
             title: title,
             message: message
@@ -213,7 +212,7 @@ extension CanvasViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    func showToast(_ model: ToastModel) {
+    private func showToast(_ model: ToastModel) {
         let toast = Toast()
         toast.setupView(model)
         view.addSubview(toast)
