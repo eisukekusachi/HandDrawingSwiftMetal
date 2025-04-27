@@ -89,8 +89,8 @@ extension TextureInMemoryRepository: TextureRepository {
         _textureSize ?? .zero
     }
 
-    /// Attempts to restore layers from a given `CanvasModel`
-    /// If the model is invalid, initialization is performed using the given texture size
+    /// Attempts to restore layers from a given `CanvasModel`.
+    /// If the model is invalid, creates a new texture and initializes the canvas with it
     func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
         drawableTextureSize = drawableSize
 
