@@ -19,19 +19,19 @@ protocol TextureRepository {
     var textureSize: CGSize { get }
 
     /// A publisher that emits when a new texture is created and the canvas needs to be initialized
-    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> { get }
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
 
     /// A publisher that emits when the canvas should be restored from `CanvasModel`
-    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
 
     /// A publisher that emits when the thumbnail is updated
-    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> { get }
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
     /// A publisher that emits after texture layers have been changed to trigger an update of the canvas
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> { get }
+    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> { get }
 
     /// A publisher that emits to trigger an update of the canvas
-    var updateCanvasPublisher: AnyPublisher<Void, Never> { get }
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> { get }
 
     /// Resolves the state of the canvas view
     func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize)

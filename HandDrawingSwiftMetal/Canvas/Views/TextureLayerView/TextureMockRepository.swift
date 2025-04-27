@@ -11,34 +11,34 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
-    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
-        initializeCanvasAfterCreatingNewTextureSubject.eraseToAnyPublisher()
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
+        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
-    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        restoreCanvasFromModelSubject.eraseToAnyPublisher()
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
     }
 
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
-        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
+    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayerChangesSubject.eraseToAnyPublisher()
     }
-    var updateCanvasPublisher: AnyPublisher<Void, Never> {
-        updateCanvasSubject.eraseToAnyPublisher()
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     /// Emit `UUID` when the thumbnail is updated
-    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
-        thumbnailWillChangeSubject.eraseToAnyPublisher()
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
+        needsThumbnailUpdateSubject.eraseToAnyPublisher()
     }
 
-    private let initializeCanvasAfterCreatingNewTextureSubject = PassthroughSubject<CGSize, Never>()
+    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let restoreCanvasFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
+    private let needsCanvasUpdateAfterTextureLayerChangesSubject = PassthroughSubject<Void, Never>()
 
-    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
+    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    private let thumbnailWillChangeSubject: PassthroughSubject<UUID, Never> = .init()
+    private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
     var textureNum: Int = 0
 
@@ -101,11 +101,11 @@ final class TextureMockRepository: TextureRepository {
     }
 
     func updateCanvasAfterTextureLayerUpdates() {
-        updateCanvasAfterTextureLayerUpdatesSubject.send()
+        needsCanvasUpdateAfterTextureLayerChangesSubject.send()
     }
 
     func updateCanvas() {
-        updateCanvasSubject.send()
+        needsCanvasUpdateSubject.send()
     }
 
 }

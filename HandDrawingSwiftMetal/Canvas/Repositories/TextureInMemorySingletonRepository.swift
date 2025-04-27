@@ -19,22 +19,22 @@ final class TextureInMemorySingletonRepository: ObservableObject, TextureReposit
         self.repository = repository
     }
 
-    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
-        repository.initializeCanvasAfterCreatingNewTexturePublisher
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
+        repository.needsCanvasInitializationAfterNewTextureCreationPublisher
     }
-    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        repository.restoreCanvasFromModelPublisher
-    }
-
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
-        repository.updateCanvasAfterTextureLayerUpdatesPublisher
-    }
-    var updateCanvasPublisher: AnyPublisher<Void, Never> {
-        repository.updateCanvasPublisher
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        repository.needsCanvasRestorationFromModelPublisher
     }
 
-    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
-        repository.thumbnailWillChangePublisher
+    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
+        repository.needsCanvasUpdateAfterTextureLayerChangesPublisher
+    }
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        repository.needsCanvasUpdatePublisher
+    }
+
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
+        repository.needsThumbnailUpdatePublisher
     }
 
     var textureNum: Int {

@@ -12,31 +12,34 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
-    private let initializeCanvasAfterCreatingNewTextureSubject = PassthroughSubject<CGSize, Never>()
+    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let restoreCanvasFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
-    private let updateCanvasSubject = PassthroughSubject<Void, Never>()
-    private let thumbnailWillChangeSubject = PassthroughSubject<UUID, Never>()
+    private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
 
-    var initializeCanvasAfterCreatingNewTexturePublisher: AnyPublisher<CGSize, Never> {
-        initializeCanvasAfterCreatingNewTextureSubject.eraseToAnyPublisher()
-    }
-    var restoreCanvasFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        restoreCanvasFromModelSubject.eraseToAnyPublisher()
-    }
+    private let needsCanvasUpdateAfterTextureLayerChangesSubject = PassthroughSubject<Void, Never>()
 
-    var updateCanvasAfterTextureLayerUpdatesPublisher: AnyPublisher<Void, Never> {
-        updateCanvasAfterTextureLayerUpdatesSubject.eraseToAnyPublisher()
+    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
+        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
 
-    var updateCanvasPublisher: AnyPublisher<Void, Never> {
-        updateCanvasSubject.eraseToAnyPublisher()
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
     }
 
-    var thumbnailWillChangePublisher: AnyPublisher<UUID, Never> {
-        thumbnailWillChangeSubject.eraseToAnyPublisher()
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
+        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayerChangesSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     var textures: [UUID: MTLTexture?] = [:]
@@ -57,12 +60,12 @@ final class MockTextureRepository: TextureRepository {
 
     func updateCanvasAfterTextureLayerUpdates() {
         callHistory.append("updateCanvasAfterTextureLayerUpdates()")
-        updateCanvasAfterTextureLayerUpdatesSubject.send(())
+        needsCanvasUpdateAfterTextureLayerChangesSubject.send(())
     }
 
     func updateCanvas() {
         callHistory.append("updateCanvas()")
-        updateCanvasSubject.send(())
+        needsCanvasUpdateSubject.send(())
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
