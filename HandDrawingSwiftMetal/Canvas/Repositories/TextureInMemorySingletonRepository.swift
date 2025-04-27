@@ -1,5 +1,5 @@
 //
-//  SingletonTextureInMemoryRepository.swift
+//  TextureInMemorySingletonRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
@@ -9,9 +9,9 @@ import Combine
 import Foundation
 import MetalKit
 
-final class SingletonTextureInMemoryRepository: ObservableObject, TextureRepository {
+final class TextureInMemorySingletonRepository: ObservableObject, TextureRepository {
 
-    static let shared = SingletonTextureInMemoryRepository()
+    static let shared = TextureInMemorySingletonRepository()
 
     private let repository: any TextureRepository
 

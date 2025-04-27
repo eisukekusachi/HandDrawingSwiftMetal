@@ -103,7 +103,7 @@ final class CanvasViewModel {
     private let device = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
+        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared,
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.textureRepository = textureRepository

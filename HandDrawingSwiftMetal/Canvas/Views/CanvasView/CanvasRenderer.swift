@@ -57,7 +57,7 @@ final class CanvasRenderer: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
+        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared,
         renderer: MTLRendering = MTLRenderer.shared
     ) {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
