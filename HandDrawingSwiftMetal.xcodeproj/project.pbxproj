@@ -543,6 +543,7 @@
 				D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */,
 				D48F76402DA20B610001C80F /* TextureInMemorySingletonRepository.swift */,
 				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
+				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
 				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
 			);
 			path = Repositories;
@@ -629,7 +630,6 @@
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
-				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */,
 			);
 			path = TextureLayerView;
