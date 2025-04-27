@@ -118,7 +118,7 @@ extension TextureInMemoryRepository: TextureRepository {
         guard textureSize > MTLRenderer.minimumTextureSize else { return }
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
+            title: TimeStampFormatter.currentDate()
         )
 
         initTexture(

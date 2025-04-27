@@ -155,7 +155,7 @@ extension TextureLayerViewModel {
         guard index >= 0 && index <= canvasState.layers.count else { return nil }
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
+            title: TimeStampFormatter.currentDate()
         )
         canvasState.layers.insert(layer, at: index)
         return layer.id
