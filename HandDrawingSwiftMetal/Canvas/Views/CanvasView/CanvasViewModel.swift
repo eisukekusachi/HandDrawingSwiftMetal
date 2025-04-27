@@ -155,7 +155,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Initialize the canvas from textureLayers using CanvasModel
+        // Restore the canvas from textureLayers using CanvasModel
         textureRepository.restoreCanvasFromModelPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] canvasModel in
@@ -165,6 +165,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Initialize the canvas from textureLayers using the textureSize
         textureRepository.initializeCanvasAfterCreatingNewTexturePublisher
             .sink { [weak self] textureSize in
                 self?.textureRepository.initializeCanvasAfterCreatingNewTexture(textureSize)
