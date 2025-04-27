@@ -18,8 +18,8 @@ final class TextureMockRepository: TextureRepository {
         needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
     }
 
-    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayerChangesSubject.eraseToAnyPublisher()
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
     }
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
         needsCanvasUpdateSubject.eraseToAnyPublisher()
@@ -34,7 +34,7 @@ final class TextureMockRepository: TextureRepository {
 
     private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
-    private let needsCanvasUpdateAfterTextureLayerChangesSubject = PassthroughSubject<Void, Never>()
+    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
@@ -101,7 +101,7 @@ final class TextureMockRepository: TextureRepository {
     }
 
     func updateCanvasAfterTextureLayerUpdates() {
-        needsCanvasUpdateAfterTextureLayerChangesSubject.send()
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
     }
 
     func updateCanvas() {

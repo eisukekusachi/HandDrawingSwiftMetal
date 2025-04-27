@@ -18,7 +18,7 @@ final class MockTextureRepository: TextureRepository {
 
     private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
 
-    private let needsCanvasUpdateAfterTextureLayerChangesSubject = PassthroughSubject<Void, Never>()
+    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
@@ -34,8 +34,8 @@ final class MockTextureRepository: TextureRepository {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
     }
 
-    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayerChangesSubject.eraseToAnyPublisher()
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
@@ -60,7 +60,7 @@ final class MockTextureRepository: TextureRepository {
 
     func updateCanvasAfterTextureLayerUpdates() {
         callHistory.append("updateCanvasAfterTextureLayerUpdates()")
-        needsCanvasUpdateAfterTextureLayerChangesSubject.send(())
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send(())
     }
 
     func updateCanvas() {

@@ -26,8 +26,8 @@ final class TextureInMemorySingletonRepository: ObservableObject, TextureReposit
         repository.needsCanvasRestorationFromModelPublisher
     }
 
-    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> {
-        repository.needsCanvasUpdateAfterTextureLayerChangesPublisher
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
+        repository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
     }
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
         repository.needsCanvasUpdatePublisher

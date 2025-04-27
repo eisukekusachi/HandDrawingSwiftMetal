@@ -173,7 +173,7 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas after updating the layers from textureLayers
-        textureRepository.needsCanvasUpdateAfterTextureLayerChangesPublisher
+        textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let `self` else { return }

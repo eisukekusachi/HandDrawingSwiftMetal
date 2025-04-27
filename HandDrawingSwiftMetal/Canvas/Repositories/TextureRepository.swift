@@ -25,7 +25,7 @@ protocol TextureRepository {
     var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
-    var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> { get }
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
 
     /// A publisher that emits to trigger the canvas update
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> { get }
