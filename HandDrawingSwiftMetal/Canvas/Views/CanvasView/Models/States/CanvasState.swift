@@ -25,8 +25,6 @@ final class CanvasState: ObservableObject {
 
     @Published var backgroundColor: UIColor = .white
 
-    @Published var isInitialized = false
-
     init(_ model: CanvasModel) {
         projectName = model.projectName
         layers = model.layers
@@ -64,8 +62,6 @@ extension CanvasState {
         projectName = model.projectName
 
         drawingToolState.setData(model)
-
-        isInitialized = true
     }
 
 }
