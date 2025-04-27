@@ -155,7 +155,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Restore the canvas from textureRepository using CanvasModel
+        // Restore the canvas using CanvasModel
         textureRepository.needsCanvasRestorationFromModelPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] canvasModel in
@@ -165,14 +165,14 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Initialize the canvas from textureLayers using the textureSize
+        // Initialize the canvas using the textureSize
         textureRepository.needsCanvasInitializationAfterNewTextureCreationPublisher
             .sink { [weak self] textureSize in
                 self?.textureRepository.initializeCanvasAfterCreatingNewTexture(textureSize)
             }
             .store(in: &cancellables)
 
-        // Update the canvas after updating the layers from textureLayers
+        // Update the canvas after updating the layers
         textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -184,7 +184,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Update the canvas from textureLayers
+        // Update the canvas
         textureRepository.needsCanvasUpdatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
