@@ -42,6 +42,8 @@ final class TextureMockRepository: TextureRepository {
 
     var textureNum: Int = 0
 
+    var textureSize: CGSize = .zero
+
     func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {}
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
@@ -52,12 +54,6 @@ final class TextureMockRepository: TextureRepository {
 
     func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
         
-    }
-
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
     }
 
     func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
@@ -91,8 +87,6 @@ final class TextureMockRepository: TextureRepository {
     func removeAll() {}
 
     func setThumbnail(texture: (any MTLTexture)?, for uuid: UUID) {}
-
-    func setAllThumbnails() {}
 
     func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
         Just(uuid)

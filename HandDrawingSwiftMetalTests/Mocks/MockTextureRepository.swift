@@ -76,13 +76,6 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("initializeCanvasAfterCreatingNewTexture(\(textureSize)")
     }
 
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        callHistory.append("initTexture(uuid: \(uuid), textureSize: \(textureSize))")
-        return Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         callHistory.append("initTextures(layers: \(layers.count), textureSize: \(textureSize), folder: \(folderURL.lastPathComponent))")
         return Just(())
@@ -126,10 +119,6 @@ final class MockTextureRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-    }
-
-    func setAllThumbnails() {
-        callHistory.append("setAllThumbnails()")
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

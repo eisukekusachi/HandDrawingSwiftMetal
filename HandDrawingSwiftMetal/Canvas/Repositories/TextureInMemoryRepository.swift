@@ -14,17 +14,22 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
+    /// A subject that emits when a new texture should be created and the canvas initialized.
     private let initializeCanvasAfterCreatingNewTextureSubject = PassthroughSubject<CGSize, Never>()
 
+    /// A subject that emits when the canvas should be restored from a model.
     private let restoreCanvasFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
+    /// A subject that emits after texture layers have been updated to refresh the canvas.
     private let updateCanvasAfterTextureLayerUpdatesSubject = PassthroughSubject<Void, Never>()
 
+    /// A subject that emits to trigger a full canvas update.
     private let updateCanvasSubject = PassthroughSubject<Void, Never>()
 
-    private var _textureSize: CGSize?
-
+    /// A subject that notifies SwiftUI about a thumbnail update for a specific layer.
     private let thumbnailWillChangeSubject: PassthroughSubject<UUID, Never> = .init()
+
+    private var _textureSize: CGSize?
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
         didSet {
@@ -77,11 +82,11 @@ extension TextureInMemoryRepository: TextureRepository {
         thumbnailWillChangeSubject.eraseToAnyPublisher()
     }
 
-    var textureSize: CGSize? {
-        _textureSize
-    }
     var textureNum: Int {
         thumbnails.count
+    }
+    var textureSize: CGSize {
+        _textureSize ?? .zero
     }
 
     /// Attempts to restore layers from a given `CanvasModel`
@@ -151,7 +156,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    private func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -254,12 +259,6 @@ extension TextureInMemoryRepository: TextureRepository {
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
         thumbnailWillChangeSubject.send(uuid)
-    }
-
-    func setAllThumbnails() {
-        textures.keys.forEach { uuid in
-            setThumbnail(texture: textures[uuid].flatMap { $0 }, for: uuid)
-        }
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

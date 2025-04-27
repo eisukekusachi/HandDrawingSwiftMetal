@@ -40,6 +40,9 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
     var textureNum: Int {
         repository.textureNum
     }
+    var textureSize: CGSize {
+        repository.textureSize
+    }
 
     func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
         repository.resolveCanvasView(from: model, drawableSize: drawableSize)
@@ -51,10 +54,6 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
 
     func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
         repository.initializeCanvasAfterCreatingNewTexture(textureSize)
-    }
-
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        repository.initTexture(uuid: uuid, textureSize: textureSize)
     }
 
     func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
@@ -83,10 +82,6 @@ final class SingletonTextureInMemoryRepository: ObservableObject, TextureReposit
 
     func setThumbnail(texture: (any MTLTexture)?, for uuid: UUID) {
         repository.setThumbnail(texture: texture, for: uuid)
-    }
-
-    func setAllThumbnails() {
-        repository.setAllThumbnails()
     }
 
     func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
