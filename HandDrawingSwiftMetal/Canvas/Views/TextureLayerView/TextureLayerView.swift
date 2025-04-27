@@ -38,7 +38,7 @@ struct TextureLayerView: View {
                 )
 
                 TwoRowsSliderView(
-                    value: $viewModel.currentSelectedAlpha,
+                    value: $viewModel.selectedLayerAlpha,
                     isPressed: $viewModel.isSliderHandleDragging,
                     title: "Alpha",
                     range: range

@@ -11,7 +11,7 @@ import MetalKit
 /// Manage texture layers using `CanvasState` and `TextureRepository`
 final class TextureLayerViewModel: ObservableObject {
 
-    @Published var currentSelectedAlpha: Int = 0
+    @Published var selectedLayerAlpha: Int = 0
 
     @Published var isSliderHandleDragging: Bool = false
 
@@ -53,7 +53,7 @@ final class TextureLayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        $currentSelectedAlpha
+        $selectedLayerAlpha
             .sink { [weak self] value in
                 guard
                     let selectedLayerId = self?.selectedLayerId
@@ -238,7 +238,7 @@ extension TextureLayerViewModel {
 
     private func updateSliderHandlePosition(_ selectedLayerId: UUID) {
         guard let layer = canvasState.getLayer(selectedLayerId) else { return }
-        currentSelectedAlpha = layer.alpha
+        selectedLayerAlpha = layer.alpha
     }
 
 }
