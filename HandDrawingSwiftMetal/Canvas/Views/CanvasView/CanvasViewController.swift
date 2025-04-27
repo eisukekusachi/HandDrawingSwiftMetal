@@ -133,12 +133,8 @@ extension CanvasViewController {
             self?.setupFileView()
         }
         contentView.tapExportImageButton = { [weak self] in
-            guard let `self` else { return }
-            contentView.exportImageButton.debounce()
-
-            if let image = contentView.canvasView.renderTexture?.uiImage {
-                UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
-            }
+            self?.contentView.exportImageButton.debounce()
+            self?.saveImage()
         }
         contentView.tapNewButton = { [weak self] in
             guard let `self` else { return }
@@ -227,6 +223,11 @@ extension CanvasViewController {
 
 extension CanvasViewController {
 
+    private func saveImage() {
+        if let image = contentView.canvasView.renderTexture?.uiImage {
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
+        }
+    }
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
             showToast(.init(title: "Failed", systemName: "exclamationmark.circle"))
