@@ -138,7 +138,7 @@ extension CanvasViewController {
         }
         contentView.tapNewButton = { [weak self] in
             guard let `self` else { return }
-            newCanvasDialogPresenter.presentAlert(on: self)
+            self.newCanvasDialogPresenter.presentAlert(on: self)
         }
 
         contentView.tapUndoButton = { [weak self] in
