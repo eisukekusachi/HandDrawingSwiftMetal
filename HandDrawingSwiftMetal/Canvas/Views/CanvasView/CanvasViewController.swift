@@ -34,8 +34,6 @@ class CanvasViewController: UIViewController {
 
         setupNewCanvasDialogPresenter()
 
-        bindViewModel()
-
         canvasViewModel.onViewDidLoad(
             canvasView: contentView.canvasView
         )
@@ -66,22 +64,20 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.setupCanvasRequestPublisher
+        canvasViewModel.needsCanvasSetupPublisher
             .sink { [weak self] canvasState in
-                guard let `self` else { return }
-
-                self.setupLayerView(canvasState)
-                self.contentView.setup(canvasState)
+                self?.setupLayerView(canvasState)
+                self?.contentView.setup(canvasState)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingActivityIndicatorPublisher
+        canvasViewModel.needsShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingAlertPublisher
+        canvasViewModel.needsShowingAlertPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.showAlert(
@@ -91,36 +87,43 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingToastPublisher
+        canvasViewModel.needsShowingToastPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingLayerViewPublisher
+        canvasViewModel.needsShowingLayerViewPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isShown in
                 self?.textureLayerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanvasPublisher
+        canvasViewModel.needsCanvasRefreshPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.canvasViewModel.initCanvas(using: model)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.updateUndoButtonIsEnabledState
+        canvasViewModel.needsUndoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)
 
-        canvasViewModel.updateRedoButtonIsEnabledState
+        canvasViewModel.needsRedoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
+
+        contentView.canvasView.needsTextureRefreshPublisher
+            .sink { [weak self] in
+                self?.canvasViewModel.updateCanvas()
+            }
+            .store(in: &cancellables)
     }
-    private func bindViewModel() {
+
+    private func addEvents() {
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
         }
@@ -132,31 +135,15 @@ extension CanvasViewController {
             self?.canvasViewModel.didTapSaveButton()
         }
         contentView.tapLoadButton = { [weak self] in
-            guard let `self` else { return }
-
-            let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
-                $0.lastPathComponent
-            }
-            let fileView = FileView(
-                zipFileList: zipFilePashArray,
-                didTapItem: { selectedZipFilePath in
-                    self.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
-                    self.presentedViewController?.dismiss(animated: true)
-            })
-            let vc = UIHostingController(rootView: fileView)
-            present(vc, animated: true)
+            self?.setupFileView()
         }
         contentView.tapExportImageButton = { [weak self] in
-            guard let `self` else { return }
-            contentView.exportImageButton.debounce()
-
-            if let image = contentView.canvasView.renderTexture?.uiImage {
-                UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
-            }
+            self?.contentView.exportImageButton.debounce()
+            self?.saveImage()
         }
         contentView.tapNewButton = { [weak self] in
             guard let `self` else { return }
-            newCanvasDialogPresenter.presentAlert(on: self)
+            self.newCanvasDialogPresenter.presentAlert(on: self)
         }
 
         contentView.tapUndoButton = { [weak self] in
@@ -165,45 +152,59 @@ extension CanvasViewController {
         contentView.tapRedoButton = { [weak self] in
             self?.canvasViewModel.didTapRedoButton()
         }
-    }
 
-    private func addEvents() {
         contentView.canvasView.addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
         contentView.canvasView.addGestureRecognizer(
             PencilInputGestureRecognizer(delegate: self)
         )
-
-        contentView.canvasView.updateTexturePublisher
-            .sink { [weak self] in
-                self?.canvasViewModel.onUpdateRenderTexture()
-            }
-            .store(in: &cancellables)
     }
 
 }
 
 extension CanvasViewController {
 
-    func setupNewCanvasDialogPresenter() {
+    private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             self?.canvasViewModel.didTapNewCanvasButton()
         }
     }
 
-    func setupLayerView(_ canvasState: CanvasState) {
-        self.textureLayerViewPresenter.setupLayerViewPresenter(
+    private func setupLayerView(_ canvasState: CanvasState) {
+        textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
             using: .init(
-                anchorButton: self.contentView.layerButton,
-                destinationView: self.contentView,
-                size: .init(width: 300, height: 300)
+                anchorButton: contentView.layerButton,
+                destinationView: contentView,
+                size: .init(
+                    width: 300,
+                    height: 300
+                )
             )
         )
     }
 
-    func showAlert(title: String, message: String) {
+    private func setupFileView() {
+        let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
+            $0.lastPathComponent
+        }
+
+        let fileView = FileView(
+            zipFileList: zipFilePashArray,
+            didTapItem: { [weak self] selectedZipFilePath in
+                self?.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
+                self?.presentedViewController?.dismiss(animated: true)
+            }
+        )
+
+        present(
+            UIHostingController(rootView: fileView),
+            animated: true
+        )
+    }
+
+    private func showAlert(title: String, message: String) {
         dialogPresenter.configuration = .init(
             title: title,
             message: message
@@ -211,7 +212,7 @@ extension CanvasViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    func showToast(_ model: ToastModel) {
+    private func showToast(_ model: ToastModel) {
         let toast = Toast()
         toast.setupView(model)
         view.addSubview(toast)
@@ -221,6 +222,11 @@ extension CanvasViewController {
 
 extension CanvasViewController {
 
+    private func saveImage() {
+        if let image = contentView.canvasView.renderTexture?.uiImage {
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
+        }
+    }
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let _ = error {
             showToast(.init(title: "Failed", systemName: "exclamationmark.circle"))
