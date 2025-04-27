@@ -14,19 +14,14 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    /// A subject that emits when a new texture should be created and the canvas initialized.
     private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    /// A subject that emits when the canvas should be restored from a model.
     private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
 
-    /// A subject that emits after texture layers have been updated to refresh the canvas.
     private let needsCanvasUpdateAfterTextureLayerChangesSubject = PassthroughSubject<Void, Never>()
 
-    /// A subject that emits to trigger a full canvas update.
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    /// A subject that notifies SwiftUI about a thumbnail update for a specific layer.
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
     private var _textureSize: CGSize?

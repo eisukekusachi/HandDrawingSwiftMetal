@@ -18,20 +18,20 @@ protocol TextureRepository {
     /// The common size used for all textures
     var textureSize: CGSize { get }
 
-    /// A publisher that emits when a new texture is created and the canvas needs to be initialized
+    /// A publisher that emits to trigger the creation of a new texture and initialization of the canvas
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
 
-    /// A publisher that emits when the canvas should be restored from `CanvasModel`
+    /// A publisher that emits to trigger restoration of the canvas from `CanvasModel`
     var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
 
-    /// A publisher that emits when the thumbnail is updated
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
-
-    /// A publisher that emits after texture layers have been changed to trigger an update of the canvas
+    /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayerChangesPublisher: AnyPublisher<Void, Never> { get }
 
-    /// A publisher that emits to trigger an update of the canvas
+    /// A publisher that emits to trigger the canvas update
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> { get }
+
+    /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
     /// Resolves the state of the canvas view
     func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize)
@@ -69,7 +69,7 @@ protocol TextureRepository {
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
 
-    /// Updates the canvas after texture layers have been modified
+    /// Update texture layers and then update the canvas
     func updateCanvasAfterTextureLayerUpdates()
 
     /// Updates the canvas
