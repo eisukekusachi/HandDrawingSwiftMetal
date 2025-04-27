@@ -253,19 +253,6 @@ extension CanvasViewModel {
         }
     }
 
-    func onUpdateRenderTexture() {
-        // Redraws the canvas when the device rotates and the canvas size changes.
-        guard
-            let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = renderer.commandBuffer
-        else { return }
-
-        renderer.updateCanvas(
-            selectedLayer: selectedLayer,
-            with: commandBuffer
-        )
-    }
-
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -336,6 +323,18 @@ extension CanvasViewModel {
         )
 
         drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
+    }
+
+    func updateCanvas() {
+        guard
+            let selectedLayer = canvasState.selectedLayer,
+            let commandBuffer = renderer.commandBuffer
+        else { return }
+
+        renderer.updateCanvas(
+            selectedLayer: selectedLayer,
+            with: commandBuffer
+        )
     }
 
 }
@@ -462,18 +461,6 @@ extension CanvasViewModel {
         if let commandBuffer = renderer.commandBuffer {
             renderer.refreshCanvasView(commandBuffer)
         }
-    }
-
-    private func updateCanvas() {
-        guard
-            let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = renderer.commandBuffer
-        else { return }
-
-        renderer.updateCanvas(
-            selectedLayer: selectedLayer,
-            with: commandBuffer
-        )
     }
 
     private func updateCanvasWithDrawing() {
