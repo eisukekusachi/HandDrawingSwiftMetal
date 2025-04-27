@@ -39,8 +39,11 @@ protocol TextureRepository {
     /// Initializes the canvas after creating a new texture
     func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize)
 
+    /// Initializes a texture
+    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
+
     /// Initializes textures for the given models using a folder URL as a source
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
+    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Checks if all specified textures exist
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>

@@ -56,8 +56,12 @@ final class TextureInMemorySingletonRepository: ObservableObject, TextureReposit
         repository.initializeCanvasAfterCreatingNewTexture(textureSize)
     }
 
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
-        repository.initTextures(layers: layers, textureSize: textureSize, folderURL: folderURL)
+    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        repository.initializeTexture(uuid: uuid, textureSize: textureSize)
+    }
+
+    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+        repository.initializeTextures(layers: layers, textureSize: textureSize, folderURL: folderURL)
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {
