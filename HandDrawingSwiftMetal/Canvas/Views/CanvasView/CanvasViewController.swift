@@ -34,8 +34,6 @@ class CanvasViewController: UIViewController {
 
         setupNewCanvasDialogPresenter()
 
-        bindViewModel()
-
         canvasViewModel.onViewDidLoad(
             canvasView: contentView.canvasView
         )
@@ -118,7 +116,8 @@ extension CanvasViewController {
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
     }
-    private func bindViewModel() {
+
+    private func addEvents() {
         contentView.tapResetTransformButton = { [weak self] in
             self?.canvasViewModel.didTapResetTransformButton()
         }
@@ -147,9 +146,7 @@ extension CanvasViewController {
         contentView.tapRedoButton = { [weak self] in
             self?.canvasViewModel.didTapRedoButton()
         }
-    }
 
-    private func addEvents() {
         contentView.canvasView.addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
