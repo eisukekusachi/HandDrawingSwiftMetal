@@ -115,6 +115,12 @@ extension CanvasViewController {
         canvasViewModel.needsRedoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
+
+        contentView.canvasView.needsTextureRefreshPublisher
+            .sink { [weak self] in
+                self?.canvasViewModel.onUpdateRenderTexture()
+            }
+            .store(in: &cancellables)
     }
 
     private func addEvents() {
@@ -153,12 +159,6 @@ extension CanvasViewController {
         contentView.canvasView.addGestureRecognizer(
             PencilInputGestureRecognizer(delegate: self)
         )
-
-        contentView.canvasView.updateTexturePublisher
-            .sink { [weak self] in
-                self?.canvasViewModel.onUpdateRenderTexture()
-            }
-            .store(in: &cancellables)
     }
 
 }
