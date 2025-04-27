@@ -85,8 +85,7 @@ extension TextureLayerViewModel {
 
     func insertLayer(at index: Int) {
         guard
-            let textureRepository,
-            let textureSize = canvasState.currentTextureSize
+            let textureRepository
         else { return }
 
         let device = self.device
@@ -94,7 +93,7 @@ extension TextureLayerViewModel {
         addNewLayerPublisher(at: index)
             .flatMap { textureLayerId in
                 textureRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
+                    texture: MTLTextureCreator.makeBlankTexture(size: textureRepository.textureSize, with: device),
                     for: textureLayerId
                 )
             }

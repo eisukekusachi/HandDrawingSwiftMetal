@@ -13,9 +13,6 @@ final class CanvasState: ObservableObject {
     /// A name of the file to be saved
     var projectName: String = Calendar.currentDate
 
-    /// Stores the current texture size
-    var currentTextureSize: CGSize?
-
     let drawingToolState = DrawingToolState(
         canvasModel: CanvasModel()
     )
@@ -35,8 +32,6 @@ final class CanvasState: ObservableObject {
         layers = model.layers
         selectedLayerId = layers.isEmpty ? nil : layers[model.layerIndex].id
         drawingToolState.setData(model)
-
-        currentTextureSize = model.textureSize
     }
 
 }
@@ -69,8 +64,6 @@ extension CanvasState {
         projectName = model.projectName
 
         drawingToolState.setData(model)
-
-        currentTextureSize = model.textureSize
 
         isInitialized = true
     }

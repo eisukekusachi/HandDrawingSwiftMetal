@@ -24,7 +24,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
-    private var _textureSize: CGSize?
+    private var _textureSize: CGSize = .zero
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
         didSet {
@@ -81,7 +81,7 @@ extension TextureInMemoryRepository: TextureRepository {
         thumbnails.count
     }
     var textureSize: CGSize {
-        _textureSize ?? .zero
+        _textureSize
     }
 
     /// Attempts to restore layers from a given `CanvasModel`
