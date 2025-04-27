@@ -113,7 +113,7 @@ final class CanvasViewModel {
 
     init(
         textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared,
-        localRepository: LocalRepository = DocumentsLocalRepository()
+        localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
     ) {
         self.textureRepository = textureRepository
         self.localRepository = localRepository
