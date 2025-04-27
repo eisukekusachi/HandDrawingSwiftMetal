@@ -12,14 +12,60 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
+    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
+
+    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
+
+    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
+
+    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
+        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
+    }
+
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
+        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateSubject.eraseToAnyPublisher()
+    }
+
     var textures: [UUID: MTLTexture?] = [:]
 
     var callHistory: [String] = []
+
+    var textureSize: CGSize = .zero
 
     var textureNum: Int = 0
 
     init(textures: [UUID : MTLTexture?] = [:]) {
         self.textures = textures
+    }
+
+    func resolveCanvasView(from model: HandDrawingSwiftMetal.CanvasModel, drawableSize: CGSize) {
+        callHistory.append("resolveCanvasView(from: \(model), drawableSize: \(drawableSize))")
+    }
+
+    func updateCanvasAfterTextureLayerUpdates() {
+        callHistory.append("updateCanvasAfterTextureLayerUpdates()")
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send(())
+    }
+
+    func updateCanvas() {
+        callHistory.append("updateCanvas()")
+        needsCanvasUpdateSubject.send(())
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
@@ -29,15 +75,17 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        callHistory.append("initTexture(uuid: \(uuid), textureSize: \(textureSize))")
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+        callHistory.append("initializeCanvasAfterCreatingNewTexture(\(textureSize)")
+    }
+
+    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
-        callHistory.append("initTextures(layers: \(layers.count), textureSize: \(textureSize), folder: \(folderURL.lastPathComponent))")
+    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -79,10 +127,6 @@ final class MockTextureRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-    }
-
-    func setAllThumbnails() {
-        callHistory.append("setAllThumbnails()")
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

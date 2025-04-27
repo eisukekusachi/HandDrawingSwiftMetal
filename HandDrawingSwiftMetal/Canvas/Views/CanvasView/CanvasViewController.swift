@@ -29,10 +29,10 @@ class CanvasViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupContentView()
+        addEvents()
+        bindData()
 
         setupNewCanvasDialogPresenter()
-        setupLayerViewPresenter()
 
         bindViewModel()
 
@@ -65,16 +65,16 @@ class CanvasViewController: UIViewController {
 
 extension CanvasViewController {
 
-    private func setupContentView() {
-        addEvents()
-        bindData()
-
-        contentView.setup(
-            canvasViewModel.canvasState
-        )
-    }
-
     private func bindData() {
+        canvasViewModel.setupCanvasRequestPublisher
+            .sink { [weak self] canvasState in
+                guard let `self` else { return }
+
+                self.setupLayerView(canvasState)
+                self.contentView.setup(canvasState)
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.requestShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
@@ -192,51 +192,14 @@ extension CanvasViewController {
         }
     }
 
-    func setupLayerViewPresenter() {
-        textureLayerViewPresenter.setupLayerViewPresenter(
-            canvasState: canvasViewModel.canvasState,
-            textureLayers: canvasViewModel.textureLayers,
-            targetView: contentView.layerButton,
-            didTapLayer: { [weak self] layer in
-                self?.canvasViewModel.didTapLayer(layer: layer)
-            },
-            didTapAddButton: { [weak self] in
-                self?.canvasViewModel.didTapAddLayerButton()
-            },
-            didTapRemoveButton: { [weak self] in
-                self?.canvasViewModel.didTapRemoveLayerButton()
-            },
-            didTapVisibility: { [weak self] layer, value in
-                self?.canvasViewModel.didTapLayerVisibility(
-                    layer: layer,
-                    isVisible: value
-                )
-            },
-            didStartChangingAlpha: { [weak self] layer in
-                self?.canvasViewModel.didStartChangingLayerAlpha(layer: layer)
-            },
-            didChangeAlpha: { [weak self] layer, value in
-                self?.canvasViewModel.didChangeLayerAlpha(
-                    layer: layer,
-                    value: value
-                )
-            },
-            didFinishChangingAlpha: { [weak self] layer in
-                self?.canvasViewModel.didFinishChangingLayerAlpha(layer: layer)
-            },
-            didEditTitle: { [weak self] layer, value in
-                self?.canvasViewModel.didEditLayerTitle(
-                    layer: layer,
-                    title: value
-                )
-            },
-            didMove: { [weak self] fromOffsets, toOffset in
-                self?.canvasViewModel.didMoveLayers(
-                    fromOffsets: fromOffsets,
-                    toOffset: toOffset
-                )
-            },
-            on: self.contentView
+    func setupLayerView(_ canvasState: CanvasState) {
+        self.textureLayerViewPresenter.setupLayerViewPresenter(
+            canvasState: canvasState,
+            using: .init(
+                anchorButton: self.contentView.layerButton,
+                destinationView: self.contentView,
+                size: .init(width: 300, height: 300)
+            )
         )
     }
 

@@ -11,6 +11,7 @@ struct CanvasModel {
 
     var projectName: String = Calendar.currentDate
 
+    // If textureSize is nil, the size of the device’s drawable will be used instead
     var textureSize: CGSize?
 
     var layerIndex: Int = 0

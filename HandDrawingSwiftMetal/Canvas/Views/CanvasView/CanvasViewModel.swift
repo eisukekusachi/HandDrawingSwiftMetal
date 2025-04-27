@@ -11,18 +11,14 @@ import SwiftUI
 
 final class CanvasViewModel {
 
-    let canvasState: CanvasState = .init(
-        CanvasModel()
-    )
-
-    private(set) lazy var textureLayers = TextureLayers(
-        canvasState: canvasState
-    )
-
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
         }
+    }
+
+    var setupCanvasRequestPublisher: AnyPublisher<CanvasState, Never> {
+        requestSetupViewsSubject.eraseToAnyPublisher()
     }
 
     var requestShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
@@ -52,9 +48,9 @@ final class CanvasViewModel {
         updateRedoButtonIsEnabledStateSubject.eraseToAnyPublisher()
     }
 
-    var isLayerViewVisible: Bool {
-        requestShowingLayerViewSubject.value
-    }
+    private let canvasState: CanvasState = .init(
+        CanvasModel()
+    )
 
     /// A class for handling finger input values
     private let fingerScreenStrokeData = FingerScreenStrokeData()
@@ -82,6 +78,8 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
+    private var requestSetupViewsSubject: PassthroughSubject<CanvasState, Never> = .init()
+
     private let requestShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let requestShowingAlertSubject = PassthroughSubject<String, Never>()
@@ -105,7 +103,7 @@ final class CanvasViewModel {
     private let device = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository = SingletonTextureInMemoryRepository.shared,
+        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared,
         localRepository: LocalRepository = DocumentsLocalRepository()
     ) {
         self.textureRepository = textureRepository
@@ -157,8 +155,9 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Initialize the canvas from textureLayers using CanvasModel
-        textureLayers.initializeCanvasWithModelPublisher
+        // Restore the canvas using CanvasModel
+        textureRepository.needsCanvasRestorationFromModelPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] canvasModel in
                 guard let textureSize = canvasModel.textureSize else { return }
                 self?.canvasState.setData(canvasModel)
@@ -166,20 +165,28 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Update the canvas after updating the layers from textureLayers
-        textureLayers.updateCanvasAfterTextureLayerUpdatesPublisher
+        // Initialize the canvas using the textureSize
+        textureRepository.needsCanvasInitializationAfterNewTextureCreationPublisher
+            .sink { [weak self] textureSize in
+                self?.textureRepository.initializeCanvasAfterCreatingNewTexture(textureSize)
+            }
+            .store(in: &cancellables)
+
+        // Update the canvas after updating the layers
+        textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let `self` else { return }
                 self.renderer.updateCanvasAfterUpdatingAllTextures(
                     canvasState: self.canvasState,
-                    textureLayers: self.textureLayers,
                     commandBuffer: self.renderer.commandBuffer
                 )
             }
             .store(in: &cancellables)
 
-        // Update the canvas from textureLayers
-        textureLayers.updateCanvasPublisher
+        // Update the canvas
+        textureRepository.needsCanvasUpdatePublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.updateCanvas()
             }
@@ -200,7 +207,7 @@ extension CanvasViewModel {
 
     func initCanvas(using model: CanvasModel) {
         guard let drawableSize = renderer.renderTextureSize else { return }
-        textureLayers.restoreLayers(from: model, drawableSize: drawableSize)
+        textureRepository.resolveCanvasView(from: model, drawableSize: drawableSize)
     }
 
     private func initTextures(textureSize: CGSize) {
@@ -212,7 +219,6 @@ extension CanvasViewModel {
         renderer.initTextures(textureSize: textureSize)
         renderer.updateCanvasAfterUpdatingAllTextures(
             canvasState: canvasState,
-            textureLayers: textureLayers,
             commandBuffer: commandBuffer
         )
     }
@@ -225,6 +231,8 @@ extension CanvasViewModel {
         canvasView: CanvasViewProtocol
     ) {
         renderer.setCanvas(canvasView)
+
+        requestSetupViewsSubject.send(canvasState)
     }
 
     func onViewDidAppear(
@@ -352,37 +360,6 @@ extension CanvasViewModel {
     func didTapSaveButton() {
         guard let canvasTexture = renderer.canvasTexture else { return }
         saveFile(canvasTexture: canvasTexture)
-    }
-
-    // MARK: Layers
-    func didTapLayer(layer: TextureLayerModel) {
-        textureLayers.selectLayer(layer.id)
-    }
-    func didTapAddLayerButton() {
-        textureLayers.insertLayer(
-            textureSize: renderer.textureSize,
-            at: textureLayers.newIndex
-        )
-    }
-    func didTapRemoveLayerButton() {
-        textureLayers.removeLayer()
-    }
-    func didMoveLayers(fromOffsets: IndexSet, toOffset: Int) {
-        textureLayers.moveLayer(fromListOffsets: fromOffsets, toListOffset: toOffset)
-    }
-    func didTapLayerVisibility(layer: TextureLayerModel, isVisible: Bool) {
-        textureLayers.updateLayer(id: layer.id, isVisible: isVisible)
-    }
-
-    func didStartChangingLayerAlpha(layer: TextureLayerModel) {}
-
-    func didChangeLayerAlpha(layer: TextureLayerModel, value: Int) {
-        textureLayers.updateLayer(id: layer.id, alpha: value)
-    }
-    func didFinishChangingLayerAlpha(layer: TextureLayerModel) {}
-
-    func didEditLayerTitle(layer: TextureLayerModel, title: String) {
-        textureLayers.updateLayer(id: layer.id, title: title)
     }
 
 }
@@ -524,7 +501,10 @@ extension CanvasViewModel {
                     texture: selectedTexture,
                     targetTextureId: selectedTextureId
                 ) { [weak self] texture in
-                    self?.textureLayers.updateThumbnail(texture)
+                    self?.textureRepository?.setThumbnail(
+                        texture: selectedTexture,
+                        for: selectedTextureId
+                    )
                 }
             }
         }

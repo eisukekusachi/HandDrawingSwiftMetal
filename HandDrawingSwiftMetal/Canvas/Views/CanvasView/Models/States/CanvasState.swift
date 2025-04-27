@@ -18,7 +18,7 @@ final class CanvasState: ObservableObject {
     )
 
     /// If `layers` is empty, a new layer is created and added to `layers`
-    /// when `restoreLayers(from:model, drawableSize:)` is called in `TextureLayers`.
+    /// when `resolveCanvasView(from:model, drawableSize:)` is called in `TextureRepository`
     @Published var layers: [TextureLayerModel] = []
 
     @Published var selectedLayerId: UUID?
@@ -50,6 +50,10 @@ extension CanvasState {
         drawingToolState.currentDrawingTool.diameter
     }
 
+    func getLayer(_ selectedLayerId: UUID) -> TextureLayerModel? {
+        layers.first(where: { $0.id == selectedLayerId })
+    }
+
     func setData(_ model: CanvasModel) {
         layers.removeAll()
         layers = model.layers
@@ -58,16 +62,6 @@ extension CanvasState {
         projectName = model.projectName
 
         drawingToolState.setData(model)
-    }
-
-    func setData(_ layer: TextureLayerModel) {
-        layers.removeAll()
-        layers.append(layer)
-        selectedLayerId = layers[0].id
-
-        projectName = Calendar.currentDate
-
-        drawingToolState.setData(CanvasModel())
     }
 
 }

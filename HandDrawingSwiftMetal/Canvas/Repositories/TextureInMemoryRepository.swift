@@ -14,11 +14,33 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
+    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
+
+    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+
+    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
+
+    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
+
+    private var _textureSize: CGSize = .zero
+
+    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
+        didSet {
+            if drawableTextureSize < MTLRenderer.minimumTextureSize {
+                drawableTextureSize = MTLRenderer.minimumTextureSize
+            }
+        }
+    }
+
     private let flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
 
     private let device = MTLCreateSystemDefaultDevice()!
+
+    private var cancellables = Set<AnyCancellable>()
 
     init(
         textures: [UUID: MTLTexture?] = [:],
@@ -37,8 +59,78 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
+    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
+        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
+    }
+    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
+        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
+    }
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateSubject.eraseToAnyPublisher()
+    }
+
+    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
+        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    }
+
     var textureNum: Int {
         thumbnails.count
+    }
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    /// Attempts to restore layers from a given `CanvasModel`
+    /// If the model is invalid, creates a new texture and initializes the canvas with it
+    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
+        drawableTextureSize = drawableSize
+
+        hasAllTextures(for: model.layers.map { $0.id })
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure: break
+                }
+            }, receiveValue: { [weak self] allExist in
+                guard let `self` else { return }
+
+                if allExist {
+                    self.needsCanvasRestorationFromModelSubject.send(model)
+                } else {
+                    self.needsCanvasInitializationAfterNewTextureCreationSubject.send(
+                        model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
+                    )
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+        guard textureSize > MTLRenderer.minimumTextureSize else { return }
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate()
+        )
+
+        initializeTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .sink(receiveCompletion: { completion in
+            switch completion {
+            case .finished: break
+            case .failure: break
+            }
+        }, receiveValue: { [weak self] in
+            self?.needsCanvasRestorationFromModelSubject.send(
+                CanvasModel(textureSize: textureSize, layers: [layer])
+            )
+        })
+        .store(in: &cancellables)
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
@@ -59,7 +151,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -73,12 +165,14 @@ extension TextureInMemoryRepository: TextureRepository {
             self.textures[uuid] = texture
             self.setThumbnail(texture: texture, for: uuid)
 
+            self._textureSize = textureSize
+
             promise(.success(()))
         }
         .eraseToAnyPublisher()
     }
 
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 self?.removeAll()
@@ -101,6 +195,8 @@ extension TextureInMemoryRepository: TextureRepository {
 
                     self?.textures[layer.id] = texture
                     self?.setThumbnail(texture: texture, for: layer.id)
+
+                    self?._textureSize = textureSize
                 }
                 promise(.success(()))
             } catch {
@@ -157,14 +253,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-
-        objectWillChange.send()
-    }
-
-    func setAllThumbnails() {
-        textures.keys.forEach { uuid in
-            setThumbnail(texture: textures[uuid].flatMap { $0 }, for: uuid)
-        }
+        needsThumbnailUpdateSubject.send(uuid)
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
@@ -179,6 +268,14 @@ extension TextureInMemoryRepository: TextureRepository {
             }
         }
         .eraseToAnyPublisher()
+    }
+
+    func updateCanvasAfterTextureLayerUpdates() {
+        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
+    }
+
+    func updateCanvas() {
+        needsCanvasUpdateSubject.send()
     }
 
 }

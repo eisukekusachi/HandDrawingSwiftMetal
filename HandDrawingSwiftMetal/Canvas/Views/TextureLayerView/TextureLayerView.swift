@@ -9,27 +9,14 @@ import SwiftUI
 
 struct TextureLayerView: View {
 
-    @ObservedObject var canvasState: CanvasState
-    @ObservedObject var textureLayers: TextureLayers
+    @ObservedObject var viewModel: TextureLayerViewModel
 
-    @State var isTextFieldPresented: Bool = false
-    @State var textFieldTitle: String = ""
+    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
-    var roundedRectangleWithArrow: RoundedRectangleWithArrow
+    @State private var isTextFieldPresented: Bool = false
+    @State private var textFieldTitle: String = ""
 
-    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
-    var didTapAddButton: (() -> Void)? = nil
-    var didTapRemoveButton: (() -> Void)? = nil
-    var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
-    var didStartChangingAlpha: ((TextureLayerModel) -> Void)? = nil
-    var didChangeAlpha: ((TextureLayerModel, Int) -> Void)? = nil
-    var didFinishChangingAlpha: ((TextureLayerModel) -> Void)? = nil
-    var didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
-    var didMove: ((IndexSet, Int) -> Void)? = nil
-
-    let sliderStyle = SliderStyleImpl(
-        trackLeftColor: UIColor(named: "trackColor")!)
-    let range = 0 ... 255
+    private let range = 0 ... 255
 
     var body: some View {
         ZStack {
@@ -40,48 +27,26 @@ struct TextureLayerView: View {
 
             VStack {
                 toolbar(
-                    textureLayers: textureLayers,
-                    didTapAddButton: didTapAddButton,
-                    didTapRemoveButton: didTapRemoveButton,
-                    didEditTitle: didEditTitle
+                    viewModel,
+                    changeTitle: { layer, title in
+                        viewModel.updateLayer(id: layer.id, title: title)
+                    }
                 )
 
                 TextureLayerListView(
-                    canvasState: canvasState,
-                    textureLayers: textureLayers,
-                    didTapLayer: { layer in
-                        didTapLayer?(layer)
-                    },
-                    didTapVisibility: { layer, isVisibility in
-                        didTapVisibility?(layer, isVisibility)
-                    },
-                    didMove: { source, destination in
-                        didMove?(source, destination)
-                    }
+                    viewModel: viewModel
                 )
 
                 TwoRowsSliderView(
+                    value: $viewModel.selectedLayerAlpha,
+                    isPressed: $viewModel.isSliderHandleDragging,
                     title: "Alpha",
-                    value: canvasState.selectedLayer?.alpha ?? 0,
-                    style: sliderStyle,
-                    range: range,
-                    didStartChanging: {
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didStartChangingAlpha?(selectedLayer)
-                    },
-                    didChange: { value in
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didChangeAlpha?(selectedLayer, value)
-                    },
-                    didFinishChanging: {
-                        guard let selectedLayer = canvasState.selectedLayer else { return }
-                        didFinishChangingAlpha?(selectedLayer)
-                    }
+                    range: range
                 )
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)
             }
-            .padding(roundedRectangleWithArrow.edgeInsets)
+            .padding(roundedRectangleWithArrow.edgeInsets())
         }
     }
 
@@ -89,21 +54,22 @@ struct TextureLayerView: View {
 
 extension TextureLayerView {
 
-    func toolbar(
-        textureLayers: TextureLayers,
-        didTapAddButton: (() -> Void)? = nil,
-        didTapRemoveButton: (() -> Void)? = nil,
-        didEditTitle: ((TextureLayerModel, String) -> Void)? = nil
+    private func toolbar(
+        _ viewModel: TextureLayerViewModel,
+        changeTitle: ((TextureLayerModel, String) -> Void)? = nil
     ) -> some View {
         let buttonSize: CGFloat = 20
 
         return HStack {
             Button(
                 action: {
-                    didTapAddButton?()
+                    viewModel.insertLayer(
+                        at: viewModel.newInsertIndex
+                    )
                 },
                 label: {
-                    Image(systemName: "plus.circle").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "plus.circle")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
 
@@ -111,10 +77,11 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    didTapRemoveButton?()
+                    viewModel.removeLayer()
                 },
                 label: {
-                    Image(systemName: "minus.circle").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "minus.circle")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
 
@@ -122,19 +89,19 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    textFieldTitle = canvasState.selectedLayer?.title ?? ""
+                    textFieldTitle = viewModel.selectedLayer?.title ?? ""
                     isTextFieldPresented = true
                 },
                 label: {
-                    Image(systemName: "pencil").buttonModifier(diameter: buttonSize)
+                    Image(systemName: "pencil")
+                        .buttonModifier(diameter: buttonSize)
                 }
             )
-            .hidden()
             .alert("Enter a title", isPresented: $isTextFieldPresented) {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
-                    guard let selectedLayer = canvasState.selectedLayer else { return }
-                    didEditTitle?(selectedLayer, textFieldTitle)
+                    guard let selectedLayer = viewModel.selectedLayer else { return }
+                    changeTitle?(selectedLayer, textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }
@@ -152,6 +119,7 @@ extension TextureLayerView {
 private struct PreviewView: View {
     let canvasState = CanvasState(
         CanvasModel(
+            textureSize: .init(width: 44, height: 44),
             layerIndex: 1,
             layers: [
                 .init(title: "Layer0", alpha: 255),
@@ -162,18 +130,22 @@ private struct PreviewView: View {
             ]
         )
     )
-    let textureLayers: TextureLayers
+    let viewModel: TextureLayerViewModel
+
+    @StateObject var roundedRectangle = RoundedRectangleWithArrow()
 
     init() {
-        textureLayers = .init(canvasState: canvasState)
+        viewModel = .init(
+            canvasState: canvasState,
+            textureRepository: TextureMockRepository()
+        )
     }
     var body: some View {
         TextureLayerView(
-            canvasState: canvasState,
-            textureLayers: textureLayers,
-            roundedRectangleWithArrow: RoundedRectangleWithArrow()
+            viewModel: viewModel,
+            roundedRectangleWithArrow: roundedRectangle
         )
-        .frame(width: 256, height: 300)
+        .frame(width: 320, height: 300)
     }
 
 }

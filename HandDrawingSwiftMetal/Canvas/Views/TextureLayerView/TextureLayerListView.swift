@@ -9,35 +9,36 @@ import SwiftUI
 
 struct TextureLayerListView: View {
 
-    @ObservedObject var canvasState: CanvasState
-    @ObservedObject var textureLayers: TextureLayers
-
-    var didTapLayer: ((TextureLayerModel) -> Void)? = nil
-    var didTapVisibility: ((TextureLayerModel, Bool) -> Void)? = nil
-    var didMove: ((IndexSet, Int) -> Void)? = nil
+    @ObservedObject var viewModel: TextureLayerViewModel
 
     var body: some View {
         List {
             ForEach(
-                Array(canvasState.layers.reversed()),
+                Array(viewModel.layers.reversed()),
                 id: \.id
             ) { layer in
                 layerRow(
                     layer: layer,
-                    thumbnail: textureLayers.getThumbnail(layer.id),
-                    selected: canvasState.selectedLayer?.id == layer.id,
+                    thumbnail: viewModel.getThumbnail(layer.id),
+                    selected: viewModel.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
-                        didTapLayer?(targetLayer)
+                        viewModel.selectLayer(targetLayer.id)
                     },
                     didTapVisibleButton: { targetLayer in
-                        didTapVisibility?(targetLayer, !targetLayer.isVisible)
+                        viewModel.updateLayer(
+                            id: targetLayer.id,
+                            isVisible: !targetLayer.isVisible
+                        )
                     }
                 )
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                didMove?(source, destination)
+                viewModel.moveLayer(
+                    fromListOffsets: source,
+                    toListOffset: destination
+                )
             })
             .listRowSeparator(.hidden)
         }
@@ -154,15 +155,14 @@ private struct PreviewView: View {
             ]
         )
     )
-    let textureLayers: TextureLayers
+    let viewModel: TextureLayerViewModel
 
     init() {
-        textureLayers = .init(canvasState: canvasState)
+        viewModel = .init(canvasState: canvasState)
     }
     var body: some View {
         TextureLayerListView(
-            canvasState: canvasState,
-            textureLayers: textureLayers
+            viewModel: viewModel
         )
         .frame(width: 256, height: 300)
     }
