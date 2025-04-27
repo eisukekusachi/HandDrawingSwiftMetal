@@ -66,7 +66,7 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.setupCanvasRequestPublisher
+        canvasViewModel.needsCanvasSetupPublisher
             .sink { [weak self] canvasState in
                 guard let `self` else { return }
 
@@ -75,13 +75,13 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingActivityIndicatorPublisher
+        canvasViewModel.needsShowingActivityIndicatorPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingAlertPublisher
+        canvasViewModel.needsShowingAlertPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.showAlert(
@@ -91,32 +91,32 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingToastPublisher
+        canvasViewModel.needsShowingToastPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.requestShowingLayerViewPublisher
+        canvasViewModel.needsShowingLayerViewPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isShown in
                 self?.textureLayerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.refreshCanvasPublisher
+        canvasViewModel.needsCanvasRefreshPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.canvasViewModel.initCanvas(using: model)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.updateUndoButtonIsEnabledState
+        canvasViewModel.needsUndoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)
 
-        canvasViewModel.updateRedoButtonIsEnabledState
+        canvasViewModel.needsRedoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.redoButton)
             .store(in: &cancellables)
     }
