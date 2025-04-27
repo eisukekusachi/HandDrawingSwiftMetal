@@ -43,7 +43,7 @@ final class MockTextureRepository: TextureRepository {
 
     var callHistory: [String] = []
 
-    var textureSize: CGSize? = nil
+    var textureSize: CGSize = .zero
 
     var textureNum: Int = 0
 
@@ -76,8 +76,13 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("initializeCanvasAfterCreatingNewTexture(\(textureSize)")
     }
 
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
-        callHistory.append("initTextures(layers: \(layers.count), textureSize: \(textureSize), folder: \(folderURL.lastPathComponent))")
+    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
