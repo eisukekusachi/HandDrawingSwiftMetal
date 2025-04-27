@@ -155,7 +155,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Restore the canvas from textureLayers using CanvasModel
+        // Restore the canvas from textureRepository using CanvasModel
         textureRepository.needsCanvasRestorationFromModelPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] canvasModel in
