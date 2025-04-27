@@ -172,12 +172,15 @@ extension CanvasViewController {
     }
 
     private func setupLayerView(_ canvasState: CanvasState) {
-        self.textureLayerViewPresenter.setupLayerViewPresenter(
+        textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
             using: .init(
-                anchorButton: self.contentView.layerButton,
-                destinationView: self.contentView,
-                size: .init(width: 300, height: 300)
+                anchorButton: contentView.layerButton,
+                destinationView: contentView,
+                size: .init(
+                    width: 300,
+                    height: 300
+                )
             )
         )
     }
