@@ -11,6 +11,14 @@ import SwiftUI
 
 final class TextureInMemoryRepository: ObservableObject {
 
+    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
+        didSet {
+            if drawableTextureSize < MTLRenderer.minimumTextureSize {
+                drawableTextureSize = MTLRenderer.minimumTextureSize
+            }
+        }
+    }
+
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
@@ -25,14 +33,6 @@ final class TextureInMemoryRepository: ObservableObject {
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
     private var _textureSize: CGSize = .zero
-
-    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
-        didSet {
-            if drawableTextureSize < MTLRenderer.minimumTextureSize {
-                drawableTextureSize = MTLRenderer.minimumTextureSize
-            }
-        }
-    }
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 

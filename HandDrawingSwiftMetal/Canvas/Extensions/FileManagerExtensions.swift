@@ -25,4 +25,23 @@ extension FileManager {
         }
     }
 
+    static func moveFile(source: URL, destination: URL) throws {
+        do {
+            if FileManager.default.fileExists(atPath: destination.path) {
+                try FileManager.default.removeItem(at: destination)
+            }
+            try FileManager.default.moveItem(at: source, to: destination)
+        } catch {
+            throw FileOutputError.filedToMove
+        }
+    }
+
+    static func clearContents(of folder: URL) throws {
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+        for file in files {
+            try fileManager.removeItem(at: file)
+        }
+    }
+
 }

@@ -81,5 +81,7 @@ enum TextureRepositoryError: Error {
     case failedToUnwrap
     case failedToLoadTexture
     case failedToAddTexture
+    case failedToUpdateTexture
+    case invalidTexture
     case repositoryDeinitialized
 }

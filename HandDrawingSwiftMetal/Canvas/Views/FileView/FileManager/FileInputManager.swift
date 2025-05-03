@@ -8,14 +8,6 @@
 import UIKit
 import ZipArchive
 
-enum FileInputError: Error {
-    case cannotFindFile
-    case failedToUnzip
-    case failedToConvertData
-    case failedToLoadJson
-    case failedToApplyData
-}
-
 enum FileInputManager {
     @Sendable
     static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
@@ -27,6 +19,19 @@ enum FileInputManager {
         }
 
         throw FileInputError.cannotFindFile
+    }
+
+    static func loadTexture(_ fileUrl: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
+        let textureData = try Data(contentsOf: fileUrl)
+        guard
+            let hexadecimalData = textureData.encodedHexadecimals
+        else { return nil }
+
+        return MTLTextureCreator.makeTexture(
+            size: textureSize,
+            colorArray: hexadecimalData,
+            with: device
+        )
     }
 
     static func loadJson<T: Codable>(_ url: URL) throws -> T? {
@@ -49,4 +54,12 @@ enum FileInputManager {
         }
     }
 
+}
+
+enum FileInputError: Error {
+    case cannotFindFile
+    case failedToUnzip
+    case failedToConvertData
+    case failedToLoadJson
+    case failedToApplyData
 }

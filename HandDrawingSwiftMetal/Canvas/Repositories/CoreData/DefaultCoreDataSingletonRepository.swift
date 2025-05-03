@@ -1,5 +1,5 @@
 //
-//  CanvasCoreDataSingletonRepository.swift
+//  DefaultCoreDataSingletonRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/03.
@@ -9,9 +9,9 @@ import Combine
 import CoreData
 import Foundation
 
-final class CanvasCoreDataSingletonRepository: CoreDataRepository {
+final class DefaultCoreDataSingletonRepository: CoreDataRepository {
 
-    static let shared = CanvasCoreDataSingletonRepository()
+    static let shared = DefaultCoreDataSingletonRepository()
 
     private let repository = DefaultCoreDataRepository(
         entityName: "CanvasStorageEntity",

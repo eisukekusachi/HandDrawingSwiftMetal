@@ -10,6 +10,14 @@ import ZipArchive
 
 enum FileOutputManager {
 
+    static func createDirectory(_ directoryUrl: URL) throws {
+        do {
+            try FileManager.createNewDirectory(url: directoryUrl)
+        } catch {
+            throw FileOutputError.failedToCreateDirectory
+        }
+    }
+
     static func saveTextureAsData(
         bytes: [UInt8],
         to url: URL
@@ -55,4 +63,8 @@ enum FileOutputManager {
 
 enum FileOutputError: Error {
     case failedToZip
+    case failedToSaveImage
+    case filedToMove
+    case failedToUpdateTexture
+    case failedToCreateDirectory
 }
