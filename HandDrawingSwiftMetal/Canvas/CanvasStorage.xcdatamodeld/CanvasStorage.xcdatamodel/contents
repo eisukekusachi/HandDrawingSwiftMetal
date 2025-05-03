@@ -9,7 +9,7 @@
         <attribute name="projectName" optional="YES" attributeType="String"/>
         <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="drawingTool" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DrawingToolStorageEntity" inverseName="canvas" inverseEntity="DrawingToolStorageEntity"/>
-        <relationship name="textureLayers" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerStorageEntity" inverseName="canvas" inverseEntity="TextureLayerStorageEntity"/>
+        <relationship name="textureLayers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TextureLayerStorageEntity" inverseName="canvas" inverseEntity="TextureLayerStorageEntity"/>
     </entity>
     <entity name="DrawingToolStorageEntity" representedClassName="DrawingToolStorageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="drawingTool" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
