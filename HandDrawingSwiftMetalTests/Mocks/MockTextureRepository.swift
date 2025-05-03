@@ -14,7 +14,7 @@ final class MockTextureRepository: TextureRepository {
 
     private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRestorationFromConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
 
@@ -26,8 +26,8 @@ final class MockTextureRepository: TextureRepository {
         needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
 
-    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
+    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        needsCanvasRestorationFromConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
@@ -54,8 +54,8 @@ final class MockTextureRepository: TextureRepository {
         self.textures = textures
     }
 
-    func resolveCanvasView(from model: HandDrawingSwiftMetal.CanvasModel, drawableSize: CGSize) {
-        callHistory.append("resolveCanvasView(from: \(model), drawableSize: \(drawableSize))")
+    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
+        callHistory.append("resolveCanvasView(from: \(configuration), drawableSize: \(drawableSize))")
     }
 
     func updateCanvasAfterTextureLayerUpdates() {

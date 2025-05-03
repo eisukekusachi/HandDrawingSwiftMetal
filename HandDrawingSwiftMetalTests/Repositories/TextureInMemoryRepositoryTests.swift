@@ -10,7 +10,7 @@ import XCTest
 @testable import HandDrawingSwiftMetal
 
 final class TextureInMemoryRepositoryTests: XCTestCase {
-    /// Confirms whether to initialize or restore based on the states of the textures and the model
+    /// Confirms whether to initialize or restore based on the states of the textures and the configuration
     func testResolveCanvasView() async {
         struct Condition {
             let textures: [UUID: MTLTexture?]
@@ -98,7 +98,7 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 initializeExpectation.isInverted = true
             }
 
-            subject.needsCanvasRestorationFromModelPublisher
+            subject.needsCanvasRestorationFromConfigurationPublisher
                 .sink { _ in
                     restoreCanvasFromModelCalled = true
                     restoreExpectation.fulfill()
@@ -112,8 +112,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 }
                 .store(in: &cancellables)
 
-            /// If all layer IDs in the `CanvasModel` have matching texture IDs in the `TextureRepository`,
-            /// the canvas will be restored using that model.
+            /// If all layer IDs in the `CanvasConfiguration` have matching texture IDs in the `TextureRepository`,
+            /// the canvas will be restored using that configuration.
             /// Otherwise, a new texture will be created and the canvas will be initialized.
             subject.resolveCanvasView(
                 from: .init(layers: condition.layers),

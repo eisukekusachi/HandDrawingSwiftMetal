@@ -118,7 +118,7 @@ extension TextureLayerView {
 
 private struct PreviewView: View {
     let canvasState = CanvasState(
-        CanvasModel(
+        .init(
             textureSize: .init(width: 44, height: 44),
             layerIndex: 1,
             layers: [

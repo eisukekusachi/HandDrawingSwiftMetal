@@ -14,8 +14,8 @@ final class TextureMockRepository: TextureRepository {
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
         needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
-    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
+    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        needsCanvasRestorationFromConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -32,7 +32,7 @@ final class TextureMockRepository: TextureRepository {
 
     private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRestorationFromConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -44,7 +44,7 @@ final class TextureMockRepository: TextureRepository {
 
     var textureSize: CGSize = .zero
 
-    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {}
+    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {}
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
         Just(true)

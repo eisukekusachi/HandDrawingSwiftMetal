@@ -16,7 +16,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let needsCanvasRestorationFromModelSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRestorationFromConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -62,8 +62,8 @@ extension TextureInMemoryRepository: TextureRepository {
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
         needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
-    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        needsCanvasRestorationFromModelSubject.eraseToAnyPublisher()
+    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        needsCanvasRestorationFromConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -84,12 +84,12 @@ extension TextureInMemoryRepository: TextureRepository {
         _textureSize
     }
 
-    /// Attempts to restore layers from a given `CanvasModel`
-    /// If the model is invalid, creates a new texture and initializes the canvas with it
-    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
+    /// Attempts to restore layers from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the canvas with it
+    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         drawableTextureSize = drawableSize
 
-        hasAllTextures(for: model.layers.map { $0.id })
+        hasAllTextures(for: configuration.layers.map { $0.id })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -99,10 +99,10 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.needsCanvasRestorationFromModelSubject.send(model)
+                    self.needsCanvasRestorationFromConfigurationSubject.send(configuration)
                 } else {
                     self.needsCanvasInitializationAfterNewTextureCreationSubject.send(
-                        model.getTextureSize(drawableTextureSize: self.drawableTextureSize)
+                        configuration.getTextureSize(drawableTextureSize: self.drawableTextureSize)
                     )
                 }
             })
@@ -126,8 +126,8 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.needsCanvasRestorationFromModelSubject.send(
-                CanvasModel(textureSize: textureSize, layers: [layer])
+            self?.needsCanvasRestorationFromConfigurationSubject.send(
+                .init(textureSize: textureSize, layers: [layer])
             )
         })
         .store(in: &cancellables)

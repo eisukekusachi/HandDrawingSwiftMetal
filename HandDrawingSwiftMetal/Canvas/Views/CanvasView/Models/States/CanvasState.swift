@@ -14,22 +14,22 @@ final class CanvasState: ObservableObject {
     var projectName: String = Calendar.currentDate
 
     let drawingToolState = DrawingToolState(
-        canvasModel: CanvasModel()
+        configuration: CanvasConfiguration()
     )
 
     /// If `layers` is empty, a new layer is created and added to `layers`
-    /// when `resolveCanvasView(from:model, drawableSize:)` is called in `TextureRepository`
+    /// when `resolveCanvasView(from:, drawableSize:)` is called in `TextureRepository`
     @Published var layers: [TextureLayerModel] = []
 
     @Published var selectedLayerId: UUID?
 
     @Published var backgroundColor: UIColor = .white
 
-    init(_ model: CanvasModel) {
-        projectName = model.projectName
-        layers = model.layers
-        selectedLayerId = layers.isEmpty ? nil : layers[model.layerIndex].id
-        drawingToolState.setData(model)
+    init(_ configuration: CanvasConfiguration) {
+        projectName = configuration.projectName
+        layers = configuration.layers
+        selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
+        drawingToolState.setData(configuration)
     }
 
 }
@@ -54,14 +54,14 @@ extension CanvasState {
         layers.first(where: { $0.id == selectedLayerId })
     }
 
-    func setData(_ model: CanvasModel) {
+    func setData(_ configuration: CanvasConfiguration) {
         layers.removeAll()
-        layers = model.layers
-        selectedLayerId = layers[model.layerIndex].id
+        layers = configuration.layers
+        selectedLayerId = layers[configuration.layerIndex].id
 
-        projectName = model.projectName
+        projectName = configuration.projectName
 
-        drawingToolState.setData(model)
+        drawingToolState.setData(configuration)
     }
 
 }

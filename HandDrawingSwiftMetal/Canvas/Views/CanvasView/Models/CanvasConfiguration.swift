@@ -1,5 +1,5 @@
 //
-//  CanvasModel.swift
+//  CanvasConfiguration.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct CanvasModel {
+struct CanvasConfiguration {
 
     var projectName: String = Calendar.currentDate
 
@@ -27,7 +27,7 @@ struct CanvasModel {
 
 }
 
-extension CanvasModel {
+extension CanvasConfiguration {
 
     init(
         projectName: String,

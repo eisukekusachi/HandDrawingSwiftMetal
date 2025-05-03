@@ -15,7 +15,7 @@ class CanvasViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var canvasModel = CanvasModel()
+    private var configuration = CanvasConfiguration()
 
     private let canvasViewModel = CanvasViewModel()
 
@@ -45,7 +45,7 @@ class CanvasViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
-            model: canvasModel,
+            configuration: configuration,
             drawableTextureSize: contentView.canvasView.drawableSize
         )
 
@@ -89,8 +89,8 @@ extension CanvasViewController {
 
         canvasViewModel.needsShowingToastPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.showToast(model)
+            .sink { [weak self] configuration in
+                self?.showToast(configuration)
             }
             .store(in: &cancellables)
 
@@ -103,8 +103,8 @@ extension CanvasViewController {
 
         canvasViewModel.needsCanvasRefreshPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.canvasViewModel.initCanvas(using: model)
+            .sink { [weak self] configuration in
+                self?.canvasViewModel.initCanvas(using: configuration)
             }
             .store(in: &cancellables)
 
@@ -271,10 +271,10 @@ extension CanvasViewController: PencilInputGestureRecognizerSender {
 extension CanvasViewController {
 
     static func create(
-        canvasModel: CanvasModel = .init()
+        configuration: CanvasConfiguration = .init()
     ) -> Self {
         let viewController = Self()
-        viewController.canvasModel = canvasModel
+        viewController.configuration = configuration
         return viewController
     }
 

@@ -145,7 +145,7 @@ extension TextureLayerListView {
 
 private struct PreviewView: View {
     let canvasState = CanvasState(
-        CanvasModel(
+        CanvasConfiguration(
             layers: [
                 .init(title: "Layer0", alpha: 255),
                 .init(title: "Layer1", alpha: 200),

@@ -22,8 +22,8 @@ final class TextureInMemorySingletonRepository: ObservableObject, TextureReposit
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
         repository.needsCanvasInitializationAfterNewTextureCreationPublisher
     }
-    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> {
-        repository.needsCanvasRestorationFromModelPublisher
+    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.needsCanvasRestorationFromConfigurationPublisher
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -44,8 +44,8 @@ final class TextureInMemorySingletonRepository: ObservableObject, TextureReposit
         repository.textureSize
     }
 
-    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize) {
-        repository.resolveCanvasView(from: model, drawableSize: drawableSize)
+    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
+        repository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
 
     func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {

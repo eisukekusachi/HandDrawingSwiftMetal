@@ -43,7 +43,7 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when refreshing the canvas is needed
-    var needsCanvasRefreshPublisher: AnyPublisher<CanvasModel, Never> {
+    var needsCanvasRefreshPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasRefreshSubject.eraseToAnyPublisher()
     }
 
@@ -58,7 +58,7 @@ final class CanvasViewModel {
     }
 
     private let canvasState: CanvasState = .init(
-        CanvasModel()
+        CanvasConfiguration()
     )
 
     /// A class for handling finger input values
@@ -97,7 +97,7 @@ final class CanvasViewModel {
 
     private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private let needsCanvasRefreshSubject = PassthroughSubject<CanvasModel, Never>()
+    private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
@@ -164,12 +164,12 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Restore the canvas using CanvasModel
-        textureRepository.needsCanvasRestorationFromModelPublisher
+        // Restore the canvas using CanvasConfiguration
+        textureRepository.needsCanvasRestorationFromConfigurationPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] canvasModel in
-                guard let textureSize = canvasModel.textureSize else { return }
-                self?.canvasState.setData(canvasModel)
+            .sink { [weak self] configuration in
+                guard let textureSize = configuration.textureSize else { return }
+                self?.canvasState.setData(configuration)
                 self?.initTextures(textureSize: textureSize)
             }
             .store(in: &cancellables)
@@ -214,9 +214,9 @@ final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initCanvas(using model: CanvasModel) {
+    func initCanvas(using configuration: CanvasConfiguration) {
         guard let drawableSize = renderer.renderTextureSize else { return }
-        textureRepository.resolveCanvasView(from: model, drawableSize: drawableSize)
+        textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
 
     private func initTextures(textureSize: CGSize) {
@@ -245,11 +245,11 @@ extension CanvasViewModel {
     }
 
     func onViewDidAppear(
-        model: CanvasModel,
+        configuration: CanvasConfiguration,
         drawableTextureSize: CGSize
     ) {
         if !renderer.hasTextureBeenInitialized {
-            initCanvas(using: model)
+            initCanvas(using: configuration)
         }
     }
 
@@ -524,8 +524,8 @@ extension CanvasViewModel {
             case .finished: self?.needsShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
             }
-        }, receiveValue: { [weak self] canvasModel in
-            self?.needsCanvasRefreshSubject.send(canvasModel)
+        }, receiveValue: { [weak self] configuration in
+            self?.needsCanvasRefreshSubject.send(configuration)
         })
         .store(in: &cancellables)
     }

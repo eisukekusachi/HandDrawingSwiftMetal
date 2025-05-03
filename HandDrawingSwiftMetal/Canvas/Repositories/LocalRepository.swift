@@ -13,7 +13,7 @@ protocol LocalRepository {
     func loadDataFromDocuments(
         sourceURL: URL,
         textureRepository: any TextureRepository
-    ) -> AnyPublisher<CanvasModel, Error>
+    ) -> AnyPublisher<CanvasConfiguration, Error>
 
     func saveDataToDocuments(
         renderTexture: MTLTexture,

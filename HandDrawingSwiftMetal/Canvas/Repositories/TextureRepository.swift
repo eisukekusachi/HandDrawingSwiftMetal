@@ -21,8 +21,8 @@ protocol TextureRepository {
     /// A publisher that emits to trigger the creation of a new texture and initialization of the canvas
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
 
-    /// A publisher that emits to trigger restoration of the canvas from `CanvasModel`
-    var needsCanvasRestorationFromModelPublisher: AnyPublisher<CanvasModel, Never> { get }
+    /// A publisher that emits to trigger restoration of the canvas from `CanvasConfiguration`
+    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
@@ -34,7 +34,7 @@ protocol TextureRepository {
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
     /// Resolves the state of the canvas view
-    func resolveCanvasView(from model: CanvasModel, drawableSize: CGSize)
+    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize)
 
     /// Initializes the canvas after creating a new texture
     func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize)
@@ -42,7 +42,7 @@ protocol TextureRepository {
     /// Initializes a texture
     func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
 
-    /// Initializes textures for the given models using a folder URL as a source
+    /// Initializes textures for the given layers using a folder URL as a source
     func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Checks if all specified textures exist

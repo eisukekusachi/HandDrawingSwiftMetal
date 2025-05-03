@@ -82,7 +82,7 @@ final class DocumentsLocalRepository: LocalRepository {
     func loadDataFromDocuments(
         sourceURL: URL,
         textureRepository: any TextureRepository
-    ) -> AnyPublisher<CanvasModel, Error> {
+    ) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasEntity, Error> { [weak self] promise in
             self?.loadDataTask?.cancel()
             self?.loadDataTask = Task {
@@ -99,27 +99,27 @@ final class DocumentsLocalRepository: LocalRepository {
                 }
             }
         }
-        .flatMap { entity -> AnyPublisher<CanvasModel, Never> in
+        .flatMap { entity -> AnyPublisher<CanvasConfiguration, Never> in
             Just(
-                CanvasModel(
+                .init(
                     projectName: sourceURL.fileName,
                     entity: entity
                 )
             )
             .eraseToAnyPublisher()
         }
-        .flatMap { model -> AnyPublisher<CanvasModel, Error> in
-            guard let textureSize = model.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
+        .flatMap { configuration -> AnyPublisher<CanvasConfiguration, Error> in
+            guard let textureSize = configuration.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
                 Logger.standard.error("Failed to load texture.")
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
             return textureRepository.initializeTextures(
-                layers: model.layers,
+                layers: configuration.layers,
                 textureSize: textureSize,
                 folderURL: URL.tmpFolderURL
             )
-            .map { _ in model }
+            .map { _ in configuration }
             .eraseToAnyPublisher()
         }
         .handleEvents(receiveCompletion: { _ in
