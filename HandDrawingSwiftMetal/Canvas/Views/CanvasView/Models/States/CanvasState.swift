@@ -11,7 +11,7 @@ import UIKit
 final class CanvasState: ObservableObject {
 
     /// A name of the file to be saved
-    var projectName: String = Calendar.currentDate
+    @Published var projectName: String = Calendar.currentDate
 
     let drawingToolState = DrawingToolState(
         configuration: CanvasConfiguration()
