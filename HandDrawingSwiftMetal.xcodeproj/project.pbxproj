@@ -448,6 +448,27 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
+		D447D89B2DC6582B00007210 /* Texture */ = {
+			isa = PBXGroup;
+			children = (
+				D48F76402DA20B610001C80F /* TextureInMemorySingletonRepository.swift */,
+				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
+				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
+				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
+			);
+			path = Texture;
+			sourceTree = "<group>";
+		};
+		D447D89C2DC6585500007210 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */,
+				D4CACC852DBE680700E70E18 /* DocumentsLocalSingletonRepository.swift */,
+				D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
 		D44B52972DB3928000EE213C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -560,13 +581,8 @@
 			isa = PBXGroup;
 			children = (
 				D447D8942DC6265200007210 /* CoreData */,
-				D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */,
-				D4CACC852DBE680700E70E18 /* DocumentsLocalSingletonRepository.swift */,
-				D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */,
-				D48F76402DA20B610001C80F /* TextureInMemorySingletonRepository.swift */,
-				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
-				D44B52DB2DB6752E00EE213C /* TextureMockRepository.swift */,
-				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
+				D447D89C2DC6585500007210 /* Local */,
+				D447D89B2DC6582B00007210 /* Texture */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
