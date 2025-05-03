@@ -33,6 +33,7 @@
 		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
+		D447D88A2DC5CE5200007210 /* CanvasStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */; };
 		D44B52B52DB3928000EE213C /* CanvasContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* CanvasContentView.xib */; };
 		D44B52B62DB3928000EE213C /* CanvasViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* CanvasViewController.xib */; };
 		D44B52B72DB3928000EE213C /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B22DB3928000EE213C /* CanvasViewModel.swift */; };
@@ -181,6 +182,7 @@
 		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
+		D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CanvasStorage.xcdatamodel; sourceTree = "<group>"; };
 		D44B52962DB3928000EE213C /* IteratorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IteratorExtensions.swift; sourceTree = "<group>"; };
 		D44B52982DB3928000EE213C /* CanvasDrawingDisplayLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingDisplayLink.swift; sourceTree = "<group>"; };
 		D44B52992DB3928000EE213C /* CanvasTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTransformer.swift; sourceTree = "<group>"; };
@@ -700,6 +702,7 @@
 			isa = PBXGroup;
 			children = (
 				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
 				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
@@ -1027,6 +1030,7 @@
 				D45179F82CC347BA0047C274 /* Constants.swift in Sources */,
 				D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
+				D447D88A2DC5CE5200007210 /* CanvasStorage.xcdatamodeld in Sources */,
 				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,
 				D48F76492DA214E10001C80F /* CollectionExtensions.swift in Sources */,
 				D469A8872C56430D00D10575 /* MTLRenderer.swift in Sources */,
@@ -1428,6 +1432,19 @@
 			productName = ZipArchive;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */,
+			);
+			currentVersion = D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */;
+			path = CanvasStorage.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = D4E1ECD12752388C00D4A23D /* Project object */;
 }
