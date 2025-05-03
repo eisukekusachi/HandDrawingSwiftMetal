@@ -18,47 +18,36 @@ final class CanvasStateStorage {
         needsToastDisplaySubject.eraseToAnyPublisher()
     }
 
-    private var canvasState: CanvasState?
-
-    private var canvasStorage: CanvasStorageEntity?
-
-    private let entityName = "CanvasStorage"
-
     private let needsErrorDialogDisplaySubject = PassthroughSubject<Error, Never>()
     private let needsToastDisplaySubject = PassthroughSubject<String, Never>()
 
-    private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: entityName)
-        container.loadPersistentStores { description, error in
-            if let error = error as NSError? {
-                fatalError("CoreData Load Error: \(error), \(error.userInfo)")
-            }
-        }
-        return container
-    }()
+    private var canvasState: CanvasState?
 
-    private var context: NSManagedObjectContext {
-        persistentContainer.viewContext
-    }
+    private var coreDataRepository: CoreDataRepository?
 
     private var cancellables = Set<AnyCancellable>()
 
+    init(
+        coreDataRepository: CoreDataRepository = CanvasCoreDataSingletonRepository.shared
+    ) {
+        self.coreDataRepository = coreDataRepository
+    }
+
     func setupStorage(_ canvasState: CanvasState) {
+        guard let coreDataRepository else { return }
+
         self.canvasState = canvasState
 
         do {
-            let request = NSFetchRequest<CanvasStorageEntity>(entityName: entityName)
-            request.fetchLimit = 1
-
-            if let existing = try context.fetch(request).first {
+            if let existing = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
                 loadState(from: existing, into: canvasState)
-                canvasStorage = existing
 
             } else {
-                initializeWithNewStorage(canvasState, to: CanvasStorageEntity(context: context))
-                try saveState()
+                initializeStorageWithCanvasState(
+                    canvasState,
+                    to: CanvasStorageEntity(context: coreDataRepository.context)
+                )
             }
-
             bindState()
 
         } catch {
@@ -66,39 +55,12 @@ final class CanvasStateStorage {
         }
     }
 
-
-    private func initializeWithNewStorage(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
-        let brush = BrushStorageEntity(context: context)
-        brush.colorHex = canvasState.drawingToolState.brush.color.hexString()
-        brush.diameter = Int16(canvasState.drawingToolState.brush.diameter)
-
-        let eraser = EraserStorageEntity(context: context)
-        eraser.alpha = Int16(canvasState.drawingToolState.eraser.alpha)
-        eraser.diameter = Int16(canvasState.drawingToolState.eraser.diameter)
-
-        let drawingTool = DrawingToolStorageEntity(context: context)
-        drawingTool.brush = brush
-        drawingTool.eraser = eraser
-
-        brush.drawingTool = drawingTool
-        eraser.drawingTool = drawingTool
-
-        newStorage.projectName = canvasState.projectName
-
-        newStorage.drawingTool?.brush = brush
-        newStorage.drawingTool?.eraser = eraser
-
-        newStorage.selectedLayerId = canvasState.selectedLayerId
-
-        for (index, layer) in canvasState.layers.enumerated() {
-            let texture = TextureLayerStorageEntity(context: context)
-            texture.title = layer.title
-            texture.alpha = Int16(layer.alpha)
-            texture.orderIndex = Int16(index)
-            texture.canvas = newStorage
+    func saveContext() {
+        do {
+            try coreDataRepository?.saveContext()
+        } catch {
+            Logger.standard.error("Failed to save canvas state: \(error)")
         }
-
-        canvasStorage = newStorage
     }
 
     private func loadState(from canvasStorage: CanvasStorageEntity?, into canvasState: CanvasState) {
@@ -136,87 +98,147 @@ final class CanvasStateStorage {
         }
     }
 
+    private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
+        guard let coreDataRepository else { return }
+
+        do {
+            let brush = BrushStorageEntity(context: coreDataRepository.context)
+            brush.colorHex = canvasState.drawingToolState.brush.color.hexString()
+            brush.diameter = Int16(canvasState.drawingToolState.brush.diameter)
+
+            let eraser = EraserStorageEntity(context: coreDataRepository.context)
+            eraser.alpha = Int16(canvasState.drawingToolState.eraser.alpha)
+            eraser.diameter = Int16(canvasState.drawingToolState.eraser.diameter)
+
+            let drawingTool = DrawingToolStorageEntity(context: coreDataRepository.context)
+            drawingTool.brush = brush
+            drawingTool.eraser = eraser
+
+            brush.drawingTool = drawingTool
+            eraser.drawingTool = drawingTool
+
+            newStorage.projectName = canvasState.projectName
+            newStorage.drawingTool?.brush = brush
+            newStorage.drawingTool?.eraser = eraser
+            newStorage.drawingTool = drawingTool
+            newStorage.selectedLayerId = canvasState.selectedLayerId
+
+            for (index, layer) in canvasState.layers.enumerated() {
+                let texture = TextureLayerStorageEntity(context: coreDataRepository.context)
+                texture.title = layer.title
+                texture.alpha = Int16(layer.alpha)
+                texture.orderIndex = Int16(index)
+                texture.canvas = newStorage
+            }
+
+            try coreDataRepository.saveContext()
+        }
+        catch {
+            needsErrorDialogDisplaySubject.send(error)
+        }
+    }
+
     private func bindState() {
         guard
-            let canvasStorage,
-            let brush = canvasStorage.drawingTool?.brush,
-            let eraser = canvasStorage.drawingTool?.eraser
+            let coreDataRepository,
+            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
+            let drawingToolStorage = canvasStorageEntity.drawingTool,
+            let brushStorage = drawingToolStorage.brush,
+            let eraserStorage = drawingToolStorage.eraser
         else { return }
 
         cancellables.removeAll()
 
         canvasState?.$projectName
             .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .compactMap { $0 }
-            .assign(to: \.projectName, on: canvasStorage)
+            .sink { result in
+                canvasStorageEntity.projectName = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.drawingToolState.brush.$color
             .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { $0.hexString() }
-            .assign(to: \.colorHex, on: brush)
+            .sink { result in
+                brushStorage.colorHex = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.drawingToolState.brush.$diameter
             .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .assign(to: \.diameter, on: brush)
+            .sink { result in
+                brushStorage.diameter = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.drawingToolState.eraser.$alpha
             .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .assign(to: \.alpha, on: eraser)
+            .sink { result in
+                eraserStorage.alpha = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.drawingToolState.eraser.$diameter
             .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .assign(to: \.diameter, on: eraser)
+            .sink { result in
+                eraserStorage.diameter = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.$selectedLayerId
             .dropFirst()
-            .assign(to: \.selectedLayerId, on: canvasStorage)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { result in
+                canvasStorageEntity.selectedLayerId = result
+                try? coreDataRepository.saveContext()
+            }
             .store(in: &cancellables)
 
         canvasState?.$layers
             .dropFirst()
-            .sink { [weak self] layers in
-                self?.replaceTextureLayers(with: layers)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] result in
+                self?.updateAllTextureLayerEntities(result)
+                try? coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
     }
 
-    private func replaceTextureLayers(with layers: [TextureLayerModel]) {
-        guard let storage = canvasStorage else { return }
+    /// Saves all texture layers to Core Data instead of saving only the differences,
+    /// assuming the number of layers stays below 100.
+    private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
+        guard
+            let coreDataRepository,
+            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
+        else { return }
 
-        if let existing = storage.textureLayers as? Set<TextureLayerStorageEntity> {
-            existing.forEach(context.delete)
+        // Deletes all existing data first
+        if let existing = canvasStorageEntity.textureLayers as? Set<TextureLayerStorageEntity> {
+            existing.forEach(coreDataRepository.context.delete)
         }
+
+        // Saves all data
         layers.enumerated().forEach { index, model in
-            let newLayer = TextureLayerStorageEntity(context: context)
+            let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)
-            newLayer.canvas = storage
+            newLayer.canvas = canvasStorageEntity
         }
-        try? saveState()
-    }
-
-}
-
-extension CanvasStateStorage {
-
-    func fetchCanvasState() throws -> CanvasStorageEntity? {
-        let request = NSFetchRequest<CanvasStorageEntity>(entityName: entityName)
-        request.fetchLimit = 1
-        return try context.fetch(request).first
-    }
-
-    func saveState() throws {
-        guard context.hasChanges else { return }
-        try context.save()
     }
 
 }

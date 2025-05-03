@@ -61,6 +61,8 @@ final class CanvasViewModel {
         CanvasConfiguration()
     )
 
+    private var canvasStateStorage: CanvasStateStorage?
+
     /// A class for handling finger input values
     private let fingerScreenStrokeData = FingerScreenStrokeData()
     /// A class for handling Apple Pencil inputs
@@ -117,6 +119,9 @@ final class CanvasViewModel {
     ) {
         self.textureRepository = textureRepository
         self.localRepository = localRepository
+
+        canvasStateStorage = CanvasStateStorage()
+        canvasStateStorage?.setupStorage(canvasState)
 
         bindData()
     }
