@@ -56,13 +56,13 @@ final class TextureMockRepository: TextureRepository {
         
     }
 
-    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

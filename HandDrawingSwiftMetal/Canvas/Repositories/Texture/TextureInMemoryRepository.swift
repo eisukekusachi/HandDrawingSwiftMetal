@@ -116,7 +116,7 @@ extension TextureInMemoryRepository: TextureRepository {
             title: TimeStampFormatter.currentDate()
         )
 
-        initializeTexture(
+        createTexture(
             uuid: layer.id,
             textureSize: textureSize
         )
@@ -151,7 +151,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -172,7 +172,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 self?.removeAll()

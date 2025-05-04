@@ -120,7 +120,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             title: TimeStampFormatter.currentDate()
         )
 
-        initializeTexture(
+        createTexture(
             uuid: layer.id,
             textureSize: textureSize
         )
@@ -137,7 +137,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .store(in: &cancellables)
     }
 
-    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -158,7 +158,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 self?.removeAll()
@@ -207,39 +207,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     Set(fileURLs.map { $0.lastPathComponent }) == Set(uuids.map { $0.uuidString })
                 )
             )
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func initTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            let fileURL = directoryUrl.appendingPathComponent(uuid.uuidString)
-
-            do {
-                try FileOutputManager.createDirectory(self.directoryUrl)
-
-                try FileOutputManager.saveTextureAsData(
-                    bytes: texture.bytes,
-                    to: fileURL
-                )
-            } catch {
-                promise(.failure(error))
-                return
-            }
-
-            self._textureSize = textureSize
-            self.textures.append(uuid)
-            self.setThumbnail(texture: texture, for: uuid)
-
-            promise(.success(()))
         }
         .eraseToAnyPublisher()
     }
