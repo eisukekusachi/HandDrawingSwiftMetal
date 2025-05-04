@@ -196,36 +196,38 @@ final class CanvasRenderer: ObservableObject {
 
     func completeDrawing(
         texture: MTLTexture,
-        targetTextureId: UUID,
-        callback: ((MTLTexture) -> Void)? = nil
-    ) {
-        textureRepository?.loadTexture(targetTextureId)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] targetTexture in
+        targetTextureId: UUID
+    ) -> AnyPublisher<MTLTexture, Error> {
+        guard let textureRepository else {
+            return Fail(error: TextureRepositoryError.failedToUnwrap)
+                .eraseToAnyPublisher()
+        }
+
+        return textureRepository.loadTexture(targetTextureId)
+            .tryMap { [weak self] targetTexture in
                 guard
-                    let flippedTextureBuffers = self?.flippedTextureBuffers,
+                    let self,
+                    let flippedTextureBuffers = self.flippedTextureBuffers,
                     let targetTexture,
-                    let temporaryRenderCommandBuffer = self?.device.makeCommandQueue()?.makeCommandBuffer()
-                else { return }
+                    let commandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
+                else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
 
-                temporaryRenderCommandBuffer.label = "commandBuffer"
+                commandBuffer.label = "commandBuffer"
 
-                self?.renderer.drawTexture(
+                self.renderer.drawTexture(
                     texture: texture,
                     buffers: flippedTextureBuffers,
                     withBackgroundColor: .clear,
                     on: targetTexture,
-                    with: temporaryRenderCommandBuffer
+                    with: commandBuffer
                 )
-                temporaryRenderCommandBuffer.commit()
+                commandBuffer.commit()
 
-                callback?(texture)
-            })
-            .store(in: &cancellables)
+                return texture
+            }
+            .eraseToAnyPublisher()
     }
 
     func renderTextureFromRepositoryToTexturePublisher(

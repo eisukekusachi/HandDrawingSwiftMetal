@@ -67,10 +67,7 @@ protocol TextureRepository {
     func setThumbnail(texture: MTLTexture?, for uuid: UUID)
 
     /// Updates an existing texture for UUID
-    func updateTextureAsync(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
-
-    /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) throws
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Update texture layers and then update the canvas
     func updateCanvasAfterTextureLayerUpdates()

@@ -335,20 +335,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
     }
 
     /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) throws {
-        guard let texture else { return }
-
-        let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
-
-        try FileOutputManager.saveTextureAsData(
-            bytes: texture.bytes,
-            to: fileURL
-        )
-        self.setThumbnail(texture: texture, for: uuid)
-    }
-
-
-    func updateTextureAsync(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             guard
                 let `self`,
@@ -359,7 +346,14 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             }
 
             do {
-                try self.updateTexture(texture: texture, for: uuid)
+                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
+                try FileOutputManager.saveTextureAsData(
+                    bytes: texture.bytes,
+                    to: fileURL
+                )
+                self.setThumbnail(texture: texture, for: uuid)
+
                 promise(.success(uuid))
             } catch {
                 Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")

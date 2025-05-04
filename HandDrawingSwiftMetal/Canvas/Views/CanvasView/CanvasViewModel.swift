@@ -145,7 +145,7 @@ final class CanvasViewModel {
             drawingEraserTextureSet.canvasDrawFinishedPublisher
         )
         .sink { [weak self] in
-            self?.completeCanvasUpdateWithDrawing()
+            self?.updateCanvasAfterDrawingCompletion()
         }
         .store(in: &cancellables)
 
@@ -297,7 +297,7 @@ extension CanvasViewModel {
         fingerScreenStrokeData.removeEndedTouchArrayFromDictionary()
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
-            resetAllInputParameters()
+            resetAllDrawingParameters()
         }
     }
 
@@ -448,7 +448,7 @@ extension CanvasViewModel {
         drawingCurveIterator == nil
     }
 
-    private func resetAllInputParameters() {
+    private func resetAllDrawingParameters() {
         inputDevice.reset()
         screenTouchGesture.reset()
 
@@ -496,22 +496,37 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
-    private func completeCanvasUpdateWithDrawing() {
-        resetAllInputParameters()
-
+    private func updateCanvasAfterDrawingCompletion() {
         renderer.commandBuffer?.addCompletedHandler { _ in
             DispatchQueue.main.async { [weak self] in
                 guard
-                    let selectedTexture = self?.renderer.selectedTexture,
-                    let selectedTextureId = self?.canvasState.selectedLayer?.id
+                    let `self`,
+                    let selectedTexture = self.renderer.selectedTexture,
+                    let selectedTextureId = self.canvasState.selectedLayer?.id
                 else { return }
 
-                self?.renderer.completeDrawing(
+                self.renderer.completeDrawing(
                     texture: selectedTexture,
                     targetTextureId: selectedTextureId
-                ) { [weak self] texture in
-                    try? self?.textureRepository.updateTexture(texture: texture, for: selectedTextureId)
+                )
+                .flatMap { [weak self] resultTexture -> AnyPublisher<UUID, Error> in
+                    guard let self else {
+                        return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+                    }
+                    return self.textureRepository.updateTexture(
+                        texture: resultTexture,
+                        for: selectedTextureId
+                    )
                 }
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: break
+                    case .failure: break
+                    }
+                }, receiveValue: { [weak self] _ in
+                    self?.resetAllDrawingParameters()
+                })
+                .store(in: &self.cancellables)
             }
         }
     }

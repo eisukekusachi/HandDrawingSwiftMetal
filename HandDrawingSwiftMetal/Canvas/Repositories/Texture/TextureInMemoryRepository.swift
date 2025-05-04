@@ -256,15 +256,12 @@ extension TextureInMemoryRepository: TextureRepository {
         needsThumbnailUpdateSubject.send(uuid)
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) {
-        guard let texture else { return }
-        textures[uuid] = texture
-        setThumbnail(texture: texture, for: uuid)
-    }
-    func updateTextureAsync(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             if let texture {
-                self?.updateTexture(texture: texture, for: uuid)
+                self?.textures[uuid] = texture
+                self?.setThumbnail(texture: texture, for: uuid)
+
                 promise(.success(uuid))
             } else {
                 promise(.failure(TextureRepositoryError.failedToAddTexture))

@@ -92,7 +92,7 @@ extension TextureLayerViewModel {
                 guard let `self` else {
                     return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
                 }
-                return self.textureRepository.updateTextureAsync(
+                return self.textureRepository.updateTexture(
                     texture: MTLTextureCreator.makeBlankTexture(size: self.textureRepository.textureSize, with: device),
                     for: textureLayerId
                 )
