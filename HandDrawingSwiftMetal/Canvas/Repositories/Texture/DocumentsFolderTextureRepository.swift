@@ -88,14 +88,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         _textureSize
     }
 
-    func prepareStorage() {
-        dataTask?.cancel()
-        dataTask = Task { [weak self] in
-            guard let `self` else { return }
-            try FileOutputManager.createDirectory(self.directoryUrl)
-        }
-    }
-
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
@@ -229,11 +221,11 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 return
             }
 
-            self.prepareStorage()
-
             let fileURL = directoryUrl.appendingPathComponent(uuid.uuidString)
 
             do {
+                try FileOutputManager.createDirectory(self.directoryUrl)
+
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL
@@ -254,8 +246,10 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
             do {
-                self?.prepareStorage()
+                try FileOutputManager.createDirectory(self.directoryUrl)
 
                 try layers.forEach { [weak self] layer in
                     guard let `self` else { return }
