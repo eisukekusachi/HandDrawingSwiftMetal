@@ -85,8 +85,8 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
-        Just(uuid)
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Just(uuid).setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
@@ -94,10 +94,13 @@ final class TextureMockRepository: TextureRepository {
 
     func setThumbnail(texture: (any MTLTexture)?, for uuid: UUID) {}
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
+    func updateTextureAsync(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
         Just(uuid)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
+    }
+    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) throws {
+
     }
 
     func updateCanvasAfterTextureLayerUpdates() {

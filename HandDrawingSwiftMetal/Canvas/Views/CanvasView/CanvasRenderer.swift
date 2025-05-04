@@ -48,7 +48,7 @@ final class CanvasRenderer: ObservableObject {
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    private var textureRepository: (any TextureRepository)!
+    private var textureRepository: TextureRepository?
 
     private let renderer: (any MTLRendering)!
 
@@ -57,7 +57,6 @@ final class CanvasRenderer: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared,
         renderer: MTLRendering = MTLRenderer.shared
     ) {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -65,7 +64,6 @@ final class CanvasRenderer: ObservableObject {
             with: device
         )
 
-        self.textureRepository = textureRepository
         self.renderer = renderer
     }
 
@@ -103,6 +101,10 @@ final class CanvasRenderer: ObservableObject {
 
     func setCanvas(_ canvasView: CanvasViewProtocol?) {
         self.canvasView = canvasView
+    }
+
+    func setTextureRepository(_ textureRepository: TextureRepository) {
+        self.textureRepository = textureRepository
     }
 
     func resetCommandBuffer() {
@@ -192,7 +194,7 @@ final class CanvasRenderer: ObservableObject {
         refreshCanvasView(commandBuffer)
     }
 
-    func renderTextureToLayerInRepository(
+    func completeDrawing(
         texture: MTLTexture,
         targetTextureId: UUID,
         callback: ((MTLTexture) -> Void)? = nil
@@ -231,6 +233,11 @@ final class CanvasRenderer: ObservableObject {
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
+        guard let textureRepository else {
+            Logger.standard.warning("Texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+        }
+
         // Clear `destinationTexture` here
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 
@@ -256,6 +263,11 @@ final class CanvasRenderer: ObservableObject {
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
+        guard let textureRepository else {
+            Logger.standard.warning("Texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+        }
+
         // Clear `destinationTexture` here
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 

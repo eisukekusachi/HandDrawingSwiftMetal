@@ -107,7 +107,7 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository!
 
-    private var textureRepository: TextureRepository!
+    let textureRepository: TextureRepository
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -118,6 +118,8 @@ final class CanvasViewModel {
         localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
     ) {
         self.textureRepository = textureRepository
+        self.renderer.setTextureRepository(textureRepository)
+
         self.localRepository = localRepository
 
         // If `DocumentsFolderTextureRepository` is used, `CanvasStateStorage` is enabled
@@ -504,14 +506,11 @@ extension CanvasViewModel {
                     let selectedTextureId = self?.canvasState.selectedLayer?.id
                 else { return }
 
-                self?.renderer.renderTextureToLayerInRepository(
+                self?.renderer.completeDrawing(
                     texture: selectedTexture,
                     targetTextureId: selectedTextureId
                 ) { [weak self] texture in
-                    self?.textureRepository?.setThumbnail(
-                        texture: selectedTexture,
-                        for: selectedTextureId
-                    )
+                    try? self?.textureRepository.updateTexture(texture: texture, for: selectedTextureId)
                 }
             }
         }

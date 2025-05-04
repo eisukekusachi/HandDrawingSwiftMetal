@@ -145,7 +145,7 @@ final class CanvasRendererTests: XCTestCase {
             ),
             renderer: mockRenderer
         )
-        canvasRenderer.renderTextureToLayerInRepository(
+        canvasRenderer.completeDrawing(
             texture: texture,
             targetTextureId: targetTextureId
         ) { _ in

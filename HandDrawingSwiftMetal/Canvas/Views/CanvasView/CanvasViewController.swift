@@ -68,8 +68,14 @@ extension CanvasViewController {
     private func bindData() {
         canvasViewModel.needsCanvasSetupPublisher
             .sink { [weak self] canvasState in
-                self?.setupLayerView(canvasState)
-                self?.contentView.setup(canvasState)
+                guard let `self` else { return }
+                self.setupLayerView(
+                    canvasState: canvasState,
+                    textureRepository: self.canvasViewModel.textureRepository
+                )
+                self.contentView.setup(
+                    canvasState
+                )
             }
             .store(in: &cancellables)
 
@@ -173,9 +179,10 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(_ canvasState: CanvasState) {
+    private func setupLayerView(canvasState: CanvasState, textureRepository: TextureRepository) {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
+            textureRepository: textureRepository,
             using: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,

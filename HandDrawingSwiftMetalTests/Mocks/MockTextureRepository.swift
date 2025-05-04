@@ -79,13 +79,13 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("initializeCanvasAfterCreatingNewTexture(\(textureSize)")
     }
 
-    func initializeTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func initializeTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -115,9 +115,9 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         callHistory.append("removeTexture(\(uuid))")
-        return Just(uuid)
+        return Just(uuid).setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 

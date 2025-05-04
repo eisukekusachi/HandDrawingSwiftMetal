@@ -73,7 +73,7 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.loadTextures(uuids)
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.removeTexture(uuid)
     }
 
@@ -85,8 +85,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.setThumbnail(texture: texture, for: uuid)
     }
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
-        repository.updateTexture(texture: texture, for: uuid)
+    func updateTextureAsync(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
+        repository.updateTextureAsync(texture: texture, for: uuid)
+    }
+
+    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) throws {
+        try repository.updateTexture(texture: texture, for: uuid)
     }
 
     func updateCanvasAfterTextureLayerUpdates() {

@@ -58,7 +58,7 @@ protocol TextureRepository {
     func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
     /// Removes a texture with UUID
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never>
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Removes all managed textures
     func removeAll()
@@ -67,7 +67,10 @@ protocol TextureRepository {
     func setThumbnail(texture: MTLTexture?, for uuid: UUID)
 
     /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+    func updateTextureAsync(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+
+    /// Updates an existing texture for UUID
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) throws
 
     /// Update texture layers and then update the canvas
     func updateCanvasAfterTextureLayerUpdates()
@@ -84,4 +87,5 @@ enum TextureRepositoryError: Error {
     case failedToUpdateTexture
     case invalidTexture
     case repositoryDeinitialized
+    case repositoryUnavailable
 }

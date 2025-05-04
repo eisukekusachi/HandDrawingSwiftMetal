@@ -27,7 +27,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     private var canvasState: CanvasState
 
-    private var textureRepository: (any TextureRepository)!
+    private var textureRepository: TextureRepository
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -35,7 +35,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     init(
         canvasState: CanvasState,
-        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared
+        textureRepository: TextureRepository
     ) {
         self.canvasState = canvasState
         self.textureRepository = textureRepository
@@ -84,16 +84,16 @@ extension TextureLayerViewModel {
     }
 
     func insertLayer(at index: Int) {
-        guard
-            let textureRepository
-        else { return }
 
         let device = self.device
 
         addNewLayerPublisher(at: index)
-            .flatMap { textureLayerId in
-                textureRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureRepository.textureSize, with: device),
+            .flatMap { [weak self] textureLayerId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.updateTextureAsync(
+                    texture: MTLTextureCreator.makeBlankTexture(size: self.textureRepository.textureSize, with: device),
                     for: textureLayerId
                 )
             }
@@ -111,13 +111,15 @@ extension TextureLayerViewModel {
 
     func removeLayer() {
         guard
-            let textureRepository,
             let selectedIndex = canvasState.selectedIndex
         else { return }
 
         removeLayerPublisher(from: selectedIndex)
-            .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
-                textureRepository.removeTexture(removedTextureId)
+            .flatMap { [weak self] removedTextureId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.removeTexture(removedTextureId)
             }
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -133,7 +135,7 @@ extension TextureLayerViewModel {
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {
-        textureRepository?.getThumbnail(uuid)
+        textureRepository.getThumbnail(uuid)
     }
 
     func selectLayer(_ uuid: UUID) {
