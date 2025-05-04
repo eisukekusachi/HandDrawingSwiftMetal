@@ -120,8 +120,11 @@ final class CanvasViewModel {
         self.textureRepository = textureRepository
         self.localRepository = localRepository
 
-        canvasStateStorage = CanvasStateStorage()
-        canvasStateStorage?.setupStorage(canvasState)
+        // If `DocumentsFolderTextureRepository` is used, `CanvasStateStorage` is enabled
+        if textureRepository is DocumentsFolderTextureRepository {
+            canvasStateStorage = CanvasStateStorage()
+            canvasStateStorage?.setupStorage(canvasState)
+        }
 
         bindData()
     }
