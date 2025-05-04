@@ -331,7 +331,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-        objectWillChange.send()
+        needsThumbnailUpdateSubject.send(uuid)
     }
 
     /// Updates an existing texture for UUID
