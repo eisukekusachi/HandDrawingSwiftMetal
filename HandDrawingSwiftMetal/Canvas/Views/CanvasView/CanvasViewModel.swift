@@ -257,7 +257,7 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !renderer.hasTextureBeenInitialized {
-            initCanvas(using: configuration)
+            initCanvas(using: canvasStateStorage?.configuration ?? configuration)
         }
     }
 

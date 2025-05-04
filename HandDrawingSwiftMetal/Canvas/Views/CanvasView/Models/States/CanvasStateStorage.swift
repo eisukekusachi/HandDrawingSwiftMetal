@@ -18,6 +18,8 @@ final class CanvasStateStorage {
         needsToastDisplaySubject.eraseToAnyPublisher()
     }
 
+    private(set) var configuration: CanvasConfiguration?
+
     private let needsErrorDialogDisplaySubject = PassthroughSubject<Error, Never>()
     private let needsToastDisplaySubject = PassthroughSubject<String, Never>()
 
@@ -40,7 +42,7 @@ final class CanvasStateStorage {
 
         do {
             if let existing = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                loadState(from: existing, into: canvasState)
+                configuration = loadState(from: existing)
 
             } else {
                 initializeStorageWithCanvasState(
@@ -63,29 +65,29 @@ final class CanvasStateStorage {
         }
     }
 
-    private func loadState(from canvasStorage: CanvasStorageEntity?, into canvasState: CanvasState) {
+    private func loadState(from canvasStorage: CanvasStorageEntity?) -> CanvasConfiguration? {
         guard
             let canvasStorage,
             let projectName = canvasStorage.projectName
-        else { return }
+        else { return nil }
 
-        canvasState.projectName = projectName
+        var configuration = CanvasConfiguration()
+
+        configuration.projectName = projectName
 
         if let brush = canvasStorage.drawingTool?.brush,
            let colorHexString = brush.colorHex {
-            canvasState.drawingToolState.brush.color = UIColor(hex: colorHexString)
-            canvasState.drawingToolState.brush.diameter = Int(brush.diameter)
+            configuration.brushColor = UIColor(hex: colorHexString)
+            configuration.brushDiameter = Int(brush.diameter)
         }
 
         if let eraser = canvasStorage.drawingTool?.eraser {
-            canvasState.drawingToolState.eraser.alpha = Int(eraser.alpha)
-            canvasState.drawingToolState.eraser.diameter = Int(eraser.diameter)
+            configuration.eraserAlpha = Int(eraser.alpha)
+            configuration.eraserDiameter = Int(eraser.diameter)
         }
 
-        canvasState.selectedLayerId = canvasStorage.selectedLayerId
-
         if let layers = canvasStorage.textureLayers as? Set<TextureLayerStorageEntity> {
-            canvasState.layers = layers
+            configuration.layers = layers
                 .sorted { $0.orderIndex < $1.orderIndex }
                 .enumerated()
                 .map { index, layer in
@@ -96,6 +98,10 @@ final class CanvasStateStorage {
                     )
                 }
         }
+
+        configuration.layerIndex = configuration.layers.firstIndex(where: { $0.id == canvasStorage.selectedLayerId }) ?? 0
+
+        return configuration
     }
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
