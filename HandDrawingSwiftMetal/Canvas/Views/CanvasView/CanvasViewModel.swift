@@ -176,9 +176,7 @@ final class CanvasViewModel {
         textureRepository.needsCanvasInitializationUsingConfigurationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                guard let textureSize = configuration.textureSize else { return }
-                self?.canvasState.setData(configuration)
-                self?.completeDrawingSetup(textureSize: textureSize)
+                self?.completeCanvasSetup(configuration)
             }
             .store(in: &cancellables)
 
@@ -227,8 +225,13 @@ extension CanvasViewModel {
         textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
 
-    private func completeDrawingSetup(textureSize: CGSize) {
-        guard let commandBuffer = renderer.commandBuffer else { return }
+    private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
+        guard
+            let commandBuffer = renderer.commandBuffer,
+            let textureSize = configuration.textureSize
+        else { return }
+
+        canvasState.setData(configuration)
 
         drawingBrushTextureSet.initTextures(textureSize)
         drawingEraserTextureSet.initTextures(textureSize)
