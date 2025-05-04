@@ -24,7 +24,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
-    private let needsCanvasRestorationFromConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -62,8 +62,8 @@ extension TextureInMemoryRepository: TextureRepository {
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
         needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
     }
-    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasRestorationFromConfigurationSubject.eraseToAnyPublisher()
+    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -99,7 +99,7 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.needsCanvasRestorationFromConfigurationSubject.send(configuration)
+                    self.needsCanvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
                     self.needsCanvasInitializationAfterNewTextureCreationSubject.send(
                         configuration.getTextureSize(drawableTextureSize: self.drawableTextureSize)
@@ -126,7 +126,7 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.needsCanvasRestorationFromConfigurationSubject.send(
+            self?.needsCanvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

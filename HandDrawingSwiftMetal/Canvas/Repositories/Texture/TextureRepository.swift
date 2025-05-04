@@ -21,8 +21,8 @@ protocol TextureRepository {
     /// A publisher that emits to trigger the creation of a new texture and initialization of the canvas
     var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
 
-    /// A publisher that emits to trigger restoration of the canvas from `CanvasConfiguration`
-    var needsCanvasRestorationFromConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+    /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
+    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }

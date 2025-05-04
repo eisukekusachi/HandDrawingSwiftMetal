@@ -173,12 +173,12 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Restore the canvas using CanvasConfiguration
-        textureRepository.needsCanvasRestorationFromConfigurationPublisher
+        textureRepository.needsCanvasInitializationUsingConfigurationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 guard let textureSize = configuration.textureSize else { return }
                 self?.canvasState.setData(configuration)
-                self?.initTextures(textureSize: textureSize)
+                self?.completeDrawingSetup(textureSize: textureSize)
             }
             .store(in: &cancellables)
 
@@ -227,7 +227,7 @@ extension CanvasViewModel {
         textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
 
-    private func initTextures(textureSize: CGSize) {
+    private func completeDrawingSetup(textureSize: CGSize) {
         guard let commandBuffer = renderer.commandBuffer else { return }
 
         drawingBrushTextureSet.initTextures(textureSize)
