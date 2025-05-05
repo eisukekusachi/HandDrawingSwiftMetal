@@ -139,8 +139,8 @@ final class CanvasRenderer: ObservableObject {
                     with: commandBuffer
                 )
             ),
-            renderTextureFromRepositoryToTexturePublisher(
-                layer: selectedLayer,
+            renderTexturesFromRepositoryToTexturePublisher(
+                layers: [selectedLayer],
                 into: selectedTexture,
                 with: commandBuffer
             )
@@ -231,36 +231,6 @@ final class CanvasRenderer: ObservableObject {
 
                 return texture
             }
-            .eraseToAnyPublisher()
-    }
-
-    func renderTextureFromRepositoryToTexturePublisher(
-        layer: TextureLayerModel,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<Void, Error> {
-        guard let textureRepository else {
-            Logger.standard.warning("Texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
-        }
-
-        // Clear `destinationTexture` here
-        renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
-
-        return textureRepository.loadTexture(uuid: layer.id, textureSize: destinationTexture.size)
-            .compactMap { $0 }
-            .handleEvents(receiveOutput: { [weak self] texture in
-                guard let flippedTextureBuffers = self?.flippedTextureBuffers else { return }
-
-                self?.renderer.drawTexture(
-                    texture: texture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: destinationTexture,
-                    with: commandBuffer
-                )
-            })
-            .map { _ in () }
             .eraseToAnyPublisher()
     }
 

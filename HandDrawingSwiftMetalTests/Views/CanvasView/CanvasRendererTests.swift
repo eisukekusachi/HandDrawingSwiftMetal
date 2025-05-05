@@ -111,11 +111,11 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that the target texture in the repository is overwritten with a new texture .
+    /// Confirms that the target texture in the repository is overwritten with a new texture.
     func testRenderTextureToLayerInRepository() {
         let expectation = XCTestExpectation()
 
-        let texture = MTLTextureCreator.makeBlankTexture(label: "texture", size: MTLRenderer.minimumTextureSize, with: device)!
+        let newTexture = MTLTextureCreator.makeBlankTexture(label: "newTexture", size: MTLRenderer.minimumTextureSize, with: device)!
 
         let sourceTexture0 = MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", size: MTLRenderer.minimumTextureSize, with: device)!
         let sourceTexture1 = MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", size: MTLRenderer.minimumTextureSize, with: device)!
@@ -134,29 +134,35 @@ final class CanvasRendererTests: XCTestCase {
         ]
 
         let result = [
-            "drawTexture(texture: texture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: sourceTexture1, with: commandBuffer)"
+            "drawTexture(texture: newTexture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: sourceTexture1, with: commandBuffer)"
         ]
 
         let mockRenderer = MockMTLRenderer()
-
-        let canvasRenderer = CanvasRenderer(
-            textureRepository: MockTextureRepository(
-                textures: condition
-            ),
-            renderer: mockRenderer
+        let mockRepository = MockTextureRepository(
+            textures: condition
         )
-        canvasRenderer.completeDrawing(
-            texture: texture,
+
+        let canvasRenderer = CanvasRenderer(renderer: mockRenderer)
+        canvasRenderer.setTextureRepository(mockRepository)
+
+        _ = canvasRenderer.completeDrawing(
+            texture: newTexture,
             targetTextureId: targetTextureId
-        ) { _ in
-            XCTAssertEqual(mockRenderer.callHistory, result)
-            expectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { completion in
+                XCTAssertEqual(mockRenderer.callHistory, result)
+                mockRenderer.callHistory.removeAll()
+
+                expectation.fulfill()
+            },
+            receiveValue: { _ in }
+        )
 
         wait(for: [expectation], timeout: 1.0)
     }
 
-    /// Confirms that unselected layers are split into `topLayers` and `bottomLayers` relative to the selected layer index, excluding invisible layers.
+    /// Confirms that unselected layers are grouped into the `topLayers` and `bottomLayers` arrays based on the index of the selected layer, ignoring any hidden layers.
     func testUnselectedLayersAreSeparatedIntoTopAndBottomArrays() {
         struct Condition {
             let layers: [TextureLayerModel]
@@ -275,64 +281,8 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that a texture loaded from the repository is drawn onto the destination texture.
-    func testRenderTextureFromRepositoryToTexturePublisher() {
-        let expectation = XCTestExpectation()
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        commandBuffer.label = "commandBuffer"
-
-        let sourceTextureId0 = UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!
-        let sourceTextureId1 = UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!
-        let sourceTextureId2 = UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!
-
-        let destinationTexture = MTLTextureCreator.makeBlankTexture(label: "destinationTexture", with: device)!
-
-        let layer = TextureLayerModel(id: sourceTextureId1)
-
-        let mockRenderer = MockMTLRenderer()
-
-        let canvasRenderer = CanvasRenderer(
-            textureRepository: MockTextureRepository.init(
-                textures: [
-                    sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
-                    sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
-                    sourceTextureId2: MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", with: device)!
-                ]
-            ),
-            renderer: mockRenderer
-        )
-
-        let results = [
-            "clearTexture(texture: destinationTexture, with: commandBuffer)",
-            "drawTexture(texture: sourceTexture1, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)"
-        ]
-
-        _ = canvasRenderer.renderTextureFromRepositoryToTexturePublisher(
-            layer: layer,
-            into: destinationTexture,
-            with: commandBuffer
-        )
-        .sink(
-            receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    XCTFail("Expected success, got error: \(error)")
-                }
-                XCTAssertEqual(mockRenderer.callHistory, results)
-
-                mockRenderer.callHistory.removeAll()
-                expectation.fulfill()
-            },
-            receiveValue: { _ in }
-        )
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    /// Confirms that all visible textures loaded from the repository are merged into the destination texture.
+    /// Confirms that textures loaded from the repository are merged into the destination texture.
     func testRenderTexturesFromRepositoryToTexturePublisher() {
-        let device = MTLCreateSystemDefaultDevice()!
-
         let sourceTextureId0 = UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!
         let sourceTextureId1 = UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!
         let sourceTextureId2 = UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!
@@ -340,8 +290,6 @@ final class CanvasRendererTests: XCTestCase {
         let sourceTextureId4 = UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!
 
         let destinationTexture = MTLTextureCreator.makeBlankTexture(label: "destinationTexture", with: device)!
-
-        let mockRenderer = MockMTLRenderer()
 
         struct Condition {
             let textureLayers: [TextureLayerModel]
@@ -360,16 +308,12 @@ final class CanvasRendererTests: XCTestCase {
             (
                 .init(
                     textureLayers: [
-                        .generate(id: sourceTextureId0),
-                        .generate(id: sourceTextureId1),
-                        .generate(id: sourceTextureId2)
+                        .generate(id: sourceTextureId0)
                     ]
                 ),
                 .init(results: [
                     "clearTexture(texture: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture0, alpha: 255, into: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture1, alpha: 255, into: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture2, alpha: 255, into: destinationTexture, with: commandBuffer)"
+                    "mergeTexture(texture: sourceTexture0, alpha: 255, into: destinationTexture, with: commandBuffer)"
                 ])
             ),
             (
@@ -393,24 +337,25 @@ final class CanvasRendererTests: XCTestCase {
             )
         ]
 
+        let mockRenderer = MockMTLRenderer()
+        let mockTextureRepository = MockTextureRepository.init(
+            textures: [
+                sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
+                sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
+                sourceTextureId2: MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", with: device)!,
+                sourceTextureId3: MTLTextureCreator.makeBlankTexture(label: "sourceTexture3", with: device)!,
+                sourceTextureId4: MTLTextureCreator.makeBlankTexture(label: "sourceTexture4", with: device)!
+            ]
+        )
+
+        let canvasRenderer = CanvasRenderer(renderer: mockRenderer)
+        canvasRenderer.setTextureRepository(mockTextureRepository)
+
         for testCase in testCases {
             let expectation = XCTestExpectation()
 
             let condition = testCase.0
             let results = testCase.1
-
-            let canvasRenderer = CanvasRenderer(
-                textureRepository: MockTextureRepository.init(
-                    textures: [
-                        sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
-                        sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
-                        sourceTextureId2: MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", with: device)!,
-                        sourceTextureId3: MTLTextureCreator.makeBlankTexture(label: "sourceTexture3", with: device)!,
-                        sourceTextureId4: MTLTextureCreator.makeBlankTexture(label: "sourceTexture4", with: device)!
-                    ]
-                ),
-                renderer: mockRenderer
-            )
 
             let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
             commandBuffer.label = "commandBuffer"

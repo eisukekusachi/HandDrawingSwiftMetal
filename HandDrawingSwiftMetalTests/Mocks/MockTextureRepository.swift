@@ -12,6 +12,39 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
+    private let device = MTLCreateSystemDefaultDevice()!
+
+    func initializeStorage(from configuration: HandDrawingSwiftMetal.CanvasConfiguration) {}
+    
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {}
+
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
+        return Just(true)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+        return Just(textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device))
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID :MTLTexture?], Error> {
+        let result = uuids.reduce(into: [UUID: MTLTexture?]()) { dict, uuid in
+            dict[uuid] = textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        }
+        return Just(result)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let canvasInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()

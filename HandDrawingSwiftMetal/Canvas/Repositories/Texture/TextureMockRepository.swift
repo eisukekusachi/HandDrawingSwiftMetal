@@ -11,6 +11,8 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
+    private let device = MTLCreateSystemDefaultDevice()!
+
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
@@ -61,7 +63,7 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -71,14 +73,17 @@ final class TextureMockRepository: TextureRepository {
         nil
     }
 
-    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
-        Just(nil)
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+        let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        return Just(texture)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
-        let result = uuids.reduce(into: [UUID: MTLTexture?]()) { $0[$1] = nil }
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : MTLTexture?], Error> {
+        let result = uuids.reduce(into: [UUID: MTLTexture?]()) {
+            $0[$1] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        }
         return Just(result)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
