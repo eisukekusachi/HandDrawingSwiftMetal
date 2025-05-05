@@ -33,9 +33,6 @@ protocol TextureRepository {
     /// Resolves the state of the canvas view
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize)
 
-    /// Initializes the canvas after creating a new texture
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize)
-
     /// Creates a texture
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
 

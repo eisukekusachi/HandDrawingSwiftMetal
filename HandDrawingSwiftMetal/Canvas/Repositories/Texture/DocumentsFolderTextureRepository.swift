@@ -100,7 +100,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             .store(in: &cancellables)
     }
 
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
+    private func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
         guard textureSize > MTLRenderer.minimumTextureSize else { return }
 
         let layer = TextureLayerModel(

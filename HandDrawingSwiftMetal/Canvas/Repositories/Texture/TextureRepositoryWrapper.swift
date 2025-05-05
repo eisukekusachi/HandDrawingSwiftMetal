@@ -46,10 +46,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.hasAllTextures(for: uuids)
     }
 
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        repository.initializeCanvasAfterCreatingNewTexture(textureSize)
-    }
-
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         repository.createTexture(uuid: uuid, textureSize: textureSize)
     }

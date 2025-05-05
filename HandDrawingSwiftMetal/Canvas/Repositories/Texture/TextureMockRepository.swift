@@ -47,10 +47,6 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        
-    }
-
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
