@@ -18,9 +18,6 @@ protocol TextureRepository {
     /// The common size used for all textures
     var textureSize: CGSize { get }
 
-    /// A publisher that emits to trigger the creation of a new texture and initialization of the canvas
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
-
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 

@@ -182,13 +182,6 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Initialize the canvas using the textureSize
-        textureRepository.needsCanvasInitializationAfterNewTextureCreationPublisher
-            .sink { [weak self] textureSize in
-                self?.textureRepository.initializeCanvasAfterCreatingNewTexture(textureSize)
-            }
-            .store(in: &cancellables)
-
         // Update the canvas after updating the layers
         textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
             .receive(on: DispatchQueue.main)

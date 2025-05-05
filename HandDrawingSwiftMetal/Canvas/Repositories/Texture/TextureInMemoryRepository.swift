@@ -22,8 +22,6 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
-
     private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
@@ -59,9 +57,6 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
-    }
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
@@ -101,7 +96,7 @@ extension TextureInMemoryRepository: TextureRepository {
                 if allExist {
                     self.needsCanvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
-                    self.needsCanvasInitializationAfterNewTextureCreationSubject.send(
+                    self.initializeCanvasAfterCreatingNewTexture(
                         configuration.getTextureSize(drawableTextureSize: self.drawableTextureSize)
                     )
                 }

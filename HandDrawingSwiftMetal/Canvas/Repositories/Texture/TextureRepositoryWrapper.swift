@@ -16,9 +16,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         self.repository = repository
     }
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        repository.needsCanvasInitializationAfterNewTextureCreationPublisher
-    }
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         repository.needsCanvasInitializationUsingConfigurationPublisher
     }

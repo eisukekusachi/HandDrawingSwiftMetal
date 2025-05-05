@@ -12,8 +12,6 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
-    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
-
     private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
@@ -21,10 +19,6 @@ final class MockTextureRepository: TextureRepository {
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
-
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
-    }
 
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()

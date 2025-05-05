@@ -63,9 +63,6 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
 extension DocumentsFolderTextureRepository: TextureRepository {
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
-    }
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }

@@ -11,9 +11,6 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
-    }
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
@@ -29,8 +26,6 @@ final class TextureMockRepository: TextureRepository {
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
     }
-
-    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
 
     private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
