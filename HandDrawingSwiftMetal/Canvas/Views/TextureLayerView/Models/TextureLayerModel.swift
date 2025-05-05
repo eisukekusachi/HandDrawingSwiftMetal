@@ -36,4 +36,14 @@ extension TextureLayerModel {
         lhs.id == rhs.id
     }
 
+    /// Uses the ID as the filename
+    var fileName: String {
+        id.uuidString
+    }
+
+    /// Uses the filename as the ID, and generates a new one if it is not valid
+    static func id(from string: String?) -> UUID {
+        UUID.init(uuidString: string ?? "") ?? UUID()
+    }
+
 }

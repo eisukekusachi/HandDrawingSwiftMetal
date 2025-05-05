@@ -80,7 +80,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        hasAllTextures(for: configuration.layers.map { $0.id })
+        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -190,7 +190,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
             guard let self else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -201,8 +201,8 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
             promise(
                 .success(
-                    !uuids.isEmpty &&
-                    Set(fileURLs.map { $0.lastPathComponent }) == Set(uuids.map { $0.uuidString })
+                    !fileNames.isEmpty &&
+                    Set(fileURLs.map { $0.lastPathComponent }) == Set(fileNames)
                 )
             )
         }

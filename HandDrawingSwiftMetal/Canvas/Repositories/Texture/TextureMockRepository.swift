@@ -41,7 +41,7 @@ final class TextureMockRepository: TextureRepository {
 
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {}
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
         Just(true)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

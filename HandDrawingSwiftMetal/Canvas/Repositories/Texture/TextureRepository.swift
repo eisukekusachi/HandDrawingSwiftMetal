@@ -40,7 +40,7 @@ protocol TextureRepository {
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Checks if all specified textures exist
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
 
     /// Retrieves the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?

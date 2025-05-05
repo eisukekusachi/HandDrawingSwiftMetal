@@ -92,6 +92,7 @@ final class CanvasStateStorage {
                 .enumerated()
                 .map { index, layer in
                     TextureLayerModel(
+                        id: TextureLayerModel.id(from: layer.fileName),
                         title: layer.title ?? "",
                         alpha: Int(layer.alpha),
                         isVisible: layer.isVisible
@@ -132,6 +133,7 @@ final class CanvasStateStorage {
             for (index, layer) in canvasState.layers.enumerated() {
                 let texture = TextureLayerStorageEntity(context: coreDataRepository.context)
                 texture.title = layer.title
+                texture.fileName = layer.fileName
                 texture.alpha = Int16(layer.alpha)
                 texture.orderIndex = Int16(index)
                 texture.canvas = newStorage
@@ -241,6 +243,7 @@ final class CanvasStateStorage {
         layers.enumerated().forEach { index, model in
             let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
+            newLayer.fileName = model.fileName
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)
             newLayer.canvas = canvasStorageEntity

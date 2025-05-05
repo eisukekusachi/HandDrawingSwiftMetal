@@ -42,8 +42,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
-        repository.hasAllTextures(for: uuids)
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
+        repository.hasAllTextures(fileNames: fileNames)
     }
 
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
