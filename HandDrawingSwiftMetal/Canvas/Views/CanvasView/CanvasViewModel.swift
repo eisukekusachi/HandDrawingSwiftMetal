@@ -519,7 +519,7 @@ extension CanvasViewModel {
                     targetTextureId: selectedTextureId
                 )
                 .flatMap { [weak self] resultTexture -> AnyPublisher<UUID, Error> in
-                    guard let self else {
+                    guard let `self` else {
                         return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
                     }
                     return self.textureRepository.updateTexture(

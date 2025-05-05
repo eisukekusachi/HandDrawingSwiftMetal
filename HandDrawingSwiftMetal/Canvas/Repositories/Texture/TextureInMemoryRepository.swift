@@ -115,10 +115,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
-            guard let self else {
-                promise(.failure(TextureRepositoryError.repositoryDeinitialized))
-                return
-            }
+            guard let `self` else { return }
 
             let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
 
@@ -253,7 +250,7 @@ extension TextureInMemoryRepository: TextureRepository {
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future { promise in
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let self else { return }
+                guard let `self` else { return }
 
                 for (uuid, texture) in self.textures {
                     guard let texture else { return }

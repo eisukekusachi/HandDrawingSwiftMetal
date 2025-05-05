@@ -28,7 +28,7 @@ final class DocumentsLocalSingletonRepository: LocalRepository {
             textureRepository: textureRepository
         )
     }
-    
+
     func saveDataToDocuments(
         renderTexture: any MTLTexture,
         canvasState: CanvasState,

@@ -154,10 +154,10 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
 
-            let url = self.directoryUrl
+            let destinationUrl = self.directoryUrl
 
             do {
-                try FileOutputManager.createDirectory(url)
+                try FileOutputManager.createDirectory(destinationUrl)
 
                 try layers.forEach { [weak self] layer in
                     let textureData = try Data(
@@ -173,7 +173,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                        ) {
                         try FileOutputManager.saveTextureAsData(
                             bytes: texture.bytes,
-                            to: url.appendingPathComponent(layer.id.uuidString)
+                            to: destinationUrl.appendingPathComponent(layer.id.uuidString)
                         )
 
                         self?.textures.append(layer.id)
@@ -190,10 +190,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
-            guard let self else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
+            guard let `self` else { return }
 
             let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directoryUrl, includingPropertiesForKeys: nil)) ?? []
 
@@ -327,7 +324,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future { [weak self] promise in
-            guard let self else { return }
+            guard let `self` else { return }
 
             do {
                 for textureId in self.textures {
