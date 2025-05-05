@@ -198,44 +198,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func initTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            do {
-                try FileOutputManager.createDirectory(self.directoryUrl)
-
-                try layers.forEach { [weak self] layer in
-                    guard let `self` else { return }
-
-                    let fileUrl = folderURL.appendingPathComponent(layer.id.uuidString)
-                    let destinationUrl = directoryUrl.appendingPathComponent(layer.id.uuidString)
-
-                    let textureData = try Data(contentsOf: fileUrl)
-
-                    guard
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
-
-                    try FileManager.moveFile(source: fileUrl, destination: destinationUrl)
-
-                    let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: self.device
-                    )
-
-                    self.textures.append(layer.id)
-                    self.setThumbnail(texture: texture, for: layer.id)
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
