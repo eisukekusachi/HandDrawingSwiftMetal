@@ -109,10 +109,10 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsCanvasRefreshPublisher
+        canvasViewModel.canvasInitializationRequestedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                self?.canvasViewModel.initCanvas(using: configuration)
+                self?.canvasViewModel.initializeCanvas(using: configuration)
             }
             .store(in: &cancellables)
 

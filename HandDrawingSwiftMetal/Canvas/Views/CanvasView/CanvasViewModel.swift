@@ -43,8 +43,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when refreshing the canvas is needed
-    var needsCanvasRefreshPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasRefreshSubject.eraseToAnyPublisher()
+    var canvasInitializationRequestedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationRequestedSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when updating the undo button state is needed.
@@ -99,7 +99,7 @@ final class CanvasViewModel {
 
     private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializationRequestedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
@@ -215,7 +215,7 @@ final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initCanvas(using configuration: CanvasConfiguration) {
+    func initializeCanvas(using configuration: CanvasConfiguration) {
         guard let drawableSize = renderer.renderTextureSize else { return }
         textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
     }
@@ -271,7 +271,7 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !renderer.hasTextureBeenInitialized {
-            initCanvas(using: canvasStateStorage?.configuration ?? configuration)
+            initializeCanvas(using: canvasStateStorage?.configuration ?? configuration)
         }
     }
 
@@ -379,7 +379,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
-        initCanvas(
+        initializeCanvas(
             using: .init(textureSize: renderer.textureSize)
         )
     }
@@ -559,7 +559,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
             }
         }, receiveValue: { [weak self] configuration in
-            self?.needsCanvasRefreshSubject.send(configuration)
+            self?.canvasInitializationRequestedSubject.send(configuration)
         })
         .store(in: &cancellables)
     }
