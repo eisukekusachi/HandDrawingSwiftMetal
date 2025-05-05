@@ -206,7 +206,7 @@ final class CanvasRenderer: ObservableObject {
                 .eraseToAnyPublisher()
         }
 
-        return textureRepository.loadTexture(uuid: targetTextureId, textureSize: texture.size)
+        return textureRepository.getTexture(uuid: targetTextureId, textureSize: texture.size)
             .tryMap { [weak self] targetTexture in
                 guard
                     let self,
@@ -254,7 +254,7 @@ final class CanvasRenderer: ObservableObject {
             return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        return textureRepository.loadTextures(
+        return textureRepository.getTextures(
             uuids: layers.map { $0.id },
             textureSize: destinationTexture.size
         )

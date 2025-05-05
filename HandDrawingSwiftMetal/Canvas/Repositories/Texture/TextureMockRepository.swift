@@ -73,14 +73,14 @@ final class TextureMockRepository: TextureRepository {
         nil
     }
 
-    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
         return Just(texture)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : MTLTexture?], Error> {
         let result = uuids.reduce(into: [UUID: MTLTexture?]()) {
             $0[$1] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
         }

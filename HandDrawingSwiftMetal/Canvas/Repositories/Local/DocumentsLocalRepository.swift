@@ -159,7 +159,7 @@ extension DocumentsLocalRepository {
         textureRepository: any TextureRepository,
         to url: URL
     ) -> AnyPublisher<Void, Error> {
-        textureRepository.loadTextures(uuids: textureIds, textureSize: textureSize)
+        textureRepository.getTextures(uuids: textureIds, textureSize: textureSize)
             .tryMap { textureDict in
                 guard textureDict.count == textureIds.count else {
                     Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")

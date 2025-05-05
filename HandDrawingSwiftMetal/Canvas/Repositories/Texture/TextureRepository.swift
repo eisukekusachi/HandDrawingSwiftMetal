@@ -42,14 +42,14 @@ protocol TextureRepository {
     /// Retrieves the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?
 
-    /// Loads a texture for the given UUID
-    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
+    /// Gets a texture for the given UUID
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
+
+    /// Gets multiple textures for the given UUIDs
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
     /// Loads textures for the given layers using a folder URL as a source
     func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
-
-    /// Loads multiple textures for the given UUIDs
-    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>

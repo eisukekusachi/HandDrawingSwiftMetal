@@ -158,7 +158,7 @@ extension TextureInMemoryRepository: TextureRepository {
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Future<MTLTexture?, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid] else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
@@ -169,7 +169,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
         let publishers = uuids.map { uuid in
             Future<(UUID, MTLTexture?), Error> { [weak self] promise in
                 guard let texture = self?.textures[uuid] else {

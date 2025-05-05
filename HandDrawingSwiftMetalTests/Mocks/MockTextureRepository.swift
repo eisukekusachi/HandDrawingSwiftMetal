@@ -24,13 +24,13 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         return Just(textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID :MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID :MTLTexture?], Error> {
         let result = uuids.reduce(into: [UUID: MTLTexture?]()) { dict, uuid in
             dict[uuid] = textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
         }
@@ -111,25 +111,6 @@ final class MockTextureRepository: TextureRepository {
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         callHistory.append("getThumbnail(\(uuid))")
         return nil
-    }
-
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
-        callHistory.append("loadTexture(\(uuid))")
-        let resultTexture: MTLTexture? = textures[uuid]?.flatMap { $0 }
-        return Just(resultTexture)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
-        callHistory.append("loadTextures(\(uuids.count) uuids)")
-        return Just(
-            uuids.reduce(into: [:]) { dict, uuid in
-                dict[uuid] = textures[uuid] ?? nil
-            }
-        )
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
     }
 
     func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
