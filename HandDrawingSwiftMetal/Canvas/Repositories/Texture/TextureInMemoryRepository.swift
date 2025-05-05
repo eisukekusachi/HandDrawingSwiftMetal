@@ -11,14 +11,6 @@ import SwiftUI
 
 final class TextureInMemoryRepository: ObservableObject {
 
-    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
-        didSet {
-            if drawableTextureSize < MTLRenderer.minimumTextureSize {
-                drawableTextureSize = MTLRenderer.minimumTextureSize
-            }
-        }
-    }
-
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
@@ -82,8 +74,6 @@ extension TextureInMemoryRepository: TextureRepository {
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        drawableTextureSize = drawableSize
-
         hasAllTextures(for: configuration.layers.map { $0.id })
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -97,7 +87,7 @@ extension TextureInMemoryRepository: TextureRepository {
                     self.needsCanvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
                     self.initializeCanvasAfterCreatingNewTexture(
-                        configuration.getTextureSize(drawableTextureSize: self.drawableTextureSize)
+                        configuration.getTextureSize(drawableSize: drawableSize)
                     )
                 }
             })
