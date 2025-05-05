@@ -25,7 +25,7 @@ extension TextureLayerModel {
         from textureLayerEntity: TextureLayerEntity
     ) {
         self.init(
-            id: UUID.init(uuidString: textureLayerEntity.textureName) ?? UUID(),
+            id: TextureLayerModel.id(from: textureLayerEntity.textureName),
             title: textureLayerEntity.title,
             alpha: textureLayerEntity.alpha,
             isVisible: textureLayerEntity.isVisible
