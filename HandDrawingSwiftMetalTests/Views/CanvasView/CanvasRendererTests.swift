@@ -102,6 +102,7 @@ final class CanvasRendererTests: XCTestCase {
             subject.updateCanvas(
                 realtimeDrawingTexture: condition.hasRealtimeDrawingTexture ? drawingTexture : nil,
                 selectedLayer: .init(
+                    title: "",
                     isVisible: condition.isLayerVisible
                 ),
                 with: commandBuffer
@@ -178,22 +179,22 @@ final class CanvasRendererTests: XCTestCase {
                 // All layers except the selected one are grouped into `topLayers` and `bottomLayers`
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 2
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 )
             ),
@@ -201,20 +202,20 @@ final class CanvasRendererTests: XCTestCase {
                 // If the selected layer is at the top, `topLayers` will be empty
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 4
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     expectationTopLayers: []
                 )
@@ -223,21 +224,21 @@ final class CanvasRendererTests: XCTestCase {
                 // If the selected layer is at the bottom, `bottomLayers` will be empty.
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 0
                 ),
                 .init(
                     expectationBottomLayers: [],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 )
             ),
@@ -245,20 +246,20 @@ final class CanvasRendererTests: XCTestCase {
                 // Layers with `isVisible` set to `false` are excluded from both arrays.
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, isVisible: false),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, isVisible: false)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: "", isVisible: false),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "", isVisible: false)
                     ],
                     selectedLayerIndex: 2
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, isVisible: true)
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true)
                     ],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, isVisible: true)
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true)
                     ]
                 )
             )

@@ -29,8 +29,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                         UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!: nil
                     ],
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 ),
                 .init(
@@ -52,8 +52,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 .init(
                     textures: [:],
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 ),
                 .init(
