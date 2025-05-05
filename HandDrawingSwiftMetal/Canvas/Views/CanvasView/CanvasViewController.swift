@@ -66,17 +66,6 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.canvasViewControllerSetupPublisher
-            .sink { [weak self] configuration in
-                self?.setupLayerView(
-                    canvasState: configuration.canvasState,
-                    textureRepository: configuration.textureRepository
-                )
-                self?.contentView.setup(
-                    configuration.canvasState
-                )
-            }
-            .store(in: &cancellables)
 
         canvasViewModel.needsShowingActivityIndicatorPublisher
             .map { !$0 }
@@ -108,7 +97,19 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.canvasInitializationRequestedPublisher
+        canvasViewModel.canvasViewControllerSetupPublisher
+            .sink { [weak self] configuration in
+                self?.setupLayerView(
+                    canvasState: configuration.canvasState,
+                    textureRepository: configuration.textureRepository
+                )
+                self?.contentView.setup(
+                    configuration.canvasState
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.canvasInitializationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.canvasViewModel.initializeCanvas(using: configuration)

@@ -43,8 +43,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when refreshing the canvas is needed
-    var canvasInitializationRequestedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationRequestedSubject.eraseToAnyPublisher()
+    var canvasInitializationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when updating the undo button state is needed.
@@ -99,7 +99,7 @@ final class CanvasViewModel {
 
     private var canvasViewControllerSetupSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
-    private let canvasInitializationRequestedSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
@@ -569,7 +569,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
             }
         }, receiveValue: { [weak self] configuration in
-            self?.canvasInitializationRequestedSubject.send(configuration)
+            self?.canvasInitializationSubject.send(configuration)
         })
         .store(in: &cancellables)
     }
