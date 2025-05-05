@@ -16,7 +16,10 @@ protocol TextureRepository {
     var textureNum: Int { get }
 
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+
+    /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
+    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
@@ -28,7 +31,10 @@ protocol TextureRepository {
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
     /// Initialized the storage
-    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize)
+    func initializeStorage(from configuration: CanvasConfiguration)
+
+    /// Initialized the storage with a new texture
+    func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
     /// Creates a texture
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>

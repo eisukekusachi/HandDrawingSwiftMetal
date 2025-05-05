@@ -12,7 +12,9 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
-    private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let canvasInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
 
@@ -20,8 +22,12 @@ final class MockTextureRepository: TextureRepository {
 
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    }
+
+    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {

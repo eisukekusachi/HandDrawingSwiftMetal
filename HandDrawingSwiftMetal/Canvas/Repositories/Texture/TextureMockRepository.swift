@@ -11,8 +11,12 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    }
+
+    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -27,7 +31,9 @@ final class TextureMockRepository: TextureRepository {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
     }
 
-    private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let canvasInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -39,7 +45,9 @@ final class TextureMockRepository: TextureRepository {
 
     var textureSize: CGSize = .zero
 
-    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize) {}
+    func initializeStorage(from configuration: CanvasConfiguration) {}
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {}
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
         Just(true)

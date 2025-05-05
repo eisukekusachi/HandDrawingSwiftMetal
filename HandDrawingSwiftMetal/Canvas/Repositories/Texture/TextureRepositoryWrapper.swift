@@ -16,8 +16,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         self.repository = repository
     }
 
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.needsCanvasInitializationUsingConfigurationPublisher
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.canvasInitializationUsingConfigurationPublisher
+    }
+
+    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.canvasInitializationWithNewTexturePublisher
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -35,8 +39,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.textureNum
     }
 
-    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        repository.initializeStorage(from: configuration, drawableSize: drawableSize)
+    func initializeStorage(from configuration: CanvasConfiguration) {
+        repository.initializeStorage(from: configuration)
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+        repository.initializeStorageWithNewTexture(textureSize)
     }
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {

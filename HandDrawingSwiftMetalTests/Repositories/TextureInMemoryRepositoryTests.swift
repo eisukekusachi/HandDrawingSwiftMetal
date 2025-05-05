@@ -83,7 +83,7 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
             let subject = TextureInMemoryRepository(textures: condition.textures)
 
             var restoreCanvasFromModelCalled = false
-            var initializeCanvasFromModelAfterNewTextureCreationCalled = false
+            var initializeCanvasWithNewTextureCalled = false
 
             var cancellables = Set<AnyCancellable>()
 
@@ -98,16 +98,16 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 initializeExpectation.isInverted = true
             }
 
-            subject.needsCanvasInitializationUsingConfigurationPublisher
+            subject.canvasInitializationUsingConfigurationPublisher
                 .sink { _ in
                     restoreCanvasFromModelCalled = true
                     restoreExpectation.fulfill()
                 }
                 .store(in: &cancellables)
 
-            subject.needsCanvasInitializationAfterNewTextureCreationPublisher
+            subject.canvasInitializationWithNewTexturePublisher
                 .sink { _ in
-                    initializeCanvasFromModelAfterNewTextureCreationCalled = true
+                    initializeCanvasWithNewTextureCalled = true
                     initializeExpectation.fulfill()
                 }
                 .store(in: &cancellables)
@@ -116,14 +116,13 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
             /// the canvas will be restored using that configuration.
             /// Otherwise, a new texture will be created and the canvas will be initialized.
             subject.initializeStorage(
-                from: .init(layers: condition.layers),
-                drawableSize: .init(width: 44, height: 44)
+                from: .init(layers: condition.layers)
             )
 
             await fulfillment(of: [restoreExpectation, initializeExpectation], timeout: 1.0)
 
             XCTAssertEqual(restoreCanvasFromModelCalled, expected.isRestoredFromModel)
-            XCTAssertEqual(initializeCanvasFromModelAfterNewTextureCreationCalled, expected.isInitializedAfterNewTextureCreation)
+            XCTAssertEqual(initializeCanvasWithNewTextureCalled, expected.isInitializedAfterNewTextureCreation)
         }
     }
 }
