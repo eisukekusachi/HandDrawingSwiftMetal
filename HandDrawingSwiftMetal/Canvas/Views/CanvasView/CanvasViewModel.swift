@@ -18,7 +18,7 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when the canvas setup is needed
-    var needsCanvasSetupPublisher: AnyPublisher<CanvasState, Never> {
+    var needsCanvasSetupPublisher: AnyPublisher<CanvasViewConfiguration, Never> {
         needsCanvasSetupSubject.eraseToAnyPublisher()
     }
 
@@ -89,7 +89,7 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private var needsCanvasSetupSubject: PassthroughSubject<CanvasState, Never> = .init()
+    private var needsCanvasSetupSubject: PassthroughSubject<CanvasViewConfiguration, Never> = .init()
 
     private let needsShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -247,7 +247,12 @@ extension CanvasViewModel {
     ) {
         renderer.setCanvas(canvasView)
 
-        needsCanvasSetupSubject.send(canvasState)
+        needsCanvasSetupSubject.send(
+            .init(
+                canvasState: canvasState,
+                textureRepository: textureRepository
+            )
+        )
     }
 
     func onViewDidAppear(
