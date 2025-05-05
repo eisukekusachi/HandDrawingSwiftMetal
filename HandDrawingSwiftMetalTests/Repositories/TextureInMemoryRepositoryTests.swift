@@ -98,14 +98,14 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 initializeExpectation.isInverted = true
             }
 
-            subject.canvasInitializationUsingConfigurationPublisher
+            subject.storageInitializationUsingConfigurationPublisher
                 .sink { _ in
                     restoreCanvasFromModelCalled = true
                     restoreExpectation.fulfill()
                 }
                 .store(in: &cancellables)
 
-            subject.canvasInitializationWithNewTexturePublisher
+            subject.storageInitializationWithNewTexturePublisher
                 .sink { _ in
                     initializeCanvasWithNewTextureCalled = true
                     initializeExpectation.fulfill()
@@ -113,8 +113,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 .store(in: &cancellables)
 
             /// If all layer IDs in the `CanvasConfiguration` have matching texture IDs in the `TextureRepository`,
-            /// the canvas will be restored using that configuration.
-            /// Otherwise, a new texture will be created and the canvas will be initialized.
+            /// the storage will be restored using that configuration.
+            /// Otherwise, a new texture will be created and the storage will be initialized.
             subject.initializeStorage(
                 from: .init(layers: condition.layers)
             )

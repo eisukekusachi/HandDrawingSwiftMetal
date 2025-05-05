@@ -14,9 +14,9 @@ final class DocumentsFolderTextureRepository: ObservableObject {
     private(set) var textures: [UUID] = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let canvasInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -53,19 +53,20 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
 extension DocumentsFolderTextureRepository: TextureRepository {
 
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
+        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
         needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
-    }
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
@@ -92,10 +93,9 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     // ids are retained if texture filenames in the folder match the ids of the configuration.layers
                     self.textures = configuration.layers.map { $0.id }
 
-                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
-
+                    self.storageInitializationUsingConfigurationSubject.send(configuration)
                 } else {
-                    self.canvasInitializationWithNewTextureSubject.send(configuration)
+                    self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
             })
             .store(in: &cancellables)
@@ -121,7 +121,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.canvasInitializationUsingConfigurationSubject.send(
+            self?.storageInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

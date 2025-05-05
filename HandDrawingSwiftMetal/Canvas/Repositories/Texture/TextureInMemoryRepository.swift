@@ -14,9 +14,9 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let canvasInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -49,12 +49,12 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var canvasInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -85,9 +85,9 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
+                    self.storageInitializationUsingConfigurationSubject.send(configuration)
                 } else {
-                    self.canvasInitializationWithNewTextureSubject.send(configuration)
+                    self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
             })
             .store(in: &cancellables)
@@ -113,7 +113,7 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.canvasInitializationUsingConfigurationSubject.send(
+            self?.storageInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

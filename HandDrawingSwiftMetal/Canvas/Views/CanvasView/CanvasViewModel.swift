@@ -175,14 +175,14 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Restore the canvas using CanvasConfiguration
-        textureRepository.canvasInitializationUsingConfigurationPublisher
+        textureRepository.storageInitializationUsingConfigurationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.completeCanvasSetup(configuration)
             }
             .store(in: &cancellables)
 
-        textureRepository.canvasInitializationWithNewTexturePublisher
+        textureRepository.storageInitializationWithNewTexturePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 guard let drawableSize = self?.renderer.renderTextureSize else { return }
