@@ -107,7 +107,7 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository!
 
-    let textureRepository: TextureRepository
+    private let textureRepository: TextureRepository
 
     private var cancellables = Set<AnyCancellable>()
 

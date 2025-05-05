@@ -68,12 +68,11 @@ extension CanvasViewController {
     private func bindData() {
         canvasViewModel.needsCanvasSetupPublisher
             .sink { [weak self] configuration in
-                guard let `self` else { return }
-                self.setupLayerView(
+                self?.setupLayerView(
                     canvasState: configuration.canvasState,
                     textureRepository: configuration.textureRepository
                 )
-                self.contentView.setup(
+                self?.contentView.setup(
                     configuration.canvasState
                 )
             }
@@ -97,8 +96,8 @@ extension CanvasViewController {
 
         canvasViewModel.needsShowingToastPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.showToast(configuration)
+            .sink { [weak self] model in
+                self?.showToast(model)
             }
             .store(in: &cancellables)
 
