@@ -13,7 +13,7 @@ final class CanvasState: ObservableObject {
     static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
     /// A name of the file to be saved
-    @Published var projectName: String = Calendar.currentDate
+    @Published var projectName: String = Calendar.currentDate()
 
     @Published var textureSize: CGSize = CanvasState.defaultTextureSize
 
@@ -37,12 +37,6 @@ final class CanvasState: ObservableObject {
 
 extension CanvasState {
 
-    var newCanvasConfiguration: CanvasConfiguration {
-        .init(
-            textureSize: textureSize
-        )
-    }
-
     var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
         return layers.first(where: { $0.id == selectedLayerId })
@@ -55,6 +49,12 @@ extension CanvasState {
 
     var drawingToolDiameter: Int? {
         drawingToolState.currentDrawingTool.diameter
+    }
+
+    func newCanvasConfiguration() -> CanvasConfiguration {
+        .init(
+            textureSize: textureSize
+        )
     }
 
     func getLayer(_ selectedLayerId: UUID) -> TextureLayerModel? {

@@ -8,7 +8,7 @@
 import Foundation
 
 extension Calendar {
-    static var currentDate: String {
+    static func currentDate() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .long
         dateFormatter.timeStyle = .long

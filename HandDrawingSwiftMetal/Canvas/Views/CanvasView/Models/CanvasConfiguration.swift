@@ -9,7 +9,7 @@ import UIKit
 
 struct CanvasConfiguration {
 
-    var projectName: String = Calendar.currentDate
+    var projectName: String = Calendar.currentDate()
 
     // If textureSize is nil, the size of the device’s drawable will be used instead
     var textureSize: CGSize?

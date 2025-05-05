@@ -380,7 +380,7 @@ extension CanvasViewModel {
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
         initializeCanvas(
-            using: canvasState.newCanvasConfiguration
+            using: canvasState.newCanvasConfiguration()
         )
     }
 
