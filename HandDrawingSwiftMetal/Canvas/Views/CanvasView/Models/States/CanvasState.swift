@@ -37,6 +37,12 @@ final class CanvasState: ObservableObject {
 
 extension CanvasState {
 
+    var newCanvasConfiguration: CanvasConfiguration {
+        .init(
+            textureSize: textureSize
+        )
+    }
+
     var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
         return layers.first(where: { $0.id == selectedLayerId })
