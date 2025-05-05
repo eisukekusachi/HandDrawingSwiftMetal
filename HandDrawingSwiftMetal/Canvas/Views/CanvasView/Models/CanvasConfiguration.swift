@@ -53,7 +53,7 @@ extension CanvasConfiguration {
 
 }
 
-struct CanvasViewConfiguration {
+struct CanvasViewControllerConfiguration {
     var canvasState: CanvasState
     var textureRepository: TextureRepository
 }

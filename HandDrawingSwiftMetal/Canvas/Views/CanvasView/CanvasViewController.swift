@@ -66,7 +66,7 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.needsCanvasSetupPublisher
+        canvasViewModel.canvasViewControllerSetupPublisher
             .sink { [weak self] configuration in
                 self?.setupLayerView(
                     canvasState: configuration.canvasState,

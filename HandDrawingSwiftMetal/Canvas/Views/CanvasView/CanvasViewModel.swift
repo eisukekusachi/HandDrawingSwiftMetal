@@ -17,11 +17,6 @@ final class CanvasViewModel {
         }
     }
 
-    /// A publisher that emits when the canvas setup is needed
-    var needsCanvasSetupPublisher: AnyPublisher<CanvasViewConfiguration, Never> {
-        needsCanvasSetupSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits when showing the activity indicator is needed
     var needsShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
         needsShowingActivityIndicatorSubject.eraseToAnyPublisher()
@@ -40,6 +35,11 @@ final class CanvasViewModel {
     /// A publisher that emits when showing the layer view is needed
     var needsShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
         needsShowingLayerViewSubject.eraseToAnyPublisher()
+    }
+
+    /// A publisher that emits when the canvas view controller setup is needed
+    var canvasViewControllerSetupPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
+        canvasViewControllerSetupSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when refreshing the canvas is needed
@@ -89,8 +89,6 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private var needsCanvasSetupSubject: PassthroughSubject<CanvasViewConfiguration, Never> = .init()
-
     private let needsShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
@@ -98,6 +96,8 @@ final class CanvasViewModel {
     private let needsShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
+
+    private var canvasViewControllerSetupSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
     private let canvasInitializationRequestedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -268,7 +268,7 @@ extension CanvasViewModel {
     ) {
         renderer.setCanvas(canvasView)
 
-        needsCanvasSetupSubject.send(
+        canvasViewControllerSetupSubject.send(
             .init(
                 canvasState: canvasState,
                 textureRepository: textureRepository
