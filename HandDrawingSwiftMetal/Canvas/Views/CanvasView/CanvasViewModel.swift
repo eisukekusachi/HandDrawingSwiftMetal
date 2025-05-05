@@ -217,7 +217,7 @@ extension CanvasViewModel {
 
     func initializeCanvas(using configuration: CanvasConfiguration) {
         guard let drawableSize = renderer.renderTextureSize else { return }
-        textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
+        textureRepository.initializeStorage(from: configuration, drawableSize: drawableSize)
     }
 
     private func completeCanvasSetup(_ configuration: CanvasConfiguration) {

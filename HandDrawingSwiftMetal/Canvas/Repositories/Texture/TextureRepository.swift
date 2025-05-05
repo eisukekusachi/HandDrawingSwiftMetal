@@ -27,8 +27,8 @@ protocol TextureRepository {
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
-    /// Resolves the state of the canvas view
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize)
+    /// Initialized the storage
+    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize)
 
     /// Creates a texture
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>

@@ -39,7 +39,7 @@ final class TextureMockRepository: TextureRepository {
 
     var textureSize: CGSize = .zero
 
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {}
+    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize) {}
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
         Just(true)

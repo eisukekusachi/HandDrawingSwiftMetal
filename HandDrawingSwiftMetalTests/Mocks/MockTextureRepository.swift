@@ -48,8 +48,8 @@ final class MockTextureRepository: TextureRepository {
         self.textures = textures
     }
 
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        callHistory.append("resolveCanvasView(from: \(configuration), drawableSize: \(drawableSize))")
+    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize) {
+        callHistory.append("initializeStorage(from: \(configuration), drawableSize: \(drawableSize))")
     }
 
     func updateCanvasAfterTextureLayerUpdates() {

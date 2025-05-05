@@ -72,7 +72,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
+    func initializeStorage(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
