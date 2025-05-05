@@ -236,6 +236,17 @@ extension CanvasViewModel {
             canvasState: canvasState,
             commandBuffer: commandBuffer
         )
+
+        textureRepository
+            .updateAllThumbnails(textureSize: textureSize)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure:  break
+                }
+            }, receiveValue: {})
+            .store(in: &cancellables)
     }
 
 }

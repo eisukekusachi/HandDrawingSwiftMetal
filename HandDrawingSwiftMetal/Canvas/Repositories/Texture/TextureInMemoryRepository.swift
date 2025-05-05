@@ -228,7 +228,11 @@ extension TextureInMemoryRepository: TextureRepository {
     }
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        thumbnails[uuid] = texture?.makeThumbnail()
+        guard let texture else {
+            Logger.standard.warning("Failed to create thumbnail for \(uuid)")
+            return
+        }
+        thumbnails[uuid] = texture.makeThumbnail()
         needsThumbnailUpdateSubject.send(uuid)
     }
 
@@ -241,6 +245,22 @@ extension TextureInMemoryRepository: TextureRepository {
                 promise(.success(uuid))
             } else {
                 promise(.failure(TextureRepositoryError.failedToAddTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { promise in
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self else { return }
+
+                for (uuid, texture) in self.textures {
+                    guard let texture else { return }
+                    self.setThumbnail(texture: texture, for: uuid)
+                }
+
+                promise(.success(()))
             }
         }
         .eraseToAnyPublisher()

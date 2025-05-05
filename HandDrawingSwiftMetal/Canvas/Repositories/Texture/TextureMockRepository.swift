@@ -91,6 +91,12 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
     func updateCanvasAfterTextureLayerUpdates() {
         needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
     }

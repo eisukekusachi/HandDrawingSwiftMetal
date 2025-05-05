@@ -83,7 +83,11 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
+                    // ids are retained if texture filenames in the folder match the ids of the configuration.layers
+                    self.textures = configuration.layers.map { $0.id }
+
                     self.needsCanvasInitializationUsingConfigurationSubject.send(configuration)
+
                 } else {
                     self.initializeCanvasAfterCreatingNewTexture(
                         configuration.getTextureSize(drawableSize: drawableSize)
@@ -279,7 +283,11 @@ extension DocumentsFolderTextureRepository: TextureRepository {
     }
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        thumbnails[uuid] = texture?.makeThumbnail()
+        guard let texture else {
+            Logger.standard.warning("Failed to create thumbnail for \(uuid)")
+            return
+        }
+        thumbnails[uuid] = texture.makeThumbnail()
         needsThumbnailUpdateSubject.send(uuid)
     }
 
@@ -306,6 +314,30 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 promise(.success(uuid))
             } catch {
                 Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
+                promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { [weak self] promise in
+            guard let self else { return }
+
+            do {
+                for textureId in self.textures {
+                    let texture: MTLTexture? = try FileInputManager.loadTexture(
+                        url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
+                        textureSize: textureSize,
+                        device: self.device
+                    )
+                    self.setThumbnail(texture: texture, for: textureId)
+                }
+
+                promise(.success(()))
+
+            } catch {
+                Logger.standard.error("Failed to load texture during thumbnail update: \(error)")
                 promise(.failure(FileOutputError.failedToUpdateTexture))
             }
         }

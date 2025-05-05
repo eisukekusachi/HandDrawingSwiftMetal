@@ -83,6 +83,10 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.updateCanvasAfterTextureLayerUpdates()
     }
 
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        repository.updateAllThumbnails(textureSize: textureSize)
+    }
+
     func updateCanvas() {
         repository.updateCanvas()
     }

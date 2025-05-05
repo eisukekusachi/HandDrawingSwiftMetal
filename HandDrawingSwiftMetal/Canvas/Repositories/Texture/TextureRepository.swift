@@ -60,6 +60,9 @@ protocol TextureRepository {
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
 
+    /// Updates all thumbnails
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
+
     /// Update texture layers and then update the canvas
     func updateCanvasAfterTextureLayerUpdates()
 
