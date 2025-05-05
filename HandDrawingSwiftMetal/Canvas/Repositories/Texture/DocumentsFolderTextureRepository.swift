@@ -234,7 +234,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
 
@@ -243,9 +243,9 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             do {
                 try FileOutputManager.createDirectory(destinationUrl)
 
-                try layers.forEach { [weak self] layer in
+                try uuids.forEach { [weak self] uuid in
                     let textureData = try Data(
-                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
+                        contentsOf: folderURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     if let device = self?.device,
@@ -257,11 +257,11 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                        ) {
                         try FileOutputManager.saveTextureAsData(
                             bytes: texture.bytes,
-                            to: destinationUrl.appendingPathComponent(layer.id.uuidString)
+                            to: destinationUrl.appendingPathComponent(uuid.uuidString)
                         )
 
-                        self?.textures.append(layer.id)
-                        self?.setThumbnail(texture: texture, for: layer.id)
+                        self?.textures.append(uuid)
+                        self?.setThumbnail(texture: texture, for: uuid)
                     }
                 }
                 promise(.success(()))

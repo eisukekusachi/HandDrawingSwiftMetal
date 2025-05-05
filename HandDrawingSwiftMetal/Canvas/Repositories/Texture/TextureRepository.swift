@@ -48,8 +48,8 @@ protocol TextureRepository {
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
-    /// Loads textures for the given layers using a folder URL as a source
-    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
+    /// Loads textures for the given uuids using a folder URL as a source
+    func loadTextures(uuids: [UUID], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>

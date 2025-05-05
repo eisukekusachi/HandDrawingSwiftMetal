@@ -189,14 +189,14 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 self?.removeAll()
 
-                try layers.forEach { [weak self] layer in
+                try uuids.forEach { [weak self] uuid in
                     let textureData = try Data(
-                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
+                        contentsOf: folderURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     guard
@@ -210,8 +210,8 @@ extension TextureInMemoryRepository: TextureRepository {
                         with: device
                     )
 
-                    self?.textures[layer.id] = texture
-                    self?.setThumbnail(texture: texture, for: layer.id)
+                    self?.textures[uuid] = texture
+                    self?.setThumbnail(texture: texture, for: uuid)
                 }
                 promise(.success(()))
             } catch {
