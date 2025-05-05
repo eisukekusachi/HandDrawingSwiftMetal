@@ -39,9 +39,6 @@ protocol TextureRepository {
     /// Creates a texture
     func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
 
-    /// Creates textures for the given layers using a folder URL as a source
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
-
     /// Checks if all specified textures exist
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
 
@@ -50,6 +47,9 @@ protocol TextureRepository {
 
     /// Loads a texture for the given UUID
     func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
+
+    /// Loads textures for the given layers using a folder URL as a source
+    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Loads multiple textures for the given UUIDs
     func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>

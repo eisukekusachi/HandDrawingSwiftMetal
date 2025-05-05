@@ -154,38 +154,6 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
-        Future<Void, Error> { [weak self] promise in
-            do {
-                self?.removeAll()
-
-                try layers.forEach { [weak self] layer in
-                    let textureData = try Data(
-                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
-                    )
-
-                    guard
-                        let device = self?.device,
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
-
-                    let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: device
-                    )
-
-                    self?.textures[layer.id] = texture
-                    self?.setThumbnail(texture: texture, for: layer.id)
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -219,6 +187,38 @@ extension TextureInMemoryRepository: TextureRepository {
                 Dictionary(uniqueKeysWithValues: pairs)
             }
             .eraseToAnyPublisher()
+    }
+
+    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+        Future<Void, Error> { [weak self] promise in
+            do {
+                self?.removeAll()
+
+                try layers.forEach { [weak self] layer in
+                    let textureData = try Data(
+                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
+                    )
+
+                    guard
+                        let device = self?.device,
+                        let hexadecimalData = textureData.encodedHexadecimals
+                    else { return }
+
+                    let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: device
+                    )
+
+                    self?.textures[layer.id] = texture
+                    self?.setThumbnail(texture: texture, for: layer.id)
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

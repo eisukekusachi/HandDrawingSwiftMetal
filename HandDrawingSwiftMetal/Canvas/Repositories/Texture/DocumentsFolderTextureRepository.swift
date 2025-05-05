@@ -157,44 +157,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            let destinationUrl = self.directoryUrl
-
-            do {
-                try FileOutputManager.createDirectory(destinationUrl)
-
-                try layers.forEach { [weak self] layer in
-                    let textureData = try Data(
-                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
-                    )
-
-                    if let device = self?.device,
-                       let hexadecimalData = textureData.encodedHexadecimals,
-                       let texture = MTLTextureCreator.makeTexture(
-                           size: textureSize,
-                           colorArray: hexadecimalData,
-                           with: device
-                       ) {
-                        try FileOutputManager.saveTextureAsData(
-                            bytes: texture.bytes,
-                            to: destinationUrl.appendingPathComponent(layer.id.uuidString)
-                        )
-
-                        self?.textures.append(layer.id)
-                        self?.setThumbnail(texture: texture, for: layer.id)
-                    }
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
             guard let `self` else { return }
@@ -270,6 +232,44 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 Dictionary(uniqueKeysWithValues: pairs)
             }
             .eraseToAnyPublisher()
+    }
+
+    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            let destinationUrl = self.directoryUrl
+
+            do {
+                try FileOutputManager.createDirectory(destinationUrl)
+
+                try layers.forEach { [weak self] layer in
+                    let textureData = try Data(
+                        contentsOf: folderURL.appendingPathComponent(layer.id.uuidString)
+                    )
+
+                    if let device = self?.device,
+                       let hexadecimalData = textureData.encodedHexadecimals,
+                       let texture = MTLTextureCreator.makeTexture(
+                           size: textureSize,
+                           colorArray: hexadecimalData,
+                           with: device
+                       ) {
+                        try FileOutputManager.saveTextureAsData(
+                            bytes: texture.bytes,
+                            to: destinationUrl.appendingPathComponent(layer.id.uuidString)
+                        )
+
+                        self?.textures.append(layer.id)
+                        self?.setThumbnail(texture: texture, for: layer.id)
+                    }
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

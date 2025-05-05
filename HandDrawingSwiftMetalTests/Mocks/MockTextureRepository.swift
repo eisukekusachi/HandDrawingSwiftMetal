@@ -114,12 +114,6 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
-        return Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         callHistory.append("getThumbnail(\(uuid))")
         return nil
@@ -140,6 +134,12 @@ final class MockTextureRepository: TextureRepository {
                 dict[uuid] = textures[uuid] ?? nil
             }
         )
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func loadTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+        return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
