@@ -98,7 +98,10 @@ extension DocumentsFolderTextureRepository: TextureRepository {
     }
 
     private func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        guard textureSize > MTLRenderer.minimumTextureSize else { return }
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Failed to initialize canvas in DocumentsFolderTextureRepository: texture size is too small")
+            return
+        }
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate()

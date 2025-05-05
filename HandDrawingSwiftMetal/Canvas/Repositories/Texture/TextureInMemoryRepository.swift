@@ -90,7 +90,10 @@ extension TextureInMemoryRepository: TextureRepository {
     }
 
     private func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        guard textureSize > MTLRenderer.minimumTextureSize else { return }
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Failed to initialize canvas in TextureInMemoryRepository: texture size is too small")
+            return
+        }
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate()
