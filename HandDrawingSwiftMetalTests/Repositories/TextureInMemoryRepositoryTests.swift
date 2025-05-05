@@ -17,8 +17,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
             let layers: [TextureLayerModel]
         }
         struct Expectation {
-            let isRestoredFromModel: Bool
-            let isInitializedAfterNewTextureCreation: Bool
+            let isCanvasInitialized: Bool
+            let isStorageInitialized: Bool
         }
 
         let testCases: [(Condition, Expectation)] = [
@@ -34,8 +34,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                     ]
                 ),
                 .init(
-                    isRestoredFromModel: true,
-                    isInitializedAfterNewTextureCreation: false
+                    isCanvasInitialized: true,
+                    isStorageInitialized: false
                 )
             ),
             (
@@ -44,8 +44,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                     layers: []
                 ),
                 .init(
-                    isRestoredFromModel: false,
-                    isInitializedAfterNewTextureCreation: true
+                    isCanvasInitialized: false,
+                    isStorageInitialized: true
                 )
             ),
             (
@@ -57,8 +57,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                     ]
                 ),
                 .init(
-                    isRestoredFromModel: false,
-                    isInitializedAfterNewTextureCreation: true
+                    isCanvasInitialized: false,
+                    isStorageInitialized: true
                 )
             ),
             (
@@ -70,8 +70,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                     layers: []
                 ),
                 .init(
-                    isRestoredFromModel: false,
-                    isInitializedAfterNewTextureCreation: true
+                    isCanvasInitialized: false,
+                    isStorageInitialized: true
                 )
             )
         ]
@@ -82,8 +82,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
 
             let subject = TextureInMemoryRepository(textures: condition.textures)
 
-            var restoreCanvasFromModelCalled = false
-            var initializeCanvasWithNewTextureCalled = false
+            var isCanvasInitialized = false
+            var isStorageInitialized = false
 
             var cancellables = Set<AnyCancellable>()
 
@@ -91,23 +91,23 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
             let initializeExpectation = XCTestExpectation()
 
             // Invert expectations based on the expected outcome
-            if !expected.isRestoredFromModel {
+            if !expected.isCanvasInitialized {
                 restoreExpectation.isInverted = true
             }
-            if !expected.isInitializedAfterNewTextureCreation {
+            if !expected.isStorageInitialized {
                 initializeExpectation.isInverted = true
             }
 
-            subject.storageInitializationUsingConfigurationPublisher
+            subject.canvasInitializationUsingConfigurationPublisher
                 .sink { _ in
-                    restoreCanvasFromModelCalled = true
+                    isCanvasInitialized = true
                     restoreExpectation.fulfill()
                 }
                 .store(in: &cancellables)
 
             subject.storageInitializationWithNewTexturePublisher
                 .sink { _ in
-                    initializeCanvasWithNewTextureCalled = true
+                    isStorageInitialized = true
                     initializeExpectation.fulfill()
                 }
                 .store(in: &cancellables)
@@ -121,8 +121,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
 
             await fulfillment(of: [restoreExpectation, initializeExpectation], timeout: 1.0)
 
-            XCTAssertEqual(restoreCanvasFromModelCalled, expected.isRestoredFromModel)
-            XCTAssertEqual(initializeCanvasWithNewTextureCalled, expected.isInitializedAfterNewTextureCreation)
+            XCTAssertEqual(isCanvasInitialized, expected.isCanvasInitialized)
+            XCTAssertEqual(isStorageInitialized, expected.isStorageInitialized)
         }
     }
 }

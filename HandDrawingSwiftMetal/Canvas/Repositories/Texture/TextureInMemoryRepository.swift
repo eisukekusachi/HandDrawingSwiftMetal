@@ -14,9 +14,9 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let storageInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -49,12 +49,12 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -85,7 +85,7 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.storageInitializationUsingConfigurationSubject.send(configuration)
+                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
@@ -113,7 +113,7 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.storageInitializationUsingConfigurationSubject.send(
+            self?.canvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

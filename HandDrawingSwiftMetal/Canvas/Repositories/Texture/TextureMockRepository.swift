@@ -13,12 +13,12 @@ final class TextureMockRepository: TextureRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -33,9 +33,9 @@ final class TextureMockRepository: TextureRepository {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
     }
 
-    private let storageInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 

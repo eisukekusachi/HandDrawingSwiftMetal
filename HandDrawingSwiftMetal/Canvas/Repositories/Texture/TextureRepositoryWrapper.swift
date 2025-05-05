@@ -16,12 +16,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         self.repository = repository
     }
 
-    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.storageInitializationUsingConfigurationPublisher
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         repository.storageInitializationWithNewTexturePublisher
+    }
+
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.canvasInitializationUsingConfigurationPublisher
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {

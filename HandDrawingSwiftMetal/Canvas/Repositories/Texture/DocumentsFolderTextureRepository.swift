@@ -14,9 +14,9 @@ final class DocumentsFolderTextureRepository: ObservableObject {
     private(set) var textures: [UUID] = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let storageInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -53,12 +53,12 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
 extension DocumentsFolderTextureRepository: TextureRepository {
 
-    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
@@ -93,7 +93,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     // ids are retained if texture filenames in the folder match the ids of the configuration.layers
                     self.textures = configuration.layers.map { $0.id }
 
-                    self.storageInitializationUsingConfigurationSubject.send(configuration)
+                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
@@ -121,7 +121,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.storageInitializationUsingConfigurationSubject.send(
+            self?.canvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

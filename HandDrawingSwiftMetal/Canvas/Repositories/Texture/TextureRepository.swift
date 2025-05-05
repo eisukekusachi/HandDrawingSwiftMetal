@@ -16,10 +16,10 @@ protocol TextureRepository {
     var textureNum: Int { get }
 
     /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
-    var storageInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
-
-    /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+
+    /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
