@@ -34,9 +34,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
     var textureNum: Int {
         repository.textureNum
     }
-    var textureSize: CGSize {
-        repository.textureSize
-    }
 
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         repository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
@@ -58,12 +55,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.getThumbnail(uuid)
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<(any MTLTexture)?, any Error> {
-        repository.loadTexture(uuid)
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
+        repository.loadTexture(uuid: uuid, textureSize: textureSize)
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
-        repository.loadTextures(uuids)
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
+        repository.loadTextures(uuids: uuids, textureSize: textureSize)
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

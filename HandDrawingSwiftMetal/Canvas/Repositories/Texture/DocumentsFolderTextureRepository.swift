@@ -22,8 +22,6 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
-    private var _textureSize: CGSize = .zero
-
     private let directoryUrl = URL.documents.appendingPathComponent("Canvas")
 
     private let flippedTextureBuffers: MTLTextureBuffers!
@@ -70,9 +68,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     var textureNum: Int {
         thumbnails.count
-    }
-    var textureSize: CGSize {
-        _textureSize
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -139,8 +134,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     self.textures.append(uuid)
                     self.setThumbnail(texture: texture, for: uuid)
 
-                    self._textureSize = textureSize
-
                     promise(.success(()))
                 } else {
                     promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -176,8 +169,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
                         self?.textures.append(layer.id)
                         self?.setThumbnail(texture: texture, for: layer.id)
-
-                        self?._textureSize = textureSize
                     }
                 }
                 promise(.success(()))
@@ -234,7 +225,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                         with: self.device
                     )
 
-                    self._textureSize = textureSize
                     self.textures.append(layer.id)
                     self.setThumbnail(texture: texture, for: layer.id)
                 }
@@ -250,17 +240,23 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
-        Future<MTLTexture?, Error> { promise in
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+        Future<MTLTexture?, Error> { [weak self] promise in
+            guard let `self` else { return }
+
             let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
             do {
                 let texture: MTLTexture? = try FileInputManager.loadTexture(
-                    destinationUrl,
-                    textureSize: self.textureSize,
+                    url: destinationUrl,
+                    textureSize: textureSize,
                     device: self.device
                 )
-                promise(.success(texture))
+                promise(
+                    .success(
+                        texture
+                    )
+                )
             } catch {
                 promise(.failure(error))
             }
@@ -268,18 +264,24 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
         let publishers = uuids.map { uuid in
-            Future<(UUID, MTLTexture?), Error> { promise in
+            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+                guard let `self` else { return }
+
                 let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
                 do {
                     let texture: MTLTexture? = try FileInputManager.loadTexture(
-                        destinationUrl,
-                        textureSize: self.textureSize,
+                        url: destinationUrl,
+                        textureSize: textureSize,
                         device: self.device
                     )
-                    promise(.success((uuid, texture)))
+                    promise(
+                        .success(
+                            (uuid, texture)
+                        )
+                    )
                 } catch {
                     promise(.failure(error))
                 }

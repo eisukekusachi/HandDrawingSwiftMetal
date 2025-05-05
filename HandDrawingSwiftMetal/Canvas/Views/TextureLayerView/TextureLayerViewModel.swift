@@ -83,7 +83,11 @@ extension TextureLayerViewModel {
         canvasState.selectedIndex
     }
 
-    func insertLayer(at index: Int) {
+    var textureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    func insertLayer(textureSize: CGSize, at index: Int) {
 
         let device = self.device
 
@@ -93,7 +97,7 @@ extension TextureLayerViewModel {
                     return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
                 }
                 return self.textureRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: self.textureRepository.textureSize, with: device),
+                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     for: textureLayerId
                 )
             }

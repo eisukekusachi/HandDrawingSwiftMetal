@@ -22,8 +22,6 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
-    private var _textureSize: CGSize = .zero
-
     private let flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
@@ -66,9 +64,6 @@ extension TextureInMemoryRepository: TextureRepository {
 
     var textureNum: Int {
         thumbnails.count
-    }
-    var textureSize: CGSize {
-        _textureSize
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -150,8 +145,6 @@ extension TextureInMemoryRepository: TextureRepository {
             self.textures[uuid] = texture
             self.setThumbnail(texture: texture, for: uuid)
 
-            self._textureSize = textureSize
-
             promise(.success(()))
         }
         .eraseToAnyPublisher()
@@ -180,8 +173,6 @@ extension TextureInMemoryRepository: TextureRepository {
 
                     self?.textures[layer.id] = texture
                     self?.setThumbnail(texture: texture, for: layer.id)
-
-                    self?._textureSize = textureSize
                 }
                 promise(.success(()))
             } catch {
@@ -195,7 +186,7 @@ extension TextureInMemoryRepository: TextureRepository {
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Future<MTLTexture?, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid] else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
@@ -206,7 +197,7 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
         let publishers = uuids.map { uuid in
             Future<(UUID, MTLTexture?), Error> { [weak self] promise in
                 guard let texture = self?.textures[uuid] else {

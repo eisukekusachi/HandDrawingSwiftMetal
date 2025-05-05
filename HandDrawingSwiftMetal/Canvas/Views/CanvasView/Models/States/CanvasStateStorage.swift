@@ -264,6 +264,7 @@ final class CanvasStateStorage {
             let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
             newLayer.fileName = model.fileName
+            newLayer.isVisible = model.isVisible
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)
             newLayer.canvas = canvasStorageEntity

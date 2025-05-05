@@ -15,9 +15,6 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
-    /// The common size used for all textures
-    var textureSize: CGSize { get }
-
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
     var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
@@ -46,10 +43,10 @@ protocol TextureRepository {
     func getThumbnail(_ uuid: UUID) -> UIImage?
 
     /// Loads a texture for the given UUID
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error>
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
 
     /// Loads multiple textures for the given UUIDs
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error>
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>

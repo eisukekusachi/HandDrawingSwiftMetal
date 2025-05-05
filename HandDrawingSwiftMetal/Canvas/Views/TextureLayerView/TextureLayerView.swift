@@ -64,6 +64,7 @@ extension TextureLayerView {
             Button(
                 action: {
                     viewModel.insertLayer(
+                        textureSize: viewModel.textureSize,
                         at: viewModel.newInsertIndex
                     )
                 },

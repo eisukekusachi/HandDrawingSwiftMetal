@@ -121,7 +121,10 @@ final class CanvasRenderer: ObservableObject {
             let commandBuffer,
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
-        else { return }
+        else {
+            Logger.standard.error("Failed to unwrap in updateCanvasAfterUpdatingAllTextures()")
+            return
+        }
 
         Publishers.Zip(
             Publishers.Zip(
@@ -203,7 +206,7 @@ final class CanvasRenderer: ObservableObject {
                 .eraseToAnyPublisher()
         }
 
-        return textureRepository.loadTexture(targetTextureId)
+        return textureRepository.loadTexture(uuid: targetTextureId, textureSize: texture.size)
             .tryMap { [weak self] targetTexture in
                 guard
                     let self,
@@ -211,6 +214,7 @@ final class CanvasRenderer: ObservableObject {
                     let targetTexture,
                     let commandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
                 else {
+                    Logger.standard.error("Failed to unwrap in completeDrawing()")
                     throw TextureRepositoryError.failedToUnwrap
                 }
 
@@ -243,7 +247,7 @@ final class CanvasRenderer: ObservableObject {
         // Clear `destinationTexture` here
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 
-        return textureRepository.loadTexture(layer.id)
+        return textureRepository.loadTexture(uuid: layer.id, textureSize: destinationTexture.size)
             .compactMap { $0 }
             .handleEvents(receiveOutput: { [weak self] texture in
                 guard let flippedTextureBuffers = self?.flippedTextureBuffers else { return }
@@ -281,7 +285,8 @@ final class CanvasRenderer: ObservableObject {
         }
 
         return textureRepository.loadTextures(
-            layers.map { $0.id }
+            uuids: layers.map { $0.id },
+            textureSize: destinationTexture.size
         )
         .handleEvents(receiveOutput: { [weak self] textures in
             guard let `self` else { return }

@@ -63,13 +63,13 @@ final class TextureMockRepository: TextureRepository {
         nil
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<(any MTLTexture)?, any Error> {
+    func loadTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
         Just(nil)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
         let result = uuids.reduce(into: [UUID: MTLTexture?]()) { $0[$1] = nil }
         return Just(result)
             .setFailureType(to: Error.self)
