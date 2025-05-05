@@ -11,7 +11,7 @@ struct TextureLayerModel: Identifiable, Equatable {
     /// The unique identifier for the layer
     var id: UUID = UUID()
     /// The name of the layer
-    var title: String = ""
+    var title: String
     /// The opacity of the layer
     var alpha: Int = 255
     /// Whether the layer is visible or not
