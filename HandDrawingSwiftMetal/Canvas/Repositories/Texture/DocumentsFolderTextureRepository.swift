@@ -154,8 +154,10 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
 
+            let url = self.directoryUrl
+
             do {
-                try FileOutputManager.createDirectory(self.directoryUrl)
+                try FileOutputManager.createDirectory(url)
 
                 try layers.forEach { [weak self] layer in
                     let textureData = try Data(
@@ -163,12 +165,15 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     )
 
                     if let device = self?.device,
-                       let hexadecimalData = textureData.encodedHexadecimals {
-
-                        let texture = MTLTextureCreator.makeTexture(
-                            size: textureSize,
-                            colorArray: hexadecimalData,
-                            with: device
+                       let hexadecimalData = textureData.encodedHexadecimals,
+                       let texture = MTLTextureCreator.makeTexture(
+                           size: textureSize,
+                           colorArray: hexadecimalData,
+                           with: device
+                       ) {
+                        try FileOutputManager.saveTextureAsData(
+                            bytes: texture.bytes,
+                            to: url.appendingPathComponent(layer.id.uuidString)
                         )
 
                         self?.textures.append(layer.id)
