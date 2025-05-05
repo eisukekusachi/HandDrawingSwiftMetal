@@ -36,9 +36,6 @@ protocol TextureRepository {
     /// Initialized the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
-    /// Creates a texture
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
-
     /// Checks if all specified textures exist
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
 

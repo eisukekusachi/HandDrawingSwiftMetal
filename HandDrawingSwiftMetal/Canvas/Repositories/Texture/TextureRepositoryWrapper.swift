@@ -51,10 +51,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.hasAllTextures(fileNames: fileNames)
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        repository.createTexture(uuid: uuid, textureSize: textureSize)
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         repository.getThumbnail(uuid)
     }
