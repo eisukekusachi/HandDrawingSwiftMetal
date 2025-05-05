@@ -42,7 +42,7 @@ final class CanvasStateStorage {
 
         do {
             if let existing = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                configuration = loadState(from: existing)
+                configuration = loadConfiguration(from: existing)
 
             } else {
                 initializeStorageWithCanvasState(
@@ -65,7 +65,7 @@ final class CanvasStateStorage {
         }
     }
 
-    private func loadState(from canvasStorage: CanvasStorageEntity?) -> CanvasConfiguration? {
+    private func loadConfiguration(from canvasStorage: CanvasStorageEntity?) -> CanvasConfiguration? {
         guard
             let canvasStorage,
             let projectName = canvasStorage.projectName
@@ -74,6 +74,11 @@ final class CanvasStateStorage {
         var configuration = CanvasConfiguration()
 
         configuration.projectName = projectName
+
+        configuration.textureSize = .init(
+            width: CGFloat(canvasStorage.textureWidth),
+            height: CGFloat(canvasStorage.textureHeight)
+        )
 
         if let brush = canvasStorage.drawingTool?.brush,
            let colorHexString = brush.colorHex {
@@ -125,6 +130,10 @@ final class CanvasStateStorage {
             eraser.drawingTool = drawingTool
 
             newStorage.projectName = canvasState.projectName
+
+            newStorage.textureWidth = Int16(canvasState.textureSize.width)
+            newStorage.textureHeight = Int16(canvasState.textureSize.height)
+
             newStorage.drawingTool?.brush = brush
             newStorage.drawingTool?.eraser = eraser
             newStorage.drawingTool = drawingTool
@@ -163,6 +172,17 @@ final class CanvasStateStorage {
             .compactMap { $0 }
             .sink { result in
                 canvasStorageEntity.projectName = result
+                try? coreDataRepository.saveContext()
+            }
+            .store(in: &cancellables)
+
+        canvasState?.$textureSize
+            .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .compactMap { $0 }
+            .sink { result in
+                canvasStorageEntity.textureWidth = Int16(result.width)
+                canvasStorageEntity.textureHeight = Int16(result.height)
                 try? coreDataRepository.saveContext()
             }
             .store(in: &cancellables)

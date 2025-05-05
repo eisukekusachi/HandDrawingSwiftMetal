@@ -10,8 +10,12 @@ import UIKit
 /// Manage the state of the canvas
 final class CanvasState: ObservableObject {
 
+    static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
+
     /// A name of the file to be saved
     @Published var projectName: String = Calendar.currentDate
+
+    @Published var textureSize: CGSize = CanvasState.defaultTextureSize
 
     let drawingToolState = DrawingToolState(
         configuration: CanvasConfiguration()
@@ -26,10 +30,7 @@ final class CanvasState: ObservableObject {
     @Published var backgroundColor: UIColor = .white
 
     init(_ configuration: CanvasConfiguration) {
-        projectName = configuration.projectName
-        layers = configuration.layers
-        selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
-        drawingToolState.setData(configuration)
+        setData(configuration)
     }
 
 }
@@ -55,12 +56,11 @@ extension CanvasState {
     }
 
     func setData(_ configuration: CanvasConfiguration) {
+        projectName = configuration.projectName
+        textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
         layers.removeAll()
         layers = configuration.layers
-        selectedLayerId = layers[configuration.layerIndex].id
-
-        projectName = configuration.projectName
-
+        selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
         drawingToolState.setData(configuration)
     }
 
