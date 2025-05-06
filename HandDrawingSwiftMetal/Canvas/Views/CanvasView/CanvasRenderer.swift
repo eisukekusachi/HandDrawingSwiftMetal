@@ -126,6 +126,10 @@ final class CanvasRenderer: ObservableObject {
             return
         }
 
+        // Make the texture opaque before merging
+        var opaqueLayer = selectedLayer
+        opaqueLayer.alpha = 255
+
         Publishers.Zip(
             Publishers.Zip(
                 renderTexturesFromRepositoryToTexturePublisher(
@@ -140,7 +144,7 @@ final class CanvasRenderer: ObservableObject {
                 )
             ),
             renderTexturesFromRepositoryToTexturePublisher(
-                layers: [selectedLayer],
+                layers: [opaqueLayer],
                 into: selectedTexture,
                 with: commandBuffer
             )
