@@ -14,6 +14,11 @@ final class DocumentsFolderTextureRepository: ObservableObject {
     private(set) var textures: [UUID] = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
+    private static let storageName = "TextureStorage"
+
+    // Define it as var to allow modification of its metadata
+    private var directoryUrl = URL.applicationSupport.appendingPathComponent(DocumentsFolderTextureRepository.storageName)
+
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
@@ -23,8 +28,6 @@ final class DocumentsFolderTextureRepository: ObservableObject {
     private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
-
-    private let directoryUrl = URL.documents.appendingPathComponent("Canvas")
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -43,10 +46,12 @@ final class DocumentsFolderTextureRepository: ObservableObject {
         self.textures = textures
         self.renderer = renderer
 
-        flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )
+
+        self.createDirectory()
     }
 
 }
@@ -134,8 +139,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
             do {
                 if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device) {
-
-                    try FileOutputManager.createDirectory(self.directoryUrl)
 
                     try FileOutputManager.saveTextureAsData(
                         bytes: texture.bytes,
@@ -241,8 +244,6 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             let destinationUrl = self.directoryUrl
 
             do {
-                try FileOutputManager.createDirectory(destinationUrl)
-
                 try uuids.forEach { [weak self] uuid in
                     let textureData = try Data(
                         contentsOf: folderURL.appendingPathComponent(uuid.uuidString)
@@ -251,9 +252,9 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                     if let device = self?.device,
                        let hexadecimalData = textureData.encodedHexadecimals,
                        let texture = MTLTextureCreator.makeTexture(
-                           size: textureSize,
-                           colorArray: hexadecimalData,
-                           with: device
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: device
                        ) {
                         try FileOutputManager.saveTextureAsData(
                             bytes: texture.bytes,
@@ -359,6 +360,25 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func updateCanvas() {
         needsCanvasUpdateSubject.send()
+    }
+
+}
+
+extension DocumentsFolderTextureRepository {
+
+    // If a directory with the same name already exists at url,
+    // this method does nothing and does not throw an error
+    private func createDirectory() {
+        do {
+            try FileManager.default.createDirectory(at: directoryUrl, withIntermediateDirectories: true)
+
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try directoryUrl.setResourceValues(resourceValues)
+
+        } catch {
+            Logger.standard.error("Failed to configure texture storage directory: \(error)")
+        }
     }
 
 }
