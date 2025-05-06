@@ -29,8 +29,8 @@ final class DocumentsLocalRepository: LocalRepository {
             self?.saveDataTask?.cancel()
             self?.saveDataTask = Task {
                 do {
-                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    promise(.success(URL.tmpFolderURL))
+                    try FileManager.createNewDirectory(url: URL.tmpDirectory)
+                    promise(.success(URL.tmpDirectory))
                 } catch {
                     promise(.failure(DocumentsLocalRepositoryError.exportLayerData))
                 }
@@ -65,17 +65,17 @@ final class DocumentsLocalRepository: LocalRepository {
         .tryMap { result in
             try FileOutputManager.saveJson(
                 result,
-                to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                to: URL.tmpDirectory.appendingPathComponent(URL.jsonFileName)
             )
         }
         .tryMap { result in
             try FileOutputManager.zip(
-                URL.tmpFolderURL,
+                URL.tmpDirectory,
                 to: zipFileURL
             )
         }
         .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+            try? FileManager.default.removeItem(at: URL.tmpDirectory)
         })
         .eraseToAnyPublisher()
     }
@@ -88,11 +88,11 @@ final class DocumentsLocalRepository: LocalRepository {
             self?.loadDataTask?.cancel()
             self?.loadDataTask = Task {
                 do {
-                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
+                    try FileManager.createNewDirectory(url: URL.tmpDirectory)
+                    try await FileInputManager.unzip(sourceURL, to: URL.tmpDirectory)
 
                     let entity = try FileInputManager.getCanvasEntity(
-                        fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                        fileURL: URL.tmpDirectory.appendingPathComponent(URL.jsonFileName)
                     )
                     promise(.success(entity))
                 } catch {
@@ -118,13 +118,13 @@ final class DocumentsLocalRepository: LocalRepository {
             return textureRepository.loadNewTextures(
                 uuids: configuration.layers.map { $0.id },
                 textureSize: textureSize,
-                from: URL.tmpFolderURL
+                from: URL.tmpDirectory
             )
             .map { _ in configuration }
             .eraseToAnyPublisher()
         }
         .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+            try? FileManager.default.removeItem(at: URL.tmpDirectory)
         })
         .eraseToAnyPublisher()
     }

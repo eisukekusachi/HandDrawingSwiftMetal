@@ -16,6 +16,9 @@ extension URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     }
 
+    /// A temporary directory URL used for file input and output
+    static let tmpDirectory: URL = FileManager.default.temporaryDirectory.appendingPathComponent("tmpDirectory")
+
     static var zipSuffix: String {
         "zip"
     }
@@ -29,9 +32,6 @@ extension URL {
     var fileName: String {
         self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
     }
-
-    /// A temporary direcotyr URL used for file input and output
-    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     static var workInProgress: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
