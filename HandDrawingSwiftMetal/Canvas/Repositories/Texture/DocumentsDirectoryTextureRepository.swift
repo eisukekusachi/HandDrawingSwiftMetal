@@ -51,7 +51,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
             with: device
         )
 
-        self.createDirectory()
+        self.createDirectory(&directoryUrl)
     }
 
 }
@@ -365,19 +365,32 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 }
 
 extension DocumentsDirectoryTextureRepository {
-
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
-    private func createDirectory() {
+    private func createDirectory(_ url: inout URL) {
         do {
-            try FileManager.default.createDirectory(at: directoryUrl, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
 
             var resourceValues = URLResourceValues()
             resourceValues.isExcludedFromBackup = true
-            try directoryUrl.setResourceValues(resourceValues)
+            try url.setResourceValues(resourceValues)
 
         } catch {
-            Logger.standard.error("Failed to configure texture storage directory: \(error)")
+            Logger.standard.error("Failed to create texture storage directory: \(error)")
+        }
+    }
+
+    // If the directory already exists, delete it and create a new one
+    private func resetDirectory(_ url: inout URL) {
+        do {
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
+            }
+
+            createDirectory(&url)
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage directory: \(error)")
         }
     }
 
