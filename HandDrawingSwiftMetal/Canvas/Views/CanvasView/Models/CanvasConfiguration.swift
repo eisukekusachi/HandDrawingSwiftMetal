@@ -33,7 +33,7 @@ extension CanvasConfiguration {
         projectName: String,
         entity: CanvasEntity
     ) {
-        // Since the project name is the same as the folder name, it will not be managed in `CanvasEntity`
+        // Since the project name is the same as the directory name, it will be excluded from management here
         self.projectName = projectName
 
         self.layerIndex = entity.layerIndex

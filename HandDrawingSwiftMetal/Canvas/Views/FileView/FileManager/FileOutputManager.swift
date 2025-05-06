@@ -46,12 +46,12 @@ enum FileOutputManager {
     }
 
     static func zip(
-        _ sourceFolderURL: URL,
+        _ sourceDirectoryURL: URL,
         to destinationZipURL: URL
     ) throws {
         let success = SSZipArchive.createZipFile(
             atPath: destinationZipURL.path,
-            withContentsOfDirectory: sourceFolderURL.path
+            withContentsOfDirectory: sourceDirectoryURL.path
         )
 
         if !success {

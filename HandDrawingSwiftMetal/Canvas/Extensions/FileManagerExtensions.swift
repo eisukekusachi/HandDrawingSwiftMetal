@@ -36,9 +36,9 @@ extension FileManager {
         }
     }
 
-    static func clearContents(of folder: URL) throws {
+    static func clearContents(of url: URL) throws {
         let fileManager = FileManager.default
-        let files = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+        let files = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
         for file in files {
             try fileManager.removeItem(at: file)
         }

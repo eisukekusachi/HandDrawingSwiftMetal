@@ -122,8 +122,8 @@ final class CanvasViewModel {
 
         self.localRepository = localRepository
 
-        // If `DocumentsFolderTextureRepository` is used, `CanvasStateStorage` is enabled
-        if textureRepository is DocumentsFolderTextureRepository {
+        // If `DocumentsDirectoryTextureRepository` is used, `CanvasStateStorage` is enabled
+        if textureRepository is DocumentsDirectoryTextureRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }

@@ -47,10 +47,10 @@ enum FileInputManager {
         return try JSONDecoder().decode(T.self, from: dataJson)
     }
 
-    static func unzip(_ sourceZipURL: URL, to destinationFolderURL: URL) async throws {
+    static func unzip(_ sourceZipURL: URL, to url: URL) async throws {
         if !SSZipArchive.unzipFile(
             atPath: sourceZipURL.path,
-            toDestination: destinationFolderURL.path
+            toDestination: url.path
         ) {
             throw FileInputError.failedToUnzip
         }

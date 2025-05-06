@@ -30,7 +30,7 @@ extension URL {
         self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
     }
 
-    /// A temporary folder URL used for file input and output
+    /// A temporary direcotyr URL used for file input and output
     static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
 
     static var workInProgress: URL {

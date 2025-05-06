@@ -118,7 +118,7 @@ final class DocumentsLocalRepository: LocalRepository {
             return textureRepository.loadTextures(
                 uuids: configuration.layers.map { $0.id },
                 textureSize: textureSize,
-                folderURL: URL.tmpFolderURL
+                directoryURL: URL.tmpFolderURL
             )
             .map { _ in configuration }
             .eraseToAnyPublisher()

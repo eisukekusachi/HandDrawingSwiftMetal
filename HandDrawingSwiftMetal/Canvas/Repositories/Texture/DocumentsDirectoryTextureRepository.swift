@@ -1,5 +1,5 @@
 //
-//  DocumentsFolderTextureRepository.swift
+//  DocumentsDirectoryTextureRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/03.
@@ -9,7 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
-final class DocumentsFolderTextureRepository: ObservableObject {
+final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private(set) var textures: [UUID] = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
@@ -17,7 +17,7 @@ final class DocumentsFolderTextureRepository: ObservableObject {
     private static let storageName = "TextureStorage"
 
     // Define it as var to allow modification of its metadata
-    private var directoryUrl = URL.applicationSupport.appendingPathComponent(DocumentsFolderTextureRepository.storageName)
+    private var directoryUrl = URL.applicationSupport.appendingPathComponent(DocumentsDirectoryTextureRepository.storageName)
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -56,7 +56,7 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
 }
 
-extension DocumentsFolderTextureRepository: TextureRepository {
+extension DocumentsDirectoryTextureRepository: TextureRepository {
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
@@ -95,7 +95,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    // ids are retained if texture filenames in the folder match the ids of the configuration.layers
+                    // ids are retained if texture filenames in the directory match the ids of the configuration.layers
                     self.textures = configuration.layers.map { $0.id }
 
                     self.canvasInitializationUsingConfigurationSubject.send(configuration)
@@ -108,7 +108,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     func initializeStorageWithNewTexture(_ textureSize: CGSize) {
         guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("Failed to initialize canvas in DocumentsFolderTextureRepository: texture size is too small")
+            Logger.standard.error("Failed to initialize canvas in DocumentsDirectoryTextureRepository: texture size is too small")
             return
         }
 
@@ -237,7 +237,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
+    func loadTextures(uuids: [UUID], textureSize: CGSize, directoryURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
 
@@ -246,7 +246,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             do {
                 try uuids.forEach { [weak self] uuid in
                     let textureData = try Data(
-                        contentsOf: folderURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: directoryURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     if let device = self?.device,
@@ -364,7 +364,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
 }
 
-extension DocumentsFolderTextureRepository {
+extension DocumentsDirectoryTextureRepository {
 
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error

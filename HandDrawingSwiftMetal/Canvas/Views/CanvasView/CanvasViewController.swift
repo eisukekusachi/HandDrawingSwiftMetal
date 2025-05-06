@@ -18,7 +18,7 @@ class CanvasViewController: UIViewController {
     private var configuration = CanvasConfiguration()
 
     private let canvasViewModel = CanvasViewModel(
-        textureRepository: DocumentsFolderTextureSingletonRepository.shared
+        textureRepository: DocumentsDirectoryTextureSingletonRepository.shared
     )
 
     private let dialogPresenter = DialogPresenter()
