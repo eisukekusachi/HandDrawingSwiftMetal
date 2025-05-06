@@ -112,6 +112,9 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             return
         }
 
+        // Delete all files
+        resetDirectory(&directoryUrl)
+
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate()
         )
@@ -237,32 +240,32 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize, directoryURL: URL) -> AnyPublisher<Void, Error> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
 
-            let destinationUrl = self.directoryUrl
+            // Delete all files
+            self.resetDirectory(&self.directoryUrl)
 
             do {
-                try uuids.forEach { [weak self] uuid in
+                try uuids.forEach { uuid in
                     let textureData = try Data(
-                        contentsOf: directoryURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
                     )
 
-                    if let device = self?.device,
-                       let hexadecimalData = textureData.encodedHexadecimals,
+                    if let hexadecimalData = textureData.encodedHexadecimals,
                        let texture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
-                        with: device
+                        with: self.device
                        ) {
                         try FileOutputManager.saveTextureAsData(
                             bytes: texture.bytes,
-                            to: destinationUrl.appendingPathComponent(uuid.uuidString)
+                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
                         )
 
-                        self?.textures.append(uuid)
-                        self?.setThumbnail(texture: texture, for: uuid)
+                        self.textures.append(uuid)
+                        self.setThumbnail(texture: texture, for: uuid)
                     }
                 }
                 promise(.success(()))

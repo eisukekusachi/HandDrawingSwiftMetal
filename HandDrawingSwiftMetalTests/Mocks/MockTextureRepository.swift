@@ -113,7 +113,7 @@ final class MockTextureRepository: TextureRepository {
         return nil
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize, directoryURL: URL) -> AnyPublisher<Void, any Error> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

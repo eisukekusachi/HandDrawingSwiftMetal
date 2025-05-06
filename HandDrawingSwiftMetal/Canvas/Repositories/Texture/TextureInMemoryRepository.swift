@@ -189,14 +189,15 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize, directoryURL: URL) -> AnyPublisher<Void, any Error> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
             do {
+                // Delete all data
                 self?.removeAll()
 
                 try uuids.forEach { [weak self] uuid in
                     let textureData = try Data(
-                        contentsOf: directoryURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     guard

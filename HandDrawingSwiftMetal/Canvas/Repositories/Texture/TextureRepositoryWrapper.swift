@@ -63,8 +63,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.getTextures(uuids: uuids, textureSize: textureSize)
     }
 
-    func loadTextures(uuids: [UUID], textureSize: CGSize, directoryURL: URL) -> AnyPublisher<Void, any Error> {
-        repository.loadTextures(uuids: uuids, textureSize: textureSize, directoryURL: directoryURL)
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        repository.loadNewTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
