@@ -250,14 +250,14 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Future<MTLTexture?, Error> { promise in
             let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
             do {
                 let texture: MTLTexture? = try FileInputManager.loadTexture(
                     destinationUrl,
-                    textureSize: self.textureSize,
+                    textureSize: textureSize,
                     device: self.device
                 )
                 promise(.success(texture))
@@ -349,7 +349,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
     }
 
     func updateTextureInStorage(texture: MTLTexture, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        loadTexture(uuid)
+        getTexture(uuid: uuid, textureSize: texture.size)
             .tryMap { [weak self] targetTexture in
                 guard
                     let `self`

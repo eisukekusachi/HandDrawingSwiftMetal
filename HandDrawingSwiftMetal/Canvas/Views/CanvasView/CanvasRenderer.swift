@@ -121,6 +121,10 @@ final class CanvasRenderer: ObservableObject {
             let selectedIndex = canvasState.selectedIndex
         else { return }
 
+        // Make the texture opaque before merging
+        var opaqueLayer = selectedLayer
+        opaqueLayer.alpha = 255
+
         Publishers.Zip(
             Publishers.Zip(
                 renderTexturesFromRepositoryToTexturePublisher(
@@ -134,8 +138,8 @@ final class CanvasRenderer: ObservableObject {
                     with: commandBuffer
                 )
             ),
-            renderTextureFromRepositoryToTexturePublisher(
-                layer: selectedLayer,
+            renderTexturesFromRepositoryToTexturePublisher(
+                layers: [opaqueLayer],
                 into: selectedTexture,
                 with: commandBuffer
             )
@@ -197,7 +201,7 @@ final class CanvasRenderer: ObservableObject {
         targetTextureId: UUID,
         callback: ((MTLTexture) -> Void)? = nil
     ) {
-        textureRepository?.loadTexture(targetTextureId)
+        textureRepository?.getTexture(uuid: targetTextureId, textureSize: texture.size)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -224,31 +228,6 @@ final class CanvasRenderer: ObservableObject {
                 callback?(texture)
             })
             .store(in: &cancellables)
-    }
-
-    func renderTextureFromRepositoryToTexturePublisher(
-        layer: TextureLayerModel,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<Void, Error> {
-        // Clear `destinationTexture` here
-        renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
-
-        return textureRepository.loadTexture(layer.id)
-            .compactMap { $0 }
-            .handleEvents(receiveOutput: { [weak self] texture in
-                guard let flippedTextureBuffers = self?.flippedTextureBuffers else { return }
-
-                self?.renderer.drawTexture(
-                    texture: texture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: destinationTexture,
-                    with: commandBuffer
-                )
-            })
-            .map { _ in () }
-            .eraseToAnyPublisher()
     }
 
     func renderTexturesFromRepositoryToTexturePublisher(

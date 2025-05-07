@@ -72,7 +72,7 @@ final class TextureMockRepository: TextureRepository {
         nil
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<(any MTLTexture)?, any Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Just(nil)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
