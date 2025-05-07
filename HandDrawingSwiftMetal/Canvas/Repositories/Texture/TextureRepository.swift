@@ -15,11 +15,11 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
-    /// A publisher that emits to trigger the creation of a new texture and initialization of the canvas
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> { get }
+    /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to update texture layers and update the canvas
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
@@ -34,10 +34,7 @@ protocol TextureRepository {
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize)
 
     /// Initializes the canvas after creating a new texture
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize)
-
-    /// Creates a texture
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
+    func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
     /// Creates textures for the given layers using a folder URL as a source
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>

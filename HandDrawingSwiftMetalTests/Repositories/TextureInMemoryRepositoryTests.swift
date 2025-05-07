@@ -98,14 +98,14 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 initializeExpectation.isInverted = true
             }
 
-            subject.needsCanvasInitializationUsingConfigurationPublisher
+            subject.canvasInitializationUsingConfigurationPublisher
                 .sink { _ in
                     restoreCanvasFromModelCalled = true
                     restoreExpectation.fulfill()
                 }
                 .store(in: &cancellables)
 
-            subject.needsCanvasInitializationAfterNewTextureCreationPublisher
+            subject.storageInitializationWithNewTexturePublisher
                 .sink { _ in
                     initializeCanvasFromModelAfterNewTextureCreationCalled = true
                     initializeExpectation.fulfill()

@@ -16,11 +16,11 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         self.repository = repository
     }
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        repository.needsCanvasInitializationAfterNewTextureCreationPublisher
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.storageInitializationWithNewTexturePublisher
     }
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.needsCanvasInitializationUsingConfigurationPublisher
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.canvasInitializationUsingConfigurationPublisher
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -46,12 +46,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.hasAllTextures(for: uuids)
     }
 
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        repository.initializeCanvasAfterCreatingNewTexture(textureSize)
-    }
-
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        repository.createTexture(uuid: uuid, textureSize: textureSize)
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+        repository.initializeStorageWithNewTexture(textureSize)
     }
 
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {

@@ -47,8 +47,8 @@ extension CanvasConfiguration {
         self.eraserDiameter = entity.eraserDiameter
     }
 
-    func getTextureSize(drawableTextureSize: CGSize) -> CGSize {
-        textureSize ?? drawableTextureSize
+    func getTextureSize(drawableSize: CGSize) -> CGSize {
+        textureSize ?? drawableSize
     }
 
 }

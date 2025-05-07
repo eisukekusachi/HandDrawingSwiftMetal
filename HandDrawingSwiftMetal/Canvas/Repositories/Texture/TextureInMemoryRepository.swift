@@ -22,9 +22,9 @@ final class TextureInMemoryRepository: ObservableObject {
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let needsCanvasInitializationAfterNewTextureCreationSubject = PassthroughSubject<CGSize, Never>()
+    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsCanvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
 
@@ -59,11 +59,11 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var needsCanvasInitializationAfterNewTextureCreationPublisher: AnyPublisher<CGSize, Never> {
-        needsCanvasInitializationAfterNewTextureCreationSubject.eraseToAnyPublisher()
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
-    var needsCanvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
     var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
@@ -99,18 +99,22 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.needsCanvasInitializationUsingConfigurationSubject.send(configuration)
+                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
-                    self.needsCanvasInitializationAfterNewTextureCreationSubject.send(
-                        configuration.getTextureSize(drawableTextureSize: self.drawableTextureSize)
-                    )
+                    self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
             })
             .store(in: &cancellables)
     }
 
-    func initializeCanvasAfterCreatingNewTexture(_ textureSize: CGSize) {
-        guard textureSize > MTLRenderer.minimumTextureSize else { return }
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Failed to initialize canvas in TextureInMemoryRepository: texture size is too small")
+            return
+        }
+
+        // Delete all files
+        self.removeAll()
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate()
@@ -126,7 +130,7 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-            self?.needsCanvasInitializationUsingConfigurationSubject.send(
+            self?.canvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })
