@@ -8,6 +8,8 @@
     <entity name="CanvasStorageEntity" representedClassName="CanvasStorageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="projectName" optional="YES" attributeType="String"/>
         <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="textureHeight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="textureWidth" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="drawingTool" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DrawingToolStorageEntity" inverseName="canvas" inverseEntity="DrawingToolStorageEntity"/>
         <relationship name="textureLayers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TextureLayerStorageEntity" inverseName="canvas" inverseEntity="TextureLayerStorageEntity"/>
     </entity>
