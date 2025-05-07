@@ -30,8 +30,8 @@ protocol TextureRepository {
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
-    /// Resolves the state of the canvas view
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize)
+    /// Initialized the storage
+    func initializeStorage(from configuration: CanvasConfiguration)
 
     /// Initializes the canvas after creating a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
@@ -40,7 +40,7 @@ protocol TextureRepository {
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Checks if all specified textures exist
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error>
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
 
     /// Retrieves the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?

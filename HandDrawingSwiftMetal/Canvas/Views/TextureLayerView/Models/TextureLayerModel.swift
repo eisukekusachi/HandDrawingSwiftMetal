@@ -25,7 +25,7 @@ extension TextureLayerModel {
         from textureLayerEntity: TextureLayerEntity
     ) {
         self.init(
-            id: UUID.init(uuidString: textureLayerEntity.textureName) ?? UUID(),
+            id: TextureLayerEntity.id(from: textureLayerEntity),
             title: textureLayerEntity.title,
             alpha: textureLayerEntity.alpha,
             isVisible: textureLayerEntity.isVisible
@@ -34,6 +34,11 @@ extension TextureLayerModel {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
+    }
+
+    /// Uses the ID as the filename
+    var fileName: String {
+        id.uuidString
     }
 
 }

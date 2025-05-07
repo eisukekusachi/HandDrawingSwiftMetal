@@ -224,9 +224,8 @@ final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initCanvas(using configuration: CanvasConfiguration) {
-        guard let drawableSize = renderer.renderTextureSize else { return }
-        textureRepository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
+    func initializeCanvas(using configuration: CanvasConfiguration) {
+        textureRepository.initializeStorage(from: configuration)
     }
 
     private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
@@ -264,7 +263,7 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !renderer.hasTextureBeenInitialized {
-            initCanvas(using: canvasStateStorage?.configuration ?? configuration)
+            initializeCanvas(using: canvasStateStorage?.configuration ?? configuration)
         }
     }
 
@@ -372,8 +371,8 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
-        initCanvas(
-            using: .init(textureSize: renderer.textureSize)
+        initializeCanvas(
+            using: CanvasConfiguration.createNewConfiguration(canvasState)
         )
     }
 

@@ -38,12 +38,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.textureNum
     }
 
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        repository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
+    func initializeStorage(from configuration: CanvasConfiguration) {
+        repository.initializeStorage(from: configuration)
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, any Error> {
-        repository.hasAllTextures(for: uuids)
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
+        repository.hasAllTextures(fileNames: fileNames)
     }
 
     func initializeStorageWithNewTexture(_ textureSize: CGSize) {

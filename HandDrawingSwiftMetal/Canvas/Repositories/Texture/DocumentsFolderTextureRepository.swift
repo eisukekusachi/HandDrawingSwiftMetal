@@ -90,10 +90,8 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        drawableTextureSize = drawableSize
-
-        hasAllTextures(for: configuration.layers.map { $0.id })
+    func initializeStorage(from configuration: CanvasConfiguration) {
+        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -103,6 +101,9 @@ extension DocumentsFolderTextureRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
+                    // ids are retained if texture filenames in the directory match the ids of the configuration.layers
+                    self.textures = configuration.layers.map { $0.id }
+
                     self.canvasInitializationUsingConfigurationSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
@@ -190,19 +191,16 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
-            guard let self else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
+            guard let `self` else { return }
 
             let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directoryUrl, includingPropertiesForKeys: nil)) ?? []
 
             promise(
                 .success(
-                    !uuids.isEmpty &&
-                    Set(fileURLs.map { $0.lastPathComponent }) == Set(uuids.map { $0.uuidString })
+                    !fileNames.isEmpty &&
+                    Set(fileURLs.map { $0.lastPathComponent }) == Set(fileNames)
                 )
             )
         }

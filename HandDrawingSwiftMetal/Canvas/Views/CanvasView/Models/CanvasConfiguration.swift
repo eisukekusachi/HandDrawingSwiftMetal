@@ -51,4 +51,10 @@ extension CanvasConfiguration {
         textureSize ?? drawableSize
     }
 
+    static func createNewConfiguration(_ canvasState: CanvasState) -> CanvasConfiguration {
+        .init(
+            textureSize: canvasState.textureSize
+        )
+    }
+
 }

@@ -86,10 +86,8 @@ extension TextureInMemoryRepository: TextureRepository {
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        drawableTextureSize = drawableSize
-
-        hasAllTextures(for: configuration.layers.map { $0.id })
+    func initializeStorage(from configuration: CanvasConfiguration) {
+        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -137,19 +135,16 @@ extension TextureInMemoryRepository: TextureRepository {
         .store(in: &cancellables)
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
-            guard let self else {
-                promise(.failure(TextureRepositoryError.repositoryDeinitialized))
-                return
-            }
+            guard let `self` else { return }
 
-            let hasAllTextures = uuids.allSatisfy { self.textures[$0] != nil }
+            let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
 
             promise(.success(
-                !uuids.isEmpty &&
+                !fileNames.isEmpty &&
                 hasAllTextures &&
-                Set(self.textures.keys) == Set(uuids))
+                Set(self.textures.keys.compactMap{ $0.uuidString }) == Set(fileNames))
             )
         }
         .eraseToAnyPublisher()

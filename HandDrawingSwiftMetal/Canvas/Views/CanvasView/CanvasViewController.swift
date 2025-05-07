@@ -106,7 +106,7 @@ extension CanvasViewController {
         canvasViewModel.needsCanvasRefreshPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                self?.canvasViewModel.initCanvas(using: configuration)
+                self?.canvasViewModel.initializeCanvas(using: configuration)
             }
             .store(in: &cancellables)
 
