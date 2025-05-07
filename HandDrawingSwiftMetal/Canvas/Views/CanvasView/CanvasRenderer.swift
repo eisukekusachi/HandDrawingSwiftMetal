@@ -109,53 +109,48 @@ final class CanvasRenderer: ObservableObject {
         canvasView?.resetCommandBuffer()
     }
 
-    /// Updates the canvas after updating all textures.
-    /// This helps maintain high drawing performance even as the number of layers increases.
-    func updateCanvasAfterUpdatingAllTextures(
+    /// Updates the drawing textures. This textures are pre-merged from layers necessary for drawing.
+    /// By using this textures, the drawing performance remains consistent regardless of the number of layers.
+    func updateDrawingTextures(
         canvasState: CanvasState,
-        commandBuffer: MTLCommandBuffer?
-    ) {
+        commandBuffer: MTLCommandBuffer
+    ) -> AnyPublisher<Void, Error> {
         guard
-            let commandBuffer,
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
-        else { return }
+        else {
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        }
 
-        // Make the texture opaque before merging
+        // The selected texture is kept opaque here because transparency is applied when used
         var opaqueLayer = selectedLayer
         opaqueLayer.alpha = 255
 
-        Publishers.Zip(
-            Publishers.Zip(
-                renderTexturesFromRepositoryToTexturePublisher(
-                    layers: getBottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-                    into: unselectedBottomTexture,
-                    with: commandBuffer
-                ),
-                renderTexturesFromRepositoryToTexturePublisher(
-                    layers: getTopLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-                    into: unselectedTopTexture,
-                    with: commandBuffer
-                )
-            ),
-            renderTexturesFromRepositoryToTexturePublisher(
-                layers: [opaqueLayer],
-                into: selectedTexture,
-                with: commandBuffer
-            )
+        let bottomPublisher = renderTexturesFromRepositoryToTexturePublisher(
+            layers: getBottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            into: unselectedBottomTexture,
+            with: commandBuffer
         )
-        .sink(receiveCompletion: { completion in
-            switch completion {
-            case .finished: break
-            case .failure: break
-            }
-        }, receiveValue: { [weak self] _ in
-            self?.updateCanvas(
-                selectedLayer: selectedLayer,
-                with: commandBuffer
-            )
-        })
-        .store(in: &cancellables)
+
+        let topPublisher = renderTexturesFromRepositoryToTexturePublisher(
+            layers: getTopLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            into: unselectedTopTexture,
+            with: commandBuffer
+        )
+
+        let selectedPublisher = renderTexturesFromRepositoryToTexturePublisher(
+            layers: [opaqueLayer],
+            into: selectedTexture,
+            with: commandBuffer
+        )
+
+        return Publishers.CombineLatest3(
+            bottomPublisher,
+            topPublisher,
+            selectedPublisher
+        )
+            .map { _, _, _ in () }
+            .eraseToAnyPublisher()
     }
 
     /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`

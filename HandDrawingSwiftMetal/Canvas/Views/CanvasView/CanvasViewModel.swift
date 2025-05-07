@@ -195,11 +195,7 @@ final class CanvasViewModel {
         textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let `self` else { return }
-                self.renderer.updateCanvasAfterUpdatingAllTextures(
-                    canvasState: self.canvasState,
-                    commandBuffer: self.renderer.commandBuffer
-                )
+                self?.updateDrawingTextures()
             }
             .store(in: &cancellables)
 
@@ -230,7 +226,6 @@ extension CanvasViewModel {
 
     private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
         guard
-            let commandBuffer = renderer.commandBuffer,
             let textureSize = configuration.textureSize
         else { return }
 
@@ -240,10 +235,8 @@ extension CanvasViewModel {
         drawingEraserTextureSet.initTextures(textureSize)
 
         renderer.initTextures(textureSize: textureSize)
-        renderer.updateCanvasAfterUpdatingAllTextures(
-            canvasState: canvasState,
-            commandBuffer: commandBuffer
-        )
+
+        updateDrawingTextures()
     }
 
 }
@@ -337,18 +330,6 @@ extension CanvasViewModel {
         )
 
         drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
-    }
-
-    func updateCanvas() {
-        guard
-            let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = renderer.commandBuffer
-        else { return }
-
-        renderer.updateCanvas(
-            selectedLayer: selectedLayer,
-            with: commandBuffer
-        )
     }
 
 }
@@ -518,6 +499,38 @@ extension CanvasViewModel {
                 }
             }
         }
+    }
+
+    /// Updates the drawing textures, which are pre-merged from layer textures to maintain high drawing performance even when the number of layers increases.
+    /// It should be invoked when the layer state changes.
+    private func updateDrawingTextures() {
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+
+        renderer.updateDrawingTextures(
+            canvasState: canvasState,
+            commandBuffer: temporaryRenderCommandBuffer
+        )
+        .subscribe(on: DispatchQueue.global(qos: .userInitiated))
+        .receive(on: DispatchQueue.main)
+        .sink(
+            receiveCompletion: { [weak self] _ in
+                temporaryRenderCommandBuffer.commit()
+                self?.updateCanvas()
+            }, receiveValue: { _ in }
+        )
+        .store(in: &cancellables)
+    }
+
+    func updateCanvas() {
+        guard
+            let selectedLayer = canvasState.selectedLayer,
+            let commandBuffer = renderer.commandBuffer
+        else { return }
+
+        renderer.updateCanvas(
+            selectedLayer: selectedLayer,
+            with: commandBuffer
+        )
     }
 
 }
