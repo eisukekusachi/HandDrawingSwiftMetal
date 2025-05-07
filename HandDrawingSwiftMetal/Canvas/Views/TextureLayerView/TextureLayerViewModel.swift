@@ -83,17 +83,21 @@ extension TextureLayerViewModel {
         canvasState.selectedIndex
     }
 
-    func insertLayer(at index: Int) {
-        guard
-            let textureRepository
-        else { return }
+    var textureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    func insertLayer(textureSize: CGSize, at index: Int) {
 
         let device = self.device
 
         addNewLayerPublisher(at: index)
-            .flatMap { textureLayerId in
-                textureRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureRepository.textureSize, with: device),
+            .flatMap { [weak self] textureLayerId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.updateTexture(
+                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     for: textureLayerId
                 )
             }

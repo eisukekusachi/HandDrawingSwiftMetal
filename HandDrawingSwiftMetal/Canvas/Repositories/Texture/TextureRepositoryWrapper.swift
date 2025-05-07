@@ -37,9 +37,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
     var textureNum: Int {
         repository.textureNum
     }
-    var textureSize: CGSize {
-        repository.textureSize
-    }
 
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         repository.resolveCanvasView(from: configuration, drawableSize: drawableSize)
