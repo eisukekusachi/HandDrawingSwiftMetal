@@ -11,6 +11,8 @@ import Metal
 
 final class TextureMockRepository: TextureRepository {
 
+    private let device = MTLCreateSystemDefaultDevice()!
+
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
@@ -74,6 +76,15 @@ final class TextureMockRepository: TextureRepository {
 
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Just(nil)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : MTLTexture?], Error> {
+        let result = uuids.reduce(into: [UUID: MTLTexture?]()) {
+            $0[$1] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        }
+        return Just(result)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

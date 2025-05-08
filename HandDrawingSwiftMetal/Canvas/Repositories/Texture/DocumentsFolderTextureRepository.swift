@@ -268,6 +268,39 @@ extension DocumentsFolderTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+        let publishers = uuids.map { uuid in
+            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+                guard let `self` else { return }
+
+                let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
+                do {
+                    let texture: MTLTexture? = try FileInputManager.loadTexture(
+                        destinationUrl,
+                        textureSize: textureSize,
+                        device: self.device
+                    )
+                    promise(
+                        .success(
+                            (uuid, texture)
+                        )
+                    )
+                } catch {
+                    promise(.failure(error))
+                }
+            }
+            .eraseToAnyPublisher()
+        }
+
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .map { pairs in
+                Dictionary(uniqueKeysWithValues: pairs)
+            }
+            .eraseToAnyPublisher()
+    }
+
     func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
         let publishers = uuids.map { uuid in
             Future<(UUID, MTLTexture?), Error> { promise in

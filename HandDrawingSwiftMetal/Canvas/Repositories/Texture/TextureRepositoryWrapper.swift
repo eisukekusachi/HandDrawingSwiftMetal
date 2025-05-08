@@ -62,6 +62,10 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.getTexture(uuid: uuid, textureSize: textureSize)
     }
 
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
+        repository.getTextures(uuids: uuids, textureSize: textureSize)
+    }
+
     func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
         repository.loadTextures(uuids)
     }
