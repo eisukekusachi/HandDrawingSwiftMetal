@@ -191,28 +191,32 @@ final class CanvasRenderer: ObservableObject {
         refreshCanvasView(commandBuffer)
     }
 
-    func renderTextureToLayerInRepository(
-        texture: MTLTexture,
-        targetTextureId: UUID,
-        callback: ((MTLTexture) -> Void)? = nil
-    ) {
-        textureRepository?.getTexture(uuid: targetTextureId, textureSize: texture.size)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] targetTexture in
+    func updateRepositoryTexture(
+        sourceTexture: MTLTexture,
+        targetTextureId: UUID
+    ) -> AnyPublisher<Void, Error> {
+        guard let textureRepository else {
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        }
+
+        return textureRepository.getTexture(
+            uuid: targetTextureId,
+            textureSize: sourceTexture.size
+        )
+            .tryMap { [weak self] targetTexture in
                 guard
-                    let flippedTextureBuffers = self?.flippedTextureBuffers,
+                    let self = self,
+                    let flippedTextureBuffers = self.flippedTextureBuffers,
                     let targetTexture,
-                    let temporaryRenderCommandBuffer = self?.device.makeCommandQueue()?.makeCommandBuffer()
-                else { return }
+                    let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
+                else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
 
                 temporaryRenderCommandBuffer.label = "commandBuffer"
 
-                self?.renderer.drawTexture(
-                    texture: texture,
+                self.renderer.drawTexture(
+                    texture: sourceTexture,
                     buffers: flippedTextureBuffers,
                     withBackgroundColor: .clear,
                     on: targetTexture,
@@ -220,9 +224,9 @@ final class CanvasRenderer: ObservableObject {
                 )
                 temporaryRenderCommandBuffer.commit()
 
-                callback?(texture)
-            })
-            .store(in: &cancellables)
+                return ()
+            }
+            .eraseToAnyPublisher()
     }
 
     func renderTexturesFromRepositoryToTexturePublisher(

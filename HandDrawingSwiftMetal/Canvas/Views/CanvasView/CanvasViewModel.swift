@@ -143,7 +143,9 @@ final class CanvasViewModel {
             drawingEraserTextureSet.canvasDrawFinishedPublisher
         )
         .sink { [weak self] in
-            self?.completeCanvasUpdateWithDrawing()
+            self?.renderer.commandBuffer?.addCompletedHandler { [weak self] _ in
+                self?.completeCanvasUpdateWithDrawing()
+            }
         }
         .store(in: &cancellables)
 
@@ -478,29 +480,32 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
+
     private func completeCanvasUpdateWithDrawing() {
-        resetAllInputParameters()
+        guard
+            let selectedTexture = self.renderer.selectedTexture,
+            let selectedTextureId = self.canvasState.selectedLayer?.id
+        else { return }
 
-        renderer.commandBuffer?.addCompletedHandler { _ in
-            DispatchQueue.main.async { [weak self] in
-                guard
-                    let selectedTexture = self?.renderer.selectedTexture,
-                    let selectedTextureId = self?.canvasState.selectedLayer?.id
-                else { return }
-
-                self?.renderer.renderTextureToLayerInRepository(
+        renderer.updateRepositoryTexture(
+            sourceTexture: selectedTexture,
+            targetTextureId: selectedTextureId
+        )
+        .sink(
+            receiveCompletion: { [weak self] _ in
+                self?.textureRepository?.setThumbnail(
                     texture: selectedTexture,
-                    targetTextureId: selectedTextureId
-                ) { [weak self] texture in
-                    self?.textureRepository?.setThumbnail(
-                        texture: selectedTexture,
-                        for: selectedTextureId
-                    )
-                }
-            }
-        }
+                    for: selectedTextureId
+                )
+                self?.resetAllInputParameters()
+            }, receiveValue: { _ in }
+        )
+        .store(in: &cancellables)
     }
 
+}
+
+extension CanvasViewModel {
     /// Updates the drawing textures, which are pre-merged from layer textures to maintain high drawing performance even when the number of layers increases.
     /// It should be invoked when the layer state changes.
     private func updateDrawingTextures() {
