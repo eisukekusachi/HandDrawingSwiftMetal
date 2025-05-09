@@ -15,6 +15,9 @@ extension URL {
     static var tmp: URL {
         URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/tmp")
     }
+    static var applicationSupport: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+    }
 
     static var zipSuffix: String {
         "zip"
