@@ -12,6 +12,8 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
+    private let device = MTLCreateSystemDefaultDevice()!
+
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
@@ -68,8 +70,7 @@ final class MockTextureRepository: TextureRepository {
         needsCanvasUpdateSubject.send(())
     }
 
-    func hasAllTextures(for uuids: [UUID]) -> AnyPublisher<Bool, Error> {
-        callHistory.append("hasAllTextures(for: \(uuids.map { $0.uuidString }))")
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         return Just(true)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -91,6 +92,25 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    func initializeStorage(from configuration: HandDrawingSwiftMetal.CanvasConfiguration) {
+
+    }
+
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
+        return Just(textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device))
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
+        let result = uuids.reduce(into: [UUID: MTLTexture?]()) { dict, uuid in
+            dict[uuid] = textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        }
+        return Just(result)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+    
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         callHistory.append("getThumbnail(\(uuid))")
         return nil
@@ -115,9 +135,15 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         callHistory.append("removeTexture(\(uuid))")
-        return Just(uuid)
+        return Just(uuid).setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
@@ -127,6 +153,12 @@ final class MockTextureRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

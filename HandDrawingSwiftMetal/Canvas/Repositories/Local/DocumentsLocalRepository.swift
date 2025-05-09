@@ -46,6 +46,7 @@ final class DocumentsLocalRepository: LocalRepository {
                 ),
                 self.exportTextures(
                     textureIds: canvasState.layers.map { $0.id },
+                    textureSize: canvasState.textureSize,
                     textureRepository: textureRepository,
                     to: url
                 )
@@ -114,10 +115,10 @@ final class DocumentsLocalRepository: LocalRepository {
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
-            return textureRepository.createTextures(
-                layers: configuration.layers,
+            return textureRepository.loadNewTextures(
+                uuids: configuration.layers.map { $0.id },
                 textureSize: textureSize,
-                folderURL: URL.tmpFolderURL
+                from: URL.tmpFolderURL
             )
             .map { _ in configuration }
             .eraseToAnyPublisher()
@@ -154,10 +155,14 @@ extension DocumentsLocalRepository {
 
     private func exportTextures(
         textureIds: [UUID],
+        textureSize: CGSize,
         textureRepository: any TextureRepository,
         to url: URL
     ) -> AnyPublisher<Void, Error> {
-        textureRepository.loadTextures(textureIds)
+        textureRepository.getTextures(
+            uuids: textureIds,
+            textureSize: textureSize
+        )
             .tryMap { textureDict in
                 guard textureDict.count == textureIds.count else {
                     Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")

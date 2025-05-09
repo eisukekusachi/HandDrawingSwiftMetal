@@ -234,6 +234,11 @@ final class CanvasRenderer: ObservableObject {
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
+        guard let textureRepository else {
+            Logger.standard.warning("Texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+        }
+
         // Clear `destinationTexture` here
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 
@@ -244,8 +249,9 @@ final class CanvasRenderer: ObservableObject {
             return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        return textureRepository.loadTextures(
-            layers.map { $0.id }
+        return textureRepository.getTextures(
+            uuids: layers.map { $0.id },
+            textureSize: destinationTexture.size
         )
         .handleEvents(receiveOutput: { [weak self] textures in
             guard let `self` else { return }

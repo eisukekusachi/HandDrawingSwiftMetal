@@ -240,7 +240,6 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-
     func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
         let publishers = uuids.map { uuid in
             Future<(UUID, MTLTexture?), Error> { [weak self] promise in
@@ -261,10 +260,43 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        Future<Void, Error> { [weak self] promise in
+            do {
+                // Delete all data
+                self?.removeAll()
+
+                try uuids.forEach { [weak self] uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    guard
+                        let device = self?.device,
+                        let hexadecimalData = textureData.encodedHexadecimals
+                    else { return }
+
+                    let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: device
+                    )
+
+                    self?.textures[uuid] = texture
+                    self?.setThumbnail(texture: texture, for: uuid)
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         textures.removeValue(forKey: uuid)
         thumbnails.removeValue(forKey: uuid)
-        return Just(uuid).eraseToAnyPublisher()
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
     func removeAll() {
         textures = [:]
@@ -285,6 +317,22 @@ extension TextureInMemoryRepository: TextureRepository {
                 promise(.success(uuid))
             } else {
                 promise(.failure(TextureRepositoryError.failedToAddTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { promise in
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let `self` else { return }
+
+                for (uuid, texture) in self.textures {
+                    guard let texture else { return }
+                    self.setThumbnail(texture: texture, for: uuid)
+                }
+
+                promise(.success(()))
             }
         }
         .eraseToAnyPublisher()

@@ -21,8 +21,8 @@ enum FileInputManager {
         throw FileInputError.cannotFindFile
     }
 
-    static func loadTexture(_ fileUrl: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
-        let textureData = try Data(contentsOf: fileUrl)
+    static func loadTexture(url: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
+        let textureData = try Data(contentsOf: url)
         guard
             let hexadecimalData = textureData.encodedHexadecimals
         else { return nil }

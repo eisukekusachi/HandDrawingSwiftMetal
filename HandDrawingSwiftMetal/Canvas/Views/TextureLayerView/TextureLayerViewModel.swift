@@ -115,13 +115,15 @@ extension TextureLayerViewModel {
 
     func removeLayer() {
         guard
-            let textureRepository,
             let selectedIndex = canvasState.selectedIndex
         else { return }
 
         removeLayerPublisher(from: selectedIndex)
-            .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
-                textureRepository.removeTexture(removedTextureId)
+            .flatMap { [weak self] removedTextureId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.removeTexture(removedTextureId)
             }
             .sink(receiveCompletion: { completion in
                 switch completion {

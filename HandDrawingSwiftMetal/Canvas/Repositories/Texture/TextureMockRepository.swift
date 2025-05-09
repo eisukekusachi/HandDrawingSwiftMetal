@@ -89,15 +89,21 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
+    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : MTLTexture?], Error> {
         let result = uuids.reduce(into: [UUID: MTLTexture?]()) { $0[$1] = nil }
         return Just(result)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
-        Just(uuid)
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Just(uuid).setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
@@ -107,6 +113,12 @@ final class TextureMockRepository: TextureRepository {
 
     func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
         Just(uuid)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

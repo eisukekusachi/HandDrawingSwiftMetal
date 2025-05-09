@@ -33,11 +33,8 @@ protocol TextureRepository {
     /// Initialized the storage
     func initializeStorage(from configuration: CanvasConfiguration)
 
-    /// Initializes the canvas after creating a new texture
+    /// Initialized the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
-
-    /// Creates textures for the given layers using a folder URL as a source
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error>
 
     /// Checks if all specified textures exist
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
@@ -51,11 +48,11 @@ protocol TextureRepository {
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
-    /// Loads multiple textures for the given UUIDs
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error>
+    /// Loads new textures for the given uuids using a directory URL
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
 
     /// Removes a texture with UUID
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never>
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Removes all managed textures
     func removeAll()
@@ -65,6 +62,9 @@ protocol TextureRepository {
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+
+    /// Updates all thumbnails
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
 
     /// Update texture layers and then update the canvas
     func updateCanvasAfterTextureLayerUpdates()
@@ -81,4 +81,5 @@ enum TextureRepositoryError: Error {
     case failedToUpdateTexture
     case invalidTexture
     case repositoryDeinitialized
+    case repositoryUnavailable
 }

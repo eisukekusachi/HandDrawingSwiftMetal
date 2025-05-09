@@ -34,7 +34,7 @@ final class DocumentsFolderTextureRepository: ObservableObject {
 
     private var _textureSize: CGSize = .zero
 
-    private let directoryUrl = URL.documents.appendingPathComponent("Canvas")
+    private var directoryUrl = URL.documents.appendingPathComponent("Canvas")
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -256,7 +256,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
             do {
                 let texture: MTLTexture? = try FileInputManager.loadTexture(
-                    destinationUrl,
+                    url: destinationUrl,
                     textureSize: textureSize,
                     device: self.device
                 )
@@ -277,7 +277,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
                 do {
                     let texture: MTLTexture? = try FileInputManager.loadTexture(
-                        destinationUrl,
+                        url: destinationUrl,
                         textureSize: textureSize,
                         device: self.device
                     )
@@ -308,7 +308,7 @@ extension DocumentsFolderTextureRepository: TextureRepository {
 
                 do {
                     let texture: MTLTexture? = try FileInputManager.loadTexture(
-                        destinationUrl,
+                        url: destinationUrl,
                         textureSize: self.textureSize,
                         device: self.device
                     )
@@ -328,7 +328,43 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Never> {
+    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            // Delete all files
+            self.resetDirectory(&self.directoryUrl)
+
+            do {
+                try uuids.forEach { uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    if let hexadecimalData = textureData.encodedHexadecimals,
+                       let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: self.device
+                       ) {
+                        try FileOutputManager.saveTextureAsData(
+                            bytes: texture.bytes,
+                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
+                        )
+
+                        self.textures.append(uuid)
+                        self.setThumbnail(texture: texture, for: uuid)
+                    }
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             guard let `self` else { return }
 
@@ -406,12 +442,69 @@ extension DocumentsFolderTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { [weak self] promise in
+            guard let `self` else { return }
+
+            do {
+                for textureId in self.textures {
+                    let texture: MTLTexture? = try FileInputManager.loadTexture(
+                        url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
+                        textureSize: textureSize,
+                        device: self.device
+                    )
+                    self.setThumbnail(texture: texture, for: textureId)
+                }
+
+                promise(.success(()))
+
+            } catch {
+                Logger.standard.error("Failed to load texture during thumbnail update: \(error)")
+                promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
     func updateCanvasAfterTextureLayerUpdates() {
         needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
     }
 
     func updateCanvas() {
         needsCanvasUpdateSubject.send()
+    }
+
+}
+
+extension DocumentsFolderTextureRepository {
+
+    // If the directory already exists, delete it and create a new one
+    private func resetDirectory(_ url: inout URL) {
+        do {
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
+            }
+
+            createDirectory(&url)
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage directory: \(error)")
+        }
+    }
+
+    // If a directory with the same name already exists at url,
+    // this method does nothing and does not throw an error
+    private func createDirectory(_ url: inout URL) {
+        do {
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try url.setResourceValues(resourceValues)
+
+        } catch {
+            Logger.standard.error("Failed to create texture storage directory: \(error)")
+        }
     }
 
 }
