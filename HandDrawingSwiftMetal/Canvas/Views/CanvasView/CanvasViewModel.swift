@@ -42,6 +42,11 @@ final class CanvasViewModel {
         needsShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
+    /// A publisher that emits when the canvas view controller setup is needed
+    var canvasViewControllerSetupPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
+        canvasViewControllerSetupSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits when refreshing the canvas is needed
     var needsCanvasRefreshPublisher: AnyPublisher<CanvasConfiguration, Never> {
         needsCanvasRefreshSubject.eraseToAnyPublisher()
@@ -98,6 +103,8 @@ final class CanvasViewModel {
     private let needsShowingToastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
+
+    private var canvasViewControllerSetupSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
     private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -250,7 +257,12 @@ extension CanvasViewModel {
     ) {
         renderer.setCanvas(canvasView)
 
-        needsCanvasSetupSubject.send(canvasState)
+        canvasViewControllerSetupSubject.send(
+            .init(
+                canvasState: canvasState,
+                textureRepository: textureRepository
+            )
+        )
     }
 
     func onViewDidAppear(
