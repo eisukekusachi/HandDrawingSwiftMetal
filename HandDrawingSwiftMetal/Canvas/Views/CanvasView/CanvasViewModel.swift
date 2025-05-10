@@ -153,7 +153,7 @@ final class CanvasViewModel {
         )
         .sink { [weak self] in
             self?.renderer.commandBuffer?.addCompletedHandler { [weak self] _ in
-                self?.completeCanvasUpdateWithDrawing()
+                self?.completeCanvasWithDrawing()
             }
         }
         .store(in: &cancellables)
@@ -507,24 +507,38 @@ extension CanvasViewModel {
         )
     }
 
-    private func completeCanvasUpdateWithDrawing() {
+    /// Completes the canvas update after the drawing is finished
+    private func completeCanvasWithDrawing() {
         guard
             let selectedTexture = self.renderer.selectedTexture,
             let selectedTextureId = self.canvasState.selectedLayer?.id
         else { return }
 
-        renderer.updateRepositoryTexture(
+        renderer.drawOnTextureFromRepository(
             sourceTexture: selectedTexture,
             targetTextureId: selectedTextureId
         )
+        .flatMap { [weak self] resultTexture -> AnyPublisher<Void, Error> in
+            guard let `self` else {
+                return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+            }
+            return self.textureRepository.updateTexture(
+                texture: resultTexture,
+                for: selectedTextureId
+            )
+            .map { _ in () }
+            .eraseToAnyPublisher()
+        }
         .sink(
-            receiveCompletion: { [weak self] _ in
-                self?.textureRepository?.setThumbnail(
-                    texture: selectedTexture,
-                    for: selectedTextureId
-                )
+            receiveCompletion: { [weak self] result in
+                switch result {
+                case .finished: break
+                case .failure(let error):
+                    Logger.standard.error("Failed to complete the drawing process: \(error)")
+                }
                 self?.resetAllInputParameters()
-            }, receiveValue: { _ in }
+            },
+            receiveValue: { _ in }
         )
         .store(in: &cancellables)
     }

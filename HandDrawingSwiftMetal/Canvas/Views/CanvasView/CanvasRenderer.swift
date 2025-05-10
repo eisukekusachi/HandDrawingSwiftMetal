@@ -193,10 +193,11 @@ final class CanvasRenderer: ObservableObject {
         refreshCanvasView(commandBuffer)
     }
 
-    func updateRepositoryTexture(
+    /// Draws `sourceTexture` on a copy of the target texture from the repository and returns the result
+    func drawOnTextureFromRepository(
         sourceTexture: MTLTexture,
         targetTextureId: UUID
-    ) -> AnyPublisher<Void, Error> {
+    ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
             return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
         }
@@ -205,30 +206,35 @@ final class CanvasRenderer: ObservableObject {
             uuid: targetTextureId,
             textureSize: sourceTexture.size
         )
-            .tryMap { [weak self] targetTexture in
-                guard
-                    let self = self,
-                    let flippedTextureBuffers = self.flippedTextureBuffers,
-                    let targetTexture,
-                    let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
-                else {
-                    throw TextureRepositoryError.failedToUnwrap
+        .flatMap { [weak self] targetTexture -> AnyPublisher<MTLTexture, Error> in
+            guard
+                let self = self,
+                let targetTexture,
+                let flippedTextureBuffers = self.flippedTextureBuffers,
+                let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
+            else {
+                return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+            }
+
+            temporaryRenderCommandBuffer.label = "commandBuffer"
+
+            self.renderer.drawTexture(
+                texture: sourceTexture,
+                buffers: flippedTextureBuffers,
+                withBackgroundColor: .clear,
+                on: targetTexture,
+                with: temporaryRenderCommandBuffer
+            )
+            temporaryRenderCommandBuffer.commit()
+
+            return Future { promise in
+                temporaryRenderCommandBuffer.addCompletedHandler { _ in
+                    promise(.success(targetTexture))
                 }
-
-                temporaryRenderCommandBuffer.label = "commandBuffer"
-
-                self.renderer.drawTexture(
-                    texture: sourceTexture,
-                    buffers: flippedTextureBuffers,
-                    withBackgroundColor: .clear,
-                    on: targetTexture,
-                    with: temporaryRenderCommandBuffer
-                )
-                temporaryRenderCommandBuffer.commit()
-
-                return ()
             }
             .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     func renderTexturesFromRepositoryToTexturePublisher(
