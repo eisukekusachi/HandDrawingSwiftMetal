@@ -151,46 +151,8 @@ final class CanvasRenderer: ObservableObject {
             topPublisher,
             selectedPublisher
         )
-            .map { _, _, _ in () }
-            .eraseToAnyPublisher()
-    }
-
-    /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
-    func updateCanvas(
-        realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let canvasTexture else { return }
-
-        renderer.fillTexture(
-            texture: canvasTexture,
-            withRGB: backgroundColor.rgb,
-            with: commandBuffer
-        )
-
-        renderer.mergeTexture(
-            texture: unselectedBottomTexture,
-            into: canvasTexture,
-            with: commandBuffer
-        )
-
-        if selectedLayer.isVisible {
-            renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedTexture,
-                alpha: selectedLayer.alpha,
-                into: canvasTexture,
-                with: commandBuffer
-            )
-        }
-
-        renderer.mergeTexture(
-            texture: unselectedTopTexture,
-            into: canvasTexture,
-            with: commandBuffer
-        )
-
-        refreshCanvasView(commandBuffer)
+        .map { _, _, _ in () }
+        .eraseToAnyPublisher()
     }
 
     /// Draws `sourceTexture` on a copy of the target texture from the repository and returns the result
@@ -277,6 +239,47 @@ final class CanvasRenderer: ObservableObject {
         })
         .map { _ in () }
         .eraseToAnyPublisher()
+    }
+
+}
+
+extension CanvasRenderer {
+    /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
+    func updateCanvas(
+        realtimeDrawingTexture: MTLTexture? = nil,
+        selectedLayer: TextureLayerModel,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let canvasTexture else { return }
+
+        renderer.fillTexture(
+            texture: canvasTexture,
+            withRGB: backgroundColor.rgb,
+            with: commandBuffer
+        )
+
+        renderer.mergeTexture(
+            texture: unselectedBottomTexture,
+            into: canvasTexture,
+            with: commandBuffer
+        )
+
+        if selectedLayer.isVisible {
+            renderer.mergeTexture(
+                texture: realtimeDrawingTexture ?? selectedTexture,
+                alpha: selectedLayer.alpha,
+                into: canvasTexture,
+                with: commandBuffer
+            )
+        }
+
+        renderer.mergeTexture(
+            texture: unselectedTopTexture,
+            into: canvasTexture,
+            with: commandBuffer
+        )
+
+        refreshCanvasView(commandBuffer)
     }
 
     func refreshCanvasView(_ commandBuffer: MTLCommandBuffer) {
