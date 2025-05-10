@@ -214,7 +214,7 @@ final class CanvasViewModel {
         textureRepository.needsCanvasUpdatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                self?.updateCanvas()
+                self?.updateCanvasView()
             }
             .store(in: &cancellables)
 
@@ -375,7 +375,7 @@ extension CanvasViewModel {
     func didTapResetTransformButton() {
         guard let commandBuffer = renderer.commandBuffer else { return }
         transformer.setMatrix(.identity)
-        renderer.refreshCanvasView(commandBuffer)
+        renderer.updateCanvasView(commandBuffer)
     }
 
     func didTapNewCanvasButton() {
@@ -441,7 +441,7 @@ extension CanvasViewModel {
             transformer.finishTransforming()
         }
 
-        renderer.refreshCanvasView(commandBuffer)
+        renderer.updateCanvasView(commandBuffer)
     }
 
 }
@@ -482,7 +482,7 @@ extension CanvasViewModel {
         renderer.resetCommandBuffer()
 
         if let commandBuffer = renderer.commandBuffer {
-            renderer.refreshCanvasView(commandBuffer)
+            renderer.updateCanvasView(commandBuffer)
         }
     }
 
@@ -500,7 +500,7 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        renderer.updateCanvas(
+        renderer.updateCanvasView(
             realtimeDrawingTexture: self.drawingTextureSet?.drawingSelectedTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
@@ -560,19 +560,20 @@ extension CanvasViewModel {
         .sink(
             receiveCompletion: { [weak self] _ in
                 temporaryRenderCommandBuffer.commit()
-                self?.updateCanvas()
+
+                self?.updateCanvasView()
             }, receiveValue: { _ in }
         )
         .store(in: &cancellables)
     }
 
-    func updateCanvas() {
+    func updateCanvasView() {
         guard
             let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = renderer.commandBuffer
         else { return }
 
-        renderer.updateCanvas(
+        renderer.updateCanvasView(
             selectedLayer: selectedLayer,
             with: commandBuffer
         )

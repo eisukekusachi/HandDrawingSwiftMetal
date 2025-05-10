@@ -245,7 +245,7 @@ final class CanvasRenderer: ObservableObject {
 
 extension CanvasRenderer {
     /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
-    func updateCanvas(
+    func updateCanvasView(
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel,
         with commandBuffer: MTLCommandBuffer
@@ -279,10 +279,10 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        refreshCanvasView(commandBuffer)
+        updateCanvasView(commandBuffer)
     }
 
-    func refreshCanvasView(_ commandBuffer: MTLCommandBuffer) {
+    func updateCanvasView(_ commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
         renderer.drawTexture(
