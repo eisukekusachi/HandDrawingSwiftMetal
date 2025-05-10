@@ -20,13 +20,6 @@ final class TextureMockRepository: TextureRepository {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
-    }
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateSubject.eraseToAnyPublisher()
-    }
-
     /// Emit `UUID` when the thumbnail is updated
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
@@ -35,10 +28,6 @@ final class TextureMockRepository: TextureRepository {
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
-    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
-
-    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
@@ -121,14 +110,6 @@ final class TextureMockRepository: TextureRepository {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
-    }
-
-    func updateCanvasAfterTextureLayerUpdates() {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
-    }
-
-    func updateCanvas() {
-        needsCanvasUpdateSubject.send()
     }
 
 }

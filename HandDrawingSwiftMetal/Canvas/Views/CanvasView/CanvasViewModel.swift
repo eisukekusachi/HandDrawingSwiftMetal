@@ -183,6 +183,20 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the canvas
+        canvasState.canvasUpdateSubject
+            .sink { [weak self] in
+                self?.updateCanvasView()
+            }
+            .store(in: &cancellables)
+
+        // Update the entire canvas, including all drawing textures
+        canvasState.fullCanvasUpdateSubject
+            .sink { [weak self] in
+                self?.updateDrawingTextures()
+            }
+            .store(in: &cancellables)
+
         // Restore the canvas using CanvasConfiguration
         textureRepository.canvasInitializationUsingConfigurationPublisher
             .receive(on: DispatchQueue.main)
@@ -199,22 +213,6 @@ final class CanvasViewModel {
                 self?.textureRepository.initializeStorageWithNewTexture(
                     configuration.getTextureSize(drawableSize: drawableSize)
                 )
-            }
-            .store(in: &cancellables)
-
-        // Update the canvas after updating the layers
-        textureRepository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateDrawingTextures()
-            }
-            .store(in: &cancellables)
-
-        // Update the canvas
-        textureRepository.needsCanvasUpdatePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.updateCanvasView()
             }
             .store(in: &cancellables)
 

@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/04/13.
 //
 
+import Combine
 import UIKit
 
 /// Manage the state of the canvas
@@ -28,6 +29,12 @@ final class CanvasState: ObservableObject {
     @Published var selectedLayerId: UUID?
 
     @Published var backgroundColor: UIColor = .white
+
+    /// Subject to publish updates for the canvas
+    let canvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    /// Subject to publish updates for the entire canvas, including all textures
+    let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
     init(_ configuration: CanvasConfiguration) {
         setData(configuration)

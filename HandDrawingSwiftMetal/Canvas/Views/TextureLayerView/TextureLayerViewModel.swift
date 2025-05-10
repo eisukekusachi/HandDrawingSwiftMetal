@@ -108,7 +108,7 @@ extension TextureLayerViewModel {
                 }
             }, receiveValue: { [weak self] newLayerTextureId in
                 self?.canvasState.selectedLayerId = newLayerTextureId
-                self?.textureRepository.updateCanvasAfterTextureLayerUpdates()
+                self?.canvasState.fullCanvasUpdateSubject.send(())
             })
             .store(in: &cancellables)
     }
@@ -133,7 +133,7 @@ extension TextureLayerViewModel {
             }, receiveValue: { [weak self] _ in
                 guard let `self` else { return }
                 self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
-                self.textureRepository.updateCanvasAfterTextureLayerUpdates()
+                self.canvasState.fullCanvasUpdateSubject.send(())
             })
             .store(in: &cancellables)
     }
@@ -144,7 +144,7 @@ extension TextureLayerViewModel {
 
     func selectLayer(_ uuid: UUID) {
         canvasState.selectedLayerId = uuid
-        textureRepository.updateCanvasAfterTextureLayerUpdates()
+        canvasState.fullCanvasUpdateSubject.send(())
     }
 
 }
@@ -187,7 +187,7 @@ extension TextureLayerViewModel {
         )
         canvasState.layers.reverse()
 
-        textureRepository.updateCanvasAfterTextureLayerUpdates()
+        canvasState.fullCanvasUpdateSubject.send(())
     }
 
     func updateLayer(
@@ -204,14 +204,14 @@ extension TextureLayerViewModel {
         if let isVisible {
             canvasState.layers[selectedIndex].isVisible = isVisible
 
-            // The visibility of the layers can be changed, so other layers will be updated
-            textureRepository.updateCanvasAfterTextureLayerUpdates()
+            // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
+            canvasState.fullCanvasUpdateSubject.send(())
         }
         if let alpha {
             canvasState.layers[selectedIndex].alpha = alpha
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
-            textureRepository.updateCanvas()
+            canvasState.canvasUpdateSubject.send(())
         }
     }
 

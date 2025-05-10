@@ -23,13 +23,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.canvasInitializationUsingConfigurationPublisher
     }
 
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
-        repository.needsCanvasUpdateAfterTextureLayersUpdatedPublisher
-    }
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        repository.needsCanvasUpdatePublisher
-    }
-
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
         repository.needsThumbnailUpdatePublisher
     }
@@ -84,14 +77,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
 
     func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
         repository.updateTexture(texture: texture, for: uuid)
-    }
-
-    func updateCanvasAfterTextureLayerUpdates() {
-        repository.updateCanvasAfterTextureLayerUpdates()
-    }
-
-    func updateCanvas() {
-        repository.updateCanvas()
     }
 
 }

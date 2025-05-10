@@ -26,10 +26,6 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
-
-    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
-
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
     private var _textureSize: CGSize = .zero
@@ -64,13 +60,6 @@ extension TextureInMemoryRepository: TextureRepository {
     }
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
-    }
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
@@ -336,14 +325,6 @@ extension TextureInMemoryRepository: TextureRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-
-    func updateCanvasAfterTextureLayerUpdates() {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
-    }
-
-    func updateCanvas() {
-        needsCanvasUpdateSubject.send()
     }
 
 }

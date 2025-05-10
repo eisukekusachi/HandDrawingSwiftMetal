@@ -20,10 +20,6 @@ final class MockTextureRepository: TextureRepository {
 
     private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
 
-    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
-
-    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
@@ -34,14 +30,6 @@ final class MockTextureRepository: TextureRepository {
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
         needsThumbnailUpdateSubject.eraseToAnyPublisher()
-    }
-
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
-    }
-
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateSubject.eraseToAnyPublisher()
     }
 
     var textures: [UUID: MTLTexture?] = [:]
@@ -58,16 +46,6 @@ final class MockTextureRepository: TextureRepository {
 
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         callHistory.append("resolveCanvasView(from: \(configuration), drawableSize: \(drawableSize))")
-    }
-
-    func updateCanvasAfterTextureLayerUpdates() {
-        callHistory.append("updateCanvasAfterTextureLayerUpdates()")
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send(())
-    }
-
-    func updateCanvas() {
-        callHistory.append("updateCanvas()")
-        needsCanvasUpdateSubject.send(())
     }
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {

@@ -23,10 +23,6 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsCanvasUpdateAfterTextureLayersUpdatedSubject = PassthroughSubject<Void, Never>()
-
-    private let needsCanvasUpdateSubject = PassthroughSubject<Void, Never>()
-
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
     private let flippedTextureBuffers: MTLTextureBuffers!
@@ -64,14 +60,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateSubject.eraseToAnyPublisher()
-    }
-
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.eraseToAnyPublisher()
     }
 
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
@@ -355,14 +343,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-
-    func updateCanvasAfterTextureLayerUpdates() {
-        needsCanvasUpdateAfterTextureLayersUpdatedSubject.send()
-    }
-
-    func updateCanvas() {
-        needsCanvasUpdateSubject.send()
     }
 
 }

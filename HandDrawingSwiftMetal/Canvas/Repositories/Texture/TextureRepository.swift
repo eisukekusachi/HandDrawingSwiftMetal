@@ -21,12 +21,6 @@ protocol TextureRepository {
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
-    /// A publisher that emits to update texture layers and update the canvas
-    var needsCanvasUpdateAfterTextureLayersUpdatedPublisher: AnyPublisher<Void, Never> { get }
-
-    /// A publisher that emits to trigger the canvas update
-    var needsCanvasUpdatePublisher: AnyPublisher<Void, Never> { get }
-
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
     var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
 
@@ -66,11 +60,6 @@ protocol TextureRepository {
     /// Updates all thumbnails
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
 
-    /// Update texture layers and then update the canvas
-    func updateCanvasAfterTextureLayerUpdates()
-
-    /// Updates the canvas
-    func updateCanvas()
 }
 
 enum TextureRepositoryError: Error {
