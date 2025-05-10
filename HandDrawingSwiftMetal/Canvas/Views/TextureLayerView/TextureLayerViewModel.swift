@@ -35,7 +35,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     init(
         canvasState: CanvasState,
-        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared
+        textureRepository: TextureRepository
     ) {
         self.canvasState = canvasState
         self.textureRepository = textureRepository
