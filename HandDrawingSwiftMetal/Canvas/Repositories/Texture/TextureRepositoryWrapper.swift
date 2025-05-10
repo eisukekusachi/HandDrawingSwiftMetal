@@ -31,6 +31,14 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.textureNum
     }
 
+    var textureSize: CGSize {
+        repository.textureSize
+    }
+
+    var hasTexturesBeenInitialized: Bool {
+        repository.hasTexturesBeenInitialized
+    }
+
     func initializeStorage(from configuration: CanvasConfiguration) {
         repository.initializeStorage(from: configuration)
     }

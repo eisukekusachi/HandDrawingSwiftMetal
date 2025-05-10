@@ -15,6 +15,10 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
+    var textureSize: CGSize { get }
+
+    var hasTexturesBeenInitialized: Bool { get }
+
     /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 

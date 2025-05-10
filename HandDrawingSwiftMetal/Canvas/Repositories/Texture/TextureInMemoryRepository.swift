@@ -28,8 +28,6 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
 
-    private var _textureSize: CGSize = .zero
-
     private let flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
@@ -37,6 +35,8 @@ final class TextureInMemoryRepository: ObservableObject {
     private let device = MTLCreateSystemDefaultDevice()!
 
     private var cancellables = Set<AnyCancellable>()
+
+    private var _textureSize: CGSize = .zero
 
     init(
         textures: [UUID: MTLTexture?] = [:],
@@ -71,6 +71,10 @@ extension TextureInMemoryRepository: TextureRepository {
     }
     var textureSize: CGSize {
         _textureSize
+    }
+
+    var hasTexturesBeenInitialized: Bool {
+        _textureSize != .zero
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -117,6 +121,9 @@ extension TextureInMemoryRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
+
+            self?._textureSize = textureSize
+
             self?.canvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )

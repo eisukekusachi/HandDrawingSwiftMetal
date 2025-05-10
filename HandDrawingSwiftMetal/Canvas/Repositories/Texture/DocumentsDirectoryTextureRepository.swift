@@ -35,6 +35,8 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private var _textureSize: CGSize = .zero
+
     init(
         textures: [UUID] = [],
         renderer: (any MTLRendering) = MTLRenderer.shared
@@ -68,6 +70,14 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
     var textureNum: Int {
         thumbnails.count
+    }
+
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    var hasTexturesBeenInitialized: Bool {
+        _textureSize != .zero
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -117,6 +127,8 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
+            self?._textureSize = textureSize
+
             self?.canvasInitializationUsingConfigurationSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
@@ -138,6 +150,8 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
                     self.textures.append(uuid)
                     self.setThumbnail(texture: texture, for: uuid)
+
+                    self._textureSize = textureSize
 
                     promise(.success(()))
                 } else {

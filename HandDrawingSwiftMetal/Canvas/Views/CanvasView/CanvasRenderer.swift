@@ -8,49 +8,31 @@
 import MetalKit
 import Combine
 
+/// A class for merging the drawing texture and the textures of `TextureRepository` to render onto the canvas.
+/// By pre-merging the layer textures into the textures from `CanvasRenderer` and using them,  it stabilizes drawing performance.
 final class CanvasRenderer: ObservableObject {
-
-    var backgroundColor: UIColor = .white
 
     var frameSize: CGSize = .zero
 
     var matrix: CGAffineTransform = .identity
 
-    var hasTextureBeenInitialized: Bool {
-        textureSize != .zero
-    }
+    private var textureRepository: TextureRepository?
 
-    var commandBuffer: MTLCommandBuffer? {
-        canvasView?.commandBuffer
-    }
+    private let renderer: MTLRendering!
 
-    var renderTextureSize: CGSize? {
-        canvasView?.renderTexture?.size
-    }
-
-    private(set) var textureSize: CGSize = .zero
-
-    private var canvasView: CanvasViewProtocol?
-
-    private let transformer = CanvasTransformer()
-
-    /// The texture that combines the background color and the textures of all `TextureLayers`.
+    /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
-
-    /// The texture of the selected layer.
-    private(set) var selectedTexture: MTLTexture!
 
     /// A texture that combines the textures of all layers below the selected layer.
     private var unselectedBottomTexture: MTLTexture!
+
+    /// The texture of the selected layer.
+    private(set) var selectedTexture: MTLTexture!
 
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers?
-
-    private var textureRepository: TextureRepository?
-
-    private let renderer: (any MTLRendering)!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -79,8 +61,6 @@ final class CanvasRenderer: ObservableObject {
             return
         }
 
-        self.textureSize = textureSize
-
         self.unselectedBottomTexture = unselectedBottomTexture
         self.selectedTexture = selectedTexture
         self.unselectedTopTexture = unselectedTopTexture
@@ -92,16 +72,8 @@ final class CanvasRenderer: ObservableObject {
         self.canvasTexture?.label = "canvasTexture"
     }
 
-    func setCanvas(_ canvasView: CanvasViewProtocol?) {
-        self.canvasView = canvasView
-    }
-
     func setTextureRepository(_ textureRepository: TextureRepository) {
         self.textureRepository = textureRepository
-    }
-
-    func resetCommandBuffer() {
-        canvasView?.resetCommandBuffer()
     }
 
 }
@@ -114,12 +86,17 @@ extension CanvasRenderer {
         layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
-    /// Updates the drawing textures. This textures are pre-merged from layers necessary for drawing.
-    /// By using this textures, the drawing performance remains consistent regardless of the number of layers.
+    /// Updates `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`.
+    /// This textures are pre-merged from `textureRepository` necessary for drawing.
+    /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
-        canvasState: CanvasState,
-        commandBuffer: MTLCommandBuffer
+        canvasState: CanvasState
     ) -> AnyPublisher<Void, Error> {
+        guard let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
+            Logger.standard.error("Failed to create command buffer")
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        }
+
         guard
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
@@ -131,36 +108,55 @@ extension CanvasRenderer {
         var opaqueLayer = selectedLayer
         opaqueLayer.alpha = 255
 
-        let bottomPublisher = renderTexturesFromRepositoryToTexturePublisher(
+        let bottomPublisher = mergeLayerTextures(
             layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            textureRepository: textureRepository,
             into: unselectedBottomTexture,
-            with: commandBuffer
+            with: temporaryRenderCommandBuffer
         )
 
-        let topPublisher = renderTexturesFromRepositoryToTexturePublisher(
+        let topPublisher = mergeLayerTextures(
             layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            textureRepository: textureRepository,
             into: unselectedTopTexture,
-            with: commandBuffer
+            with: temporaryRenderCommandBuffer
         )
 
-        let selectedPublisher = renderTexturesFromRepositoryToTexturePublisher(
+        let selectedPublisher = mergeLayerTextures(
             layers: [opaqueLayer],
+            textureRepository: textureRepository,
             into: selectedTexture,
-            with: commandBuffer
+            with: temporaryRenderCommandBuffer
         )
 
         return Publishers.CombineLatest3(
             bottomPublisher,
-            topPublisher,
-            selectedPublisher
+            selectedPublisher,
+            topPublisher
         )
         .map { _, _, _ in () }
+        .flatMap { targetTexture -> AnyPublisher<Void, Error> in
+            Future { promise in
+                temporaryRenderCommandBuffer.addCompletedHandler { completedBuffer in
+                    if completedBuffer.status == .completed {
+                        promise(.success(()))
+                    } else {
+                        let error = completedBuffer.error ?? TextureRepositoryError.commandBufferFailed
+                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
+                        promise(.failure(error))
+                    }
+                }
+                temporaryRenderCommandBuffer.commit()
+            }
+            .eraseToAnyPublisher()
+        }
         .eraseToAnyPublisher()
     }
 
-    func prepareTextureForDrawing(
+    /// Merges `sourceTexture` with the destination texture from the repository and returns the combined result
+    func mergeTextures(
         sourceTexture: MTLTexture,
-        targetTextureId: UUID,
+        destinationTextureId: UUID,
         commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
@@ -169,7 +165,7 @@ extension CanvasRenderer {
         }
 
         return textureRepository.getTexture(
-            uuid: targetTextureId,
+            uuid: destinationTextureId,
             textureSize: sourceTexture.size
         )
         .tryMap { [weak self] targetTexture -> MTLTexture in
@@ -178,7 +174,7 @@ extension CanvasRenderer {
                 let targetTexture,
                 let flippedTextureBuffers = self.flippedTextureBuffers
             else {
-                throw TextureRepositoryError.notFound
+                throw TextureRepositoryError.failedToUnwrap
             }
 
             self.renderer.drawTexture(
@@ -194,24 +190,24 @@ extension CanvasRenderer {
         .eraseToAnyPublisher()
     }
 
-    /// Draws `sourceTexture` on a copy of the target texture from the repository and returns the result
-    func drawOnTextureFromRepository(
+    /// Merges the given `sourceTexture` with the destination texture retrieved from the repository using an internally created command buffer and returns the combined result
+    func mergeTexturesWithCommandBuffer(
         sourceTexture: MTLTexture,
-        targetTextureId: UUID
+        destinationTextureId: UUID
     ) -> AnyPublisher<MTLTexture, Error> {
-        guard let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
+        guard let temporaryCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
             Logger.standard.error("Failed to create command buffer")
             return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
         }
 
-        return prepareTextureForDrawing(
+        return mergeTextures(
             sourceTexture: sourceTexture,
-            targetTextureId: targetTextureId,
-            commandBuffer: temporaryRenderCommandBuffer
+            destinationTextureId: destinationTextureId,
+            commandBuffer: temporaryCommandBuffer
         )
         .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
             Future { promise in
-                temporaryRenderCommandBuffer.addCompletedHandler { completedBuffer in
+                temporaryCommandBuffer.addCompletedHandler { completedBuffer in
                     if completedBuffer.status == .completed {
                         promise(.success(targetTexture))
                     } else {
@@ -220,15 +216,16 @@ extension CanvasRenderer {
                         promise(.failure(error))
                     }
                 }
-                temporaryRenderCommandBuffer.commit()
+                temporaryCommandBuffer.commit()
             }
             .eraseToAnyPublisher()
         }
         .eraseToAnyPublisher()
     }
 
-    func renderTexturesFromRepositoryToTexturePublisher(
+    func mergeLayerTextures(
         layers: [TextureLayerModel],
+        textureRepository: TextureRepository?,
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
@@ -237,26 +234,23 @@ extension CanvasRenderer {
             return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
         }
 
-        // Clear `destinationTexture` here
+        // Clear the destination texture before merging
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 
-        // Emit `Void` as a success value when the array is empty
-        guard
-            !layers.isEmpty
-        else {
+        // If no layers, return immediately as success
+        guard !layers.isEmpty else {
             return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
+        // Fetch textures from the repository
         return textureRepository.getTextures(
             uuids: layers.map { $0.id },
             textureSize: destinationTexture.size
         )
-        .handleEvents(receiveOutput: { [weak self] textures in
-            guard let `self` else { return }
-
+        .map { [weak self] textures in
             for layer in layers {
                 if let resultTexture = textures[layer.id]?.flatMap({ $0 }) {
-                    self.renderer.mergeTexture(
+                    self?.renderer.mergeTexture(
                         texture: resultTexture,
                         alpha: layer.alpha,
                         into: destinationTexture,
@@ -264,8 +258,8 @@ extension CanvasRenderer {
                     )
                 }
             }
-        })
-        .map { _ in () }
+            return ()
+        }
         .eraseToAnyPublisher()
     }
 
@@ -274,8 +268,10 @@ extension CanvasRenderer {
 extension CanvasRenderer {
     /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
     func updateCanvasView(
+        _ canvasView: CanvasViewProtocol?,
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel,
+        backgroundColor: UIColor = .white,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard let canvasTexture else { return }
@@ -307,10 +303,10 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView(commandBuffer)
+        updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    func updateCanvasView(_ commandBuffer: MTLCommandBuffer) {
+    func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
         renderer.drawTexture(
