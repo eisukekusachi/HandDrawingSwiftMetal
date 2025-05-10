@@ -248,6 +248,18 @@ extension CanvasViewModel {
         renderer.initTextures(textureSize: textureSize)
 
         updateDrawingTextures()
+
+        textureRepository
+            .updateAllThumbnails(textureSize: textureSize)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { [weak self] completion in
+                switch completion {
+                case .finished: break
+                case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
+                }
+                self?.needsShowingActivityIndicatorSubject.send(false)
+            }, receiveValue: {})
+            .store(in: &cancellables)
     }
 
 }
