@@ -68,6 +68,7 @@ enum TextureRepositoryError: Error {
     case failedToLoadTexture
     case failedToAddTexture
     case failedToUpdateTexture
+    case commandBufferFailed
     case invalidTexture
     case repositoryDeinitialized
     case repositoryUnavailable

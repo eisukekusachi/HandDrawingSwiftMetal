@@ -29,8 +29,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                         UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!: nil
                     ],
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 ),
                 .init(
@@ -52,8 +52,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
                 .init(
                     textures: [:],
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 ),
                 .init(
@@ -115,9 +115,8 @@ final class TextureInMemoryRepositoryTests: XCTestCase {
             /// If all layer IDs in the `CanvasConfiguration` have matching texture IDs in the `TextureRepository`,
             /// the canvas will be restored using that configuration.
             /// Otherwise, a new texture will be created and the canvas will be initialized.
-            subject.resolveCanvasView(
-                from: .init(layers: condition.layers),
-                drawableSize: .init(width: 44, height: 44)
+            subject.initializeStorage(
+                from: .init(layers: condition.layers)
             )
 
             await fulfillment(of: [restoreExpectation, initializeExpectation], timeout: 1.0)

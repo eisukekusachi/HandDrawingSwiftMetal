@@ -99,11 +99,9 @@ final class CanvasRendererTests: XCTestCase {
             )
             subject.initTextures(textureSize: MTLRenderer.minimumTextureSize)
 
-            subject.updateCanvas(
+            subject.updateCanvasView(
                 realtimeDrawingTexture: condition.hasRealtimeDrawingTexture ? drawingTexture : nil,
-                selectedLayer: .init(
-                    isVisible: condition.isLayerVisible
-                ),
+                selectedLayer: .init(title: "", isVisible: condition.isLayerVisible),
                 with: commandBuffer
             )
 
@@ -140,18 +138,30 @@ final class CanvasRendererTests: XCTestCase {
         let mockRenderer = MockMTLRenderer()
 
         let canvasRenderer = CanvasRenderer(
-            textureRepository: MockTextureRepository(
-                textures: condition
-            ),
             renderer: mockRenderer
         )
-        canvasRenderer.renderTextureToLayerInRepository(
-            texture: texture,
-            targetTextureId: targetTextureId
-        ) { _ in
-            XCTAssertEqual(mockRenderer.callHistory, result)
-            expectation.fulfill()
-        }
+        canvasRenderer.setTextureRepository(MockTextureRepository(textures: condition))
+
+        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        commandBuffer.label = "commandBuffer"
+
+        _ = canvasRenderer.prepareTextureForDrawing(
+            sourceTexture: texture,
+            targetTextureId: targetTextureId,
+            commandBuffer: commandBuffer
+        )
+        .sink(
+            receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    XCTFail("Expected success, got error: \(error)")
+                }
+                XCTAssertEqual(mockRenderer.callHistory, result)
+
+                mockRenderer.callHistory.removeAll()
+                expectation.fulfill()
+            },
+            receiveValue: { _ in }
+        )
 
         wait(for: [expectation], timeout: 1.0)
     }
@@ -172,22 +182,22 @@ final class CanvasRendererTests: XCTestCase {
                 // All layers except the selected one are grouped into `topLayers` and `bottomLayers`
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 2
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 )
             ),
@@ -195,20 +205,20 @@ final class CanvasRendererTests: XCTestCase {
                 // If the selected layer is at the top, `topLayers` will be empty
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 4
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     expectationTopLayers: []
                 )
@@ -217,21 +227,21 @@ final class CanvasRendererTests: XCTestCase {
                 // If the selected layer is at the bottom, `bottomLayers` will be empty.
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ],
                     selectedLayerIndex: 0
                 ),
                 .init(
                     expectationBottomLayers: [],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!)
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: ""),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "")
                     ]
                 )
             ),
@@ -239,20 +249,20 @@ final class CanvasRendererTests: XCTestCase {
                 // Layers with `isVisible` set to `false` are excluded from both arrays.
                 .init(
                     layers: [
-                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, isVisible: false),
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, isVisible: true),
-                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, isVisible: false)
+                        .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: "", isVisible: false),
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true),
+                        .init(id: UUID(uuidString: "00000004-1234-4abc-8def-1234567890ab")!, title: "", isVisible: false)
                     ],
                     selectedLayerIndex: 2
                 ),
                 .init(
                     expectationBottomLayers: [
-                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, isVisible: true)
+                        .init(id: UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true)
                     ],
                     expectationTopLayers: [
-                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, isVisible: true)
+                        .init(id: UUID(uuidString: "00000003-1234-4abc-8def-1234567890ab")!, title: "", isVisible: true)
                     ]
                 )
             )
@@ -265,11 +275,11 @@ final class CanvasRendererTests: XCTestCase {
             let subject = CanvasRenderer()
 
             XCTAssertEqual(
-                subject.getBottomLayers(selectedIndex: condition.selectedLayerIndex, layers: condition.layers),
+                subject.bottomLayers(selectedIndex: condition.selectedLayerIndex, layers: condition.layers),
                 expectation.expectationBottomLayers
             )
             XCTAssertEqual(
-                subject.getTopLayers(selectedIndex: condition.selectedLayerIndex, layers: condition.layers),
+                subject.topLayers(selectedIndex: condition.selectedLayerIndex, layers: condition.layers),
                 expectation.expectationTopLayers
             )
         }
@@ -288,28 +298,30 @@ final class CanvasRendererTests: XCTestCase {
 
         let destinationTexture = MTLTextureCreator.makeBlankTexture(label: "destinationTexture", with: device)!
 
-        let layer = TextureLayerModel(id: sourceTextureId1)
+        let layer = TextureLayerModel(id: sourceTextureId1, title: "")
 
         let mockRenderer = MockMTLRenderer()
 
         let canvasRenderer = CanvasRenderer(
-            textureRepository: MockTextureRepository.init(
+            renderer: mockRenderer
+        )
+        canvasRenderer.setTextureRepository(
+            MockTextureRepository.init(
                 textures: [
                     sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
                     sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
                     sourceTextureId2: MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", with: device)!
                 ]
-            ),
-            renderer: mockRenderer
+            )
         )
 
         let results = [
             "clearTexture(texture: destinationTexture, with: commandBuffer)",
-            "drawTexture(texture: sourceTexture1, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: destinationTexture, with: commandBuffer)"
+            "mergeTexture(texture: sourceTexture1, alpha: 255, into: destinationTexture, with: commandBuffer)"
         ]
 
-        _ = canvasRenderer.renderTextureFromRepositoryToTexturePublisher(
-            layer: layer,
+        _ = canvasRenderer.renderTexturesFromRepositoryToTexturePublisher(
+            layers: [layer],
             into: destinationTexture,
             with: commandBuffer
         )
@@ -400,7 +412,10 @@ final class CanvasRendererTests: XCTestCase {
             let results = testCase.1
 
             let canvasRenderer = CanvasRenderer(
-                textureRepository: MockTextureRepository.init(
+                renderer: mockRenderer
+            )
+            canvasRenderer.setTextureRepository(
+                MockTextureRepository.init(
                     textures: [
                         sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
                         sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
@@ -408,8 +423,7 @@ final class CanvasRendererTests: XCTestCase {
                         sourceTextureId3: MTLTextureCreator.makeBlankTexture(label: "sourceTexture3", with: device)!,
                         sourceTextureId4: MTLTextureCreator.makeBlankTexture(label: "sourceTexture4", with: device)!
                     ]
-                ),
-                renderer: mockRenderer
+                )
             )
 
             let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!

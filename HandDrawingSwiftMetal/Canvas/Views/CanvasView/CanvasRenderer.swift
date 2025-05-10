@@ -158,10 +158,10 @@ extension CanvasRenderer {
         .eraseToAnyPublisher()
     }
 
-    /// Draws `sourceTexture` on a copy of the target texture from the repository and returns the result
-    func drawOnTextureFromRepository(
+    func prepareTextureForDrawing(
         sourceTexture: MTLTexture,
-        targetTextureId: UUID
+        targetTextureId: UUID,
+        commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
             Logger.standard.warning("The texture repository is unavailable")
@@ -172,31 +172,55 @@ extension CanvasRenderer {
             uuid: targetTextureId,
             textureSize: sourceTexture.size
         )
-        .flatMap { [weak self] targetTexture -> AnyPublisher<MTLTexture, Error> in
+        .tryMap { [weak self] targetTexture -> MTLTexture in
             guard
                 let `self`,
                 let targetTexture,
-                let flippedTextureBuffers = self.flippedTextureBuffers,
-                let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
+                let flippedTextureBuffers = self.flippedTextureBuffers
             else {
-                return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+                throw TextureRepositoryError.notFound
             }
-
-            temporaryRenderCommandBuffer.label = "commandBuffer"
 
             self.renderer.drawTexture(
                 texture: sourceTexture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
                 on: targetTexture,
-                with: temporaryRenderCommandBuffer
+                with: commandBuffer
             )
-            temporaryRenderCommandBuffer.commit()
 
-            return Future { promise in
-                temporaryRenderCommandBuffer.addCompletedHandler { _ in
-                    promise(.success(targetTexture))
+            return targetTexture
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Draws `sourceTexture` on a copy of the target texture from the repository and returns the result
+    func drawOnTextureFromRepository(
+        sourceTexture: MTLTexture,
+        targetTextureId: UUID
+    ) -> AnyPublisher<MTLTexture, Error> {
+        guard let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
+            Logger.standard.error("Failed to create command buffer")
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        }
+
+        return prepareTextureForDrawing(
+            sourceTexture: sourceTexture,
+            targetTextureId: targetTextureId,
+            commandBuffer: temporaryRenderCommandBuffer
+        )
+        .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
+            Future { promise in
+                temporaryRenderCommandBuffer.addCompletedHandler { completedBuffer in
+                    if completedBuffer.status == .completed {
+                        promise(.success(targetTexture))
+                    } else {
+                        let error = completedBuffer.error ?? TextureRepositoryError.commandBufferFailed
+                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
+                        promise(.failure(error))
+                    }
                 }
+                temporaryRenderCommandBuffer.commit()
             }
             .eraseToAnyPublisher()
         }
