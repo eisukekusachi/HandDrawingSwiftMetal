@@ -282,10 +282,11 @@ final class CanvasRenderer: ObservableObject {
     func refreshCanvasView(_ commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
-        MTLRenderer.shared.drawTexture(
+        renderer.drawTexture(
             texture: canvasTexture,
             matrix: matrix,
             frameSize: frameSize,
+            backgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
             on: renderTexture,
             device: device,
             with: commandBuffer

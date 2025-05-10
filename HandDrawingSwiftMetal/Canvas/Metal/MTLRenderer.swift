@@ -24,6 +24,16 @@ protocol MTLRendering {
     )
 
     func drawTexture(
+        texture: MTLTexture?,
+        matrix: CGAffineTransform,
+        frameSize: CGSize,
+        backgroundColor: UIColor,
+        on destinationTexture: MTLTexture,
+        device: MTLDevice,
+        with commandBuffer: MTLCommandBuffer
+    )
+
+    func drawTexture(
         grayscaleTexture: MTLTexture,
         color rgb: (Int, Int, Int),
         on destinationTexture: MTLTexture,
@@ -114,7 +124,7 @@ final class MTLRenderer: MTLRendering {
         texture: MTLTexture?,
         matrix: CGAffineTransform,
         frameSize: CGSize,
-        backgroundColor: UIColor = UIColor(rgb: Constants.blankAreaBackgroundColor),
+        backgroundColor: UIColor,
         on destinationTexture: MTLTexture,
         device: MTLDevice,
         with commandBuffer: MTLCommandBuffer
