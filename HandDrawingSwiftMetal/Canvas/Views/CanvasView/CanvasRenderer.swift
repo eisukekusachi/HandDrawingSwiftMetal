@@ -92,13 +92,6 @@ final class CanvasRenderer: ObservableObject {
         self.canvasTexture?.label = "canvasTexture"
     }
 
-    func getBottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
-    }
-    func getTopLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
-    }
-
     func setCanvas(_ canvasView: CanvasViewProtocol?) {
         self.canvasView = canvasView
     }
@@ -109,6 +102,16 @@ final class CanvasRenderer: ObservableObject {
 
     func resetCommandBuffer() {
         canvasView?.resetCommandBuffer()
+    }
+
+}
+
+extension CanvasRenderer {
+    func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
+    }
+    func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
     /// Updates the drawing textures. This textures are pre-merged from layers necessary for drawing.
@@ -129,13 +132,13 @@ final class CanvasRenderer: ObservableObject {
         opaqueLayer.alpha = 255
 
         let bottomPublisher = renderTexturesFromRepositoryToTexturePublisher(
-            layers: getBottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
             into: unselectedBottomTexture,
             with: commandBuffer
         )
 
         let topPublisher = renderTexturesFromRepositoryToTexturePublisher(
-            layers: getTopLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
             into: unselectedTopTexture,
             with: commandBuffer
         )
@@ -161,7 +164,8 @@ final class CanvasRenderer: ObservableObject {
         targetTextureId: UUID
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+            Logger.standard.warning("The texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
         }
 
         return textureRepository.getTexture(
@@ -170,7 +174,7 @@ final class CanvasRenderer: ObservableObject {
         )
         .flatMap { [weak self] targetTexture -> AnyPublisher<MTLTexture, Error> in
             guard
-                let self = self,
+                let `self`,
                 let targetTexture,
                 let flippedTextureBuffers = self.flippedTextureBuffers,
                 let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer()
@@ -205,7 +209,7 @@ final class CanvasRenderer: ObservableObject {
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
         guard let textureRepository else {
-            Logger.standard.warning("Texture repository is unavailable")
+            Logger.standard.warning("The texture repository is unavailable")
             return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
         }
 
