@@ -115,12 +115,6 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
-        return Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         callHistory.append("removeTexture(\(uuid))")
         return Just(uuid).setFailureType(to: Error.self)
@@ -135,15 +129,21 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+        callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
+        return Just(uuid)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
         return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-        return Just(uuid)
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

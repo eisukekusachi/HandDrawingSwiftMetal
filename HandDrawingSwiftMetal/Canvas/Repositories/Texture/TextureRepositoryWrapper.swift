@@ -59,10 +59,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.getTextures(uuids: uuids, textureSize: textureSize)
     }
 
-    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
-        repository.loadNewTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
-    }
-
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.removeTexture(uuid)
     }
@@ -71,12 +67,16 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.removeAll()
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        repository.updateAllThumbnails(textureSize: textureSize)
-    }
-
     func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
         repository.updateTexture(texture: texture, for: uuid)
+    }
+
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        repository.updateAllTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        repository.updateAllThumbnails(textureSize: textureSize)
     }
 
 }

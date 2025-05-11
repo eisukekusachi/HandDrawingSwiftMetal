@@ -115,7 +115,7 @@ final class DocumentsLocalRepository: LocalRepository {
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
-            return textureRepository.loadNewTextures(
+            return textureRepository.updateAllTextures(
                 uuids: configuration.layers.map { $0.id },
                 textureSize: textureSize,
                 from: URL.tmpFolderURL

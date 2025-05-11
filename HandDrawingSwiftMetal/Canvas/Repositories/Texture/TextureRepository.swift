@@ -43,9 +43,6 @@ protocol TextureRepository {
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
-    /// Loads new textures for the given uuids using a directory URL
-    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
-
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
@@ -54,6 +51,9 @@ protocol TextureRepository {
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+
+    /// Updates all textures for the given uuids using a directory URL
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
 
     /// Updates all thumbnails
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>

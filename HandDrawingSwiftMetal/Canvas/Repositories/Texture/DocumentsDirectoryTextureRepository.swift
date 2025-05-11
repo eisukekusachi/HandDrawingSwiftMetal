@@ -242,42 +242,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            // Delete all files
-            self.resetDirectory(&self.directoryUrl)
-
-            do {
-                try uuids.forEach { uuid in
-                    let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    if let hexadecimalData = textureData.encodedHexadecimals,
-                       let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: self.device
-                       ) {
-                        try FileOutputManager.saveTextureAsData(
-                            bytes: texture.bytes,
-                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
-                        )
-
-                        self.textures.append(uuid)
-                        self.setThumbnail(texture: texture, for: uuid)
-                    }
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             guard let `self` else { return }
@@ -330,6 +294,42 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             } catch {
                 Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
                 promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            // Delete all files
+            self.resetDirectory(&self.directoryUrl)
+
+            do {
+                try uuids.forEach { uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    if let hexadecimalData = textureData.encodedHexadecimals,
+                       let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: self.device
+                       ) {
+                        try FileOutputManager.saveTextureAsData(
+                            bytes: texture.bytes,
+                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
+                        )
+
+                        self.textures.append(uuid)
+                        self.setThumbnail(texture: texture, for: uuid)
+                    }
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
             }
         }
         .eraseToAnyPublisher()

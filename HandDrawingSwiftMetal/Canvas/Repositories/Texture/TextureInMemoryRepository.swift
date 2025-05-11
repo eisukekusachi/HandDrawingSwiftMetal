@@ -256,7 +256,36 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadNewTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        textures.removeValue(forKey: uuid)
+        thumbnails.removeValue(forKey: uuid)
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
+    }
+    func removeAll() {
+        textures = [:]
+        thumbnails = [:]
+    }
+
+    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
+        thumbnails[uuid] = texture?.makeThumbnail()
+        thumbnailUpdateRequestedSubject.send(uuid)
+    }
+
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Future { [weak self] promise in
+            if let texture {
+                self?.textures[uuid] = texture
+                self?.setThumbnail(texture: texture, for: uuid)
+
+                promise(.success(uuid))
+            } else {
+                promise(.failure(TextureRepositoryError.failedToAddTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 // Delete all data
@@ -284,35 +313,6 @@ extension TextureInMemoryRepository: TextureRepository {
                 promise(.success(()))
             } catch {
                 promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        textures.removeValue(forKey: uuid)
-        thumbnails.removeValue(forKey: uuid)
-        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
-    func removeAll() {
-        textures = [:]
-        thumbnails = [:]
-    }
-
-    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        thumbnails[uuid] = texture?.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
-    }
-
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Future { [weak self] promise in
-            if let texture {
-                self?.textures[uuid] = texture
-                self?.setThumbnail(texture: texture, for: uuid)
-
-                promise(.success(uuid))
-            } else {
-                promise(.failure(TextureRepositoryError.failedToAddTexture))
             }
         }
         .eraseToAnyPublisher()
