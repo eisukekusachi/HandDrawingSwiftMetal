@@ -22,7 +22,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
@@ -57,12 +57,12 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
 extension DocumentsDirectoryTextureRepository: TextureRepository {
 
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
     }
 
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
@@ -97,7 +97,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
                     // ids are retained if texture filenames in the directory match the ids of the configuration.layers
                     self.textures = configuration.layers.map { $0.id }
 
-                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
+                    self.storageInitializationCompletedSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
@@ -130,7 +130,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
         }, receiveValue: { [weak self] in
             self?._textureSize = textureSize
 
-            self?.canvasInitializationUsingConfigurationSubject.send(
+            self?.storageInitializationCompletedSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

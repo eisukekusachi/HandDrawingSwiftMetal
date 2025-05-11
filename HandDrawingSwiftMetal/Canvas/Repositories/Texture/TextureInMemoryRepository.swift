@@ -25,7 +25,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
@@ -56,12 +56,12 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
-    }
-
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
     }
 
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
@@ -92,7 +92,7 @@ extension TextureInMemoryRepository: TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
-                    self.canvasInitializationUsingConfigurationSubject.send(configuration)
+                    self.storageInitializationCompletedSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
                 }
@@ -126,7 +126,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
             self?._textureSize = textureSize
 
-            self?.canvasInitializationUsingConfigurationSubject.send(
+            self?.storageInitializationCompletedSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })

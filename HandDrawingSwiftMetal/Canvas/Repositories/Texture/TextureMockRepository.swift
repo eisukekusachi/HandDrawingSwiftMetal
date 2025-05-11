@@ -16,8 +16,8 @@ final class TextureMockRepository: TextureRepository {
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
     }
 
     /// Emit `UUID` when the thumbnail is updated
@@ -27,7 +27,7 @@ final class TextureMockRepository: TextureRepository {
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 

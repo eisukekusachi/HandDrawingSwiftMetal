@@ -19,8 +19,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         repository.storageInitializationWithNewTexturePublisher
     }
-    var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.canvasInitializationUsingConfigurationPublisher
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        repository.storageInitializationCompletedPublisher
     }
 
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {

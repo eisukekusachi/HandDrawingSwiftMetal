@@ -204,15 +204,7 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Restore the canvas using CanvasConfiguration
-        textureRepository.canvasInitializationUsingConfigurationPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.completeCanvasSetup(configuration)
-            }
-            .store(in: &cancellables)
-
-        // Initialize the canvas using the textureSize
+        // Initialize the texture storage using the specified texture size.
         textureRepository.storageInitializationWithNewTexturePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
@@ -220,6 +212,14 @@ final class CanvasViewModel {
                 self?.textureRepository.initializeStorageWithNewTexture(
                     configuration.getTextureSize(drawableSize: drawableSize)
                 )
+            }
+            .store(in: &cancellables)
+
+        // Complete the canvas setup after the texture storage is initialized.
+        textureRepository.storageInitializationCompletedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] configuration in
+                self?.completeCanvasSetup(configuration)
             }
             .store(in: &cancellables)
 
