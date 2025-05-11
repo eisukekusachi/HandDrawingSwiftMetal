@@ -101,7 +101,7 @@ final class CanvasViewModel {
 
     private let canvasSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
-    private let activityIndicatorShowRequestedSubject = CurrentValueSubject<Bool, Never>(false)
+    private let activityIndicatorShowRequestedSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
 
