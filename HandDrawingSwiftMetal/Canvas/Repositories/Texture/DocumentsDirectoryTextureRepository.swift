@@ -12,7 +12,7 @@ import SwiftUI
 /// A repository that manages on-disk textures
 final class DocumentsDirectoryTextureRepository: ObservableObject {
 
-    private(set) var textures: [UUID] = []
+    private(set) var textures: Set<UUID> = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
     private static let storageName = "TextureStorage"
@@ -39,7 +39,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
     private var _textureSize: CGSize = .zero
 
     init(
-        textures: [UUID] = [],
+        textures: Set<UUID> = [],
         renderer: (any MTLRendering) = MTLRenderer.shared
     ) {
         self.textures = textures
@@ -95,7 +95,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
                 if allExist {
                     // ids are retained if texture filenames in the directory match the ids of the configuration.layers
-                    self.textures = configuration.layers.map { $0.id }
+                    self.textures = Set(configuration.layers.map { $0.id })
 
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
@@ -242,7 +242,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
                             to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
                         )
 
-                        self.textures.append(uuid)
+                        self.textures.insert(uuid)
                         self.setThumbnail(texture: texture, for: uuid)
                     }
                 }
@@ -337,7 +337,7 @@ extension DocumentsDirectoryTextureRepository {
                         to: directoryUrl.appendingPathComponent(uuid.uuidString)
                     )
 
-                    self.textures.append(uuid)
+                    self.textures.insert(uuid)
                     self.setThumbnail(texture: texture, for: uuid)
 
                     self._textureSize = textureSize
