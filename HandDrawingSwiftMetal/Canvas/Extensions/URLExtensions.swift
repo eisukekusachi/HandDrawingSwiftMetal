@@ -13,6 +13,7 @@ extension URL {
         URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
     }
 
+    /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     }
@@ -36,10 +37,6 @@ extension URL {
 
     var fileName: String {
         self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
-    }
-
-    static var workInProgress: URL {
-        URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
     }
 
     func allFileURLs(suffix: String = "") -> [URL] {
