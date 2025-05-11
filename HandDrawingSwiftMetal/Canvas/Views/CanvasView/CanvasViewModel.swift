@@ -552,10 +552,14 @@ extension CanvasViewModel {
     /// Updates the drawing textures, which are pre-merged from layer textures to maintain high drawing performance even when the number of layers increases.
     /// It should be invoked when the layer state changes.
     private func updateDrawingTextures() {
+        guard
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
         renderer.updateDrawingTextures(
-            canvasState: canvasState
+            canvasState: canvasState,
+            with: commandBuffer
         )
-        .subscribe(on: DispatchQueue.global(qos: .userInitiated))
         .receive(on: DispatchQueue.main)
         .sink(
             receiveCompletion: { [weak self] _ in

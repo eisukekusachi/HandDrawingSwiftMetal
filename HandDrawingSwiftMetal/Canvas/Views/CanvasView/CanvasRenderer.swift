@@ -90,13 +90,9 @@ extension CanvasRenderer {
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
-        canvasState: CanvasState
+        canvasState: CanvasState,
+        with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
-        guard let temporaryRenderCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
-            Logger.standard.error("Failed to create command buffer")
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-        }
-
         guard
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
@@ -112,21 +108,21 @@ extension CanvasRenderer {
             layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
             textureRepository: textureRepository,
             into: unselectedBottomTexture,
-            with: temporaryRenderCommandBuffer
+            with: commandBuffer
         )
 
         let topPublisher = mergeLayerTextures(
             layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
             textureRepository: textureRepository,
             into: unselectedTopTexture,
-            with: temporaryRenderCommandBuffer
+            with: commandBuffer
         )
 
         let selectedPublisher = mergeLayerTextures(
             layers: [opaqueLayer],
             textureRepository: textureRepository,
             into: selectedTexture,
-            with: temporaryRenderCommandBuffer
+            with: commandBuffer
         )
 
         return Publishers.CombineLatest3(
@@ -135,21 +131,6 @@ extension CanvasRenderer {
             topPublisher
         )
         .map { _, _, _ in () }
-        .flatMap { targetTexture -> AnyPublisher<Void, Error> in
-            Future { promise in
-                temporaryRenderCommandBuffer.addCompletedHandler { completedBuffer in
-                    if completedBuffer.status == .completed {
-                        promise(.success(()))
-                    } else {
-                        let error = completedBuffer.error ?? TextureRepositoryError.commandBufferFailed
-                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
-                        promise(.failure(error))
-                    }
-                }
-                temporaryRenderCommandBuffer.commit()
-            }
-            .eraseToAnyPublisher()
-        }
         .eraseToAnyPublisher()
     }
 
