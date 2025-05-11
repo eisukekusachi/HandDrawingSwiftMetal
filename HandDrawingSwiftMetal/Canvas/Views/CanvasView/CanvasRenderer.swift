@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
-import MetalKit
 import Combine
+import MetalKit
 
 /// A class for merging the drawing texture and the textures of `TextureRepository` to render onto the canvas.
 /// By pre-merging the layer textures into the textures from `CanvasRenderer` and using them,  it stabilizes drawing performance.
@@ -16,9 +16,9 @@ final class CanvasRenderer: ObservableObject {
 
     var matrix: CGAffineTransform = .identity
 
-    private var textureRepository: TextureRepository?
-
     private let renderer: MTLRendering!
+
+    private var textureRepository: TextureRepository?
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
@@ -153,7 +153,7 @@ extension CanvasRenderer {
         .eraseToAnyPublisher()
     }
 
-    /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
+    /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     func updateCanvasView(
         _ canvasView: CanvasViewProtocol?,
         realtimeDrawingTexture: MTLTexture? = nil,
@@ -193,6 +193,7 @@ extension CanvasRenderer {
         updateCanvasView(canvasView, with: commandBuffer)
     }
 
+    /// Updates the canvas
     func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
@@ -211,10 +212,11 @@ extension CanvasRenderer {
 }
 
 extension CanvasRenderer {
-    /// Merges `sourceTexture` with the destination texture from the repository and returns the combined result
+    /// Merges `sourceTexture` with the destination texture from `textureRepository` and returns the combined result
     func mergeTextures(
         sourceTexture: MTLTexture,
         destinationTextureId: UUID,
+        textureRepository: TextureRepository?,
         commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
@@ -253,6 +255,11 @@ extension CanvasRenderer {
         sourceTexture: MTLTexture,
         destinationTextureId: UUID
     ) -> AnyPublisher<MTLTexture, Error> {
+        guard let textureRepository else {
+            Logger.standard.warning("The texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+        }
+
         guard let temporaryCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
             Logger.standard.error("Failed to create command buffer")
             return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
@@ -261,6 +268,7 @@ extension CanvasRenderer {
         return mergeTextures(
             sourceTexture: sourceTexture,
             destinationTextureId: destinationTextureId,
+            textureRepository: textureRepository,
             commandBuffer: temporaryCommandBuffer
         )
         .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
