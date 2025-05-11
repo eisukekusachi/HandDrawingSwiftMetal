@@ -56,12 +56,12 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
 extension DocumentsDirectoryTextureRepository: TextureRepository {
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
-
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
@@ -136,55 +136,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
         .store(in: &cancellables)
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            do {
-                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device) {
-
-                    try FileOutputManager.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    self.textures.append(uuid)
-                    self.setThumbnail(texture: texture, for: uuid)
-
-                    self._textureSize = textureSize
-
-                    promise(.success(()))
-                } else {
-                    promise(.failure(TextureRepositoryError.failedToUnwrap))
-                }
-
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
-        Future<Bool, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directoryUrl, includingPropertiesForKeys: nil)) ?? []
-
-            promise(
-                .success(
-                    !fileNames.isEmpty &&
-                    Set(fileURLs.map { $0.lastPathComponent }) == Set(fileNames)
-                )
-            )
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
-    }
-
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Future<MTLTexture?, Error> { [weak self] promise in
             guard let `self` else { return }
@@ -242,6 +193,15 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    func getThumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
+    func removeAll() {
+        try? FileManager.clearContents(of: directoryUrl)
+        thumbnails = [:]
+    }
+
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             guard let `self` else { return }
@@ -253,39 +213,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             }
 
             promise(.success(uuid))
-        }
-        .eraseToAnyPublisher()
-    }
-    func removeAll() {
-        try? FileManager.clearContents(of: directoryUrl)
-        thumbnails = [:]
-    }
-
-    /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Future { [weak self] promise in
-            guard
-                let `self`,
-                let texture
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            do {
-                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
-
-                try FileOutputManager.saveTextureAsData(
-                    bytes: texture.bytes,
-                    to: fileURL
-                )
-                self.setThumbnail(texture: texture, for: uuid)
-
-                promise(.success(uuid))
-            } catch {
-                Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
-                promise(.failure(FileOutputError.failedToUpdateTexture))
-            }
         }
         .eraseToAnyPublisher()
     }
@@ -350,10 +277,38 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    /// Updates an existing texture for UUID
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Future { [weak self] promise in
+            guard
+                let `self`,
+                let texture
+            else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            do {
+                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
+                try FileOutputManager.saveTextureAsData(
+                    bytes: texture.bytes,
+                    to: fileURL
+                )
+                self.setThumbnail(texture: texture, for: uuid)
+
+                promise(.success(uuid))
+            } catch {
+                Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
+                promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
 }
 
 extension DocumentsDirectoryTextureRepository {
-
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
     private func createDirectory(_ url: inout URL) {
@@ -367,6 +322,51 @@ extension DocumentsDirectoryTextureRepository {
         } catch {
             Logger.standard.error("Failed to create texture storage directory: \(error)")
         }
+    }
+
+    private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            do {
+                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device) {
+
+                    try FileOutputManager.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textures.append(uuid)
+                    self.setThumbnail(texture: texture, for: uuid)
+
+                    self._textureSize = textureSize
+
+                    promise(.success(()))
+                } else {
+                    promise(.failure(TextureRepositoryError.failedToUnwrap))
+                }
+
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
+        Future<Bool, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directoryUrl, includingPropertiesForKeys: nil)) ?? []
+
+            promise(
+                .success(
+                    !fileNames.isEmpty &&
+                    Set(fileURLs.map { $0.lastPathComponent }) == Set(fileNames)
+                )
+            )
+        }
+        .eraseToAnyPublisher()
     }
 
     // If the directory already exists, delete it and create a new one

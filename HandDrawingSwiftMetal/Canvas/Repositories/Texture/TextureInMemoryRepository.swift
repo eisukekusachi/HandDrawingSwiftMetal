@@ -55,11 +55,12 @@ final class TextureInMemoryRepository: ObservableObject {
 
 extension TextureInMemoryRepository: TextureRepository {
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
@@ -129,21 +130,6 @@ extension TextureInMemoryRepository: TextureRepository {
             )
         })
         .store(in: &cancellables)
-    }
-
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
-        Future<Bool, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
-
-            promise(.success(
-                !fileNames.isEmpty &&
-                hasAllTextures &&
-                Set(self.textures.keys.compactMap{ $0.uuidString }) == Set(fileNames))
-            )
-        }
-        .eraseToAnyPublisher()
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {
@@ -276,6 +262,21 @@ extension TextureInMemoryRepository {
             self._textureSize = textureSize
 
             promise(.success(()))
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
+        Future<Bool, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
+
+            promise(.success(
+                !fileNames.isEmpty &&
+                hasAllTextures &&
+                Set(self.textures.keys.compactMap{ $0.uuidString }) == Set(fileNames))
+            )
         }
         .eraseToAnyPublisher()
     }
