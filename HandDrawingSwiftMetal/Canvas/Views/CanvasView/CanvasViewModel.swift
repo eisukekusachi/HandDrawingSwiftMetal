@@ -62,12 +62,15 @@ final class CanvasViewModel {
         needsRedoButtonStateUpdateSubject.eraseToAnyPublisher()
     }
 
+    /// A rendering target
+    private var canvasView: CanvasViewProtocol?
+
+    /// Maintains the state of the canvas
     private let canvasState: CanvasState = .init(
         CanvasConfiguration()
     )
 
-    private var canvasView: CanvasViewProtocol?
-
+    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `DocumentsDirectoryTextureRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
     /// A class for handling finger input values
