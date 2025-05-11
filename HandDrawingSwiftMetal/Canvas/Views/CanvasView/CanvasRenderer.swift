@@ -153,6 +153,64 @@ extension CanvasRenderer {
         .eraseToAnyPublisher()
     }
 
+    /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
+    func updateCanvasView(
+        _ canvasView: CanvasViewProtocol?,
+        realtimeDrawingTexture: MTLTexture? = nil,
+        selectedLayer: TextureLayerModel,
+        backgroundColor: UIColor = .white,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let canvasTexture else { return }
+
+        renderer.fillTexture(
+            texture: canvasTexture,
+            withRGB: backgroundColor.rgb,
+            with: commandBuffer
+        )
+
+        renderer.mergeTexture(
+            texture: unselectedBottomTexture,
+            into: canvasTexture,
+            with: commandBuffer
+        )
+
+        if selectedLayer.isVisible {
+            renderer.mergeTexture(
+                texture: realtimeDrawingTexture ?? selectedTexture,
+                alpha: selectedLayer.alpha,
+                into: canvasTexture,
+                with: commandBuffer
+            )
+        }
+
+        renderer.mergeTexture(
+            texture: unselectedTopTexture,
+            into: canvasTexture,
+            with: commandBuffer
+        )
+
+        updateCanvasView(canvasView, with: commandBuffer)
+    }
+
+    func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
+        guard let renderTexture = canvasView?.renderTexture else { return }
+
+        renderer.drawTexture(
+            texture: canvasTexture,
+            matrix: matrix,
+            frameSize: frameSize,
+            backgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
+            on: renderTexture,
+            device: device,
+            with: commandBuffer
+        )
+        canvasView?.setNeedsDisplay()
+    }
+
+}
+
+extension CanvasRenderer {
     /// Merges `sourceTexture` with the destination texture from the repository and returns the combined result
     func mergeTextures(
         sourceTexture: MTLTexture,
@@ -261,64 +319,6 @@ extension CanvasRenderer {
             return ()
         }
         .eraseToAnyPublisher()
-    }
-
-}
-
-extension CanvasRenderer {
-    /// Updates the canvas using `unselectedTopTexture` and `unselectedBottomTexture`
-    func updateCanvasView(
-        _ canvasView: CanvasViewProtocol?,
-        realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel,
-        backgroundColor: UIColor = .white,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let canvasTexture else { return }
-
-        renderer.fillTexture(
-            texture: canvasTexture,
-            withRGB: backgroundColor.rgb,
-            with: commandBuffer
-        )
-
-        renderer.mergeTexture(
-            texture: unselectedBottomTexture,
-            into: canvasTexture,
-            with: commandBuffer
-        )
-
-        if selectedLayer.isVisible {
-            renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedTexture,
-                alpha: selectedLayer.alpha,
-                into: canvasTexture,
-                with: commandBuffer
-            )
-        }
-
-        renderer.mergeTexture(
-            texture: unselectedTopTexture,
-            into: canvasTexture,
-            with: commandBuffer
-        )
-
-        updateCanvasView(canvasView, with: commandBuffer)
-    }
-
-    func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
-        guard let renderTexture = canvasView?.renderTexture else { return }
-
-        renderer.drawTexture(
-            texture: canvasTexture,
-            matrix: matrix,
-            frameSize: frameSize,
-            backgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
-            on: renderTexture,
-            device: device,
-            with: commandBuffer
-        )
-        canvasView?.setNeedsDisplay()
     }
 
 }
