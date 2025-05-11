@@ -104,17 +104,6 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
-        callHistory.append("loadTextures(\(uuids.count) uuids)")
-        return Just(
-            uuids.reduce(into: [:]) { dict, uuid in
-                dict[uuid] = textures[uuid] ?? nil
-            }
-        )
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         callHistory.append("removeTexture(\(uuid))")
         return Just(uuid).setFailureType(to: Error.self)

@@ -202,26 +202,6 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID: MTLTexture?], Error> {
-        let publishers = uuids.map { uuid in
-            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
-                guard let texture = self?.textures[uuid] else {
-                    promise(.failure(TextureRepositoryError.failedToLoadTexture))
-                    return
-                }
-                promise(.success((uuid, texture)))
-            }
-            .eraseToAnyPublisher()
-        }
-
-        return Publishers.MergeMany(publishers)
-            .collect()
-            .map { pairs in
-                Dictionary(uniqueKeysWithValues: pairs)
-            }
-            .eraseToAnyPublisher()
-    }
-
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         textures.removeValue(forKey: uuid)
         thumbnails.removeValue(forKey: uuid)

@@ -74,13 +74,6 @@ final class TextureMockRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func loadTextures(_ uuids: [UUID]) -> AnyPublisher<[UUID : MTLTexture?], Error> {
-        let result = uuids.reduce(into: [UUID: MTLTexture?]()) { $0[$1] = nil }
-        return Just(result)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
