@@ -261,15 +261,6 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
         thumbnails = [:]
     }
 
-    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        guard let texture else {
-            Logger.standard.warning("Failed to create thumbnail for \(uuid)")
-            return
-        }
-        thumbnails[uuid] = texture.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
-    }
-
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
@@ -362,6 +353,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 }
 
 extension DocumentsDirectoryTextureRepository {
+
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
     private func createDirectory(_ url: inout URL) {
@@ -389,6 +381,15 @@ extension DocumentsDirectoryTextureRepository {
         } catch {
             Logger.standard.error("Failed to reset texture storage directory: \(error)")
         }
+    }
+
+    private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
+        guard let texture else {
+            Logger.standard.warning("Failed to create thumbnail for \(uuid)")
+            return
+        }
+        thumbnails[uuid] = texture.makeThumbnail()
+        thumbnailUpdateRequestedSubject.send(uuid)
     }
 
 }
