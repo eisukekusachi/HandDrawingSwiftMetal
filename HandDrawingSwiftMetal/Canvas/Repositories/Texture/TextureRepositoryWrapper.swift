@@ -43,10 +43,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.initializeStorage(from: configuration)
     }
 
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
-        repository.hasAllTextures(fileNames: fileNames)
-    }
-
     func initializeStorageWithNewTexture(_ textureSize: CGSize) {
         repository.initializeStorageWithNewTexture(textureSize)
     }
@@ -73,10 +69,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
 
     func removeAll() {
         repository.removeAll()
-    }
-
-    func setThumbnail(texture: (any MTLTexture)?, for uuid: UUID) {
-        repository.setThumbnail(texture: texture, for: uuid)
     }
 
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {

@@ -34,9 +34,6 @@ protocol TextureRepository {
     /// Initialized the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
-    /// Checks if all specified textures exist
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error>
-
     /// Retrieves the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?
 
@@ -54,9 +51,6 @@ protocol TextureRepository {
 
     /// Removes all managed textures
     func removeAll()
-
-    /// Sets a thumbnail image for UUID based on the provided texture
-    func setThumbnail(texture: MTLTexture?, for uuid: UUID)
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
