@@ -11,8 +11,6 @@ import UIKit
 /// Manage the state of the canvas
 final class CanvasState: ObservableObject {
 
-    static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
-
     /// A name of the file to be saved
     @Published var projectName: String = Calendar.currentDate
 
@@ -35,6 +33,8 @@ final class CanvasState: ObservableObject {
 
     /// Subject to publish updates for the entire canvas, including all textures
     let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
     init(_ configuration: CanvasConfiguration) {
         setData(configuration)

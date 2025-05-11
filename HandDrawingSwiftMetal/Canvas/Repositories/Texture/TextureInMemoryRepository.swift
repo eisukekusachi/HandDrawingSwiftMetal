@@ -12,14 +12,6 @@ import SwiftUI
 /// A repository that manages in-memory textures
 final class TextureInMemoryRepository: ObservableObject {
 
-    var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
-        didSet {
-            if drawableTextureSize < MTLRenderer.minimumTextureSize {
-                drawableTextureSize = MTLRenderer.minimumTextureSize
-            }
-        }
-    }
-
     private(set) var textures: [UUID: MTLTexture?] = [:]
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 

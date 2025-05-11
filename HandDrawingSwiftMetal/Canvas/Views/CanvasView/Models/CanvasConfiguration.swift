@@ -11,7 +11,6 @@ struct CanvasConfiguration {
 
     var projectName: String = Calendar.currentDate
 
-    // If textureSize is nil, the size of the device’s drawable will be used instead
     var textureSize: CGSize?
 
     var layerIndex: Int = 0
@@ -47,14 +46,14 @@ extension CanvasConfiguration {
         self.eraserDiameter = entity.eraserDiameter
     }
 
-    func getTextureSize(drawableSize: CGSize) -> CGSize {
-        textureSize ?? drawableSize
-    }
-
-    static func createNewConfiguration(_ canvasState: CanvasState) -> CanvasConfiguration {
-        .init(
-            textureSize: canvasState.textureSize
-        )
+    func createConfigurationWithValidTextureSize(_ newTextureSize: CGSize) -> Self {
+        var configuration = self
+        if configuration.textureSize?.width ?? .zero < MTLRenderer.minimumTextureSize.width ||
+            configuration.textureSize?.height ?? .zero < MTLRenderer.minimumTextureSize.height
+        {
+            configuration.textureSize = newTextureSize
+        }
+        return configuration
     }
 
 }

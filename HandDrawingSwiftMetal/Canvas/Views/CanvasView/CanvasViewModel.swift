@@ -210,7 +210,7 @@ final class CanvasViewModel {
             .sink { [weak self] configuration in
                 guard let drawableSize = self?.canvasView?.renderTexture?.size else { return }
                 self?.textureRepository.initializeStorageWithNewTexture(
-                    configuration.getTextureSize(drawableSize: drawableSize)
+                    configuration.textureSize ?? drawableSize
                 )
             }
             .store(in: &cancellables)
@@ -286,7 +286,7 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !textureRepository.hasTexturesBeenInitialized {
-            initializeCanvas(using: canvasStateStorage?.configuration ?? configuration)
+            initializeCanvas(using: configuration.createConfigurationWithValidTextureSize(drawableTextureSize))
         }
     }
 
@@ -383,7 +383,7 @@ extension CanvasViewModel {
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
         initializeCanvas(
-            using: CanvasConfiguration.createNewConfiguration(canvasState)
+            using: CanvasConfiguration().createConfigurationWithValidTextureSize(canvasState.textureSize)
         )
     }
 
