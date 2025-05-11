@@ -20,6 +20,10 @@ extension URL {
     /// A temporary folder URL used for file input and output
     static let tmpFolderURL = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
+    static func zipFileURL(projectName: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
+    }
+
     static var zipSuffix: String {
         "zip"
     }
@@ -52,10 +56,6 @@ extension URL {
             }
         }
         return []
-    }
-
-    static func getZipFileURL(projectName: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
     }
 
 }

@@ -605,7 +605,7 @@ extension CanvasViewModel {
             renderTexture: canvasTexture,
             canvasState: canvasState,
             textureRepository: textureRepository,
-            to: URL.getZipFileURL(projectName: canvasState.projectName)
+            to: URL.zipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.needsShowingActivityIndicatorSubject.send(true) },
