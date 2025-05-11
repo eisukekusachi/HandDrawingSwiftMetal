@@ -12,7 +12,7 @@ import SwiftUI
 /// A repository that manages on-disk textures
 final class DocumentsDirectoryTextureRepository: ObservableObject {
 
-    private(set) var textures: Set<UUID> = []
+    private(set) var textureIds: Set<UUID> = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
     private static let storageName = "TextureStorage"
@@ -42,7 +42,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
         textures: Set<UUID> = [],
         renderer: (any MTLRendering) = MTLRenderer.shared
     ) {
-        self.textures = textures
+        self.textureIds = textures
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -95,7 +95,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
                 if allExist {
                     // ids are retained if texture filenames in the directory match the ids of the configuration.layers
-                    self.textures = Set(configuration.layers.map { $0.id })
+                    self.textureIds = Set(configuration.layers.map { $0.id })
 
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
@@ -200,6 +200,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
     func removeAll() {
         try? FileManager.clearContents(of: directoryUrl)
+        textureIds = []
         thumbnails = [:]
     }
 
@@ -212,6 +213,9 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 try? FileManager.default.removeItem(at: fileURL)
             }
+
+            textureIds.remove(uuid)
+            thumbnails.removeValue(forKey: uuid)
 
             promise(.success(uuid))
         }
@@ -242,7 +246,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
                             to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
                         )
 
-                        self.textures.insert(uuid)
+                        self.textureIds.insert(uuid)
                         self.setThumbnail(texture: texture, for: uuid)
                     }
                 }
@@ -259,7 +263,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             guard let `self` else { return }
 
             do {
-                for textureId in self.textures {
+                for textureId in self.textureIds {
                     let texture: MTLTexture? = try FileInputManager.loadTexture(
                         url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
                         textureSize: textureSize,
@@ -337,7 +341,7 @@ extension DocumentsDirectoryTextureRepository {
                         to: directoryUrl.appendingPathComponent(uuid.uuidString)
                     )
 
-                    self.textures.insert(uuid)
+                    self.textureIds.insert(uuid)
                     self.setThumbnail(texture: texture, for: uuid)
 
                     self._textureSize = textureSize
