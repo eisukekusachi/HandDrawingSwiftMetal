@@ -23,8 +23,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when showing the activity indicator is needed
-    var needsShowingActivityIndicatorPublisher: AnyPublisher<Bool, Never> {
-        needsShowingActivityIndicatorSubject.eraseToAnyPublisher()
+    var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
+        activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when showing an alert is needed
@@ -101,7 +101,7 @@ final class CanvasViewModel {
 
     private var needsCanvasSetupSubject: PassthroughSubject<CanvasState, Never> = .init()
 
-    private let needsShowingActivityIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
+    private let activityIndicatorShowRequestedSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
 
@@ -256,7 +256,7 @@ extension CanvasViewModel {
                 case .finished: break
                 case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
                 }
-                self?.needsShowingActivityIndicatorSubject.send(false)
+                self?.activityIndicatorShowRequestedSubject.send(false)
             }, receiveValue: {})
             .store(in: &cancellables)
     }
@@ -586,8 +586,8 @@ extension CanvasViewModel {
             textureRepository: textureRepository
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.needsShowingActivityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.needsShowingActivityIndicatorSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
@@ -608,8 +608,8 @@ extension CanvasViewModel {
             to: URL.zipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.needsShowingActivityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.needsShowingActivityIndicatorSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
