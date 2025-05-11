@@ -17,6 +17,11 @@ final class CanvasViewModel {
         }
     }
 
+    /// A publisher that emits a value when the canvas setup is completed
+    var canvasSetupCompletedPublisher: AnyPublisher<Void, Never> {
+        canvasSetupCompletedSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits when showing the activity indicator is needed
     var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
         activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
@@ -94,6 +99,8 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
+    private let canvasSetupCompletedSubject = PassthroughSubject<Void, Never>()
+
     private let activityIndicatorShowRequestedSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
@@ -134,6 +141,8 @@ final class CanvasViewModel {
         }
 
         bindData()
+
+        activityIndicatorShowRequestedSubject.send(true)
     }
 
     private func bindData() {
@@ -249,6 +258,7 @@ extension CanvasViewModel {
                 case .finished: break
                 case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
                 }
+                self?.canvasSetupCompletedSubject.send(())
                 self?.activityIndicatorShowRequestedSubject.send(false)
             }, receiveValue: {})
             .store(in: &cancellables)

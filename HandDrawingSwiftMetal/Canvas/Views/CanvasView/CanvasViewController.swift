@@ -50,10 +50,6 @@ class CanvasViewController: UIViewController {
             configuration: configuration,
             drawableTextureSize: contentView.canvasView.drawableSize
         )
-
-        UIView.animate(withDuration: 0.05) { [weak self] in
-            self?.contentView.alpha = 1.0
-        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -66,6 +62,13 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
+        canvasViewModel.canvasSetupCompletedPublisher
+            .sink { [weak self] configuration in
+                UIView.animate(withDuration: 0.05) { [weak self] in
+                    self?.contentView.alpha = 1.0
+                }
+            }
+            .store(in: &cancellables)
 
         canvasViewModel.canvasViewControllerSetupPublisher
             .sink { [weak self] configuration in
