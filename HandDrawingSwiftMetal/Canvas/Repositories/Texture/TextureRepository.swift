@@ -9,7 +9,7 @@ import Combine
 import Foundation
 import MetalKit
 
-/// A repository that manages textures and related canvas operations
+/// A repository that manages textures
 protocol TextureRepository {
 
     /// The number of textures currently managed

@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
+/// A repository that manages on-disk textures
 final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private(set) var textures: [UUID] = []

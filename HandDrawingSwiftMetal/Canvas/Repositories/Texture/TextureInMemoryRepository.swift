@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
+/// A repository that manages in-memory textures
 final class TextureInMemoryRepository: ObservableObject {
 
     var drawableTextureSize: CGSize = MTLRenderer.minimumTextureSize {
