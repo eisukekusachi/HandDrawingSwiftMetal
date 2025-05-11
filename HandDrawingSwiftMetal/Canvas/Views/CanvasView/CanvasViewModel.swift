@@ -17,11 +17,6 @@ final class CanvasViewModel {
         }
     }
 
-    /// A publisher that emits when the canvas setup is needed
-    var needsCanvasSetupPublisher: AnyPublisher<CanvasState, Never> {
-        needsCanvasSetupSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits when showing the activity indicator is needed
     var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
         activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
@@ -98,8 +93,6 @@ final class CanvasViewModel {
     private let inputDevice = CanvasInputDeviceStatus()
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
-
-    private var needsCanvasSetupSubject: PassthroughSubject<CanvasState, Never> = .init()
 
     private let activityIndicatorShowRequestedSubject = CurrentValueSubject<Bool, Never>(false)
 
