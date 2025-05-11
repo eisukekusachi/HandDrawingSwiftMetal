@@ -34,29 +34,29 @@ protocol TextureRepository {
     /// Initialized the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
-    /// Retrieves the thumbnail image for UUID
-    func getThumbnail(_ uuid: UUID) -> UIImage?
-
     /// Gets a texture for the given UUID
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
 
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
 
-    /// Removes a texture with UUID
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
+    /// Retrieves the thumbnail image for UUID
+    func getThumbnail(_ uuid: UUID) -> UIImage?
 
     /// Removes all managed textures
     func removeAll()
 
-    /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+    /// Removes a texture with UUID
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Updates all textures for the given uuids using a directory URL
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
 
     /// Updates all thumbnails
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
+
+    /// Updates an existing texture for UUID
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
 
 }
 

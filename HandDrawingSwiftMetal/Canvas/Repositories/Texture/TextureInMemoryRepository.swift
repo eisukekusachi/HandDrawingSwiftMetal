@@ -146,27 +146,6 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            self.removeAll()
-
-            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
-
-            self.textures[uuid] = texture
-            self.setThumbnail(texture: texture, for: uuid)
-
-            self._textureSize = textureSize
-
-            promise(.success(()))
-        }
-        .eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -202,28 +181,15 @@ extension TextureInMemoryRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        textures.removeValue(forKey: uuid)
-        thumbnails.removeValue(forKey: uuid)
-        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
     func removeAll() {
         textures = [:]
         thumbnails = [:]
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Future { [weak self] promise in
-            if let texture {
-                self?.textures[uuid] = texture
-                self?.setThumbnail(texture: texture, for: uuid)
-
-                promise(.success(uuid))
-            } else {
-                promise(.failure(TextureRepositoryError.failedToAddTexture))
-            }
-        }
-        .eraseToAnyPublisher()
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        textures.removeValue(forKey: uuid)
+        thumbnails.removeValue(forKey: uuid)
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
@@ -275,9 +241,44 @@ extension TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Future { [weak self] promise in
+            if let texture {
+                self?.textures[uuid] = texture
+                self?.setThumbnail(texture: texture, for: uuid)
+
+                promise(.success(uuid))
+            } else {
+                promise(.failure(TextureRepositoryError.failedToAddTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
 }
 
 extension TextureInMemoryRepository {
+
+    private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            self.removeAll()
+
+            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
+
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            self._textureSize = textureSize
+
+            promise(.success(()))
+        }
+        .eraseToAnyPublisher()
+    }
 
     private func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
         Future<Void, Error> { [weak self] promise in
