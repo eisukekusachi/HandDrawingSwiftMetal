@@ -115,6 +115,7 @@
 		D484B4FC2DC6FAC6004359B5 /* DocumentsDirectoryTextureSingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D484B4FB2DC6FAC6004359B5 /* DocumentsDirectoryTextureSingletonRepository.swift */; };
 		D484B4FE2DC6FB7B004359B5 /* TextureRepositoryWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D484B4FD2DC6FB7B004359B5 /* TextureRepositoryWrapper.swift */; };
 		D488B59B2DD03D0F00089B3D /* MockCanvasViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D488B59A2DD03D0F00089B3D /* MockCanvasViewProtocol.swift */; };
+		D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D488B59C2DD0803400089B3D /* ButtonThrottle.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48F763B2DA209190001C80F /* TextureLayerEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763A2DA209190001C80F /* TextureLayerEntity.swift */; };
 		D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */; };
@@ -272,6 +273,7 @@
 		D484B4FB2DC6FAC6004359B5 /* DocumentsDirectoryTextureSingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsDirectoryTextureSingletonRepository.swift; sourceTree = "<group>"; };
 		D484B4FD2DC6FB7B004359B5 /* TextureRepositoryWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureRepositoryWrapper.swift; sourceTree = "<group>"; };
 		D488B59A2DD03D0F00089B3D /* MockCanvasViewProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCanvasViewProtocol.swift; sourceTree = "<group>"; };
+		D488B59C2DD0803400089B3D /* ButtonThrottle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonThrottle.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48F763A2DA209190001C80F /* TextureLayerEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerEntity.swift; sourceTree = "<group>"; };
 		D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModel.swift; sourceTree = "<group>"; };
@@ -690,6 +692,7 @@
 			children = (
 				D45179FB2CC365FC0047C274 /* BezierCurve.swift */,
 				D4517A022CC3686F0047C274 /* BezierCurveHandlePoints.swift */,
+				D488B59C2DD0803400089B3D /* ButtonThrottle.swift */,
 				D40D979029DAB0D700A82E6A /* Calculate.swift */,
 				D45179F72CC347BA0047C274 /* Constants.swift */,
 				D40D979229DAB0D700A82E6A /* Interpolator.swift */,
@@ -1034,6 +1037,7 @@
 				D48F76432DA20B800001C80F /* TextureInMemoryRepository.swift in Sources */,
 				D45179FC2CC365FC0047C274 /* BezierCurve.swift in Sources */,
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
+				D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* DrawingCurvePencilIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
