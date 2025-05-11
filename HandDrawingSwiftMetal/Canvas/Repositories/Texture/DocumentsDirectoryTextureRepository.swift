@@ -23,7 +23,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
+    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -64,8 +64,8 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
-        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
     }
 
     var textureNum: Int {
@@ -303,7 +303,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
             return
         }
         thumbnails[uuid] = texture.makeThumbnail()
-        needsThumbnailUpdateSubject.send(uuid)
+        thumbnailUpdateRequestedSubject.send(uuid)
     }
 
     /// Updates an existing texture for UUID

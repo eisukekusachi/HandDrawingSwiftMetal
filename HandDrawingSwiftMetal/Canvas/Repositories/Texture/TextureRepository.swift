@@ -26,7 +26,7 @@ protocol TextureRepository {
     var canvasInitializationUsingConfigurationPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> { get }
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> { get }
 
     /// Initialized the storage
     func initializeStorage(from configuration: CanvasConfiguration)

@@ -18,7 +18,7 @@ final class MockTextureRepository: TextureRepository {
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsThumbnailUpdateSubject = PassthroughSubject<UUID, Never>()
+    private let thumbnailUpdateRequestedSubject = PassthroughSubject<UUID, Never>()
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
@@ -28,8 +28,8 @@ final class MockTextureRepository: TextureRepository {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
-        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
     }
 
     var textures: [UUID: MTLTexture?] = [:]

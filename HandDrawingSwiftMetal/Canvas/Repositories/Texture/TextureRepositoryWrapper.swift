@@ -23,8 +23,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.canvasInitializationUsingConfigurationPublisher
     }
 
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
-        repository.needsThumbnailUpdatePublisher
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        repository.thumbnailUpdateRequestedPublisher
     }
 
     var textureNum: Int {

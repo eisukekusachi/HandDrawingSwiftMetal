@@ -26,7 +26,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
+    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -62,8 +62,8 @@ extension TextureInMemoryRepository: TextureRepository {
         canvasInitializationUsingConfigurationSubject.eraseToAnyPublisher()
     }
 
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
-        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
     }
 
     var textureNum: Int {
@@ -301,7 +301,7 @@ extension TextureInMemoryRepository: TextureRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-        needsThumbnailUpdateSubject.send(uuid)
+        thumbnailUpdateRequestedSubject.send(uuid)
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

@@ -21,15 +21,15 @@ final class TextureMockRepository: TextureRepository {
     }
 
     /// Emit `UUID` when the thumbnail is updated
-    var needsThumbnailUpdatePublisher: AnyPublisher<UUID, Never> {
-        needsThumbnailUpdateSubject.eraseToAnyPublisher()
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
     }
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let canvasInitializationUsingConfigurationSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private let needsThumbnailUpdateSubject: PassthroughSubject<UUID, Never> = .init()
+    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
     var textureNum: Int = 0
 
