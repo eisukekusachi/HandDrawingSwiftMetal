@@ -140,18 +140,21 @@ final class CanvasRendererTests: XCTestCase {
 
         let mockRenderer = MockMTLRenderer()
 
+        let textureRepository = MockTextureRepository(textures: condition)
+
         let canvasRenderer = CanvasRenderer(
             renderer: mockRenderer
         )
-        canvasRenderer.setTextureRepository(MockTextureRepository(textures: condition))
+        canvasRenderer.setTextureRepository(textureRepository)
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"
 
-        _ = canvasRenderer.mergeTextures(
-            sourceTexture: texture,
-            destinationTextureId: destinationTextureId,
-            commandBuffer: commandBuffer
+        _ = canvasRenderer.drawTexture(
+            texture: texture,
+            on: destinationTextureId,
+            in: textureRepository,
+            with: commandBuffer
         )
         .sink(
             receiveCompletion: { completion in

@@ -514,9 +514,9 @@ extension CanvasViewModel {
             let selectedTextureId = self.canvasState.selectedLayer?.id
         else { return }
 
-        renderer.mergeTexturesWithCommandBuffer(
-            sourceTexture: selectedTexture,
-            destinationTextureId: selectedTextureId
+        renderer.drawTexture(
+            texture: selectedTexture,
+            on: selectedTextureId
         )
         .flatMap { [weak self] resultTexture -> AnyPublisher<Void, Error> in
             guard let `self` else {

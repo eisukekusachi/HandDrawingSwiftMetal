@@ -212,12 +212,12 @@ extension CanvasRenderer {
 }
 
 extension CanvasRenderer {
-    /// Merges `sourceTexture` with the destination texture from `textureRepository` and returns the combined result
-    func mergeTextures(
-        sourceTexture: MTLTexture,
-        destinationTextureId: UUID,
-        textureRepository: TextureRepository?,
-        commandBuffer: MTLCommandBuffer
+    /// Draws `texture` on the destination texture from `textureRepository` and returns the combined result
+    func drawTexture(
+        texture: MTLTexture,
+        on destinationTextureId: UUID,
+        in textureRepository: TextureRepository?,
+        with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
             Logger.standard.warning("The texture repository is unavailable")
@@ -226,7 +226,7 @@ extension CanvasRenderer {
 
         return textureRepository.getTexture(
             uuid: destinationTextureId,
-            textureSize: sourceTexture.size
+            textureSize: texture.size
         )
         .tryMap { [weak self] targetTexture -> MTLTexture in
             guard
@@ -238,7 +238,7 @@ extension CanvasRenderer {
             }
 
             self.renderer.drawTexture(
-                texture: sourceTexture,
+                texture: texture,
                 buffers: flippedTextureBuffers,
                 withBackgroundColor: .clear,
                 on: targetTexture,
@@ -250,10 +250,10 @@ extension CanvasRenderer {
         .eraseToAnyPublisher()
     }
 
-    /// Merges the given `sourceTexture` with the destination texture retrieved from the repository using an internally created command buffer and returns the combined result
-    func mergeTexturesWithCommandBuffer(
-        sourceTexture: MTLTexture,
-        destinationTextureId: UUID
+    /// Draws the given `sourceTexture` on the destination texture retrieved from the repository using an internally created command buffer and returns the result
+    func drawTexture(
+        texture: MTLTexture,
+        on destinationTextureId: UUID
     ) -> AnyPublisher<MTLTexture, Error> {
         guard let textureRepository else {
             Logger.standard.warning("The texture repository is unavailable")
@@ -265,11 +265,11 @@ extension CanvasRenderer {
             return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
         }
 
-        return mergeTextures(
-            sourceTexture: sourceTexture,
-            destinationTextureId: destinationTextureId,
-            textureRepository: textureRepository,
-            commandBuffer: temporaryCommandBuffer
+        return drawTexture(
+            texture: texture,
+            on: destinationTextureId,
+            in: textureRepository,
+            with: temporaryCommandBuffer
         )
         .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
             Future { promise in
