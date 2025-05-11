@@ -258,7 +258,7 @@ extension CanvasRenderer {
                     if completedBuffer.status == .completed {
                         promise(.success(targetTexture))
                     } else {
-                        let error = completedBuffer.error ?? TextureRepositoryError.commandBufferFailed
+                        let error = completedBuffer.error ?? TextureRepositoryError.failedToCommitCommandBuffer
                         Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
                         promise(.failure(error))
                     }
