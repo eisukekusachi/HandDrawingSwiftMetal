@@ -12,17 +12,9 @@ import UIKit
 /// A class that binds `CanvasState` and `CoreData`
 final class CanvasStateStorage {
 
-    var needsErrorDialogDisplayPublisher: AnyPublisher<Error, Never> {
-        needsErrorDialogDisplaySubject.eraseToAnyPublisher()
-    }
-    var needsToastDisplayPublisher: AnyPublisher<String, Never> {
-        needsToastDisplaySubject.eraseToAnyPublisher()
-    }
-
     private(set) var coreDataConfiguration: CanvasConfiguration?
 
-    private let needsErrorDialogDisplaySubject = PassthroughSubject<Error, Never>()
-    private let needsToastDisplaySubject = PassthroughSubject<String, Never>()
+    let errorDialogSubject = PassthroughSubject<Error, Never>()
 
     private var coreDataRepository: CoreDataRepository
 
@@ -52,7 +44,7 @@ final class CanvasStateStorage {
             )
 
         } catch {
-            needsErrorDialogDisplaySubject.send(error)
+            errorDialogSubject.send(error)
         }
     }
 
@@ -107,7 +99,7 @@ extension CanvasStateStorage {
             try coreDataRepository.saveContext()
         }
         catch {
-            needsErrorDialogDisplaySubject.send(error)
+            errorDialogSubject.send(error)
         }
     }
 

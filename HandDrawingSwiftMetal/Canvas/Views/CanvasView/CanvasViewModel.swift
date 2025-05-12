@@ -204,6 +204,12 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        canvasStateStorage?.errorDialogSubject
+            .sink { [weak self] error in
+                self?.needsShowingAlertSubject.send(error.localizedDescription)
+            }
+            .store(in: &cancellables)
+
         // Initialize the texture storage using the specified texture size.
         textureRepository.storageInitializationWithNewTexturePublisher
             .receive(on: DispatchQueue.main)
