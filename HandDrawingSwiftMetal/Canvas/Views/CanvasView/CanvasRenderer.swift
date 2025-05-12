@@ -8,8 +8,7 @@
 import Combine
 import MetalKit
 
-/// A class for merging the drawing texture and the textures of `TextureRepository` to render onto the canvas.
-/// By pre-merging the layer textures into the textures from `CanvasRenderer` and using them,  it stabilizes drawing performance.
+/// A class that combines `TextureRepository` textures and renders them on the canvas using `MTLRenderer`
 final class CanvasRenderer: ObservableObject {
 
     var frameSize: CGSize = .zero
