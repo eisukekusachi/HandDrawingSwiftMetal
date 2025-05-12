@@ -36,10 +36,9 @@ final class CanvasStateStorage {
     }
 
     func setupStorage(_ canvasState: CanvasState) {
-
-        self.canvasState = canvasState
-
         do {
+            self.canvasState = canvasState
+
             if let storageEntity = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
                 coreDataConfiguration = .init(entity: storageEntity)
 
@@ -64,6 +63,10 @@ final class CanvasStateStorage {
             Logger.standard.error("Failed to save canvas state: \(error)")
         }
     }
+
+}
+
+extension CanvasStateStorage {
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
         do {
