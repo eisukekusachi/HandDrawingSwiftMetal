@@ -39,17 +39,20 @@ final class CanvasStateStorage {
         do {
             self.canvasState = canvasState
 
-            if let storageEntity = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                coreDataConfiguration = .init(entity: storageEntity)
+            if let storageEntity = try self.coreDataRepository.fetchEntity() as? CanvasStorageEntity {
+                self.coreDataConfiguration = .init(entity: storageEntity)
 
             } else {
                 initializeStorageWithCanvasState(
                     canvasState,
-                    to: CanvasStorageEntity(context: coreDataRepository.context)
+                    to: CanvasStorageEntity(context: self.coreDataRepository.context)
                 )
             }
 
-            bindCanvasStateToCoreDataEntities()
+            bindCanvasStateToCoreDataEntities(
+                canvasState: self.canvasState,
+                coreDataRepository: self.coreDataRepository
+            )
 
         } catch {
             needsErrorDialogDisplaySubject.send(error)
@@ -111,7 +114,7 @@ extension CanvasStateStorage {
         }
     }
 
-    private func bindCanvasStateToCoreDataEntities() {
+    private func bindCanvasStateToCoreDataEntities(canvasState: CanvasState?, coreDataRepository: CoreDataRepository) {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
             let drawingToolStorage = canvasStorageEntity.drawingTool,
