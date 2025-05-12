@@ -18,7 +18,7 @@ final class CanvasStateStorage {
         needsToastDisplaySubject.eraseToAnyPublisher()
     }
 
-    private(set) var configuration: CanvasConfiguration?
+    private(set) var coreDataConfiguration: CanvasConfiguration?
 
     private let needsErrorDialogDisplaySubject = PassthroughSubject<Error, Never>()
     private let needsToastDisplaySubject = PassthroughSubject<String, Never>()
@@ -42,7 +42,7 @@ final class CanvasStateStorage {
 
         do {
             if let existing = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                configuration = loadConfiguration(from: existing)
+                coreDataConfiguration = loadConfiguration(from: existing)
 
             } else {
                 initializeStorageWithCanvasState(
