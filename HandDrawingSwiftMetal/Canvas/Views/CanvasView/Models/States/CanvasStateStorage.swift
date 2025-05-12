@@ -9,7 +9,7 @@ import Combine
 import CoreData
 import UIKit
 
-/// A class that binds `CanvasState` and `CoreData`
+/// A class that binds `CanvasState` and `CoreDataRepository`
 final class CanvasStateStorage {
 
     private(set) var coreDataConfiguration: CanvasConfiguration?
