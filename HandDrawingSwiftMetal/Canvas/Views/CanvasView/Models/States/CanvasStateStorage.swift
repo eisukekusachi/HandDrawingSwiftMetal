@@ -24,8 +24,6 @@ final class CanvasStateStorage {
     private let needsErrorDialogDisplaySubject = PassthroughSubject<Error, Never>()
     private let needsToastDisplaySubject = PassthroughSubject<String, Never>()
 
-    private var canvasState: CanvasState?
-
     private var coreDataRepository: CoreDataRepository
 
     private var cancellables = Set<AnyCancellable>()
@@ -38,8 +36,6 @@ final class CanvasStateStorage {
 
     func setupStorage(_ canvasState: CanvasState) {
         do {
-            self.canvasState = canvasState
-
             if let storageEntity = try self.coreDataRepository.fetchEntity() as? CanvasStorageEntity {
                 self.coreDataConfiguration = .init(entity: storageEntity)
 
@@ -51,7 +47,7 @@ final class CanvasStateStorage {
             }
 
             bindCanvasStateToCoreDataEntities(
-                canvasState: self.canvasState,
+                canvasState: canvasState,
                 coreDataRepository: self.coreDataRepository
             )
 
