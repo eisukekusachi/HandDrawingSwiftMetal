@@ -41,8 +41,8 @@ final class CanvasStateStorage {
         self.canvasState = canvasState
 
         do {
-            if let existing = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                coreDataConfiguration = loadConfiguration(from: existing)
+            if let storageEntity = try coreDataRepository.fetchEntity() as? CanvasStorageEntity {
+                coreDataConfiguration = .init(entity: storageEntity)
 
             } else {
                 initializeStorageWithCanvasState(
@@ -63,51 +63,6 @@ final class CanvasStateStorage {
         } catch {
             Logger.standard.error("Failed to save canvas state: \(error)")
         }
-    }
-
-    private func loadConfiguration(from canvasStorage: CanvasStorageEntity?) -> CanvasConfiguration? {
-        guard
-            let canvasStorage,
-            let projectName = canvasStorage.projectName
-        else { return nil }
-
-        var configuration = CanvasConfiguration()
-
-        configuration.projectName = projectName
-
-        configuration.textureSize = .init(
-            width: CGFloat(canvasStorage.textureWidth),
-            height: CGFloat(canvasStorage.textureHeight)
-        )
-
-        if let brush = canvasStorage.drawingTool?.brush,
-           let colorHexString = brush.colorHex {
-            configuration.brushColor = UIColor(hex: colorHexString)
-            configuration.brushDiameter = Int(brush.diameter)
-        }
-
-        if let eraser = canvasStorage.drawingTool?.eraser {
-            configuration.eraserAlpha = Int(eraser.alpha)
-            configuration.eraserDiameter = Int(eraser.diameter)
-        }
-
-        if let layers = canvasStorage.textureLayers as? Set<TextureLayerStorageEntity> {
-            configuration.layers = layers
-                .sorted { $0.orderIndex < $1.orderIndex }
-                .enumerated()
-                .map { index, layer in
-                    TextureLayerModel(
-                        id: TextureLayerModel.id(from: layer.fileName),
-                        title: layer.title ?? "",
-                        alpha: Int(layer.alpha),
-                        isVisible: layer.isVisible
-                    )
-                }
-        }
-
-        configuration.layerIndex = configuration.layers.firstIndex(where: { $0.id == canvasStorage.selectedLayerId }) ?? 0
-
-        return configuration
     }
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {

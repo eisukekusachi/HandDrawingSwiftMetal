@@ -46,6 +46,44 @@ extension CanvasConfiguration {
         self.eraserDiameter = entity.eraserDiameter
     }
 
+    init(
+        entity: CanvasStorageEntity
+    ) {
+        self.projectName = entity.projectName ?? ""
+
+        self.textureSize = .init(
+            width: CGFloat(entity.textureWidth),
+            height: CGFloat(entity.textureHeight)
+        )
+
+        if let brush = entity.drawingTool?.brush,
+           let colorHexString = brush.colorHex {
+            self.brushColor = UIColor(hex: colorHexString)
+            self.brushDiameter = Int(brush.diameter)
+        }
+
+        if let eraser = entity.drawingTool?.eraser {
+            self.eraserAlpha = Int(eraser.alpha)
+            self.eraserDiameter = Int(eraser.diameter)
+        }
+
+        if let layers = entity.textureLayers as? Set<TextureLayerStorageEntity> {
+            self.layers = layers
+                .sorted { $0.orderIndex < $1.orderIndex }
+                .enumerated()
+                .map { index, layer in
+                    TextureLayerModel(
+                        id: TextureLayerModel.id(from: layer.fileName),
+                        title: layer.title ?? "",
+                        alpha: Int(layer.alpha),
+                        isVisible: layer.isVisible
+                    )
+                }
+        }
+
+        self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
+    }
+
     func createConfigurationWithValidTextureSize(_ newTextureSize: CGSize) -> Self {
         var configuration = self
         if configuration.textureSize?.width ?? .zero < MTLRenderer.minimumTextureSize.width ||
