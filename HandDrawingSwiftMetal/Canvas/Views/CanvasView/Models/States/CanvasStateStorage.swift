@@ -49,7 +49,8 @@ final class CanvasStateStorage {
                     to: CanvasStorageEntity(context: coreDataRepository.context)
                 )
             }
-            bindState()
+
+            bindCanvasStateToCoreDataEntities()
 
         } catch {
             needsErrorDialogDisplaySubject.send(error)
@@ -107,7 +108,7 @@ final class CanvasStateStorage {
         }
     }
 
-    private func bindState() {
+    private func bindCanvasStateToCoreDataEntities() {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
             let drawingToolStorage = canvasStorageEntity.drawingTool,
