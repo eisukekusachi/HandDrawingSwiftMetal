@@ -141,8 +141,6 @@ final class CanvasViewModel {
         }
 
         bindData()
-
-        activityIndicatorShowRequestedSubject.send(true)
     }
 
     private func bindData() {
@@ -285,6 +283,10 @@ extension CanvasViewModel {
                 textureRepository: textureRepository
             )
         )
+    }
+
+    func onViewWillAppear() {
+        activityIndicatorShowRequestedSubject.send(true)
     }
 
     func onViewDidAppear(

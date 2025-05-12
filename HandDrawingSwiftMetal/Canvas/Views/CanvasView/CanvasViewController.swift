@@ -44,6 +44,11 @@ class CanvasViewController: UIViewController {
         view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        canvasViewModel.onViewWillAppear()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
