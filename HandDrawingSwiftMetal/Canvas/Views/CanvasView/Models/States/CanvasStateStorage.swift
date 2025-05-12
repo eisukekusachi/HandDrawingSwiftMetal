@@ -9,6 +9,7 @@ import Combine
 import CoreData
 import UIKit
 
+/// A class that binds `CanvasState` and `CoreData`
 final class CanvasStateStorage {
 
     var needsErrorDialogDisplayPublisher: AnyPublisher<Error, Never> {
