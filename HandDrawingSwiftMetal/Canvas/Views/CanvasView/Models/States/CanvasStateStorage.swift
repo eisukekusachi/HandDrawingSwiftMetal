@@ -25,7 +25,7 @@ final class CanvasStateStorage {
 
     private var canvasState: CanvasState?
 
-    private var coreDataRepository: CoreDataRepository?
+    private var coreDataRepository: CoreDataRepository
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -36,7 +36,6 @@ final class CanvasStateStorage {
     }
 
     func setupStorage(_ canvasState: CanvasState) {
-        guard let coreDataRepository else { return }
 
         self.canvasState = canvasState
 
@@ -59,15 +58,13 @@ final class CanvasStateStorage {
 
     func saveContext() {
         do {
-            try coreDataRepository?.saveContext()
+            try coreDataRepository.saveContext()
         } catch {
             Logger.standard.error("Failed to save canvas state: \(error)")
         }
     }
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
-        guard let coreDataRepository else { return }
-
         do {
             let brush = BrushStorageEntity(context: coreDataRepository.context)
             brush.colorHex = canvasState.drawingToolState.brush.color.hexString()
@@ -112,7 +109,6 @@ final class CanvasStateStorage {
 
     private func bindState() {
         guard
-            let coreDataRepository,
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
             let drawingToolStorage = canvasStorageEntity.drawingTool,
             let brushStorage = drawingToolStorage.brush,
@@ -125,9 +121,9 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .compactMap { $0 }
-            .sink { result in
+            .sink { [weak self] result in
                 canvasStorageEntity.projectName = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -135,10 +131,10 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .compactMap { $0 }
-            .sink { result in
+            .sink { [weak self] result in
                 canvasStorageEntity.textureWidth = Int16(result.width)
                 canvasStorageEntity.textureHeight = Int16(result.height)
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -146,9 +142,9 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { $0.hexString() }
-            .sink { result in
+            .sink { [weak self] result in
                 brushStorage.colorHex = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -156,9 +152,9 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .sink { result in
+            .sink { [weak self] result in
                 brushStorage.diameter = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -166,9 +162,9 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .sink { result in
+            .sink { [weak self] result in
                 eraserStorage.alpha = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -176,18 +172,18 @@ final class CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
-            .sink { result in
+            .sink { [weak self] result in
                 eraserStorage.diameter = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
         canvasState?.$selectedLayerId
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { result in
+            .sink { [weak self] result in
                 canvasStorageEntity.selectedLayerId = result
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
 
@@ -196,7 +192,7 @@ final class CanvasStateStorage {
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
                 self?.updateAllTextureLayerEntities(result)
-                try? coreDataRepository.saveContext()
+                try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
     }
@@ -205,7 +201,6 @@ final class CanvasStateStorage {
     /// assuming the number of layers stays below 100.
     private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
         guard
-            let coreDataRepository,
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
 
