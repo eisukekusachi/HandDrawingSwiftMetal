@@ -26,17 +26,17 @@ final class DrawingToolState: ObservableObject {
     private(set) var currentDrawingTool: DrawingToolProtocol!
 
     convenience init(
-        canvasModel: CanvasModel
+        configuration: CanvasConfiguration
     ) {
         self.init()
 
-        self.brush.color = canvasModel.brushColor
-        self.brush.setDiameter(canvasModel.brushDiameter)
+        self.brush.color = configuration.brushColor
+        self.brush.setDiameter(configuration.brushDiameter)
 
-        self.eraser.alpha = canvasModel.eraserAlpha
-        self.eraser.setDiameter(canvasModel.eraserDiameter)
+        self.eraser.alpha = configuration.eraserAlpha
+        self.eraser.setDiameter(configuration.eraserDiameter)
 
-        self.drawingTool = canvasModel.drawingTool
+        self.drawingTool = configuration.drawingTool
     }
     convenience init(
         brushColor: UIColor,
@@ -60,12 +60,12 @@ final class DrawingToolState: ObservableObject {
 
 extension DrawingToolState {
 
-    func setData(_ model: CanvasModel) {
+    func setData(_ configuration: CanvasConfiguration) {
 
-        brush.setDiameter(model.brushDiameter)
-        eraser.setDiameter(model.eraserDiameter)
+        brush.setDiameter(configuration.brushDiameter)
+        eraser.setDiameter(configuration.eraserDiameter)
 
-        drawingTool = model.drawingTool
+        drawingTool = configuration.drawingTool
     }
 
 }

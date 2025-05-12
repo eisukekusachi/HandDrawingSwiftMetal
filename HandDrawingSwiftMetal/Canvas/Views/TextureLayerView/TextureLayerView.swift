@@ -16,6 +16,8 @@ struct TextureLayerView: View {
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
+    private let buttonThrottle = ButtonThrottle()
+
     private let range = 0 ... 255
 
     var body: some View {
@@ -63,9 +65,12 @@ extension TextureLayerView {
         return HStack {
             Button(
                 action: {
-                    viewModel.insertLayer(
-                        at: viewModel.newInsertIndex
-                    )
+                    buttonThrottle.throttle(id: "insertLayer") {
+                        viewModel.insertLayer(
+                            textureSize: viewModel.textureSize,
+                            at: viewModel.newInsertIndex
+                        )
+                    }
                 },
                 label: {
                     Image(systemName: "plus.circle")
@@ -77,7 +82,9 @@ extension TextureLayerView {
 
             Button(
                 action: {
-                    viewModel.removeLayer()
+                    buttonThrottle.throttle(id: "removeLayer") {
+                        viewModel.removeLayer()
+                    }
                 },
                 label: {
                     Image(systemName: "minus.circle")
@@ -118,7 +125,7 @@ extension TextureLayerView {
 
 private struct PreviewView: View {
     let canvasState = CanvasState(
-        CanvasModel(
+        .init(
             textureSize: .init(width: 44, height: 44),
             layerIndex: 1,
             layers: [

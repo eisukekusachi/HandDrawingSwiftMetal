@@ -1,0 +1,282 @@
+//
+//  TextureInMemoryRepository.swift
+//  HandDrawingSwiftMetal
+//
+//  Created by Eisuke Kusachi on 2025/04/06.
+//
+
+import Combine
+import MetalKit
+import SwiftUI
+
+/// A repository that manages in-memory textures
+final class TextureInMemoryRepository: ObservableObject {
+
+    private(set) var textures: [UUID: MTLTexture?] = [:]
+    @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
+
+    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
+
+    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
+
+    private let flippedTextureBuffers: MTLTextureBuffers!
+
+    private let renderer: MTLRendering!
+
+    private let device = MTLCreateSystemDefaultDevice()!
+
+    private var cancellables = Set<AnyCancellable>()
+
+    private var _textureSize: CGSize = .zero
+
+    init(
+        textures: [UUID: MTLTexture?] = [:],
+        renderer: (any MTLRendering) = MTLRenderer.shared
+    ) {
+        self.textures = textures
+        self.renderer = renderer
+
+        flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: device
+        )
+    }
+
+}
+
+extension TextureInMemoryRepository: TextureRepository {
+
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
+    }
+
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
+    }
+
+    var textureNum: Int {
+        thumbnails.count
+    }
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    var hasTexturesBeenInitialized: Bool {
+        _textureSize != .zero
+    }
+
+    /// Attempts to restore layers from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the canvas with it
+    func initializeStorage(from configuration: CanvasConfiguration) {
+        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished: break
+                case .failure: break
+                }
+            }, receiveValue: { [weak self] allExist in
+                guard let `self` else { return }
+
+                if allExist {
+                    self.storageInitializationCompletedSubject.send(configuration)
+                } else {
+                    self.storageInitializationWithNewTextureSubject.send(configuration)
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Failed to initialize canvas in TextureInMemoryRepository: texture size is too small")
+            return
+        }
+
+        // Delete all files
+        self.removeAll()
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate()
+        )
+
+        createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .sink(receiveCompletion: { completion in
+            switch completion {
+            case .finished: break
+            case .failure: break
+            }
+        }, receiveValue: { [weak self] in
+
+            self?._textureSize = textureSize
+
+            self?.storageInitializationCompletedSubject.send(
+                .init(textureSize: textureSize, layers: [layer])
+            )
+        })
+        .store(in: &cancellables)
+    }
+
+    func getThumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
+        Future<MTLTexture?, Error> { [weak self] promise in
+            guard let texture = self?.textures[uuid] else {
+                promise(.failure(TextureRepositoryError.failedToLoadTexture))
+                return
+            }
+            promise(.success(texture))
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+        let publishers = uuids.map { uuid in
+            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+                guard let texture = self?.textures[uuid] else {
+                    promise(.failure(TextureRepositoryError.failedToLoadTexture))
+                    return
+                }
+                promise(.success((uuid, texture)))
+            }
+            .eraseToAnyPublisher()
+        }
+
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .map { pairs in
+                Dictionary(uniqueKeysWithValues: pairs)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func removeAll() {
+        textures = [:]
+        thumbnails = [:]
+    }
+
+    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        textures.removeValue(forKey: uuid)
+        thumbnails.removeValue(forKey: uuid)
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
+    }
+
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        Future<Void, Error> { [weak self] promise in
+            do {
+                // Delete all data
+                self?.removeAll()
+
+                try uuids.forEach { [weak self] uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    guard
+                        let device = self?.device,
+                        let hexadecimalData = textureData.encodedHexadecimals
+                    else { return }
+
+                    let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: device
+                    )
+
+                    self?.textures[uuid] = texture
+                    self?.setThumbnail(texture: texture, for: uuid)
+                }
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { promise in
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let `self` else { return }
+
+                for (uuid, texture) in self.textures {
+                    guard let texture else { return }
+                    self.setThumbnail(texture: texture, for: uuid)
+                }
+
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+        Future { [weak self] promise in
+            if let texture {
+                self?.textures[uuid] = texture
+                self?.setThumbnail(texture: texture, for: uuid)
+
+                promise(.success(uuid))
+            } else {
+                promise(.failure(TextureRepositoryError.failedToAddTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+}
+
+extension TextureInMemoryRepository {
+
+    private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            self.removeAll()
+
+            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
+
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            self._textureSize = textureSize
+
+            promise(.success(()))
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
+        Future<Bool, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
+
+            promise(.success(
+                !fileNames.isEmpty &&
+                hasAllTextures &&
+                Set(self.textures.keys.compactMap{ $0.uuidString }) == Set(fileNames))
+            )
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
+        thumbnails[uuid] = texture?.makeThumbnail()
+        thumbnailUpdateRequestedSubject.send(uuid)
+    }
+
+}

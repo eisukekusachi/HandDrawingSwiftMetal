@@ -11,7 +11,7 @@ struct TextureLayerModel: Identifiable, Equatable {
     /// The unique identifier for the layer
     var id: UUID = UUID()
     /// The name of the layer
-    var title: String = ""
+    var title: String
     /// The opacity of the layer
     var alpha: Int = 255
     /// Whether the layer is visible or not
@@ -25,7 +25,7 @@ extension TextureLayerModel {
         from textureLayerEntity: TextureLayerEntity
     ) {
         self.init(
-            id: UUID.init(uuidString: textureLayerEntity.textureName) ?? UUID(),
+            id: TextureLayerModel.id(from: textureLayerEntity.textureName),
             title: textureLayerEntity.title,
             alpha: textureLayerEntity.alpha,
             isVisible: textureLayerEntity.isVisible
@@ -34,6 +34,16 @@ extension TextureLayerModel {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
+    }
+
+    /// Uses the ID as the filename
+    var fileName: String {
+        id.uuidString
+    }
+
+    /// Uses the filename as the ID, and generates a new one if it is not valid
+    static func id(from string: String?) -> UUID {
+        UUID.init(uuidString: string ?? "") ?? UUID()
     }
 
 }

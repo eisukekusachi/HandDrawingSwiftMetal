@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24D81" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="BrushStorageEntity" representedClassName="BrushStorageEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="colorHex" optional="YES" attributeType="String"/>
+        <attribute name="diameter" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="drawingTool" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DrawingToolStorageEntity" inverseName="brush" inverseEntity="DrawingToolStorageEntity"/>
+    </entity>
+    <entity name="CanvasStorageEntity" representedClassName="CanvasStorageEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="projectName" optional="YES" attributeType="String"/>
+        <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="textureHeight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="textureWidth" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="drawingTool" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DrawingToolStorageEntity" inverseName="canvas" inverseEntity="DrawingToolStorageEntity"/>
+        <relationship name="textureLayers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TextureLayerStorageEntity" inverseName="canvas" inverseEntity="TextureLayerStorageEntity"/>
+    </entity>
+    <entity name="DrawingToolStorageEntity" representedClassName="DrawingToolStorageEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="drawingTool" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="brush" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BrushStorageEntity" inverseName="drawingTool" inverseEntity="BrushStorageEntity"/>
+        <relationship name="canvas" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CanvasStorageEntity" inverseName="drawingTool" inverseEntity="CanvasStorageEntity"/>
+        <relationship name="eraser" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EraserStorageEntity" inverseName="drawingTool" inverseEntity="EraserStorageEntity"/>
+    </entity>
+    <entity name="EraserStorageEntity" representedClassName="EraserStorageEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="alpha" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="diameter" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="drawingTool" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DrawingToolStorageEntity" inverseName="eraser" inverseEntity="DrawingToolStorageEntity"/>
+    </entity>
+    <entity name="TextureLayerStorageEntity" representedClassName="TextureLayerStorageEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="alpha" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="fileName" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isVisible" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="orderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="canvas" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CanvasStorageEntity" inverseName="textureLayers" inverseEntity="CanvasStorageEntity"/>
+    </entity>
+</model>

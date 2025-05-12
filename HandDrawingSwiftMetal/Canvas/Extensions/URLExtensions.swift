@@ -12,8 +12,17 @@ extension URL {
     static var documents: URL {
         URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
     }
-    static var tmp: URL {
-        URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/tmp")
+
+    /// A URL to store persistent and temporary data
+    static var applicationSupport: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+    }
+
+    /// A temporary folder URL used for file input and output
+    static let tmpFolderURL = URL.applicationSupport.appendingPathComponent("TmpFolder")
+
+    static func zipFileURL(projectName: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
     }
 
     static var zipSuffix: String {
@@ -30,13 +39,6 @@ extension URL {
         self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
     }
 
-    /// A temporary folder URL used for file input and output
-    static let tmpFolderURL = URL.documents.appendingPathComponent("tmpFolder")
-
-    static var workInProgress: URL {
-        URL(fileURLWithPath: NSHomeDirectory() + NSHomeDirectory() + "/Documents/workinprogress")
-    }
-
     func allFileURLs(suffix: String = "") -> [URL] {
         if FileManager.default.fileExists(atPath: self.path) {
             do {
@@ -51,10 +53,6 @@ extension URL {
             }
         }
         return []
-    }
-
-    static func getZipFileURL(projectName: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
     }
 
 }

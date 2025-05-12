@@ -30,4 +30,9 @@ extension TextureLayerEntity {
         self.isVisible = model.isVisible
     }
 
+    /// Uses the filename as the ID, and generates a new one if it is not valid
+    static func id(from entity: TextureLayerEntity) -> UUID {
+        UUID.init(uuidString: entity.textureName) ?? UUID()
+    }
+
 }

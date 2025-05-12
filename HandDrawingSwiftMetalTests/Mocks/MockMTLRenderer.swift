@@ -32,6 +32,32 @@ final class MockMTLRenderer: MTLRendering {
     }
 
     func drawTexture(
+        texture: MTLTexture?,
+        matrix: CGAffineTransform,
+        frameSize: CGSize,
+        backgroundColor: UIColor,
+        on destinationTexture: MTLTexture,
+        device: MTLDevice,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        let textureLabel = texture?.label ?? ""
+        let destinationTextureLabel = destinationTexture.label ?? ""
+        let commandBufferLabel = commandBuffer.label ?? ""
+        callHistory.append(
+            [
+                "drawTexture(",
+                "texture: \(textureLabel), ",
+                "frameSize: \(frameSize.width), \(frameSize.height)",
+                "withBackgroundColor: \(backgroundColor.rgba), ",
+                "on: \(destinationTextureLabel) ",
+                "device: \(device.name), ",
+                "with: \(commandBufferLabel)",
+                ")"
+            ].joined()
+        )
+    }
+
+    func drawTexture(
         texture: MTLTexture,
         buffers: HandDrawingSwiftMetal.MTLTextureBuffers,
         withBackgroundColor color: UIColor?,

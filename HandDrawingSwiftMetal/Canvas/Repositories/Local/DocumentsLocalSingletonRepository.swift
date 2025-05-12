@@ -22,7 +22,7 @@ final class DocumentsLocalSingletonRepository: LocalRepository {
     func loadDataFromDocuments(
         sourceURL: URL,
         textureRepository: TextureRepository
-    ) -> AnyPublisher<CanvasModel, any Error> {
+    ) -> AnyPublisher<CanvasConfiguration, any Error> {
         repository.loadDataFromDocuments(
             sourceURL: sourceURL,
             textureRepository: textureRepository

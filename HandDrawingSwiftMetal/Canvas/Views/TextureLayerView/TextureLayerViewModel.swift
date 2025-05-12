@@ -35,7 +35,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     init(
         canvasState: CanvasState,
-        textureRepository: TextureRepository = TextureInMemorySingletonRepository.shared
+        textureRepository: TextureRepository
     ) {
         self.canvasState = canvasState
         self.textureRepository = textureRepository
@@ -46,7 +46,7 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
 
-        textureRepository.needsThumbnailUpdatePublisher
+        textureRepository.thumbnailUpdateRequestedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
@@ -83,17 +83,21 @@ extension TextureLayerViewModel {
         canvasState.selectedIndex
     }
 
-    func insertLayer(at index: Int) {
-        guard
-            let textureRepository
-        else { return }
+    var textureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    func insertLayer(textureSize: CGSize, at index: Int) {
 
         let device = self.device
 
         addNewLayerPublisher(at: index)
-            .flatMap { textureLayerId in
-                textureRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureRepository.textureSize, with: device),
+            .flatMap { [weak self] textureLayerId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.updateTexture(
+                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     for: textureLayerId
                 )
             }
@@ -104,20 +108,22 @@ extension TextureLayerViewModel {
                 }
             }, receiveValue: { [weak self] newLayerTextureId in
                 self?.canvasState.selectedLayerId = newLayerTextureId
-                self?.textureRepository.updateCanvasAfterTextureLayerUpdates()
+                self?.canvasState.fullCanvasUpdateSubject.send(())
             })
             .store(in: &cancellables)
     }
 
     func removeLayer() {
         guard
-            let textureRepository,
             let selectedIndex = canvasState.selectedIndex
         else { return }
 
         removeLayerPublisher(from: selectedIndex)
-            .flatMap { removedTextureId -> AnyPublisher<UUID, Never> in
-                textureRepository.removeTexture(removedTextureId)
+            .flatMap { [weak self] removedTextureId -> AnyPublisher<UUID, Error> in
+                guard let `self` else {
+                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                }
+                return self.textureRepository.removeTexture(removedTextureId)
             }
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -127,7 +133,7 @@ extension TextureLayerViewModel {
             }, receiveValue: { [weak self] _ in
                 guard let `self` else { return }
                 self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
-                self.textureRepository.updateCanvasAfterTextureLayerUpdates()
+                self.canvasState.fullCanvasUpdateSubject.send(())
             })
             .store(in: &cancellables)
     }
@@ -138,7 +144,7 @@ extension TextureLayerViewModel {
 
     func selectLayer(_ uuid: UUID) {
         canvasState.selectedLayerId = uuid
-        textureRepository.updateCanvasAfterTextureLayerUpdates()
+        canvasState.fullCanvasUpdateSubject.send(())
     }
 
 }
@@ -181,7 +187,7 @@ extension TextureLayerViewModel {
         )
         canvasState.layers.reverse()
 
-        textureRepository.updateCanvasAfterTextureLayerUpdates()
+        canvasState.fullCanvasUpdateSubject.send(())
     }
 
     func updateLayer(
@@ -198,14 +204,14 @@ extension TextureLayerViewModel {
         if let isVisible {
             canvasState.layers[selectedIndex].isVisible = isVisible
 
-            // The visibility of the layers can be changed, so other layers will be updated
-            textureRepository.updateCanvasAfterTextureLayerUpdates()
+            // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
+            canvasState.fullCanvasUpdateSubject.send(())
         }
         if let alpha {
             canvasState.layers[selectedIndex].alpha = alpha
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
-            textureRepository.updateCanvas()
+            canvasState.canvasUpdateSubject.send(())
         }
     }
 

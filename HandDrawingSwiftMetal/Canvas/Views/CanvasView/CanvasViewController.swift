@@ -15,9 +15,11 @@ class CanvasViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var canvasModel = CanvasModel()
+    private var configuration = CanvasConfiguration()
 
-    private let canvasViewModel = CanvasViewModel()
+    private let canvasViewModel = CanvasViewModel(
+        textureRepository: DocumentsDirectoryTextureSingletonRepository.shared
+    )
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -42,16 +44,17 @@ class CanvasViewController: UIViewController {
         view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        canvasViewModel.onViewWillAppear()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
-            model: canvasModel,
+            configuration: configuration,
             drawableTextureSize: contentView.canvasView.drawableSize
         )
-
-        UIView.animate(withDuration: 0.05) { [weak self] in
-            self?.contentView.alpha = 1.0
-        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -64,14 +67,27 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.needsCanvasSetupPublisher
-            .sink { [weak self] canvasState in
-                self?.setupLayerView(canvasState)
-                self?.contentView.setup(canvasState)
+        canvasViewModel.canvasSetupCompletedPublisher
+            .sink { [weak self] configuration in
+                UIView.animate(withDuration: 0.05) { [weak self] in
+                    self?.contentView.alpha = 1.0
+                }
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingActivityIndicatorPublisher
+        canvasViewModel.canvasViewControllerSetupPublisher
+            .sink { [weak self] configuration in
+                self?.setupLayerView(
+                    canvasState: configuration.canvasState,
+                    textureRepository: configuration.textureRepository
+                )
+                self?.contentView.setup(
+                    configuration.canvasState
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.activityIndicatorShowRequestedPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
@@ -89,8 +105,8 @@ extension CanvasViewController {
 
         canvasViewModel.needsShowingToastPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.showToast(model)
+            .sink { [weak self] configuration in
+                self?.showToast(configuration)
             }
             .store(in: &cancellables)
 
@@ -103,8 +119,8 @@ extension CanvasViewController {
 
         canvasViewModel.needsCanvasRefreshPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.canvasViewModel.initCanvas(using: model)
+            .sink { [weak self] configuration in
+                self?.canvasViewModel.initializeCanvas(using: configuration)
             }
             .store(in: &cancellables)
 
@@ -118,7 +134,7 @@ extension CanvasViewController {
 
         contentView.canvasView.needsTextureRefreshPublisher
             .sink { [weak self] in
-                self?.canvasViewModel.updateCanvas()
+                self?.canvasViewModel.updateCanvasView()
             }
             .store(in: &cancellables)
     }
@@ -171,9 +187,10 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(_ canvasState: CanvasState) {
+    private func setupLayerView(canvasState: CanvasState, textureRepository: TextureRepository) {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
+            textureRepository: textureRepository,
             using: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
@@ -271,10 +288,10 @@ extension CanvasViewController: PencilInputGestureRecognizerSender {
 extension CanvasViewController {
 
     static func create(
-        canvasModel: CanvasModel = .init()
+        configuration: CanvasConfiguration = .init()
     ) -> Self {
         let viewController = Self()
-        viewController.canvasModel = canvasModel
+        viewController.configuration = configuration
         return viewController
     }
 
