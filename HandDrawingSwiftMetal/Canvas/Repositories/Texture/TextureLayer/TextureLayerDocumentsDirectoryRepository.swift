@@ -23,7 +23,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     override init(
         directoryName: String,
         textures: Set<UUID> = [],
-        renderer: (any MTLRendering) = MTLRenderer.shared
+        renderer: MTLRendering = MTLRenderer.shared
     ) {
         super.init(
             directoryName: directoryName,

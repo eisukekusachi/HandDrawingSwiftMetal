@@ -58,7 +58,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     init(
         directoryName: String,
         textures: Set<UUID> = [],
-        renderer: (any MTLRendering) = MTLRenderer.shared
+        renderer: MTLRendering = MTLRenderer.shared
     ) {
         self.textureIds = textures
         self.renderer = renderer

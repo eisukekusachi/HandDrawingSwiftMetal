@@ -50,12 +50,12 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     init(
         textures: [UUID: MTLTexture?] = [:],
-        renderer: (any MTLRendering) = MTLRenderer.shared
+        renderer: MTLRendering = MTLRenderer.shared
     ) {
         self.textures = textures
         self.renderer = renderer
 
-        flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )

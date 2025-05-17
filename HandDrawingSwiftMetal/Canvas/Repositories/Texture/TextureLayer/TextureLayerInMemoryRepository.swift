@@ -19,7 +19,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
     override init(
         textures: [UUID: MTLTexture?] = [:],
-        renderer: (any MTLRendering) = MTLRenderer.shared
+        renderer: MTLRendering = MTLRenderer.shared
     ) {
         super.init(textures: textures, renderer: renderer)
     }
