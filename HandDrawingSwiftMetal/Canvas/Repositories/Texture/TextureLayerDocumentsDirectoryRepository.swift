@@ -1,5 +1,5 @@
 //
-//  TextureDocumentsDirectoryRepository.swift
+//  TextureLayerDocumentsDirectoryRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/03.
@@ -10,7 +10,7 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages on-disk textures
-final class TextureDocumentsDirectoryRepository: ObservableObject {
+final class TextureLayerDocumentsDirectoryRepository: ObservableObject {
 
     private(set) var textureIds: Set<UUID> = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
@@ -18,7 +18,7 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
     private static let storageName = "TextureStorage"
 
     // Define it as var to allow modification of its metadata
-    private var directoryUrl = URL.applicationSupport.appendingPathComponent(TextureDocumentsDirectoryRepository.storageName)
+    private var directoryUrl = URL.applicationSupport.appendingPathComponent(TextureLayerDocumentsDirectoryRepository.storageName)
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -55,7 +55,7 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
 
 }
 
-extension TextureDocumentsDirectoryRepository: TextureRepository {
+extension TextureLayerDocumentsDirectoryRepository: TextureRepository {
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
@@ -313,7 +313,7 @@ extension TextureDocumentsDirectoryRepository: TextureRepository {
 
 }
 
-extension TextureDocumentsDirectoryRepository {
+extension TextureLayerDocumentsDirectoryRepository {
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
     private func createDirectory(_ url: inout URL) {
