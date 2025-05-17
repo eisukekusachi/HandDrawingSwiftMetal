@@ -12,6 +12,7 @@ import SwiftUI
 /// A repository that manages in-memory textures
 class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
+    /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {

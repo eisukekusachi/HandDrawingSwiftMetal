@@ -21,27 +21,22 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     /// The IDs of the textures managed by this repository. The IDs are used as file names.
     var textureIds: Set<UUID> = []
 
-    /// Emits `CanvasConfiguration` when storage is newly initialized
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
     }
 
-    /// Emits `CanvasConfiguration` when storage initialization is completed
     var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationCompletedSubject.eraseToAnyPublisher()
     }
 
-    /// The number of textures managed by this repository
     var textureNum: Int {
         textureIds.count
     }
 
-    /// The size of the textures managed by this repository
     var textureSize: CGSize {
         _textureSize
     }
 
-    /// Whether it has been initialized
     var isInitialized: Bool {
         _textureSize != .zero
     }

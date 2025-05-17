@@ -12,18 +12,20 @@ import MetalKit
 /// A repository that manages textures
 protocol TextureRepository {
 
-    /// The number of textures currently managed
-    var textureNum: Int { get }
-
-    var textureSize: CGSize { get }
-
-    var isInitialized: Bool { get }
-
     /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
     var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
+
+    /// The number of textures currently managed
+    var textureNum: Int { get }
+
+    /// The size of the textures managed by this repository
+    var textureSize: CGSize { get }
+
+    /// Whether it has been initialized
+    var isInitialized: Bool { get }
 
     /// Initialized the storage
     func initializeStorage(from configuration: CanvasConfiguration)
