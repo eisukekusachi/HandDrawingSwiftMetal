@@ -12,7 +12,7 @@ final class TextureLayerDocumentsDirectorySingletonRepository: TextureLayerRepos
     static let shared = TextureLayerDocumentsDirectorySingletonRepository()
 
     private init() {
-        super.init(repository: TextureLayerDocumentsDirectoryRepository(storageName: "TextureStorage"))
+        super.init(repository: TextureLayerDocumentsDirectoryRepository(directoryName: "TextureStorage"))
     }
 
 }

@@ -10,14 +10,41 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages on-disk textures
-final class TextureDocumentsDirectoryRepository: ObservableObject {
+class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 
-    private(set) var textureIds: Set<UUID> = []
+    /// The directory name where texture files are stored
+    let directoryName: String
 
-    let storageName: String
+    /// The URL of the texture storage directory. Define it as `var` to allow modification of its metadata
+    var directoryUrl: URL
 
-    // Define it as var to allow modification of its metadata
-    private var directoryUrl: URL
+    /// The IDs of the textures managed by this repository. The IDs are used as file names.
+    var textureIds: Set<UUID> = []
+
+    /// Emits `CanvasConfiguration` when storage is newly initialized
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    /// Emits `CanvasConfiguration` when storage initialization is completed
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
+    }
+
+    /// The number of textures managed by this repository
+    var textureNum: Int {
+        textureIds.count
+    }
+
+    /// The size of the textures managed by this repository
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    /// Whether it has been initialized
+    var isInitialized: Bool {
+        _textureSize != .zero
+    }
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -29,14 +56,12 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    private var dataTask: Task<Void, Error>?
-
     private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
 
     init(
-        storageName: String,
+        directoryName: String,
         textures: Set<UUID> = [],
         renderer: (any MTLRendering) = MTLRenderer.shared
     ) {
@@ -48,34 +73,10 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
             with: device
         )
 
-        self.storageName = storageName
-        self.directoryUrl = URL.applicationSupport.appendingPathComponent(storageName)
+        self.directoryName = directoryName
+        self.directoryUrl = URL.applicationSupport.appendingPathComponent(directoryName)
 
         self.createDirectory(&directoryUrl)
-    }
-
-}
-
-extension TextureDocumentsDirectoryRepository: TextureRepository {
-
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
-
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationCompletedSubject.eraseToAnyPublisher()
-    }
-
-    var textureNum: Int {
-        textureIds.count
-    }
-
-    var textureSize: CGSize {
-        _textureSize
-    }
-
-    var hasTexturesBeenInitialized: Bool {
-        _textureSize != .zero
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -276,6 +277,20 @@ extension TextureDocumentsDirectoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    // If the directory already exists, delete it and create a new one
+    func resetDirectory(_ url: inout URL) {
+        do {
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
+            }
+
+            createDirectory(&url)
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage directory: \(error)")
+        }
+    }
+
 }
 
 extension TextureDocumentsDirectoryRepository {
@@ -336,20 +351,6 @@ extension TextureDocumentsDirectoryRepository {
             )
         }
         .eraseToAnyPublisher()
-    }
-
-    // If the directory already exists, delete it and create a new one
-    private func resetDirectory(_ url: inout URL) {
-        do {
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.removeItem(at: url)
-            }
-
-            createDirectory(&url)
-
-        } catch {
-            Logger.standard.error("Failed to reset texture storage directory: \(error)")
-        }
     }
 
 }

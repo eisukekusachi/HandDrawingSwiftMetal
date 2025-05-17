@@ -67,7 +67,7 @@ extension TextureInMemoryRepository: TextureWithThumbnailRepository {
         _textureSize
     }
 
-    var hasTexturesBeenInitialized: Bool {
+    var isInitialized: Bool {
         _textureSize != .zero
     }
 

@@ -35,8 +35,8 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureWithThumbnailRepos
         repository.textureSize
     }
 
-    var hasTexturesBeenInitialized: Bool {
-        repository.hasTexturesBeenInitialized
+    var isInitialized: Bool {
+        repository.isInitialized
     }
 
     func initializeStorage(from configuration: CanvasConfiguration) {

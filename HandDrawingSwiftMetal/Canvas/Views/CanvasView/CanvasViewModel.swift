@@ -293,7 +293,7 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         drawableTextureSize: CGSize
     ) {
-        if !textureRepository.hasTexturesBeenInitialized {
+        if !textureRepository.isInitialized {
             let existingValue = canvasStateStorage?.coreDataConfiguration
             let defaultValue = configuration.createConfigurationWithValidTextureSize(drawableTextureSize)
             initializeCanvas(using: existingValue ?? defaultValue)

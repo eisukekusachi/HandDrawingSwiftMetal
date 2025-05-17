@@ -35,7 +35,7 @@ final class TextureLayerMockRepository: TextureWithThumbnailRepository {
 
     var textureSize: CGSize = .zero
 
-    var hasTexturesBeenInitialized: Bool = false
+    var isInitialized: Bool = false
 
     func initializeStorage(from configuration: CanvasConfiguration) {}
 
