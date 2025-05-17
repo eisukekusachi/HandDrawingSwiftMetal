@@ -1,5 +1,5 @@
 //
-//  DocumentsFolderTextureRepository.swift
+//  TextureDocumentsDirectoryRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/03.
@@ -10,7 +10,7 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages on-disk textures
-final class DocumentsDirectoryTextureRepository: ObservableObject {
+final class TextureDocumentsDirectoryRepository: ObservableObject {
 
     private(set) var textureIds: Set<UUID> = []
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
@@ -18,7 +18,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
     private static let storageName = "TextureStorage"
 
     // Define it as var to allow modification of its metadata
-    private var directoryUrl = URL.applicationSupport.appendingPathComponent(DocumentsDirectoryTextureRepository.storageName)
+    private var directoryUrl = URL.applicationSupport.appendingPathComponent(TextureDocumentsDirectoryRepository.storageName)
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -55,7 +55,7 @@ final class DocumentsDirectoryTextureRepository: ObservableObject {
 
 }
 
-extension DocumentsDirectoryTextureRepository: TextureRepository {
+extension TextureDocumentsDirectoryRepository: TextureRepository {
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
@@ -107,7 +107,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
     func initializeStorageWithNewTexture(_ textureSize: CGSize) {
         guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("Failed to initialize canvas in DocumentsDirectoryTextureRepository: texture size is too small")
+            Logger.standard.error("Failed to initialize canvas in TextureDocumentsDirectoryRepository: texture size is too small")
             return
         }
 
@@ -313,7 +313,7 @@ extension DocumentsDirectoryTextureRepository: TextureRepository {
 
 }
 
-extension DocumentsDirectoryTextureRepository {
+extension TextureDocumentsDirectoryRepository {
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
     private func createDirectory(_ url: inout URL) {
