@@ -9,7 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
-/// A repository that manages on-disk textures
+/// A repository that manages on-disk textures and in-memory thumbnails
 final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository, TextureLayerRepository {
 
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]

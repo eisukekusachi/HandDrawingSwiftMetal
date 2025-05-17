@@ -9,7 +9,7 @@ import Combine
 import Foundation
 import MetalKit
 
-/// A repository that manages textures
+/// A protocol that defines a repository for managing textures
 protocol TextureRepository {
 
     /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`

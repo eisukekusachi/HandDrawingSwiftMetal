@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
+/// A repository that manages in-memory textures and thumbnails
 final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLayerRepository {
 
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
