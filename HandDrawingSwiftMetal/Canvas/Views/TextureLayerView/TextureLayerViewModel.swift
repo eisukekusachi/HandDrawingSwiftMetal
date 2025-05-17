@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// Manage texture layers using `CanvasState` and `TextureWithThumbnailRepository`
+/// Manage texture layers using `CanvasState` and `TextureLayerRepository`
 final class TextureLayerViewModel: ObservableObject {
 
     @Published var selectedLayerAlpha: Int = 0
