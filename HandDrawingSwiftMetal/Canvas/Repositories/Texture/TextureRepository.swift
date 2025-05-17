@@ -24,13 +24,13 @@ protocol TextureRepository {
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }
 
-    /// Whether it has been initialized
+    /// Whether this repository has been initialized
     var isInitialized: Bool { get }
 
-    /// Initialized the storage
+    /// Initializes the storage
     func initializeStorage(from configuration: CanvasConfiguration)
 
-    /// Initialized the storage with a new texture
+    /// Initializes the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
     /// Gets a texture for the given UUID

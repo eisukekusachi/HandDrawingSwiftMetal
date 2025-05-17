@@ -13,7 +13,7 @@ protocol TextureLayerRepository: TextureRepository {
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> { get }
 
-    /// Retrieves the thumbnail image for UUID
+    /// Gets the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?
 
     /// Updates all thumbnails
