@@ -37,7 +37,7 @@ protocol TextureRepository {
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
 
     /// Gets multiple textures for the given UUIDs
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error>
 
     /// Removes all managed textures
     func removeAll()

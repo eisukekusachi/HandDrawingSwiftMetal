@@ -65,11 +65,8 @@ final class TextureLayerMockRepository: TextureLayerRepository {
             .eraseToAnyPublisher()
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : MTLTexture?], Error> {
-        let result = uuids.reduce(into: [UUID: MTLTexture?]()) {
-            $0[$1] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-        }
-        return Just(result)
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        return Just([])
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

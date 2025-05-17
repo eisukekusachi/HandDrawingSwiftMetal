@@ -129,23 +129,20 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
-            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+            Future<TextureRepositoryEntity, Error> { [weak self] promise in
                 guard let texture = self?.textures[uuid] else {
                     promise(.failure(TextureRepositoryError.failedToLoadTexture))
                     return
                 }
-                promise(.success((uuid, texture)))
+                promise(.success(.init(uuid: uuid, texture: texture)))
             }
             .eraseToAnyPublisher()
         }
 
         return Publishers.MergeMany(publishers)
             .collect()
-            .map { pairs in
-                Dictionary(uniqueKeysWithValues: pairs)
-            }
             .eraseToAnyPublisher()
     }
 
