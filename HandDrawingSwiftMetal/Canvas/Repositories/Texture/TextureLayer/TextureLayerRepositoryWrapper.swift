@@ -8,11 +8,11 @@
 import Combine
 import UIKit
 
-class TextureLayerRepositoryWrapper: ObservableObject, TextureWithThumbnailRepository {
+class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
 
-    let repository: TextureWithThumbnailRepository
+    let repository: TextureLayerRepository
 
-    init(repository: TextureWithThumbnailRepository) {
+    init(repository: TextureLayerRepository) {
         self.repository = repository
     }
 

@@ -144,7 +144,7 @@ private struct PreviewView: View {
     init() {
         viewModel = .init(
             canvasState: canvasState,
-            textureRepository: TextureLayerMockRepository()
+            textureLayerRepository: TextureLayerMockRepository()
         )
     }
     var body: some View {

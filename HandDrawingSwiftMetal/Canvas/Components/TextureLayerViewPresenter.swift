@@ -21,13 +21,13 @@ final class TextureLayerViewPresenter {
 
     func setupLayerViewPresenter(
         canvasState: CanvasState,
-        textureRepository: TextureWithThumbnailRepository,
+        textureLayerRepository: TextureLayerRepository,
         using viewSettings: TextureLayerViewSettings
     ) {
         layerView = TextureLayerView(
             viewModel: .init(
                 canvasState: canvasState,
-                textureRepository: textureRepository
+                textureLayerRepository: textureLayerRepository
             ),
             roundedRectangleWithArrow: roundedRectangleWithArrow
         )

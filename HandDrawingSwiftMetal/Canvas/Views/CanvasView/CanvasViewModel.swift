@@ -119,23 +119,23 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository!
 
-    private var textureRepository: TextureWithThumbnailRepository!
+    private var textureLayerRepository: TextureLayerRepository!
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureWithThumbnailRepository,
+        textureLayerRepository: TextureLayerRepository,
         localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
     ) {
-        self.textureRepository = textureRepository
-        self.renderer.setTextureRepository(textureRepository)
+        self.textureLayerRepository = textureLayerRepository
+        self.renderer.setTextureRepository(textureLayerRepository)
 
         self.localRepository = localRepository
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if textureRepository is TextureLayerDocumentsDirectorySingletonRepository {
+        if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }
@@ -209,18 +209,18 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Initialize the texture storage using the specified texture size.
-        textureRepository.storageInitializationWithNewTexturePublisher
+        textureLayerRepository.storageInitializationWithNewTexturePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 guard let drawableSize = self?.canvasView?.renderTexture?.size else { return }
-                self?.textureRepository.initializeStorageWithNewTexture(
+                self?.textureLayerRepository.initializeStorageWithNewTexture(
                     configuration.textureSize ?? drawableSize
                 )
             }
             .store(in: &cancellables)
 
         // Complete the canvas setup after the texture storage is initialized.
-        textureRepository.storageInitializationCompletedPublisher
+        textureLayerRepository.storageInitializationCompletedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.completeCanvasSetup(configuration)
@@ -237,7 +237,7 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func initializeCanvas(using configuration: CanvasConfiguration) {
-        textureRepository.initializeStorage(from: configuration)
+        textureLayerRepository.initializeStorage(from: configuration)
     }
 
     private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
@@ -254,7 +254,7 @@ extension CanvasViewModel {
 
         updateDrawingTextures()
 
-        textureRepository
+        textureLayerRepository
             .updateAllThumbnails(textureSize: textureSize)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
@@ -280,7 +280,7 @@ extension CanvasViewModel {
         canvasViewControllerSetupSubject.send(
             .init(
                 canvasState: canvasState,
-                textureRepository: textureRepository
+                textureLayerRepository: textureLayerRepository
             )
         )
     }
@@ -293,7 +293,7 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         drawableTextureSize: CGSize
     ) {
-        if !textureRepository.isInitialized {
+        if !textureLayerRepository.isInitialized {
             let existingValue = canvasStateStorage?.coreDataConfiguration
             let defaultValue = configuration.createConfigurationWithValidTextureSize(drawableTextureSize)
             initializeCanvas(using: existingValue ?? defaultValue)
@@ -535,7 +535,7 @@ extension CanvasViewModel {
             guard let `self` else {
                 return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
             }
-            return self.textureRepository.updateTexture(
+            return self.textureLayerRepository.updateTexture(
                 texture: resultTexture,
                 for: selectedTextureId
             )
@@ -600,7 +600,7 @@ extension CanvasViewModel {
     private func loadFile(from filePath: String) {
         localRepository.loadDataFromDocuments(
             sourceURL: URL.documents.appendingPathComponent(filePath),
-            textureRepository: textureRepository
+            textureRepository: textureLayerRepository
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
@@ -621,7 +621,7 @@ extension CanvasViewModel {
         localRepository.saveDataToDocuments(
             renderTexture: canvasTexture,
             canvasState: canvasState,
-            textureRepository: textureRepository,
+            textureRepository: textureLayerRepository,
             to: URL.zipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(

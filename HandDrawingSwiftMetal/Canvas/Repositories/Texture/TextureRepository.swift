@@ -51,19 +51,6 @@ protocol TextureRepository {
 
 }
 
-protocol TextureWithThumbnailRepository: TextureRepository {
-
-    /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> { get }
-
-    /// Retrieves the thumbnail image for UUID
-    func getThumbnail(_ uuid: UUID) -> UIImage?
-
-    /// Updates all thumbnails
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
-
-}
-
 enum TextureRepositoryError: Error {
     case notFound
     case failedToUnwrap

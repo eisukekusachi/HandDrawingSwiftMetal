@@ -87,6 +87,7 @@
 		D45478CD2DBD2934009CBCF5 /* TextureInMemoryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CC2DBD2934009CBCF5 /* TextureInMemoryRepositoryTests.swift */; };
 		D4553DED2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */; };
 		D4553DEF2DD899B000037800 /* TextureLayerInMemoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */; };
+		D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */; };
 		D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */; };
 		D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
@@ -247,6 +248,7 @@
 		D45478CC2DBD2934009CBCF5 /* TextureInMemoryRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureInMemoryRepositoryTests.swift; sourceTree = "<group>"; };
 		D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureDocumentsDirectoryRepository.swift; sourceTree = "<group>"; };
 		D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerInMemoryRepository.swift; sourceTree = "<group>"; };
+		D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerRepository.swift; sourceTree = "<group>"; };
 		D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSizeExtensions.swift; sourceTree = "<group>"; };
 		D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureNodes.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
@@ -465,14 +467,9 @@
 		D447D89B2DC6582B00007210 /* Texture */ = {
 			isa = PBXGroup;
 			children = (
+				D4553DF12DD89EFD00037800 /* TextureLayer */,
 				D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */,
 				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
-				D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */,
-				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
-				D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */,
-				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
-				D44B52DB2DB6752E00EE213C /* TextureLayerMockRepository.swift */,
-				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
 				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
 			);
 			path = Texture;
@@ -621,6 +618,20 @@
 				D45478CC2DBD2934009CBCF5 /* TextureInMemoryRepositoryTests.swift */,
 			);
 			path = Repositories;
+			sourceTree = "<group>";
+		};
+		D4553DF12DD89EFD00037800 /* TextureLayer */ = {
+			isa = PBXGroup;
+			children = (
+				D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */,
+				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
+				D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */,
+				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
+				D44B52DB2DB6752E00EE213C /* TextureLayerMockRepository.swift */,
+				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
+				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
+			);
+			path = TextureLayer;
 			sourceTree = "<group>";
 		};
 		D463A5F02C6E346500D102AD /* Models */ = {
@@ -1049,6 +1060,7 @@
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */,
 				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
+				D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,

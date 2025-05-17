@@ -9,7 +9,7 @@ import Combine
 import MetalKit
 import SwiftUI
 
-final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureWithThumbnailRepository {
+final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLayerRepository {
 
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 

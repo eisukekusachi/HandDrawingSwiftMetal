@@ -9,7 +9,7 @@ import Combine
 import UIKit
 import Metal
 
-final class TextureLayerMockRepository: TextureWithThumbnailRepository {
+final class TextureLayerMockRepository: TextureLayerRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
