@@ -10,16 +10,32 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages in-memory textures
-final class TextureInMemoryRepository: ObservableObject {
+class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
-    private(set) var textures: [UUID: MTLTexture?] = [:]
-    @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
+    var textures: [UUID: MTLTexture?] = [:]
+
+    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
+    }
+
+    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        storageInitializationCompletedSubject.eraseToAnyPublisher()
+    }
+
+    var textureNum: Int {
+        textures.count
+    }
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    var isInitialized: Bool {
+        _textureSize != .zero
+    }
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
-    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -42,33 +58,6 @@ final class TextureInMemoryRepository: ObservableObject {
             nodes: .flippedTextureNodes,
             with: device
         )
-    }
-
-}
-
-extension TextureInMemoryRepository: TextureWithThumbnailRepository {
-
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
-
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationCompletedSubject.eraseToAnyPublisher()
-    }
-
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-
-    var textureNum: Int {
-        thumbnails.count
-    }
-    var textureSize: CGSize {
-        _textureSize
-    }
-
-    var isInitialized: Bool {
-        _textureSize != .zero
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -125,10 +114,6 @@ extension TextureInMemoryRepository: TextureWithThumbnailRepository {
         .store(in: &cancellables)
     }
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
-    }
-
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
         Future<MTLTexture?, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid] else {
@@ -162,12 +147,10 @@ extension TextureInMemoryRepository: TextureWithThumbnailRepository {
 
     func removeAll() {
         textures = [:]
-        thumbnails = [:]
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         textures.removeValue(forKey: uuid)
-        thumbnails.removeValue(forKey: uuid)
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
@@ -194,7 +177,6 @@ extension TextureInMemoryRepository: TextureWithThumbnailRepository {
                     )
 
                     self?.textures[uuid] = texture
-                    self?.setThumbnail(texture: texture, for: uuid)
                 }
                 promise(.success(()))
             } catch {
@@ -204,27 +186,10 @@ extension TextureInMemoryRepository: TextureWithThumbnailRepository {
         .eraseToAnyPublisher()
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future { promise in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let `self` else { return }
-
-                for (uuid, texture) in self.textures {
-                    guard let texture else { return }
-                    self.setThumbnail(texture: texture, for: uuid)
-                }
-
-                promise(.success(()))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
             if let texture {
                 self?.textures[uuid] = texture
-                self?.setThumbnail(texture: texture, for: uuid)
 
                 promise(.success(uuid))
             } else {
@@ -250,7 +215,6 @@ extension TextureInMemoryRepository {
             let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
             self.textures[uuid] = texture
-            self.setThumbnail(texture: texture, for: uuid)
 
             self._textureSize = textureSize
 
@@ -272,11 +236,6 @@ extension TextureInMemoryRepository {
             )
         }
         .eraseToAnyPublisher()
-    }
-
-    private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        thumbnails[uuid] = texture?.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
     }
 
 }
