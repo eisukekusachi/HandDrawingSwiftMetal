@@ -1,5 +1,5 @@
 //
-//  TextureRepositoryWrapper.swift
+//  TextureLayerRepositoryWrapper.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/04.
@@ -8,11 +8,11 @@
 import Combine
 import UIKit
 
-class TextureRepositoryWrapper: ObservableObject, TextureRepository {
+class TextureLayerRepositoryWrapper: ObservableObject, TextureWithThumbnailRepository {
 
-    let repository: any TextureRepository
+    let repository: TextureWithThumbnailRepository
 
-    init(repository: any TextureRepository) {
+    init(repository: TextureWithThumbnailRepository) {
         self.repository = repository
     }
 

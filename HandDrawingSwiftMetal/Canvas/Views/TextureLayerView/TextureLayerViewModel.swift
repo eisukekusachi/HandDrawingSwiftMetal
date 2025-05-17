@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// Manage texture layers using `CanvasState` and `TextureRepository`
+/// Manage texture layers using `CanvasState` and `TextureWithThumbnailRepository`
 final class TextureLayerViewModel: ObservableObject {
 
     @Published var selectedLayerAlpha: Int = 0
@@ -27,7 +27,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     private var canvasState: CanvasState
 
-    private var textureRepository: (any TextureRepository)!
+    private var textureRepository: TextureWithThumbnailRepository!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -35,7 +35,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     init(
         canvasState: CanvasState,
-        textureRepository: TextureRepository
+        textureRepository: TextureWithThumbnailRepository
     ) {
         self.canvasState = canvasState
         self.textureRepository = textureRepository

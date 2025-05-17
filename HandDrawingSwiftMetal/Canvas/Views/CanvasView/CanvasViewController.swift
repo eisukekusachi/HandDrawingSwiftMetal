@@ -187,7 +187,7 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(canvasState: CanvasState, textureRepository: TextureRepository) {
+    private func setupLayerView(canvasState: CanvasState, textureRepository: TextureWithThumbnailRepository) {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
             textureRepository: textureRepository,

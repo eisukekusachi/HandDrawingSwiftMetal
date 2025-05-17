@@ -1,5 +1,5 @@
 //
-//  TextureMockRepository.swift
+//  TextureLayerMockRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/21.
@@ -9,7 +9,7 @@ import Combine
 import UIKit
 import Metal
 
-final class TextureMockRepository: TextureRepository {
+final class TextureLayerMockRepository: TextureWithThumbnailRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 

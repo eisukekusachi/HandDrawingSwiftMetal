@@ -21,7 +21,7 @@ final class TextureLayerViewPresenter {
 
     func setupLayerViewPresenter(
         canvasState: CanvasState,
-        textureRepository: TextureRepository,
+        textureRepository: TextureWithThumbnailRepository,
         using viewSettings: TextureLayerViewSettings
     ) {
         layerView = TextureLayerView(

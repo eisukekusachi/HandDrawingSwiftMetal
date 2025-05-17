@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TextureInMemorySingletonRepository: TextureRepositoryWrapper {
+final class TextureInMemorySingletonRepository: TextureLayerRepositoryWrapper {
 
     static let shared = TextureInMemorySingletonRepository()
 

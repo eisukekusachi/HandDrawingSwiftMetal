@@ -46,7 +46,7 @@ final class TextureInMemoryRepository: ObservableObject {
 
 }
 
-extension TextureInMemoryRepository: TextureRepository {
+extension TextureInMemoryRepository: TextureWithThumbnailRepository {
 
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
         storageInitializationWithNewTextureSubject.eraseToAnyPublisher()

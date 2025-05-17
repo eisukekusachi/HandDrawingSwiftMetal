@@ -160,7 +160,7 @@ private struct PreviewView: View {
     init() {
         viewModel = .init(
             canvasState: canvasState,
-            textureRepository: TextureMockRepository()
+            textureRepository: TextureLayerMockRepository()
         )
     }
     var body: some View {

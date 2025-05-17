@@ -119,14 +119,14 @@ final class CanvasViewModel {
 
     private var localRepository: LocalRepository!
 
-    private var textureRepository: TextureRepository!
+    private var textureRepository: TextureWithThumbnailRepository!
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
     init(
-        textureRepository: TextureRepository,
+        textureRepository: TextureWithThumbnailRepository,
         localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
     ) {
         self.textureRepository = textureRepository
