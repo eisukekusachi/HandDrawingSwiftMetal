@@ -322,8 +322,6 @@ extension TextureDocumentsDirectoryRepository {
 
                     self.textureIds.insert(uuid)
 
-                    self._textureSize = textureSize
-
                     promise(.success(()))
                 } else {
                     promise(.failure(TextureRepositoryError.failedToUnwrap))

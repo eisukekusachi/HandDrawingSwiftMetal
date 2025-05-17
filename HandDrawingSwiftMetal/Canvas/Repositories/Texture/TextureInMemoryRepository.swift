@@ -74,6 +74,9 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                 guard let `self` else { return }
 
                 if allExist {
+                    // Set `_textureSize` after the initialization of this repository is completed
+                    self._textureSize = configuration.textureSize ?? .zero
+
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
@@ -105,7 +108,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
-
+            // Set `_textureSize` after the initialization of this repository is completed
             self?._textureSize = textureSize
 
             self?.storageInitializationCompletedSubject.send(
@@ -216,8 +219,6 @@ extension TextureInMemoryRepository {
             let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
             self.textures[uuid] = texture
-
-            self._textureSize = textureSize
 
             promise(.success(()))
         }
