@@ -1,5 +1,5 @@
 //
-//  TextureMockRepository.swift
+//  TextureLayerMockRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/21.
@@ -9,7 +9,7 @@ import Combine
 import UIKit
 import Metal
 
-final class TextureMockRepository: TextureRepository {
+final class TextureLayerMockRepository: TextureLayerRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
@@ -35,7 +35,7 @@ final class TextureMockRepository: TextureRepository {
 
     var textureSize: CGSize = .zero
 
-    var hasTexturesBeenInitialized: Bool = false
+    var isInitialized: Bool = false
 
     func initializeStorage(from configuration: CanvasConfiguration) {}
 

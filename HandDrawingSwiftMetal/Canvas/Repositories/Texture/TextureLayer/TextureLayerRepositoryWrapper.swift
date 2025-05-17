@@ -1,5 +1,5 @@
 //
-//  TextureRepositoryWrapper.swift
+//  TextureLayerRepositoryWrapper.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/04.
@@ -8,11 +8,11 @@
 import Combine
 import UIKit
 
-class TextureRepositoryWrapper: ObservableObject, TextureRepository {
+class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
 
-    let repository: any TextureRepository
+    let repository: TextureLayerRepository
 
-    init(repository: any TextureRepository) {
+    init(repository: TextureLayerRepository) {
         self.repository = repository
     }
 
@@ -35,8 +35,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.textureSize
     }
 
-    var hasTexturesBeenInitialized: Bool {
-        repository.hasTexturesBeenInitialized
+    var isInitialized: Bool {
+        repository.isInitialized
     }
 
     func initializeStorage(from configuration: CanvasConfiguration) {

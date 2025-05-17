@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// Manage texture layers using `CanvasState` and `TextureRepository`
+/// Manage texture layers using `CanvasState` and `TextureLayerRepository`
 final class TextureLayerViewModel: ObservableObject {
 
     @Published var selectedLayerAlpha: Int = 0
@@ -27,7 +27,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     private var canvasState: CanvasState
 
-    private var textureRepository: (any TextureRepository)!
+    private var textureLayerRepository: TextureLayerRepository!
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -35,10 +35,10 @@ final class TextureLayerViewModel: ObservableObject {
 
     init(
         canvasState: CanvasState,
-        textureRepository: TextureRepository
+        textureLayerRepository: TextureLayerRepository
     ) {
         self.canvasState = canvasState
-        self.textureRepository = textureRepository
+        self.textureLayerRepository = textureLayerRepository
 
         canvasState.$layers.assign(to: \.layers, on: self)
             .store(in: &cancellables)
@@ -46,7 +46,7 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
 
-        textureRepository.thumbnailUpdateRequestedPublisher
+        textureLayerRepository.thumbnailUpdateRequestedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
@@ -96,7 +96,7 @@ extension TextureLayerViewModel {
                 guard let `self` else {
                     return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
                 }
-                return self.textureRepository.updateTexture(
+                return self.textureLayerRepository.updateTexture(
                     texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     for: textureLayerId
                 )
@@ -123,7 +123,7 @@ extension TextureLayerViewModel {
                 guard let `self` else {
                     return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
                 }
-                return self.textureRepository.removeTexture(removedTextureId)
+                return self.textureLayerRepository.removeTexture(removedTextureId)
             }
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -139,7 +139,7 @@ extension TextureLayerViewModel {
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {
-        textureRepository?.getThumbnail(uuid)
+        textureLayerRepository?.getThumbnail(uuid)
     }
 
     func selectLayer(_ uuid: UUID) {

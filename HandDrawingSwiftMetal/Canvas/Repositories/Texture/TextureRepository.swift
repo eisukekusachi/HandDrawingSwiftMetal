@@ -9,15 +9,8 @@ import Combine
 import Foundation
 import MetalKit
 
-/// A repository that manages textures
+/// A protocol that defines a repository for managing textures
 protocol TextureRepository {
-
-    /// The number of textures currently managed
-    var textureNum: Int { get }
-
-    var textureSize: CGSize { get }
-
-    var hasTexturesBeenInitialized: Bool { get }
 
     /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
     var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
@@ -25,13 +18,19 @@ protocol TextureRepository {
     /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
     var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
 
-    /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> { get }
+    /// The number of textures currently managed
+    var textureNum: Int { get }
 
-    /// Initialized the storage
+    /// The size of the textures managed by this repository
+    var textureSize: CGSize { get }
+
+    /// Whether this repository has been initialized
+    var isInitialized: Bool { get }
+
+    /// Initializes the storage
     func initializeStorage(from configuration: CanvasConfiguration)
 
-    /// Initialized the storage with a new texture
+    /// Initializes the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
     /// Gets a texture for the given UUID
@@ -39,9 +38,6 @@ protocol TextureRepository {
 
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error>
-
-    /// Retrieves the thumbnail image for UUID
-    func getThumbnail(_ uuid: UUID) -> UIImage?
 
     /// Removes all managed textures
     func removeAll()
@@ -51,9 +47,6 @@ protocol TextureRepository {
 
     /// Updates all textures for the given uuids using a directory URL
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
-
-    /// Updates all thumbnails
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>

@@ -18,7 +18,7 @@ class CanvasViewController: UIViewController {
     private var configuration = CanvasConfiguration()
 
     private let canvasViewModel = CanvasViewModel(
-        textureRepository: TextureDocumentsDirectorySingletonRepository.shared
+        textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared
     )
 
     private let dialogPresenter = DialogPresenter()
@@ -79,7 +79,7 @@ extension CanvasViewController {
             .sink { [weak self] configuration in
                 self?.setupLayerView(
                     canvasState: configuration.canvasState,
-                    textureRepository: configuration.textureRepository
+                    textureLayerRepository: configuration.textureLayerRepository
                 )
                 self?.contentView.setup(
                     configuration.canvasState
@@ -187,10 +187,10 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(canvasState: CanvasState, textureRepository: TextureRepository) {
+    private func setupLayerView(canvasState: CanvasState, textureLayerRepository: TextureLayerRepository) {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
-            textureRepository: textureRepository,
+            textureLayerRepository: textureLayerRepository,
             using: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
