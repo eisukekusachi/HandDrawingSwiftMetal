@@ -9,7 +9,7 @@ import Foundation
 
 final class TextureDocumentsDirectorySingletonRepository: TextureRepositoryWrapper {
 
-    static let shared = TextureDocumentsDirectoryRepository()
+    static let shared = TextureDocumentsDirectorySingletonRepository()
 
     private init() {
         super.init(repository: TextureDocumentsDirectoryRepository())
