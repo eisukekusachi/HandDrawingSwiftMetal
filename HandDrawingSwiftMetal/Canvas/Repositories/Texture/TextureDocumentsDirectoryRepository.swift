@@ -14,10 +14,10 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
 
     private(set) var textureIds: Set<UUID> = []
 
-    private static let storageName = "TextureStorage"
+    let storageName: String
 
     // Define it as var to allow modification of its metadata
-    private var directoryUrl = URL.applicationSupport.appendingPathComponent(TextureDocumentsDirectoryRepository.storageName)
+    private var directoryUrl: URL
 
     private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -36,6 +36,7 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
     private var _textureSize: CGSize = .zero
 
     init(
+        storageName: String,
         textures: Set<UUID> = [],
         renderer: (any MTLRendering) = MTLRenderer.shared
     ) {
@@ -46,6 +47,9 @@ final class TextureDocumentsDirectoryRepository: ObservableObject {
             nodes: .flippedTextureNodes,
             with: device
         )
+
+        self.storageName = storageName
+        self.directoryUrl = URL.applicationSupport.appendingPathComponent(storageName)
 
         self.createDirectory(&directoryUrl)
     }
