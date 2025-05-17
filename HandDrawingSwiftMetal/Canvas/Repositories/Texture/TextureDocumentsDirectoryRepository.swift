@@ -95,6 +95,9 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                     // ids are retained if texture filenames in the directory match the ids of the configuration.layers
                     self.textureIds = Set(configuration.layers.map { $0.id })
 
+                    // Set `_textureSize` after the initialization of this repository is completed
+                    self._textureSize = configuration.textureSize ?? .zero
+
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
                     self.storageInitializationWithNewTextureSubject.send(configuration)
@@ -126,6 +129,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             case .failure: break
             }
         }, receiveValue: { [weak self] in
+            // Set `_textureSize` after the initialization of this repository is completed
             self?._textureSize = textureSize
 
             self?.storageInitializationCompletedSubject.send(
