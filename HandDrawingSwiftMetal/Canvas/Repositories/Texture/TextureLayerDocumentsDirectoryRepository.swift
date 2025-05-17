@@ -12,10 +12,6 @@ import SwiftUI
 /// A repository that manages on-disk textures
 final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository, TextureWithThumbnailRepository {
 
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
     private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
@@ -34,10 +30,6 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             textures: textures,
             renderer: renderer
         )
-    }
-
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
     }
 
     override func removeAll() {
@@ -100,30 +92,6 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         .eraseToAnyPublisher()
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future { [weak self] promise in
-            guard let `self` else { return }
-
-            do {
-                for textureId in self.textureIds {
-                    let texture: MTLTexture? = try FileInputManager.loadTexture(
-                        url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
-                        textureSize: textureSize,
-                        device: self.device
-                    )
-                    self.setThumbnail(texture: texture, for: textureId)
-                }
-
-                promise(.success(()))
-
-            } catch {
-                Logger.standard.error("Failed to load texture during thumbnail update: \(error)")
-                promise(.failure(FileOutputError.failedToUpdateTexture))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
     /// Updates an existing texture for UUID
     override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
@@ -147,6 +115,42 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 promise(.success(uuid))
             } catch {
                 Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
+                promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+}
+
+extension TextureLayerDocumentsDirectoryRepository {
+
+    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
+        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
+    }
+
+    func getThumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future { [weak self] promise in
+            guard let `self` else { return }
+
+            do {
+                for textureId in self.textureIds {
+                    let texture: MTLTexture? = try FileInputManager.loadTexture(
+                        url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
+                        textureSize: textureSize,
+                        device: self.device
+                    )
+                    self.setThumbnail(texture: texture, for: textureId)
+                }
+
+                promise(.success(()))
+
+            } catch {
+                Logger.standard.error("Failed to load texture during thumbnail update: \(error)")
                 promise(.failure(FileOutputError.failedToUpdateTexture))
             }
         }
