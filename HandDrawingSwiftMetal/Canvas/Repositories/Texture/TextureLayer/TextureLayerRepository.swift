@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// A repository that manages textures and in-memory thumbnails
+/// A protocol that defines a repository for managing textures and in-memory thumbnails
 protocol TextureLayerRepository: TextureRepository {
 
     /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
