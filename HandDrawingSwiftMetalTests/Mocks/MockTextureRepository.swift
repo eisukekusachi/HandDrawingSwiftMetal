@@ -40,7 +40,7 @@ final class MockTextureRepository: TextureRepository {
 
     var textureNum: Int = 0
 
-    var hasTexturesBeenInitialized: Bool { false }
+    var isInitialized: Bool { false }
 
     init(textures: [UUID : MTLTexture?] = [:]) {
         self.textures = textures
