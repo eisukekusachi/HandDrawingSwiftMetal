@@ -76,8 +76,8 @@ final class MockTextureRepository: TextureRepository {
 
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
-        return Just(textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device))
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        return Just(.init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

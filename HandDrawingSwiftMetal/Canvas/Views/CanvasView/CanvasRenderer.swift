@@ -208,10 +208,10 @@ extension CanvasRenderer {
             uuid: destinationTextureId,
             textureSize: texture.size
         )
-        .tryMap { [weak self] targetTexture -> MTLTexture in
+        .tryMap { [weak self] result -> MTLTexture in
             guard
                 let `self`,
-                let targetTexture,
+                let targetTexture = result.texture,
                 let flippedTextureBuffers = self.flippedTextureBuffers
             else {
                 throw TextureRepositoryError.failedToUnwrap

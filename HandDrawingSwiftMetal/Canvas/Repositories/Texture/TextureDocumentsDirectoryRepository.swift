@@ -134,8 +134,8 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
-        Future<MTLTexture?, Error> { [weak self] promise in
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        Future<TextureRepositoryEntity, Error> { [weak self] promise in
             guard let `self` else { return }
 
             let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
@@ -148,7 +148,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                 )
                 promise(
                     .success(
-                        texture
+                        .init(uuid: uuid, texture: texture)
                     )
                 )
             } catch {

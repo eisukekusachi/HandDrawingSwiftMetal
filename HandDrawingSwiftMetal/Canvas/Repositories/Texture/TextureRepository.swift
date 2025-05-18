@@ -34,7 +34,7 @@ protocol TextureRepository {
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
     /// Gets a texture for the given UUID
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error>
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error>
 
     /// Gets multiple textures for the given UUIDs
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error>
