@@ -39,7 +39,7 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func initializeStorage(from configuration: CanvasConfiguration) {}
 
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, any Error> {
+    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Just(true)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -49,7 +49,7 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     }
 
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, any Error> {
+    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -84,15 +84,15 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func removeAll() {}
 
-    func setThumbnail(texture: (any MTLTexture)?, for uuid: UUID) {}
+    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {}
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Just(uuid)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

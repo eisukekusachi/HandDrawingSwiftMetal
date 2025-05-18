@@ -155,7 +155,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 // Delete all data

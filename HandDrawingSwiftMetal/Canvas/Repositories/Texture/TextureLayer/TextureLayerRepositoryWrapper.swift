@@ -51,7 +51,7 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.getThumbnail(uuid)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
         repository.getTexture(uuid: uuid, textureSize: textureSize)
     }
 
@@ -67,15 +67,15 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.removeAll()
     }
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, any Error> {
+    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.updateTexture(texture: texture, for: uuid)
     }
 
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         repository.updateAllTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         repository.updateAllThumbnails(textureSize: textureSize)
     }
 
