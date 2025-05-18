@@ -25,6 +25,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         super.init(textures: textures, renderer: renderer)
     }
 
+    /// Clears texture ID data and the thumbnails
     override func removeAll() {
         textures = [:]
         thumbnails = [:]
@@ -36,7 +37,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    override func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+    override func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 // Delete all data

@@ -163,11 +163,13 @@ extension DocumentsLocalRepository {
             uuids: textureIds,
             textureSize: textureSize
         )
-            .tryMap { textureDict in
-                guard textureDict.count == textureIds.count else {
+            .tryMap { results in
+                guard results.count == textureIds.count else {
                     Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
                     throw DocumentsLocalRepositoryError.exportLayerData
                 }
+                // Convert entities to a dictionary for easy lookup
+                let textureDict = Dictionary(uniqueKeysWithValues: results.map { ($0.uuid, $0.texture) })
 
                 try textureIds.forEach { id in
                     guard let texture = textureDict[id].flatMap({ $0 }) else {

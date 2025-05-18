@@ -208,10 +208,10 @@ extension CanvasRenderer {
             uuid: destinationTextureId,
             textureSize: texture.size
         )
-        .tryMap { [weak self] targetTexture -> MTLTexture in
+        .tryMap { [weak self] result -> MTLTexture in
             guard
                 let `self`,
-                let targetTexture,
+                let targetTexture = result.texture,
                 let flippedTextureBuffers = self.flippedTextureBuffers
             else {
                 throw TextureRepositoryError.failedToUnwrap
@@ -293,9 +293,12 @@ extension CanvasRenderer {
             uuids: layers.map { $0.id },
             textureSize: destinationTexture.size
         )
-        .map { [weak self] textures in
+        .map { [weak self] results in
             for layer in layers {
-                if let resultTexture = textures[layer.id]?.flatMap({ $0 }) {
+                // Convert entities to a dictionary for easy lookup
+                let textureDict = Dictionary(uniqueKeysWithValues: results.map { ($0.uuid, $0.texture) })
+
+                if let resultTexture = textureDict[layer.id]?.flatMap({ $0 }) {
                     self?.renderer.mergeTexture(
                         texture: resultTexture,
                         alpha: layer.alpha,

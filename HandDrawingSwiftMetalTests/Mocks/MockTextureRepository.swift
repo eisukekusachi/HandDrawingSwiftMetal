@@ -40,7 +40,7 @@ final class MockTextureRepository: TextureRepository {
 
     var textureNum: Int = 0
 
-    var hasTexturesBeenInitialized: Bool { false }
+    var isInitialized: Bool { false }
 
     init(textures: [UUID : MTLTexture?] = [:]) {
         self.textures = textures
@@ -76,17 +76,14 @@ final class MockTextureRepository: TextureRepository {
 
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<(any MTLTexture)?, any Error> {
-        return Just(textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device))
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        return Just(.init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID : (any MTLTexture)?], any Error> {
-        let result = uuids.reduce(into: [UUID: MTLTexture?]()) { dict, uuid in
-            dict[uuid] = textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-        }
-        return Just(result)
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        return Just([])
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

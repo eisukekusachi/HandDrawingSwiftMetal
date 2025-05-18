@@ -134,8 +134,8 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
-        Future<MTLTexture?, Error> { [weak self] promise in
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        Future<TextureRepositoryEntity, Error> { [weak self] promise in
             guard let `self` else { return }
 
             let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
@@ -148,7 +148,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                 )
                 promise(
                     .success(
-                        texture
+                        .init(uuid: uuid, texture: texture)
                     )
                 )
             } catch {
@@ -158,9 +158,9 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
-            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+            Future<TextureRepositoryEntity, Error> { [weak self] promise in
                 guard let `self` else { return }
 
                 let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
@@ -173,7 +173,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                     )
                     promise(
                         .success(
-                            (uuid, texture)
+                            .init(uuid: uuid, texture: texture)
                         )
                     )
                 } catch {
@@ -185,14 +185,15 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 
         return Publishers.MergeMany(publishers)
             .collect()
-            .map { pairs in
-                Dictionary(uniqueKeysWithValues: pairs)
-            }
             .eraseToAnyPublisher()
     }
 
+    /// Deletes all files within the directory and clears texture ID data
     func removeAll() {
+        // Delete all contents inside the folder
         try? FileManager.clearContents(of: directoryUrl)
+
+        // Clear the texture ID array
         textureIds = []
     }
 
@@ -211,6 +212,24 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             promise(.success(uuid))
         }
         .eraseToAnyPublisher()
+    }
+
+    /// Deletes the entire directory and recreates it as an empty folder
+    func resetDirectory(_ url: inout URL) {
+        do {
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
+            }
+
+            // Create a new folder
+            createDirectory(&url)
+
+            // Clear in-memory texture ID data
+            textureIds = []
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage directory: \(error)")
+        }
     }
 
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
@@ -274,20 +293,6 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-
-    // If the directory already exists, delete it and create a new one
-    func resetDirectory(_ url: inout URL) {
-        do {
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.removeItem(at: url)
-            }
-
-            createDirectory(&url)
-
-        } catch {
-            Logger.standard.error("Failed to reset texture storage directory: \(error)")
-        }
     }
 
 }

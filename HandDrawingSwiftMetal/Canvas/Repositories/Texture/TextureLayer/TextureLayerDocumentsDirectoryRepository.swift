@@ -32,6 +32,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    /// Deletes all files within the directory and clears texture ID data and the thumbnails
     override func removeAll() {
         try? FileManager.clearContents(of: directoryUrl)
         textureIds = []
@@ -139,12 +140,17 @@ extension TextureLayerDocumentsDirectoryRepository {
 
             do {
                 for textureId in self.textureIds {
-                    let texture: MTLTexture? = try FileInputManager.loadTexture(
-                        url: self.directoryUrl.appendingPathComponent(textureId.uuidString),
-                        textureSize: textureSize,
-                        device: self.device
-                    )
-                    self.setThumbnail(texture: texture, for: textureId)
+                    let url = self.directoryUrl.appendingPathComponent(textureId.uuidString)
+                    if FileManager.default.fileExists(atPath: url.path) {
+                        let texture: MTLTexture? = try FileInputManager.loadTexture(
+                            url: url,
+                            textureSize: textureSize,
+                            device: self.device
+                        )
+                        self.setThumbnail(texture: texture, for: textureId)
+                    } else {
+                        Logger.standard.error("Failed to load texture for \(textureId.uuidString): file not found")
+                    }
                 }
 
                 promise(.success(()))

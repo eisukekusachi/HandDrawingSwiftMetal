@@ -118,37 +118,35 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<MTLTexture?, Error> {
-        Future<MTLTexture?, Error> { [weak self] promise in
+    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        Future<TextureRepositoryEntity, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid] else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
                 return
             }
-            promise(.success(texture))
+            promise(.success(.init(uuid: uuid, texture: texture)))
         }
         .eraseToAnyPublisher()
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[UUID: MTLTexture?], Error> {
+    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
-            Future<(UUID, MTLTexture?), Error> { [weak self] promise in
+            Future<TextureRepositoryEntity, Error> { [weak self] promise in
                 guard let texture = self?.textures[uuid] else {
                     promise(.failure(TextureRepositoryError.failedToLoadTexture))
                     return
                 }
-                promise(.success((uuid, texture)))
+                promise(.success(.init(uuid: uuid, texture: texture)))
             }
             .eraseToAnyPublisher()
         }
 
         return Publishers.MergeMany(publishers)
             .collect()
-            .map { pairs in
-                Dictionary(uniqueKeysWithValues: pairs)
-            }
             .eraseToAnyPublisher()
     }
 
+    /// Clears texture ID data and the thumbnails
     func removeAll() {
         textures = [:]
     }
@@ -158,7 +156,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 // Delete all data
@@ -214,11 +212,7 @@ extension TextureInMemoryRepository {
                 return
             }
 
-            self.removeAll()
-
-            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
-
-            self.textures[uuid] = texture
+            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
             promise(.success(()))
         }

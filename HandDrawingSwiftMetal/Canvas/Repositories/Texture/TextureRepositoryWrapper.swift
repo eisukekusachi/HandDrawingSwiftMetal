@@ -1,18 +1,18 @@
 //
-//  TextureLayerRepositoryWrapper.swift
+//  TextureRepositoryWrapper.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/05/04.
+//  Created by Eisuke Kusachi on 2025/05/17.
 //
 
 import Combine
 import UIKit
 
-class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
+class TextureRepositoryWrapper: ObservableObject, TextureRepository {
 
-    let repository: TextureLayerRepository
+    let repository: TextureRepository
 
-    init(repository: TextureLayerRepository) {
+    init(repository: TextureRepository) {
         self.repository = repository
     }
 
@@ -21,10 +21,6 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
     }
     var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
         repository.storageInitializationCompletedPublisher
-    }
-
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        repository.thumbnailUpdateRequestedPublisher
     }
 
     var textureNum: Int {
@@ -47,10 +43,6 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.initializeStorageWithNewTexture(textureSize)
     }
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        repository.getThumbnail(uuid)
-    }
-
     func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
         repository.getTexture(uuid: uuid, textureSize: textureSize)
     }
@@ -67,16 +59,12 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.removeAll()
     }
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.updateTexture(texture: texture, for: uuid)
     }
 
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         repository.updateAllTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
-    }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        repository.updateAllThumbnails(textureSize: textureSize)
     }
 
 }
