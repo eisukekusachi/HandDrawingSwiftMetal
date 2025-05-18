@@ -214,6 +214,24 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    /// Deletes the entire directory and recreates it as an empty folder
+    func resetDirectory(_ url: inout URL) {
+        do {
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
+            }
+
+            // Create a new folder
+            createDirectory(&url)
+
+            // Clear in-memory texture ID data
+            textureIds = []
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage directory: \(error)")
+        }
+    }
+
     func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             guard let `self` else { return }
@@ -275,24 +293,6 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-
-    /// Deletes the entire directory and recreates it as an empty folder
-    func resetDirectory(_ url: inout URL) {
-        do {
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.removeItem(at: url)
-            }
-
-            // Create a new folder
-            createDirectory(&url)
-
-            // Clear in-memory texture ID data
-            textureIds = []
-
-        } catch {
-            Logger.standard.error("Failed to reset texture storage directory: \(error)")
-        }
     }
 
 }
