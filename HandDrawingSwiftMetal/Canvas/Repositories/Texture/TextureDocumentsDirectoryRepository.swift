@@ -189,7 +189,10 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     }
 
     func removeAll() {
+        // Delete all contents inside the folder
         try? FileManager.clearContents(of: directoryUrl)
+
+        // Clear the texture ID array
         textureIds = []
     }
 
@@ -280,7 +283,11 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                 try FileManager.default.removeItem(at: url)
             }
 
+            // Create a new folder
             createDirectory(&url)
+
+            // Clear the texture ID array
+            textureIds = []
 
         } catch {
             Logger.standard.error("Failed to reset texture storage directory: \(error)")
