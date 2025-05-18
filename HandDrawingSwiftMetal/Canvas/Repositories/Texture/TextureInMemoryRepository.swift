@@ -211,11 +211,7 @@ extension TextureInMemoryRepository {
                 return
             }
 
-            self.removeAll()
-
-            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
-
-            self.textures[uuid] = texture
+            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
             promise(.success(()))
         }
