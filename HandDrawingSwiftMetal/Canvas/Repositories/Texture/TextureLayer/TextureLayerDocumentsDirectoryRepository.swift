@@ -32,6 +32,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    /// Deletes all files within the directory and clears texture ID data and the thumbnails
     override func removeAll() {
         try? FileManager.clearContents(of: directoryUrl)
         textureIds = []

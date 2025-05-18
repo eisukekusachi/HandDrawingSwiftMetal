@@ -146,6 +146,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    /// Clears texture ID data and the thumbnails
     func removeAll() {
         textures = [:]
     }

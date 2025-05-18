@@ -25,6 +25,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         super.init(textures: textures, renderer: renderer)
     }
 
+    /// Clears texture ID data and the thumbnails
     override func removeAll() {
         textures = [:]
         thumbnails = [:]

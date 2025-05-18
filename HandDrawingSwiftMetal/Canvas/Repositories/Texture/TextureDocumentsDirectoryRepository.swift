@@ -188,6 +188,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    /// Deletes all files within the directory and clears texture ID data
     func removeAll() {
         // Delete all contents inside the folder
         try? FileManager.clearContents(of: directoryUrl)
@@ -276,7 +277,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    // If the directory already exists, delete it and create a new one
+    /// Deletes the entire directory and recreates it as an empty folder
     func resetDirectory(_ url: inout URL) {
         do {
             if FileManager.default.fileExists(atPath: url.path) {
@@ -286,7 +287,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             // Create a new folder
             createDirectory(&url)
 
-            // Clear the texture ID array
+            // Clear in-memory texture ID data
             textureIds = []
 
         } catch {
