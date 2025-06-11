@@ -1,23 +1,22 @@
 //
-//  DrawingCurvePencilIterator.swift
+//  PencilSingleCurveIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
+import Combine
 import UIKit
 
 /// An iterator for real-time pencil drawing with `UITouch.Phase`
-final class DrawingCurvePencilIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
+final class PencilSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
 
-    var touchPhase: UITouch.Phase = .began
-
-    private var hasFirstCurveBeenCreated: Bool = false
+    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
     var latestCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
-        if shouldGetFirstCurve {
+        if isFirstCurveNeeded {
             array.append(contentsOf: makeFirstCurvePoints())
         }
 
@@ -30,26 +29,28 @@ final class DrawingCurvePencilIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
         return array
     }
 
+    private var hasFirstCurveBeenCreated: Bool = false
+
     func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
         self.append(points)
-        self.touchPhase = touchPhase
+        self.touchPhase.send(touchPhase)
     }
 
     override func reset() {
         super.reset()
 
-        touchPhase = .began
+        touchPhase.send(.cancelled)
         hasFirstCurveBeenCreated = false
     }
 
 }
 
-extension DrawingCurvePencilIterator {
+extension PencilSingleCurveIterator {
 
-    var shouldGetFirstCurve: Bool {
+    var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
 
         if isFirstCurveToBeCreated {

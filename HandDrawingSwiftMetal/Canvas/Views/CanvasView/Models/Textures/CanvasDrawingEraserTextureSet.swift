@@ -63,7 +63,7 @@ extension CanvasDrawingEraserTextureSet {
     }
 
     func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
+        singleCurveIterator: SingleCurveIterator,
         withBackgroundTexture backgroundTexture: MTLTexture?,
         withBackgroundColor backgroundColor: UIColor = .clear,
         with commandBuffer: MTLCommandBuffer
@@ -73,7 +73,7 @@ extension CanvasDrawingEraserTextureSet {
         else { return }
 
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.latestCurvePoints,
+            points: singleCurveIterator.latestCurvePoints,
             sourceTexture: backgroundTexture,
             with: commandBuffer
         )
@@ -81,7 +81,7 @@ extension CanvasDrawingEraserTextureSet {
         drawDrawingTextureWithBackgroundTexture(
             backgroundTexture: backgroundTexture,
             backgroundColor: backgroundColor,
-            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
+            shouldUpdateSelectedTexture: singleCurveIterator.isDrawingFinished,
             with: commandBuffer
         )
     }

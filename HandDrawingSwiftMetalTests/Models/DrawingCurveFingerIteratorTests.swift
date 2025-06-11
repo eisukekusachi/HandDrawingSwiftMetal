@@ -1,5 +1,5 @@
 //
-//  DrawingCurveFingerIteratorTests.swift
+//  FingerSingleCurveIteratorTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
@@ -8,50 +8,50 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class DrawingCurveFingerIteratorTests: XCTestCase {
+final class FingerSingleCurveIteratorTests: XCTestCase {
 
     func testIsDrawingFinished() {
-        let subject = DrawingCurveFingerIterator()
+        let subject = FingerSingleCurveIterator()
 
-        subject.touchPhase = .began
+        subject.touchPhase.send(.began)
         XCTAssertFalse(subject.isDrawingFinished)
         XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        subject.touchPhase = .moved
+        subject.touchPhase.send(.moved)
         XCTAssertFalse(subject.isDrawingFinished)
         XCTAssertTrue(subject.isCurrentlyDrawing)
 
-        subject.touchPhase = .ended
+        subject.touchPhase.send(.ended)
         XCTAssertTrue(subject.isDrawingFinished)
         XCTAssertFalse(subject.isCurrentlyDrawing)
 
-        subject.touchPhase = .cancelled
+        subject.touchPhase.send(.cancelled)
         XCTAssertTrue(subject.isDrawingFinished)
         XCTAssertFalse(subject.isCurrentlyDrawing)
     }
 
-    func testShouldGetFirstCurve() {
-        let subject = DrawingCurveFingerIterator()
+    func testIsFirstCurveNeeded() {
+        let subject = FingerSingleCurveIterator()
 
         subject.append([
             .generate(),
             .generate()
         ])
-        XCTAssertFalse(subject.shouldGetFirstCurve)
+        XCTAssertFalse(subject.isFirstCurveNeeded)
 
         // After creating the instance, it becomes `true` when three elements are stored in the array.
         subject.append([
             .generate()
         ])
-        XCTAssertTrue(subject.shouldGetFirstCurve)
+        XCTAssertTrue(subject.isFirstCurveNeeded)
 
         // The value of the first curve is retrieved only once
         _ = subject.latestCurvePoints
-        XCTAssertFalse(subject.shouldGetFirstCurve)
+        XCTAssertFalse(subject.isFirstCurveNeeded)
     }
 
     func testAppendToIterator() {
-        let subject = DrawingCurveFingerIterator()
+        let subject = FingerSingleCurveIterator()
 
         subject.append(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
         subject.append(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)

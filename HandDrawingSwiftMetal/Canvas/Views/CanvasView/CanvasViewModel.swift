@@ -78,8 +78,8 @@ final class CanvasViewModel {
     /// A class for handling Apple Pencil inputs
     private let pencilScreenStrokeData = PencilScreenStrokeData()
 
-    /// An iterator for real-time drawing
-    private var drawingCurveIterator: DrawingCurveIterator?
+    /// An iterator that manages a single curve being drawn in real time
+    private var singleCurveIterator: SingleCurveIterator?
 
     /// A texture set for real-time drawing
     private var drawingTextureSet: CanvasDrawingTextureSet?
@@ -317,7 +317,7 @@ extension CanvasViewModel {
         switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
         case .drawing:
             if shouldCreateFingerDrawingCurveIteratorInstance() {
-                drawingCurveIterator = DrawingCurveFingerIterator()
+                singleCurveIterator = FingerSingleCurveIterator()
             }
 
             fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
@@ -360,7 +360,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
-            drawingCurveIterator = DrawingCurvePencilIterator()
+            singleCurveIterator = PencilSingleCurveIterator()
         }
 
         pencilScreenStrokeData.appendActualTouches(
@@ -415,7 +415,7 @@ extension CanvasViewModel {
             let diameter = canvasState.drawingToolDiameter
         else { return }
 
-        drawingCurveIterator?.append(
+        singleCurveIterator?.append(
             points: screenTouchPoints.map {
                 .init(
                     matrix: transformer.matrix.inverted(flipY: true),
@@ -430,7 +430,7 @@ extension CanvasViewModel {
         )
 
         drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: drawingCurveIterator?.isCurrentlyDrawing ?? false
+            isCurrentlyDrawing: singleCurveIterator?.isCurrentlyDrawing ?? false
         )
     }
 
@@ -467,7 +467,7 @@ extension CanvasViewModel {
 
     // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
     private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
-        drawingCurveIterator == nil
+        singleCurveIterator == nil
     }
 
     private func resetAllInputParameters() {
@@ -477,7 +477,7 @@ extension CanvasViewModel {
         fingerScreenStrokeData.reset()
         pencilScreenStrokeData.reset()
 
-        drawingCurveIterator = nil
+        singleCurveIterator = nil
         transformer.resetMatrix()
     }
 
@@ -490,7 +490,7 @@ extension CanvasViewModel {
 
         fingerScreenStrokeData.reset()
 
-        drawingCurveIterator = nil
+        singleCurveIterator = nil
         transformer.resetMatrix()
 
         canvasView?.resetCommandBuffer()
@@ -500,21 +500,21 @@ extension CanvasViewModel {
 
     private func updateCanvasWithDrawing() {
         guard
-            let drawingCurveIterator,
+            let singleCurveIterator,
             let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = canvasView?.commandBuffer
         else { return }
 
         drawingTextureSet?.drawCurvePoints(
-            drawingCurveIterator: drawingCurveIterator,
-            withBackgroundTexture: self.renderer.selectedTexture,
+            singleCurveIterator: singleCurveIterator,
+            withBackgroundTexture: renderer.selectedTexture,
             withBackgroundColor: .clear,
             with: commandBuffer
         )
 
         renderer.updateCanvasView(
             canvasView,
-            realtimeDrawingTexture: self.drawingTextureSet?.drawingSelectedTexture,
+            realtimeDrawingTexture: drawingTextureSet?.drawingSelectedTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
         )

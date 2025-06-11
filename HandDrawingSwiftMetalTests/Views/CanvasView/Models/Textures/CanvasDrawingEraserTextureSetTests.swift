@@ -83,9 +83,9 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         ]
 
         testCases.forEach { testCase in
-            let drawingIterator = MockDrawingCurveIterator()
+            let iterator = MockDrawingCurveIterator()
 
-            drawingIterator.touchPhase = testCase.key.touchPhase
+            iterator.touchPhase.send(testCase.key.touchPhase)
 
             let publisherExpectation = XCTestExpectation()
             if !testCase.value.isDrawingFinished {
@@ -100,7 +100,7 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
                 .store(in: &cancellables)
 
             subject.drawCurvePoints(
-                drawingCurveIterator: drawingIterator,
+                singleCurveIterator: iterator,
                 withBackgroundTexture: backgroundTexture,
                 withBackgroundColor: .clear,
                 with: commandBuffer

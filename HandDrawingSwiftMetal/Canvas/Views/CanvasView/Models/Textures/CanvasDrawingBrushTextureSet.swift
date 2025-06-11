@@ -61,7 +61,7 @@ extension CanvasDrawingBrushTextureSet {
     }
 
     func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
+        singleCurveIterator: SingleCurveIterator,
         withBackgroundTexture backgroundTexture: MTLTexture?,
         withBackgroundColor backgroundColor: UIColor = .clear,
         with commandBuffer: MTLCommandBuffer
@@ -69,14 +69,14 @@ extension CanvasDrawingBrushTextureSet {
         guard let backgroundTexture else { return }
 
         drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.latestCurvePoints,
+            points: singleCurveIterator.latestCurvePoints,
             with: commandBuffer
         )
 
         drawDrawingTextureWithBackgroundTexture(
             backgroundTexture: backgroundTexture,
             backgroundColor: backgroundColor,
-            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
+            shouldUpdateSelectedTexture: singleCurveIterator.isDrawingFinished,
             with: commandBuffer
         )
     }

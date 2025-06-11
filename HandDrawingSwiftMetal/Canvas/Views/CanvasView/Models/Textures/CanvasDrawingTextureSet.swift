@@ -21,7 +21,7 @@ protocol CanvasDrawingTextureSet {
 
     /// Draws a curve points on `destinationTexture` using the selected texture
     func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
+        singleCurveIterator: SingleCurveIterator,
         withBackgroundTexture backgroundTexture: MTLTexture?,
         withBackgroundColor backgroundColor: UIColor,
         with commandBuffer: MTLCommandBuffer
