@@ -10,16 +10,10 @@ import Combine
 @testable import HandDrawingSwiftMetal
 
 final class CanvasDrawingDisplayLinkTests: XCTestCase {
-    var commandBuffer: MTLCommandBuffer!
-    let device = MTLCreateSystemDefaultDevice()!
 
     var cancellables = Set<AnyCancellable>()
 
-    override func setUp() {
-        commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-    }
-
-    /// Confirms that the displayLink is running and `requestDrawingOnCanvasPublisher` emits `Void`
+    /// Confirms that the displayLink is running and `canvasDrawingPublisher` emits `Void`
     func testEmitRequestDrawingOnCanvasPublisherWhenTouchingScreen() {
         let subject = CanvasDrawingDisplayLink()
 
@@ -32,14 +26,14 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
             }
             .store(in: &cancellables)
 
-        subject.updateCanvasWithDrawing(isCurrentlyDrawing: true)
+        subject.run(true)
 
         XCTAssertEqual(subject.displayLink?.isPaused, false)
 
         wait(for: [publisherExpectation], timeout: 1.0)
     }
 
-    /// Confirms that the displayLink stops and `requestDrawingOnCanvasPublisher` emits `Void` once
+    /// Confirms that the displayLink stops and `canvasDrawingPublisher` emits `Void` once
     func testEmitRequestDrawingOnCanvasPublisherWhenFingerIsLifted() {
         let subject = CanvasDrawingDisplayLink()
 
@@ -52,7 +46,7 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
             }
             .store(in: &cancellables)
 
-        subject.updateCanvasWithDrawing(isCurrentlyDrawing: false)
+        subject.run(false)
 
         XCTAssertEqual(subject.displayLink?.isPaused, true)
 
