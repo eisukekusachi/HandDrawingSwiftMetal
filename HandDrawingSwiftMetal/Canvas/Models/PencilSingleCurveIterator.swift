@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// An iterator for real-time pencil drawing with `UITouch.Phase`
+/// An iterator for realtime pencil drawing with `UITouch.Phase`
 final class PencilSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
 
     let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)

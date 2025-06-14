@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// An iterator for real-time drawing with `UITouch.Phase`
+/// An iterator for realtime drawing with `UITouch.Phase`
 protocol SingleCurveIterator: Iterator<GrayscaleDotPoint> {
 
     /// Points that have not yet been drawn

@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// An iterator for real-time finger drawing with `UITouch.Phase`
+/// An iterator for realtime finger drawing with `UITouch.Phase`
 final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
 
     let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)

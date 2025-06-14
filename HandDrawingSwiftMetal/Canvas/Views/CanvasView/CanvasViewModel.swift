@@ -69,7 +69,6 @@ final class CanvasViewModel {
     private let canvasState: CanvasState = .init(
         CanvasConfiguration()
     )
-
     /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `DocumentsDirectoryTextureRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
@@ -78,17 +77,17 @@ final class CanvasViewModel {
     /// Handles input from Apple Pencil
     private let pencilStroke = PencilStroke()
 
-    /// An iterator that manages a single curve being drawn in real time
+    /// An iterator that manages a single curve being drawn in realtime
     private var singleCurveIterator: SingleCurveIterator?
 
-    /// A texture set for real-time drawing
+    /// A texture set for realtime drawing
     private var drawingTextureSet: CanvasDrawingTextureSet?
-    /// A brush texture set for real-time drawing
+    /// A brush texture set for realtime drawing
     private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
-    /// An eraser texture set for real-time drawing
+    /// An eraser texture set for realtime drawing
     private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
 
-    /// A display link for real-time drawing
+    /// A display link for realtime drawing
     private var drawingDisplayLink = CanvasDrawingDisplayLink()
 
     private var renderer = CanvasRenderer()
