@@ -344,7 +344,7 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
         case .drawing:
-            if shouldCreateFingerDrawingCurveIteratorInstance() {
+            if shouldCreateFingerSingleCurveIteratorInstance() {
                 singleCurveIterator = FingerSingleCurveIterator()
             }
 
@@ -387,7 +387,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
+        if shouldCreatePencilSingleCurveIteratorInstance(actualTouches: actualTouches) {
             singleCurveIterator = PencilSingleCurveIterator()
         }
 
@@ -487,14 +487,14 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    // Since the pencil takes priority, even if `drawingCurveIterator` contains an instance,
-    // it will be overwritten when touchBegan occurs.
-    private func shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
+    // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
+    // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
+    private func shouldCreatePencilSingleCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
         actualTouches.contains(where: { $0.phase == .began })
     }
 
-    // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
-    private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
+    // Set a new `FingerSingleCurveIterator` if `singleCurveIterator` is nil.
+    private func shouldCreateFingerSingleCurveIteratorInstance() -> Bool {
         singleCurveIterator == nil
     }
 
