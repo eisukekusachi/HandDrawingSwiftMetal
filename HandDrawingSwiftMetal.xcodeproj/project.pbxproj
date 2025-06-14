@@ -93,8 +93,8 @@
 		D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */; };
 		D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
-		D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */; };
-		D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */; };
+		D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerStroke.swift */; };
+		D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilStroke.swift */; };
 		D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB02D23E66700BCC565 /* UndoMoveData.swift */; };
 		D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB22D23E68000BCC565 /* UndoStackObject.swift */; };
 		D464FCB52D23E69000BCC565 /* UndoStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB42D23E69000BCC565 /* UndoStack.swift */; };
@@ -256,8 +256,8 @@
 		D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSizeExtensions.swift; sourceTree = "<group>"; };
 		D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureNodes.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
-		D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerScreenStrokeData.swift; sourceTree = "<group>"; };
-		D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilScreenStrokeData.swift; sourceTree = "<group>"; };
+		D45ACBE12C57C2C3000002BE /* FingerStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerStroke.swift; sourceTree = "<group>"; };
+		D45ACBE32C57C2D9000002BE /* PencilStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilStroke.swift; sourceTree = "<group>"; };
 		D464FCB02D23E66700BCC565 /* UndoMoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveData.swift; sourceTree = "<group>"; };
 		D464FCB22D23E68000BCC565 /* UndoStackObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackObject.swift; sourceTree = "<group>"; };
 		D464FCB42D23E69000BCC565 /* UndoStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStack.swift; sourceTree = "<group>"; };
@@ -421,9 +421,9 @@
 			isa = PBXGroup;
 			children = (
 				D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */,
-				D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */,
+				D45ACBE12C57C2C3000002BE /* FingerStroke.swift */,
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
-				D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */,
+				D45ACBE32C57C2D9000002BE /* PencilStroke.swift */,
 				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 			);
 			path = Gestures;
@@ -1065,10 +1065,10 @@
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* PencilSingleCurveIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */,
+				D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */,
 				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
 				D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */,
-				D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */,
+				D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */,

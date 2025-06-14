@@ -73,10 +73,10 @@ final class CanvasViewModel {
     /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `DocumentsDirectoryTextureRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
-    /// A class for handling finger input values
-    private let fingerScreenStrokeData = FingerScreenStrokeData()
-    /// A class for handling Apple Pencil inputs
-    private let pencilScreenStrokeData = PencilScreenStrokeData()
+    /// Handles input from finger touches
+    private let fingerStroke = FingerStroke()
+    /// Handles input from Apple Pencil
+    private let pencilStroke = PencilStroke()
 
     /// An iterator that manages a single curve being drawn in real time
     private var singleCurveIterator: SingleCurveIterator?
@@ -335,28 +335,28 @@ extension CanvasViewModel {
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
-        fingerScreenStrokeData.appendTouchPointToDictionary(
+        fingerStroke.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
                 $0[$1.hashValue] = .init(touch: $1, view: view)
             }
         )
 
         // determine the gesture from the dictionary
-        switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
+        switch screenTouchGesture.update(fingerStroke.touchArrayDictionary) {
         case .drawing:
             if shouldCreateFingerSingleCurveIteratorInstance() {
                 singleCurveIterator = FingerSingleCurveIterator()
             }
 
-            fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
+            fingerStroke.setActiveDictionaryKeyIfNil()
 
-            drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
+            drawCurveOnCanvas(fingerStroke.latestTouchPoints)
 
         case .transforming: transformCanvas()
         default: break
         }
 
-        fingerScreenStrokeData.removeEndedTouchArrayFromDictionary()
+        fingerStroke.removeEndedTouchArrayFromDictionary()
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
@@ -374,7 +374,7 @@ extension CanvasViewModel {
         }
         inputDevice.update(.pencil)
 
-        pencilScreenStrokeData.setLatestEstimatedTouchPoint(
+        pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
                 .filter({ $0.type == .pencil })
                 .sorted(by: { $0.timestamp < $1.timestamp })
@@ -391,13 +391,13 @@ extension CanvasViewModel {
             singleCurveIterator = PencilSingleCurveIterator()
         }
 
-        pencilScreenStrokeData.appendActualTouches(
+        pencilStroke.appendActualTouches(
             actualTouches: actualTouches
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
+        drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
     }
 
 }
@@ -464,16 +464,16 @@ extension CanvasViewModel {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         transformer.initTransformingIfNeeded(
-            fingerScreenStrokeData.touchArrayDictionary
+            fingerStroke.touchArrayDictionary
         )
 
-        if fingerScreenStrokeData.isAllFingersOnScreen {
+        if fingerStroke.isAllFingersOnScreen {
             transformer.transformCanvas(
                 screenCenter: .init(
                     x: renderer.frameSize.width * 0.5,
                     y: renderer.frameSize.height * 0.5
                 ),
-                fingerScreenStrokeData.touchArrayDictionary
+                fingerStroke.touchArrayDictionary
             )
         } else {
             transformer.finishTransforming()
@@ -503,7 +503,7 @@ extension CanvasViewModel {
         drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 
-        fingerScreenStrokeData.reset()
+        fingerStroke.reset()
 
         singleCurveIterator = nil
         transformer.resetMatrix()
@@ -536,8 +536,8 @@ extension CanvasViewModel {
         inputDevice.reset()
         screenTouchGesture.reset()
 
-        fingerScreenStrokeData.reset()
-        pencilScreenStrokeData.reset()
+        fingerStroke.reset()
+        pencilStroke.reset()
 
         singleCurveIterator = nil
         transformer.resetMatrix()
