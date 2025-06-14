@@ -150,6 +150,7 @@ final class CanvasViewModel {
                 guard
                     let singleCurveIterator = self?.singleCurveIterator,
                     let texture = self?.renderer.selectedTexture,
+                    let selectedLayerId = self?.canvasState.selectedLayer?.id,
                     let commandBuffer = self?.canvasView?.commandBuffer
                 else { return }
 
@@ -158,8 +159,8 @@ final class CanvasViewModel {
                     baseTexture: texture,
                     with: commandBuffer
                 ) { [weak self] in
-                    commandBuffer.addCompletedHandler { _ in
-                        self?.updateLocalRepositoryTexture()
+                    commandBuffer.addCompletedHandler { [weak self] _ in
+                        self?.updateLocalRepositoryTexture(texture: texture, for: selectedLayerId)
                     }
                 }
             }
@@ -525,15 +526,10 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    private func updateLocalRepositoryTexture() {
-        guard
-            let selectedTexture = self.renderer.selectedTexture,
-            let selectedTextureId = self.canvasState.selectedLayer?.id
-        else { return }
-
-        renderer.drawTexture(
-            texture: selectedTexture,
-            on: selectedTextureId
+    private func updateLocalRepositoryTexture(texture: MTLTexture, for selectedTextureId: UUID) {
+        renderer.renderTextureFromRepository(
+            texture: texture,
+            for: selectedTextureId
         )
         .flatMap { [weak self] resultTexture -> AnyPublisher<Void, Error> in
             guard let `self` else {

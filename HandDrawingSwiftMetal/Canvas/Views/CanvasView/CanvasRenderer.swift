@@ -199,10 +199,50 @@ extension CanvasRenderer {
 }
 
 extension CanvasRenderer {
-    /// Draws `texture` on the destination texture from `textureRepository` and returns the combined result
-    func drawTexture(
+
+    /// Renders `texture` onto a texture retrieved from the repository using an internally created command buffer, and returns the rendered texture
+    func renderTextureFromRepository(
         texture: MTLTexture,
-        on destinationTextureId: UUID,
+        for textureRepositoryId: UUID
+    ) -> AnyPublisher<MTLTexture, Error> {
+        guard let textureRepository else {
+            Logger.standard.warning("The texture repository is unavailable")
+            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+        }
+
+        guard let temporaryCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
+            Logger.standard.error("Failed to create command buffer")
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        }
+
+        return renderTextureFromRepository(
+            texture: texture,
+            for: textureRepositoryId,
+            in: textureRepository,
+            with: temporaryCommandBuffer
+        )
+        .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
+            Future { promise in
+                temporaryCommandBuffer.addCompletedHandler { completedBuffer in
+                    if completedBuffer.status == .completed {
+                        promise(.success(targetTexture))
+                    } else {
+                        let error = completedBuffer.error ?? TextureRepositoryError.failedToCommitCommandBuffer
+                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
+                        promise(.failure(error))
+                    }
+                }
+                temporaryCommandBuffer.commit()
+            }
+            .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Renders `texture` onto a texture retrieved from `textureRepository`, and returns the rendered texture
+    func renderTextureFromRepository(
+        texture: MTLTexture,
+        for destinationTextureId: UUID,
         in textureRepository: TextureRepository?,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<MTLTexture, Error> {
@@ -233,45 +273,6 @@ extension CanvasRenderer {
             )
 
             return targetTexture
-        }
-        .eraseToAnyPublisher()
-    }
-
-    /// Draws the given `sourceTexture` on the destination texture retrieved from the repository using an internally created command buffer and returns the result
-    func drawTexture(
-        texture: MTLTexture,
-        on destinationTextureId: UUID
-    ) -> AnyPublisher<MTLTexture, Error> {
-        guard let textureRepository else {
-            Logger.standard.warning("The texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
-        }
-
-        guard let temporaryCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
-            Logger.standard.error("Failed to create command buffer")
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-        }
-
-        return drawTexture(
-            texture: texture,
-            on: destinationTextureId,
-            in: textureRepository,
-            with: temporaryCommandBuffer
-        )
-        .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
-            Future { promise in
-                temporaryCommandBuffer.addCompletedHandler { completedBuffer in
-                    if completedBuffer.status == .completed {
-                        promise(.success(targetTexture))
-                    } else {
-                        let error = completedBuffer.error ?? TextureRepositoryError.failedToCommitCommandBuffer
-                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
-                        promise(.failure(error))
-                    }
-                }
-                temporaryCommandBuffer.commit()
-            }
-            .eraseToAnyPublisher()
         }
         .eraseToAnyPublisher()
     }

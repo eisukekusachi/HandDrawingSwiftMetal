@@ -150,9 +150,9 @@ final class CanvasRendererTests: XCTestCase {
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"
 
-        _ = canvasRenderer.drawTexture(
+        _ = canvasRenderer.renderTextureFromRepository(
             texture: texture,
-            on: destinationTextureId,
+            for: destinationTextureId,
             in: textureRepository,
             with: commandBuffer
         )
