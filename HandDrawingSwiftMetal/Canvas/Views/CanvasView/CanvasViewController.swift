@@ -67,15 +67,7 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.canvasSetupCompletedPublisher
-            .sink { [weak self] configuration in
-                UIView.animate(withDuration: 0.05) { [weak self] in
-                    self?.contentView.alpha = 1.0
-                }
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.canvasViewControllerSetupPublisher
+        canvasViewModel.viewConfigureRequestPublisher
             .sink { [weak self] configuration in
                 self?.setupLayerView(
                     canvasState: configuration.canvasState,
@@ -84,6 +76,14 @@ extension CanvasViewController {
                 self?.contentView.setup(
                     configuration.canvasState
                 )
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.canvasViewSetupCompletedPublisher
+            .sink { [weak self] configuration in
+                UIView.animate(withDuration: 0.05) { [weak self] in
+                    self?.contentView.alpha = 1.0
+                }
             }
             .store(in: &cancellables)
 

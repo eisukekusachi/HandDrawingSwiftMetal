@@ -17,11 +17,6 @@ final class CanvasViewModel {
         }
     }
 
-    /// A publisher that emits a value when the canvas setup is completed
-    var canvasSetupCompletedPublisher: AnyPublisher<Void, Never> {
-        canvasSetupCompletedSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits when showing the activity indicator is needed
     var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
         activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
@@ -42,9 +37,14 @@ final class CanvasViewModel {
         needsShowingLayerViewSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when the canvas view controller setup is needed
-    var canvasViewControllerSetupPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
-        canvasViewControllerSetupSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
+    var viewConfigureRequestPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
+        viewConfigureRequestSubject.eraseToAnyPublisher()
+    }
+
+    /// A publisher that emits `Void` when the canvas view setup is completed
+    var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
+        canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when refreshing the canvas is needed
@@ -98,8 +98,6 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private let canvasSetupCompletedSubject = PassthroughSubject<Void, Never>()
-
     private let activityIndicatorShowRequestedSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
@@ -108,7 +106,9 @@ final class CanvasViewModel {
 
     private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private var canvasViewControllerSetupSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
+
+    private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
     private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -289,7 +289,7 @@ extension CanvasViewModel {
                 case .finished: break
                 case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
                 }
-                self?.canvasSetupCompletedSubject.send(())
+                self?.canvasViewSetupCompletedSubject.send(())
                 self?.activityIndicatorShowRequestedSubject.send(false)
             }, receiveValue: {})
             .store(in: &cancellables)
@@ -304,7 +304,7 @@ extension CanvasViewModel {
     ) {
         self.canvasView = canvasView
 
-        canvasViewControllerSetupSubject.send(
+        viewConfigureRequestSubject.send(
             .init(
                 canvasState: canvasState,
                 textureLayerRepository: textureLayerRepository
