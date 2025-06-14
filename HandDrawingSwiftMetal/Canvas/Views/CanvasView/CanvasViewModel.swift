@@ -17,24 +17,24 @@ final class CanvasViewModel {
         }
     }
 
-    /// A publisher that emits when showing the activity indicator is needed
-    var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
-        activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the activity indicator
+    var activityIndicatorShowRequestPublisher: AnyPublisher<Bool, Never> {
+        activityIndicatorShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing an alert is needed
-    var needsShowingAlertPublisher: AnyPublisher<String, Never> {
-        needsShowingAlertSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the alert
+    var alertShowRequestPublisher: AnyPublisher<String, Never> {
+        alertShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing a toast is needed
-    var needsShowingToastPublisher: AnyPublisher<ToastModel, Never> {
-        needsShowingToastSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the toast
+    var toastShowRequestPublisher: AnyPublisher<ToastModel, Never> {
+        toastShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing the layer view is needed
-    var needsShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
-        needsShowingLayerViewSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the layer view
+    var layerViewShowRequestPublisher: AnyPublisher<Bool, Never> {
+        layerViewShowRequestSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
@@ -48,8 +48,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits when refreshing the canvas is needed
-    var needsCanvasRefreshPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasRefreshSubject.eraseToAnyPublisher()
+    var canvasInitializeRequestPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializeRequestSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when updating the undo button state is needed.
@@ -98,19 +98,19 @@ final class CanvasViewModel {
 
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private let activityIndicatorShowRequestedSubject: PassthroughSubject<Bool, Never> = .init()
+    private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
+    private let alertShowRequestSubject = PassthroughSubject<String, Never>()
 
-    private let needsShowingToastSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastShowRequestSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
+    private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
     private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
-    private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializeRequestSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
@@ -225,7 +225,7 @@ final class CanvasViewModel {
 
         canvasStateStorage?.errorDialogSubject
             .sink { [weak self] error in
-                self?.needsShowingAlertSubject.send(error.localizedDescription)
+                self?.alertShowRequestSubject.send(error.localizedDescription)
             }
             .store(in: &cancellables)
 
@@ -290,7 +290,7 @@ extension CanvasViewModel {
                 case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
                 }
                 self?.canvasViewSetupCompletedSubject.send(())
-                self?.activityIndicatorShowRequestedSubject.send(false)
+                self?.activityIndicatorShowRequestSubject.send(false)
             }, receiveValue: {})
             .store(in: &cancellables)
     }
@@ -313,7 +313,7 @@ extension CanvasViewModel {
     }
 
     func onViewWillAppear() {
-        activityIndicatorShowRequestedSubject.send(true)
+        activityIndicatorShowRequestSubject.send(true)
     }
 
     func onViewDidAppear(
@@ -408,7 +408,7 @@ extension CanvasViewModel {
 
     func didTapLayerButton() {
         // Toggle the visibility of `TextureLayerView`
-        needsShowingLayerViewSubject.send(!needsShowingLayerViewSubject.value)
+        layerViewShowRequestSubject.send(!layerViewShowRequestSubject.value)
     }
 
     func didTapResetTransformButton() {
@@ -566,16 +566,16 @@ extension CanvasViewModel {
             textureRepository: textureLayerRepository
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.needsShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
+            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
             }
         }, receiveValue: { [weak self] configuration in
-            self?.needsCanvasRefreshSubject.send(configuration)
+            self?.canvasInitializeRequestSubject.send(configuration)
         })
         .store(in: &cancellables)
     }
@@ -588,13 +588,13 @@ extension CanvasViewModel {
             to: URL.zipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.needsShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
+            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
             }
         }, receiveValue: {})
         .store(in: &cancellables)

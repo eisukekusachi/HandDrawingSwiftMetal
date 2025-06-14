@@ -87,13 +87,13 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicatorShowRequestedPublisher
+        canvasViewModel.activityIndicatorShowRequestPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingAlertPublisher
+        canvasViewModel.alertShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.showAlert(
@@ -103,21 +103,21 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingToastPublisher
+        canvasViewModel.toastShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.showToast(configuration)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingLayerViewPublisher
+        canvasViewModel.layerViewShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isShown in
                 self?.textureLayerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsCanvasRefreshPublisher
+        canvasViewModel.canvasInitializeRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.canvasViewModel.initializeCanvas(using: configuration)
