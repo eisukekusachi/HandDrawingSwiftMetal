@@ -13,51 +13,55 @@ final class CanvasRendererTests: XCTestCase {
 
     let device = MTLCreateSystemDefaultDevice()!
 
-    /// Confirms that the canvas is updated based on the visibility of the selected layer and the presence of a realtime drawing texture.
-    func testUpdateCanvas() {
+    /// Confirms that the canvas is updated correctly depending on the presence of the realtime drawing texture and the visibility of the selected layer
+    func testUpdateCanvasView() {
         struct Condition {
-            let isLayerVisible: Bool
             let hasRealtimeDrawingTexture: Bool
+            let isLayerVisible: Bool
         }
         struct Expectation {
             let result: [String]
         }
+
+        let selectedTextureLabel = "selectedTexture"
+        let realtimeDrawingTextureLabel = "realtimeDrawingTexture"
+
         let testCases: [(Condition, Expectation)] = [
             (
-                // When `isLayerVisible` is true and `drawingTexture` is not available, render `selectedTexture`.
+                // When `realtimeDrawingTexture` is unavailable and `isLayerVisible` is true, render `selectedTexture`
                 .init(
-                    isLayerVisible: true,
-                    hasRealtimeDrawingTexture: false
+                    hasRealtimeDrawingTexture: false,
+                    isLayerVisible: true
                 ),
                 .init(
                     result: [
                         "fillTexture(texture: canvasTexture, withRGB: (255, 255, 255), with: commandBuffer)",
                         "mergeTexture(texture: unselectedBottomTexture, into: canvasTexture, with: commandBuffer)",
-                        "mergeTexture(texture: selectedTexture, alpha: 255, into: canvasTexture, with: commandBuffer)",
+                        "mergeTexture(texture: \(selectedTextureLabel), alpha: 255, into: canvasTexture, with: commandBuffer)",
                         "mergeTexture(texture: unselectedTopTexture, into: canvasTexture, with: commandBuffer)"
                     ]
                 )
             ),
             (
-                // When `isLayerVisible` is true and `drawingTexture` is available, render `drawingTexture` instead of `selectedTexture`.
+                // When `realtimeDrawingTexture` is available and `isLayerVisible` is true, render `realtimeDrawingTexture`
                 .init(
-                    isLayerVisible: true,
-                    hasRealtimeDrawingTexture: true
+                    hasRealtimeDrawingTexture: true,
+                    isLayerVisible: true
                 ),
                 .init(
                     result: [
                         "fillTexture(texture: canvasTexture, withRGB: (255, 255, 255), with: commandBuffer)",
                         "mergeTexture(texture: unselectedBottomTexture, into: canvasTexture, with: commandBuffer)",
-                        "mergeTexture(texture: drawingTexture, alpha: 255, into: canvasTexture, with: commandBuffer)",
+                        "mergeTexture(texture: \(realtimeDrawingTextureLabel), alpha: 255, into: canvasTexture, with: commandBuffer)",
                         "mergeTexture(texture: unselectedTopTexture, into: canvasTexture, with: commandBuffer)"
                     ]
                 )
             ),
             (
-                // When `isLayerVisible` is false, neither `selectedTexture` nor `drawingTexture` is rendered.
+                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered
                 .init(
-                    isLayerVisible: false,
-                    hasRealtimeDrawingTexture: false
+                    hasRealtimeDrawingTexture: false,
+                    isLayerVisible: false
                 ),
                 .init(
                     result: [
@@ -68,10 +72,10 @@ final class CanvasRendererTests: XCTestCase {
                 )
             ),
             (
-                // When `isLayerVisible` is false, neither `selectedTexture` nor `drawingTexture` is rendered.
+                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered
                 .init(
-                    isLayerVisible: false,
-                    hasRealtimeDrawingTexture: true
+                    hasRealtimeDrawingTexture: true,
+                    isLayerVisible: false
                 ),
                 .init(
                     result: [
@@ -83,7 +87,7 @@ final class CanvasRendererTests: XCTestCase {
             )
         ]
 
-        let drawingTexture = MTLTextureCreator.makeBlankTexture(label: "drawingTexture", with: device)
+        let realtimeDrawingTexture = MTLTextureCreator.makeBlankTexture(label: realtimeDrawingTextureLabel, with: device)
 
         let canvasView = MockCanvasViewProtocol()
 
@@ -103,8 +107,8 @@ final class CanvasRendererTests: XCTestCase {
 
             subject.updateCanvasView(
                 canvasView,
-                realtimeDrawingTexture: condition.hasRealtimeDrawingTexture ? drawingTexture : nil,
-                selectedLayer: .init(title: "", isVisible: condition.isLayerVisible),
+                realtimeDrawingTexture: condition.hasRealtimeDrawingTexture ? realtimeDrawingTexture : nil,
+                selectedLayer: .init(title: "TestLayer", isVisible: condition.isLayerVisible),
                 with: commandBuffer
             )
 
@@ -112,7 +116,7 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that the target texture in the repository is overwritten with a new texture .
+    /// Confirms that the target texture in the repository is overwritten with a new texture
     func testRenderTextureToLayerInRepository() {
         let expectation = XCTestExpectation()
 
@@ -328,7 +332,6 @@ final class CanvasRendererTests: XCTestCase {
 
         _ = canvasRenderer.mergeLayerTextures(
             layers: [layer],
-            textureRepository: textureRepository,
             into: destinationTexture,
             with: commandBuffer
         )
@@ -348,8 +351,8 @@ final class CanvasRendererTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    /// Confirms that all visible textures loaded from the repository are merged into the destination texture.
-    func testRenderTexturesFromRepositoryToTexturePublisher() {
+    /// Confirms that all visible textures loaded from the repository are merged into the destination texture
+    func testMergeLayerTextures() {
         let device = MTLCreateSystemDefaultDevice()!
 
         let sourceTextureId0 = UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!
@@ -438,7 +441,6 @@ final class CanvasRendererTests: XCTestCase {
 
             let _ = canvasRenderer.mergeLayerTextures(
                 layers: condition.textureLayers,
-                textureRepository: textureRepository,
                 into: destinationTexture,
                 with: commandBuffer
             )

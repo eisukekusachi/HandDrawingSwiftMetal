@@ -106,21 +106,18 @@ extension CanvasRenderer {
 
         let bottomPublisher = mergeLayerTextures(
             layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            textureRepository: textureRepository,
             into: unselectedBottomTexture,
             with: commandBuffer
         )
 
         let topPublisher = mergeLayerTextures(
             layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            textureRepository: textureRepository,
             into: unselectedTopTexture,
             with: commandBuffer
         )
 
         let selectedPublisher = mergeLayerTextures(
             layers: [opaqueLayer],
-            textureRepository: textureRepository,
             into: selectedTexture,
             with: commandBuffer
         )
@@ -279,7 +276,6 @@ extension CanvasRenderer {
 
     func mergeLayerTextures(
         layers: [TextureLayerModel],
-        textureRepository: TextureRepository?,
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
