@@ -90,13 +90,14 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
         canvasState: CanvasState,
-        with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<Void, Error> {
+        with commandBuffer: MTLCommandBuffer,
+        onCompleted: (() -> Void)?
+    ) {
         guard
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
         else {
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+            return
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
@@ -124,13 +125,19 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        return Publishers.CombineLatest3(
+        Publishers.CombineLatest3(
             bottomPublisher,
             selectedPublisher,
             topPublisher
         )
-        .map { _, _, _ in () }
-        .eraseToAnyPublisher()
+        .receive(on: DispatchQueue.main)
+        .sink(
+            receiveCompletion: { _ in
+                onCompleted?()
+            },
+            receiveValue: { _ in }
+        )
+        .store(in: &cancellables)
     }
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`

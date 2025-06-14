@@ -209,7 +209,17 @@ final class CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         canvasState.fullCanvasUpdateSubject
             .sink { [weak self] in
-                self?.updateDrawingTextures()
+                guard
+                    let `self`,
+                    let commandBuffer = canvasView?.commandBuffer
+                else { return }
+
+                self.renderer.updateDrawingTextures(
+                    canvasState: self.canvasState,
+                    with: commandBuffer
+                ) { [weak self] in
+                    self?.updateCanvasView()
+                }
             }
             .store(in: &cancellables)
 
@@ -253,7 +263,8 @@ extension CanvasViewModel {
 
     private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
         guard
-            let textureSize = configuration.textureSize
+            let textureSize = configuration.textureSize,
+            let commandBuffer = canvasView?.commandBuffer
         else { return }
 
         canvasState.setData(configuration)
@@ -263,7 +274,12 @@ extension CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
 
-        updateDrawingTextures()
+        renderer.updateDrawingTextures(
+            canvasState: canvasState,
+            with: commandBuffer
+        ) { [weak self] in
+            self?.updateCanvasView()
+        }
 
         textureLayerRepository
             .updateAllThumbnails(textureSize: textureSize)
@@ -547,26 +563,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Updates the drawing textures, which are pre-merged from layer textures to maintain high drawing performance even when the number of layers increases.
-    /// It should be invoked when the layer state changes.
-    private func updateDrawingTextures() {
-        guard
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        renderer.updateDrawingTextures(
-            canvasState: canvasState,
-            with: commandBuffer
-        )
-        .receive(on: DispatchQueue.main)
-        .sink(
-            receiveCompletion: { [weak self] _ in
-                self?.updateCanvasView()
-            },
-            receiveValue: { _ in }
-        )
-        .store(in: &cancellables)
-    }
 
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
