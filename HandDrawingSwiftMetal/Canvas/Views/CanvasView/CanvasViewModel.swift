@@ -457,9 +457,7 @@ extension CanvasViewModel {
             touchPhase: screenTouchPoints.lastTouchPhase
         )
 
-        drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: singleCurveIterator?.isCurrentlyDrawing ?? false
-        )
+        drawingDisplayLink.run(singleCurveIterator?.isCurrentlyDrawing ?? false)
     }
 
     private func transformCanvas() {
