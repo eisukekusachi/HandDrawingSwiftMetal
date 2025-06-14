@@ -498,17 +498,6 @@ extension CanvasViewModel {
         singleCurveIterator == nil
     }
 
-    private func resetAllInputParameters() {
-        inputDevice.reset()
-        screenTouchGesture.reset()
-
-        fingerScreenStrokeData.reset()
-        pencilScreenStrokeData.reset()
-
-        singleCurveIterator = nil
-        transformer.resetMatrix()
-    }
-
     private func cancelFingerDrawing() {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
@@ -545,9 +534,16 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-}
+    private func resetAllInputParameters() {
+        inputDevice.reset()
+        screenTouchGesture.reset()
 
-extension CanvasViewModel {
+        fingerScreenStrokeData.reset()
+        pencilScreenStrokeData.reset()
+
+        singleCurveIterator = nil
+        transformer.resetMatrix()
+    }
 
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard

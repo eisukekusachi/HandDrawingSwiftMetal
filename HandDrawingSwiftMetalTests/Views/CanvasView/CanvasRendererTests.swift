@@ -13,7 +13,7 @@ final class CanvasRendererTests: XCTestCase {
 
     let device = MTLCreateSystemDefaultDevice()!
 
-    /// Confirms that the canvas is updated correctly depending on the presence of the realtime drawing texture and the visibility of the selected layer
+    /// Confirms that the canvas is updated correctly depending on the presence of the realtime drawing texture and the visibility of the selected layer.
     func testUpdateCanvasView() {
         struct Condition {
             let hasRealtimeDrawingTexture: Bool
@@ -28,7 +28,7 @@ final class CanvasRendererTests: XCTestCase {
 
         let testCases: [(Condition, Expectation)] = [
             (
-                // When `realtimeDrawingTexture` is unavailable and `isLayerVisible` is true, render `selectedTexture`
+                // When `realtimeDrawingTexture` is unavailable and `isLayerVisible` is true, render `selectedTexture`.
                 .init(
                     hasRealtimeDrawingTexture: false,
                     isLayerVisible: true
@@ -43,7 +43,7 @@ final class CanvasRendererTests: XCTestCase {
                 )
             ),
             (
-                // When `realtimeDrawingTexture` is available and `isLayerVisible` is true, render `realtimeDrawingTexture`
+                // When `realtimeDrawingTexture` is available and `isLayerVisible` is true, render `realtimeDrawingTexture`.
                 .init(
                     hasRealtimeDrawingTexture: true,
                     isLayerVisible: true
@@ -58,7 +58,7 @@ final class CanvasRendererTests: XCTestCase {
                 )
             ),
             (
-                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered
+                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered.
                 .init(
                     hasRealtimeDrawingTexture: false,
                     isLayerVisible: false
@@ -72,7 +72,7 @@ final class CanvasRendererTests: XCTestCase {
                 )
             ),
             (
-                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered
+                // When `isLayerVisible` is false, neither `selectedTexture` nor `realtimeDrawingTexture` is rendered.
                 .init(
                     hasRealtimeDrawingTexture: true,
                     isLayerVisible: false
@@ -129,7 +129,7 @@ final class CanvasRendererTests: XCTestCase {
 
         let testCases: [(Condition, Expectation)] = [
             (
-                // All layers except the selected one are grouped into `topLayers` and `bottomLayers`
+                // All layers except the selected one are grouped into `topLayers` and `bottomLayers`.
                 .init(
                     layers: [
                         .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
@@ -152,7 +152,7 @@ final class CanvasRendererTests: XCTestCase {
                 )
             ),
             (
-                // If the selected layer is at the top, `topLayers` will be empty
+                // If the selected layer is at the top, `topLayers` will be empty.
                 .init(
                     layers: [
                         .init(id: UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!, title: ""),
@@ -235,7 +235,7 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that all visible textures loaded from the repository are merged into the destination texture
+    /// Confirms that all visible textures loaded from the repository are merged into the destination texture.
     func testMergeLayerTextures() {
         let device = MTLCreateSystemDefaultDevice()!
 
