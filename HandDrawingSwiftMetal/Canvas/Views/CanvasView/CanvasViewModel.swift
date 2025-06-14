@@ -147,21 +147,32 @@ final class CanvasViewModel {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
-                self?.updateCanvasWithDrawing()
+                guard
+                    let singleCurveIterator = self?.singleCurveIterator,
+                    let texture = self?.renderer.selectedTexture,
+                    let commandBuffer = self?.canvasView?.commandBuffer
+                else { return }
+
+                self?.drawingTextureSet?.updateRealTimeDrawingTexture(
+                    singleCurveIterator: singleCurveIterator,
+                    baseTexture: texture,
+                    with: commandBuffer
+                ) { [weak self] in
+                    commandBuffer.addCompletedHandler { _ in
+                        self?.updateLocalRepositoryTexture()
+                    }
+                }
             }
             .store(in: &cancellables)
 
-        // The canvas is updated when drawing ends
         Publishers.Merge(
-            drawingBrushTextureSet.canvasDrawFinishedPublisher,
-            drawingEraserTextureSet.canvasDrawFinishedPublisher
+            drawingBrushTextureSet.realtimeDrawingTexturePublisher,
+            drawingEraserTextureSet.realtimeDrawingTexturePublisher
         )
-        .sink { [weak self] in
-            self?.canvasView?.commandBuffer?.addCompletedHandler { [weak self] _ in
-                self?.completeCanvasWithDrawing()
+            .sink { [weak self] texture in
+                self?.updateCanvasView(realtimeDrawingTexture: texture)
             }
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
 
         // Update drawingTextureSet when the tool is switched
         canvasState.drawingToolState.$drawingTool
@@ -485,7 +496,7 @@ extension CanvasViewModel {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        drawingTextureSet?.clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 
         fingerScreenStrokeData.reset()
@@ -498,30 +509,7 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    private func updateCanvasWithDrawing() {
-        guard
-            let singleCurveIterator,
-            let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        drawingTextureSet?.drawCurvePoints(
-            singleCurveIterator: singleCurveIterator,
-            withBackgroundTexture: renderer.selectedTexture,
-            withBackgroundColor: .clear,
-            with: commandBuffer
-        )
-
-        renderer.updateCanvasView(
-            canvasView,
-            realtimeDrawingTexture: drawingTextureSet?.drawingSelectedTexture,
-            selectedLayer: selectedLayer,
-            with: commandBuffer
-        )
-    }
-
-    /// Completes the canvas update after the drawing is finished
-    private func completeCanvasWithDrawing() {
+    private func updateLocalRepositoryTexture() {
         guard
             let selectedTexture = self.renderer.selectedTexture,
             let selectedTextureId = self.canvasState.selectedLayer?.id
@@ -580,7 +568,7 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-    func updateCanvasView() {
+    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = canvasView?.commandBuffer
@@ -588,6 +576,7 @@ extension CanvasViewModel {
 
         renderer.updateCanvasView(
             canvasView,
+            realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
         )
