@@ -527,21 +527,10 @@ extension CanvasViewModel {
     }
 
     private func updateLocalRepositoryTexture(texture: MTLTexture, for selectedTextureId: UUID) {
-        renderer.renderTextureFromRepository(
+        textureLayerRepository.updateTexture(
             texture: texture,
             for: selectedTextureId
         )
-        .flatMap { [weak self] resultTexture -> AnyPublisher<Void, Error> in
-            guard let `self` else {
-                return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-            }
-            return self.textureLayerRepository.updateTexture(
-                texture: resultTexture,
-                for: selectedTextureId
-            )
-            .map { _ in () }
-            .eraseToAnyPublisher()
-        }
         .sink(
             receiveCompletion: { [weak self] result in
                 switch result {

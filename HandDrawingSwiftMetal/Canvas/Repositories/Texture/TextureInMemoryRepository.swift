@@ -118,17 +118,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
-        Future<TextureRepositoryEntity, Error> { [weak self] promise in
-            guard let texture = self?.textures[uuid] else {
-                promise(.failure(TextureRepositoryError.failedToLoadTexture))
-                return
-            }
-            promise(.success(.init(uuid: uuid, texture: texture)))
-        }
-        .eraseToAnyPublisher()
-    }
-
     func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
             Future<TextureRepositoryEntity, Error> { [weak self] promise in

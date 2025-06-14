@@ -116,66 +116,6 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that the target texture in the repository is overwritten with a new texture
-    func testRenderTextureToLayerInRepository() {
-        let expectation = XCTestExpectation()
-
-        let texture = MTLTextureCreator.makeBlankTexture(label: "texture", size: MTLRenderer.minimumTextureSize, with: device)!
-
-        let sourceTexture0 = MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", size: MTLRenderer.minimumTextureSize, with: device)!
-        let sourceTexture1 = MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", size: MTLRenderer.minimumTextureSize, with: device)!
-        let sourceTexture2 = MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", size: MTLRenderer.minimumTextureSize, with: device)!
-
-        let uuid0 = UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!
-        let uuid1 = UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!
-        let uuid2 = UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!
-
-        let destinationTextureId: UUID = uuid1
-
-        let condition: [UUID: MTLTexture?] = [
-            uuid0: sourceTexture0,
-            uuid1: sourceTexture1,
-            uuid2: sourceTexture2
-        ]
-
-        let result = [
-            "drawTexture(texture: texture, buffers: buffers, withBackgroundColor: (0, 0, 0, 0), on: sourceTexture1, with: commandBuffer)"
-        ]
-
-        let mockRenderer = MockMTLRenderer()
-
-        let textureRepository = MockTextureRepository(textures: condition)
-
-        let canvasRenderer = CanvasRenderer(
-            renderer: mockRenderer
-        )
-        canvasRenderer.setTextureRepository(textureRepository)
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        commandBuffer.label = "commandBuffer"
-
-        _ = canvasRenderer.renderTextureFromRepository(
-            texture: texture,
-            for: destinationTextureId,
-            in: textureRepository,
-            with: commandBuffer
-        )
-        .sink(
-            receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    XCTFail("Expected success, got error: \(error)")
-                }
-                XCTAssertEqual(mockRenderer.callHistory, result)
-
-                mockRenderer.callHistory.removeAll()
-                expectation.fulfill()
-            },
-            receiveValue: { _ in }
-        )
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
     /// Confirms that unselected layers are split into `topLayers` and `bottomLayers` relative to the selected layer index, excluding invisible layers.
     func testUnselectedLayersAreSeparatedIntoTopAndBottomArrays() {
         struct Condition {
