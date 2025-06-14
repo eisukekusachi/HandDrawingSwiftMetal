@@ -104,21 +104,21 @@ extension CanvasRenderer {
         var opaqueLayer = selectedLayer
         opaqueLayer.alpha = 255
 
-        let bottomPublisher = mergeLayerTextures(
+        let bottomPublisher = drawLayerTextures(
             layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            into: unselectedBottomTexture,
+            on: unselectedBottomTexture,
             with: commandBuffer
         )
 
-        let topPublisher = mergeLayerTextures(
+        let topPublisher = drawLayerTextures(
             layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            into: unselectedTopTexture,
+            on: unselectedTopTexture,
             with: commandBuffer
         )
 
-        let selectedPublisher = mergeLayerTextures(
+        let selectedPublisher = drawLayerTextures(
             layers: [opaqueLayer],
-            into: selectedTexture,
+            on: selectedTexture,
             with: commandBuffer
         )
 
@@ -193,13 +193,9 @@ extension CanvasRenderer {
         canvasView?.setNeedsDisplay()
     }
 
-}
-
-extension CanvasRenderer {
-
-    func mergeLayerTextures(
+    func drawLayerTextures(
         layers: [TextureLayerModel],
-        into destinationTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
         guard let textureRepository else {

@@ -235,62 +235,6 @@ final class CanvasRendererTests: XCTestCase {
         }
     }
 
-    /// Confirms that a texture loaded from the repository is drawn onto the destination texture.
-    func testRenderTextureFromRepositoryToTexturePublisher() {
-        let expectation = XCTestExpectation()
-
-        let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        commandBuffer.label = "commandBuffer"
-
-        let sourceTextureId0 = UUID(uuidString: "00000000-1234-4abc-8def-1234567890ab")!
-        let sourceTextureId1 = UUID(uuidString: "00000001-1234-4abc-8def-1234567890ab")!
-        let sourceTextureId2 = UUID(uuidString: "00000002-1234-4abc-8def-1234567890ab")!
-
-        let destinationTexture = MTLTextureCreator.makeBlankTexture(label: "destinationTexture", with: device)!
-
-        let layer = TextureLayerModel(id: sourceTextureId1, title: "")
-
-        let mockRenderer = MockMTLRenderer()
-
-        let textureRepository = MockTextureRepository.init(
-            textures: [
-                sourceTextureId0: MTLTextureCreator.makeBlankTexture(label: "sourceTexture0", with: device)!,
-                sourceTextureId1: MTLTextureCreator.makeBlankTexture(label: "sourceTexture1", with: device)!,
-                sourceTextureId2: MTLTextureCreator.makeBlankTexture(label: "sourceTexture2", with: device)!
-            ]
-        )
-
-        let canvasRenderer = CanvasRenderer(
-            renderer: mockRenderer
-        )
-        canvasRenderer.setTextureRepository(textureRepository)
-
-        let results = [
-            "clearTexture(texture: destinationTexture, with: commandBuffer)",
-            "mergeTexture(texture: sourceTexture1, alpha: 255, into: destinationTexture, with: commandBuffer)"
-        ]
-
-        _ = canvasRenderer.mergeLayerTextures(
-            layers: [layer],
-            into: destinationTexture,
-            with: commandBuffer
-        )
-        .sink(
-            receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    XCTFail("Expected success, got error: \(error)")
-                }
-                XCTAssertEqual(mockRenderer.callHistory, results)
-
-                mockRenderer.callHistory.removeAll()
-                expectation.fulfill()
-            },
-            receiveValue: { _ in }
-        )
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
     /// Confirms that all visible textures loaded from the repository are merged into the destination texture
     func testMergeLayerTextures() {
         let device = MTLCreateSystemDefaultDevice()!
@@ -322,16 +266,12 @@ final class CanvasRendererTests: XCTestCase {
             (
                 .init(
                     textureLayers: [
-                        .generate(id: sourceTextureId0),
-                        .generate(id: sourceTextureId1),
-                        .generate(id: sourceTextureId2)
+                        .generate(id: sourceTextureId0)
                     ]
                 ),
                 .init(results: [
                     "clearTexture(texture: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture0, alpha: 255, into: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture1, alpha: 255, into: destinationTexture, with: commandBuffer)",
-                    "mergeTexture(texture: sourceTexture2, alpha: 255, into: destinationTexture, with: commandBuffer)"
+                    "mergeTexture(texture: sourceTexture0, alpha: 255, into: destinationTexture, with: commandBuffer)"
                 ])
             ),
             (
@@ -379,9 +319,9 @@ final class CanvasRendererTests: XCTestCase {
             let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
             commandBuffer.label = "commandBuffer"
 
-            let _ = canvasRenderer.mergeLayerTextures(
+            let _ = canvasRenderer.drawLayerTextures(
                 layers: condition.textureLayers,
-                into: destinationTexture,
+                on: destinationTexture,
                 with: commandBuffer
             )
             .sink(
