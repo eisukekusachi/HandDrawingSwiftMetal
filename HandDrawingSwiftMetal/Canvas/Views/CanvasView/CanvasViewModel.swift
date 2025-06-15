@@ -249,7 +249,7 @@ final class CanvasViewModel {
         textureLayerRepository.storageInitializationCompletedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                self?.completeCanvasSetup(configuration)
+                self?.completeInitialization(configuration)
             }
             .store(in: &cancellables)
 
@@ -262,11 +262,11 @@ final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initializeCanvas(using configuration: CanvasConfiguration) {
+    func initialize(using configuration: CanvasConfiguration) {
         textureLayerRepository.initializeStorage(from: configuration)
     }
 
-    private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
+    private func completeInitialization(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
             let commandBuffer = canvasView?.commandBuffer
@@ -328,7 +328,7 @@ extension CanvasViewModel {
         if !textureLayerRepository.isInitialized {
             let existingValue = canvasStateStorage?.coreDataConfiguration
             let defaultValue = configuration.createConfigurationWithValidTextureSize(drawableTextureSize)
-            initializeCanvas(using: existingValue ?? defaultValue)
+            initialize(using: existingValue ?? defaultValue)
         }
     }
 
@@ -424,7 +424,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
-        initializeCanvas(
+        initialize(
             using: CanvasConfiguration().createConfigurationWithValidTextureSize(canvasState.textureSize)
         )
     }
