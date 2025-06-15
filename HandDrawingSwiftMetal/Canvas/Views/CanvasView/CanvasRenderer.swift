@@ -211,8 +211,8 @@ extension CanvasRenderer {
             return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        // Fetch textures from the repository
-        return textureRepository.getTextures(
+        // Copy textures from the repository
+        return textureRepository.copyTextures(
             uuids: layers.map { $0.id },
             textureSize: destinationTexture.size
         )

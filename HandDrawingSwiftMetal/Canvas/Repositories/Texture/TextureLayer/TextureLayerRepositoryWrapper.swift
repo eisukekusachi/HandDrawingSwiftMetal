@@ -51,8 +51,8 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.getThumbnail(uuid)
     }
 
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
-        repository.getTextures(uuids: uuids, textureSize: textureSize)
+    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        repository.copyTextures(uuids: uuids, textureSize: textureSize)
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

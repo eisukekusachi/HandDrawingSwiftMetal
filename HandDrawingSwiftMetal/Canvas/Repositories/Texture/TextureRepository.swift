@@ -33,8 +33,8 @@ protocol TextureRepository {
     /// Initializes the storage with a new texture
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
 
-    /// Gets multiple textures for the given UUIDs
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error>
+    /// Copies multiple textures for the given UUIDs
+    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error>
 
     /// Removes all managed textures
     func removeAll()
