@@ -93,8 +93,8 @@
 		D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */; };
 		D459F5E92CDCF7EF00BEA5CD /* MTLTextureNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */; };
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
-		D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */; };
-		D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */; };
+		D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerStroke.swift */; };
+		D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilStroke.swift */; };
 		D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB02D23E66700BCC565 /* UndoMoveData.swift */; };
 		D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB22D23E68000BCC565 /* UndoStackObject.swift */; };
 		D464FCB52D23E69000BCC565 /* UndoStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB42D23E69000BCC565 /* UndoStack.swift */; };
@@ -105,9 +105,9 @@
 		D468FC4D2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D468FC4C2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift */; };
 		D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85C2C56206800D10575 /* ScaleManager.swift */; };
 		D469A85F2C5620FB00D10575 /* GrayscaleDotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A85E2C5620FB00D10575 /* GrayscaleDotPoint.swift */; };
-		D469A86F2C5633FC00D10575 /* DrawingCurvePencilIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A86E2C5633FC00D10575 /* DrawingCurvePencilIterator.swift */; };
-		D469A8712C56340B00D10575 /* DrawingCurveFingerIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8702C56340B00D10575 /* DrawingCurveFingerIterator.swift */; };
-		D469A8732C56342700D10575 /* DrawingCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8722C56342700D10575 /* DrawingCurveIterator.swift */; };
+		D469A86F2C5633FC00D10575 /* PencilSingleCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A86E2C5633FC00D10575 /* PencilSingleCurveIterator.swift */; };
+		D469A8712C56340B00D10575 /* FingerSingleCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8702C56340B00D10575 /* FingerSingleCurveIterator.swift */; };
+		D469A8732C56342700D10575 /* SingleCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8722C56342700D10575 /* SingleCurveIterator.swift */; };
 		D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8802C563FA100D10575 /* MTLBuffers.swift */; };
 		D469A8832C56422D00D10575 /* MTLPipelines.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8822C56422D00D10575 /* MTLPipelines.swift */; };
 		D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */; };
@@ -256,8 +256,8 @@
 		D458C7302D562A150004D9E6 /* CGSizeExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSizeExtensions.swift; sourceTree = "<group>"; };
 		D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureNodes.swift; sourceTree = "<group>"; };
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
-		D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerScreenStrokeData.swift; sourceTree = "<group>"; };
-		D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilScreenStrokeData.swift; sourceTree = "<group>"; };
+		D45ACBE12C57C2C3000002BE /* FingerStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerStroke.swift; sourceTree = "<group>"; };
+		D45ACBE32C57C2D9000002BE /* PencilStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilStroke.swift; sourceTree = "<group>"; };
 		D464FCB02D23E66700BCC565 /* UndoMoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveData.swift; sourceTree = "<group>"; };
 		D464FCB22D23E68000BCC565 /* UndoStackObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackObject.swift; sourceTree = "<group>"; };
 		D464FCB42D23E69000BCC565 /* UndoStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStack.swift; sourceTree = "<group>"; };
@@ -268,9 +268,9 @@
 		D468FC4C2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingDisplayLinkTests.swift; sourceTree = "<group>"; };
 		D469A85C2C56206800D10575 /* ScaleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleManager.swift; sourceTree = "<group>"; };
 		D469A85E2C5620FB00D10575 /* GrayscaleDotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleDotPoint.swift; sourceTree = "<group>"; };
-		D469A86E2C5633FC00D10575 /* DrawingCurvePencilIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurvePencilIterator.swift; sourceTree = "<group>"; };
-		D469A8702C56340B00D10575 /* DrawingCurveFingerIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurveFingerIterator.swift; sourceTree = "<group>"; };
-		D469A8722C56342700D10575 /* DrawingCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurveIterator.swift; sourceTree = "<group>"; };
+		D469A86E2C5633FC00D10575 /* PencilSingleCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilSingleCurveIterator.swift; sourceTree = "<group>"; };
+		D469A8702C56340B00D10575 /* FingerSingleCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerSingleCurveIterator.swift; sourceTree = "<group>"; };
+		D469A8722C56342700D10575 /* SingleCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleCurveIterator.swift; sourceTree = "<group>"; };
 		D469A8802C563FA100D10575 /* MTLBuffers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLBuffers.swift; sourceTree = "<group>"; };
 		D469A8822C56422D00D10575 /* MTLPipelines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLPipelines.swift; sourceTree = "<group>"; };
 		D469A8842C56428500D10575 /* MTLCommandBufferManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandBufferManager.swift; sourceTree = "<group>"; };
@@ -421,9 +421,9 @@
 			isa = PBXGroup;
 			children = (
 				D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */,
-				D45ACBE12C57C2C3000002BE /* FingerScreenStrokeData.swift */,
+				D45ACBE12C57C2C3000002BE /* FingerStroke.swift */,
 				D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */,
-				D45ACBE32C57C2D9000002BE /* PencilScreenStrokeData.swift */,
+				D45ACBE32C57C2D9000002BE /* PencilStroke.swift */,
 				D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */,
 			);
 			path = Gestures;
@@ -734,9 +734,9 @@
 			isa = PBXGroup;
 			children = (
 				D4517A002CC367FA0047C274 /* BezierCurvePoints.swift */,
-				D469A8722C56342700D10575 /* DrawingCurveIterator.swift */,
-				D469A8702C56340B00D10575 /* DrawingCurveFingerIterator.swift */,
-				D469A86E2C5633FC00D10575 /* DrawingCurvePencilIterator.swift */,
+				D469A8722C56342700D10575 /* SingleCurveIterator.swift */,
+				D469A8702C56340B00D10575 /* FingerSingleCurveIterator.swift */,
+				D469A86E2C5633FC00D10575 /* PencilSingleCurveIterator.swift */,
 				D4057FFC2D69972100DB8B4D /* Points */,
 				D40D975629DAB04700A82E6A /* Gestures */,
 				D464FCAF2D23E65300BCC565 /* Undo */,
@@ -1063,18 +1063,18 @@
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
-				D469A86F2C5633FC00D10575 /* DrawingCurvePencilIterator.swift in Sources */,
+				D469A86F2C5633FC00D10575 /* PencilSingleCurveIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
-				D45ACBE42C57C2D9000002BE /* PencilScreenStrokeData.swift in Sources */,
+				D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */,
 				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
 				D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */,
-				D45ACBE22C57C2C3000002BE /* FingerScreenStrokeData.swift in Sources */,
+				D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,
 				D4513AA82AF5DAA600CA4438 /* CalendarExtensions.swift in Sources */,
 				D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
-				D469A8732C56342700D10575 /* DrawingCurveIterator.swift in Sources */,
+				D469A8732C56342700D10575 /* SingleCurveIterator.swift in Sources */,
 				D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
@@ -1094,7 +1094,7 @@
 				D4517A012CC367FA0047C274 /* BezierCurvePoints.swift in Sources */,
 				D447D8982DC6267100007210 /* CoreDataRepository.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
-				D469A8712C56340B00D10575 /* DrawingCurveFingerIterator.swift in Sources */,
+				D469A8712C56340B00D10575 /* FingerSingleCurveIterator.swift in Sources */,
 				D458C7312D562A150004D9E6 /* CGSizeExtensions.swift in Sources */,
 				D40D977529DAB0AD00A82E6A /* DictionaryExtensions.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,

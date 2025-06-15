@@ -159,7 +159,7 @@ extension DocumentsLocalRepository {
         textureRepository: any TextureRepository,
         to url: URL
     ) -> AnyPublisher<Void, Error> {
-        textureRepository.getTextures(
+        textureRepository.copyTextures(
             uuids: textureIds,
             textureSize: textureSize
         )

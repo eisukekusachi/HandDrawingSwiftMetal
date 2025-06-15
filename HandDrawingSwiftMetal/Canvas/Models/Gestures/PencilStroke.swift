@@ -1,5 +1,5 @@
 //
-//  PencilScreenStrokeData.swift
+//  PencilStroke.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/29.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// A class that manages the pen position information sent from the Apple Pencil
-final class PencilScreenStrokeData {
+final class PencilStroke {
 
     /// An array that stores real values.
     /// https://developer.apple.com/documentation/uikit/apple_pencil_interactions/handling_input_from_apple_pencil/
@@ -36,7 +36,7 @@ final class PencilScreenStrokeData {
 
 }
 
-extension PencilScreenStrokeData {
+extension PencilStroke {
 
     /// Uses the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing.
     var latestActualTouchPoints: [TouchPoint] {

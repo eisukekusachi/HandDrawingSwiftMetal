@@ -67,15 +67,7 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
-        canvasViewModel.canvasSetupCompletedPublisher
-            .sink { [weak self] configuration in
-                UIView.animate(withDuration: 0.05) { [weak self] in
-                    self?.contentView.alpha = 1.0
-                }
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.canvasViewControllerSetupPublisher
+        canvasViewModel.viewConfigureRequestPublisher
             .sink { [weak self] configuration in
                 self?.setupLayerView(
                     canvasState: configuration.canvasState,
@@ -87,13 +79,21 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicatorShowRequestedPublisher
+        canvasViewModel.canvasViewSetupCompletedPublisher
+            .sink { [weak self] configuration in
+                UIView.animate(withDuration: 0.05) { [weak self] in
+                    self?.contentView.alpha = 1.0
+                }
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.activityIndicatorShowRequestPublisher
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingAlertPublisher
+        canvasViewModel.alertShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.showAlert(
@@ -103,24 +103,24 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingToastPublisher
+        canvasViewModel.toastShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
                 self?.showToast(configuration)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsShowingLayerViewPublisher
+        canvasViewModel.layerViewShowRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isShown in
                 self?.textureLayerViewPresenter.showView(isShown)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsCanvasRefreshPublisher
+        canvasViewModel.canvasInitializeRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                self?.canvasViewModel.initializeCanvas(using: configuration)
+                self?.canvasViewModel.initialize(using: configuration)
             }
             .store(in: &cancellables)
 

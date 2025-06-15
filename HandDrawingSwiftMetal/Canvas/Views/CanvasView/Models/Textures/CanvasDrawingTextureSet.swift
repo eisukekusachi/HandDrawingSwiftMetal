@@ -8,26 +8,24 @@
 import Combine
 import MetalKit
 
-/// A protocol for a set of textures for real-time drawing
+/// A protocol for a set of textures for realtime drawing
 protocol CanvasDrawingTextureSet {
 
-    /// A publisher that emits `Void` when the drawing process is finished
-    var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> { get }
+    /// A publisher that emits the realtime drawing texture when it is updated
+    var realtimeDrawingTexturePublisher: AnyPublisher<MTLTexture?, Never> { get }
 
-    var drawingSelectedTexture: MTLTexture { get }
-
-    /// Initializes the textures for drawing with the specified texture size.
+    /// Initializes the textures for realtime drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)
 
-    /// Draws a curve points on `destinationTexture` using the selected texture
-    func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
-        withBackgroundTexture backgroundTexture: MTLTexture?,
-        withBackgroundColor backgroundColor: UIColor,
-        with commandBuffer: MTLCommandBuffer
+    /// Updates the realtime drawing texture by curve points from the given iterator
+    func updateRealTimeDrawingTexture(
+        singleCurveIterator: SingleCurveIterator,
+        baseTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer,
+        onDrawingCompleted: (() -> Void)?
     )
 
-    /// Resets the real-time drawing textures
-    func clearDrawingTextures(with commandBuffer: MTLCommandBuffer)
+    /// Resets the realtime drawing textures
+    func clearTextures(with commandBuffer: MTLCommandBuffer)
 
 }

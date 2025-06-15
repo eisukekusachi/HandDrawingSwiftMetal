@@ -134,31 +134,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
-        Future<TextureRepositoryEntity, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
-
-            do {
-                let texture: MTLTexture? = try FileInputManager.loadTexture(
-                    url: destinationUrl,
-                    textureSize: textureSize,
-                    device: self.device
-                )
-                promise(
-                    .success(
-                        .init(uuid: uuid, texture: texture)
-                    )
-                )
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
             Future<TextureRepositoryEntity, Error> { [weak self] promise in
                 guard let `self` else { return }
@@ -166,14 +142,14 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                 let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
                 do {
-                    let texture: MTLTexture? = try FileInputManager.loadTexture(
+                    let newTexture: MTLTexture? = try FileInputManager.loadTexture(
                         url: destinationUrl,
                         textureSize: textureSize,
                         device: self.device
                     )
                     promise(
                         .success(
-                            .init(uuid: uuid, texture: texture)
+                            .init(uuid: uuid, texture: newTexture)
                         )
                     )
                 } catch {

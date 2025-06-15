@@ -5,15 +5,16 @@
 //  Created by Eisuke Kusachi on 2025/01/25.
 //
 
-import XCTest
+import Combine
 import Foundation
+import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class MockDrawingCurveIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
+final class MockDrawingCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
 
     var iterator: Iterator<GrayscaleDotPoint> = .init()
 
-    var touchPhase: UITouch.Phase = .began
+    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
     var latestCurvePoints: [GrayscaleDotPoint] = []
 

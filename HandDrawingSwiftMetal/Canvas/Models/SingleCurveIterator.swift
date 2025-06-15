@@ -1,18 +1,21 @@
 //
-//  DrawingCurveIterator.swift
+//  SingleCurveIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
+import Combine
 import UIKit
 
-/// An iterator for real-time drawing with `UITouch.Phase`
-protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
+/// An iterator for realtime drawing with `UITouch.Phase`
+protocol SingleCurveIterator: Iterator<GrayscaleDotPoint> {
 
-    var touchPhase: UITouch.Phase { get }
-
+    /// Points that have not yet been drawn
     var latestCurvePoints: [GrayscaleDotPoint] { get }
+
+    /// The touch phases for drawing a single curve
+    var touchPhase: CurrentValueSubject<UITouch.Phase, Never> { get }
 
     func append(
         points: [GrayscaleDotPoint],
@@ -23,13 +26,14 @@ protocol DrawingCurveIterator: Iterator<GrayscaleDotPoint> {
 
 }
 
-extension DrawingCurveIterator {
+extension SingleCurveIterator {
 
-    /// Is the drawing finished
+    /// True if the current drawing operation has been completed
     var isDrawingFinished: Bool {
-        UITouch.isTouchCompleted(touchPhase)
+        UITouch.isTouchCompleted(touchPhase.value)
     }
 
+    /// True if a drawing operation is currently in progress
     var isCurrentlyDrawing: Bool {
         !isDrawingFinished
     }

@@ -59,13 +59,7 @@ final class TextureLayerMockRepository: TextureLayerRepository {
         nil
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
-        Just(.init(uuid: uuid))
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         return Just([])
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

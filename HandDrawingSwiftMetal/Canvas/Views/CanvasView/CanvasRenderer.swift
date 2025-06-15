@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// A class that combines `TextureRepository` textures and renders them on the canvas using `MTLRenderer`
+/// A class that renders textures from `TextureRepository` onto the canvas
 final class CanvasRenderer: ObservableObject {
 
     var frameSize: CGSize = .zero
@@ -90,47 +90,51 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
         canvasState: CanvasState,
-        with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<Void, Error> {
+        with commandBuffer: MTLCommandBuffer,
+        onCompleted: (() -> Void)?
+    ) {
         guard
             let selectedLayer = canvasState.selectedLayer,
             let selectedIndex = canvasState.selectedIndex
         else {
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+            return
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
         var opaqueLayer = selectedLayer
         opaqueLayer.alpha = 255
 
-        let bottomPublisher = mergeLayerTextures(
+        let bottomPublisher = drawLayerTextures(
             layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            textureRepository: textureRepository,
-            into: unselectedBottomTexture,
+            on: unselectedBottomTexture,
             with: commandBuffer
         )
 
-        let topPublisher = mergeLayerTextures(
+        let topPublisher = drawLayerTextures(
             layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
-            textureRepository: textureRepository,
-            into: unselectedTopTexture,
+            on: unselectedTopTexture,
             with: commandBuffer
         )
 
-        let selectedPublisher = mergeLayerTextures(
+        let selectedPublisher = drawLayerTextures(
             layers: [opaqueLayer],
-            textureRepository: textureRepository,
-            into: selectedTexture,
+            on: selectedTexture,
             with: commandBuffer
         )
 
-        return Publishers.CombineLatest3(
+        Publishers.CombineLatest3(
             bottomPublisher,
             selectedPublisher,
             topPublisher
         )
-        .map { _, _, _ in () }
-        .eraseToAnyPublisher()
+        .receive(on: DispatchQueue.main)
+        .sink(
+            receiveCompletion: { _ in
+                onCompleted?()
+            },
+            receiveValue: { _ in }
+        )
+        .store(in: &cancellables)
     }
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
@@ -173,7 +177,6 @@ extension CanvasRenderer {
         updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    /// Updates the canvas
     func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
@@ -189,90 +192,9 @@ extension CanvasRenderer {
         canvasView?.setNeedsDisplay()
     }
 
-}
-
-extension CanvasRenderer {
-    /// Draws `texture` on the destination texture from `textureRepository` and returns the combined result
-    func drawTexture(
-        texture: MTLTexture,
-        on destinationTextureId: UUID,
-        in textureRepository: TextureRepository?,
-        with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<MTLTexture, Error> {
-        guard let textureRepository else {
-            Logger.standard.warning("The texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
-        }
-
-        return textureRepository.getTexture(
-            uuid: destinationTextureId,
-            textureSize: texture.size
-        )
-        .tryMap { [weak self] result -> MTLTexture in
-            guard
-                let `self`,
-                let targetTexture = result.texture,
-                let flippedTextureBuffers = self.flippedTextureBuffers
-            else {
-                throw TextureRepositoryError.failedToUnwrap
-            }
-
-            self.renderer.drawTexture(
-                texture: texture,
-                buffers: flippedTextureBuffers,
-                withBackgroundColor: .clear,
-                on: targetTexture,
-                with: commandBuffer
-            )
-
-            return targetTexture
-        }
-        .eraseToAnyPublisher()
-    }
-
-    /// Draws the given `sourceTexture` on the destination texture retrieved from the repository using an internally created command buffer and returns the result
-    func drawTexture(
-        texture: MTLTexture,
-        on destinationTextureId: UUID
-    ) -> AnyPublisher<MTLTexture, Error> {
-        guard let textureRepository else {
-            Logger.standard.warning("The texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
-        }
-
-        guard let temporaryCommandBuffer = self.device.makeCommandQueue()?.makeCommandBuffer() else {
-            Logger.standard.error("Failed to create command buffer")
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-        }
-
-        return drawTexture(
-            texture: texture,
-            on: destinationTextureId,
-            in: textureRepository,
-            with: temporaryCommandBuffer
-        )
-        .flatMap { targetTexture -> AnyPublisher<MTLTexture, Error> in
-            Future { promise in
-                temporaryCommandBuffer.addCompletedHandler { completedBuffer in
-                    if completedBuffer.status == .completed {
-                        promise(.success(targetTexture))
-                    } else {
-                        let error = completedBuffer.error ?? TextureRepositoryError.failedToCommitCommandBuffer
-                        Logger.standard.error("Command buffer failed with error: \(error.localizedDescription)")
-                        promise(.failure(error))
-                    }
-                }
-                temporaryCommandBuffer.commit()
-            }
-            .eraseToAnyPublisher()
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func mergeLayerTextures(
+    func drawLayerTextures(
         layers: [TextureLayerModel],
-        textureRepository: TextureRepository?,
-        into destinationTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
         guard let textureRepository else {
@@ -288,8 +210,8 @@ extension CanvasRenderer {
             return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        // Fetch textures from the repository
-        return textureRepository.getTextures(
+        // Copy textures from the repository
+        return textureRepository.copyTextures(
             uuids: layers.map { $0.id },
             textureSize: destinationTexture.size
         )

@@ -1,25 +1,22 @@
 //
-//  DrawingCurveFingerIterator.swift
+//  FingerSingleCurveIterator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
+import Combine
 import UIKit
 
-/// An iterator for real-time finger drawing with `UITouch.Phase`
-final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurveIterator {
+/// An iterator for realtime finger drawing with `UITouch.Phase`
+final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
 
-    var touchPhase: UITouch.Phase = .began
-
-    private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
-
-    private var hasFirstCurveBeenCreated: Bool = false
+    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
     var latestCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
-        if shouldGetFirstCurve {
+        if isFirstCurveNeeded {
             array.append(contentsOf: makeFirstCurvePoints())
         }
 
@@ -32,14 +29,18 @@ final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
         return array
     }
 
+    private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
+
+    private var hasFirstCurveBeenCreated: Bool = false
+
     func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
-        tmpIterator.append(points)
-        self.touchPhase = touchPhase
+        self.tmpIterator.append(points)
+        self.touchPhase.send(touchPhase)
 
-        makeSmoothCurve()
+        self.makeSmoothCurve()
     }
 
     override func reset() {
@@ -47,15 +48,15 @@ final class DrawingCurveFingerIterator: Iterator<GrayscaleDotPoint>, DrawingCurv
 
         tmpIterator.reset()
 
-        touchPhase = .began
+        touchPhase.send(.cancelled)
         hasFirstCurveBeenCreated = false
     }
 
 }
 
-extension DrawingCurveFingerIterator {
+extension FingerSingleCurveIterator {
 
-    var shouldGetFirstCurve: Bool {
+    var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
 
         if isFirstCurveToBeCreated {
@@ -79,7 +80,7 @@ extension DrawingCurveFingerIterator {
             self.append(dotPoint)
         }
 
-        if touchPhase == .ended,
+        if touchPhase.value == .ended,
             let lastElement = tmpIterator.array.last {
             self.append(lastElement)
         }

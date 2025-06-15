@@ -1,5 +1,5 @@
 //
-//  FingerScreenStrokeDataTests.swift
+//  FingerStrokeTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/02/09.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class FingerScreenStrokeDataTests: XCTestCase {
+final class FingerStrokeTests: XCTestCase {
     /// Confirms finger input
     func testLatestTouchPoints() {
-        let subject = FingerScreenStrokeData(
+        let subject = FingerStroke(
             touchArrayDictionary:[
                 1: [
                     .generate(location: .init(x: 0, y: 0), phase: .began),
@@ -185,7 +185,7 @@ final class FingerScreenStrokeDataTests: XCTestCase {
             let condition = testCase.condition
             let expectation = testCase.expectation
 
-            let subject = FingerScreenStrokeData(
+            let subject = FingerStroke(
                 touchArrayDictionary: condition.fingers
             )
 
@@ -210,7 +210,7 @@ final class FingerScreenStrokeDataTests: XCTestCase {
             ]
         ]
 
-        let subject = FingerScreenStrokeData(touchArrayDictionary: dictionary)
+        let subject = FingerStroke(touchArrayDictionary: dictionary)
 
         subject.setActiveDictionaryKeyIfNil()
 
@@ -219,7 +219,7 @@ final class FingerScreenStrokeDataTests: XCTestCase {
     }
 
     func testReset() {
-        let subject = FingerScreenStrokeData(
+        let subject = FingerStroke(
             touchArrayDictionary: [
                 1: [
                     .generate(location: .init(x: 0, y: 0)),

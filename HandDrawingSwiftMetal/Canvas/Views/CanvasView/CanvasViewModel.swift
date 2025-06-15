@@ -17,39 +17,39 @@ final class CanvasViewModel {
         }
     }
 
-    /// A publisher that emits a value when the canvas setup is completed
-    var canvasSetupCompletedPublisher: AnyPublisher<Void, Never> {
-        canvasSetupCompletedSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the activity indicator
+    var activityIndicatorShowRequestPublisher: AnyPublisher<Bool, Never> {
+        activityIndicatorShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing the activity indicator is needed
-    var activityIndicatorShowRequestedPublisher: AnyPublisher<Bool, Never> {
-        activityIndicatorShowRequestedSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the alert
+    var alertShowRequestPublisher: AnyPublisher<String, Never> {
+        alertShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing an alert is needed
-    var needsShowingAlertPublisher: AnyPublisher<String, Never> {
-        needsShowingAlertSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the toast
+    var toastShowRequestPublisher: AnyPublisher<ToastModel, Never> {
+        toastShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing a toast is needed
-    var needsShowingToastPublisher: AnyPublisher<ToastModel, Never> {
-        needsShowingToastSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show or hide the layer view
+    var layerViewShowRequestPublisher: AnyPublisher<Bool, Never> {
+        layerViewShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when showing the layer view is needed
-    var needsShowingLayerViewPublisher: AnyPublisher<Bool, Never> {
-        needsShowingLayerViewSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
+    var viewConfigureRequestPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
+        viewConfigureRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when the canvas view controller setup is needed
-    var canvasViewControllerSetupPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
-        canvasViewControllerSetupSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CanvasConfiguration` when initializing the canvas
+    var canvasInitializeRequestPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializeRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits when refreshing the canvas is needed
-    var needsCanvasRefreshPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        needsCanvasRefreshSubject.eraseToAnyPublisher()
+    /// A publisher that emits `Void` when the canvas view setup is completed
+    var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
+        canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when updating the undo button state is needed.
@@ -69,56 +69,59 @@ final class CanvasViewModel {
     private let canvasState: CanvasState = .init(
         CanvasConfiguration()
     )
-
-    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `DocumentsDirectoryTextureRepository`
+    /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
-    /// A class for handling finger input values
-    private let fingerScreenStrokeData = FingerScreenStrokeData()
-    /// A class for handling Apple Pencil inputs
-    private let pencilScreenStrokeData = PencilScreenStrokeData()
+    /// Handles input from finger touches
+    private let fingerStroke = FingerStroke()
+    /// Handles input from Apple Pencil
+    private let pencilStroke = PencilStroke()
 
-    /// An iterator for real-time drawing
-    private var drawingCurveIterator: DrawingCurveIterator?
+    /// An iterator that manages a single curve being drawn in realtime
+    private var singleCurveIterator: SingleCurveIterator?
 
-    /// A texture set for real-time drawing
+    /// A texture set for realtime drawing
     private var drawingTextureSet: CanvasDrawingTextureSet?
-    /// A brush texture set for real-time drawing
+    /// A brush texture set for realtime drawing
     private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
-    /// An eraser texture set for real-time drawing
+    /// An eraser texture set for realtime drawing
     private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
 
-    /// A display link for real-time drawing
+    /// A display link for realtime drawing
     private var drawingDisplayLink = CanvasDrawingDisplayLink()
 
     private var renderer = CanvasRenderer()
 
     private let transformer = CanvasTransformer()
 
+    /// Manages input from pen and finger
     private let inputDevice = CanvasInputDeviceStatus()
 
+    /// Manages on-screen gestures such as drag and pinch
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private let canvasSetupCompletedSubject = PassthroughSubject<Void, Never>()
+    private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let activityIndicatorShowRequestedSubject: PassthroughSubject<Bool, Never> = .init()
+    private let alertShowRequestSubject = PassthroughSubject<String, Never>()
 
-    private let needsShowingAlertSubject = PassthroughSubject<String, Never>()
+    private let toastShowRequestSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let needsShowingToastSubject = PassthroughSubject<ToastModel, Never>()
+    private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private let needsShowingLayerViewSubject = CurrentValueSubject<Bool, Never>(false)
+    private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
-    private var canvasViewControllerSetupSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
-    private let needsCanvasRefreshSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasInitializeRequestSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
     private let needsRedoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
+    /// A repository for loading and saving local files
     private var localRepository: LocalRepository!
 
+    /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
 
     private var cancellables = Set<AnyCancellable>()
@@ -147,21 +150,34 @@ final class CanvasViewModel {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.canvasDrawingPublisher
             .sink { [weak self] in
-                self?.updateCanvasWithDrawing()
+                guard
+                    let singleCurveIterator = self?.singleCurveIterator,
+                    let texture = self?.renderer.selectedTexture,
+                    let selectedLayerId = self?.canvasState.selectedLayer?.id,
+                    let commandBuffer = self?.canvasView?.commandBuffer
+                else { return }
+
+                self?.drawingTextureSet?.updateRealTimeDrawingTexture(
+                    singleCurveIterator: singleCurveIterator,
+                    baseTexture: texture,
+                    with: commandBuffer,
+                    onDrawingCompleted: {
+                        commandBuffer.addCompletedHandler { [weak self] _ in
+                            self?.updateLocalTextureLayerRepository(texture: texture, for: selectedLayerId)
+                        }
+                    }
+                )
             }
             .store(in: &cancellables)
 
-        // The canvas is updated when drawing ends
         Publishers.Merge(
-            drawingBrushTextureSet.canvasDrawFinishedPublisher,
-            drawingEraserTextureSet.canvasDrawFinishedPublisher
+            drawingBrushTextureSet.realtimeDrawingTexturePublisher,
+            drawingEraserTextureSet.realtimeDrawingTexturePublisher
         )
-        .sink { [weak self] in
-            self?.canvasView?.commandBuffer?.addCompletedHandler { [weak self] _ in
-                self?.completeCanvasWithDrawing()
+            .sink { [weak self] texture in
+                self?.updateCanvasView(realtimeDrawingTexture: texture)
             }
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
 
         // Update drawingTextureSet when the tool is switched
         canvasState.drawingToolState.$drawingTool
@@ -198,13 +214,23 @@ final class CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         canvasState.fullCanvasUpdateSubject
             .sink { [weak self] in
-                self?.updateDrawingTextures()
+                guard
+                    let `self`,
+                    let commandBuffer = canvasView?.commandBuffer
+                else { return }
+
+                self.renderer.updateDrawingTextures(
+                    canvasState: self.canvasState,
+                    with: commandBuffer
+                ) { [weak self] in
+                    self?.updateCanvasView()
+                }
             }
             .store(in: &cancellables)
 
         canvasStateStorage?.errorDialogSubject
             .sink { [weak self] error in
-                self?.needsShowingAlertSubject.send(error.localizedDescription)
+                self?.alertShowRequestSubject.send(error.localizedDescription)
             }
             .store(in: &cancellables)
 
@@ -223,7 +249,7 @@ final class CanvasViewModel {
         textureLayerRepository.storageInitializationCompletedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] configuration in
-                self?.completeCanvasSetup(configuration)
+                self?.completeInitialization(configuration)
             }
             .store(in: &cancellables)
 
@@ -236,13 +262,14 @@ final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initializeCanvas(using configuration: CanvasConfiguration) {
+    func initialize(using configuration: CanvasConfiguration) {
         textureLayerRepository.initializeStorage(from: configuration)
     }
 
-    private func completeCanvasSetup(_ configuration: CanvasConfiguration) {
+    private func completeInitialization(_ configuration: CanvasConfiguration) {
         guard
-            let textureSize = configuration.textureSize
+            let textureSize = configuration.textureSize,
+            let commandBuffer = canvasView?.commandBuffer
         else { return }
 
         canvasState.setData(configuration)
@@ -252,7 +279,12 @@ extension CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
 
-        updateDrawingTextures()
+        renderer.updateDrawingTextures(
+            canvasState: canvasState,
+            with: commandBuffer
+        ) { [weak self] in
+            self?.updateCanvasView()
+        }
 
         textureLayerRepository
             .updateAllThumbnails(textureSize: textureSize)
@@ -262,8 +294,8 @@ extension CanvasViewModel {
                 case .finished: break
                 case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
                 }
-                self?.canvasSetupCompletedSubject.send(())
-                self?.activityIndicatorShowRequestedSubject.send(false)
+                self?.canvasViewSetupCompletedSubject.send(())
+                self?.activityIndicatorShowRequestSubject.send(false)
             }, receiveValue: {})
             .store(in: &cancellables)
     }
@@ -277,7 +309,7 @@ extension CanvasViewModel {
     ) {
         self.canvasView = canvasView
 
-        canvasViewControllerSetupSubject.send(
+        viewConfigureRequestSubject.send(
             .init(
                 canvasState: canvasState,
                 textureLayerRepository: textureLayerRepository
@@ -286,7 +318,7 @@ extension CanvasViewModel {
     }
 
     func onViewWillAppear() {
-        activityIndicatorShowRequestedSubject.send(true)
+        activityIndicatorShowRequestSubject.send(true)
     }
 
     func onViewDidAppear(
@@ -296,7 +328,7 @@ extension CanvasViewModel {
         if !textureLayerRepository.isInitialized {
             let existingValue = canvasStateStorage?.coreDataConfiguration
             let defaultValue = configuration.createConfigurationWithValidTextureSize(drawableTextureSize)
-            initializeCanvas(using: existingValue ?? defaultValue)
+            initialize(using: existingValue ?? defaultValue)
         }
     }
 
@@ -307,28 +339,28 @@ extension CanvasViewModel {
     ) {
         guard inputDevice.update(.finger) != .pencil else { return }
 
-        fingerScreenStrokeData.appendTouchPointToDictionary(
+        fingerStroke.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
                 $0[$1.hashValue] = .init(touch: $1, view: view)
             }
         )
 
         // determine the gesture from the dictionary
-        switch screenTouchGesture.update(fingerScreenStrokeData.touchArrayDictionary) {
+        switch screenTouchGesture.update(fingerStroke.touchArrayDictionary) {
         case .drawing:
-            if shouldCreateFingerDrawingCurveIteratorInstance() {
-                drawingCurveIterator = DrawingCurveFingerIterator()
+            if shouldCreateFingerSingleCurveIteratorInstance() {
+                singleCurveIterator = FingerSingleCurveIterator()
             }
 
-            fingerScreenStrokeData.setActiveDictionaryKeyIfNil()
+            fingerStroke.setActiveDictionaryKeyIfNil()
 
-            drawCurveOnCanvas(fingerScreenStrokeData.latestTouchPoints)
+            drawCurveOnCanvas(fingerStroke.latestTouchPoints)
 
         case .transforming: transformCanvas()
         default: break
         }
 
-        fingerScreenStrokeData.removeEndedTouchArrayFromDictionary()
+        fingerStroke.removeEndedTouchArrayFromDictionary()
 
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
@@ -346,7 +378,7 @@ extension CanvasViewModel {
         }
         inputDevice.update(.pencil)
 
-        pencilScreenStrokeData.setLatestEstimatedTouchPoint(
+        pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
                 .filter({ $0.type == .pencil })
                 .sorted(by: { $0.timestamp < $1.timestamp })
@@ -359,17 +391,17 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        if shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: actualTouches) {
-            drawingCurveIterator = DrawingCurvePencilIterator()
+        if shouldCreatePencilSingleCurveIteratorInstance(actualTouches: actualTouches) {
+            singleCurveIterator = PencilSingleCurveIterator()
         }
 
-        pencilScreenStrokeData.appendActualTouches(
+        pencilStroke.appendActualTouches(
             actualTouches: actualTouches
                 .sorted { $0.timestamp < $1.timestamp }
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        drawCurveOnCanvas(pencilScreenStrokeData.latestActualTouchPoints)
+        drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
     }
 
 }
@@ -381,7 +413,7 @@ extension CanvasViewModel {
 
     func didTapLayerButton() {
         // Toggle the visibility of `TextureLayerView`
-        needsShowingLayerViewSubject.send(!needsShowingLayerViewSubject.value)
+        layerViewShowRequestSubject.send(!layerViewShowRequestSubject.value)
     }
 
     func didTapResetTransformButton() {
@@ -392,7 +424,7 @@ extension CanvasViewModel {
 
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
-        initializeCanvas(
+        initialize(
             using: CanvasConfiguration().createConfigurationWithValidTextureSize(canvasState.textureSize)
         )
     }
@@ -415,7 +447,7 @@ extension CanvasViewModel {
             let diameter = canvasState.drawingToolDiameter
         else { return }
 
-        drawingCurveIterator?.append(
+        singleCurveIterator?.append(
             points: screenTouchPoints.map {
                 .init(
                     matrix: transformer.matrix.inverted(flipY: true),
@@ -429,25 +461,23 @@ extension CanvasViewModel {
             touchPhase: screenTouchPoints.lastTouchPhase
         )
 
-        drawingDisplayLink.updateCanvasWithDrawing(
-            isCurrentlyDrawing: drawingCurveIterator?.isCurrentlyDrawing ?? false
-        )
+        drawingDisplayLink.run(singleCurveIterator?.isCurrentlyDrawing ?? false)
     }
 
     private func transformCanvas() {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         transformer.initTransformingIfNeeded(
-            fingerScreenStrokeData.touchArrayDictionary
+            fingerStroke.touchArrayDictionary
         )
 
-        if fingerScreenStrokeData.isAllFingersOnScreen {
+        if fingerStroke.isAllFingersOnScreen {
             transformer.transformCanvas(
                 screenCenter: .init(
                     x: renderer.frameSize.width * 0.5,
                     y: renderer.frameSize.height * 0.5
                 ),
-                fingerScreenStrokeData.touchArrayDictionary
+                fingerStroke.touchArrayDictionary
             )
         } else {
             transformer.finishTransforming()
@@ -459,38 +489,27 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    // Since the pencil takes priority, even if `drawingCurveIterator` contains an instance,
-    // it will be overwritten when touchBegan occurs.
-    private func shouldCreatePencilDrawingCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
+    // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
+    // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
+    private func shouldCreatePencilSingleCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
         actualTouches.contains(where: { $0.phase == .began })
     }
 
-    // If `drawingCurveIterator` is nil, an instance of `FingerDrawingCurveIterator` will be set.
-    private func shouldCreateFingerDrawingCurveIteratorInstance() -> Bool {
-        drawingCurveIterator == nil
-    }
-
-    private func resetAllInputParameters() {
-        inputDevice.reset()
-        screenTouchGesture.reset()
-
-        fingerScreenStrokeData.reset()
-        pencilScreenStrokeData.reset()
-
-        drawingCurveIterator = nil
-        transformer.resetMatrix()
+    // Set a new `FingerSingleCurveIterator` if `singleCurveIterator` is nil.
+    private func shouldCreateFingerSingleCurveIteratorInstance() -> Bool {
+        singleCurveIterator == nil
     }
 
     private func cancelFingerDrawing() {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        drawingTextureSet?.clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 
-        fingerScreenStrokeData.reset()
+        fingerStroke.reset()
 
-        drawingCurveIterator = nil
+        singleCurveIterator = nil
         transformer.resetMatrix()
 
         canvasView?.resetCommandBuffer()
@@ -498,50 +517,11 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    private func updateCanvasWithDrawing() {
-        guard
-            let drawingCurveIterator,
-            let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
-
-        drawingTextureSet?.drawCurvePoints(
-            drawingCurveIterator: drawingCurveIterator,
-            withBackgroundTexture: self.renderer.selectedTexture,
-            withBackgroundColor: .clear,
-            with: commandBuffer
+    private func updateLocalTextureLayerRepository(texture: MTLTexture, for selectedTextureId: UUID) {
+        textureLayerRepository.updateTexture(
+            texture: texture,
+            for: selectedTextureId
         )
-
-        renderer.updateCanvasView(
-            canvasView,
-            realtimeDrawingTexture: self.drawingTextureSet?.drawingSelectedTexture,
-            selectedLayer: selectedLayer,
-            with: commandBuffer
-        )
-    }
-
-    /// Completes the canvas update after the drawing is finished
-    private func completeCanvasWithDrawing() {
-        guard
-            let selectedTexture = self.renderer.selectedTexture,
-            let selectedTextureId = self.canvasState.selectedLayer?.id
-        else { return }
-
-        renderer.drawTexture(
-            texture: selectedTexture,
-            on: selectedTextureId
-        )
-        .flatMap { [weak self] resultTexture -> AnyPublisher<Void, Error> in
-            guard let `self` else {
-                return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-            }
-            return self.textureLayerRepository.updateTexture(
-                texture: resultTexture,
-                for: selectedTextureId
-            )
-            .map { _ in () }
-            .eraseToAnyPublisher()
-        }
         .sink(
             receiveCompletion: { [weak self] result in
                 switch result {
@@ -556,31 +536,18 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-}
+    private func resetAllInputParameters() {
+        inputDevice.reset()
+        screenTouchGesture.reset()
 
-extension CanvasViewModel {
-    /// Updates the drawing textures, which are pre-merged from layer textures to maintain high drawing performance even when the number of layers increases.
-    /// It should be invoked when the layer state changes.
-    private func updateDrawingTextures() {
-        guard
-            let commandBuffer = canvasView?.commandBuffer
-        else { return }
+        fingerStroke.reset()
+        pencilStroke.reset()
 
-        renderer.updateDrawingTextures(
-            canvasState: canvasState,
-            with: commandBuffer
-        )
-        .receive(on: DispatchQueue.main)
-        .sink(
-            receiveCompletion: { [weak self] _ in
-                self?.updateCanvasView()
-            },
-            receiveValue: { _ in }
-        )
-        .store(in: &cancellables)
+        singleCurveIterator = nil
+        transformer.resetMatrix()
     }
 
-    func updateCanvasView() {
+    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,
             let commandBuffer = canvasView?.commandBuffer
@@ -588,6 +555,7 @@ extension CanvasViewModel {
 
         renderer.updateCanvasView(
             canvasView,
+            realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
         )
@@ -603,16 +571,16 @@ extension CanvasViewModel {
             textureRepository: textureLayerRepository
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.needsShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
+            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
             }
         }, receiveValue: { [weak self] configuration in
-            self?.needsCanvasRefreshSubject.send(configuration)
+            self?.canvasInitializeRequestSubject.send(configuration)
         })
         .store(in: &cancellables)
     }
@@ -625,13 +593,13 @@ extension CanvasViewModel {
             to: URL.zipFileURL(projectName: canvasState.projectName)
         )
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestedSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.needsShowingToastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.needsShowingAlertSubject.send(error.localizedDescription)
+            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
             }
         }, receiveValue: {})
         .store(in: &cancellables)

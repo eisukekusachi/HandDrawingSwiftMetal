@@ -8,22 +8,17 @@
 import Combine
 import MetalKit
 
-/// A set of textures for real-time brush drawing
+/// A set of textures for realtime brush drawing
 final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 
-    var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
-        canvasDrawFinishedSubject.eraseToAnyPublisher()
+    var realtimeDrawingTexturePublisher: AnyPublisher<MTLTexture?, Never> {
+        realtimeDrawingTextureSubject.eraseToAnyPublisher()
     }
-
-    var drawingSelectedTexture: MTLTexture {
-        resultTexture
-    }
-
-    private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
+    private let realtimeDrawingTextureSubject = PassthroughSubject<MTLTexture?, Never>()
 
     private var blushColor: UIColor = .black
 
-    private var resultTexture: MTLTexture!
+    private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
 
@@ -47,12 +42,12 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
 extension CanvasDrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
-        self.resultTexture = MTLTextureCreator.makeTexture(label: "resultTexture", size: textureSize, with: device)
+        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
     }
 
@@ -60,28 +55,30 @@ extension CanvasDrawingBrushTextureSet {
         blushColor = color
     }
 
-    func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
-        withBackgroundTexture backgroundTexture: MTLTexture?,
-        withBackgroundColor backgroundColor: UIColor = .clear,
-        with commandBuffer: MTLCommandBuffer
+    func updateRealTimeDrawingTexture(
+        singleCurveIterator: SingleCurveIterator,
+        baseTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer,
+        onDrawingCompleted: (() -> Void)?
     ) {
-        guard let backgroundTexture else { return }
-
-        drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.latestCurvePoints,
+        updateRealTimeDrawingTexture(
+            singleCurveIterator: singleCurveIterator,
+            baseTexture: baseTexture,
             with: commandBuffer
         )
 
-        drawDrawingTextureWithBackgroundTexture(
-            backgroundTexture: backgroundTexture,
-            backgroundColor: backgroundColor,
-            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
-            with: commandBuffer
-        )
+        if singleCurveIterator.isDrawingFinished {
+            drawCurrentTexture(
+                on: baseTexture,
+                with: commandBuffer
+            )
+            onDrawingCompleted?()
+        }
+
+        realtimeDrawingTextureSubject.send(realtimeDrawingTexture)
     }
 
-    func clearDrawingTextures(with commandBuffer: MTLCommandBuffer) {
+    func clearTextures(with commandBuffer: MTLCommandBuffer) {
         renderer.clearTextures(
             textures: [
                 drawingTexture,
@@ -95,13 +92,16 @@ extension CanvasDrawingBrushTextureSet {
 
 extension CanvasDrawingBrushTextureSet {
 
-    private func drawCurvePointsOnDrawingTexture(
-        points: [GrayscaleDotPoint],
+    private func updateRealTimeDrawingTexture(
+        singleCurveIterator: SingleCurveIterator,
+        baseTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let baseTexture else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
-                points: points,
+                points: singleCurveIterator.latestCurvePoints,
                 alpha: blushColor.alpha,
                 textureSize: drawingTexture.size,
                 with: device
@@ -116,39 +116,37 @@ extension CanvasDrawingBrushTextureSet {
             on: drawingTexture,
             with: commandBuffer
         )
-    }
 
-    private func drawDrawingTextureWithBackgroundTexture(
-        backgroundTexture: MTLTexture,
-        backgroundColor: UIColor = .clear,
-        shouldUpdateSelectedTexture: Bool,
-        with commandBuffer: MTLCommandBuffer
-    ) {
         renderer.drawTexture(
-            texture: backgroundTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
-            withBackgroundColor: backgroundColor,
-            on: resultTexture,
+            withBackgroundColor: .clear,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: resultTexture,
+            into: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+    }
+
+    private func drawCurrentTexture(
+        on texture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let texture else { return }
+
+        renderer.drawTexture(
+            texture: realtimeDrawingTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: texture,
             with: commandBuffer
         )
 
-        if shouldUpdateSelectedTexture {
-            renderer.mergeTexture(
-                texture: drawingTexture,
-                into: backgroundTexture,
-                with: commandBuffer
-            )
-
-            clearDrawingTextures(with: commandBuffer)
-
-            canvasDrawFinishedSubject.send(())
-        }
+        clearTextures(with: commandBuffer)
     }
 
 }

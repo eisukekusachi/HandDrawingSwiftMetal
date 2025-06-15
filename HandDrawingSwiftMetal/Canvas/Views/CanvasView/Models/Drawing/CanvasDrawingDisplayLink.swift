@@ -8,7 +8,8 @@
 import UIKit
 import Combine
 
-/// A class that manages the displayLink for real-time drawing
+
+/// A class that manages the displayLink for realtime drawing
 final class CanvasDrawingDisplayLink {
 
     // Requesting to draw a line on the canvas emits `Void`
@@ -24,10 +25,8 @@ final class CanvasDrawingDisplayLink {
         setupDisplayLink()
     }
 
-    func updateCanvasWithDrawing(
-        isCurrentlyDrawing: Bool
-    ) {
-        if isCurrentlyDrawing {
+    func run(_ running: Bool) {
+        if running {
             displayLink?.isPaused = false
         } else {
             displayLink?.isPaused = true

@@ -8,22 +8,17 @@
 import Combine
 import MetalKit
 
-/// A set of textures for real-time eraser drawing
+/// A set of textures for realtime eraser drawing
 final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
 
-    var canvasDrawFinishedPublisher: AnyPublisher<Void, Never> {
-        canvasDrawFinishedSubject.eraseToAnyPublisher()
+    var realtimeDrawingTexturePublisher: AnyPublisher<MTLTexture?, Never> {
+        realtimeDrawingTextureSubject.eraseToAnyPublisher()
     }
-
-    var drawingSelectedTexture: MTLTexture {
-        resultTexture
-    }
-
-    private let canvasDrawFinishedSubject = PassthroughSubject<Void, Never>()
+    private let realtimeDrawingTextureSubject = PassthroughSubject<MTLTexture?, Never>()
 
     private var eraserAlpha: Int = 255
 
-    private var resultTexture: MTLTexture!
+    private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     private var lineDrawnTexture: MTLTexture!
@@ -48,13 +43,13 @@ final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
 extension CanvasDrawingEraserTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
-        self.resultTexture = MTLTextureCreator.makeTexture(label: "resultTexture", size: textureSize, with: device)
+        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
         self.lineDrawnTexture = MTLTextureCreator.makeTexture(label: "lineDrawnTexture", size: textureSize, with: device)
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearDrawingTextures(with: temporaryRenderCommandBuffer)
+        clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
     }
 
@@ -62,31 +57,30 @@ extension CanvasDrawingEraserTextureSet {
         eraserAlpha = alpha
     }
 
-    func drawCurvePoints(
-        drawingCurveIterator: DrawingCurveIterator,
-        withBackgroundTexture backgroundTexture: MTLTexture?,
-        withBackgroundColor backgroundColor: UIColor = .clear,
-        with commandBuffer: MTLCommandBuffer
+    func updateRealTimeDrawingTexture(
+        singleCurveIterator: SingleCurveIterator,
+        baseTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer,
+        onDrawingCompleted: (() -> Void)?
     ) {
-        guard
-            let backgroundTexture
-        else { return }
-
-        drawCurvePointsOnDrawingTexture(
-            points: drawingCurveIterator.latestCurvePoints,
-            sourceTexture: backgroundTexture,
+        updateRealTimeDrawingTexture(
+            singleCurveIterator: singleCurveIterator,
+            baseTexture: baseTexture,
             with: commandBuffer
         )
 
-        drawDrawingTextureWithBackgroundTexture(
-            backgroundTexture: backgroundTexture,
-            backgroundColor: backgroundColor,
-            shouldUpdateSelectedTexture: drawingCurveIterator.isDrawingFinished,
-            with: commandBuffer
-        )
+        if singleCurveIterator.isDrawingFinished {
+            drawCurrentTexture(
+                on: baseTexture,
+                with: commandBuffer
+            )
+            onDrawingCompleted?()
+        }
+
+        realtimeDrawingTextureSubject.send(realtimeDrawingTexture)
     }
 
-    func clearDrawingTextures(with commandBuffer: MTLCommandBuffer) {
+    func clearTextures(with commandBuffer: MTLCommandBuffer) {
         renderer.clearTextures(
             textures: [
                 drawingTexture,
@@ -101,14 +95,16 @@ extension CanvasDrawingEraserTextureSet {
 
 extension CanvasDrawingEraserTextureSet {
 
-    private func drawCurvePointsOnDrawingTexture(
-        points: [GrayscaleDotPoint],
-        sourceTexture: MTLTexture,
+    private func updateRealTimeDrawingTexture(
+        singleCurveIterator: SingleCurveIterator,
+        baseTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let baseTexture else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
-                points: points,
+                points: singleCurveIterator.latestCurvePoints,
                 alpha: eraserAlpha,
                 textureSize: lineDrawnTexture.size,
                 with: device
@@ -125,7 +121,7 @@ extension CanvasDrawingEraserTextureSet {
         )
 
         renderer.drawTexture(
-            texture: sourceTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: drawingTexture,
@@ -138,50 +134,31 @@ extension CanvasDrawingEraserTextureSet {
             from: drawingTexture,
             with: commandBuffer
         )
-    }
 
-    private func drawDrawingTextureWithBackgroundTexture(
-        backgroundTexture: MTLTexture,
-        backgroundColor: UIColor = .clear,
-        shouldUpdateSelectedTexture: Bool,
-        with commandBuffer: MTLCommandBuffer
-    ) {
         renderer.drawTexture(
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: resultTexture,
+            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+    }
+
+    private func drawCurrentTexture(
+        on texture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let texture else { return }
+
+        renderer.drawTexture(
+            texture: realtimeDrawingTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: texture,
             with: commandBuffer
         )
 
-        if shouldUpdateSelectedTexture {
-            renderer.drawTexture(
-                texture: backgroundTexture,
-                buffers: flippedTextureBuffers,
-                withBackgroundColor: .clear,
-                on: drawingTexture,
-                with: commandBuffer
-            )
-
-            renderer.subtractTextureWithEraseBlendMode(
-                texture: lineDrawnTexture,
-                buffers: flippedTextureBuffers,
-                from: drawingTexture,
-                with: commandBuffer
-            )
-
-            renderer.drawTexture(
-                texture: drawingTexture,
-                buffers: flippedTextureBuffers,
-                withBackgroundColor: .clear,
-                on: backgroundTexture,
-                with: commandBuffer
-            )
-
-            clearDrawingTextures(with: commandBuffer)
-
-            canvasDrawFinishedSubject.send(())
-        }
+        clearTextures(with: commandBuffer)
     }
 
 }

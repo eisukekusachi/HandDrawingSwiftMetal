@@ -1,5 +1,5 @@
 //
-//  PencilScreenStrokeDataTests.swift
+//  PencilStrokeTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/02/09.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class PencilScreenStrokeDataTests: XCTestCase {
+final class PencilStrokeTests: XCTestCase {
     /// Confirms pencil input
     func testActualTouchPointArray() {
-        let subject = PencilScreenStrokeData()
+        let subject = PencilStroke()
 
         subject.appendActualTouches(actualTouches: [
             .generate(location: .init(x: 0, y: 0), phase: .began, estimationUpdateIndex: 0)
@@ -75,7 +75,7 @@ final class PencilScreenStrokeDataTests: XCTestCase {
 
     /// Confirms that a pen has left the screen
     func testIsPenOffScreen() {
-        let subject = PencilScreenStrokeData()
+        let subject = PencilStroke()
 
         let actualTouches: [TouchPoint] = [
             .generate(phase: .moved, estimationUpdateIndex: 1)
@@ -102,7 +102,7 @@ final class PencilScreenStrokeDataTests: XCTestCase {
     }
 
     func testReset() {
-        let subject = PencilScreenStrokeData(
+        let subject = PencilStroke(
             actualTouchPointArray: [
                 .generate(location: .init(x: 0, y: 0)),
                 .generate(location: .init(x: 1, y: 1))

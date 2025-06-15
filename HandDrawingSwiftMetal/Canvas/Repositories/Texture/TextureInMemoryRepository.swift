@@ -118,25 +118,18 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func getTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<TextureRepositoryEntity, Error> {
-        Future<TextureRepositoryEntity, Error> { [weak self] promise in
-            guard let texture = self?.textures[uuid] else {
-                promise(.failure(TextureRepositoryError.failedToLoadTexture))
-                return
-            }
-            promise(.success(.init(uuid: uuid, texture: texture)))
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func getTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         let publishers = uuids.map { uuid in
             Future<TextureRepositoryEntity, Error> { [weak self] promise in
-                guard let texture = self?.textures[uuid] else {
+                guard let texture = self?.textures[uuid], let device = self?.device else {
                     promise(.failure(TextureRepositoryError.failedToLoadTexture))
                     return
                 }
-                promise(.success(.init(uuid: uuid, texture: texture)))
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
+                promise(.success(.init(uuid: uuid, texture: newTexture)))
             }
             .eraseToAnyPublisher()
         }
@@ -190,8 +183,12 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            if let texture {
-                self?.textures[uuid] = texture
+            if let texture, let device = self?.device {
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
+                self?.textures[uuid] = newTexture
 
                 promise(.success(uuid))
             } else {
