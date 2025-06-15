@@ -72,9 +72,13 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
     override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            if let texture {
-                self?.textures[uuid] = texture
-                self?.setThumbnail(texture: texture, for: uuid)
+            if let texture, let device = self?.device {
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
+                self?.textures[uuid] = newTexture
+                self?.setThumbnail(texture: newTexture, for: uuid)
 
                 promise(.success(uuid))
             } else {

@@ -156,12 +156,13 @@ final class CanvasViewModel {
                 self?.drawingTextureSet?.updateRealTimeDrawingTexture(
                     singleCurveIterator: singleCurveIterator,
                     baseTexture: texture,
-                    with: commandBuffer
-                ) { [weak self] in
-                    commandBuffer.addCompletedHandler { [weak self] _ in
-                        self?.updateLocalRepositoryTexture(texture: texture, for: selectedLayerId)
+                    with: commandBuffer,
+                    onDrawingCompleted: {
+                        commandBuffer.addCompletedHandler { [weak self] _ in
+                            self?.updateLocalTextureLayerRepository(texture: texture, for: selectedLayerId)
+                        }
                     }
-                }
+                )
             }
             .store(in: &cancellables)
 
@@ -512,7 +513,7 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    private func updateLocalRepositoryTexture(texture: MTLTexture, for selectedTextureId: UUID) {
+    private func updateLocalTextureLayerRepository(texture: MTLTexture, for selectedTextureId: UUID) {
         textureLayerRepository.updateTexture(
             texture: texture,
             for: selectedTextureId

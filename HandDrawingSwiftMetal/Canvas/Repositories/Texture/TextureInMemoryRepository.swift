@@ -179,8 +179,12 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            if let texture {
-                self?.textures[uuid] = texture
+            if let texture, let device = self?.device {
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
+                self?.textures[uuid] = newTexture
 
                 promise(.success(uuid))
             } else {
