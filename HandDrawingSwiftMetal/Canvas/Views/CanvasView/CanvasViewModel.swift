@@ -42,14 +42,14 @@ final class CanvasViewModel {
         viewConfigureRequestSubject.eraseToAnyPublisher()
     }
 
+    /// A publisher that emits `CanvasConfiguration` when initializing the canvas
+    var canvasInitializeRequestPublisher: AnyPublisher<CanvasConfiguration, Never> {
+        canvasInitializeRequestSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits `Void` when the canvas view setup is completed
     var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
-    }
-
-    /// A publisher that emits when refreshing the canvas is needed
-    var canvasInitializeRequestPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializeRequestSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits when updating the undo button state is needed.
@@ -69,7 +69,7 @@ final class CanvasViewModel {
     private let canvasState: CanvasState = .init(
         CanvasConfiguration()
     )
-    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `DocumentsDirectoryTextureRepository`
+    /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
     /// Handles input from finger touches
@@ -94,8 +94,10 @@ final class CanvasViewModel {
 
     private let transformer = CanvasTransformer()
 
+    /// Manages input from pen and finger
     private let inputDevice = CanvasInputDeviceStatus()
 
+    /// Manages on-screen gestures such as drag and pinch
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
     private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
@@ -106,9 +108,9 @@ final class CanvasViewModel {
 
     private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
-
     private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
+
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
     private let canvasInitializeRequestSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
@@ -116,8 +118,10 @@ final class CanvasViewModel {
 
     private let needsRedoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
+    /// A repository for loading and saving local files
     private var localRepository: LocalRepository!
 
+    /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
 
     private var cancellables = Set<AnyCancellable>()

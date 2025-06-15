@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-/// A class that combines `TextureRepository` textures and renders them on the canvas using `MTLRenderer`
+/// A class that renders textures from `TextureRepository` onto the canvas
 final class CanvasRenderer: ObservableObject {
 
     var frameSize: CGSize = .zero
@@ -177,7 +177,6 @@ extension CanvasRenderer {
         updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    /// Updates the canvas
     func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
