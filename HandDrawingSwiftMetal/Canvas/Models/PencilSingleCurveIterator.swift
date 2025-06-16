@@ -31,6 +31,12 @@ final class PencilSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveI
 
     private var hasFirstCurveBeenCreated: Bool = false
 
+    // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
+    // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
+    static func shouldCreateInstance(actualTouches: Set<UITouch>) -> Bool {
+        actualTouches.contains(where: { $0.phase == .began })
+    }
+
     func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase

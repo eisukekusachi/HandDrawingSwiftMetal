@@ -33,6 +33,11 @@ final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveI
 
     private var hasFirstCurveBeenCreated: Bool = false
 
+    /// Returns true if `singleCurveIterator` is nil
+    static func shouldCreateInstance(singleCurveIterator: SingleCurveIterator?) -> Bool {
+        singleCurveIterator == nil
+    }
+
     func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
