@@ -348,7 +348,7 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch screenTouchGesture.update(fingerStroke.touchArrayDictionary) {
         case .drawing:
-            if shouldCreateFingerSingleCurveIteratorInstance() {
+            if FingerSingleCurveIterator.shouldCreateInstance(singleCurveIterator: singleCurveIterator) {
                 singleCurveIterator = FingerSingleCurveIterator()
             }
 
@@ -391,7 +391,7 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        if shouldCreatePencilSingleCurveIteratorInstance(actualTouches: actualTouches) {
+        if PencilSingleCurveIterator.shouldCreateInstance(actualTouches: actualTouches) {
             singleCurveIterator = PencilSingleCurveIterator()
         }
 
@@ -489,16 +489,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
-    // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
-    private func shouldCreatePencilSingleCurveIteratorInstance(actualTouches: Set<UITouch>) -> Bool {
-        actualTouches.contains(where: { $0.phase == .began })
-    }
-
-    // Set a new `FingerSingleCurveIterator` if `singleCurveIterator` is nil.
-    private func shouldCreateFingerSingleCurveIteratorInstance() -> Bool {
-        singleCurveIterator == nil
-    }
 
     private func cancelFingerDrawing() {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
