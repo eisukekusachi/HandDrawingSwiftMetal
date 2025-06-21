@@ -203,17 +203,23 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            if let texture, let device = self?.device {
-                let newTexture = MTLTextureCreator.duplicateTexture(
-                    texture: texture,
-                    with: device
-                )
-                self?.textures[uuid] = newTexture
-
-                promise(.success(uuid))
-            } else {
-                promise(.failure(TextureRepositoryError.failedToAddTexture))
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
             }
+
+            guard self.textures[uuid] != nil else {
+                promise(.failure(TextureRepositoryError.fileNotFound))
+                return
+            }
+
+            let newTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                with: self.device
+            )
+            self.textures[uuid] = newTexture
+
+            promise(.success(uuid))
         }
         .eraseToAnyPublisher()
     }

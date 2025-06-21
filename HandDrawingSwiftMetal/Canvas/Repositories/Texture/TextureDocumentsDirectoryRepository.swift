@@ -278,23 +278,26 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            guard
-                let `self`,
-                let texture
+            guard let `self`, let texture
             else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
-            do {
-                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
+            guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                promise(.failure(TextureRepositoryError.fileNotFound))
+                return
+            }
+
+            do {
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL
                 )
-
                 promise(.success(uuid))
+
             } catch {
                 Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
                 promise(.failure(FileOutputError.failedToUpdateTexture))

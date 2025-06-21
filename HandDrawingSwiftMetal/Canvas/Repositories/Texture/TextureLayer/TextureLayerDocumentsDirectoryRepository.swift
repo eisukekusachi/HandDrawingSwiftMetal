@@ -128,17 +128,19 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     /// Updates an existing texture for UUID
     override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            guard
-                let `self`,
-                let texture
-            else {
+            guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
-            do {
-                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
+            guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                promise(.failure(TextureRepositoryError.fileNotFound))
+                return
+            }
+
+            do {
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL

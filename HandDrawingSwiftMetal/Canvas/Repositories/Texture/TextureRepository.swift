@@ -67,4 +67,5 @@ enum TextureRepositoryError: Error {
     case repositoryDeinitialized
     case repositoryUnavailable
     case fileAlreadyExists
+    case fileNotFound
 }
