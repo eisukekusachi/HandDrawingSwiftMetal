@@ -27,11 +27,16 @@ protocol TextureRepository {
     /// Whether this repository has been initialized
     var isInitialized: Bool { get }
 
-    /// Initializes the storage
+    /// Initializes the texture storage and setting the texture size
     func initializeStorage(from configuration: CanvasConfiguration)
 
-    /// Initializes the storage with a new texture
+    /// Initializes the texture storage with a new texture and setting the texture size
     func initializeStorageWithNewTexture(_ textureSize: CGSize)
+
+    /// Initializes the texture storage by loading textures from the source URL and setting the texture size
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
+
+    func setTextureSize(_ size: CGSize)
 
     /// Adds a texture using UUID
     func addTexture(_ texture: MTLTexture?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error>
@@ -47,9 +52,6 @@ protocol TextureRepository {
 
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
-
-    /// Updates all textures for the given uuids using a directory URL
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>

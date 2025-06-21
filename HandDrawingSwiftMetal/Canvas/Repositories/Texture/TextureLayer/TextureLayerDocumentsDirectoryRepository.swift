@@ -32,6 +32,45 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    override func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            // Delete all files
+            self.resetDirectory(&self.directoryUrl)
+
+            do {
+                try uuids.forEach { uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    if let hexadecimalData = textureData.encodedHexadecimals,
+                       let newTexture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: self.device
+                       ) {
+                        try FileOutputManager.saveTextureAsData(
+                            bytes: newTexture.bytes,
+                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
+                        )
+
+                        self.textureIds.insert(uuid)
+                        self.setThumbnail(texture: newTexture, for: uuid)
+                    }
+                }
+
+                self.setTextureSize(textureSize)
+
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
     override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
@@ -85,42 +124,6 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             thumbnails.removeValue(forKey: uuid)
 
             promise(.success(uuid))
-        }
-        .eraseToAnyPublisher()
-    }
-
-    override func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            // Delete all files
-            self.resetDirectory(&self.directoryUrl)
-
-            do {
-                try uuids.forEach { uuid in
-                    let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    if let hexadecimalData = textureData.encodedHexadecimals,
-                       let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: self.device
-                       ) {
-                        try FileOutputManager.saveTextureAsData(
-                            bytes: texture.bytes,
-                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
-                        )
-
-                        self.textureIds.insert(uuid)
-                        self.setThumbnail(texture: texture, for: uuid)
-                    }
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
         }
         .eraseToAnyPublisher()
     }

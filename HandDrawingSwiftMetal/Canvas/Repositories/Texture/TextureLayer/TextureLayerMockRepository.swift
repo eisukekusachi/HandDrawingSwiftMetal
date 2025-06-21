@@ -37,10 +37,18 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     var isInitialized: Bool = false
 
-    func initializeStorage(from configuration: CanvasConfiguration) {}
+    func setTextureSize(_ size: CGSize) {}
 
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Just(true)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func initializeStorage(from configuration: CanvasConfiguration) {}
+
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
@@ -73,12 +81,6 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
         return Just([])
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

@@ -31,33 +31,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
-    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
-        Future { [weak self] promise in
-            guard let `self`, let texture else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            guard self.textures[uuid] == nil else {
-                promise(.failure(TextureRepositoryError.fileAlreadyExists))
-                return
-            }
-
-            self.textures[uuid] = texture
-            self.setThumbnail(texture: texture, for: uuid)
-
-            promise(.success(.init(uuid: uuid, texture: texture)))
-        }
-        .eraseToAnyPublisher()
-    }
-
-    override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        textures.removeValue(forKey: uuid)
-        thumbnails.removeValue(forKey: uuid)
-        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
-
-    override func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+    override func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
             do {
                 // Delete all data
@@ -88,6 +62,32 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
             }
         }
         .eraseToAnyPublisher()
+    }
+
+    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        Future { [weak self] promise in
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            guard self.textures[uuid] == nil else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            promise(.success(.init(uuid: uuid, texture: texture)))
+        }
+        .eraseToAnyPublisher()
+    }
+
+    override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        textures.removeValue(forKey: uuid)
+        thumbnails.removeValue(forKey: uuid)
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
     override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

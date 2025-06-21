@@ -46,6 +46,8 @@ final class MockTextureRepository: TextureRepository {
         self.textures = textures
     }
 
+    func setTextureSize(_ size: CGSize) {}
+
     func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
         callHistory.append("resolveCanvasView(from: \(configuration), drawableSize: \(drawableSize))")
     }
@@ -74,6 +76,12 @@ final class MockTextureRepository: TextureRepository {
 
     func initializeStorage(from configuration: HandDrawingSwiftMetal.CanvasConfiguration) {
 
+    }
+
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
     func copyTexture(uuid: UUID) -> AnyPublisher<HandDrawingSwiftMetal.TextureRepositoryEntity, any Error> {
@@ -118,12 +126,6 @@ final class MockTextureRepository: TextureRepository {
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
         return Just(uuid)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, any Error> {
-        return Just(())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

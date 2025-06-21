@@ -43,6 +43,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.initializeStorageWithNewTexture(textureSize)
     }
 
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        repository.initializeStorage(uuids: uuids, textureSize: textureSize, from: sourceURL)
+    }
+
+    func setTextureSize(_ size: CGSize) {}
+
     func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
         repository.addTexture(texture, using: uuid)
     }
@@ -65,10 +71,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.updateTexture(texture: texture, for: uuid)
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        repository.updateAllTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
     }
 
 }

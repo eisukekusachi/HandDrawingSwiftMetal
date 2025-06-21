@@ -61,8 +61,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         )
     }
 
-    /// Attempts to restore layers from a given `CanvasConfiguration`
-    /// If that is invalid, creates a new texture and initializes the canvas with it
     func initializeStorage(from configuration: CanvasConfiguration) {
         hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
@@ -75,7 +73,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
                 if allExist {
                     // Set `_textureSize` after the initialization of this repository is completed
-                    self._textureSize = configuration.textureSize ?? .zero
+                    self.setTextureSize(configuration.textureSize ?? .zero)
 
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
@@ -109,13 +107,54 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             }
         }, receiveValue: { [weak self] in
             // Set `_textureSize` after the initialization of this repository is completed
-            self?._textureSize = textureSize
+            self?.setTextureSize(textureSize)
 
             self?.storageInitializationCompletedSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })
         .store(in: &cancellables)
+    }
+
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            // Delete all data
+            self.removeAll()
+
+            do {
+                try uuids.forEach { [weak self] uuid in
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    guard
+                        let device = self?.device,
+                        let hexadecimalData = textureData.encodedHexadecimals
+                    else { return }
+
+                    let texture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: device
+                    )
+
+                    self?.textures[uuid] = texture
+                }
+
+                self.setTextureSize(textureSize)
+
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func setTextureSize(_ size: CGSize) {
+        _textureSize = size
     }
 
     func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
@@ -167,38 +206,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         textures.removeValue(forKey: uuid)
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            do {
-                // Delete all data
-                self?.removeAll()
-
-                try uuids.forEach { [weak self] uuid in
-                    let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    guard
-                        let device = self?.device,
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
-
-                    let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: device
-                    )
-
-                    self?.textures[uuid] = texture
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {

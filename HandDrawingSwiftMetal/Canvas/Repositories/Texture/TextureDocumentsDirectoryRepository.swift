@@ -91,7 +91,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                     self.textureIds = Set(configuration.layers.map { $0.id })
 
                     // Set `_textureSize` after the initialization of this repository is completed
-                    self._textureSize = configuration.textureSize ?? .zero
+                    self.setTextureSize(configuration.textureSize ?? .zero)
 
                     self.storageInitializationCompletedSubject.send(configuration)
                 } else {
@@ -125,13 +125,59 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             }
         }, receiveValue: { [weak self] in
             // Set `_textureSize` after the initialization of this repository is completed
-            self?._textureSize = textureSize
+            self?.setTextureSize(textureSize)
 
             self?.storageInitializationCompletedSubject.send(
                 .init(textureSize: textureSize, layers: [layer])
             )
         })
         .store(in: &cancellables)
+    }
+
+    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard let `self` else { return }
+
+            // Delete all files
+            self.resetDirectory(&self.directoryUrl)
+
+            do {
+                try uuids.forEach { [weak self] uuid in
+                    guard let `self` else { return }
+
+                    let textureData = try Data(
+                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    guard
+                        let hexadecimalData = textureData.encodedHexadecimals,
+                        let newTexture = MTLTextureCreator.makeTexture(
+                            size: textureSize,
+                            colorArray: hexadecimalData,
+                            with: self.device
+                        )
+                    else { return }
+
+                    try FileOutputManager.saveTextureAsData(
+                        bytes: newTexture.bytes,
+                        to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textureIds.insert(uuid)
+                }
+
+                self.setTextureSize(textureSize)
+
+                promise(.success(()))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func setTextureSize(_ size: CGSize) {
+        _textureSize = size
     }
 
     func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
@@ -238,41 +284,6 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         } catch {
             Logger.standard.error("Failed to reset texture storage directory: \(error)")
         }
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            // Delete all files
-            self.resetDirectory(&self.directoryUrl)
-
-            do {
-                try uuids.forEach { uuid in
-                    let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    if let hexadecimalData = textureData.encodedHexadecimals,
-                       let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: self.device
-                       ) {
-                        try FileOutputManager.saveTextureAsData(
-                            bytes: texture.bytes,
-                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
-                        )
-
-                        self.textureIds.insert(uuid)
-                    }
-                }
-                promise(.success(()))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
     }
 
     /// Updates an existing texture for UUID
