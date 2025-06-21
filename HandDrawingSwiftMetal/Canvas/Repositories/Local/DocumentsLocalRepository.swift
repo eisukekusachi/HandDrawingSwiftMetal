@@ -160,8 +160,7 @@ extension DocumentsLocalRepository {
         to url: URL
     ) -> AnyPublisher<Void, Error> {
         textureRepository.copyTextures(
-            uuids: textureIds,
-            textureSize: textureSize
+            uuids: textureIds
         )
             .tryMap { results in
                 guard results.count == textureIds.count else {

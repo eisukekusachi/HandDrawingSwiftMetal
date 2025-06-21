@@ -43,8 +43,12 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.initializeStorageWithNewTexture(textureSize)
     }
 
-    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
-        repository.copyTextures(uuids: uuids, textureSize: textureSize)
+    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        repository.copyTexture(uuid: uuid)
+    }
+
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        repository.copyTextures(uuids: uuids)
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

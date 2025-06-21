@@ -212,8 +212,7 @@ extension CanvasRenderer {
 
         // Copy textures from the repository
         return textureRepository.copyTextures(
-            uuids: layers.map { $0.id },
-            textureSize: destinationTexture.size
+            uuids: layers.map { $0.id }
         )
         .map { [weak self] results in
             for layer in layers {

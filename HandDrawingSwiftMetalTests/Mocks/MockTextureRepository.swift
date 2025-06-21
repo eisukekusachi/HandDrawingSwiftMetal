@@ -76,8 +76,14 @@ final class MockTextureRepository: TextureRepository {
 
     }
 
-    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
-        return Just(uuids.map { uuid in .init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)) })
+    func copyTexture(uuid: UUID) -> AnyPublisher<HandDrawingSwiftMetal.TextureRepositoryEntity, any Error> {
+        Just(.init(uuid: UUID()))
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        Just(uuids.map { uuid in .init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)) })
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

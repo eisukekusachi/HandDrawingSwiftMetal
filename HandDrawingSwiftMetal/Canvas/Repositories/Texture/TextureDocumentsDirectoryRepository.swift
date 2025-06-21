@@ -134,34 +134,36 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
-    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
-        let publishers = uuids.map { uuid in
-            Future<TextureRepositoryEntity, Error> { [weak self] promise in
-                guard let `self` else { return }
+    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        Future<TextureRepositoryEntity, Error> { [weak self] promise in
+            guard let `self` else { return }
 
-                let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
-                do {
-                    let newTexture: MTLTexture? = try FileInputManager.loadTexture(
-                        url: destinationUrl,
-                        textureSize: textureSize,
-                        device: self.device
+            do {
+                let newTexture: MTLTexture? = try FileInputManager.loadTexture(
+                    url: destinationUrl,
+                    textureSize: self.textureSize,
+                    device: self.device
+                )
+                promise(
+                    .success(
+                        .init(uuid: uuid, texture: newTexture)
                     )
-                    promise(
-                        .success(
-                            .init(uuid: uuid, texture: newTexture)
-                        )
-                    )
-                } catch {
-                    promise(.failure(error))
-                }
+                )
+            } catch {
+                promise(.failure(error))
             }
-            .eraseToAnyPublisher()
         }
+        .eraseToAnyPublisher()
+    }
 
-        return Publishers.MergeMany(publishers)
-            .collect()
-            .eraseToAnyPublisher()
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        Publishers.MergeMany(
+            uuids.map { copyTexture(uuid: $0) }
+        )
+        .collect()
+        .eraseToAnyPublisher()
     }
 
     /// Deletes all files within the directory and clears texture ID data
