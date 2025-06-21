@@ -31,6 +31,21 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
+    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        Future { [weak self] promise in
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            promise(.success(.init(uuid: uuid, texture: texture)))
+        }
+        .eraseToAnyPublisher()
+    }
+
     override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
         textures.removeValue(forKey: uuid)
         thumbnails.removeValue(forKey: uuid)

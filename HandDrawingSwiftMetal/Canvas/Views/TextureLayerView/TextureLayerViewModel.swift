@@ -88,28 +88,25 @@ extension TextureLayerViewModel {
     }
 
     func insertLayer(textureSize: CGSize, at index: Int) {
+        let newTextureLayer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate())
+        let newTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
-        let device = self.device
+        textureLayerRepository
+            .addTexture(newTexture, using: newTextureLayer.id)
+            .sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: break
+                    case .failure: break
+                    }
+                },
+                receiveValue: { [weak self] result in
+                    guard let `self` else { return }
 
-        addNewLayerPublisher(at: index)
-            .flatMap { [weak self] textureLayerId -> AnyPublisher<UUID, Error> in
-                guard let `self` else {
-                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                    self.canvasState.addLayer(textureLayer: newTextureLayer, at: index)
+                    self.canvasState.fullCanvasUpdateSubject.send(())
                 }
-                return self.textureLayerRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-                    for: textureLayerId
-                )
-            }
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] newLayerTextureId in
-                self?.canvasState.selectedLayerId = newLayerTextureId
-                self?.canvasState.fullCanvasUpdateSubject.send(())
-            })
+            )
             .store(in: &cancellables)
     }
 

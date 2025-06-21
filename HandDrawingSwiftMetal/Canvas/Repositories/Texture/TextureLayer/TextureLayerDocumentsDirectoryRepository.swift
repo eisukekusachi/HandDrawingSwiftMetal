@@ -32,6 +32,33 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        Future { [weak self] promise in
+
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            do {
+                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
+                try FileOutputManager.saveTextureAsData(
+                    bytes: texture.bytes,
+                    to: fileURL
+                )
+                self.setThumbnail(texture: texture, for: uuid)
+
+                promise(.success(.init(uuid: uuid, texture: texture)))
+
+            } catch {
+                Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
+                promise(.failure(FileOutputError.failedToUpdateTexture))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
     /// Deletes all files within the directory and clears texture ID data and the thumbnails
     override func removeAll() {
         try? FileManager.clearContents(of: directoryUrl)
