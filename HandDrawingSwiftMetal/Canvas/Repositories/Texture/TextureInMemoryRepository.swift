@@ -62,7 +62,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
     }
 
     func initializeStorage(from configuration: CanvasConfiguration) {
-        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
+        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -249,7 +249,8 @@ extension TextureInMemoryRepository {
         .eraseToAnyPublisher()
     }
 
-    private func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
+    /// Checks whether the current storage directory contains the given set of file names
+    private func isStorageSynchronized(with fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
             guard let `self` else { return }
 

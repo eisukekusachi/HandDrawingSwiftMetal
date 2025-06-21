@@ -77,7 +77,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     func initializeStorage(from configuration: CanvasConfiguration) {
-        hasAllTextures(fileNames: configuration.layers.map { $0.fileName })
+        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished: break
@@ -361,7 +361,8 @@ extension TextureDocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
-    private func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
+    /// Checks whether the current storage directory contains the given set of file names
+    private func isStorageSynchronized(with fileNames: [String]) -> AnyPublisher<Bool, Error> {
         Future<Bool, Error> { [weak self] promise in
             guard let `self` else { return }
 

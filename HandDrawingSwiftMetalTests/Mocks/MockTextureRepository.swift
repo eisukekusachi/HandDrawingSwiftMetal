@@ -48,12 +48,6 @@ final class MockTextureRepository: TextureRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
-        return Just(true)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func initializeStorageWithNewTexture(_ textureSize: CGSize) {
         callHistory.append("initializeStorageWithNewTexture(\(textureSize)")
     }

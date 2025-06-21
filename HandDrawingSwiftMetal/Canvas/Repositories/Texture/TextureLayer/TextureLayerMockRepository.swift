@@ -39,12 +39,6 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
-        Just(true)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func initializeStorage(from configuration: CanvasConfiguration) {}
 
     func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
