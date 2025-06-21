@@ -84,6 +84,12 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<HandDrawingSwiftMetal.TextureRepositoryEntity, any Error> {
+        callHistory.append("addTexture(\(uuid))")
+        return Just(.init(uuid: UUID())).setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<HandDrawingSwiftMetal.TextureRepositoryEntity, any Error> {
         Just(.init(uuid: UUID()))
             .setFailureType(to: Error.self)
