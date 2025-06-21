@@ -111,13 +111,12 @@ final class DocumentsLocalRepository: LocalRepository {
         }
         .flatMap { configuration -> AnyPublisher<CanvasConfiguration, Error> in
             guard let textureSize = configuration.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
-                Logger.standard.error("Failed to load texture.")
+                Logger.standard.error("The texture size is too small")
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()
             }
             return textureRepository.initializeStorage(
-                uuids: configuration.layers.map { $0.id },
-                textureSize: textureSize,
+                configuration: configuration,
                 from: URL.tmpFolderURL
             )
             .map { _ in configuration }

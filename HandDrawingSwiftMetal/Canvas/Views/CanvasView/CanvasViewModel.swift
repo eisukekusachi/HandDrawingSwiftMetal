@@ -42,11 +42,6 @@ final class CanvasViewModel {
         viewConfigureRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `CanvasConfiguration` when initializing the canvas
-    var canvasInitializeRequestPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        canvasInitializeRequestSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits `Void` when the canvas view setup is completed
     var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
@@ -111,8 +106,6 @@ final class CanvasViewModel {
     private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
-
-    private let canvasInitializeRequestSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
@@ -234,25 +227,6 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Initialize the texture storage using the specified texture size.
-        textureLayerRepository.storageInitializationWithNewTexturePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                guard let drawableSize = self?.canvasView?.renderTexture?.size else { return }
-                self?.textureLayerRepository.initializeStorageWithNewTexture(
-                    configuration.textureSize ?? drawableSize
-                )
-            }
-            .store(in: &cancellables)
-
-        // Complete the canvas setup after the texture storage is initialized.
-        textureLayerRepository.storageInitializationCompletedPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.completeInitialization(configuration)
-            }
-            .store(in: &cancellables)
-
         transformer.matrixPublisher
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
@@ -263,10 +237,28 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func initialize(using configuration: CanvasConfiguration) {
-        textureLayerRepository.initializeStorage(from: configuration)
+        textureLayerRepository.initialize(from: configuration)
+            .handleEvents(
+                receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
+                receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
+            )
+            .sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: break
+                    case .failure(let error): Logger.standard.error("Initialization failed. Please try restarting the application: \(error)")
+                    }
+                },
+                receiveValue: { [weak self] result in
+                    Task { @MainActor in
+                        self?.completeInitialization(result)
+                    }
+                }
+            )
+            .store(in: &cancellables)
     }
 
-    private func completeInitialization(_ configuration: CanvasConfiguration) {
+    @MainActor private func completeInitialization(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
             let commandBuffer = canvasView?.commandBuffer
@@ -570,7 +562,9 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
             }
         }, receiveValue: { [weak self] configuration in
-            self?.canvasInitializeRequestSubject.send(configuration)
+            Task { @MainActor in
+                self?.completeInitialization(configuration)
+            }
         })
         .store(in: &cancellables)
     }

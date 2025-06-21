@@ -31,32 +31,43 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
-    override func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
+    override func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        Future<CanvasConfiguration, Error> { [weak self] promise in
             do {
                 // Delete all data
                 self?.removeAll()
 
-                try uuids.forEach { [weak self] uuid in
+                guard
+                    let device = self?.device,
+                    let textureSize = configuration.textureSize
+                else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
+
+                try configuration.layers.forEach { [weak self] layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
                     )
 
                     guard
-                        let device = self?.device,
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
+                        let hexadecimalData = textureData.encodedHexadecimals,
+                        let newTexture = MTLTextureCreator.makeTexture(
+                            size: textureSize,
+                            colorArray: hexadecimalData,
+                            with: device
+                        )
+                    else {
+                        throw TextureRepositoryError.failedToUnwrap
+                    }
 
-                    let texture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: device
-                    )
-
-                    self?.textures[uuid] = texture
-                    self?.setThumbnail(texture: texture, for: uuid)
+                    self?.textures[layer.id] = newTexture
+                    self?.setThumbnail(texture: newTexture, for: layer.id)
                 }
-                promise(.success(()))
+
+                // Set the texture size after the initialization of this repository is completed
+                self?.setTextureSize(textureSize)
+
+                promise(.success(configuration))
             } catch {
                 promise(.failure(error))
             }

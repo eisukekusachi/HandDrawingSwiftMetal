@@ -16,13 +16,6 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         self.repository = repository
     }
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.storageInitializationWithNewTexturePublisher
-    }
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.storageInitializationCompletedPublisher
-    }
-
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
         repository.thumbnailUpdateRequestedPublisher
     }
@@ -41,16 +34,20 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initializeStorage(from configuration: CanvasConfiguration) {
-        repository.initializeStorage(from: configuration)
+    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.initialize(from: configuration)
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.initializeStorage(configuration: configuration)
+    }
+
+    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.initializeStorage(configuration: configuration, from: sourceURL)
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
         repository.initializeStorageWithNewTexture(textureSize)
-    }
-
-    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        repository.initializeStorage(uuids: uuids, textureSize: textureSize, from: sourceURL)
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {

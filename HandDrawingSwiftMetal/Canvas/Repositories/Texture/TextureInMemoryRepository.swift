@@ -15,14 +15,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
-
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationCompletedSubject.eraseToAnyPublisher()
-    }
-
     var textureNum: Int {
         textures.count
     }
@@ -33,10 +25,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
     var isInitialized: Bool {
         _textureSize != .zero
     }
-
-    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
-    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let flippedTextureBuffers: MTLTextureBuffers!
 
@@ -61,76 +49,54 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         )
     }
 
-    func initializeStorage(from configuration: CanvasConfiguration) {
-        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
+    /// Attempts to restore layers from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the canvas with it
+    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+        initializeStorage(configuration: configuration)
+            .catch { [weak self] error -> AnyPublisher<CanvasConfiguration, Error> in
+                guard let self else {
+                    return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
                 }
-            }, receiveValue: { [weak self] allExist in
-                guard let `self` else { return }
-
-                if allExist {
-                    // Set `_textureSize` after the initialization of this repository is completed
-                    self.setTextureSize(configuration.textureSize ?? .zero)
-
-                    self.storageInitializationCompletedSubject.send(configuration)
-                } else {
-                    self.storageInitializationWithNewTextureSubject.send(configuration)
-                }
-            })
-            .store(in: &cancellables)
-    }
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
-        guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("Failed to initialize canvas in TextureInMemoryRepository: texture size is too small")
-            return
-        }
-
-        // Delete all files
-        self.removeAll()
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate()
-        )
-
-        createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .sink(receiveCompletion: { completion in
-            switch completion {
-            case .finished: break
-            case .failure: break
+                return self.initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
             }
-        }, receiveValue: { [weak self] in
-            // Set `_textureSize` after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            self?.storageInitializationCompletedSubject.send(
-                .init(textureSize: textureSize, layers: [layer])
-            )
-        })
-        .store(in: &cancellables)
+            .eraseToAnyPublisher()
     }
 
-    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
+            .tryMap { [weak self] allExist in
+                guard let self else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
+
+                guard allExist else {
+                    throw TextureRepositoryError.storageNotSynchronized
+                }
+
+                // Set the texture size after the initialization of this repository is completed
+                self.setTextureSize(configuration.textureSize ?? .zero)
+
+                return configuration
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
             // Delete all data
             self.removeAll()
 
             do {
-                try uuids.forEach { [weak self] uuid in
+                try configuration.layers.forEach { [weak self] layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
                     )
 
                     guard
                         let device = self?.device,
+                        let textureSize = configuration.textureSize,
                         let hexadecimalData = textureData.encodedHexadecimals
                     else { return }
 
@@ -140,15 +106,43 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                         with: device
                     )
 
-                    self?.textures[uuid] = texture
+                    self?.textures[layer.id] = texture
                 }
 
+                // Set the texture size after the initialization of this repository is completed
                 self.setTextureSize(textureSize)
 
-                promise(.success(()))
+                promise(.success(configuration))
             } catch {
                 promise(.failure(error))
             }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("The texture size is too small")
+            return Fail(error: TextureRepositoryError.invalidTextureSize)
+                .eraseToAnyPublisher()
+        }
+
+        // Delete all files
+        self.removeAll()
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate()
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return ( .init(textureSize: textureSize, layers: [layer]))
         }
         .eraseToAnyPublisher()
     }

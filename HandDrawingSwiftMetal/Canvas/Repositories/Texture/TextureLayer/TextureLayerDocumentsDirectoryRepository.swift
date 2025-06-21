@@ -32,38 +32,43 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
-    override func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
+    override func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
             // Delete all files
             self.resetDirectory(&self.directoryUrl)
 
             do {
-                try uuids.forEach { uuid in
+                try configuration.layers.forEach { layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
+                    )
+                    guard
+                        let textureSize = configuration.textureSize,
+                        let hexadecimalData = textureData.encodedHexadecimals,
+                        let newTexture = MTLTextureCreator.makeTexture(
+                            size: textureSize,
+                            colorArray: hexadecimalData,
+                            with: self.device
+                        )
+                    else {
+                        throw TextureRepositoryError.failedToUnwrap
+                    }
+
+                    try FileOutputManager.saveTextureAsData(
+                        bytes: newTexture.bytes,
+                        to: self.directoryUrl.appendingPathComponent(layer.id.uuidString)
                     )
 
-                    if let hexadecimalData = textureData.encodedHexadecimals,
-                       let newTexture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: self.device
-                       ) {
-                        try FileOutputManager.saveTextureAsData(
-                            bytes: newTexture.bytes,
-                            to: self.directoryUrl.appendingPathComponent(uuid.uuidString)
-                        )
-
-                        self.textureIds.insert(uuid)
-                        self.setThumbnail(texture: newTexture, for: uuid)
-                    }
+                    self.textureIds.insert(layer.id)
+                    self.setThumbnail(texture: newTexture, for: layer.id)
                 }
 
+                // Set the texture size after the initialization of this repository is completed
                 self.setTextureSize(textureSize)
 
-                promise(.success(()))
+                promise(.success(configuration))
             } catch {
                 promise(.failure(error))
             }
@@ -86,7 +91,6 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             }
 
             do {
-
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL
@@ -206,7 +210,7 @@ extension TextureLayerDocumentsDirectoryRepository {
 
     private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         guard let texture else {
-            Logger.standard.warning("Failed to create thumbnail for \(uuid)")
+            Logger.standard.warning("Failed to unwrap texture for \(uuid)")
             return
         }
         thumbnails[uuid] = texture.makeThumbnail()

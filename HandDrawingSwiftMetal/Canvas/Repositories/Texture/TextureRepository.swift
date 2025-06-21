@@ -12,12 +12,6 @@ import MetalKit
 /// A protocol that defines a repository for managing textures
 protocol TextureRepository {
 
-    /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
-
-    /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
-
     /// The number of textures currently managed
     var textureNum: Int { get }
 
@@ -27,14 +21,17 @@ protocol TextureRepository {
     /// Whether this repository has been initialized
     var isInitialized: Bool { get }
 
-    /// Initializes the texture storage and setting the texture size
-    func initializeStorage(from configuration: CanvasConfiguration)
+    /// Initializes the storage from the given configuration, falling back to a new texture if that fails
+    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
-    /// Initializes the texture storage with a new texture and setting the texture size
-    func initializeStorageWithNewTexture(_ textureSize: CGSize)
+    /// Initializes the texture storage and setting the texture size
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
-    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
+    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error>
+
+    /// Initializes the texture storage with a new texture and setting the texture size
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error>
 
     func setTextureSize(_ size: CGSize)
 
@@ -70,4 +67,6 @@ enum TextureRepositoryError: Error {
     case repositoryUnavailable
     case fileAlreadyExists
     case fileNotFound
+    case storageNotSynchronized
+    case invalidTextureSize
 }

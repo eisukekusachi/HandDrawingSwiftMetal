@@ -13,21 +13,10 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationWithNewTextureSubject.eraseToAnyPublisher()
-    }
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        storageInitializationCompletedSubject.eraseToAnyPublisher()
-    }
-
     /// Emit `UUID` when the thumbnail is updated
     var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
         thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
     }
-
-    private let storageInitializationWithNewTextureSubject = PassthroughSubject<CanvasConfiguration, Never>()
-
-    private let storageInitializationCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
 
@@ -39,16 +28,28 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initializeStorage(from configuration: CanvasConfiguration) {}
-
-    func initializeStorage(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Just(())
+    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+        Just(.init())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
 
+    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        Just(.init())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        Just(.init())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {

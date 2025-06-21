@@ -20,8 +20,6 @@ final class CanvasState: ObservableObject {
         configuration: CanvasConfiguration()
     )
 
-    /// If `layers` is empty, a new layer is created and added to `layers`
-    /// when `initializeStorage(from:)` is called in `TextureRepository`
     @Published var layers: [TextureLayerModel] = []
 
     @Published var selectedLayerId: UUID?
