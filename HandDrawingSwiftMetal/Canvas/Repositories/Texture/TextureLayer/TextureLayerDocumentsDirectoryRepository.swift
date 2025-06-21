@@ -34,14 +34,19 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
     override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
         Future { [weak self] promise in
-
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
+            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
+            guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
             do {
-                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,

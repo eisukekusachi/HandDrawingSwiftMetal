@@ -136,15 +136,19 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 
     func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
         Future { [weak self] promise in
-
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
-            do {
-                let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
+            guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
+            do {
                 try FileOutputManager.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL

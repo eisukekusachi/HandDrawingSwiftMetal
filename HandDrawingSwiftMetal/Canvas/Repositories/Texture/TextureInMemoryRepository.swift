@@ -125,6 +125,11 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                 return
             }
 
+            guard self.textures[uuid] == nil else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
             self.textures[uuid] = texture
             promise(.success(.init(uuid: uuid, texture: texture)))
         }

@@ -38,6 +38,11 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                 return
             }
 
+            guard self.textures[uuid] == nil else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
             self.textures[uuid] = texture
             self.setThumbnail(texture: texture, for: uuid)
 
