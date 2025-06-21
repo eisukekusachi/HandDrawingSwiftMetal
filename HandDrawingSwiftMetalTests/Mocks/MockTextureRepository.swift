@@ -48,10 +48,6 @@ final class MockTextureRepository: TextureRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func resolveCanvasView(from configuration: CanvasConfiguration, drawableSize: CGSize) {
-        callHistory.append("resolveCanvasView(from: \(configuration), drawableSize: \(drawableSize))")
-    }
-
     func hasAllTextures(fileNames: [String]) -> AnyPublisher<Bool, Error> {
         return Just(true)
             .setFailureType(to: Error.self)
