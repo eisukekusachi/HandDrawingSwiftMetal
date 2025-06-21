@@ -118,6 +118,19 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .store(in: &cancellables)
     }
 
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        Future { [weak self] promise in
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            self.textures[uuid] = texture
+            promise(.success(.init(uuid: uuid, texture: texture)))
+        }
+        .eraseToAnyPublisher()
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
         Future<TextureRepositoryEntity, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid], let device = self?.device else {

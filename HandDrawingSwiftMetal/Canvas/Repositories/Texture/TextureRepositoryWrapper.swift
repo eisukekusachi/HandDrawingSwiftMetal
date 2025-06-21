@@ -43,6 +43,10 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.initializeStorageWithNewTexture(textureSize)
     }
 
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        repository.addTexture(texture, using: uuid)
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
         repository.copyTexture(uuid: uuid)
     }

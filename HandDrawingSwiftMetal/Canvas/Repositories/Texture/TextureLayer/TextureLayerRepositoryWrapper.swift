@@ -51,6 +51,10 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.getThumbnail(uuid)
     }
 
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        repository.addTexture(texture, using: uuid)
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
         repository.copyTexture(uuid: uuid)
     }

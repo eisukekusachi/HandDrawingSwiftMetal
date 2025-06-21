@@ -59,6 +59,12 @@ final class TextureLayerMockRepository: TextureLayerRepository {
         nil
     }
 
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        return Just(.init(uuid: UUID()))
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
         return Just(.init(uuid: UUID()))
             .setFailureType(to: Error.self)
