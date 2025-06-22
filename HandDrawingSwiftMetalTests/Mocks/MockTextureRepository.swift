@@ -36,7 +36,7 @@ final class MockTextureRepository: TextureRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()

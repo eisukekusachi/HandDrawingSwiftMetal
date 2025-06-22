@@ -65,8 +65,8 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
-    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        initializeStorage(configuration: configuration)
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        initializeStorageIfValid(configuration: configuration)
             .catch { [weak self] error -> AnyPublisher<CanvasConfiguration, Error> in
                 guard let self else {
                     return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
@@ -264,7 +264,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 
 extension TextureDocumentsDirectoryRepository {
 
-    private func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+    private func initializeStorageIfValid(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         isStorageSynchronized(at: directoryUrl, expectedFileNames: configuration.layers.map { $0.fileName })
             .tryMap { [weak self] allExist in
                 guard let self else {

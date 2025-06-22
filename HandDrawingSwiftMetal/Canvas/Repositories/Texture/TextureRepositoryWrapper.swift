@@ -28,8 +28,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.isInitialized
     }
 
-    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
-        repository.initialize(from: configuration)
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+        repository.initializeStorage(configuration: configuration)
     }
 
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {

@@ -22,7 +22,7 @@ protocol TextureRepository {
     var isInitialized: Bool { get }
 
     /// Initializes the storage from the given configuration, falling back to a new texture if that fails
-    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error>

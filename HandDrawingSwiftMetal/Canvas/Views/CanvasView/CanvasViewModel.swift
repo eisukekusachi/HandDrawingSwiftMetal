@@ -237,7 +237,7 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func initialize(using configuration: CanvasConfiguration) {
-        textureLayerRepository.initialize(from: configuration)
+        textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
                 receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
                 receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }

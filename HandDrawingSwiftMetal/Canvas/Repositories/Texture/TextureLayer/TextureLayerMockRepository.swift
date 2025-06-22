@@ -28,25 +28,13 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initialize(from configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
