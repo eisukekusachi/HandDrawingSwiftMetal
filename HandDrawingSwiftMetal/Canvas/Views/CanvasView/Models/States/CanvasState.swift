@@ -70,12 +70,3 @@ extension CanvasState {
     }
 
 }
-
-extension CanvasState {
-
-    func addLayer(textureLayer: TextureLayerModel, at index: Int) {
-        layers.insert(textureLayer, at: index)
-        selectedLayerId = textureLayer.id
-    }
-
-}
