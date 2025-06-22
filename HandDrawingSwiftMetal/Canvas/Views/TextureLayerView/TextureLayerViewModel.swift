@@ -238,8 +238,8 @@ extension TextureLayerViewModel {
             .eraseToAnyPublisher()
     }
 
-    private func updateSliderHandlePosition(_ selectedLayerId: UUID) {
-        guard let layer = canvasState.getLayer(selectedLayerId) else { return }
+    private func updateSliderHandlePosition(_ layerId: UUID) {
+        guard let layer = canvasState.layer(layerId) else { return }
         selectedLayerAlpha = layer.alpha
     }
 

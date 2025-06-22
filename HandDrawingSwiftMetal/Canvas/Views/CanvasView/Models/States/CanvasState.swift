@@ -56,7 +56,7 @@ extension CanvasState {
         drawingToolState.currentDrawingTool.diameter
     }
 
-    func getLayer(_ selectedLayerId: UUID) -> TextureLayerModel? {
+    func layer(_ layerId: UUID) -> TextureLayerModel? {
         layers.first(where: { $0.id == selectedLayerId })
     }
 
