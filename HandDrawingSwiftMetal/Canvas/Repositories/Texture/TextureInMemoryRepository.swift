@@ -80,7 +80,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                     )
 
                     guard let hexadecimalData = textureData.encodedHexadecimals else {
-                        throw TextureRepositoryError.failedToLoadTexture
+                        throw TextureRepositoryError.failedToUnwrap
                     }
 
                     guard let newTexture = MTLTextureCreator.makeTexture(

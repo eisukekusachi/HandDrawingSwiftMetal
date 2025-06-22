@@ -53,7 +53,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                     )
 
                     guard let hexadecimalData = textureData.encodedHexadecimals else {
-                        throw TextureRepositoryError.failedToLoadTexture
+                        throw TextureRepositoryError.failedToUnwrap
                     }
 
                     guard let newTexture = MTLTextureCreator.makeTexture(
