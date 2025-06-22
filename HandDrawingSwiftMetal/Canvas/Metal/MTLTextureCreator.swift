@@ -122,12 +122,12 @@ enum MTLTextureCreator {
 
     static func makeBlankTexture(
         label: String? = nil,
-        size: CGSize,
+        size: CGSize = MTLRenderer.minimumTextureSize,
         with device: MTLDevice
     ) -> MTLTexture? {
         guard
-            Int(size.width) > MTLRenderer.threadGroupLength &&
-            Int(size.height) > MTLRenderer.threadGroupLength
+            Int(size.width) >= MTLRenderer.threadGroupLength &&
+            Int(size.height) >= MTLRenderer.threadGroupLength
         else {
             Logger.standard.error("Texture size is below the minimum: \(size.width) \(size.height)")
             return nil

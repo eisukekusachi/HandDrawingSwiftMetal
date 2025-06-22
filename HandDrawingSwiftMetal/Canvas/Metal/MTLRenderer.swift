@@ -90,6 +90,11 @@ final class MTLRenderer: MTLRendering {
 
     static let threadGroupLength: Int = 16
 
+    static let minimumTextureSize: CGSize = .init(
+        width: threadGroupLength,
+        height: threadGroupLength
+    )
+
     private let pipelines = MTLPipelines()
 
     private init() {}
