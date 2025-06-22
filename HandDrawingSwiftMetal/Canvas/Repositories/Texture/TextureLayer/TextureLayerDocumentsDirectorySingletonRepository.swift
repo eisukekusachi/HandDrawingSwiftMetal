@@ -14,7 +14,7 @@ final class TextureLayerDocumentsDirectorySingletonRepository: TextureLayerRepos
     private init() {
         super.init(
             repository: TextureLayerDocumentsDirectoryRepository(
-                targetURL: URL.applicationSupport,
+                storageDirectoryURL: URL.applicationSupport,
                 directoryName: "TextureStorage"
             )
         )
