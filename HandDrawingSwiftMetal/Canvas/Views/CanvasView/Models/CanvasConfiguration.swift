@@ -84,6 +84,15 @@ extension CanvasConfiguration {
         self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
     }
 
+    /// Returns an instance with the provided texture size if it was previously nil
+    func resolvedTextureSize(_ textureSize: CGSize) -> Self {
+        var newInstance = self
+        if newInstance.textureSize == nil {
+            newInstance.textureSize = textureSize
+        }
+        return newInstance
+    }
+
 }
 
 struct CanvasViewControllerConfiguration {

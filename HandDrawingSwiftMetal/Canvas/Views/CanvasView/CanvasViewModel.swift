@@ -318,7 +318,9 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !textureLayerRepository.isInitialized {
-            initialize(using: canvasStateStorage?.coreDataConfiguration ?? configuration)
+            initialize(
+                using: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(drawableTextureSize)
+            )
         }
     }
 
