@@ -15,6 +15,22 @@ final class TextureLayerViewModel: ObservableObject {
 
     @Published var isSliderHandleDragging: Bool = false
 
+    var selectedLayer: TextureLayerModel? {
+        canvasState.selectedLayer
+    }
+
+    var textureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    var newInsertIndex: Int {
+        (canvasState.selectedIndex ?? 0) + 1
+    }
+
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        textureLayerRepository?.thumbnail(uuid)
+    }
+
     @Published private(set) var layers: [TextureLayerModel] = []
 
     @Published private(set) var selectedLayerId: UUID? {
@@ -73,19 +89,8 @@ final class TextureLayerViewModel: ObservableObject {
 
 }
 
+// MARK: CRUD
 extension TextureLayerViewModel {
-
-    var selectedLayer: TextureLayerModel? {
-        canvasState.selectedLayer
-    }
-
-    var selectedIndex: Int? {
-        canvasState.selectedIndex
-    }
-
-    var textureSize: CGSize {
-        canvasState.textureSize
-    }
 
     func insertLayer(textureSize: CGSize, at index: Int) {
         let newTextureLayer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate())
@@ -141,24 +146,6 @@ extension TextureLayerViewModel {
             .store(in: &cancellables)
     }
 
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        textureLayerRepository?.thumbnail(uuid)
-    }
-
-    func selectLayer(_ uuid: UUID) {
-        canvasState.selectedLayerId = uuid
-        canvasState.fullCanvasUpdateSubject.send(())
-    }
-
-}
-
-// MARK: CRUD
-extension TextureLayerViewModel {
-
-    var newInsertIndex: Int {
-        (canvasState.selectedIndex ?? 0) + 1
-    }
-
     /// Sort TextureLayers's `layers` based on the values received from `List`
     func moveLayer(
         fromListOffsets: IndexSet,
@@ -173,6 +160,11 @@ extension TextureLayerViewModel {
         )
         canvasState.layers.reverse()
 
+        canvasState.fullCanvasUpdateSubject.send(())
+    }
+
+    func selectLayer(_ uuid: UUID) {
+        canvasState.selectedLayerId = uuid
         canvasState.fullCanvasUpdateSubject.send(())
     }
 
@@ -203,7 +195,6 @@ extension TextureLayerViewModel {
 
 }
 
-// MARK: Publishers
 extension TextureLayerViewModel {
 
     private func updateSliderHandlePosition(_ layerId: UUID) {
