@@ -182,7 +182,10 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 extension TextureInMemoryRepository {
 
     private func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard textureSize > MTLRenderer.minimumTextureSize else {
+        guard
+            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
+            Int(textureSize.height) > MTLRenderer.threadGroupLength
+        else {
             Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return Fail(error: TextureRepositoryError.invalidTextureSize)
                 .eraseToAnyPublisher()

@@ -110,7 +110,10 @@ final class DocumentsLocalRepository: LocalRepository {
             .eraseToAnyPublisher()
         }
         .flatMap { configuration -> AnyPublisher<CanvasConfiguration, Error> in
-            guard let textureSize = configuration.textureSize, textureSize > MTLRenderer.minimumTextureSize else {
+            guard
+                let textureSize = configuration.textureSize,
+                Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
+            else {
                 Logger.standard.error("Texture size is below the minimum: \(configuration.textureSize?.width ?? 0) \(configuration.textureSize?.height ?? 0)")
                 return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
                     .eraseToAnyPublisher()

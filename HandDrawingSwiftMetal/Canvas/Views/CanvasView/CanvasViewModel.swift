@@ -246,7 +246,7 @@ extension CanvasViewModel {
                 receiveCompletion: { completion in
                     switch completion {
                     case .finished: break
-                    case .failure(let error): Logger.standard.error("Initialization failed. Please try restarting the application: \(error)")
+                    case .failure(let error): Logger.standard.error("Initialization failed. Please set an appropriate texture size and restart the application: \(error)")
                     }
                 },
                 receiveValue: { [weak self] result in
@@ -318,9 +318,7 @@ extension CanvasViewModel {
         drawableTextureSize: CGSize
     ) {
         if !textureLayerRepository.isInitialized {
-            let existingValue = canvasStateStorage?.coreDataConfiguration
-            let defaultValue = configuration.createConfigurationWithValidTextureSize(drawableTextureSize)
-            initialize(using: existingValue ?? defaultValue)
+            initialize(using: canvasStateStorage?.coreDataConfiguration ?? configuration)
         }
     }
 
@@ -417,7 +415,7 @@ extension CanvasViewModel {
     func didTapNewCanvasButton() {
         transformer.setMatrix(.identity)
         initialize(
-            using: CanvasConfiguration().createConfigurationWithValidTextureSize(canvasState.textureSize)
+            using: CanvasConfiguration(textureSize: canvasState.textureSize)
         )
     }
 
