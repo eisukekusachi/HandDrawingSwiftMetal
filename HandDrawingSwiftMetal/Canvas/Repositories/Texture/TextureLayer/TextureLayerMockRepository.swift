@@ -44,7 +44,7 @@ final class TextureLayerMockRepository: TextureLayerRepository {
             .eraseToAnyPublisher()
     }
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
+    func thumbnail(_ uuid: UUID) -> UIImage? {
         nil
     }
 

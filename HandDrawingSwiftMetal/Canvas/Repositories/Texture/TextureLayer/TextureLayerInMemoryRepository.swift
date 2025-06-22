@@ -138,7 +138,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
 extension TextureLayerInMemoryRepository {
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
+    func thumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
 

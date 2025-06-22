@@ -135,8 +135,8 @@ extension TextureLayerViewModel {
             .store(in: &cancellables)
     }
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        textureLayerRepository?.getThumbnail(uuid)
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        textureLayerRepository?.thumbnail(uuid)
     }
 
     func selectLayer(_ uuid: UUID) {

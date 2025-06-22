@@ -71,8 +71,8 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
     
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        callHistory.append("getThumbnail(\(uuid))")
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        callHistory.append("thumbnail(\(uuid))")
         return nil
     }
 

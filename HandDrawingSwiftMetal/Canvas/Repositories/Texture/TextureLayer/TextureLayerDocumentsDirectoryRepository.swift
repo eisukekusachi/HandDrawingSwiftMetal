@@ -181,7 +181,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
 extension TextureLayerDocumentsDirectoryRepository {
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
+    func thumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
 

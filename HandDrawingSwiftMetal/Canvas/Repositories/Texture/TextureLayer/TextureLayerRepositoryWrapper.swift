@@ -42,8 +42,8 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.resetStorage(configuration: configuration, sourceFolderURL: sourceFolderURL)
     }
 
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        repository.getThumbnail(uuid)
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        repository.thumbnail(uuid)
     }
 
     func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
