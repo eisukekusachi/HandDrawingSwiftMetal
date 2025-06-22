@@ -10,9 +10,9 @@ import ZipArchive
 
 enum FileOutputManager {
 
-    static func createDirectory(_ directoryUrl: URL) throws {
+    static func createDirectory(_ url: URL) throws {
         do {
-            try FileManager.createNewDirectory(url: directoryUrl)
+            try FileManager.createNewDirectory(url: url)
         } catch {
             throw FileOutputError.failedToCreateDirectory
         }
