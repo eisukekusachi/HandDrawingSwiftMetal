@@ -40,8 +40,8 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.initializeStorageWithNewTexture(textureSize)
     }
 
-    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.initializeStorage(configuration: configuration, from: sourceURL)
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.resetStorage(configuration: configuration, sourceFolderURL: sourceFolderURL)
     }
 
     func setTextureSize(_ size: CGSize) {}

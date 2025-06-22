@@ -34,7 +34,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
-    override func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
@@ -44,7 +44,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             do {
                 try configuration.layers.forEach { layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
+                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
                     guard
                         let textureSize = configuration.textureSize,

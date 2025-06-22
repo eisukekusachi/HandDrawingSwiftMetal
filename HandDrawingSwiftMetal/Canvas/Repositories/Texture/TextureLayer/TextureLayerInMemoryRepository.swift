@@ -31,7 +31,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
-    override func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             do {
                 // Delete all data
@@ -46,7 +46,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
                 try configuration.layers.forEach { [weak self] layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
+                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
 
                     guard

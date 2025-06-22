@@ -28,7 +28,7 @@ protocol TextureRepository {
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
-    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error>
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error>
 
     /// Initializes the texture storage with a new texture and setting the texture size
     func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error>

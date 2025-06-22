@@ -98,7 +98,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initializeStorage(configuration: CanvasConfiguration, from sourceURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
@@ -110,7 +110,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
                     guard let `self` else { return }
 
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(layer.id.uuidString)
+                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
 
                     guard
