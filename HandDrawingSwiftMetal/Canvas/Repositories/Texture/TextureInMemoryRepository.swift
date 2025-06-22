@@ -122,7 +122,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
         guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("The texture size is too small")
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return Fail(error: TextureRepositoryError.invalidTextureSize)
                 .eraseToAnyPublisher()
         }
