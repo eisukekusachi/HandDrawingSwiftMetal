@@ -83,7 +83,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                         throw TextureRepositoryError.failedToLoadTexture
                     }
 
-                    guard let texture = MTLTextureCreator.makeTexture(
+                    guard let newTexture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
                         with: self.device
@@ -91,7 +91,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                         throw TextureRepositoryError.failedToLoadTexture
                     }
 
-                    newTextures[layer.id] = texture
+                    newTextures[layer.id] = newTexture
                 }
 
                 // If all succeeded, apply the new state

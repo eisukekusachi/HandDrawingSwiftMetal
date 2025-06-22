@@ -36,39 +36,45 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
     override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
-            do {
-                // Delete all data
-                self?.removeAll()
+            guard let self else { return }
 
-                guard
-                    let device = self?.device,
-                    let textureSize = configuration.textureSize
-                else {
-                    throw TextureRepositoryError.failedToUnwrap
+            do {
+                // Temporary dictionary to hold new textures before applying
+                var newTextures: [UUID: MTLTexture] = [:]
+                var newThumbnails: [UUID: UIImage?] = [:]
+
+                guard let textureSize = configuration.textureSize else {
+                    throw TextureRepositoryError.invalidTextureSize
                 }
 
-                try configuration.layers.forEach { [weak self] layer in
+                try configuration.layers.forEach { layer in
                     let textureData = try Data(
                         contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
 
-                    guard
-                        let hexadecimalData = textureData.encodedHexadecimals,
-                        let newTexture = MTLTextureCreator.makeTexture(
-                            size: textureSize,
-                            colorArray: hexadecimalData,
-                            with: device
-                        )
-                    else {
-                        throw TextureRepositoryError.failedToUnwrap
+                    guard let hexadecimalData = textureData.encodedHexadecimals else {
+                        throw TextureRepositoryError.failedToLoadTexture
                     }
 
-                    self?.textures[layer.id] = newTexture
-                    self?.setThumbnail(texture: newTexture, for: layer.id)
+                    guard let newTexture = MTLTextureCreator.makeTexture(
+                        size: textureSize,
+                        colorArray: hexadecimalData,
+                        with: self.device
+                    ) else {
+                        throw TextureRepositoryError.failedToLoadTexture
+                    }
+
+                    newTextures[layer.id] = newTexture
+                    newThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
 
-                // Set the texture size after the initialization of this repository is completed
-                self?.setTextureSize(textureSize)
+                // If all succeeded, apply the new state
+                self.removeAll()
+
+                self.textures = newTextures
+                self.thumbnails = newThumbnails
+
+                self.setTextureSize(textureSize)
 
                 promise(.success(configuration))
             } catch {
