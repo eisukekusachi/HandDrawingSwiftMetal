@@ -279,7 +279,7 @@ extension TextureDocumentsDirectoryRepository {
                 }
 
                 guard allExist else {
-                    throw TextureRepositoryError.storageNotSynchronized
+                    throw TextureDocumentsDirectoryRepositoryError.storageNotSynchronized
                 }
 
                 // Retain IDs if texture filenames match the configuration
@@ -380,4 +380,8 @@ extension TextureDocumentsDirectoryRepository {
         }
         .eraseToAnyPublisher()
     }
+}
+
+enum TextureDocumentsDirectoryRepositoryError: Error {
+    case storageNotSynchronized
 }
