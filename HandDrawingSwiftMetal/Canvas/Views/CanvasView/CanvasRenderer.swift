@@ -50,7 +50,14 @@ final class CanvasRenderer: ObservableObject {
 
     func initTextures(textureSize: CGSize) {
         guard
-            textureSize >= MTLRenderer.minimumTextureSize,
+            Int(textureSize.width) >= MTLRenderer.threadGroupLength &&
+            Int(textureSize.height) >= MTLRenderer.threadGroupLength
+        else {
+            assert(false, "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return
+        }
+
+        guard
             let unselectedBottomTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
             let selectedTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
             let unselectedTopTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
@@ -212,8 +219,7 @@ extension CanvasRenderer {
 
         // Copy textures from the repository
         return textureRepository.copyTextures(
-            uuids: layers.map { $0.id },
-            textureSize: destinationTexture.size
+            uuids: layers.map { $0.id }
         )
         .map { [weak self] results in
             for layer in layers {

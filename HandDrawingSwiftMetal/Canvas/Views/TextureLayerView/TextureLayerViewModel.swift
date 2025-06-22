@@ -15,6 +15,22 @@ final class TextureLayerViewModel: ObservableObject {
 
     @Published var isSliderHandleDragging: Bool = false
 
+    var selectedLayer: TextureLayerModel? {
+        canvasState.selectedLayer
+    }
+
+    var textureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    var newInsertIndex: Int {
+        (canvasState.selectedIndex ?? 0) + 1
+    }
+
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        textureLayerRepository?.thumbnail(uuid)
+    }
+
     @Published private(set) var layers: [TextureLayerModel] = []
 
     @Published private(set) var selectedLayerId: UUID? {
@@ -46,9 +62,9 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
 
-        textureLayerRepository.thumbnailUpdateRequestedPublisher
+        textureLayerRepository.objectWillChangePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
@@ -73,104 +89,61 @@ final class TextureLayerViewModel: ObservableObject {
 
 }
 
+// MARK: CRUD
 extension TextureLayerViewModel {
 
-    var selectedLayer: TextureLayerModel? {
-        canvasState.selectedLayer
-    }
-
-    var selectedIndex: Int? {
-        canvasState.selectedIndex
-    }
-
-    var textureSize: CGSize {
-        canvasState.textureSize
-    }
-
     func insertLayer(textureSize: CGSize, at index: Int) {
+        let newTextureLayer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate())
+        let newTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
 
-        let device = self.device
+        textureLayerRepository
+            .addTexture(newTexture, using: newTextureLayer.id)
+            .sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: break
+                    case .failure: break
+                    }
+                },
+                receiveValue: { [weak self] result in
+                    guard let `self` else { return }
 
-        addNewLayerPublisher(at: index)
-            .flatMap { [weak self] textureLayerId -> AnyPublisher<UUID, Error> in
-                guard let `self` else {
-                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+                    self.canvasState.layers.insert(newTextureLayer, at: index)
+                    self.canvasState.selectedLayerId = newTextureLayer.id
+
+                    self.canvasState.fullCanvasUpdateSubject.send(())
                 }
-                return self.textureLayerRepository.updateTexture(
-                    texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-                    for: textureLayerId
-                )
-            }
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] newLayerTextureId in
-                self?.canvasState.selectedLayerId = newLayerTextureId
-                self?.canvasState.fullCanvasUpdateSubject.send(())
-            })
+            )
             .store(in: &cancellables)
     }
 
     func removeLayer() {
         guard
-            let selectedIndex = canvasState.selectedIndex
+            let selectedIndex = canvasState.selectedIndex,
+            canvasState.layers.count > 1, canvasState.layers.indices.contains(selectedIndex)
         else { return }
 
-        removeLayerPublisher(from: selectedIndex)
-            .flatMap { [weak self] removedTextureId -> AnyPublisher<UUID, Error> in
-                guard let `self` else {
-                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
+        let layerId = canvasState.layers[selectedIndex].id
+
+        textureLayerRepository
+            .removeTexture(layerId)
+            .sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: break
+                    case .failure: break
+                    }
+                },
+                receiveValue: { [weak self] _ in
+                    guard let `self` else { return }
+
+                    self.canvasState.layers.remove(at: selectedIndex)
+                    self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
+
+                    self.canvasState.fullCanvasUpdateSubject.send(())
                 }
-                return self.textureLayerRepository.removeTexture(removedTextureId)
-            }
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished: break
-                case .failure: break
-                }
-            }, receiveValue: { [weak self] _ in
-                guard let `self` else { return }
-                self.canvasState.selectedLayerId = self.canvasState.layers[max(selectedIndex - 1, 0)].id
-                self.canvasState.fullCanvasUpdateSubject.send(())
-            })
+            )
             .store(in: &cancellables)
-    }
-
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
-        textureLayerRepository?.getThumbnail(uuid)
-    }
-
-    func selectLayer(_ uuid: UUID) {
-        canvasState.selectedLayerId = uuid
-        canvasState.fullCanvasUpdateSubject.send(())
-    }
-
-}
-
-// MARK: CRUD
-extension TextureLayerViewModel {
-
-    var newInsertIndex: Int {
-        (canvasState.selectedIndex ?? 0) + 1
-    }
-
-    func addLayer(at index: Int) -> UUID? {
-        guard index >= 0 && index <= canvasState.layers.count else { return nil }
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate()
-        )
-        canvasState.layers.insert(layer, at: index)
-        return layer.id
-    }
-    func removeLayer(from index: Int) -> UUID? {
-        guard canvasState.layers.count > 1, canvasState.layers.indices.contains(index) else { return nil }
-
-        let removedLayerId = canvasState.layers[index].id
-        canvasState.layers.remove(at: index)
-        return removedLayerId
     }
 
     /// Sort TextureLayers's `layers` based on the values received from `List`
@@ -187,6 +160,11 @@ extension TextureLayerViewModel {
         )
         canvasState.layers.reverse()
 
+        canvasState.fullCanvasUpdateSubject.send(())
+    }
+
+    func selectLayer(_ uuid: UUID) {
+        canvasState.selectedLayerId = uuid
         canvasState.fullCanvasUpdateSubject.send(())
     }
 
@@ -217,32 +195,10 @@ extension TextureLayerViewModel {
 
 }
 
-// MARK: Publishers
 extension TextureLayerViewModel {
 
-    private func addNewLayerPublisher(at index: Int) -> AnyPublisher<UUID, Error> {
-        Just(index)
-            .tryMap { [weak self] index in
-                guard let newLayerId = self?.addLayer(at: index) else {
-                    throw TextureLayerError.indexOutOfBounds
-                }
-                return newLayerId
-            }
-            .eraseToAnyPublisher()
-    }
-    func removeLayerPublisher(from index: Int) -> AnyPublisher<UUID, Error> {
-        Just(index)
-            .tryMap { [weak self] index in
-                guard let removeLayerId = self?.removeLayer(from: index) else {
-                    throw TextureLayerError.minimumLayerRequired
-                }
-                return removeLayerId
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func updateSliderHandlePosition(_ selectedLayerId: UUID) {
-        guard let layer = canvasState.getLayer(selectedLayerId) else { return }
+    private func updateSliderHandlePosition(_ layerId: UUID) {
+        guard let layer = canvasState.layer(layerId) else { return }
         selectedLayerAlpha = layer.alpha
     }
 

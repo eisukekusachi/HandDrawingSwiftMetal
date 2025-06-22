@@ -12,12 +12,6 @@ import MetalKit
 /// A protocol that defines a repository for managing textures
 protocol TextureRepository {
 
-    /// A publisher that emits to trigger initialization of the storage using `CanvasConfiguration`
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> { get }
-
-    /// A publisher that emits to trigger initialization of the canvas using `CanvasConfiguration`
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> { get }
-
     /// The number of textures currently managed
     var textureNum: Int { get }
 
@@ -27,23 +21,28 @@ protocol TextureRepository {
     /// Whether this repository has been initialized
     var isInitialized: Bool { get }
 
-    /// Initializes the storage
-    func initializeStorage(from configuration: CanvasConfiguration)
+    /// Initializes the storage from the given configuration, falling back to a new texture if that fails
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
-    /// Initializes the storage with a new texture
-    func initializeStorageWithNewTexture(_ textureSize: CGSize)
+    /// Initializes the texture storage by loading textures from the source URL and setting the texture size
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error>
+
+    func setTextureSize(_ size: CGSize)
+
+    /// Adds a texture using UUID
+    func addTexture(_ texture: MTLTexture?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error>
+
+    /// Copies a texture for the given UUID
+    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error>
 
     /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error>
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error>
 
     /// Removes all managed textures
     func removeAll()
 
     /// Removes a texture with UUID
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
-
-    /// Updates all textures for the given uuids using a directory URL
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error>
 
     /// Updates an existing texture for UUID
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
@@ -60,4 +59,7 @@ enum TextureRepositoryError: Error {
     case invalidTexture
     case repositoryDeinitialized
     case repositoryUnavailable
+    case fileAlreadyExists
+    case fileNotFound
+    case invalidTextureSize
 }

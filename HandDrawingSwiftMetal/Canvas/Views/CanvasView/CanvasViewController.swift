@@ -117,13 +117,6 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.canvasInitializeRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.canvasViewModel.initialize(using: configuration)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.needsUndoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)

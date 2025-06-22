@@ -12,9 +12,12 @@ import SwiftUI
 /// A repository that manages in-memory textures and thumbnails
 final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLayerRepository {
 
-    @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
+    private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        objectWillChangeSubject.eraseToAnyPublisher()
+    }
+    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
@@ -31,38 +34,49 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
-    override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        textures.removeValue(forKey: uuid)
-        thumbnails.removeValue(forKey: uuid)
-        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
+    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        Future<CanvasConfiguration, Error> { [weak self] promise in
+            guard let self else { return }
 
-    override func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
             do {
-                // Delete all data
-                self?.removeAll()
+                // Temporary dictionary to hold new textures before applying
+                var newTextures: [UUID: MTLTexture] = [:]
+                var newThumbnails: [UUID: UIImage?] = [:]
 
-                try uuids.forEach { [weak self] uuid in
+                guard let textureSize = configuration.textureSize else {
+                    throw TextureRepositoryError.invalidTextureSize
+                }
+
+                try configuration.layers.forEach { layer in
                     let textureData = try Data(
-                        contentsOf: sourceURL.appendingPathComponent(uuid.uuidString)
+                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
 
-                    guard
-                        let device = self?.device,
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
+                    guard let hexadecimalData = textureData.encodedHexadecimals else {
+                        throw TextureRepositoryError.failedToUnwrap
+                    }
 
-                    let texture = MTLTextureCreator.makeTexture(
+                    guard let newTexture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
-                        with: device
-                    )
+                        with: self.device
+                    ) else {
+                        throw TextureRepositoryError.failedToLoadTexture
+                    }
 
-                    self?.textures[uuid] = texture
-                    self?.setThumbnail(texture: texture, for: uuid)
+                    newTextures[layer.id] = newTexture
+                    newThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
-                promise(.success(()))
+
+                // If all succeeded, apply the new state
+                self.removeAll()
+
+                self.textures = newTextures
+                self.thumbnails = newThumbnails
+
+                self.setTextureSize(textureSize)
+
+                promise(.success(configuration))
             } catch {
                 promise(.failure(error))
             }
@@ -70,20 +84,52 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         .eraseToAnyPublisher()
     }
 
+    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        Future { [weak self] promise in
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            guard self.textures[uuid] == nil else {
+                promise(.failure(TextureRepositoryError.fileAlreadyExists))
+                return
+            }
+
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            promise(.success(.init(uuid: uuid, texture: texture)))
+        }
+        .eraseToAnyPublisher()
+    }
+
+    override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+        textures.removeValue(forKey: uuid)
+        thumbnails.removeValue(forKey: uuid)
+        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
+    }
+
     override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         Future { [weak self] promise in
-            if let texture, let device = self?.device {
-                let newTexture = MTLTextureCreator.duplicateTexture(
-                    texture: texture,
-                    with: device
-                )
-                self?.textures[uuid] = newTexture
-                self?.setThumbnail(texture: newTexture, for: uuid)
-
-                promise(.success(uuid))
-            } else {
-                promise(.failure(TextureRepositoryError.failedToAddTexture))
+            guard let `self`, let texture else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
             }
+
+            guard self.textures[uuid] != nil else {
+                promise(.failure(TextureRepositoryError.fileNotFound))
+                return
+            }
+
+            let newTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                with: self.device
+            )
+            self.textures[uuid] = newTexture
+            self.setThumbnail(texture: newTexture, for: uuid)
+
+            promise(.success(uuid))
         }
         .eraseToAnyPublisher()
     }
@@ -92,11 +138,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
 extension TextureLayerInMemoryRepository {
 
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-
-    func getThumbnail(_ uuid: UUID) -> UIImage? {
+    func thumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
 
@@ -122,7 +164,7 @@ extension TextureLayerInMemoryRepository {
 
     private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
+        objectWillChangeSubject.send(())
     }
 
 }

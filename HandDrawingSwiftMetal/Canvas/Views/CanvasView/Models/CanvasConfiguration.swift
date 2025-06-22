@@ -84,14 +84,13 @@ extension CanvasConfiguration {
         self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
     }
 
-    func createConfigurationWithValidTextureSize(_ newTextureSize: CGSize) -> Self {
-        var configuration = self
-        if configuration.textureSize?.width ?? .zero < MTLRenderer.minimumTextureSize.width ||
-            configuration.textureSize?.height ?? .zero < MTLRenderer.minimumTextureSize.height
-        {
-            configuration.textureSize = newTextureSize
+    /// Returns an instance with the provided texture size if it was previously nil
+    func resolvedTextureSize(_ textureSize: CGSize) -> Self {
+        var newInstance = self
+        if newInstance.textureSize == nil {
+            newInstance.textureSize = textureSize
         }
-        return configuration
+        return newInstance
     }
 
 }

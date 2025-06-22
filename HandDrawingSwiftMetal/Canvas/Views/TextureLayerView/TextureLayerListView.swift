@@ -19,7 +19,7 @@ struct TextureLayerListView: View {
             ) { layer in
                 layerRow(
                     layer: layer,
-                    thumbnail: viewModel.getThumbnail(layer.id),
+                    thumbnail: viewModel.thumbnail(layer.id),
                     selected: viewModel.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
                         viewModel.selectLayer(targetLayer.id)

@@ -16,13 +16,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         self.repository = repository
     }
 
-    var storageInitializationWithNewTexturePublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.storageInitializationWithNewTexturePublisher
-    }
-    var storageInitializationCompletedPublisher: AnyPublisher<CanvasConfiguration, Never> {
-        repository.storageInitializationCompletedPublisher
-    }
-
     var textureNum: Int {
         repository.textureNum
     }
@@ -35,16 +28,26 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
         repository.isInitialized
     }
 
-    func initializeStorage(from configuration: CanvasConfiguration) {
-        repository.initializeStorage(from: configuration)
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+        repository.initializeStorage(configuration: configuration)
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) {
-        repository.initializeStorageWithNewTexture(textureSize)
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.resetStorage(configuration: configuration, sourceFolderURL: sourceFolderURL)
     }
 
-    func copyTextures(uuids: [UUID], textureSize: CGSize) -> AnyPublisher<[TextureRepositoryEntity], Error> {
-        repository.copyTextures(uuids: uuids, textureSize: textureSize)
+    func setTextureSize(_ size: CGSize) {}
+
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+        repository.addTexture(texture, using: uuid)
+    }
+
+    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
+        repository.copyTexture(uuid: uuid)
+    }
+
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+        repository.copyTextures(uuids: uuids)
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
@@ -57,10 +60,6 @@ class TextureRepositoryWrapper: ObservableObject, TextureRepository {
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
         repository.updateTexture(texture: texture, for: uuid)
-    }
-
-    func updateAllTextures(uuids: [UUID], textureSize: CGSize, from sourceURL: URL) -> AnyPublisher<Void, Error> {
-        repository.updateAllTextures(uuids: uuids, textureSize: textureSize, from: sourceURL)
     }
 
 }
