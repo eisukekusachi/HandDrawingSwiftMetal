@@ -64,33 +64,40 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
-            guard let `self` else { return }
-
-            // Delete all data
-            self.removeAll()
+            guard let self else { return }
 
             do {
-                try configuration.layers.forEach { [weak self] layer in
+                // Temporary dictionary to hold new textures before applying
+                var newTextures: [UUID: MTLTexture] = [:]
+
+                guard let textureSize = configuration.textureSize else {
+                    throw TextureRepositoryError.invalidTextureSize
+                }
+
+                try configuration.layers.forEach { layer in
                     let textureData = try Data(
                         contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
 
-                    guard
-                        let device = self?.device,
-                        let textureSize = configuration.textureSize,
-                        let hexadecimalData = textureData.encodedHexadecimals
-                    else { return }
+                    guard let hexadecimalData = textureData.encodedHexadecimals else {
+                        throw TextureRepositoryError.failedToLoadTexture
+                    }
 
-                    let texture = MTLTextureCreator.makeTexture(
+                    guard let texture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
-                        with: device
-                    )
+                        with: self.device
+                    ) else {
+                        throw TextureRepositoryError.failedToLoadTexture
+                    }
 
-                    self?.textures[layer.id] = texture
+                    newTextures[layer.id] = texture
                 }
 
-                // Set the texture size after the initialization of this repository is completed
+                // If all succeeded, apply the new state
+                self.removeAll()
+
+                self.textures = newTextures
                 self.setTextureSize(textureSize)
 
                 promise(.success(configuration))
