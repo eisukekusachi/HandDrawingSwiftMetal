@@ -80,33 +80,40 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
-            // Delete all files
-            self.resetDirectory(&self.directoryUrl)
-
             do {
-                try configuration.layers.forEach { [weak self] layer in
-                    guard let `self` else { return }
+                var tmpTextureIds: Set<UUID> = []
 
+                try configuration.layers.forEach { layer in
                     let textureData = try Data(
                         contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
                     )
-
                     guard
+                        let textureSize = configuration.textureSize,
                         let hexadecimalData = textureData.encodedHexadecimals,
-                        let newTexture = MTLTextureCreator.makeTexture(
+                        let _ = MTLTextureCreator.makeTexture(
                             size: textureSize,
                             colorArray: hexadecimalData,
                             with: self.device
                         )
-                    else { return }
+                    else {
+                        throw TextureRepositoryError.failedToUnwrap
+                    }
 
-                    try FileOutputManager.saveTextureAsData(
-                        bytes: newTexture.bytes,
+                    tmpTextureIds.insert(layer.id)
+                }
+
+                // Delete all files
+                self.resetDirectory(&self.directoryUrl)
+
+                // Move all files
+                try configuration.layers.forEach { layer in
+                    try FileManager.default.moveItem(
+                        at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                         to: self.directoryUrl.appendingPathComponent(layer.id.uuidString)
                     )
-
-                    self.textureIds.insert(layer.id)
                 }
+
+                self.textureIds = tmpTextureIds
 
                 // Set the texture size after the initialization of this repository is completed
                 self.setTextureSize(textureSize)

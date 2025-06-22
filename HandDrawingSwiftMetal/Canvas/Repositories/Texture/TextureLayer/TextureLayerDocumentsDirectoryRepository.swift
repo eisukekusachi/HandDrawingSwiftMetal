@@ -41,10 +41,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
 
-            // Delete all files
-            self.resetDirectory(&self.directoryUrl)
-
             do {
+                var tmpTextureIds: Set<UUID> = []
+                var tmpThumbnails: [UUID: UIImage?] = [:]
+
                 try configuration.layers.forEach { layer in
                     let textureData = try Data(
                         contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
@@ -61,14 +61,23 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                         throw TextureRepositoryError.failedToUnwrap
                     }
 
-                    try FileOutputManager.saveTextureAsData(
-                        bytes: newTexture.bytes,
+                    tmpTextureIds.insert(layer.id)
+                    tmpThumbnails[layer.id] = newTexture.makeThumbnail()
+                }
+
+                // Delete all files
+                self.resetDirectory(&self.directoryUrl)
+
+                // Move all files
+                try configuration.layers.forEach { layer in
+                    try FileManager.default.moveItem(
+                        at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                         to: self.directoryUrl.appendingPathComponent(layer.id.uuidString)
                     )
-
-                    self.textureIds.insert(layer.id)
-                    self.setThumbnail(texture: newTexture, for: layer.id)
                 }
+
+                self.textureIds = tmpTextureIds
+                self.thumbnails = tmpThumbnails
 
                 // Set the texture size after the initialization of this repository is completed
                 self.setTextureSize(textureSize)
