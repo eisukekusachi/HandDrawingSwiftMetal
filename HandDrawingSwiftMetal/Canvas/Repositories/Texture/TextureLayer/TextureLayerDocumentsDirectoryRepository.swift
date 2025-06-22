@@ -12,7 +12,7 @@ import SwiftUI
 /// A repository that manages on-disk textures and in-memory thumbnails
 final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository, TextureLayerRepository {
 
-    @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
+    private(set) var thumbnails: [UUID: UIImage?] = [:]
 
     var objectWillChangePublisher: AnyPublisher<Void, Never> {
         objectWillChangeSubject.eraseToAnyPublisher()
