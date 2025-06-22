@@ -44,6 +44,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
     private var _textureSize: CGSize = .zero
 
     init(
+        targetURL: URL,
         directoryName: String,
         textures: Set<UUID> = [],
         renderer: MTLRendering = MTLRenderer.shared
@@ -57,7 +58,7 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
         )
 
         self.directoryName = directoryName
-        self.directoryUrl = URL.applicationSupport.appendingPathComponent(directoryName)
+        self.directoryUrl = targetURL.appendingPathComponent(directoryName)
 
         self.createDirectory(&directoryUrl)
     }

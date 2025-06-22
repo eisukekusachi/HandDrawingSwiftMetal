@@ -21,11 +21,13 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     private var cancellables = Set<AnyCancellable>()
 
     override init(
+        targetURL: URL,
         directoryName: String,
         textures: Set<UUID> = [],
         renderer: MTLRendering = MTLRenderer.shared
     ) {
         super.init(
+            targetURL: targetURL,
             directoryName: directoryName,
             textures: textures,
             renderer: renderer
