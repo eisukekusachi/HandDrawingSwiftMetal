@@ -57,7 +57,7 @@ extension CanvasState {
     }
 
     func layer(_ layerId: UUID) -> TextureLayerModel? {
-        layers.first(where: { $0.id == selectedLayerId })
+        layers.first(where: { $0.id == layerId })
     }
 
     func setData(_ configuration: CanvasConfiguration) {
