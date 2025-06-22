@@ -62,25 +62,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
-            .tryMap { [weak self] allExist in
-                guard let self else {
-                    throw TextureRepositoryError.failedToUnwrap
-                }
-
-                guard allExist else {
-                    throw TextureRepositoryError.storageNotSynchronized
-                }
-
-                // Set the texture size after the initialization of this repository is completed
-                self.setTextureSize(configuration.textureSize ?? .zero)
-
-                return configuration
-            }
-            .eraseToAnyPublisher()
-    }
-
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
@@ -116,33 +97,6 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             } catch {
                 promise(.failure(error))
             }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize)
-                .eraseToAnyPublisher()
-        }
-
-        // Delete all files
-        self.removeAll()
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate()
-        )
-
-        return createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            return ( .init(textureSize: textureSize, layers: [layer]))
         }
         .eraseToAnyPublisher()
     }
@@ -228,6 +182,52 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 }
 
 extension TextureInMemoryRepository {
+
+    private func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
+            .tryMap { [weak self] allExist in
+                guard let self else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
+
+                guard allExist else {
+                    throw TextureRepositoryError.storageNotSynchronized
+                }
+
+                // Set the texture size after the initialization of this repository is completed
+                self.setTextureSize(configuration.textureSize ?? .zero)
+
+                return configuration
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return Fail(error: TextureRepositoryError.invalidTextureSize)
+                .eraseToAnyPublisher()
+        }
+
+        // Delete all files
+        self.removeAll()
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate()
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return ( .init(textureSize: textureSize, layers: [layer]))
+        }
+        .eraseToAnyPublisher()
+    }
 
     private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in

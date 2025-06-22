@@ -76,28 +76,6 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        isStorageSynchronized(at: directoryUrl, expectedFileNames: configuration.layers.map { $0.fileName })
-            .tryMap { [weak self] allExist in
-                guard let self else {
-                    throw TextureRepositoryError.failedToUnwrap
-                }
-
-                guard allExist else {
-                    throw TextureRepositoryError.storageNotSynchronized
-                }
-
-                // Retain IDs if texture filenames match the configuration
-                self.textureIds = Set(configuration.layers.map { $0.id })
-
-                // Set the texture size after the initialization of this repository is completed
-                self.setTextureSize(configuration.textureSize ?? .zero)
-
-                return (configuration)
-            }
-            .eraseToAnyPublisher()
-    }
-
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard let `self` else { return }
@@ -137,32 +115,6 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
             } catch {
                 promise(.failure(error))
             }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard textureSize > MTLRenderer.minimumTextureSize else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
-        }
-
-        // Delete all files in the directory
-        resetDirectory(&directoryUrl)
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate()
-        )
-
-        return createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            return (.init(textureSize: textureSize, layers: [layer]))
         }
         .eraseToAnyPublisher()
     }
@@ -311,6 +263,55 @@ class TextureDocumentsDirectoryRepository: ObservableObject, TextureRepository {
 }
 
 extension TextureDocumentsDirectoryRepository {
+
+    private func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        isStorageSynchronized(at: directoryUrl, expectedFileNames: configuration.layers.map { $0.fileName })
+            .tryMap { [weak self] allExist in
+                guard let self else {
+                    throw TextureRepositoryError.failedToUnwrap
+                }
+
+                guard allExist else {
+                    throw TextureRepositoryError.storageNotSynchronized
+                }
+
+                // Retain IDs if texture filenames match the configuration
+                self.textureIds = Set(configuration.layers.map { $0.id })
+
+                // Set the texture size after the initialization of this repository is completed
+                self.setTextureSize(configuration.textureSize ?? .zero)
+
+                return (configuration)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard textureSize > MTLRenderer.minimumTextureSize else {
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
+        }
+
+        // Delete all files in the directory
+        resetDirectory(&directoryUrl)
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate()
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return (.init(textureSize: textureSize, layers: [layer]))
+        }
+        .eraseToAnyPublisher()
+    }
+
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
     private func createDirectory(_ url: inout URL) {

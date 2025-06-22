@@ -42,12 +42,6 @@ final class MockTextureRepository: TextureRepository {
             .eraseToAnyPublisher()
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, any Error> {
         Just(.init())
             .setFailureType(to: Error.self)

@@ -38,16 +38,8 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         repository.initialize(from: configuration)
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.initializeStorage(configuration: configuration)
-    }
-
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         repository.resetStorage(configuration: configuration, sourceFolderURL: sourceFolderURL)
-    }
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.initializeStorageWithNewTexture(textureSize)
     }
 
     func getThumbnail(_ uuid: UUID) -> UIImage? {
