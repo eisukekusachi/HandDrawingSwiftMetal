@@ -191,7 +191,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
 extension TextureInMemoryRepository {
 
     private func initializeStorageIfValid(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        isStorageSynchronized(with: configuration.layers.map { $0.fileName })
+        isStorageSynchronized(textures: textures, expectedTextureNames: configuration.layers.map { $0.fileName })
             .tryMap { [weak self] allExist in
                 guard let self else {
                     throw TextureRepositoryError.failedToUnwrap
@@ -250,18 +250,18 @@ extension TextureInMemoryRepository {
         .eraseToAnyPublisher()
     }
 
-    /// Checks whether the current storage directory contains the given set of file names
-    private func isStorageSynchronized(with fileNames: [String]) -> AnyPublisher<Bool, Error> {
-        Future<Bool, Error> { [weak self] promise in
-            guard let `self` else { return }
+    /// Checks whether the given textures contain all and only the expected texture names.
+    private func isStorageSynchronized(
+        textures: [UUID: MTLTexture?],
+        expectedTextureNames: [String]
+    ) -> AnyPublisher<Bool, Error> {
+        Future<Bool, Error> { promise in
+            let textureUUIDs = Set(textures.keys.map { $0.uuidString })
+            let expectedUUIDs = Set(expectedTextureNames)
 
-            let hasAllTextures = fileNames.compactMap{ UUID(uuidString: $0) }.allSatisfy { self.textures[$0] != nil }
+            let isSynchronized = !expectedUUIDs.isEmpty && textureUUIDs == expectedUUIDs
 
-            promise(.success(
-                !fileNames.isEmpty &&
-                hasAllTextures &&
-                Set(self.textures.keys.compactMap{ $0.uuidString }) == Set(fileNames))
-            )
+            promise(.success(isSynchronized))
         }
         .eraseToAnyPublisher()
     }
