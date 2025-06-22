@@ -46,9 +46,9 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
 
-        textureLayerRepository.thumbnailUpdateRequestedPublisher
+        textureLayerRepository.objectWillChangePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)

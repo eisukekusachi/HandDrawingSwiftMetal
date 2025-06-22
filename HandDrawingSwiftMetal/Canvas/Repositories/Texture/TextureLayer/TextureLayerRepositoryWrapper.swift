@@ -16,8 +16,8 @@ class TextureLayerRepositoryWrapper: ObservableObject, TextureLayerRepository {
         self.repository = repository
     }
 
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        repository.thumbnailUpdateRequestedPublisher
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        repository.objectWillChangePublisher
     }
 
     var textureNum: Int {

@@ -14,7 +14,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        objectWillChangeSubject.eraseToAnyPublisher()
+    }
+    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
@@ -169,10 +172,6 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
 extension TextureLayerDocumentsDirectoryRepository {
 
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -216,7 +215,7 @@ extension TextureLayerDocumentsDirectoryRepository {
             return
         }
         thumbnails[uuid] = texture.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
+        objectWillChangeSubject.send(())
     }
 
 }

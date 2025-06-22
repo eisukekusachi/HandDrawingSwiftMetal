@@ -13,12 +13,10 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    /// Emit `UUID` when the thumbnail is updated
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        objectWillChangeSubject.eraseToAnyPublisher()
     }
-
-    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
+    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
     var textureNum: Int = 0
 

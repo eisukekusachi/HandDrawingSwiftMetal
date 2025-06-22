@@ -14,7 +14,10 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
     @Published private(set) var thumbnails: [UUID: UIImage?] = [:]
 
-    private let thumbnailUpdateRequestedSubject: PassthroughSubject<UUID, Never> = .init()
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        objectWillChangeSubject.eraseToAnyPublisher()
+    }
+    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
     private let device = MTLCreateSystemDefaultDevice()!
 
@@ -129,10 +132,6 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
 extension TextureLayerInMemoryRepository {
 
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-
     func getThumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
@@ -159,7 +158,7 @@ extension TextureLayerInMemoryRepository {
 
     private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
         thumbnails[uuid] = texture?.makeThumbnail()
-        thumbnailUpdateRequestedSubject.send(uuid)
+        objectWillChangeSubject.send(())
     }
 
 }

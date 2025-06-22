@@ -11,8 +11,8 @@ import UIKit
 /// A protocol that defines a repository for managing textures and in-memory thumbnails
 protocol TextureLayerRepository: TextureRepository {
 
-    /// A publisher that notifies SwiftUI about a thumbnail update for a specific layer
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> { get }
+    /// A publisher that notifies SwiftUI of upcoming changes
+    var objectWillChangePublisher: AnyPublisher<Void, Never> { get }
 
     /// Gets the thumbnail image for UUID
     func getThumbnail(_ uuid: UUID) -> UIImage?

@@ -14,11 +14,10 @@ final class MockTextureRepository: TextureRepository {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    private let thumbnailUpdateRequestedSubject = PassthroughSubject<UUID, Never>()
-
-    var thumbnailUpdateRequestedPublisher: AnyPublisher<UUID, Never> {
-        thumbnailUpdateRequestedSubject.eraseToAnyPublisher()
+    var objectWillChangePublisher: AnyPublisher<Void, Never> {
+        objectWillChangeSubject.eraseToAnyPublisher()
     }
+    private let objectWillChangeSubject = PassthroughSubject<Void, Never>()
 
     var textures: [UUID: MTLTexture?] = [:]
 
