@@ -31,17 +31,17 @@ struct TextureLayerView: View {
                 toolbar(
                     viewModel,
                     changeTitle: { layer, title in
-                        viewModel.updateLayer(id: layer.id, title: title)
+                        viewModel.onTapTitleButton(id: layer.id, title: title)
                     }
                 )
 
                 TextureLayerListView(
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    canvasState: viewModel.canvasState
                 )
 
                 TwoRowsSliderView(
-                    value: $viewModel.selectedLayerAlpha,
-                    isPressed: $viewModel.isSliderHandleDragging,
+                    sliderValue: viewModel.alphaSliderValue,
                     title: "Alpha",
                     range: range
                 )
@@ -66,10 +66,7 @@ extension TextureLayerView {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
-                        viewModel.insertLayer(
-                            textureSize: viewModel.textureSize,
-                            at: viewModel.newInsertIndex
-                        )
+                        viewModel.onTapInsertButton()
                     }
                 },
                 label: {
@@ -83,7 +80,7 @@ extension TextureLayerView {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
-                        viewModel.removeLayer()
+                        viewModel.onTapDeleteButton()
                     }
                 },
                 label: {
@@ -144,7 +141,8 @@ private struct PreviewView: View {
     init() {
         viewModel = .init(
             canvasState: canvasState,
-            textureLayerRepository: TextureLayerMockRepository()
+            textureLayerRepository: MockTextureLayerRepository(),
+            undoStack: nil
         )
     }
     var body: some View {

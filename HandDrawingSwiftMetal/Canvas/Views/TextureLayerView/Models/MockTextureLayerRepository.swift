@@ -1,5 +1,5 @@
 //
-//  TextureLayerMockRepository.swift
+//  MockTextureLayerRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/21.
@@ -9,18 +9,15 @@ import Combine
 import UIKit
 import Metal
 
-final class TextureLayerMockRepository: TextureLayerRepository {
+final class MockTextureLayerRepository: TextureLayerRepository {
 
-    private let device = MTLCreateSystemDefaultDevice()!
-
-    var objectWillChangePublisher: AnyPublisher<Void, Never> {
-        objectWillChangeSubject.eraseToAnyPublisher()
-    }
-    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
+    let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
     var textureNum: Int = 0
 
     var textureSize: CGSize = .zero
+
+    var textureIds: Set<UUID> { Set([]) }
 
     var isInitialized: Bool = false
 
@@ -48,20 +45,20 @@ final class TextureLayerMockRepository: TextureLayerRepository {
         nil
     }
 
-    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
-        return Just(.init(uuid: UUID()))
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+        Just(.init(uuid: UUID()))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        return Just(.init(uuid: UUID()))
+        Just(.init(uuid: UUID()))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
     func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        return Just([])
+        Just([])
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
@@ -75,8 +72,8 @@ final class TextureLayerMockRepository: TextureLayerRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {}
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Just(uuid)
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+        Just(.init(uuid: uuid))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

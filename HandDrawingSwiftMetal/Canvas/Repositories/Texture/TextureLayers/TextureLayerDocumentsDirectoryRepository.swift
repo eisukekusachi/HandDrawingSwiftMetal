@@ -12,14 +12,9 @@ import SwiftUI
 /// A repository that manages on-disk textures and in-memory thumbnails
 final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository, TextureLayerRepository {
 
+    let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
+
     private(set) var thumbnails: [UUID: UIImage?] = [:]
-
-    var objectWillChangePublisher: AnyPublisher<Void, Never> {
-        objectWillChangeSubject.eraseToAnyPublisher()
-    }
-    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
-
-    private let device = MTLCreateSystemDefaultDevice()!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -39,7 +34,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
     override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
-            guard let `self` else { return }
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
 
             do {
                 var tmpTextureIds: Set<UUID> = []
@@ -55,7 +53,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                         let newTexture = MTLTextureCreator.makeTexture(
                             size: textureSize,
                             colorArray: hexadecimalData,
-                            with: self.device
+                            with: device
                         )
                     else {
                         throw TextureRepositoryError.failedToUnwrap
@@ -90,7 +88,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         .eraseToAnyPublisher()
     }
 
-    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
+    override func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -111,11 +109,14 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 )
                 self.setThumbnail(texture: texture, for: uuid)
 
-                promise(.success(.init(uuid: uuid, texture: texture)))
+                promise(
+                    .success(
+                        .init(uuid: uuid, texture: texture)
+                    )
+                )
 
             } catch {
-                Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
-                promise(.failure(FileOutputError.failedToUpdateTexture))
+                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -147,9 +148,13 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     }
 
     /// Updates an existing texture for UUID
-    override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future { [weak self] promise in
-            guard let `self`, let texture else {
+            guard
+                let `self`,
+                let texture,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
@@ -157,21 +162,30 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
             guard FileManager.default.fileExists(atPath: fileURL.path) else {
-                promise(.failure(TextureRepositoryError.fileNotFound))
+                promise(.failure(TextureRepositoryError.fileNotFound(fileURL.path)))
+                return
+            }
+
+            guard let newTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                with: device
+            ) else {
+                promise(.failure(TextureDocumentsDirectoryRepositoryError.failedToCreateNewTexture))
                 return
             }
 
             do {
                 try FileOutputManager.saveTextureAsData(
-                    bytes: texture.bytes,
+                    bytes: newTexture.bytes,
                     to: fileURL
                 )
                 self.setThumbnail(texture: texture, for: uuid)
 
-                promise(.success(uuid))
+                promise(.success(
+                    .init(uuid: uuid, texture: newTexture)
+                ))
             } catch {
-                Logger.standard.warning("Failed to save texture for UUID \(uuid): \(error)")
-                promise(.failure(FileOutputError.failedToUpdateTexture))
+                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -187,7 +201,10 @@ extension TextureLayerDocumentsDirectoryRepository {
 
     func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future { [weak self] promise in
-            guard let `self` else { return }
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
 
             do {
                 for textureId in self.textureIds {
@@ -196,7 +213,7 @@ extension TextureLayerDocumentsDirectoryRepository {
                         let texture: MTLTexture? = try FileInputManager.loadTexture(
                             url: url,
                             textureSize: textureSize,
-                            device: self.device
+                            device: device
                         )
                         self.setThumbnail(texture: texture, for: textureId)
                     } else {
@@ -207,8 +224,7 @@ extension TextureLayerDocumentsDirectoryRepository {
                 promise(.success(()))
 
             } catch {
-                Logger.standard.error("Failed to load texture during thumbnail update: \(error)")
-                promise(.failure(FileOutputError.failedToUpdateTexture))
+                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()

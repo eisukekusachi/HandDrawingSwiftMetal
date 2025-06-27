@@ -65,6 +65,6 @@ enum FileOutputError: Error {
     case failedToZip
     case failedToSaveImage
     case filedToMove
-    case failedToUpdateTexture
+    case failedToUpdateTexture(Error)
     case failedToCreateDirectory
 }

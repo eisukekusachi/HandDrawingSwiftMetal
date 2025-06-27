@@ -12,14 +12,11 @@ import UIKit
 
 final class MockTextureRepository: TextureRepository {
 
-    private let device = MTLCreateSystemDefaultDevice()!
-
-    var objectWillChangePublisher: AnyPublisher<Void, Never> {
-        objectWillChangeSubject.eraseToAnyPublisher()
-    }
-    private let objectWillChangeSubject = PassthroughSubject<Void, Never>()
+    let objectWillChangeSubject = PassthroughSubject<Void, Never>()
 
     var textures: [UUID: MTLTexture?] = [:]
+
+    var textureIds: Set<UUID> = Set([])
 
     var callHistory: [String] = []
 
@@ -35,38 +32,39 @@ final class MockTextureRepository: TextureRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
         Just(.init())
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         callHistory.append("addTexture(\(uuid))")
         return Just(.init(uuid: UUID())).setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
+    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Just(.init(uuid: UUID()))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
     func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        Just(uuids.map { uuid in .init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)) })
+        let device = MTLCreateSystemDefaultDevice()!
+        return Just(uuids.map { uuid in .init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)) })
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
@@ -98,9 +96,9 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-        return Just(uuid)
+        return Just(.init(uuid: uuid))
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }

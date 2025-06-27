@@ -94,8 +94,3 @@ extension CanvasConfiguration {
     }
 
 }
-
-struct CanvasViewControllerConfiguration {
-    var canvasState: CanvasState
-    var textureLayerRepository: TextureLayerRepository
-}

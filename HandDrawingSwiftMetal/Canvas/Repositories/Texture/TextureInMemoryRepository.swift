@@ -10,13 +10,16 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages in-memory textures
-class TextureInMemoryRepository: ObservableObject, TextureRepository {
+class TextureInMemoryRepository: TextureRepository {
 
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
 
     var textureNum: Int {
         textures.count
+    }
+    var textureIds: Set<UUID> {
+        Set(textures.keys.map { $0 })
     }
     var textureSize: CGSize {
         _textureSize
@@ -26,11 +29,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         _textureSize != .zero
     }
 
-    private let flippedTextureBuffers: MTLTextureBuffers!
-
     private let renderer: MTLRendering!
-
-    private let device = MTLCreateSystemDefaultDevice()!
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -42,20 +41,18 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
     ) {
         self.textures = textures
         self.renderer = renderer
-
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: .flippedTextureNodes,
-            with: device
-        )
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, any Error> {
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
     }
 
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
-            guard let self else { return }
+            guard
+                let self,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
 
             do {
                 // Temporary dictionary to hold new textures before applying
@@ -77,7 +74,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
                     guard let newTexture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
-                        with: self.device
+                        with: device
                     ) else {
                         throw TextureRepositoryError.failedToLoadTexture
                     }
@@ -103,7 +100,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         _textureSize = size
     }
 
-    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -116,22 +113,32 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
             }
 
             self.textures[uuid] = texture
-            promise(.success(.init(uuid: uuid, texture: texture)))
+
+            promise(.success(
+                .init(uuid: uuid, texture: texture)
+            ))
         }
         .eraseToAnyPublisher()
     }
 
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future<IdentifiedTexture, Error> { [weak self] promise in
-            guard let texture = self?.textures[uuid], let device = self?.device else {
+            guard
+                let texture = self?.textures[uuid],
+                let device = MTLCreateSystemDefaultDevice()
+            else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
                 return
             }
+
             let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: texture,
                 with: device
             )
-            promise(.success(.init(uuid: uuid, texture: newTexture)))
+
+            promise(.success(
+                .init(uuid: uuid, texture: newTexture)
+            ))
         }
         .eraseToAnyPublisher()
     }
@@ -154,25 +161,31 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future { [weak self] promise in
-            guard let `self`, let texture else {
+            guard
+                let `self`,
+                let texture,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
             guard self.textures[uuid] != nil else {
-                promise(.failure(TextureRepositoryError.fileNotFound))
+                promise(.failure(TextureRepositoryError.fileNotFound(uuid.uuidString)))
                 return
             }
 
             let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: texture,
-                with: self.device
+                with: device
             )
             self.textures[uuid] = newTexture
 
-            promise(.success(uuid))
+            promise(.success(
+                .init(uuid: uuid, texture: newTexture)
+            ))
         }
         .eraseToAnyPublisher()
     }
@@ -195,7 +208,7 @@ extension TextureInMemoryRepository {
         self.removeAll()
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate()
+            title: TimeStampFormatter.currentDate
         )
 
         return createTexture(
@@ -213,12 +226,15 @@ extension TextureInMemoryRepository {
 
     private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future<Void, Error> { [weak self] promise in
-            guard let `self` else {
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
-            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: self.device)
+            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
 
             promise(.success(()))
         }

@@ -9,21 +9,19 @@ import SwiftUI
 
 struct TwoRowsSliderView: View {
 
-    @Binding var value: Int
-    @Binding var isPressed: Bool
+    @ObservedObject var sliderValue: SliderValue
 
     let title: String
     let range: ClosedRange<Int>
 
     var buttonSize: CGFloat = 20
-    var valueLabelWidth: CGFloat = 64
 
     var body: some View {
         VStack(spacing: 4) {
             buttons
             IntSlider(
-                value: $value,
-                isPressed: $isPressed,
+                value: $sliderValue.value,
+                isHandleDragging: $sliderValue.isHandleDragging,
                 in: range
             )
         }
@@ -42,7 +40,7 @@ struct TwoRowsSliderView: View {
     private var minusButton: some View {
         Button(
             action: {
-                value = (max(value - 1, range.lowerBound))
+                sliderValue.value = (max(sliderValue.value - 1, range.lowerBound))
             },
             label: {
                 Image(systemName: "minus")
@@ -58,15 +56,15 @@ struct TwoRowsSliderView: View {
             Text("\(title):")
                 .font(.footnote)
                 .foregroundColor(Color(uiColor: .gray))
-                .frame(width: valueLabelWidth, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .trailing)
 
             Spacer()
                 .frame(width: 8)
 
-            Text("\(value)")
+            Text("\(sliderValue.value)")
                 .font(.footnote)
                 .foregroundColor(Color(uiColor: .gray))
-                .frame(width: valueLabelWidth, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }
     }
@@ -74,12 +72,12 @@ struct TwoRowsSliderView: View {
     private var plusButton: some View {
         Button(
             action: {
-                value = (min(value + 1, range.upperBound))
+                sliderValue.value = (min(sliderValue.value + 1, range.upperBound))
             },
             label: {
                 Image(systemName: "plus")
                     .frame(width: buttonSize, height: buttonSize)
-                    .foregroundColor(Color(uiColor: .systemBlue))
+                    .foregroundColor(.init(uiColor: .systemBlue))
             }
         )
     }
@@ -90,22 +88,15 @@ struct TwoRowsSliderView: View {
 }
 
 private struct PreviewView: View {
-
-    @State var alpha: Int = 125
-    @State var isPressed: Bool = false
-
-    @State var alphaArray: [Int] = [25, 125, 225]
-    @State var isPressedArray: [Bool] = [false, false, false]
-
-    let sliderStyle = DefaultSliderStyle(
-        trackLeftColor: UIColor(named: "trackColor")
-    )
-
+    var sliderValues: [SliderValue] = [
+        .init(value: 25),
+        .init(value: 125),
+        .init(value: 225)
+    ]
     var body: some View {
-        ForEach(alphaArray.indices, id: \.self) { index in
+        ForEach(sliderValues.indices, id: \.self) { index in
             TwoRowsSliderView(
-                value: $alphaArray[index],
-                isPressed: $isPressedArray[index],
+                sliderValue: sliderValues[index],
                 title: "Alpha",
                 range: 0 ... 255
             )
@@ -114,3 +105,4 @@ private struct PreviewView: View {
 
     }
 }
+

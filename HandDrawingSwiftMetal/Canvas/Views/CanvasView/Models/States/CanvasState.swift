@@ -70,3 +70,32 @@ extension CanvasState {
     }
 
 }
+
+extension CanvasState {
+
+    func addLayer(newTextureLayer textureLayer: TextureLayerModel, at index: Int) {
+        self.layers.insert(textureLayer, at: index)
+        self.selectedLayerId = textureLayer.id
+    }
+
+    func removeLayer(textureLayer: TextureLayerModel, newSelectedLayerId: UUID) {
+        guard let index = layers.firstIndex(where: { $0.id == textureLayer.id }) else { return }
+        self.layers.remove(at: index)
+        self.selectedLayerId = newSelectedLayerId
+    }
+
+    func moveLayer(
+        indices: MoveLayerIndices,
+        selectedLayerId: UUID
+    ) {
+        self.layers.move(fromOffsets: indices.sourceIndexSet, toOffset: indices.destinationIndex)
+        self.selectedLayerId = selectedLayerId
+    }
+
+    func updateLayer(newTextureLayer: TextureLayerModel) {
+        guard let index = layers.firstIndex(where: { $0.id == newTextureLayer.id }) else { return }
+        self.layers[index] = newTextureLayer
+        self.selectedLayerId = newTextureLayer.id
+    }
+
+}

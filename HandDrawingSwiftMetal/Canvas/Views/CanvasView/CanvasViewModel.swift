@@ -57,6 +57,10 @@ final class CanvasViewModel {
         needsRedoButtonStateUpdateSubject.eraseToAnyPublisher()
     }
 
+    var canvasViewControllerUndoButtonsDisplayPublisher: AnyPublisher<Bool, Never> {
+        canvasViewControllerUndoButtonsDisplaySubject.eraseToAnyPublisher()
+    }
+
     /// A rendering target
     private var canvasView: CanvasViewProtocol?
 
@@ -111,11 +115,15 @@ final class CanvasViewModel {
 
     private let needsRedoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
 
+    private var canvasViewControllerUndoButtonsDisplaySubject: PassthroughSubject<Bool, Never> = .init()
+
     /// A repository for loading and saving local files
     private var localRepository: LocalRepository!
 
     /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
+
+    private var undoStack: UndoStack? = nil
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -123,6 +131,7 @@ final class CanvasViewModel {
 
     init(
         textureLayerRepository: TextureLayerRepository,
+        undoTextureRepository: TextureRepository?,
         localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
     ) {
         self.textureLayerRepository = textureLayerRepository
@@ -134,6 +143,15 @@ final class CanvasViewModel {
         if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
+        }
+
+        // If `undoTextureRepository` is used, undo functionality is enabled
+        if let undoTextureRepository {
+            undoStack = .init(
+                canvasState: canvasState,
+                textureLayerRepository: textureLayerRepository,
+                undoTextureRepository: undoTextureRepository
+            )
         }
 
         bindData()
@@ -156,7 +174,7 @@ final class CanvasViewModel {
                     with: commandBuffer,
                     onDrawingCompleted: {
                         commandBuffer.addCompletedHandler { [weak self] _ in
-                            self?.updateLocalTextureLayerRepository(texture: texture, for: selectedLayerId)
+                            self?.completeDrawingProcess(texture: texture, for: selectedLayerId)
                         }
                     }
                 )
@@ -207,17 +225,7 @@ final class CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         canvasState.fullCanvasUpdateSubject
             .sink { [weak self] in
-                guard
-                    let `self`,
-                    let commandBuffer = canvasView?.commandBuffer
-                else { return }
-
-                self.renderer.updateDrawingTextures(
-                    canvasState: self.canvasState,
-                    with: commandBuffer
-                ) { [weak self] in
-                    self?.updateCanvasView()
-                }
+                self?.updateCanvasByMergingAllLayers()
             }
             .store(in: &cancellables)
 
@@ -229,6 +237,21 @@ final class CanvasViewModel {
 
         transformer.matrixPublisher
             .assign(to: \.matrix, on: renderer)
+            .store(in: &cancellables)
+
+        // Undo
+        undoStack?.undoButtonStateUpdateSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.needsUndoButtonStateUpdateSubject.send(state)
+            }
+            .store(in: &cancellables)
+
+        undoStack?.redoButtonStateUpdateSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.needsRedoButtonStateUpdateSubject.send(state)
+            }
             .store(in: &cancellables)
     }
 
@@ -271,6 +294,8 @@ extension CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
 
+        undoStack?.initialize(textureSize)
+
         renderer.updateDrawingTextures(
             canvasState: canvasState,
             with: commandBuffer
@@ -304,9 +329,14 @@ extension CanvasViewModel {
         viewConfigureRequestSubject.send(
             .init(
                 canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository
+                textureLayerRepository: textureLayerRepository,
+                undoStack: undoStack
             )
         )
+
+        if undoStack != nil {
+            canvasViewControllerUndoButtonsDisplaySubject.send(true)
+        }
     }
 
     func onViewWillAppear() {
@@ -342,6 +372,7 @@ extension CanvasViewModel {
         case .drawing:
             if FingerSingleCurveIterator.shouldCreateInstance(singleCurveIterator: singleCurveIterator) {
                 singleCurveIterator = FingerSingleCurveIterator()
+                undoStack?.setDrawingUndoObject()
             }
 
             fingerStroke.setActiveDictionaryKeyIfNil()
@@ -385,6 +416,7 @@ extension CanvasViewModel {
     ) {
         if PencilSingleCurveIterator.shouldCreateInstance(actualTouches: actualTouches) {
             singleCurveIterator = PencilSingleCurveIterator()
+            undoStack?.setDrawingUndoObject()
         }
 
         pencilStroke.appendActualTouches(
@@ -400,8 +432,12 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
     // MARK: Toolbar
-    func didTapUndoButton() {}
-    func didTapRedoButton() {}
+    func didTapUndoButton() {
+        undoStack?.undo()
+    }
+    func didTapRedoButton() {
+        undoStack?.redo()
+    }
 
     func didTapLayerButton() {
         // Toggle the visibility of `TextureLayerView`
@@ -499,7 +535,7 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    private func updateLocalTextureLayerRepository(texture: MTLTexture, for selectedTextureId: UUID) {
+    private func completeDrawingProcess(texture: MTLTexture, for selectedTextureId: UUID) {
         textureLayerRepository.updateTexture(
             texture: texture,
             for: selectedTextureId
@@ -513,7 +549,14 @@ extension CanvasViewModel {
                 }
                 self?.resetAllInputParameters()
             },
-            receiveValue: { _ in }
+            receiveValue: { [weak self] result in
+                if let canvasState = self?.canvasState, let texture = result.texture {
+                    self?.undoStack?.pushUndoDrawingObject(
+                        canvasState: canvasState,
+                        texture: texture
+                    )
+                }
+            }
         )
         .store(in: &cancellables)
     }
@@ -527,6 +570,19 @@ extension CanvasViewModel {
 
         singleCurveIterator = nil
         transformer.resetMatrix()
+    }
+
+    func updateCanvasByMergingAllLayers() {
+        guard
+            let commandBuffer = canvasView?.commandBuffer
+        else { return }
+
+        renderer.updateDrawingTextures(
+            canvasState: canvasState,
+            with: commandBuffer
+        ) { [weak self] in
+            self?.updateCanvasView()
+        }
     }
 
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {

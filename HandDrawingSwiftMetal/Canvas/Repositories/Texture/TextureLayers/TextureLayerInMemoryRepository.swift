@@ -12,14 +12,9 @@ import SwiftUI
 /// A repository that manages in-memory textures and thumbnails
 final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLayerRepository {
 
+    let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
+
     private(set) var thumbnails: [UUID: UIImage?] = [:]
-
-    var objectWillChangePublisher: AnyPublisher<Void, Never> {
-        objectWillChangeSubject.eraseToAnyPublisher()
-    }
-    private let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
-
-    private let device = MTLCreateSystemDefaultDevice()!
 
     override init(
         textures: [UUID: MTLTexture?] = [:],
@@ -36,7 +31,10 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
 
     override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
-            guard let self else { return }
+            guard
+                let self,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
 
             do {
                 // Temporary dictionary to hold new textures before applying
@@ -59,7 +57,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                     guard let newTexture = MTLTextureCreator.makeTexture(
                         size: textureSize,
                         colorArray: hexadecimalData,
-                        with: self.device
+                        with: device
                     ) else {
                         throw TextureRepositoryError.failedToLoadTexture
                     }
@@ -84,7 +82,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         .eraseToAnyPublisher()
     }
 
-    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
+    override func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -99,7 +97,9 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
             self.textures[uuid] = texture
             self.setThumbnail(texture: texture, for: uuid)
 
-            promise(.success(.init(uuid: uuid, texture: texture)))
+            promise(.success(
+                .init(uuid: uuid, texture: texture)
+            ))
         }
         .eraseToAnyPublisher()
     }
@@ -110,26 +110,32 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error> {
+    override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future { [weak self] promise in
-            guard let `self`, let texture else {
+            guard
+                let `self`,
+                let texture,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
             }
 
             guard self.textures[uuid] != nil else {
-                promise(.failure(TextureRepositoryError.fileNotFound))
+                promise(.failure(TextureRepositoryError.fileNotFound(uuid.uuidString)))
                 return
             }
 
             let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: texture,
-                with: self.device
+                with: device
             )
             self.textures[uuid] = newTexture
             self.setThumbnail(texture: newTexture, for: uuid)
 
-            promise(.success(uuid))
+            promise(.success(
+                .init(uuid: uuid, texture: newTexture)
+            ))
         }
         .eraseToAnyPublisher()
     }

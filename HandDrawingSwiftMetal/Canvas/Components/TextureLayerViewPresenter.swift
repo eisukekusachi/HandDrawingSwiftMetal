@@ -22,17 +22,17 @@ final class TextureLayerViewPresenter {
     func setupLayerViewPresenter(
         canvasState: CanvasState,
         textureLayerRepository: TextureLayerRepository,
+        undoStack: UndoStack?,
         using viewSettings: TextureLayerViewSettings
     ) {
         layerView = TextureLayerView(
             viewModel: .init(
                 canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository
+                textureLayerRepository: textureLayerRepository,
+                undoStack: undoStack
             ),
             roundedRectangleWithArrow: roundedRectangleWithArrow
         )
-
-        guard let layerView else { return }
 
         layerViewController = UIHostingController(rootView: layerView)
         layerViewController.view.backgroundColor = .clear

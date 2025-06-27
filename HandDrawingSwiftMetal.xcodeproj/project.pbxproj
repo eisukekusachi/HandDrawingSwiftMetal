@@ -11,6 +11,7 @@
 		D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A2772C8BEA5E00275138 /* UITouchDummy.swift */; };
 		D400A27C2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift */; };
 		D4057FFE2D69A11600DB8B4D /* DotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4057FFD2D69A11600DB8B4D /* DotPoint.swift */; };
+		D40B769B2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -32,6 +33,15 @@
 		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
 		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
 		D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */; };
+		D43E70022E0EDCAC006E07CE /* UndoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E6FFF2E0EDCAC006E07CE /* UndoObject.swift */; };
+		D43E70032E0EDCAC006E07CE /* UndoDrawingObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E6FFE2E0EDCAC006E07CE /* UndoDrawingObject.swift */; };
+		D43E70042E0EDCAC006E07CE /* UndoAdditionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E6FFC2E0EDCAC006E07CE /* UndoAdditionObject.swift */; };
+		D43E70052E0EDCAC006E07CE /* UndoDeletionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E6FFD2E0EDCAC006E07CE /* UndoDeletionObject.swift */; };
+		D43E70062E0EDCAC006E07CE /* UndoMoveObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */; };
+		D43E70092E0EDCD9006E07CE /* UndoStackModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */; };
+		D43E700B2E0EDCE2006E07CE /* UndoStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700A2E0EDCE2006E07CE /* UndoStack.swift */; };
+		D43E700D2E0EDD30006E07CE /* UndoRedoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */; };
+		D43E700F2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D447D88A2DC5CE5200007210 /* CanvasStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */; };
 		D447D88C2DC5D2D700007210 /* CanvasStateStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D88B2DC5D2D700007210 /* CanvasStateStorage.swift */; };
@@ -64,7 +74,7 @@
 		D44B52D82DB3ACA500EE213C /* DrawingEraserToolState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52CE2DB3ACA500EE213C /* DrawingEraserToolState.swift */; };
 		D44B52D92DB3ACA500EE213C /* DrawingToolState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52D22DB3ACA500EE213C /* DrawingToolState.swift */; };
 		D44B52DA2DB3ACA500EE213C /* DrawingToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52CF2DB3ACA500EE213C /* DrawingToolProtocol.swift */; };
-		D44B52DC2DB6752E00EE213C /* TextureLayerMockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* TextureLayerMockRepository.swift */; };
+		D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */; };
 		D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */; };
 		D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */; };
 		D44D19672BE5D8AB0069D4A9 /* FileInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19662BE5D8AB0069D4A9 /* FileInputManager.swift */; };
@@ -94,9 +104,6 @@
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerStroke.swift */; };
 		D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilStroke.swift */; };
-		D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB02D23E66700BCC565 /* UndoMoveData.swift */; };
-		D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB22D23E68000BCC565 /* UndoStackObject.swift */; };
-		D464FCB52D23E69000BCC565 /* UndoStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464FCB42D23E69000BCC565 /* UndoStack.swift */; };
 		D4650CA72D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */; };
 		D4650CAA2D447ED900E7D60E /* MockMTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */; };
 		D4650CAC2D447F8900E7D60E /* MockDrawingCurveIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */; };
@@ -114,6 +121,7 @@
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
 		D46C036D2C96B22D001658C5 /* MTLCommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */; };
 		D4812E472D1643F400F47DC7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4812E462D1643F400F47DC7 /* Logger.swift */; };
+		D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F8132E17FACA00B8DE41 /* SliderValue.swift */; };
 		D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */; };
 		D4837AEE2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AED2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift */; };
 		D484B4FC2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */; };
@@ -150,6 +158,11 @@
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
 		D4F00CFA2C59257E00FE8D26 /* TouchHashValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */; };
 		D4F1BB3E2B2D436F006EA102 /* TextureLayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */; };
+		D4FE0F292E0FDA24001A0E87 /* UndoAlphaChangedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FE0F282E0FDA24001A0E87 /* UndoAlphaChangedObject.swift */; };
+		D4FE0F322E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FE0F312E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift */; };
+		D4FE0F372E156CAC001A0E87 /* MoveLayerIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FE0F362E156CAC001A0E87 /* MoveLayerIndices.swift */; };
+		D4FE0F392E158791001A0E87 /* RemoveLayerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FE0F382E158791001A0E87 /* RemoveLayerIndex.swift */; };
+		D4FE0F3D2E16ABB1001A0E87 /* AddLayerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FE0F3C2E16ABB1001A0E87 /* AddLayerIndex.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -174,6 +187,7 @@
 		D400A2772C8BEA5E00275138 /* UITouchDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchDummy.swift; sourceTree = "<group>"; };
 		D400A27B2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurvePencilIteratorTests.swift; sourceTree = "<group>"; };
 		D4057FFD2D69A11600DB8B4D /* DotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotPoint.swift; sourceTree = "<group>"; };
+		D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewControllerConfiguration.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -194,6 +208,15 @@
 		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
 		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
 		D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredDotSize.swift; sourceTree = "<group>"; };
+		D43E6FFC2E0EDCAC006E07CE /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
+		D43E6FFD2E0EDCAC006E07CE /* UndoDeletionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDeletionObject.swift; sourceTree = "<group>"; };
+		D43E6FFE2E0EDCAC006E07CE /* UndoDrawingObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDrawingObject.swift; sourceTree = "<group>"; };
+		D43E6FFF2E0EDCAC006E07CE /* UndoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoObject.swift; sourceTree = "<group>"; };
+		D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveObject.swift; sourceTree = "<group>"; };
+		D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackModel.swift; sourceTree = "<group>"; };
+		D43E700A2E0EDCE2006E07CE /* UndoStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStack.swift; sourceTree = "<group>"; };
+		D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoRedoObject.swift; sourceTree = "<group>"; };
+		D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureUndoDocumentsDirectorySingletonRepository.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CanvasStorage.xcdatamodel; sourceTree = "<group>"; };
 		D447D88B2DC5D2D700007210 /* CanvasStateStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStateStorage.swift; sourceTree = "<group>"; };
@@ -226,7 +249,7 @@
 		D44B52D02DB3ACA500EE213C /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
 		D44B52D22DB3ACA500EE213C /* DrawingToolState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolState.swift; sourceTree = "<group>"; };
 		D44B52D32DB3ACA500EE213C /* CanvasState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasState.swift; sourceTree = "<group>"; };
-		D44B52DB2DB6752E00EE213C /* TextureLayerMockRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerMockRepository.swift; sourceTree = "<group>"; };
+		D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureLayerRepository.swift; sourceTree = "<group>"; };
 		D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasEntity.swift; sourceTree = "<group>"; };
 		D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldCanvasEntity.swift; sourceTree = "<group>"; };
 		D44D19662BE5D8AB0069D4A9 /* FileInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInputManager.swift; sourceTree = "<group>"; };
@@ -256,9 +279,6 @@
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D45ACBE12C57C2C3000002BE /* FingerStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerStroke.swift; sourceTree = "<group>"; };
 		D45ACBE32C57C2D9000002BE /* PencilStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilStroke.swift; sourceTree = "<group>"; };
-		D464FCB02D23E66700BCC565 /* UndoMoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveData.swift; sourceTree = "<group>"; };
-		D464FCB22D23E68000BCC565 /* UndoStackObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackObject.swift; sourceTree = "<group>"; };
-		D464FCB42D23E69000BCC565 /* UndoStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStack.swift; sourceTree = "<group>"; };
 		D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingBrushTextureSetTests.swift; sourceTree = "<group>"; };
 		D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockMTLRenderer.swift; sourceTree = "<group>"; };
 		D4650CAB2D447F8900E7D60E /* MockDrawingCurveIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDrawingCurveIterator.swift; sourceTree = "<group>"; };
@@ -276,6 +296,7 @@
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
 		D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandManager.swift; sourceTree = "<group>"; };
 		D4812E462D1643F400F47DC7 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		D481F8132E17FACA00B8DE41 /* SliderValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderValue.swift; sourceTree = "<group>"; };
 		D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchExtensions.swift; sourceTree = "<group>"; };
 		D4837AED2CC5ECBE00BD25F5 /* DrawingCurveFingerIteratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurveFingerIteratorTests.swift; sourceTree = "<group>"; };
 		D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerDocumentsDirectorySingletonRepository.swift; sourceTree = "<group>"; };
@@ -316,6 +337,11 @@
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D4F00CF92C59257E00FE8D26 /* TouchHashValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchHashValue.swift; sourceTree = "<group>"; };
 		D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewModel.swift; sourceTree = "<group>"; };
+		D4FE0F282E0FDA24001A0E87 /* UndoAlphaChangedObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaChangedObject.swift; sourceTree = "<group>"; };
+		D4FE0F312E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureUndoInMemorySingletonRepository.swift; sourceTree = "<group>"; };
+		D4FE0F362E156CAC001A0E87 /* MoveLayerIndices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndices.swift; sourceTree = "<group>"; };
+		D4FE0F382E158791001A0E87 /* RemoveLayerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndex.swift; sourceTree = "<group>"; };
+		D4FE0F3C2E16ABB1001A0E87 /* AddLayerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndex.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -456,6 +482,39 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		D43E6FFB2E0EDC9B006E07CE /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				D4FE0F352E156C96001A0E87 /* Layers */,
+				D43E70072E0EDCB0006E07CE /* Undo */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D43E70012E0EDCAC006E07CE /* UndoObject */ = {
+			isa = PBXGroup;
+			children = (
+				D43E6FFC2E0EDCAC006E07CE /* UndoAdditionObject.swift */,
+				D4FE0F282E0FDA24001A0E87 /* UndoAlphaChangedObject.swift */,
+				D43E6FFD2E0EDCAC006E07CE /* UndoDeletionObject.swift */,
+				D43E6FFE2E0EDCAC006E07CE /* UndoDrawingObject.swift */,
+				D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */,
+				D43E6FFF2E0EDCAC006E07CE /* UndoObject.swift */,
+				D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */,
+			);
+			path = UndoObject;
+			sourceTree = "<group>";
+		};
+		D43E70072E0EDCB0006E07CE /* Undo */ = {
+			isa = PBXGroup;
+			children = (
+				D43E70012E0EDCAC006E07CE /* UndoObject */,
+				D43E700A2E0EDCE2006E07CE /* UndoStack.swift */,
+				D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */,
+			);
+			path = Undo;
+			sourceTree = "<group>";
+		};
 		D447D8942DC6265200007210 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
@@ -469,11 +528,12 @@
 		D447D89B2DC6582B00007210 /* Texture */ = {
 			isa = PBXGroup;
 			children = (
-				D4553DF12DD89EFD00037800 /* TextureLayer */,
+				D4FE0F342E112820001A0E87 /* Protocols */,
+				D4FE0F332E1126EF001A0E87 /* Wrappers */,
+				D4FE0F2D2E10C2C3001A0E87 /* Singletons */,
+				D4553DF12DD89EFD00037800 /* TextureLayers */,
 				D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */,
 				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
-				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
-				D4553DF62DD8C78100037800 /* TextureRepositoryWrapper.swift */,
 			);
 			path = Texture;
 			sourceTree = "<group>";
@@ -534,6 +594,7 @@
 				D44B52A32DB3928000EE213C /* Textures */,
 				D44B52D42DB3ACA500EE213C /* States */,
 				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
+				D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -616,36 +677,22 @@
 			path = FileView;
 			sourceTree = "<group>";
 		};
-		D4553DF12DD89EFD00037800 /* TextureLayer */ = {
+		D4553DF12DD89EFD00037800 /* TextureLayers */ = {
 			isa = PBXGroup;
 			children = (
 				D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */,
-				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
 				D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */,
-				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
-				D44B52DB2DB6752E00EE213C /* TextureLayerMockRepository.swift */,
-				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
-				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
 			);
-			path = TextureLayer;
+			path = TextureLayers;
 			sourceTree = "<group>";
 		};
 		D463A5F02C6E346500D102AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */,
 				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		D464FCAF2D23E65300BCC565 /* Undo */ = {
-			isa = PBXGroup;
-			children = (
-				D464FCB02D23E66700BCC565 /* UndoMoveData.swift */,
-				D464FCB22D23E68000BCC565 /* UndoStackObject.swift */,
-				D464FCB42D23E69000BCC565 /* UndoStack.swift */,
-			);
-			path = Undo;
 			sourceTree = "<group>";
 		};
 		D464FCC12D23EC2400BCC565 /* Models */ = {
@@ -716,6 +763,7 @@
 				D44D19732BE5DFE80069D4A9 /* ToastModel.swift */,
 				D40CDF0A2B4130A40059527E /* TimeStampFormatter.swift */,
 				D4CE840F2C8B42BF00DEABC5 /* ViewSize.swift */,
+				D481F8132E17FACA00B8DE41 /* SliderValue.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -729,7 +777,6 @@
 				D469A86E2C5633FC00D10575 /* PencilSingleCurveIterator.swift */,
 				D4057FFC2D69972100DB8B4D /* Points */,
 				D40D975629DAB04700A82E6A /* Gestures */,
-				D464FCAF2D23E65300BCC565 /* Undo */,
 				D43906C92ADB7D1A00E22361 /* BlurredDotSize.swift */,
 				D44D195E2BE5D1390069D4A9 /* Entities */,
 			);
@@ -769,6 +816,7 @@
 				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
 				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
 				D42F40992B4402EC00B32707 /* Components */,
+				D43E6FFB2E0EDC9B006E07CE /* Domain */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D4784EF42C848A0A00A02E11 /* Models */,
@@ -830,6 +878,45 @@
 				D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */,
 			);
 			path = HandDrawingSwiftMetalUITests;
+			sourceTree = "<group>";
+		};
+		D4FE0F2D2E10C2C3001A0E87 /* Singletons */ = {
+			isa = PBXGroup;
+			children = (
+				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
+				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
+				D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */,
+				D4FE0F312E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift */,
+			);
+			path = Singletons;
+			sourceTree = "<group>";
+		};
+		D4FE0F332E1126EF001A0E87 /* Wrappers */ = {
+			isa = PBXGroup;
+			children = (
+				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
+				D4553DF62DD8C78100037800 /* TextureRepositoryWrapper.swift */,
+			);
+			path = Wrappers;
+			sourceTree = "<group>";
+		};
+		D4FE0F342E112820001A0E87 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
+				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		D4FE0F352E156C96001A0E87 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				D4FE0F3C2E16ABB1001A0E87 /* AddLayerIndex.swift */,
+				D4FE0F362E156CAC001A0E87 /* MoveLayerIndices.swift */,
+				D4FE0F382E158791001A0E87 /* RemoveLayerIndex.swift */,
+			);
+			path = Layers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -994,7 +1081,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D464FCB12D23E66700BCC565 /* UndoMoveData.swift in Sources */,
 				D43906CA2ADB7D1A00E22361 /* BlurredDotSize.swift in Sources */,
 				D469A8832C56422D00D10575 /* MTLPipelines.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
@@ -1006,8 +1092,10 @@
 				D44B52BA2DB3928000EE213C /* CanvasDrawingBrushTextureSet.swift in Sources */,
 				D44B52D52DB3ACA500EE213C /* CanvasState.swift in Sources */,
 				D44B52D62DB3ACA500EE213C /* DrawingBrushToolState.swift in Sources */,
+				D43E70092E0EDCD9006E07CE /* UndoStackModel.swift in Sources */,
 				D44B52D72DB3ACA500EE213C /* DrawingToolType.swift in Sources */,
 				D44B52D82DB3ACA500EE213C /* DrawingEraserToolState.swift in Sources */,
+				D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */,
 				D44B52D92DB3ACA500EE213C /* DrawingToolState.swift in Sources */,
 				D44B52DA2DB3ACA500EE213C /* DrawingToolProtocol.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* CanvasContentView.swift in Sources */,
@@ -1018,12 +1106,16 @@
 				D44B52C02DB3928000EE213C /* IteratorExtensions.swift in Sources */,
 				D44B52C12DB3928000EE213C /* CanvasViewProtocol.swift in Sources */,
 				D447D89E2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift in Sources */,
+				D43E700B2E0EDCE2006E07CE /* UndoStack.swift in Sources */,
 				D44B52C22DB3928000EE213C /* CanvasTransformer.swift in Sources */,
+				D4FE0F3D2E16ABB1001A0E87 /* AddLayerIndex.swift in Sources */,
 				D44B52C42DB3928000EE213C /* CanvasRenderer.swift in Sources */,
 				D44B52C52DB3928000EE213C /* CanvasDrawingEraserTextureSet.swift in Sources */,
 				D44B52C72DB3928000EE213C /* CanvasConfiguration.swift in Sources */,
 				D44B52C92DB3928000EE213C /* CanvasDrawingDisplayLink.swift in Sources */,
 				D484B4FC2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift in Sources */,
+				D40B769B2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift in Sources */,
+				D4FE0F372E156CAC001A0E87 /* MoveLayerIndices.swift in Sources */,
 				D44B52CA2DB3928000EE213C /* CanvasInputDeviceStatus.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* CanvasViewController.swift in Sources */,
 				D44D19692BE5DA4D0069D4A9 /* FileOutputManager.swift in Sources */,
@@ -1032,8 +1124,8 @@
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
 				D469A85D2C56206800D10575 /* ScaleManager.swift in Sources */,
 				D4CACC862DBE680700E70E18 /* DocumentsLocalSingletonRepository.swift in Sources */,
-				D464FCB52D23E69000BCC565 /* UndoStack.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
+				D4FE0F292E0FDA24001A0E87 /* UndoAlphaChangedObject.swift in Sources */,
 				D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */,
 				D469A85F2C5620FB00D10575 /* GrayscaleDotPoint.swift in Sources */,
 				D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */,
@@ -1045,6 +1137,11 @@
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D4553DFB2DD8CD8200037800 /* IdentifiedTexture.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */,
+				D43E70022E0EDCAC006E07CE /* UndoObject.swift in Sources */,
+				D43E70032E0EDCAC006E07CE /* UndoDrawingObject.swift in Sources */,
+				D43E70042E0EDCAC006E07CE /* UndoAdditionObject.swift in Sources */,
+				D43E70052E0EDCAC006E07CE /* UndoDeletionObject.swift in Sources */,
+				D43E70062E0EDCAC006E07CE /* UndoMoveObject.swift in Sources */,
 				D40D979529DAB0D700A82E6A /* Interpolator.swift in Sources */,
 				D469A8852C56428500D10575 /* MTLCommandBufferManager.swift in Sources */,
 				D48F76432DA20B800001C80F /* TextureInMemoryRepository.swift in Sources */,
@@ -1052,8 +1149,10 @@
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
+				D43E700D2E0EDD30006E07CE /* UndoRedoObject.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* PencilSingleCurveIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
+				D43E700F2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */,
 				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
 				D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */,
@@ -1069,9 +1168,10 @@
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,
 				D48F763F2DA20B3D0001C80F /* TextureRepository.swift in Sources */,
-				D464FCB32D23E68000BCC565 /* UndoStackObject.swift in Sources */,
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
+				D4FE0F322E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift in Sources */,
+				D4FE0F392E158791001A0E87 /* RemoveLayerIndex.swift in Sources */,
 				D4812E472D1643F400F47DC7 /* Logger.swift in Sources */,
 				D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */,
 				D4553DED2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift in Sources */,
@@ -1091,7 +1191,7 @@
 				D40D976029DAB09400A82E6A /* TouchPoint.swift in Sources */,
 				D4B4AAA02B3FBEA700298CFB /* MTLTextureCreator.swift in Sources */,
 				D4CE84102C8B42BF00DEABC5 /* ViewSize.swift in Sources */,
-				D44B52DC2DB6752E00EE213C /* TextureLayerMockRepository.swift in Sources */,
+				D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */,
 				D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4057FFE2D69A11600DB8B4D /* DotPoint.swift in Sources */,

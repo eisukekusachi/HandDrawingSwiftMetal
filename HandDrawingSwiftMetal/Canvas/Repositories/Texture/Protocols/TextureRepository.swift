@@ -15,6 +15,8 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
+    var textureIds: Set<UUID> { get }
+
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }
 
@@ -30,7 +32,7 @@ protocol TextureRepository {
     func setTextureSize(_ size: CGSize)
 
     /// Adds a texture using UUID
-    func addTexture(_ texture: MTLTexture?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
@@ -45,21 +47,16 @@ protocol TextureRepository {
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<UUID, Error>
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 
 }
 
 enum TextureRepositoryError: Error {
-    case notFound
     case failedToUnwrap
     case failedToLoadTexture
     case failedToAddTexture
     case failedToUpdateTexture
-    case failedToCommitCommandBuffer
-    case invalidTexture
-    case repositoryDeinitialized
-    case repositoryUnavailable
     case fileAlreadyExists
-    case fileNotFound
+    case fileNotFound(String)
     case invalidTextureSize
 }

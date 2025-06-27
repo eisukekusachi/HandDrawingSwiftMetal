@@ -18,7 +18,8 @@ class CanvasViewController: UIViewController {
     private var configuration = CanvasConfiguration()
 
     private let canvasViewModel = CanvasViewModel(
-        textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared
+        textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared,
+        undoTextureRepository: TextureUndoDocumentsDirectorySingletonRepository.shared
     )
 
     private let dialogPresenter = DialogPresenter()
@@ -71,7 +72,8 @@ extension CanvasViewController {
             .sink { [weak self] configuration in
                 self?.setupLayerView(
                     canvasState: configuration.canvasState,
-                    textureLayerRepository: configuration.textureLayerRepository
+                    textureLayerRepository: configuration.textureLayerRepository,
+                    undoStack: configuration.undoStack
                 )
                 self?.contentView.setup(
                     configuration.canvasState
@@ -123,6 +125,13 @@ extension CanvasViewController {
 
         canvasViewModel.needsRedoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.redoButton)
+            .store(in: &cancellables)
+
+        canvasViewModel.canvasViewControllerUndoButtonsDisplayPublisher
+            .sink { [weak self] shown in
+                self?.contentView.undoButton.isHidden = !shown
+                self?.contentView.redoButton.isHidden = !shown
+            }
             .store(in: &cancellables)
 
         contentView.canvasView.needsTextureRefreshPublisher
@@ -180,10 +189,15 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(canvasState: CanvasState, textureLayerRepository: TextureLayerRepository) {
+    private func setupLayerView(
+        canvasState: CanvasState,
+        textureLayerRepository: TextureLayerRepository,
+        undoStack: UndoStack?
+    ) {
         textureLayerViewPresenter.setupLayerViewPresenter(
             canvasState: canvasState,
             textureLayerRepository: textureLayerRepository,
+            undoStack: undoStack,
             using: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,

@@ -10,11 +10,12 @@ import SwiftUI
 struct TextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
+    @ObservedObject var canvasState: CanvasState
 
     var body: some View {
         List {
             ForEach(
-                Array(viewModel.layers.reversed()),
+                Array(canvasState.layers.reversed()),
                 id: \.id
             ) { layer in
                 layerRow(
@@ -22,10 +23,10 @@ struct TextureLayerListView: View {
                     thumbnail: viewModel.thumbnail(layer.id),
                     selected: viewModel.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
-                        viewModel.selectLayer(targetLayer.id)
+                        viewModel.onTapCell(id: targetLayer.id)
                     },
                     didTapVisibleButton: { targetLayer in
-                        viewModel.updateLayer(
+                        viewModel.onTapVisibleButton(
                             id: targetLayer.id,
                             isVisible: !targetLayer.isVisible
                         )
@@ -35,10 +36,7 @@ struct TextureLayerListView: View {
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                viewModel.moveLayer(
-                    fromListOffsets: source,
-                    toListOffset: destination
-                )
+                viewModel.onMoveLayer(source: source, destination: destination)
             })
             .listRowSeparator(.hidden)
         }
@@ -160,12 +158,14 @@ private struct PreviewView: View {
     init() {
         viewModel = .init(
             canvasState: canvasState,
-            textureLayerRepository: TextureLayerMockRepository()
+            textureLayerRepository: MockTextureLayerRepository(),
+            undoStack: nil
         )
     }
     var body: some View {
         TextureLayerListView(
-            viewModel: viewModel
+            viewModel: viewModel,
+            canvasState: canvasState
         )
         .frame(width: 256, height: 300)
     }
