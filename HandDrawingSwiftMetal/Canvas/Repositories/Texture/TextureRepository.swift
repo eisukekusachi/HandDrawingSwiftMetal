@@ -30,13 +30,13 @@ protocol TextureRepository {
     func setTextureSize(_ size: CGSize)
 
     /// Adds a texture using UUID
-    func addTexture(_ texture: MTLTexture?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error>
+    func addTexture(_ texture: MTLTexture?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 
     /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error>
+    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 
     /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error>
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error>
 
     /// Removes all managed textures
     func removeAll()

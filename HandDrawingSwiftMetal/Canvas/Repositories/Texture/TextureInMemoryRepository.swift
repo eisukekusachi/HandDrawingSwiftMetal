@@ -103,7 +103,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         _textureSize = size
     }
 
-    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+    func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
@@ -121,8 +121,8 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func copyTexture(uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, Error> {
-        Future<TextureRepositoryEntity, Error> { [weak self] promise in
+    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+        Future<IdentifiedTexture, Error> { [weak self] promise in
             guard let texture = self?.textures[uuid], let device = self?.device else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
                 return
@@ -136,7 +136,7 @@ class TextureInMemoryRepository: ObservableObject, TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[TextureRepositoryEntity], Error> {
+    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
         Publishers.MergeMany(
             uuids.map { copyTexture(uuid: $0) }
         )

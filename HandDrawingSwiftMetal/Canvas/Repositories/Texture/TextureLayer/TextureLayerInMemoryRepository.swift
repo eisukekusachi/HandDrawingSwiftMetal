@@ -84,7 +84,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         .eraseToAnyPublisher()
     }
 
-    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<TextureRepositoryEntity, any Error> {
+    override func addTexture(_ texture: (any MTLTexture)?, using uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
