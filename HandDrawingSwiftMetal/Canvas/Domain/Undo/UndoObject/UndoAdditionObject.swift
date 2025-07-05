@@ -41,7 +41,7 @@ final class UndoAdditionObject: UndoObject {
         self.insertIndex = insertIndex
     }
 
-    /// Copies a texture from `UndoTextureRepository` and add it to `TextureLayerRepository`
+    /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
     func updateTextureLayerRepositoryIfNeeded(
         _ textureLayerRepository: TextureLayerRepository,
         using undoTextureRepository: TextureRepository

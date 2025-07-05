@@ -29,6 +29,7 @@ final class UndoDrawingObject: UndoObject {
         self.textureLayer = textureLayer
     }
 
+    /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
     func updateTextureLayerRepositoryIfNeeded(
         _ textureLayerRepository: TextureLayerRepository,
         using undoTextureRepository: TextureRepository
