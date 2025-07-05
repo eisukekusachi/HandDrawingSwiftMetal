@@ -206,7 +206,7 @@ extension CanvasRenderer {
     ) -> AnyPublisher<Void, Error> {
         guard let textureRepository else {
             Logger.standard.warning("The texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.repositoryUnavailable).eraseToAnyPublisher()
+            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
         }
 
         // Clear the destination texture before merging

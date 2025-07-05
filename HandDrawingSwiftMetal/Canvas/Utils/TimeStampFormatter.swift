@@ -9,7 +9,7 @@ import Foundation
 
 enum TimeStampFormatter {
 
-    static func currentDate() -> String {
+    static var currentDate: String {
         TimeStampFormatter.current(template: "MMM dd HH mm ss")
     }
 

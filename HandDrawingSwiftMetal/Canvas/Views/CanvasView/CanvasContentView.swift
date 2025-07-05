@@ -56,9 +56,6 @@ final class CanvasContentView: UIView {
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        undoButton.isHidden = true
-        redoButton.isHidden = true
     }
 
 }

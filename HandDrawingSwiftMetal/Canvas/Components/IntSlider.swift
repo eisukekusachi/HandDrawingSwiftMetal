@@ -10,7 +10,7 @@ import SwiftUI
 struct IntSlider: View {
 
     @Binding var value: Int
-    @Binding var isPressed: Bool
+    @Binding var isHandleDragging: Bool
 
     @State private var knobOffsetX: CGFloat?
     @State private var isDragging: Bool = false
@@ -21,14 +21,14 @@ struct IntSlider: View {
 
     init(
         value: Binding<Int>,
-        isPressed: Binding<Bool>,
+        isHandleDragging: Binding<Bool>,
         in range: ClosedRange<Int>,
         style: SliderStyleProtocol = DefaultSliderStyle(
             trackLeftColor: UIColor(named: "trackColor")
         )
     ) {
         self._value = value
-        self._isPressed = isPressed
+        self._isHandleDragging = isHandleDragging
         self.closedRange = range
         self.style = style
     }
@@ -98,7 +98,7 @@ struct IntSlider: View {
                             .onChanged { dragGestureValue in
                                 if !isDragging {
                                     isDragging = true
-                                    isPressed = true
+                                    isHandleDragging = true
                                 }
                                 dragging(
                                     geometry: geometry,
@@ -112,7 +112,7 @@ struct IntSlider: View {
                             .onEnded { _ in
                                 isDragging = false
                                 knobOffsetX = nil
-                                isPressed = false
+                                isHandleDragging = false
                             }
                     )
             }
@@ -196,7 +196,7 @@ private struct PreviewView: View {
         ForEach(alphaArray.indices, id: \.self) { index in
             IntSlider(
                 value: $alphaArray[index],
-                isPressed: $isPressedArray[index],
+                isHandleDragging: $isPressedArray[index],
                 in: 0...255
             )
             .padding()
