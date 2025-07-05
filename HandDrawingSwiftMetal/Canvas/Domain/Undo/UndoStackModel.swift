@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import MetalKit
 
 /// A structure that holds both `undo` and `redo` objects
 struct UndoStackModel<T> {
 
     let undoObject: T
     let redoObject: T
+
+    var texture: MTLTexture?
 
     /// Alternate swapping between `undoObject` and `redoObject`
     var reversedObject: Self {

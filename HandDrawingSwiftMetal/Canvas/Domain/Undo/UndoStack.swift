@@ -123,7 +123,10 @@ extension UndoStack {
                 },
                 receiveValue: { [weak self] _ in
                     self?.pushUndoObject(
-                        .init(undoObject: undoObject, redoObject: redoObject)
+                        .init(
+                            undoObject: undoObject,
+                            redoObject: redoObject
+                        )
                     )
                     self?.drawingUndoObject = nil
                 }
@@ -132,7 +135,7 @@ extension UndoStack {
     }
 
     func pushUndoAdditionObject(
-        _ undoRedoObject: UndoRedoObject
+        _ undoRedoObject: UndoStackModel<UndoObject>
     ) {
         // Add a texture to the UndoTextureRepository for restoration
         undoTextureRepository
@@ -155,7 +158,7 @@ extension UndoStack {
     }
 
     func pushUndoDeletionObject(
-        _ undoRedoObject: UndoRedoObject
+        _ undoRedoObject: UndoStackModel<UndoObject>
     ) {
         // Add a texture to the UndoTextureRepository for restoration
         undoTextureRepository
@@ -178,7 +181,7 @@ extension UndoStack {
     }
 
     func pushUndoObject(
-        _ undoRedoObject: UndoRedoObject
+        _ undoRedoObject: UndoStackModel<UndoObject>
     ) {
         let undoObject = undoRedoObject.undoObject
         let redoObject = undoRedoObject.redoObject
@@ -217,7 +220,7 @@ extension UndoStack {
             )
             .store(in: &cancellables)
 
-        pushUndoObject(
+        pushUndoObjectToUndoStack(
             .init(
                 undoObject: undoObject,
                 redoObject: redoObject
@@ -229,7 +232,7 @@ extension UndoStack {
 
 extension UndoStack {
 
-    private func pushUndoObject(
+    private func pushUndoObjectToUndoStack(
         _ undoStack: UndoStackModel<UndoObject>
     ) {
         undoManager.beginUndoGrouping()

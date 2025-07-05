@@ -43,7 +43,6 @@
 		D43E70062E0EDCAC006E07CE /* UndoMoveObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */; };
 		D43E70092E0EDCD9006E07CE /* UndoStackModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */; };
 		D43E700B2E0EDCE2006E07CE /* UndoStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700A2E0EDCE2006E07CE /* UndoStack.swift */; };
-		D43E700D2E0EDD30006E07CE /* UndoRedoObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */; };
 		D43E700F2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */; };
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D447D88A2DC5CE5200007210 /* CanvasStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */; };
@@ -221,7 +220,6 @@
 		D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoMoveObject.swift; sourceTree = "<group>"; };
 		D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStackModel.swift; sourceTree = "<group>"; };
 		D43E700A2E0EDCE2006E07CE /* UndoStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoStack.swift; sourceTree = "<group>"; };
-		D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoRedoObject.swift; sourceTree = "<group>"; };
 		D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureUndoDocumentsDirectorySingletonRepository.swift; sourceTree = "<group>"; };
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CanvasStorage.xcdatamodel; sourceTree = "<group>"; };
@@ -524,7 +522,6 @@
 				D43E6FFE2E0EDCAC006E07CE /* UndoDrawingObject.swift */,
 				D43E70002E0EDCAC006E07CE /* UndoMoveObject.swift */,
 				D43E6FFF2E0EDCAC006E07CE /* UndoObject.swift */,
-				D43E700C2E0EDD30006E07CE /* UndoRedoObject.swift */,
 			);
 			path = UndoObject;
 			sourceTree = "<group>";
@@ -1174,7 +1171,6 @@
 				D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */,
 				D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */,
 				D469A8812C563FA100D10575 /* MTLBuffers.swift in Sources */,
-				D43E700D2E0EDD30006E07CE /* UndoRedoObject.swift in Sources */,
 				D469A86F2C5633FC00D10575 /* PencilSingleCurveIterator.swift in Sources */,
 				D40D977429DAB0AD00A82E6A /* UIColorExtensions.swift in Sources */,
 				D43E700F2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift in Sources */,

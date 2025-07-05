@@ -351,7 +351,7 @@ extension TextureLayerViewModel {
                 )
 
                 undoStack?.pushUndoObject(
-                    UndoRedoObject(
+                    .init(
                         undoObject: undoObject,
                         redoObject: UndoAlphaChangedObject(undoObject, withNewAlpha: newAlpha)
                     )
