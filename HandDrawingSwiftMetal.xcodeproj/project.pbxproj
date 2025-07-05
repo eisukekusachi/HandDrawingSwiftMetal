@@ -12,6 +12,9 @@
 		D400A27C2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D400A27B2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift */; };
 		D4057FFE2D69A11600DB8B4D /* DotPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4057FFD2D69A11600DB8B4D /* DotPoint.swift */; };
 		D40B769B2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */; };
+		D40B769F2E192B140012BFF5 /* AddLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */; };
+		D40B76A12E192B280012BFF5 /* MoveLayerIndicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */; };
+		D40B76A32E192B3B0012BFF5 /* RemoveLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -188,6 +191,9 @@
 		D400A27B2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCurvePencilIteratorTests.swift; sourceTree = "<group>"; };
 		D4057FFD2D69A11600DB8B4D /* DotPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotPoint.swift; sourceTree = "<group>"; };
 		D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewControllerConfiguration.swift; sourceTree = "<group>"; };
+		D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndexTests.swift; sourceTree = "<group>"; };
+		D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndicesTests.swift; sourceTree = "<group>"; };
+		D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndexTests.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -415,6 +421,24 @@
 				D40D975A29DAB09400A82E6A /* TouchPoint.swift */,
 			);
 			path = Points;
+			sourceTree = "<group>";
+		};
+		D40B769C2E192AEB0012BFF5 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				D40B769D2E192AFE0012BFF5 /* Layers */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D40B769D2E192AFE0012BFF5 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */,
+				D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */,
+				D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */,
+			);
+			path = Layers;
 			sourceTree = "<group>";
 		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
@@ -863,6 +887,7 @@
 			isa = PBXGroup;
 			children = (
 				D400A2732C8BEA3000275138 /* Dummies */,
+				D40B769C2E192AEB0012BFF5 /* Domain */,
 				D4650CA82D447EC400E7D60E /* Mocks */,
 				D464FCC12D23EC2400BCC565 /* Models */,
 				D400A2742C8BEA3F00275138 /* Views */,
@@ -1219,6 +1244,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D40B76A12E192B280012BFF5 /* MoveLayerIndicesTests.swift in Sources */,
 				D4650CAE2D447FBE00E7D60E /* CanvasDrawingEraserTextureSetTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D488B59B2DD03D0F00089B3D /* MockCanvasViewProtocol.swift in Sources */,
@@ -1230,11 +1256,13 @@
 				D4517A072CC369FD0047C274 /* GrayscaleDotPointDummy.swift in Sources */,
 				D400A27C2C8BEA8800275138 /* DrawingCurvePencilIteratorTests.swift in Sources */,
 				D4650CA72D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift in Sources */,
+				D40B76A32E192B3B0012BFF5 /* RemoveLayerIndexTests.swift in Sources */,
 				D4650CAC2D447F8900E7D60E /* MockDrawingCurveIterator.swift in Sources */,
 				D400A2762C8BEA5100275138 /* TouchPointDummy.swift in Sources */,
 				D468FC4D2D53A0FF00B0F22E /* CanvasDrawingDisplayLinkTests.swift in Sources */,
 				D45037C22D58554E0039BDA2 /* PencilScreenStrokeDataTests.swift in Sources */,
 				D400A2782C8BEA5E00275138 /* UITouchDummy.swift in Sources */,
+				D40B769F2E192B140012BFF5 /* AddLayerIndexTests.swift in Sources */,
 				D45037C02D58379A0039BDA2 /* FingerScreenStrokeData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

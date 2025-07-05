@@ -25,9 +25,9 @@ final class UndoMoveObject: UndoObject {
 
     var reversedObject: UndoMoveObject {
         let sourceIndex = indices.sourceIndex
-        let destinationIndex = MoveLayerIndices.normalizedDestinationIndex(
-            sourceIndex: sourceIndex,
-            destinationIndex: indices.destinationIndex
+        let destinationIndex = MoveLayerIndices.arrayDestinationIndex(
+            moveLayerSourceIndex: sourceIndex,
+            moveLayerDestinationIndex: indices.destinationIndex
         )
 
         // Reverse the values
@@ -38,8 +38,8 @@ final class UndoMoveObject: UndoObject {
             indices: .init(
                 sourceIndexSet: IndexSet(integer: reversedSourceIndex),
                 destinationIndex: MoveLayerIndices.moveLayerDestinationIndex(
-                    sourceIndex: reversedSourceIndex,
-                    destinationIndex: reversedDestinationIndex
+                    arraySourceIndex: reversedSourceIndex,
+                    arrayDestinationIndex: reversedDestinationIndex
                 )
             ),
             selectedLayerId: selectedLayerId,

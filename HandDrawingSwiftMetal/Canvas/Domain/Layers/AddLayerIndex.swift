@@ -9,7 +9,7 @@ import Foundation
 
 enum AddLayerIndex {
 
-    static func newInsertIndex(selectedIndex: Int) -> Int {
+    static func insertIndex(selectedIndex: Int) -> Int {
         selectedIndex + 1
     }
 

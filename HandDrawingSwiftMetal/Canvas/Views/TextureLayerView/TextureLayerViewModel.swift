@@ -93,7 +93,7 @@ extension TextureLayerViewModel {
         else { return }
 
         let layer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate)
-        let index = AddLayerIndex.newInsertIndex(selectedIndex: selectedIndex)
+        let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
         textureLayerRepository
             .addTexture(
