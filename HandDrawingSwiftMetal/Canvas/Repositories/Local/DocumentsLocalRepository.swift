@@ -63,13 +63,13 @@ final class DocumentsLocalRepository: LocalRepository {
             )
         }
         .tryMap { result in
-            try FileOutputManager.saveJson(
+            try OutputData.saveJson(
                 result,
                 to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
             )
         }
         .tryMap { result in
-            try FileOutputManager.zip(
+            try OutputData.zip(
                 URL.tmpFolderURL,
                 to: zipFileURL
             )
@@ -89,9 +89,9 @@ final class DocumentsLocalRepository: LocalRepository {
             self?.loadDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    try await FileInputManager.unzip(sourceURL, to: URL.tmpFolderURL)
+                    try await InputData.unzip(sourceURL, to: URL.tmpFolderURL)
 
-                    let entity = try FileInputManager.getCanvasEntity(
+                    let entity = try InputData.getCanvasEntity(
                         fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
                     )
                     promise(.success(entity))
@@ -141,7 +141,7 @@ extension DocumentsLocalRepository {
     ) -> AnyPublisher<String, Error> {
         Future<String, Error> { promise in
             do {
-                try FileOutputManager.saveImage(
+                try OutputData.saveImage(
                     image: texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0),
                     to: url.appendingPathComponent(fileName)
                 )
@@ -176,7 +176,7 @@ extension DocumentsLocalRepository {
                         throw DocumentsLocalRepositoryError.exportLayerData
                     }
                     let fileURL = url.appendingPathComponent(id.uuidString)
-                    try FileOutputManager.saveTextureAsData(
+                    try OutputData.saveTextureAsData(
                         bytes: texture.bytes,
                         to: fileURL
                     )

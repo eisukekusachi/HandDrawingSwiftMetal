@@ -1,5 +1,5 @@
 //
-//  FileOutputManager.swift
+//  OutputData.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,7 +8,7 @@
 import UIKit
 import ZipArchive
 
-enum FileOutputManager {
+enum OutputData {
 
     static func createDirectory(_ url: URL) throws {
         do {

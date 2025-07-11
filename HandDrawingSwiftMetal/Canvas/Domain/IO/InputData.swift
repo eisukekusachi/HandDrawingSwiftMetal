@@ -1,5 +1,5 @@
 //
-//  FileInputManager.swift
+//  InputData.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,13 +8,13 @@
 import UIKit
 import ZipArchive
 
-enum FileInputManager {
+enum InputData {
     @Sendable
     static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
-        if let jsonData: CanvasEntity = try FileInputManager.loadJson(fileURL) {
+        if let jsonData: CanvasEntity = try InputData.loadJson(fileURL) {
             return jsonData
 
-        } else if let jsonData: OldCanvasEntity = try FileInputManager.loadJson(fileURL) {
+        } else if let jsonData: OldCanvasEntity = try InputData.loadJson(fileURL) {
             return CanvasEntity.init(entity: jsonData)
         }
 

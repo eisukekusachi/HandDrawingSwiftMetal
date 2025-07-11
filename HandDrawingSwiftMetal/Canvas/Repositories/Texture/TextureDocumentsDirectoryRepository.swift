@@ -138,7 +138,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             }
 
             do {
-                try FileOutputManager.saveTextureAsData(
+                try OutputData.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL
                 )
@@ -171,7 +171,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
 
             do {
-                let newTexture: MTLTexture? = try FileInputManager.loadTexture(
+                let newTexture: MTLTexture? = try InputData.loadTexture(
                     url: destinationUrl,
                     textureSize: self.textureSize,
                     device: device
@@ -274,7 +274,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             }
 
             do {
-                try FileOutputManager.saveTextureAsData(
+                try OutputData.saveTextureAsData(
                     bytes: newTexture.bytes,
                     to: fileURL
                 )
@@ -369,7 +369,7 @@ extension TextureDocumentsDirectoryRepository {
             do {
                 if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
 
-                    try FileOutputManager.saveTextureAsData(
+                    try OutputData.saveTextureAsData(
                         bytes: texture.bytes,
                         to: directoryUrl.appendingPathComponent(uuid.uuidString)
                     )
