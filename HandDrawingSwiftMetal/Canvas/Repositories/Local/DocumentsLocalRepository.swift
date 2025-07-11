@@ -84,15 +84,18 @@ final class DocumentsLocalRepository: LocalRepository {
         sourceURL: URL,
         textureRepository: any TextureRepository
     ) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasEntity, Error> { [weak self] promise in
+
+        let workingDirectory = URL.tmpFolderURL
+
+        return Future<CanvasEntity, Error> { [weak self] promise in
             self?.loadDataTask?.cancel()
             self?.loadDataTask = Task {
                 do {
-                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    try await InputData.unzip(sourceURL, to: URL.tmpFolderURL)
+                    try FileManager.createNewDirectory(url: workingDirectory)
+                    try await InputData.unzip(sourceURL, to: workingDirectory)
 
                     let entity = try InputData.getCanvasEntity(
-                        fileURL: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                        fileURL: workingDirectory.appendingPathComponent(URL.jsonFileName)
                     )
                     promise(.success(entity))
                 } catch {
@@ -120,12 +123,12 @@ final class DocumentsLocalRepository: LocalRepository {
             }
             return textureRepository.resetStorage(
                 configuration: configuration,
-                sourceFolderURL: URL.tmpFolderURL
+                sourceFolderURL: workingDirectory
             )
             .eraseToAnyPublisher()
         }
         .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+            try? FileManager.default.removeItem(at: workingDirectory)
         })
         .eraseToAnyPublisher()
     }
