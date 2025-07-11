@@ -153,7 +153,7 @@ extension CanvasViewController {
             self?.canvasViewModel.didTapSaveButton()
         }
         contentView.tapLoadButton = { [weak self] in
-            self?.setupFileView()
+            self?.showFileView()
         }
         contentView.tapExportImageButton = { [weak self] in
             self?.contentView.exportImageButton.debounce()
@@ -209,19 +209,15 @@ extension CanvasViewController {
         )
     }
 
-    private func setupFileView() {
-        let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
-            $0.lastPathComponent
-        }
-
+    private func showFileView() {
         let fileView = FileView(
-            zipFileList: zipFilePashArray,
-            didTapItem: { [weak self] selectedZipFilePath in
-                self?.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
+            targetURL: URL.documents,
+            suffix: URL.zipSuffix,
+            onTapItem: { [weak self] url in
+                self?.canvasViewModel.loadFile(from: url)
                 self?.presentedViewController?.dismiss(animated: true)
             }
         )
-
         present(
             UIHostingController(rootView: fileView),
             animated: true

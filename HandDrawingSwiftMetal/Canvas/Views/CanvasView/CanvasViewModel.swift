@@ -457,9 +457,6 @@ extension CanvasViewModel {
         )
     }
 
-    func didTapLoadButton(filePath: String) {
-        loadFile(from: filePath)
-    }
     func didTapSaveButton() {
         guard let canvasTexture = renderer.canvasTexture else { return }
         saveFile(canvasTexture: canvasTexture)
@@ -603,9 +600,9 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func loadFile(from filePath: String) {
+    func loadFile(from url: URL) {
         localRepository.loadDataFromDocuments(
-            sourceURL: URL.documents.appendingPathComponent(filePath),
+            sourceURL: url,
             textureRepository: textureLayerRepository
         )
         .handleEvents(
