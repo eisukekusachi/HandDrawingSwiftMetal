@@ -63,7 +63,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                     tmpThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
 
-                // Delete all files
+                // Delete all existing files
                 self.resetDirectory(&self.directoryUrl)
 
                 // Move all files
