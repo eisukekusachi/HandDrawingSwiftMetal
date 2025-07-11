@@ -18,7 +18,7 @@ enum InputData {
             return CanvasEntity.init(entity: jsonData)
         }
 
-        throw FileInputError.cannotFindFile
+        throw InputDataError.cannotFindFile
     }
 
     static func loadTexture(url: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
@@ -39,7 +39,7 @@ enum InputData {
         let dataJson: Data? = jsonString.data(using: .utf8)
 
         guard let dataJson else {
-            throw FileInputError.failedToConvertData
+            throw InputDataError.failedToConvertData
         }
 
         return try JSONDecoder().decode(T.self, from: dataJson)
@@ -50,16 +50,14 @@ enum InputData {
             atPath: sourceZipURL.path,
             toDestination: destinationFolderURL.path
         ) {
-            throw FileInputError.failedToUnzip
+            throw InputDataError.failedToUnzip
         }
     }
 
 }
 
-enum FileInputError: Error {
+enum InputDataError: Error {
     case cannotFindFile
     case failedToUnzip
     case failedToConvertData
-    case failedToLoadJson
-    case failedToApplyData
 }

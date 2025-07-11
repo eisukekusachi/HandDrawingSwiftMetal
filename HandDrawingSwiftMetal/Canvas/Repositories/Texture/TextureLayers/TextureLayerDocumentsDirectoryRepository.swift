@@ -116,7 +116,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 )
 
             } catch {
-                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
+                promise(.failure(TextureLayerDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -185,7 +185,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                     .init(uuid: uuid, texture: newTexture)
                 ))
             } catch {
-                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
+                promise(.failure(TextureLayerDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -224,7 +224,7 @@ extension TextureLayerDocumentsDirectoryRepository {
                 promise(.success(()))
 
             } catch {
-                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
+                promise(.failure(TextureLayerDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -243,4 +243,8 @@ extension TextureLayerDocumentsDirectoryRepository {
         objectWillChangeSubject.send(())
     }
 
+}
+
+enum TextureLayerDocumentsDirectoryRepositoryError: Error {
+    case failedToUpdateTexture(Error)
 }

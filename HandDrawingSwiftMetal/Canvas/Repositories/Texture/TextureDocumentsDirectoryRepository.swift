@@ -148,7 +148,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 ))
 
             } catch {
-                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
+                promise(.failure(TextureDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -283,7 +283,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 ))
 
             } catch {
-                promise(.failure(FileOutputError.failedToUpdateTexture(error)))
+                promise(.failure(TextureDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -409,6 +409,7 @@ extension TextureDocumentsDirectoryRepository {
 
 enum TextureDocumentsDirectoryRepositoryError: Error {
     case failedToCreateNewTexture
+    case failedToUpdateTexture(Error)
     case storageNotSynchronized
     case textureSizeIsZero
     case fileNotFound(String)
