@@ -307,20 +307,9 @@ extension CanvasViewModel {
             self?.updateCanvasView()
         }
 
-        textureLayerRepository
-            .updateAllThumbnails(textureSize: textureSize)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                switch completion {
-                case .finished: break
-                case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
-                }
-                self?.canvasViewSetupCompletedSubject.send(())
-                self?.activityIndicatorShowRequestSubject.send(false)
-            }, receiveValue: {})
-            .store(in: &cancellables)
+        canvasViewSetupCompletedSubject.send(())
+        activityIndicatorShowRequestSubject.send(false)
     }
-
 }
 
 extension CanvasViewModel {

@@ -82,6 +82,25 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         .eraseToAnyPublisher()
     }
 
+    override func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            promise(.success(()))
+        }
+        .eraseToAnyPublisher()
+    }
+
     override func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, any Error> {
         Future { [weak self] promise in
             guard let `self`, let texture else {
@@ -151,23 +170,6 @@ extension TextureLayerInMemoryRepository {
     func thumbnail(_ uuid: UUID) -> UIImage? {
         thumbnails[uuid]?.flatMap { $0 }
     }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future { promise in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let `self` else { return }
-
-                for (uuid, texture) in self.textures {
-                    guard let texture else { return }
-                    self.setThumbnail(texture: texture, for: uuid)
-                }
-
-                promise(.success(()))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
 }
 
 extension TextureLayerInMemoryRepository {

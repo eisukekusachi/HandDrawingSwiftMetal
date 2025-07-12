@@ -121,6 +121,23 @@ class TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+
+            promise(.success(()))
+        }
+        .eraseToAnyPublisher()
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         Future<IdentifiedTexture, Error> { [weak self] promise in
             guard
@@ -222,22 +239,4 @@ extension TextureInMemoryRepository {
         }
         .eraseToAnyPublisher()
     }
-
-    private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-
-            promise(.success(()))
-        }
-        .eraseToAnyPublisher()
-    }
-
 }

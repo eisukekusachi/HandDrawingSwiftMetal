@@ -56,6 +56,10 @@ class TextureLayerRepositoryWrapper: TextureLayerRepository {
         repository.addTexture(texture, newTextureUUID: uuid)
     }
 
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        repository.createTexture(uuid: uuid, textureSize: textureSize)
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         repository.copyTexture(uuid: uuid)
     }
@@ -75,9 +79,4 @@ class TextureLayerRepositoryWrapper: TextureLayerRepository {
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         repository.updateTexture(texture: texture, for: uuid)
     }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        repository.updateAllThumbnails(textureSize: textureSize)
-    }
-
 }

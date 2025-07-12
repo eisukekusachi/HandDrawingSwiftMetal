@@ -34,6 +34,8 @@ protocol TextureRepository {
     /// Adds a texture using UUID
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
+
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
 

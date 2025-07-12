@@ -16,8 +16,4 @@ protocol TextureLayerRepository: TextureRepository {
 
     /// Gets the thumbnail image for UUID
     func thumbnail(_ uuid: UUID) -> UIImage?
-
-    /// Updates all thumbnails
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error>
-
 }

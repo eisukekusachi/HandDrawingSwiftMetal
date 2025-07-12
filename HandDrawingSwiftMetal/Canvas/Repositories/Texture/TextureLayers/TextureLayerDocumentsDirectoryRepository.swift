@@ -32,6 +32,90 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    /// Attempts to restore layers from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the canvas with it
+    override func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        if FileManager.containsFiles(configuration.layers.map { $0.fileName }, in: directoryUrl) {
+            let textureSize = configuration.textureSize ?? .zero
+
+            // Retain IDs if texture filenames match the configuration
+            textureIds = Set(configuration.layers.map { $0.id })
+
+            // Set the texture size after the initialization of this repository is completed
+            setTextureSize(textureSize)
+
+            return updateAllThumbnails(textureSize: textureSize)
+                .flatMap { result -> AnyPublisher<CanvasConfiguration, Error> in
+                    Just(configuration)
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
+                }
+                .eraseToAnyPublisher()
+        } else {
+            return initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    override func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard
+            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
+            Int(textureSize.height) > MTLRenderer.threadGroupLength
+        else {
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
+        }
+
+        // Delete all files in the directory
+        resetDirectory(&directoryUrl)
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return .init(textureSize: textureSize, layers: [layer])
+        }
+        .eraseToAnyPublisher()
+    }
+
+    override func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
+
+            do {
+                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+
+                    try FileOutput.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textureIds.insert(uuid)
+                    self.setThumbnail(texture: texture, for: uuid)
+
+                    promise(.success(()))
+                } else {
+                    promise(.failure(TextureRepositoryError.failedToUnwrap))
+                }
+
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
     override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
         Future<CanvasConfiguration, Error> { [weak self] promise in
             guard

@@ -35,6 +35,12 @@ final class MockTextureLayerRepository: TextureLayerRepository {
             .eraseToAnyPublisher()
     }
 
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
     func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
         Just(())
             .setFailureType(to: Error.self)
@@ -113,11 +119,4 @@ final class MockTextureLayerRepository: TextureLayerRepository {
         .setFailureType(to: Error.self)
         .eraseToAnyPublisher()
     }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
 }

@@ -48,6 +48,10 @@ class TextureRepositoryWrapper: TextureRepository {
         repository.addTexture(texture, newTextureUUID: uuid)
     }
 
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        repository.createTexture(uuid: uuid, textureSize: textureSize)
+    }
+
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         repository.copyTexture(uuid: uuid)
     }

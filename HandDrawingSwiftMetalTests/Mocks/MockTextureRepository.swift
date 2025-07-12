@@ -102,11 +102,4 @@ final class MockTextureRepository: TextureRepository {
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        return Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
 }

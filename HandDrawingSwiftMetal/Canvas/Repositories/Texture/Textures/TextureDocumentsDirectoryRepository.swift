@@ -56,14 +56,78 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        initializeStorageIfValid(configuration: configuration)
-            .catch { [weak self] error -> AnyPublisher<CanvasConfiguration, Error> in
-                guard let self else {
-                    return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
+        if FileManager.containsFiles(configuration.layers.map { $0.fileName }, in: directoryUrl) {
+            // Retain IDs if texture filenames match the configuration
+            textureIds = Set(configuration.layers.map { $0.id })
+
+            // Set the texture size after the initialization of this repository is completed
+            setTextureSize(configuration.textureSize ?? .zero)
+
+            return Just(configuration)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        } else {
+            return initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard
+            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
+            Int(textureSize.height) > MTLRenderer.threadGroupLength
+        else {
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
+        }
+
+        // Delete all files in the directory
+        resetDirectory(&directoryUrl)
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return .init(textureSize: textureSize, layers: [layer])
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
+
+            do {
+                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+
+                    try FileOutput.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textureIds.insert(uuid)
+
+                    promise(.success(()))
+                } else {
+                    promise(.failure(TextureRepositoryError.failedToUnwrap))
                 }
-                return self.initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
+
+            } catch {
+                promise(.failure(error))
             }
-            .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
@@ -289,60 +353,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
 
 extension TextureDocumentsDirectoryRepository {
 
-    private func initializeStorageIfValid(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        isStorageSynchronized(at: directoryUrl, expectedFileNames: configuration.layers.map { $0.fileName })
-            .tryMap { [weak self] allExist in
-                guard let self else {
-                    throw TextureRepositoryError.failedToUnwrap
-                }
-
-                guard allExist else {
-                    throw TextureDocumentsDirectoryRepositoryError.storageNotSynchronized
-                }
-
-                // Retain IDs if texture filenames match the configuration
-                self.textureIds = Set(configuration.layers.map { $0.id })
-
-                // Set the texture size after the initialization of this repository is completed
-                self.setTextureSize(configuration.textureSize ?? .zero)
-
-                return (configuration)
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
-        else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
-        }
-
-        // Delete all files in the directory
-        resetDirectory(&directoryUrl)
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
-        )
-
-        return createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            return (.init(textureSize: textureSize, layers: [layer]))
-        }
-        .eraseToAnyPublisher()
-    }
-
     // If a directory with the same name already exists at url,
     // this method does nothing and does not throw an error
-    private func createDirectory(_ url: inout URL) {
+    func createDirectory(_ url: inout URL) {
         do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
 
@@ -353,53 +366,6 @@ extension TextureDocumentsDirectoryRepository {
         } catch {
             Logger.standard.error("Failed to create texture storage directory: \(error)")
         }
-    }
-
-    private func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
-
-            do {
-                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
-
-                    try FileOutput.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    self.textureIds.insert(uuid)
-
-                    promise(.success(()))
-                } else {
-                    promise(.failure(TextureRepositoryError.failedToUnwrap))
-                }
-
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    /// Checks whether the contents of the specified directory exactly match the given set of file names
-    private func isStorageSynchronized(
-        at directory: URL,
-        expectedFileNames: [String]
-    ) -> AnyPublisher<Bool, Error> {
-        Future<Bool, Error> { promise in
-            let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
-
-            let existingFileNames = Set(fileURLs.map { $0.lastPathComponent })
-            let expectedNames = Set(expectedFileNames)
-
-            let isSynchronized = !expectedNames.isEmpty && existingFileNames == expectedNames
-
-            promise(.success(isSynchronized))
-        }
-        .eraseToAnyPublisher()
     }
 }
 
