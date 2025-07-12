@@ -15,6 +15,8 @@ final class DocumentsDirectoryRepository {
     private var saveDataTask: Task<Void, Error>?
     private var loadDataTask: Task<Void, Error>?
 
+    private let workingDirectory = URL.tmpFolderURL
+
     deinit {
         saveDataTask?.cancel()
         loadDataTask?.cancel()
@@ -25,12 +27,15 @@ final class DocumentsDirectoryRepository {
         textureRepository: any TextureRepository,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-        Future<URL, Error> { [weak self] promise in
+
+        let workingDirectory = self.workingDirectory
+
+        return Future<URL, Error> { [weak self] promise in
             self?.saveDataTask?.cancel()
             self?.saveDataTask = Task {
                 do {
-                    try FileManager.createNewDirectory(url: URL.tmpFolderURL)
-                    promise(.success(URL.tmpFolderURL))
+                    try FileManager.createNewDirectory(url: workingDirectory)
+                    promise(.success(workingDirectory))
                 } catch {
                     promise(.failure(DocumentsLocalRepositoryError.exportLayerData))
                 }
@@ -65,17 +70,17 @@ final class DocumentsDirectoryRepository {
         .tryMap { result in
             try FileOutput.saveJson(
                 result,
-                to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
+                to: workingDirectory.appendingPathComponent(URL.jsonFileName)
             )
         }
         .tryMap { result in
             try FileOutput.zip(
-                URL.tmpFolderURL,
+                workingDirectory,
                 to: zipFileURL
             )
         }
         .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: URL.tmpFolderURL)
+            try? FileManager.default.removeItem(at: workingDirectory)
         })
         .eraseToAnyPublisher()
     }
@@ -85,7 +90,7 @@ final class DocumentsDirectoryRepository {
         textureRepository: any TextureRepository
     ) -> AnyPublisher<CanvasConfiguration, Error> {
 
-        let workingDirectory = URL.tmpFolderURL
+        let workingDirectory = self.workingDirectory
 
         return Future<CanvasEntity, Error> { [weak self] promise in
             self?.loadDataTask?.cancel()
