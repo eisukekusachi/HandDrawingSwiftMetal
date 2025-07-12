@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+/// A repository responsible for handling local file operations
 final class LocalFileRepository {
 
     let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
@@ -18,7 +19,7 @@ final class LocalFileRepository {
 }
 
 extension LocalFileRepository {
-
+    /// Compresses the working directory contents into a ZIP file
     func zipWorkingDirectory(
         to zipFileURL: URL
     ) throws {
@@ -27,7 +28,7 @@ extension LocalFileRepository {
             to: zipFileURL
         )
     }
-
+    /// Unzips a file into the working directory
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
@@ -69,7 +70,7 @@ extension LocalFileRepository {
 }
 
 extension LocalFileRepository {
-
+    /// Saves a single file item to the working directory
     func saveToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>
     ) -> AnyPublisher<URL, Error> {
@@ -85,7 +86,7 @@ extension LocalFileRepository {
         }
         .eraseToAnyPublisher()
     }
-
+    /// Saves multiple file items to the working directory
     func saveAllToWorkingDirectory<T: LocalFileConvertible>(
         namedItems: [LocalFileNamedItem<T>]
     ) -> AnyPublisher<[URL], Error> {
