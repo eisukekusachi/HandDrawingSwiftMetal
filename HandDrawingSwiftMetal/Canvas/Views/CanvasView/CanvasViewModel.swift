@@ -22,9 +22,9 @@ final class CanvasViewModel {
         activityIndicatorShowRequestSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits a request to show or hide the alert
-    var alertShowRequestPublisher: AnyPublisher<String, Never> {
-        alertShowRequestSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show the alert
+    var alert: AnyPublisher<Error, Never> {
+        alertSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the toast
@@ -101,7 +101,7 @@ final class CanvasViewModel {
 
     private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertShowRequestSubject = PassthroughSubject<String, Never>()
+    private let alertSubject = PassthroughSubject<Error, Never>()
 
     private let toastShowRequestSubject = PassthroughSubject<ToastModel, Never>()
 
@@ -231,7 +231,7 @@ final class CanvasViewModel {
 
         canvasStateStorage?.errorDialogSubject
             .sink { [weak self] error in
-                self?.alertShowRequestSubject.send(error.localizedDescription)
+                self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
 
@@ -601,10 +601,25 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func loadFile(from url: URL) {
-        documentsDirectoryRepository.loadData(
-            from: url,
-            textureRepository: textureLayerRepository
+        documentsDirectoryRepository.extractZip(
+            url: url
         )
+        .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
+            do {
+                let entity = try FileInput.getCanvasEntity(
+                    fileURL: workingDirectoryURL.appendingPathComponent(URL.jsonFileName)
+                )
+                return self.textureLayerRepository.resetStorage(
+                    configuration: .init(
+                        projectName: url.fileName,
+                        entity: entity
+                    ),
+                   sourceFolderURL: workingDirectoryURL
+               )
+           } catch(let error) {
+               return Fail(error: error).eraseToAnyPublisher()
+           }
+        }
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
             receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
@@ -612,8 +627,11 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
+            case .failure(let error): self?.alertSubject.send(error)
             }
+
+            self?.documentsDirectoryRepository.removeWorkingDirectory()
+
         }, receiveValue: { [weak self] configuration in
             Task { @MainActor in
                 self?.completeInitialization(configuration)
@@ -636,7 +654,7 @@ extension CanvasViewModel {
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
             case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
+            case .failure(let error): self?.alertSubject.send(error)
             }
         }, receiveValue: {})
         .store(in: &cancellables)

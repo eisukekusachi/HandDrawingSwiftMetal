@@ -95,12 +95,12 @@ extension CanvasViewController {
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.alertShowRequestPublisher
+        canvasViewModel.alert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
+            .sink { [weak self] error in
                 self?.showAlert(
                     title: "Alert",
-                    message: message
+                    message: error.localizedDescription
                 )
             }
             .store(in: &cancellables)

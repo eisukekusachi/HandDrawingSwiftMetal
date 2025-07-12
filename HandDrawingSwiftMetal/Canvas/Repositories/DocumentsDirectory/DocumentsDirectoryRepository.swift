@@ -13,10 +13,10 @@ final class DocumentsDirectoryRepository {
     static let thumbnailName: String = "thumbnail.png"
     static let thumbnailLength: CGFloat = 500
 
+    static let workingDirectory = URL.tmpFolderURL
+
     private var saveDataTask: Task<Void, Error>?
     private var loadDataTask: Task<Void, Error>?
-
-    private let workingDirectory = URL.tmpFolderURL
 
     deinit {
         saveDataTask?.cancel()
@@ -29,7 +29,7 @@ final class DocumentsDirectoryRepository {
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
 
-        let workingDirectory = self.workingDirectory
+        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
         return Future<URL, Error> { [weak self] promise in
             self?.saveDataTask?.cancel()
@@ -86,61 +86,29 @@ final class DocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
-    func loadData(
-        from sourceURL: URL,
-        textureRepository: any TextureRepository
-    ) -> AnyPublisher<CanvasConfiguration, Error> {
+    func extractZip(
+        url sourceURL: URL
+    ) -> AnyPublisher<URL, Error> {
+        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
-        let workingDirectory = self.workingDirectory
-
-        return Future<CanvasEntity, Error> { [weak self] promise in
+        return Future<URL, Error> { [weak self] promise in
             self?.loadDataTask?.cancel()
             self?.loadDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: workingDirectory)
                     try await FileInput.unzip(sourceURL, to: workingDirectory)
 
-                    let entity = try FileInput.getCanvasEntity(
-                        fileURL: workingDirectory.appendingPathComponent(URL.jsonFileName)
-                    )
-                    promise(.success(entity))
+                    promise(.success(workingDirectory))
                 } catch {
                     promise(.failure(error))
                 }
             }
         }
-        .flatMap { entity -> AnyPublisher<CanvasConfiguration, Never> in
-            Just(
-                .init(
-                    projectName: sourceURL.fileName,
-                    entity: entity
-                )
-            )
-            .eraseToAnyPublisher()
-        }
-        .flatMap { configuration -> AnyPublisher<CanvasConfiguration, Error> in
-            guard
-                let textureSize = configuration.textureSize,
-                Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
-            else {
-                Logger.standard.error("Texture size is below the minimum: \(configuration.textureSize?.width ?? 0) \(configuration.textureSize?.height ?? 0)")
-                return Fail(error: DocumentsDirectoryRepositoryError.invalidValue("thumbnail size \(configuration.textureSize?.width ?? 0) \(configuration.textureSize?.height ?? 0)"))
-                    .eraseToAnyPublisher()
-            }
-            return textureRepository.resetStorage(
-                configuration: configuration,
-                sourceFolderURL: workingDirectory
-            )
-            .eraseToAnyPublisher()
-        }
-        .handleEvents(receiveCompletion: { [weak self] _ in
-            self?.removeWorkingDirectory()
-        })
         .eraseToAnyPublisher()
     }
 
     func removeWorkingDirectory() {
-        try? FileManager.default.removeItem(at: workingDirectory)
+        try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
     }
 }
 
