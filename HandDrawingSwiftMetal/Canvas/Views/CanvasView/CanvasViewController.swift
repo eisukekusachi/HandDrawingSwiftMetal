@@ -214,8 +214,8 @@ extension CanvasViewController {
             targetURL: URL.documents,
             suffix: URL.zipSuffix,
             onTapItem: { [weak self] url in
-                self?.canvasViewModel.loadFile(from: url)
                 self?.presentedViewController?.dismiss(animated: true)
+                self?.canvasViewModel.loadFile(zipFileURL: url)
             }
         )
         present(

@@ -83,8 +83,8 @@ final class DocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
-    func extractZip(
-        url sourceURL: URL
+    func unzipToWorkingDirectory(
+        zipFileURL url: URL
     ) -> AnyPublisher<URL, Error> {
         let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
@@ -93,7 +93,7 @@ final class DocumentsDirectoryRepository {
             self?.loadDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: workingDirectory)
-                    try await FileInput.unzip(sourceURL, to: workingDirectory)
+                    try await FileInput.unzip(url, to: workingDirectory)
 
                     promise(.success(workingDirectory))
                 } catch {

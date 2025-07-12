@@ -600,9 +600,9 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func loadFile(from url: URL) {
-        documentsDirectoryRepository.extractZip(
-            url: url
+    func loadFile(zipFileURL url: URL) {
+        documentsDirectoryRepository.unzipToWorkingDirectory(
+            zipFileURL: url
         )
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
