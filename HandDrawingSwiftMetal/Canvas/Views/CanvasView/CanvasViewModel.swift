@@ -547,10 +547,10 @@ extension CanvasViewModel {
                 self?.resetAllInputParameters()
             },
             receiveValue: { [weak self] result in
-                if let canvasState = self?.canvasState, let texture = result.texture {
+                if let canvasState = self?.canvasState {
                     self?.undoStack?.pushUndoDrawingObject(
                         canvasState: canvasState,
-                        texture: texture
+                        texture: result.texture
                     )
                 }
             }

@@ -126,10 +126,14 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                 return
             }
 
-            let newTexture = MTLTextureCreator.duplicateTexture(
+            guard let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: texture,
                 with: device
-            )
+            ) else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
             self.textures[uuid] = newTexture
             self.setThumbnail(texture: newTexture, for: uuid)
 

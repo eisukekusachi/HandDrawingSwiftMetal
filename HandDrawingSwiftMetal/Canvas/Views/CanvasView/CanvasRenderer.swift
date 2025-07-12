@@ -224,9 +224,9 @@ extension CanvasRenderer {
         .map { [weak self] results in
             for layer in layers {
                 // Convert entities to a dictionary for easy lookup
-                let textureDict = Dictionary(uniqueKeysWithValues: results.map { ($0.uuid, $0.texture) })
+                let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
 
-                if let resultTexture = textureDict[layer.id]?.flatMap({ $0 }) {
+                if let resultTexture = textureDictionary[layer.id].flatMap({ $0 }) {
                     self?.renderer.mergeTexture(
                         texture: resultTexture,
                         alpha: layer.alpha,

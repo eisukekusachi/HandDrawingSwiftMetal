@@ -151,10 +151,10 @@ extension DocumentsDirectoryRepository {
                     throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
                 }
                 // Convert entities to a dictionary for easy lookup
-                let textureDict = Dictionary(uniqueKeysWithValues: results.map { ($0.uuid, $0.texture) })
+                let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
 
                 try textureIds.forEach { id in
-                    guard let texture = textureDict[id].flatMap({ $0 }) else {
+                    guard let texture = textureDictionary[id].flatMap({ $0 }) else {
                         throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
                     }
                     let fileURL = url.appendingPathComponent(id.uuidString)

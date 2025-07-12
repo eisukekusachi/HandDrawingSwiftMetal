@@ -125,16 +125,15 @@ class TextureInMemoryRepository: TextureRepository {
         Future<IdentifiedTexture, Error> { [weak self] promise in
             guard
                 let texture = self?.textures[uuid],
-                let device = MTLCreateSystemDefaultDevice()
+                let device = MTLCreateSystemDefaultDevice(),
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
             else {
                 promise(.failure(TextureRepositoryError.failedToLoadTexture))
                 return
             }
-
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
-            )
 
             promise(.success(
                 .init(uuid: uuid, texture: newTexture)
@@ -166,7 +165,11 @@ class TextureInMemoryRepository: TextureRepository {
             guard
                 let `self`,
                 let texture,
-                let device = MTLCreateSystemDefaultDevice()
+                let device = MTLCreateSystemDefaultDevice(),
+                let newTexture = MTLTextureCreator.duplicateTexture(
+                    texture: texture,
+                    with: device
+                )
             else {
                 promise(.failure(TextureRepositoryError.failedToUnwrap))
                 return
@@ -177,10 +180,6 @@ class TextureInMemoryRepository: TextureRepository {
                 return
             }
 
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
-            )
             self.textures[uuid] = newTexture
 
             promise(.success(

@@ -162,31 +162,27 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             .eraseToAnyPublisher()
         }
 
+        let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+
         return Future<IdentifiedTexture, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
-
-            let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
-
             do {
-                let newTexture: MTLTexture? = try FileInput.loadTexture(
-                    url: destinationUrl,
-                    textureSize: self.textureSize,
-                    device: device
-                )
-
-                if newTexture == nil {
-                    promise(.failure(TextureDocumentsDirectoryRepositoryError.fileNotFound(destinationUrl.path)))
-                } else {
-                    promise(
-                        .success(
-                            .init(uuid: uuid, texture: newTexture)
-                        )
+                guard
+                    let `self`,
+                    let device = MTLCreateSystemDefaultDevice(),
+                    let newTexture: MTLTexture = try FileInput.loadTexture(
+                        url: destinationUrl,
+                        textureSize: self.textureSize,
+                        device: device
                     )
+                else {
+                    return promise(.failure(TextureDocumentsDirectoryRepositoryError.fileNotFound(destinationUrl.path)))
                 }
 
+                promise(
+                    .success(
+                        .init(uuid: uuid, texture: newTexture)
+                    )
+                )
             } catch {
                 promise(.failure(error))
             }
