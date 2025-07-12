@@ -15,6 +15,7 @@
 		D40B769F2E192B140012BFF5 /* AddLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */; };
 		D40B76A12E192B280012BFF5 /* MoveLayerIndicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */; };
 		D40B76A32E192B3B0012BFF5 /* RemoveLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */; };
+		D40B76F32E21F11A0012BFF5 /* CanvasSaveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -192,6 +193,7 @@
 		D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndexTests.swift; sourceTree = "<group>"; };
 		D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndicesTests.swift; sourceTree = "<group>"; };
 		D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndexTests.swift; sourceTree = "<group>"; };
+		D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasSaveData.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -575,13 +577,13 @@
 			path = Texture;
 			sourceTree = "<group>";
 		};
-		D447D89C2DC6585500007210 /* Local */ = {
+		D447D89C2DC6585500007210 /* DocumentsDirectory */ = {
 			isa = PBXGroup;
 			children = (
 				D44D19712BE5DBF60069D4A9 /* DocumentsDirectoryRepository.swift */,
 				D4CACC852DBE680700E70E18 /* DocumentsDirectorySingletonRepository.swift */,
 			);
-			path = Local;
+			path = DocumentsDirectory;
 			sourceTree = "<group>";
 		};
 		D44B52972DB3928000EE213C /* Extensions */ = {
@@ -630,6 +632,7 @@
 				D44B52A32DB3928000EE213C /* Textures */,
 				D44B52D42DB3ACA500EE213C /* States */,
 				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
+				D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */,
 				D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */,
 			);
 			path = Models;
@@ -689,7 +692,7 @@
 			isa = PBXGroup;
 			children = (
 				D447D8942DC6265200007210 /* CoreData */,
-				D447D89C2DC6585500007210 /* Local */,
+				D447D89C2DC6585500007210 /* DocumentsDirectory */,
 				D447D89B2DC6582B00007210 /* Texture */,
 			);
 			path = Repositories;
@@ -1180,6 +1183,7 @@
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4FE0F322E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift in Sources */,
+				D40B76F32E21F11A0012BFF5 /* CanvasSaveData.swift in Sources */,
 				D4FE0F392E158791001A0E87 /* RemoveLayerIndex.swift in Sources */,
 				D4812E472D1643F400F47DC7 /* Logger.swift in Sources */,
 				D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */,
