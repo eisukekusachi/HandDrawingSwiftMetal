@@ -11,6 +11,10 @@ import SwiftUI
 
 final class CanvasViewModel {
 
+    static var fileSuffix: String {
+        "zip"
+    }
+
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
@@ -614,7 +618,7 @@ extension CanvasViewModel {
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
                 let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(URL.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
                 )
                 return self.textureLayerRepository.resetStorage(
                     configuration: .init(
@@ -659,7 +663,10 @@ extension CanvasViewModel {
             renderTexture: canvasTexture,
             canvasState: canvasState,
             textureRepository: textureLayerRepository,
-            to: URL.zipFileURL(projectName: canvasState.projectName)
+            to: DocumentsDirectoryRepository.fileURL(
+                projectName: canvasState.projectName,
+                fileSuffix: CanvasViewModel.fileSuffix
+            )
         )
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },

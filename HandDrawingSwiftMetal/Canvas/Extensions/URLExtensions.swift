@@ -18,20 +18,6 @@ extension URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     }
 
-    static func zipFileURL(projectName: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
-    }
-
-    static var zipSuffix: String {
-        "zip"
-    }
-    static var thumbnailPath: String {
-        "thumbnail.png"
-    }
-    static var jsonFileName: String {
-        "data"
-    }
-
     var fileName: String {
         self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
     }

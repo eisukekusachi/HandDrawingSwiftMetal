@@ -13,6 +13,15 @@ final class DocumentsDirectoryRepository {
     static let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
     static let thumbnailName: String = "thumbnail.png"
+
+    static var jsonFileName: String {
+        "data"
+    }
+
+    static func fileURL(projectName: String, fileSuffix: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + fileSuffix)
+    }
+
     static let thumbnailLength: CGFloat = 500
 
     private var saveDataTask: Task<Void, Error>?
@@ -54,7 +63,7 @@ final class DocumentsDirectoryRepository {
         .tryMap { result in
             try FileOutput.saveJson(
                 result,
-                to: workingDirectory.appendingPathComponent(URL.jsonFileName)
+                to: workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
             )
         }
         .tryMap { result in

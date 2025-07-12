@@ -212,7 +212,7 @@ extension CanvasViewController {
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
-            suffix: URL.zipSuffix,
+            suffix: CanvasViewModel.fileSuffix,
             onTapItem: { [weak self] url in
                 self?.presentedViewController?.dismiss(animated: true)
                 self?.canvasViewModel.loadFile(zipFileURL: url)
