@@ -79,8 +79,8 @@ final class DocumentsDirectoryRepository {
                 to: zipFileURL
             )
         }
-        .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: workingDirectory)
+        .handleEvents(receiveCompletion: { [weak self] _ in
+            self?.removeWorkingDirectory()
         })
         .eraseToAnyPublisher()
     }
@@ -132,10 +132,14 @@ final class DocumentsDirectoryRepository {
             )
             .eraseToAnyPublisher()
         }
-        .handleEvents(receiveCompletion: { _ in
-            try? FileManager.default.removeItem(at: workingDirectory)
+        .handleEvents(receiveCompletion: { [weak self] _ in
+            self?.removeWorkingDirectory()
         })
         .eraseToAnyPublisher()
+    }
+
+    func removeWorkingDirectory() {
+        try? FileManager.default.removeItem(at: workingDirectory)
     }
 }
 
