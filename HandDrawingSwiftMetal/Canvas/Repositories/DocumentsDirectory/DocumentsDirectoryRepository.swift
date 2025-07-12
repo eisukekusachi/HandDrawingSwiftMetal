@@ -14,54 +14,17 @@ final class DocumentsDirectoryRepository {
 
     static let thumbnailName: String = "thumbnail.png"
 
-    static var jsonFileName: String {
-        "data"
-    }
+    static let jsonFileName: String = "data"
+
+    static let thumbnailLength: CGFloat = 500
 
     static func fileURL(projectName: String, suffix: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
     }
 
-    static let thumbnailLength: CGFloat = 500
+}
 
-    private var saveDataTask: Task<Void, Error>?
-    private var loadDataTask: Task<Void, Error>?
-
-    deinit {
-        saveDataTask?.cancel()
-        loadDataTask?.cancel()
-    }
-
-    func saveData(
-        renderTexture: MTLTexture,
-        canvasState: CanvasState,
-        textureRepository: any TextureRepository,
-        to zipFileURL: URL
-    ) -> AnyPublisher<Void, Error> {
-        Publishers.CombineLatest(
-            self.saveThumbnailToWorkingDirectory(
-                canvasTexture: renderTexture
-            ),
-            self.saveTexturesToWorkingDirectory(
-                textureRepository: textureRepository,
-                textureIds: canvasState.layers.map { $0.id }
-            )
-        )
-        .tryMap { [weak self] thumbnailName, _ in
-            self?.saveCanvasEntityToWorkingDirectory(
-                entity: .init(
-                    thumbnailName: thumbnailName,
-                    canvasState: canvasState
-                )
-            )
-        }
-        .tryMap { [weak self] result in
-            try self?.zipWorkingDirectory(
-                to: zipFileURL
-            )
-        }
-        .eraseToAnyPublisher()
-    }
+extension DocumentsDirectoryRepository {
 
     func zipWorkingDirectory(
         to zipFileURL: URL
@@ -73,17 +36,18 @@ final class DocumentsDirectoryRepository {
     }
 
     func unzipToWorkingDirectory(
-        zipFileURL url: URL
+        from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
         let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
-        return Future<URL, Error> { [weak self] promise in
-            self?.loadDataTask?.cancel()
-            self?.loadDataTask = Task {
+        return Future<URL, Error> { promise in
+            Task {
                 do {
-                    try await FileInput.unzip(url, to: workingDirectory)
+                    try await FileInput.unzip(zipFileURL, to: workingDirectory)
+                    promise(
+                        .success(workingDirectory)
+                    )
 
-                    promise(.success(workingDirectory))
                 } catch {
                     promise(.failure(error))
                 }
@@ -91,6 +55,27 @@ final class DocumentsDirectoryRepository {
         }
         .eraseToAnyPublisher()
     }
+}
+
+extension DocumentsDirectoryRepository {
+
+    func createWorkingDirectory() throws {
+        do {
+            try FileManager.createNewDirectory(url: DocumentsDirectoryRepository.workingDirectory)
+        } catch {
+            throw DocumentsDirectoryRepositoryError.operationError(
+                "createWorkingDirectory()"
+            )
+        }
+    }
+
+    func removeWorkingDirectory() {
+        // Do nothing if directory deletion fails
+        try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
+    }
+}
+
+extension DocumentsDirectoryRepository {
 
     func saveThumbnailToWorkingDirectory(
         canvasTexture: MTLTexture
@@ -172,21 +157,6 @@ final class DocumentsDirectoryRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-
-    func createWorkingDirectory() throws {
-        do {
-            try FileManager.createNewDirectory(url: DocumentsDirectoryRepository.workingDirectory)
-        } catch {
-            throw DocumentsDirectoryRepositoryError.operationError(
-                "createWorkingDirectory()"
-            )
-        }
-    }
-
-    func removeWorkingDirectory() {
-        // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
     }
 }
 

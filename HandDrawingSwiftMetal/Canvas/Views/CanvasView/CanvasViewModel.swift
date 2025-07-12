@@ -613,7 +613,7 @@ extension CanvasViewModel {
         }
 
         documentsDirectoryRepository.unzipToWorkingDirectory(
-            zipFileURL: url
+            from: url
         )
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
@@ -659,15 +659,35 @@ extension CanvasViewModel {
             alertSubject.send(error)
         }
 
-        documentsDirectoryRepository.saveData(
-            renderTexture: canvasTexture,
-            canvasState: canvasState,
-            textureRepository: textureLayerRepository,
-            to: DocumentsDirectoryRepository.fileURL(
-                projectName: canvasState.projectName,
-                suffix: CanvasViewModel.fileSuffix
+        let canvasState = canvasState
+
+        let zipFileURL = DocumentsDirectoryRepository.fileURL(
+            projectName: canvasState.projectName,
+            suffix: CanvasViewModel.fileSuffix
+        )
+
+        Publishers.CombineLatest(
+            documentsDirectoryRepository.saveThumbnailToWorkingDirectory(
+                canvasTexture: canvasTexture
+            ),
+            documentsDirectoryRepository.saveTexturesToWorkingDirectory(
+                textureRepository: textureLayerRepository,
+                textureIds: canvasState.layers.map { $0.id }
             )
         )
+        .tryMap { [weak self] thumbnailName, _ in
+            self?.documentsDirectoryRepository.saveCanvasEntityToWorkingDirectory(
+                entity: .init(
+                    thumbnailName: thumbnailName,
+                    canvasState: canvasState
+                )
+            )
+        }
+        .tryMap { [weak self] result in
+            try self?.documentsDirectoryRepository.zipWorkingDirectory(
+                to: zipFileURL
+            )
+        }
         .handleEvents(
             receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
             receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
