@@ -448,6 +448,17 @@
 			path = IO;
 			sourceTree = "<group>";
 		};
+		D40B76F12E21E7690012BFF5 /* Textures */ = {
+			isa = PBXGroup;
+			children = (
+				D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */,
+				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
+				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
+				D4553DF62DD8C78100037800 /* TextureRepositoryWrapper.swift */,
+			);
+			path = Textures;
+			sourceTree = "<group>";
+		};
 		D40D975529DAB03E00A82E6A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -559,12 +570,9 @@
 		D447D89B2DC6582B00007210 /* Texture */ = {
 			isa = PBXGroup;
 			children = (
-				D4FE0F342E112820001A0E87 /* Protocols */,
-				D4FE0F332E1126EF001A0E87 /* Wrappers */,
-				D4FE0F2D2E10C2C3001A0E87 /* Singletons */,
 				D4553DF12DD89EFD00037800 /* TextureLayers */,
-				D4553DEC2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift */,
-				D48F76422DA20B800001C80F /* TextureInMemoryRepository.swift */,
+				D40B76F12E21E7690012BFF5 /* Textures */,
+				D4FE0F2D2E10C2C3001A0E87 /* Undo */,
 			);
 			path = Texture;
 			sourceTree = "<group>";
@@ -702,7 +710,11 @@
 			isa = PBXGroup;
 			children = (
 				D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */,
+				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
 				D4553DEE2DD899B000037800 /* TextureLayerInMemoryRepository.swift */,
+				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
+				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
+				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
 			);
 			path = TextureLayers;
 			sourceTree = "<group>";
@@ -902,33 +914,13 @@
 			path = HandDrawingSwiftMetalUITests;
 			sourceTree = "<group>";
 		};
-		D4FE0F2D2E10C2C3001A0E87 /* Singletons */ = {
+		D4FE0F2D2E10C2C3001A0E87 /* Undo */ = {
 			isa = PBXGroup;
 			children = (
-				D484B4FB2DC6FAC6004359B5 /* TextureLayerDocumentsDirectorySingletonRepository.swift */,
-				D48F76402DA20B610001C80F /* TextureLayerInMemorySingletonRepository.swift */,
 				D43E700E2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift */,
 				D4FE0F312E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift */,
 			);
-			path = Singletons;
-			sourceTree = "<group>";
-		};
-		D4FE0F332E1126EF001A0E87 /* Wrappers */ = {
-			isa = PBXGroup;
-			children = (
-				D484B4FD2DC6FB7B004359B5 /* TextureLayerRepositoryWrapper.swift */,
-				D4553DF62DD8C78100037800 /* TextureRepositoryWrapper.swift */,
-			);
-			path = Wrappers;
-			sourceTree = "<group>";
-		};
-		D4FE0F342E112820001A0E87 /* Protocols */ = {
-			isa = PBXGroup;
-			children = (
-				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
-				D48F763E2DA20B3D0001C80F /* TextureRepository.swift */,
-			);
-			path = Protocols;
+			path = Undo;
 			sourceTree = "<group>";
 		};
 		D4FE0F352E156C96001A0E87 /* Layers */ = {
