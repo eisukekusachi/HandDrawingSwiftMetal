@@ -10,7 +10,8 @@ import MetalKit
 
 final class DocumentsDirectoryRepository {
 
-    private static let thumbnailName: String = "thumbnail.png"
+    static let thumbnailName: String = "thumbnail.png"
+    static let thumbnailLength: CGFloat = 500
 
     private var saveDataTask: Task<Void, Error>?
     private var loadDataTask: Task<Void, Error>?
@@ -46,7 +47,7 @@ final class DocumentsDirectoryRepository {
                 self.exportThumbnail(
                     texture: renderTexture,
                     fileName: DocumentsDirectoryRepository.thumbnailName,
-                    height: 500,
+                    height: DocumentsDirectoryRepository.thumbnailLength,
                     to: url
                 ),
                 self.exportTextures(
