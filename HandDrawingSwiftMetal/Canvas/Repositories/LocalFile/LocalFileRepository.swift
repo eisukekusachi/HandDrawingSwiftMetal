@@ -77,14 +77,13 @@ extension LocalFileRepository {
 extension LocalFileRepository {
 
     func saveToWorkingDirectory<T: LocalFileConvertible>(
-        item: T,
-        fileName: String
+        namedItem: LocalFileNamedItem<T>
     ) -> AnyPublisher<URL, Error> {
-        let fileURL = LocalFileRepository.workingDirectory.appendingPathComponent(fileName)
+        let fileURL = LocalFileRepository.workingDirectory.appendingPathComponent(namedItem.name)
 
         return Future<URL, Error> { promise in
             do {
-                try item.write(to: fileURL)
+                try namedItem.item.write(to: fileURL)
                 promise(.success(fileURL))
             } catch {
                 promise(.failure(error))
@@ -93,40 +92,15 @@ extension LocalFileRepository {
         .eraseToAnyPublisher()
     }
 
-    func saveTexturesToWorkingDirectory(
-        textureRepository: TextureRepository,
-        textureIds: [UUID]
+    func saveAllToWorkingDirectory<T: LocalFileConvertible>(
+        namedItems: [LocalFileNamedItem<T>]
     ) -> AnyPublisher<[URL], Error> {
-        let workingDirectory = LocalFileRepository.workingDirectory
-
-        return textureRepository.copyTextures(
-            uuids: textureIds
+        Publishers.MergeMany(
+            namedItems.map { namedItem in
+                saveToWorkingDirectory(namedItem: namedItem)
+            }
         )
-        .tryMap { results in
-            guard results.count == textureIds.count else {
-                Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
-                throw DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)")
-            }
-            // Convert entities to a dictionary for easy lookup
-            let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
-
-            var urls: [URL] = []
-
-            try textureIds.forEach { id in
-                guard let texture = textureDictionary[id] else {
-                    throw DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)")
-                }
-                let fileURL = workingDirectory.appendingPathComponent(id.uuidString)
-                try FileOutput.saveTextureAsData(
-                    bytes: texture.bytes,
-                    to: fileURL
-                )
-                urls.append(fileURL)
-            }
-
-            return urls
-        }
-        .mapError { _ in DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)") }
+        .collect()
         .eraseToAnyPublisher()
     }
 }

@@ -150,7 +150,7 @@ extension CanvasViewController {
             self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.canvasViewModel.didTapSaveButton()
+            self?.canvasViewModel.saveFile()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()

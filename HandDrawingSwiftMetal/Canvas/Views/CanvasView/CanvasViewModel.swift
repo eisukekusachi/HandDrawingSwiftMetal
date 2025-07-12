@@ -460,12 +460,6 @@ extension CanvasViewModel {
             using: CanvasConfiguration(textureSize: canvasState.textureSize)
         )
     }
-
-    func didTapSaveButton() {
-        guard let canvasTexture = renderer.canvasTexture else { return }
-        saveFile(canvasTexture: canvasTexture)
-    }
-
 }
 
 extension CanvasViewModel {
@@ -651,10 +645,14 @@ extension CanvasViewModel {
         .store(in: &cancellables)
     }
 
-    private func saveFile(canvasTexture: MTLTexture) {
-        guard let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
-            height: LocalFileRepository.thumbnailLength, scale: 1.0
-        ) else { return }
+    func saveFile() {
+        guard
+            let canvasTexture = renderer.canvasTexture,
+            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+                height: LocalFileRepository.thumbnailLength,
+                scale: 1.0
+            )
+        else { return }
 
         do {
             try localFileRepository.createWorkingDirectory()
@@ -670,23 +668,44 @@ extension CanvasViewModel {
             suffix: CanvasViewModel.fileSuffix
         )
 
-        Publishers.CombineLatest(
-            localFileRepository.saveToWorkingDirectory(
-                item: thumbnail,
-                fileName: LocalFileRepository.thumbnailName
-            ),
-            localFileRepository.saveTexturesToWorkingDirectory(
-                textureRepository: textureLayerRepository,
-                textureIds: canvasState.layers.map { $0.id }
-            )
+        textureLayerRepository.copyTextures(
+            uuids: canvasState.layers.map { $0.id }
         )
-        .tryMap { [weak self] _, _ in
-            self?.localFileRepository.saveToWorkingDirectory(
-                item: CanvasEntity.init(
-                    thumbnailName: LocalFileRepository.thumbnailName,
-                    canvasState: canvasState
+        .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
+            guard let self else {
+                return Fail(
+                    error: CanvasViewModelError.invalidValue("failed to unwrap")
+                ).eraseToAnyPublisher()
+            }
+
+            return Publishers.CombineLatest(
+                self.localFileRepository.saveToWorkingDirectory(
+                    namedItem: .init(name: LocalFileRepository.thumbnailName, item: thumbnail)
                 ),
-                fileName: LocalFileRepository.jsonFileName
+                self.localFileRepository.saveAllToWorkingDirectory(
+                    namedItems: identifiedTextures.map {
+                        .init(name: $0.uuid.uuidString, item: $0)
+                    }
+                )
+            )
+            .map { _, _ in () }
+            .eraseToAnyPublisher()
+        }
+        .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
+            guard let self else {
+                return Fail(
+                    error: CanvasViewModelError.invalidValue("failed to unwrap")
+                ).eraseToAnyPublisher()
+            }
+
+            return self.localFileRepository.saveToWorkingDirectory(
+                namedItem: .init(
+                    name: LocalFileRepository.jsonFileName,
+                    item: CanvasEntity(
+                        thumbnailName: LocalFileRepository.thumbnailName,
+                        canvasState: canvasState
+                    )
+                )
             )
         }
         .tryMap { [weak self] result in
@@ -709,4 +728,8 @@ extension CanvasViewModel {
         }, receiveValue: {})
         .store(in: &cancellables)
     }
+}
+
+enum CanvasViewModelError: Error {
+    case invalidValue(String)
 }
