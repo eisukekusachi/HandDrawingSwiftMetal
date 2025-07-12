@@ -10,7 +10,7 @@ import MetalKit
 
 final class LocalFileRepository {
 
-    static let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
+    let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
     static func fileURL(projectName: String, suffix: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
@@ -23,7 +23,7 @@ extension LocalFileRepository {
         to zipFileURL: URL
     ) throws {
         try FileOutput.zip(
-            LocalFileRepository.workingDirectory,
+            workingDirectory,
             to: zipFileURL
         )
     }
@@ -31,7 +31,7 @@ extension LocalFileRepository {
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
-        let workingDirectory = LocalFileRepository.workingDirectory
+        let workingDirectory = workingDirectory
 
         return Future<URL, Error> { promise in
             Task {
@@ -54,7 +54,7 @@ extension LocalFileRepository {
 
     func createWorkingDirectory() throws {
         do {
-            try FileManager.createNewDirectory(url: LocalFileRepository.workingDirectory)
+            try FileManager.createNewDirectory(url: workingDirectory)
         } catch {
             throw DocumentsDirectoryRepositoryError.operationError(
                 "createWorkingDirectory()"
@@ -64,7 +64,7 @@ extension LocalFileRepository {
 
     func removeWorkingDirectory() {
         // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: LocalFileRepository.workingDirectory)
+        try? FileManager.default.removeItem(at: workingDirectory)
     }
 }
 
@@ -73,7 +73,7 @@ extension LocalFileRepository {
     func saveToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>
     ) -> AnyPublisher<URL, Error> {
-        let fileURL = LocalFileRepository.workingDirectory.appendingPathComponent(namedItem.name)
+        let fileURL = workingDirectory.appendingPathComponent(namedItem.name)
 
         return Future<URL, Error> { promise in
             do {
