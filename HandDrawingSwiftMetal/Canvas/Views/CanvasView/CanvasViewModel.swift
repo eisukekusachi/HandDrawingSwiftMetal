@@ -606,7 +606,7 @@ extension CanvasViewModel {
         )
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
-                let entity = try FileInput.getCanvasEntity(
+                let entity: CanvasEntity = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(URL.jsonFileName)
                 )
                 return self.textureLayerRepository.resetStorage(

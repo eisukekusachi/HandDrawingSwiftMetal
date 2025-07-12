@@ -9,16 +9,6 @@ import UIKit
 import ZipArchive
 
 enum FileInput {
-    static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
-        if let jsonData: CanvasEntity = try FileInput.loadJson(fileURL) {
-            return jsonData
-
-        } else if let jsonData: OldCanvasEntity = try FileInput.loadJson(fileURL) {
-            return CanvasEntity.init(entity: jsonData)
-        }
-
-        throw FileInputError.operationError("getCanvasEntity(fileURL:)")
-    }
 
     static func loadTexture(url: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
         let textureData = try Data(contentsOf: url)

@@ -19,42 +19,61 @@ struct CanvasEntity: Codable, Equatable {
 
     let brushDiameter: Int
     let eraserDiameter: Int
+}
 
+extension CanvasEntity {
     init(
         thumbnailName: String,
-        textureSize: CGSize,
-        layerIndex: Int,
-        layers: [TextureLayerEntity],
         canvasState: CanvasState
     ) {
         self.thumbnailName = thumbnailName
 
-        self.textureSize = textureSize
-
-        self.layerIndex = layerIndex
-        self.layers = layers
+        self.textureSize = canvasState.textureSize
+        self.layerIndex = canvasState.selectedIndex ?? 0
+        self.layers = canvasState.layers.map { .init(from: $0) }
 
         self.drawingTool = canvasState.drawingToolState.drawingTool.rawValue
+
         self.brushDiameter = canvasState.drawingToolState.brush.diameter
         self.eraserDiameter = canvasState.drawingToolState.eraser.diameter
     }
 
-    init(entity: OldCanvasEntity) {
-        self.thumbnailName = entity.thumbnailName ?? ""
+    init(fileURL: URL) throws {
+        if let entity: CanvasEntity = try FileInput.loadJson(fileURL) {
+            self.thumbnailName = entity.thumbnailName
 
-        self.textureSize = entity.textureSize ?? CGSize(width: 1, height: 1)
+            self.textureSize = entity.textureSize
 
-        self.layerIndex = 0
-        self.layers = [.init(
-            textureName: entity.textureName ?? "",
-            title: "NewLayer",
-            alpha: 255,
-            isVisible: true)
-        ]
+            self.layerIndex = entity.layerIndex
+            self.layers = entity.layers
 
-        self.drawingTool = entity.drawingTool ?? 0
-        self.brushDiameter = entity.brushDiameter ?? 8
-        self.eraserDiameter = entity.eraserDiameter ?? 8
+            self.drawingTool = entity.drawingTool
+            self.brushDiameter = entity.brushDiameter
+            self.eraserDiameter = entity.eraserDiameter
+
+        } else if let entity: OldCanvasEntity = try FileInput.loadJson(fileURL) {
+            self.thumbnailName = entity.thumbnailName ?? ""
+
+            self.textureSize = entity.textureSize ?? .zero
+
+            self.layerIndex = 0
+            self.layers = [.init(
+                textureName: entity.textureName ?? "",
+                title: "NewLayer",
+                alpha: 255,
+                isVisible: true)
+            ]
+
+            self.drawingTool = entity.drawingTool ?? 0
+            self.brushDiameter = entity.brushDiameter ?? 8
+            self.eraserDiameter = entity.eraserDiameter ?? 8
+
+        } else {
+            throw CanvasEntityError.operationError("getCanvasEntity(fileURL:)")
+        }
     }
+}
 
+enum CanvasEntityError: Error {
+    case operationError(String)
 }

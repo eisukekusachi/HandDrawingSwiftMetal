@@ -62,9 +62,6 @@ final class DocumentsDirectoryRepository {
         .compactMap { thumbnailName, _ in
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
-                textureSize: renderTexture.size,
-                layerIndex: canvasState.selectedIndex ?? 0,
-                layers: canvasState.layers.map { .init(from: $0) },
                 canvasState: canvasState
             )
         }
