@@ -118,7 +118,7 @@ final class CanvasViewModel {
     private var canvasViewControllerUndoButtonsDisplaySubject: PassthroughSubject<Bool, Never> = .init()
 
     /// A repository for loading and saving local files
-    private var localRepository: LocalRepository!
+    private var documentsDirectoryRepository: DocumentsDirectoryRepository!
 
     /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
@@ -132,12 +132,12 @@ final class CanvasViewModel {
     init(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
-        localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
+        localRepository: DocumentsDirectoryRepository = DocumentsDirectorySingletonRepository.shared
     ) {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)
 
-        self.localRepository = localRepository
+        self.documentsDirectoryRepository = localRepository
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
         if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
@@ -601,7 +601,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func loadFile(from url: URL) {
-        localRepository.loadDataFromDocuments(
+        documentsDirectoryRepository.loadDataFromDocuments(
             sourceURL: url,
             textureRepository: textureLayerRepository
         )
@@ -623,7 +623,7 @@ extension CanvasViewModel {
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
-        localRepository.saveDataToDocuments(
+        documentsDirectoryRepository.saveDataToDocuments(
             renderTexture: canvasTexture,
             canvasState: canvasState,
             textureRepository: textureLayerRepository,

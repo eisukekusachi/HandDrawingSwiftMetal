@@ -1,5 +1,5 @@
 //
-//  DocumentsLocalRepository.swift
+//  DocumentsDirectoryRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-final class DocumentsLocalRepository: LocalRepository {
+final class DocumentsDirectoryRepository {
 
     private static let thumbnailName: String = "thumbnail.png"
 
@@ -40,7 +40,7 @@ final class DocumentsLocalRepository: LocalRepository {
             Publishers.CombineLatest(
                 self.exportThumbnail(
                     texture: renderTexture,
-                    fileName: DocumentsLocalRepository.thumbnailName,
+                    fileName: DocumentsDirectoryRepository.thumbnailName,
                     height: 500,
                     to: url
                 ),
@@ -132,10 +132,9 @@ final class DocumentsLocalRepository: LocalRepository {
         })
         .eraseToAnyPublisher()
     }
-
 }
 
-extension DocumentsLocalRepository {
+extension DocumentsDirectoryRepository {
     private func exportThumbnail(
         texture: MTLTexture,
         fileName: String,
@@ -190,7 +189,6 @@ extension DocumentsLocalRepository {
             .mapError { _ in DocumentsLocalRepositoryError.exportLayerData }
             .eraseToAnyPublisher()
     }
-
 }
 
 enum DocumentsLocalRepositoryError: Error {
