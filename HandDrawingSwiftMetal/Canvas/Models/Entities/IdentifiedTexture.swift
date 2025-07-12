@@ -34,3 +34,9 @@ struct IdentifiedTexture: Hashable {
         )
     }
 }
+
+extension IdentifiedTexture: LocalFileConvertible {
+    func write(to url: URL) throws {
+        try FileOutput.saveTextureAsData(bytes: self.texture.bytes, to: url)
+    }
+}

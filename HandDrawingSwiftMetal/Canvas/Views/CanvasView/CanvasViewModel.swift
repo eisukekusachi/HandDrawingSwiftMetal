@@ -652,6 +652,10 @@ extension CanvasViewModel {
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
+        guard let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+            height: LocalFileRepository.thumbnailLength, scale: 1.0
+        ) else { return }
+
         do {
             try localFileRepository.createWorkingDirectory()
         }
@@ -667,20 +671,22 @@ extension CanvasViewModel {
         )
 
         Publishers.CombineLatest(
-            localFileRepository.saveThumbnailToWorkingDirectory(
-                canvasTexture: canvasTexture
+            localFileRepository.saveToWorkingDirectory(
+                item: thumbnail,
+                fileName: LocalFileRepository.thumbnailName
             ),
             localFileRepository.saveTexturesToWorkingDirectory(
                 textureRepository: textureLayerRepository,
                 textureIds: canvasState.layers.map { $0.id }
             )
         )
-        .tryMap { [weak self] thumbnailName, _ in
-            self?.localFileRepository.saveCanvasEntityToWorkingDirectory(
-                entity: .init(
-                    thumbnailName: thumbnailName,
+        .tryMap { [weak self] _, _ in
+            self?.localFileRepository.saveToWorkingDirectory(
+                item: CanvasEntity.init(
+                    thumbnailName: LocalFileRepository.thumbnailName,
                     canvasState: canvasState
-                )
+                ),
+                fileName: LocalFileRepository.jsonFileName
             )
         }
         .tryMap { [weak self] result in

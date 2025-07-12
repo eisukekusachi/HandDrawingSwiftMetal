@@ -74,6 +74,12 @@ extension CanvasEntity {
     }
 }
 
+extension CanvasEntity: LocalFileConvertible {
+    func write(to url: URL) throws {
+        try FileOutput.saveJson(self, to: url)
+    }
+}
+
 enum CanvasEntityError: Error {
     case operationError(String)
 }

@@ -21,7 +21,6 @@ final class LocalFileRepository {
     static func fileURL(projectName: String, suffix: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
     }
-
 }
 
 extension LocalFileRepository {
@@ -77,27 +76,18 @@ extension LocalFileRepository {
 
 extension LocalFileRepository {
 
-    func saveThumbnailToWorkingDirectory(
-        canvasTexture: MTLTexture
-    ) -> AnyPublisher<String, Error> {
-        let workingDirectory = LocalFileRepository.workingDirectory
+    func saveToWorkingDirectory<T: LocalFileConvertible>(
+        item: T,
+        fileName: String
+    ) -> AnyPublisher<URL, Error> {
+        let fileURL = LocalFileRepository.workingDirectory.appendingPathComponent(fileName)
 
-        return Future<String, Error> { promise in
+        return Future<URL, Error> { promise in
             do {
-                try FileOutput.saveImage(
-                    image: canvasTexture.uiImage?.resizeWithAspectRatio(
-                        height: LocalFileRepository.thumbnailLength, scale: 1.0
-                    ),
-                    to: workingDirectory.appendingPathComponent(LocalFileRepository.thumbnailName)
-                )
-                promise(
-                    .success(LocalFileRepository.thumbnailName)
-                )
+                try item.write(to: fileURL)
+                promise(.success(fileURL))
             } catch {
-                Logger.standard.error("Failed to export thumbnail: \(error)")
-                promise(
-                    .failure(DocumentsDirectoryRepositoryError.error(error))
-                )
+                promise(.failure(error))
             }
         }
         .eraseToAnyPublisher()
@@ -137,25 +127,6 @@ extension LocalFileRepository {
             return urls
         }
         .mapError { _ in DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)") }
-        .eraseToAnyPublisher()
-    }
-
-    func saveCanvasEntityToWorkingDirectory(
-        entity: CanvasEntity
-    ) -> AnyPublisher<URL, Error> {
-        Future<URL, Error> { promise in
-            do {
-                try FileOutput.saveJson(
-                    entity,
-                    to: LocalFileRepository.workingDirectory.appendingPathComponent(LocalFileRepository.jsonFileName)
-                )
-            } catch {
-                Logger.standard.error("Failed to export jsonFile: \(error)")
-                promise(
-                    .failure(DocumentsDirectoryRepositoryError.error(error))
-                )
-            }
-        }
         .eraseToAnyPublisher()
     }
 }
