@@ -51,22 +51,43 @@ final class MockTextureRepository: TextureRepository {
     }
 
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+        let device = MTLCreateSystemDefaultDevice()
         callHistory.append("addTexture(\(uuid))")
-        return Just(.init(uuid: UUID())).setFailureType(to: Error.self)
+        return Just(
+            .init(
+                uuid: UUID(),
+                texture: texture!
+            )
+        )
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
+    }
+
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
+        Just(())
+            .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Just(.init(uuid: UUID()))
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+        let device = MTLCreateSystemDefaultDevice()!
+        return Just(
+            .init(
+                uuid: UUID(),
+                texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!
+            )
+        )
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
     }
 
     func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
         let device = MTLCreateSystemDefaultDevice()!
-        return Just(uuids.map { uuid in .init(uuid: uuid, texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)) })
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+        return Just(uuids.map { uuid in
+            .init(uuid: uuid, texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!) }
+        )
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
     }
     
     func thumbnail(_ uuid: UUID) -> UIImage? {
@@ -97,9 +118,15 @@ final class MockTextureRepository: TextureRepository {
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+        let device = MTLCreateSystemDefaultDevice()!
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-        return Just(.init(uuid: uuid))
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+        return Just(
+            .init(
+                uuid: UUID(),
+                texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!
+            )
+        )
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
     }
 }
