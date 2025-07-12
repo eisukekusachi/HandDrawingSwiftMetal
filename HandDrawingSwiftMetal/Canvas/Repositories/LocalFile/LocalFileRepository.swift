@@ -19,6 +19,22 @@ final class LocalFileRepository {
 }
 
 extension LocalFileRepository {
+
+    func createWorkingDirectory() throws {
+        do {
+            try FileManager.createNewDirectory(url: workingDirectory)
+        } catch {
+            throw DocumentsDirectoryRepositoryError.operationError(
+                "createWorkingDirectory()"
+            )
+        }
+    }
+
+    func removeWorkingDirectory() {
+        // Do nothing if directory deletion fails
+        try? FileManager.default.removeItem(at: workingDirectory)
+    }
+
     /// Compresses the working directory contents into a ZIP file
     func zipWorkingDirectory(
         to zipFileURL: URL
@@ -48,24 +64,6 @@ extension LocalFileRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-}
-
-extension LocalFileRepository {
-
-    func createWorkingDirectory() throws {
-        do {
-            try FileManager.createNewDirectory(url: workingDirectory)
-        } catch {
-            throw DocumentsDirectoryRepositoryError.operationError(
-                "createWorkingDirectory()"
-            )
-        }
-    }
-
-    func removeWorkingDirectory() {
-        // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: workingDirectory)
     }
 }
 
