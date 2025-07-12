@@ -14,7 +14,7 @@ enum FileOutput {
         do {
             try FileManager.createNewDirectory(url: url)
         } catch {
-            throw FileOutputError.failedToCreateDirectory
+            throw FileOutputError.operationError("createDirectory(:)")
         }
     }
 
@@ -55,12 +55,11 @@ enum FileOutput {
         )
 
         if !success {
-            throw FileOutputError.failedToZip
+            throw FileOutputError.operationError("zip(:, to:)")
         }
     }
 }
 
 enum FileOutputError: Error {
-    case failedToZip
-    case failedToCreateDirectory
+    case operationError(String)
 }

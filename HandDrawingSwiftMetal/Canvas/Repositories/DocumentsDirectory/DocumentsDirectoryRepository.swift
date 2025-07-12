@@ -37,7 +37,7 @@ final class DocumentsDirectoryRepository {
                     try FileManager.createNewDirectory(url: workingDirectory)
                     promise(.success(workingDirectory))
                 } catch {
-                    promise(.failure(DocumentsLocalRepositoryError.exportLayerData))
+                    promise(.failure(DocumentsDirectoryRepositoryError.operationError("saveData(renderTexture:, canvasState:, textureRepository:, to:)")))
                 }
             }
         }
@@ -123,7 +123,7 @@ final class DocumentsDirectoryRepository {
                 Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
             else {
                 Logger.standard.error("Texture size is below the minimum: \(configuration.textureSize?.width ?? 0) \(configuration.textureSize?.height ?? 0)")
-                return Fail(error: DocumentsLocalRepositoryError.invalidTextureSize)
+                return Fail(error: DocumentsDirectoryRepositoryError.invalidValue("thumbnail size \(configuration.textureSize?.width ?? 0) \(configuration.textureSize?.height ?? 0)"))
                     .eraseToAnyPublisher()
             }
             return textureRepository.resetStorage(
@@ -159,7 +159,7 @@ extension DocumentsDirectoryRepository {
                 promise(.success(fileName))
             } catch {
                 Logger.standard.error("Failed to export thumbnail: \(error)")
-                promise(.failure(DocumentsLocalRepositoryError.exportThumbnail))
+                promise(.failure(DocumentsDirectoryRepositoryError.error(error)))
             }
         }
         .eraseToAnyPublisher()
@@ -177,14 +177,14 @@ extension DocumentsDirectoryRepository {
             .tryMap { results in
                 guard results.count == textureIds.count else {
                     Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
-                    throw DocumentsLocalRepositoryError.exportLayerData
+                    throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
                 }
                 // Convert entities to a dictionary for easy lookup
                 let textureDict = Dictionary(uniqueKeysWithValues: results.map { ($0.uuid, $0.texture) })
 
                 try textureIds.forEach { id in
                     guard let texture = textureDict[id].flatMap({ $0 }) else {
-                        throw DocumentsLocalRepositoryError.exportLayerData
+                        throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
                     }
                     let fileURL = url.appendingPathComponent(id.uuidString)
                     try FileOutput.saveTextureAsData(
@@ -195,13 +195,13 @@ extension DocumentsDirectoryRepository {
 
                 return ()
             }
-            .mapError { _ in DocumentsLocalRepositoryError.exportLayerData }
+            .mapError { _ in DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)") }
             .eraseToAnyPublisher()
     }
 }
 
-enum DocumentsLocalRepositoryError: Error {
-    case exportThumbnail
-    case exportLayerData
-    case invalidTextureSize
+enum DocumentsDirectoryRepositoryError: Error {
+    case error(Error)
+    case operationError(String)
+    case invalidValue(String)
 }
