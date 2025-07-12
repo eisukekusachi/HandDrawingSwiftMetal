@@ -122,7 +122,7 @@ final class CanvasViewModel {
     private var canvasViewControllerUndoButtonsDisplaySubject: PassthroughSubject<Bool, Never> = .init()
 
     /// A repository for loading and saving local files
-    private var documentsDirectoryRepository: DocumentsDirectoryRepository!
+    private var localFileRepository: LocalFileRepository!
 
     /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
@@ -136,12 +136,12 @@ final class CanvasViewModel {
     init(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
-        localRepository: DocumentsDirectoryRepository = DocumentsDirectorySingletonRepository.shared
+        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared
     ) {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)
 
-        self.documentsDirectoryRepository = localRepository
+        self.localFileRepository = localFileRepository
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
         if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
@@ -606,19 +606,19 @@ extension CanvasViewModel {
 
     func loadFile(zipFileURL url: URL) {
         do {
-            try documentsDirectoryRepository.createWorkingDirectory()
+            try localFileRepository.createWorkingDirectory()
         }
         catch(let error) {
             alertSubject.send(error)
         }
 
-        documentsDirectoryRepository.unzipToWorkingDirectory(
+        localFileRepository.unzipToWorkingDirectory(
             from: url
         )
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
                 let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(LocalFileRepository.jsonFileName)
                 )
                 return self.textureLayerRepository.resetStorage(
                     configuration: .init(
@@ -641,7 +641,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertSubject.send(error)
             }
 
-            self?.documentsDirectoryRepository.removeWorkingDirectory()
+            self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: { [weak self] configuration in
             Task { @MainActor in
@@ -653,7 +653,7 @@ extension CanvasViewModel {
 
     private func saveFile(canvasTexture: MTLTexture) {
         do {
-            try documentsDirectoryRepository.createWorkingDirectory()
+            try localFileRepository.createWorkingDirectory()
         }
         catch(let error) {
             alertSubject.send(error)
@@ -661,22 +661,22 @@ extension CanvasViewModel {
 
         let canvasState = canvasState
 
-        let zipFileURL = DocumentsDirectoryRepository.fileURL(
+        let zipFileURL = LocalFileRepository.fileURL(
             projectName: canvasState.projectName,
             suffix: CanvasViewModel.fileSuffix
         )
 
         Publishers.CombineLatest(
-            documentsDirectoryRepository.saveThumbnailToWorkingDirectory(
+            localFileRepository.saveThumbnailToWorkingDirectory(
                 canvasTexture: canvasTexture
             ),
-            documentsDirectoryRepository.saveTexturesToWorkingDirectory(
+            localFileRepository.saveTexturesToWorkingDirectory(
                 textureRepository: textureLayerRepository,
                 textureIds: canvasState.layers.map { $0.id }
             )
         )
         .tryMap { [weak self] thumbnailName, _ in
-            self?.documentsDirectoryRepository.saveCanvasEntityToWorkingDirectory(
+            self?.localFileRepository.saveCanvasEntityToWorkingDirectory(
                 entity: .init(
                     thumbnailName: thumbnailName,
                     canvasState: canvasState
@@ -684,7 +684,7 @@ extension CanvasViewModel {
             )
         }
         .tryMap { [weak self] result in
-            try self?.documentsDirectoryRepository.zipWorkingDirectory(
+            try self?.localFileRepository.zipWorkingDirectory(
                 to: zipFileURL
             )
         }
@@ -698,7 +698,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertSubject.send(error)
             }
 
-            self?.documentsDirectoryRepository.removeWorkingDirectory()
+            self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: {})
         .store(in: &cancellables)

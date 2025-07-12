@@ -1,5 +1,5 @@
 //
-//  DocumentsDirectoryRepository.swift
+//  LocalFileRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-final class DocumentsDirectoryRepository {
+final class LocalFileRepository {
 
     static let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
@@ -24,13 +24,13 @@ final class DocumentsDirectoryRepository {
 
 }
 
-extension DocumentsDirectoryRepository {
+extension LocalFileRepository {
 
     func zipWorkingDirectory(
         to zipFileURL: URL
     ) throws {
         try FileOutput.zip(
-            DocumentsDirectoryRepository.workingDirectory,
+            LocalFileRepository.workingDirectory,
             to: zipFileURL
         )
     }
@@ -38,7 +38,7 @@ extension DocumentsDirectoryRepository {
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
-        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
+        let workingDirectory = LocalFileRepository.workingDirectory
 
         return Future<URL, Error> { promise in
             Task {
@@ -57,11 +57,11 @@ extension DocumentsDirectoryRepository {
     }
 }
 
-extension DocumentsDirectoryRepository {
+extension LocalFileRepository {
 
     func createWorkingDirectory() throws {
         do {
-            try FileManager.createNewDirectory(url: DocumentsDirectoryRepository.workingDirectory)
+            try FileManager.createNewDirectory(url: LocalFileRepository.workingDirectory)
         } catch {
             throw DocumentsDirectoryRepositoryError.operationError(
                 "createWorkingDirectory()"
@@ -71,27 +71,27 @@ extension DocumentsDirectoryRepository {
 
     func removeWorkingDirectory() {
         // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
+        try? FileManager.default.removeItem(at: LocalFileRepository.workingDirectory)
     }
 }
 
-extension DocumentsDirectoryRepository {
+extension LocalFileRepository {
 
     func saveThumbnailToWorkingDirectory(
         canvasTexture: MTLTexture
     ) -> AnyPublisher<String, Error> {
-        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
+        let workingDirectory = LocalFileRepository.workingDirectory
 
         return Future<String, Error> { promise in
             do {
                 try FileOutput.saveImage(
                     image: canvasTexture.uiImage?.resizeWithAspectRatio(
-                        height: DocumentsDirectoryRepository.thumbnailLength, scale: 1.0
+                        height: LocalFileRepository.thumbnailLength, scale: 1.0
                     ),
-                    to: workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.thumbnailName)
+                    to: workingDirectory.appendingPathComponent(LocalFileRepository.thumbnailName)
                 )
                 promise(
-                    .success(DocumentsDirectoryRepository.thumbnailName)
+                    .success(LocalFileRepository.thumbnailName)
                 )
             } catch {
                 Logger.standard.error("Failed to export thumbnail: \(error)")
@@ -107,7 +107,7 @@ extension DocumentsDirectoryRepository {
         textureRepository: TextureRepository,
         textureIds: [UUID]
     ) -> AnyPublisher<[URL], Error> {
-        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
+        let workingDirectory = LocalFileRepository.workingDirectory
 
         return textureRepository.copyTextures(
             uuids: textureIds
@@ -147,7 +147,7 @@ extension DocumentsDirectoryRepository {
             do {
                 try FileOutput.saveJson(
                     entity,
-                    to: DocumentsDirectoryRepository.workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
+                    to: LocalFileRepository.workingDirectory.appendingPathComponent(LocalFileRepository.jsonFileName)
                 )
             } catch {
                 Logger.standard.error("Failed to export jsonFile: \(error)")
