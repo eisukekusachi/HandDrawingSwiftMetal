@@ -601,6 +601,13 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func loadFile(zipFileURL url: URL) {
+        do {
+            try documentsDirectoryRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
         documentsDirectoryRepository.unzipToWorkingDirectory(
             zipFileURL: url
         )

@@ -18,9 +18,6 @@ extension URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     }
 
-    /// A temporary folder URL used for file input and output
-    static let tmpFolderURL = URL.applicationSupport.appendingPathComponent("TmpFolder")
-
     static func zipFileURL(projectName: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + URL.zipSuffix)
     }

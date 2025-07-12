@@ -10,10 +10,10 @@ import MetalKit
 
 final class DocumentsDirectoryRepository {
 
+    static let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
+
     static let thumbnailName: String = "thumbnail.png"
     static let thumbnailLength: CGFloat = 500
-
-    static let workingDirectory = URL.tmpFolderURL
 
     private var saveDataTask: Task<Void, Error>?
     private var loadDataTask: Task<Void, Error>?
@@ -85,7 +85,6 @@ final class DocumentsDirectoryRepository {
             self?.loadDataTask?.cancel()
             self?.loadDataTask = Task {
                 do {
-                    try FileManager.createNewDirectory(url: workingDirectory)
                     try await FileInput.unzip(url, to: workingDirectory)
 
                     promise(.success(workingDirectory))
