@@ -648,6 +648,13 @@ extension CanvasViewModel {
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
+        do {
+            try documentsDirectoryRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
         documentsDirectoryRepository.saveData(
             renderTexture: canvasTexture,
             canvasState: canvasState,
@@ -663,6 +670,9 @@ extension CanvasViewModel {
             case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
+
+            self?.documentsDirectoryRepository.removeWorkingDirectory()
+
         }, receiveValue: {})
         .store(in: &cancellables)
     }

@@ -31,27 +31,20 @@ final class DocumentsDirectoryRepository {
 
         let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
-        return Result {
-            try createWorkingDirectory()
-        }
-        .publisher
-        .flatMap { _ in
-            Publishers.CombineLatest(
-                self.exportThumbnail(
-                    texture: renderTexture,
-                    fileName: DocumentsDirectoryRepository.thumbnailName,
-                    height: DocumentsDirectoryRepository.thumbnailLength,
-                    to: workingDirectory
-                ),
-                self.exportTextures(
-                    textureIds: canvasState.layers.map { $0.id },
-                    textureSize: canvasState.textureSize,
-                    textureRepository: textureRepository,
-                    to: workingDirectory
-                )
+        return Publishers.CombineLatest(
+            self.exportThumbnail(
+                texture: renderTexture,
+                fileName: DocumentsDirectoryRepository.thumbnailName,
+                height: DocumentsDirectoryRepository.thumbnailLength,
+                to: workingDirectory
+            ),
+            self.exportTextures(
+                textureIds: canvasState.layers.map { $0.id },
+                textureSize: canvasState.textureSize,
+                textureRepository: textureRepository,
+                to: workingDirectory
             )
-            .eraseToAnyPublisher()
-        }
+        )
         .compactMap { thumbnailName, _ in
             CanvasEntity.init(
                 thumbnailName: thumbnailName,
@@ -70,9 +63,6 @@ final class DocumentsDirectoryRepository {
                 to: zipFileURL
             )
         }
-        .handleEvents(receiveCompletion: { [weak self] _ in
-            self?.removeWorkingDirectory()
-        })
         .eraseToAnyPublisher()
     }
 
