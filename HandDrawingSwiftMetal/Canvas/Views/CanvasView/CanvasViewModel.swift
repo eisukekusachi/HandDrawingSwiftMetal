@@ -601,8 +601,8 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func loadFile(from url: URL) {
-        documentsDirectoryRepository.loadDataFromDocuments(
-            sourceURL: url,
+        documentsDirectoryRepository.loadData(
+            from: url,
             textureRepository: textureLayerRepository
         )
         .handleEvents(
@@ -623,7 +623,7 @@ extension CanvasViewModel {
     }
 
     private func saveFile(canvasTexture: MTLTexture) {
-        documentsDirectoryRepository.saveDataToDocuments(
+        documentsDirectoryRepository.saveData(
             renderTexture: canvasTexture,
             canvasState: canvasState,
             textureRepository: textureLayerRepository,
@@ -641,5 +641,4 @@ extension CanvasViewModel {
         }, receiveValue: {})
         .store(in: &cancellables)
     }
-
 }

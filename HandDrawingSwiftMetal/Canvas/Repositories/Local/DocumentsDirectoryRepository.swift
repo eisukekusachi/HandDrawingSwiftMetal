@@ -19,7 +19,7 @@ final class DocumentsDirectoryRepository {
         saveDataTask?.cancel()
         loadDataTask?.cancel()
     }
-    func saveDataToDocuments(
+    func saveData(
         renderTexture: MTLTexture,
         canvasState: CanvasState,
         textureRepository: any TextureRepository,
@@ -80,8 +80,8 @@ final class DocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
-    func loadDataFromDocuments(
-        sourceURL: URL,
+    func loadData(
+        from sourceURL: URL,
         textureRepository: any TextureRepository
     ) -> AnyPublisher<CanvasConfiguration, Error> {
 
