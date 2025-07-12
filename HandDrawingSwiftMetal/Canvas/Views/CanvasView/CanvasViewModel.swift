@@ -612,7 +612,7 @@ extension CanvasViewModel {
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
                 let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(LocalFileRepository.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
                 )
                 return self.textureLayerRepository.resetStorage(
                     configuration: .init(
@@ -649,7 +649,7 @@ extension CanvasViewModel {
         guard
             let canvasTexture = renderer.canvasTexture,
             let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: LocalFileRepository.thumbnailLength,
+                height: CanvasEntity.thumbnailLength,
                 scale: 1.0
             )
         else { return }
@@ -680,7 +680,7 @@ extension CanvasViewModel {
 
             return Publishers.CombineLatest(
                 self.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(name: LocalFileRepository.thumbnailName, item: thumbnail)
+                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
                 ),
                 self.localFileRepository.saveAllToWorkingDirectory(
                     namedItems: identifiedTextures.map {
@@ -700,9 +700,9 @@ extension CanvasViewModel {
 
             return self.localFileRepository.saveToWorkingDirectory(
                 namedItem: .init(
-                    name: LocalFileRepository.jsonFileName,
+                    name: CanvasEntity.jsonFileName,
                     item: CanvasEntity(
-                        thumbnailName: LocalFileRepository.thumbnailName,
+                        thumbnailName: CanvasEntity.thumbnailName,
                         canvasState: canvasState
                     )
                 )

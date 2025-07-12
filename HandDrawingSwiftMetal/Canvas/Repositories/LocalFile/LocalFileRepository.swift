@@ -12,12 +12,6 @@ final class LocalFileRepository {
 
     static let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
-    static let thumbnailName: String = "thumbnail.png"
-
-    static let jsonFileName: String = "data"
-
-    static let thumbnailLength: CGFloat = 500
-
     static func fileURL(projectName: String, suffix: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
     }

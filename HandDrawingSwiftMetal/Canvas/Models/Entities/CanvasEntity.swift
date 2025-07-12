@@ -22,6 +22,13 @@ struct CanvasEntity: Codable, Equatable {
 }
 
 extension CanvasEntity {
+
+    static let thumbnailName: String = "thumbnail.png"
+
+    static let jsonFileName: String = "data"
+
+    static let thumbnailLength: CGFloat = 500
+
     init(
         thumbnailName: String,
         canvasState: CanvasState
