@@ -18,8 +18,8 @@ final class DocumentsDirectoryRepository {
         "data"
     }
 
-    static func fileURL(projectName: String, fileSuffix: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + fileSuffix)
+    static func fileURL(projectName: String, suffix: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + suffix)
     }
 
     static let thumbnailLength: CGFloat = 500
@@ -31,48 +31,45 @@ final class DocumentsDirectoryRepository {
         saveDataTask?.cancel()
         loadDataTask?.cancel()
     }
+
     func saveData(
         renderTexture: MTLTexture,
         canvasState: CanvasState,
         textureRepository: any TextureRepository,
         to zipFileURL: URL
     ) -> AnyPublisher<Void, Error> {
-
-        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
-
-        return Publishers.CombineLatest(
-            self.exportThumbnail(
-                texture: renderTexture,
-                fileName: DocumentsDirectoryRepository.thumbnailName,
-                height: DocumentsDirectoryRepository.thumbnailLength,
-                to: workingDirectory
+        Publishers.CombineLatest(
+            self.saveThumbnailToWorkingDirectory(
+                canvasTexture: renderTexture
             ),
-            self.exportTextures(
-                textureIds: canvasState.layers.map { $0.id },
-                textureSize: canvasState.textureSize,
+            self.saveTexturesToWorkingDirectory(
                 textureRepository: textureRepository,
-                to: workingDirectory
+                textureIds: canvasState.layers.map { $0.id }
             )
         )
-        .compactMap { thumbnailName, _ in
-            CanvasEntity.init(
-                thumbnailName: thumbnailName,
-                canvasState: canvasState
+        .tryMap { [weak self] thumbnailName, _ in
+            self?.saveCanvasEntityToWorkingDirectory(
+                entity: .init(
+                    thumbnailName: thumbnailName,
+                    canvasState: canvasState
+                )
             )
         }
-        .tryMap { result in
-            try FileOutput.saveJson(
-                result,
-                to: workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
-            )
-        }
-        .tryMap { result in
-            try FileOutput.zip(
-                workingDirectory,
+        .tryMap { [weak self] result in
+            try self?.zipWorkingDirectory(
                 to: zipFileURL
             )
         }
         .eraseToAnyPublisher()
+    }
+
+    func zipWorkingDirectory(
+        to zipFileURL: URL
+    ) throws {
+        try FileOutput.zip(
+            DocumentsDirectoryRepository.workingDirectory,
+            to: zipFileURL
+        )
     }
 
     func unzipToWorkingDirectory(
@@ -95,6 +92,88 @@ final class DocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
+    func saveThumbnailToWorkingDirectory(
+        canvasTexture: MTLTexture
+    ) -> AnyPublisher<String, Error> {
+        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
+
+        return Future<String, Error> { promise in
+            do {
+                try FileOutput.saveImage(
+                    image: canvasTexture.uiImage?.resizeWithAspectRatio(
+                        height: DocumentsDirectoryRepository.thumbnailLength, scale: 1.0
+                    ),
+                    to: workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.thumbnailName)
+                )
+                promise(
+                    .success(DocumentsDirectoryRepository.thumbnailName)
+                )
+            } catch {
+                Logger.standard.error("Failed to export thumbnail: \(error)")
+                promise(
+                    .failure(DocumentsDirectoryRepositoryError.error(error))
+                )
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func saveTexturesToWorkingDirectory(
+        textureRepository: TextureRepository,
+        textureIds: [UUID]
+    ) -> AnyPublisher<[URL], Error> {
+        let workingDirectory = DocumentsDirectoryRepository.workingDirectory
+
+        return textureRepository.copyTextures(
+            uuids: textureIds
+        )
+        .tryMap { results in
+            guard results.count == textureIds.count else {
+                Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
+                throw DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)")
+            }
+            // Convert entities to a dictionary for easy lookup
+            let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
+
+            var urls: [URL] = []
+
+            try textureIds.forEach { id in
+                guard let texture = textureDictionary[id] else {
+                    throw DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)")
+                }
+                let fileURL = workingDirectory.appendingPathComponent(id.uuidString)
+                try FileOutput.saveTextureAsData(
+                    bytes: texture.bytes,
+                    to: fileURL
+                )
+                urls.append(fileURL)
+            }
+
+            return urls
+        }
+        .mapError { _ in DocumentsDirectoryRepositoryError.operationError("saveTexturesToWorkingDirectory(textureRepository:, textureIds:)") }
+        .eraseToAnyPublisher()
+    }
+
+    func saveCanvasEntityToWorkingDirectory(
+        entity: CanvasEntity
+    ) -> AnyPublisher<URL, Error> {
+        Future<URL, Error> { promise in
+            do {
+                try FileOutput.saveJson(
+                    entity,
+                    to: DocumentsDirectoryRepository.workingDirectory.appendingPathComponent(DocumentsDirectoryRepository.jsonFileName)
+                )
+            } catch {
+                Logger.standard.error("Failed to export jsonFile: \(error)")
+                promise(
+                    .failure(DocumentsDirectoryRepositoryError.error(error))
+                )
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
     func createWorkingDirectory() throws {
         do {
             try FileManager.createNewDirectory(url: DocumentsDirectoryRepository.workingDirectory)
@@ -108,64 +187,6 @@ final class DocumentsDirectoryRepository {
     func removeWorkingDirectory() {
         // Do nothing if directory deletion fails
         try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
-    }
-
-}
-
-extension DocumentsDirectoryRepository {
-    private func exportThumbnail(
-        texture: MTLTexture,
-        fileName: String,
-        height: CGFloat,
-        to url: URL
-    ) -> AnyPublisher<String, Error> {
-        Future<String, Error> { promise in
-            do {
-                try FileOutput.saveImage(
-                    image: texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0),
-                    to: url.appendingPathComponent(fileName)
-                )
-                promise(.success(fileName))
-            } catch {
-                Logger.standard.error("Failed to export thumbnail: \(error)")
-                promise(.failure(DocumentsDirectoryRepositoryError.error(error)))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    private func exportTextures(
-        textureIds: [UUID],
-        textureSize: CGSize,
-        textureRepository: any TextureRepository,
-        to url: URL
-    ) -> AnyPublisher<Void, Error> {
-        textureRepository.copyTextures(
-            uuids: textureIds
-        )
-            .tryMap { results in
-                guard results.count == textureIds.count else {
-                    Logger.standard.error("Failed to export textures: mismatch between texture IDs and loaded textures.")
-                    throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
-                }
-                // Convert entities to a dictionary for easy lookup
-                let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
-
-                try textureIds.forEach { id in
-                    guard let texture = textureDictionary[id].flatMap({ $0 }) else {
-                        throw DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)")
-                    }
-                    let fileURL = url.appendingPathComponent(id.uuidString)
-                    try FileOutput.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: fileURL
-                    )
-                }
-
-                return ()
-            }
-            .mapError { _ in DocumentsDirectoryRepositoryError.operationError("exportTextures(textureIds:, textureSize:, textureRepository:, to:)") }
-            .eraseToAnyPublisher()
     }
 }
 

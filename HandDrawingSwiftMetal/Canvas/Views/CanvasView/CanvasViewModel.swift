@@ -665,7 +665,7 @@ extension CanvasViewModel {
             textureRepository: textureLayerRepository,
             to: DocumentsDirectoryRepository.fileURL(
                 projectName: canvasState.projectName,
-                fileSuffix: CanvasViewModel.fileSuffix
+                suffix: CanvasViewModel.fileSuffix
             )
         )
         .handleEvents(
