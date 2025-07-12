@@ -63,13 +63,13 @@ final class DocumentsLocalRepository: LocalRepository {
             )
         }
         .tryMap { result in
-            try OutputData.saveJson(
+            try FileOutput.saveJson(
                 result,
                 to: URL.tmpFolderURL.appendingPathComponent(URL.jsonFileName)
             )
         }
         .tryMap { result in
-            try OutputData.zip(
+            try FileOutput.zip(
                 URL.tmpFolderURL,
                 to: zipFileURL
             )
@@ -92,9 +92,9 @@ final class DocumentsLocalRepository: LocalRepository {
             self?.loadDataTask = Task {
                 do {
                     try FileManager.createNewDirectory(url: workingDirectory)
-                    try await InputData.unzip(sourceURL, to: workingDirectory)
+                    try await FileInput.unzip(sourceURL, to: workingDirectory)
 
-                    let entity = try InputData.getCanvasEntity(
+                    let entity = try FileInput.getCanvasEntity(
                         fileURL: workingDirectory.appendingPathComponent(URL.jsonFileName)
                     )
                     promise(.success(entity))
@@ -144,7 +144,7 @@ extension DocumentsLocalRepository {
     ) -> AnyPublisher<String, Error> {
         Future<String, Error> { promise in
             do {
-                try OutputData.saveImage(
+                try FileOutput.saveImage(
                     image: texture.uiImage?.resizeWithAspectRatio(height: height, scale: 1.0),
                     to: url.appendingPathComponent(fileName)
                 )
@@ -179,7 +179,7 @@ extension DocumentsLocalRepository {
                         throw DocumentsLocalRepositoryError.exportLayerData
                     }
                     let fileURL = url.appendingPathComponent(id.uuidString)
-                    try OutputData.saveTextureAsData(
+                    try FileOutput.saveTextureAsData(
                         bytes: texture.bytes,
                         to: fileURL
                     )

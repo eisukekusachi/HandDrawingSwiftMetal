@@ -1,5 +1,5 @@
 //
-//  InputData.swift
+//  FileInput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,17 +8,16 @@
 import UIKit
 import ZipArchive
 
-enum InputData {
-    @Sendable
+enum FileInput {
     static func getCanvasEntity(fileURL: URL) throws -> CanvasEntity {
-        if let jsonData: CanvasEntity = try InputData.loadJson(fileURL) {
+        if let jsonData: CanvasEntity = try FileInput.loadJson(fileURL) {
             return jsonData
 
-        } else if let jsonData: OldCanvasEntity = try InputData.loadJson(fileURL) {
+        } else if let jsonData: OldCanvasEntity = try FileInput.loadJson(fileURL) {
             return CanvasEntity.init(entity: jsonData)
         }
 
-        throw InputDataError.cannotFindFile
+        throw FileInputError.cannotFindFile
     }
 
     static func loadTexture(url: URL, textureSize: CGSize, device: MTLDevice) throws -> MTLTexture? {
@@ -39,7 +38,7 @@ enum InputData {
         let dataJson: Data? = jsonString.data(using: .utf8)
 
         guard let dataJson else {
-            throw InputDataError.failedToConvertData
+            throw FileInputError.failedToConvertData
         }
 
         return try JSONDecoder().decode(T.self, from: dataJson)
@@ -50,7 +49,7 @@ enum InputData {
             atPath: sourceZipURL.path,
             toDestination: destinationFolderURL.path
         ) {
-            throw InputDataError.failedToUnzip
+            throw FileInputError.failedToUnzip
         }
     }
 
@@ -65,7 +64,7 @@ enum InputData {
     }
 }
 
-enum InputDataError: Error {
+enum FileInputError: Error {
     case cannotFindFile
     case failedToUnzip
     case failedToConvertData

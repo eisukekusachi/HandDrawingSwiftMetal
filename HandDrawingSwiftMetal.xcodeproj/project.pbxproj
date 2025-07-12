@@ -79,8 +79,8 @@
 		D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */; };
 		D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */; };
 		D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */; };
-		D44D19672BE5D8AB0069D4A9 /* InputData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19662BE5D8AB0069D4A9 /* InputData.swift */; };
-		D44D19692BE5DA4D0069D4A9 /* OutputData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19682BE5DA4D0069D4A9 /* OutputData.swift */; };
+		D44D19672BE5D8AB0069D4A9 /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19662BE5D8AB0069D4A9 /* FileInput.swift */; };
+		D44D19692BE5DA4D0069D4A9 /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19682BE5DA4D0069D4A9 /* FileOutput.swift */; };
 		D44D196C2BE5DAF50069D4A9 /* LocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */; };
 		D44D19722BE5DBF60069D4A9 /* DocumentsLocalRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */; };
 		D44D19742BE5DFE80069D4A9 /* ToastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D19732BE5DFE80069D4A9 /* ToastModel.swift */; };
@@ -256,8 +256,8 @@
 		D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureLayerRepository.swift; sourceTree = "<group>"; };
 		D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasEntity.swift; sourceTree = "<group>"; };
 		D44D19612BE5D1820069D4A9 /* OldCanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldCanvasEntity.swift; sourceTree = "<group>"; };
-		D44D19662BE5D8AB0069D4A9 /* InputData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputData.swift; sourceTree = "<group>"; };
-		D44D19682BE5DA4D0069D4A9 /* OutputData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputData.swift; sourceTree = "<group>"; };
+		D44D19662BE5D8AB0069D4A9 /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
+		D44D19682BE5DA4D0069D4A9 /* FileOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutput.swift; sourceTree = "<group>"; };
 		D44D196B2BE5DAF50069D4A9 /* LocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRepository.swift; sourceTree = "<group>"; };
 		D44D19712BE5DBF60069D4A9 /* DocumentsLocalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsLocalRepository.swift; sourceTree = "<group>"; };
 		D44D19732BE5DFE80069D4A9 /* ToastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastModel.swift; sourceTree = "<group>"; };
@@ -442,8 +442,8 @@
 		D40B76ED2E2131AC0012BFF5 /* IO */ = {
 			isa = PBXGroup;
 			children = (
-				D44D19662BE5D8AB0069D4A9 /* InputData.swift */,
-				D44D19682BE5DA4D0069D4A9 /* OutputData.swift */,
+				D44D19662BE5D8AB0069D4A9 /* FileInput.swift */,
+				D44D19682BE5DA4D0069D4A9 /* FileOutput.swift */,
 			);
 			path = IO;
 			sourceTree = "<group>";
@@ -1132,7 +1132,7 @@
 				D4FE0F372E156CAC001A0E87 /* MoveLayerIndices.swift in Sources */,
 				D44B52CA2DB3928000EE213C /* CanvasInputDeviceStatus.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* CanvasViewController.swift in Sources */,
-				D44D19692BE5DA4D0069D4A9 /* OutputData.swift in Sources */,
+				D44D19692BE5DA4D0069D4A9 /* FileOutput.swift in Sources */,
 				D447D88C2DC5D2D700007210 /* CanvasStateStorage.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
@@ -1176,7 +1176,7 @@
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D469A8732C56342700D10575 /* SingleCurveIterator.swift in Sources */,
-				D44D19672BE5D8AB0069D4A9 /* InputData.swift in Sources */,
+				D44D19672BE5D8AB0069D4A9 /* FileInput.swift in Sources */,
 				D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */,
 				D44D19622BE5D1820069D4A9 /* OldCanvasEntity.swift in Sources */,
 				D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */,

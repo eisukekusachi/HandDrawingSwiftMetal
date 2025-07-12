@@ -103,7 +103,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             }
 
             do {
-                try OutputData.saveTextureAsData(
+                try FileOutput.saveTextureAsData(
                     bytes: texture.bytes,
                     to: fileURL
                 )
@@ -175,7 +175,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
             }
 
             do {
-                try OutputData.saveTextureAsData(
+                try FileOutput.saveTextureAsData(
                     bytes: newTexture.bytes,
                     to: fileURL
                 )
@@ -210,7 +210,7 @@ extension TextureLayerDocumentsDirectoryRepository {
                 for textureId in self.textureIds {
                     let url = self.directoryUrl.appendingPathComponent(textureId.uuidString)
                     if FileManager.default.fileExists(atPath: url.path) {
-                        let texture: MTLTexture? = try InputData.loadTexture(
+                        let texture: MTLTexture? = try FileInput.loadTexture(
                             url: url,
                             textureSize: textureSize,
                             device: device
