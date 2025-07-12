@@ -8,7 +8,31 @@
 import MetalKit
 
 /// A struct that represents a texture entity with `UUID` and `MTLTexture`
-struct IdentifiedTexture {
+struct IdentifiedTexture: Hashable {
     var uuid: UUID
     var texture: MTLTexture?
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
+    }
+
+    static func == (lhs: IdentifiedTexture, rhs: IdentifiedTexture) -> Bool {
+        lhs.uuid == rhs.uuid
+    }
+
+    /// Converts a single IdentifiedTexture to a dictionary [UUID: MTLTexture]
+    static func dictionary(from item: IdentifiedTexture) -> [UUID: MTLTexture] {
+        guard let texture = item.texture else { return [:] }
+        return [item.uuid: texture]
+    }
+
+    /// Converts a Set of IdentifiedTexture to a dictionary [UUID: MTLTexture]
+    static func dictionary(from set: Set<IdentifiedTexture>) -> [UUID: MTLTexture] {
+        Dictionary(
+            uniqueKeysWithValues: set.compactMap { item in
+                guard let texture = item.texture else { return nil }
+                return (item.uuid, texture)
+            }
+        )
+    }
 }
