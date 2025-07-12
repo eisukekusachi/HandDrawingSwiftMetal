@@ -31,30 +31,23 @@ final class DocumentsDirectoryRepository {
 
         let workingDirectory = DocumentsDirectoryRepository.workingDirectory
 
-        return Future<URL, Error> { [weak self] promise in
-            self?.saveDataTask?.cancel()
-            self?.saveDataTask = Task {
-                do {
-                    try FileManager.createNewDirectory(url: workingDirectory)
-                    promise(.success(workingDirectory))
-                } catch {
-                    promise(.failure(DocumentsDirectoryRepositoryError.operationError("saveData(renderTexture:, canvasState:, textureRepository:, to:)")))
-                }
-            }
+        return Result {
+            try createWorkingDirectory()
         }
-        .flatMap { url in
+        .publisher
+        .flatMap { _ in
             Publishers.CombineLatest(
                 self.exportThumbnail(
                     texture: renderTexture,
                     fileName: DocumentsDirectoryRepository.thumbnailName,
                     height: DocumentsDirectoryRepository.thumbnailLength,
-                    to: url
+                    to: workingDirectory
                 ),
                 self.exportTextures(
                     textureIds: canvasState.layers.map { $0.id },
                     textureSize: canvasState.textureSize,
                     textureRepository: textureRepository,
-                    to: url
+                    to: workingDirectory
                 )
             )
             .eraseToAnyPublisher()
@@ -104,9 +97,21 @@ final class DocumentsDirectoryRepository {
         .eraseToAnyPublisher()
     }
 
+    func createWorkingDirectory() throws {
+        do {
+            try FileManager.createNewDirectory(url: DocumentsDirectoryRepository.workingDirectory)
+        } catch {
+            throw DocumentsDirectoryRepositoryError.operationError(
+                "createWorkingDirectory()"
+            )
+        }
+    }
+
     func removeWorkingDirectory() {
+        // Do nothing if directory deletion fails
         try? FileManager.default.removeItem(at: DocumentsDirectoryRepository.workingDirectory)
     }
+
 }
 
 extension DocumentsDirectoryRepository {
