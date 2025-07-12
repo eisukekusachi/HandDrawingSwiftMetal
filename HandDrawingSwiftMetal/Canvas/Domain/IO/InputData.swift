@@ -54,6 +54,15 @@ enum InputData {
         }
     }
 
+    /// Checks whether the contents of the specified directory exactly match the given set of file names
+    static func containsAllFiles(
+        at directory: URL,
+        fileNames: [String]
+    ) -> Bool {
+        let fileURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+        let expectedNames = Set(fileNames)
+        return !expectedNames.isEmpty && Set(fileURLs.map { $0.lastPathComponent }) == expectedNames
+    }
 }
 
 enum InputDataError: Error {
