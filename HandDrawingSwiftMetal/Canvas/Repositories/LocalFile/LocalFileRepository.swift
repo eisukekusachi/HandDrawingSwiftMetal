@@ -11,10 +11,11 @@ import Foundation
 /// A repository responsible for handling local file operations
 final class LocalFileRepository {
 
-    private var workingDirectory: URL
+    /// The URL of the directory for storing temporary files
+    private var workingDirectoryURL: URL
 
-    init(workingDirectory: URL) {
-        self.workingDirectory = workingDirectory
+    init(workingDirectoryURL: URL) {
+        self.workingDirectoryURL = workingDirectoryURL
     }
 
     static func fileURL(projectName: String, suffix: String) -> URL {
@@ -26,7 +27,7 @@ extension LocalFileRepository {
 
     func createWorkingDirectory() throws {
         do {
-            try FileManager.createNewDirectory(workingDirectory)
+            try FileManager.createNewDirectory(workingDirectoryURL)
         } catch {
             throw DocumentsDirectoryRepositoryError.operationError(
                 "createWorkingDirectory()"
@@ -36,7 +37,7 @@ extension LocalFileRepository {
 
     func removeWorkingDirectory() {
         // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: workingDirectory)
+        try? FileManager.default.removeItem(at: workingDirectoryURL)
     }
 
     /// Compresses the working directory contents into a ZIP file
@@ -44,7 +45,7 @@ extension LocalFileRepository {
         to zipFileURL: URL
     ) throws {
         try FileOutput.zip(
-            workingDirectory,
+            workingDirectoryURL,
             to: zipFileURL
         )
     }
@@ -52,14 +53,13 @@ extension LocalFileRepository {
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
-        let workingDirectory = workingDirectory
-
+        let workingDirectoryURL = workingDirectoryURL
         return Future<URL, Error> { promise in
             Task {
                 do {
-                    try await FileInput.unzip(zipFileURL, to: workingDirectory)
+                    try await FileInput.unzip(zipFileURL, to: workingDirectoryURL)
                     promise(
-                        .success(workingDirectory)
+                        .success(workingDirectoryURL)
                     )
 
                 } catch {
@@ -76,7 +76,7 @@ extension LocalFileRepository {
     func saveToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>
     ) -> AnyPublisher<URL, Error> {
-        let fileURL = workingDirectory.appendingPathComponent(namedItem.name)
+        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.name)
 
         return Future<URL, Error> { promise in
             do {
