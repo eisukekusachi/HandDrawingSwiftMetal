@@ -14,7 +14,7 @@ final class MockTextureRepository: TextureRepository {
 
     let objectWillChangeSubject = PassthroughSubject<Void, Never>()
 
-    var textures: [UUID: MTLTexture?] = [:]
+    var textures: [UUID: MTLTexture] = [:]
 
     var textureIds: Set<UUID> = Set([])
 
@@ -26,7 +26,7 @@ final class MockTextureRepository: TextureRepository {
 
     var isInitialized: Bool { false }
 
-    init(textures: [UUID : MTLTexture?] = [:]) {
+    init(textures: [UUID : MTLTexture] = [:]) {
         self.textures = textures
     }
 
@@ -51,7 +51,6 @@ final class MockTextureRepository: TextureRepository {
     }
 
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        let device = MTLCreateSystemDefaultDevice()
         callHistory.append("addTexture(\(uuid))")
         return Just(
             .init(
@@ -73,8 +72,8 @@ final class MockTextureRepository: TextureRepository {
         let device = MTLCreateSystemDefaultDevice()!
         return Just(
             .init(
-                uuid: UUID(),
-                texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!
+                uuid: uuid,
+                texture: textures[uuid] ?? (MTLTextureCreator.makeBlankTexture(with: device)!)
             )
         )
         .setFailureType(to: Error.self)
@@ -84,8 +83,11 @@ final class MockTextureRepository: TextureRepository {
     func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
         let device = MTLCreateSystemDefaultDevice()!
         return Just(uuids.map { uuid in
-            .init(uuid: uuid, texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!) }
-        )
+            .init(
+                uuid: uuid,
+                texture: textures[uuid] ?? MTLTextureCreator.makeBlankTexture(with: device)!
+            )
+        })
         .setFailureType(to: Error.self)
         .eraseToAnyPublisher()
     }
@@ -97,7 +99,7 @@ final class MockTextureRepository: TextureRepository {
 
     func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
         callHistory.append("loadTexture(\(uuid))")
-        let resultTexture: MTLTexture? = textures[uuid]?.flatMap { $0 }
+        let resultTexture: MTLTexture? = textures[uuid].flatMap { $0 }
         return Just(resultTexture)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
@@ -123,7 +125,7 @@ final class MockTextureRepository: TextureRepository {
         return Just(
             .init(
                 uuid: UUID(),
-                texture: MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)!
+                texture: MTLTextureCreator.makeBlankTexture(with: device)!
             )
         )
         .setFailureType(to: Error.self)
