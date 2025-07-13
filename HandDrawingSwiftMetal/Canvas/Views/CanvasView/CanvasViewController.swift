@@ -89,7 +89,7 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicatorShowRequestPublisher
+        canvasViewModel.activityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)

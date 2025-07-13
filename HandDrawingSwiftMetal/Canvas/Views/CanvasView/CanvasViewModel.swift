@@ -22,8 +22,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicatorShowRequestPublisher: AnyPublisher<Bool, Never> {
-        activityIndicatorShowRequestSubject.eraseToAnyPublisher()
+    var activityIndicator: AnyPublisher<Bool, Never> {
+        activityIndicatorSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show the alert
@@ -103,7 +103,7 @@ final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
+    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let alertSubject = PassthroughSubject<Error, Never>()
 
@@ -266,8 +266,8 @@ extension CanvasViewModel {
     func initialize(using configuration: CanvasConfiguration) {
         textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
-                receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-                receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
+                receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+                receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
             )
             .sink(
                 receiveCompletion: { completion in
@@ -308,7 +308,7 @@ extension CanvasViewModel {
         }
 
         canvasViewSetupCompletedSubject.send(())
-        activityIndicatorShowRequestSubject.send(false)
+        activityIndicatorSubject.send(false)
     }
 }
 
@@ -333,7 +333,7 @@ extension CanvasViewModel {
     }
 
     func onViewWillAppear() {
-        activityIndicatorShowRequestSubject.send(true)
+        activityIndicatorSubject.send(true)
     }
 
     func onViewDidAppear(
@@ -616,8 +616,8 @@ extension CanvasViewModel {
            }
         }
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
@@ -699,8 +699,8 @@ extension CanvasViewModel {
             )
         }
         .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
