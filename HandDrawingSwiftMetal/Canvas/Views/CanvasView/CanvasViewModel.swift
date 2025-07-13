@@ -47,7 +47,7 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -264,6 +264,7 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func initialize(using configuration: CanvasConfiguration) {
+        // Initialize the texture repository
         textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
                 receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
@@ -278,14 +279,14 @@ extension CanvasViewModel {
                 },
                 receiveValue: { [weak self] result in
                     Task { @MainActor in
-                        self?.completeInitialization(result)
+                        self?.setupCanvas(result)
                     }
                 }
             )
             .store(in: &cancellables)
     }
 
-    @MainActor private func completeInitialization(_ configuration: CanvasConfiguration) {
+    @MainActor private func setupCanvas(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
             let commandBuffer = canvasView?.commandBuffer
@@ -451,6 +452,7 @@ extension CanvasViewModel {
     }
 
     func loadFile(zipFileURL: URL) {
+        /// Create the working space
         do {
             try localFileRepository.createWorkingDirectory()
         }
@@ -458,6 +460,7 @@ extension CanvasViewModel {
             alertSubject.send(error)
         }
 
+        /// Unzip into the working space
         localFileRepository.unzipToWorkingDirectory(
             from: zipFileURL
         )
@@ -470,6 +473,7 @@ extension CanvasViewModel {
                     projectName: zipFileURL.fileName,
                     entity: entity
                 )
+                /// Restore the repository from the extracted textures
                 return self.textureLayerRepository.restoreStorage(
                     from: workingDirectoryURL,
                     with: configuration
@@ -487,12 +491,12 @@ extension CanvasViewModel {
             case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
-
+            /// Save textures to the working space
             self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: { [weak self] configuration in
             Task { @MainActor in
-                self?.completeInitialization(configuration)
+                self?.setupCanvas(configuration)
             }
         })
         .store(in: &cancellables)
@@ -516,6 +520,7 @@ extension CanvasViewModel {
             canvasState: canvasState
         )
 
+        /// Create the working space
         do {
             try localFileRepository.createWorkingDirectory()
         }
@@ -534,9 +539,11 @@ extension CanvasViewModel {
             }
 
             return Publishers.CombineLatest(
+                /// Save the thumbnail to the working space
                 self.localFileRepository.saveToWorkingDirectory(
                     namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
                 ),
+                /// Save textures to the working space
                 self.localFileRepository.saveAllToWorkingDirectory(
                     namedItems: identifiedTextures.map {
                         .init(name: $0.uuid.uuidString, item: $0)
@@ -547,6 +554,7 @@ extension CanvasViewModel {
             .eraseToAnyPublisher()
         }
         .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
+            /// Save canvas data to the working space
             self?.localFileRepository.saveToWorkingDirectory(
                 namedItem: .init(
                     name: CanvasEntity.jsonFileName,
@@ -557,6 +565,7 @@ extension CanvasViewModel {
             ).eraseToAnyPublisher()
         }
         .tryMap { [weak self] result in
+            /// Archive the working space as a ZIP file
             try self?.localFileRepository.zipWorkingDirectory(
                 to: zipFileURL
             )
@@ -571,6 +580,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertSubject.send(error)
             }
 
+            /// Delete the working space
             self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: {})

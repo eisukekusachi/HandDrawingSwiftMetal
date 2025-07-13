@@ -81,7 +81,7 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.canvasViewSetupCompletedPublisher
+        canvasViewModel.canvasViewSetupCompleted
             .sink { [weak self] configuration in
                 UIView.animate(withDuration: 0.05) { [weak self] in
                     self?.contentView.alpha = 1.0
