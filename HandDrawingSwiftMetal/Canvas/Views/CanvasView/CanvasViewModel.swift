@@ -136,7 +136,7 @@ final class CanvasViewModel {
     init(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
-        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared
+        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository
     ) {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)

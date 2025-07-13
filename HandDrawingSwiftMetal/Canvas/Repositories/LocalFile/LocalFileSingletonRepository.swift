@@ -9,11 +9,13 @@ import Foundation
 
 final class LocalFileSingletonRepository {
 
-    static let shared = LocalFileRepository()
+    static let shared = LocalFileSingletonRepository()
 
-    private let repository: LocalFileRepository
+    let repository: LocalFileRepository
 
-    private init(repository: LocalFileRepository = .init()) {
-        self.repository = repository
+    private init() {
+        self.repository = LocalFileRepository(
+            workingDirectory: URL.applicationSupport.appendingPathComponent("TmpFolder")
+        )
     }
 }

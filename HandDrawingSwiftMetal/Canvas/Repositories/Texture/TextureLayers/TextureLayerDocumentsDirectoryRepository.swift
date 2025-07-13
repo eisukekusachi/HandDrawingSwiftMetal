@@ -41,7 +41,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     override func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(directoryUrl)
+            in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
             let textureSize = configuration.textureSize ?? .zero
 
@@ -103,13 +103,13 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 }
 
                 // Delete all existing files
-                self.resetDirectory(self.directoryUrl)
+                self.resetDirectory(self.workingDirectoryURL)
 
                 // Move all files
                 try configuration.layers.forEach { layer in
                     try FileManager.default.moveItem(
                         at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
-                        to: self.directoryUrl.appendingPathComponent(layer.id.uuidString)
+                        to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
                     )
                 }
 
@@ -139,7 +139,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
                     try FileOutput.saveTextureAsData(
                         bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                        to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     self.textureIds.insert(uuid)
@@ -164,7 +164,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 return
             }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             guard !FileManager.default.fileExists(atPath: fileURL.path) else {
                 promise(.failure(TextureRepositoryError.fileAlreadyExists))
@@ -193,7 +193,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
 
     /// Deletes all files within the directory and clears texture ID data and the thumbnails
     override func removeAll() {
-        try? FileManager.clearContents(of: directoryUrl)
+        try? FileManager.clearContents(of: workingDirectoryURL)
         textureIds = []
         thumbnails = [:]
     }
@@ -202,7 +202,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         Future { [weak self] promise in
             guard let `self` else { return }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 try? FileManager.default.removeItem(at: fileURL)
@@ -228,7 +228,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 return
             }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             guard FileManager.default.fileExists(atPath: fileURL.path) else {
                 promise(.failure(TextureRepositoryError.fileNotFound(fileURL.path)))
@@ -281,7 +281,7 @@ extension TextureLayerDocumentsDirectoryRepository {
 
             do {
                 for textureId in self.textureIds {
-                    let url = self.directoryUrl.appendingPathComponent(textureId.uuidString)
+                    let url = self.workingDirectoryURL.appendingPathComponent(textureId.uuidString)
                     if FileManager.default.fileExists(atPath: url.path) {
                         let texture: MTLTexture? = try FileInput.loadTexture(
                             url: url,

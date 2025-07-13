@@ -16,7 +16,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     let directoryName: String
 
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
-    var directoryUrl: URL
+    private(set) var workingDirectoryURL: URL!
 
     /// The IDs of the textures managed by this repository. The IDs are used as file names.
     var textureIds: Set<UUID> = []
@@ -48,10 +48,20 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         self.renderer = renderer
 
         self.directoryName = directoryName
-        self.directoryUrl = storageDirectoryURL.appendingPathComponent(directoryName)
+
+        self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
+
+        // Do not back up because this is an intermediate directory
+        do {
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try workingDirectoryURL.setResourceValues(resourceValues)
+        } catch {
+            Logger.standard.error("LocalFileRepository: \(error)")
+        }
 
         do {
-            try FileManager.createDirectory(directoryUrl)
+            try FileManager.createDirectory(workingDirectoryURL)
         } catch {
             Logger.standard.error("Failed to create the storage: \(error)")
         }
@@ -62,7 +72,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(directoryUrl)
+            in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
             // Retain IDs if texture filenames match the configuration
             textureIds = Set(configuration.layers.map { $0.id })
@@ -116,13 +126,13 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 }
 
                 // Delete all files
-                self.resetDirectory(self.directoryUrl)
+                self.resetDirectory(self.workingDirectoryURL)
 
                 // Move all files
                 try configuration.layers.forEach { layer in
                     try FileManager.default.moveItem(
                         at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
-                        to: self.directoryUrl.appendingPathComponent(layer.id.uuidString)
+                        to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
                     )
                 }
 
@@ -149,7 +159,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         }
 
         // Delete all files in the directory
-        resetDirectory(directoryUrl)
+        resetDirectory(workingDirectoryURL)
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
@@ -177,10 +187,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
 
             do {
                 if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
-
                     try FileOutput.saveTextureAsData(
                         bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                        to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
                     )
 
                     self.textureIds.insert(uuid)
@@ -208,7 +217,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 return
             }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             guard !FileManager.default.fileExists(atPath: fileURL.path) else {
                 promise(.failure(TextureRepositoryError.fileAlreadyExists))
@@ -240,7 +249,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             .eraseToAnyPublisher()
         }
 
-        let destinationUrl = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+        let destinationUrl = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
         return Future<IdentifiedTexture, Error> { [weak self] promise in
             do {
@@ -279,7 +288,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     /// Deletes all files within the directory and clears texture ID data
     func removeAll() {
         // Delete all contents inside the folder
-        try? FileManager.clearContents(of: directoryUrl)
+        try? FileManager.clearContents(of: workingDirectoryURL)
 
         // Clear the texture ID array
         textureIds = []
@@ -289,7 +298,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         Future { [weak self] promise in
             guard let `self` else { return }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 try? FileManager.default.removeItem(at: fileURL)
@@ -328,7 +337,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 return
             }
 
-            let fileURL = self.directoryUrl.appendingPathComponent(uuid.uuidString)
+            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
             guard FileManager.default.fileExists(atPath: fileURL.path) else {
                 promise(.failure(TextureRepositoryError.fileNotFound(fileURL.path)))
