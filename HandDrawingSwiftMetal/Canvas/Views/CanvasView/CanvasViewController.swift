@@ -75,9 +75,7 @@ extension CanvasViewController {
                     textureLayerRepository: configuration.textureLayerRepository,
                     undoStack: configuration.undoStack
                 )
-                self?.contentView.setup(
-                    configuration.canvasState
-                )
+                self?.contentView.setup()
             }
             .store(in: &cancellables)
 
@@ -112,13 +110,6 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.layerViewShowRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isShown in
-                self?.textureLayerViewPresenter.showView(isShown)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.needsUndoButtonStateUpdatePublisher
             .assign(to: \.isEnabled, on: contentView.undoButton)
             .store(in: &cancellables)
@@ -143,11 +134,29 @@ extension CanvasViewController {
 
     private func addEvents() {
         contentView.tapResetTransformButton = { [weak self] in
-            self?.canvasViewModel.didTapResetTransformButton()
+            self?.canvasViewModel.resetTransforming()
+        }
+
+        contentView.tapBlackButton = { [weak self] in
+            self?.canvasViewModel.setDrawingTool(.brush)
+            self?.canvasViewModel.setBrushColor(UIColor.black.withAlphaComponent(0.75))
+        }
+        contentView.tapRedButton = { [weak self] in
+            self?.canvasViewModel.setDrawingTool(.brush)
+            self?.canvasViewModel.setBrushColor(UIColor.red.withAlphaComponent(0.75))
+        }
+        contentView.tapEraserButton = { [weak self] in
+            self?.canvasViewModel.setDrawingTool(.eraser)
+        }
+        contentView.changeBrushDiameter = { [weak self] value in
+            self?.canvasViewModel.setBrushDiameter(value)
+        }
+        contentView.changeEraserDiameter = { [weak self] value in
+            self?.canvasViewModel.setEraserDiameter(value)
         }
 
         contentView.tapLayerButton = { [weak self] in
-            self?.canvasViewModel.didTapLayerButton()
+            self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
             self?.canvasViewModel.saveFile()
@@ -165,10 +174,10 @@ extension CanvasViewController {
         }
 
         contentView.tapUndoButton = { [weak self] in
-            self?.canvasViewModel.didTapUndoButton()
+            self?.canvasViewModel.undo()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.canvasViewModel.didTapRedoButton()
+            self?.canvasViewModel.redo()
         }
 
         contentView.canvasView.addGestureRecognizer(
@@ -178,14 +187,13 @@ extension CanvasViewController {
             PencilInputGestureRecognizer(delegate: self)
         )
     }
-
 }
 
 extension CanvasViewController {
 
     private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            self?.canvasViewModel.didTapNewCanvasButton()
+            self?.canvasViewModel.newCanvas()
         }
     }
 

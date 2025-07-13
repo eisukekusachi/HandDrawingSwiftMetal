@@ -63,12 +63,12 @@ extension CanvasStateStorage {
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
         do {
             let brush = BrushStorageEntity(context: coreDataRepository.context)
-            brush.colorHex = canvasState.drawingToolState.brush.color.hexString()
-            brush.diameter = Int16(canvasState.drawingToolState.brush.diameter)
+            brush.colorHex = canvasState.brush.color.hexString()
+            brush.diameter = Int16(canvasState.brush.diameter)
 
             let eraser = EraserStorageEntity(context: coreDataRepository.context)
-            eraser.alpha = Int16(canvasState.drawingToolState.eraser.alpha)
-            eraser.diameter = Int16(canvasState.drawingToolState.eraser.diameter)
+            eraser.alpha = Int16(canvasState.eraser.alpha)
+            eraser.diameter = Int16(canvasState.eraser.diameter)
 
             let drawingTool = DrawingToolStorageEntity(context: coreDataRepository.context)
             drawingTool.brush = brush
@@ -134,7 +134,7 @@ extension CanvasStateStorage {
             }
             .store(in: &cancellables)
 
-        canvasState?.drawingToolState.brush.$color
+        canvasState?.brush.$color
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { $0.hexString() }
@@ -144,7 +144,7 @@ extension CanvasStateStorage {
             }
             .store(in: &cancellables)
 
-        canvasState?.drawingToolState.brush.$diameter
+        canvasState?.brush.$diameter
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
@@ -154,7 +154,7 @@ extension CanvasStateStorage {
             }
             .store(in: &cancellables)
 
-        canvasState?.drawingToolState.eraser.$alpha
+        canvasState?.eraser.$alpha
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }
@@ -164,7 +164,7 @@ extension CanvasStateStorage {
             }
             .store(in: &cancellables)
 
-        canvasState?.drawingToolState.eraser.$diameter
+        canvasState?.eraser.$diameter
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .map { Int16($0) }

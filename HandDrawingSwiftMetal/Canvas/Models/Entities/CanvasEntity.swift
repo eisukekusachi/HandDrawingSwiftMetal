@@ -39,10 +39,10 @@ extension CanvasEntity {
         self.layerIndex = canvasState.selectedIndex ?? 0
         self.layers = canvasState.layers.map { .init(from: $0) }
 
-        self.drawingTool = canvasState.drawingToolState.drawingTool.rawValue
+        self.drawingTool = canvasState.drawingTool.rawValue
 
-        self.brushDiameter = canvasState.drawingToolState.brush.diameter
-        self.eraserDiameter = canvasState.drawingToolState.eraser.diameter
+        self.brushDiameter = canvasState.brush.diameter
+        self.eraserDiameter = canvasState.eraser.diameter
     }
 
     init(fileURL: URL) throws {

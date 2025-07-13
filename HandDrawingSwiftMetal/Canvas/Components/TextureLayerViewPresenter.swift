@@ -15,8 +15,8 @@ final class TextureLayerViewPresenter {
 
     private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
 
-    func showView(_ isShown: Bool) {
-        layerViewController.view.isHidden = !isShown
+    func toggleView() {
+        layerViewController.view.isHidden = !layerViewController.view.isHidden
     }
 
     func setupLayerViewPresenter(

@@ -36,11 +36,6 @@ final class CanvasViewModel {
         toastSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits a request to show or hide the layer view
-    var layerViewShowRequestPublisher: AnyPublisher<Bool, Never> {
-        layerViewShowRequestSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
     var viewConfigureRequestPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
         viewConfigureRequestSubject.eraseToAnyPublisher()
@@ -108,8 +103,6 @@ final class CanvasViewModel {
     private let alertSubject = PassthroughSubject<Error, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
-
-    private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
     private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
@@ -195,7 +188,7 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update drawingTextureSet when the tool is switched
-        canvasState.drawingToolState.$drawingTool
+        canvasState.$drawingTool
             .sink { [weak self] tool in
                 guard let `self` else { return }
                 switch tool {
@@ -206,14 +199,14 @@ final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the color of drawingBrushTextureSet when the brush color changes
-        canvasState.drawingToolState.brush.$color
+        canvasState.brush.$color
             .sink { [weak self] color in
                 self?.drawingBrushTextureSet.setBlushColor(color)
             }
             .store(in: &cancellables)
 
         // Update the alpha of drawingEraserTextureSet when the eraser alpha changes
-        canvasState.drawingToolState.eraser.$alpha
+        canvasState.eraser.$alpha
             .sink { [weak self] alpha in
                 self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
@@ -425,29 +418,37 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func didTapUndoButton() {
-        undoStack?.undo()
-    }
-    func didTapRedoButton() {
-        undoStack?.redo()
-    }
-
-    func didTapLayerButton() {
-        // Toggle the visibility of `TextureLayerView`
-        layerViewShowRequestSubject.send(!layerViewShowRequestSubject.value)
-    }
-
-    func didTapResetTransformButton() {
+    func resetTransforming() {
         guard let commandBuffer = canvasView?.commandBuffer else { return }
         transformer.setMatrix(.identity)
         renderer.updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    func didTapNewCanvasButton() {
+    func newCanvas() {
         transformer.setMatrix(.identity)
         initialize(
             using: CanvasConfiguration(textureSize: canvasState.textureSize)
         )
+    }
+
+    func setDrawingTool(_ drawingTool: DrawingToolType) {
+        canvasState.drawingTool = drawingTool
+    }
+    func setBrushColor(_ color: UIColor) {
+        canvasState.brush.color = color
+    }
+    func setBrushDiameter(_ value: Float) {
+        canvasState.brush.diameter = DrawingBrushToolState.diameterIntValue(value)
+    }
+    func setEraserDiameter(_ value: Float) {
+        canvasState.brush.diameter = DrawingEraserToolState.diameterIntValue(value)
+    }
+
+    func undo() {
+        undoStack?.undo()
+    }
+    func redo() {
+        undoStack?.redo()
     }
 
     func loadFile(zipFileURL: URL) {

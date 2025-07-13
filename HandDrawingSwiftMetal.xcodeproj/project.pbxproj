@@ -77,7 +77,6 @@
 		D44B52D62DB3ACA500EE213C /* DrawingBrushToolState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52CD2DB3ACA500EE213C /* DrawingBrushToolState.swift */; };
 		D44B52D72DB3ACA500EE213C /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52D02DB3ACA500EE213C /* DrawingToolType.swift */; };
 		D44B52D82DB3ACA500EE213C /* DrawingEraserToolState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52CE2DB3ACA500EE213C /* DrawingEraserToolState.swift */; };
-		D44B52D92DB3ACA500EE213C /* DrawingToolState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52D22DB3ACA500EE213C /* DrawingToolState.swift */; };
 		D44B52DA2DB3ACA500EE213C /* DrawingToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52CF2DB3ACA500EE213C /* DrawingToolProtocol.swift */; };
 		D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */; };
 		D44D19602BE5D1770069D4A9 /* CanvasEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */; };
@@ -256,7 +255,6 @@
 		D44B52CE2DB3ACA500EE213C /* DrawingEraserToolState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingEraserToolState.swift; sourceTree = "<group>"; };
 		D44B52CF2DB3ACA500EE213C /* DrawingToolProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolProtocol.swift; sourceTree = "<group>"; };
 		D44B52D02DB3ACA500EE213C /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
-		D44B52D22DB3ACA500EE213C /* DrawingToolState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolState.swift; sourceTree = "<group>"; };
 		D44B52D32DB3ACA500EE213C /* CanvasState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasState.swift; sourceTree = "<group>"; };
 		D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureLayerRepository.swift; sourceTree = "<group>"; };
 		D44D195F2BE5D1760069D4A9 /* CanvasEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasEntity.swift; sourceTree = "<group>"; };
@@ -674,7 +672,6 @@
 				D44B52CD2DB3ACA500EE213C /* DrawingBrushToolState.swift */,
 				D44B52CE2DB3ACA500EE213C /* DrawingEraserToolState.swift */,
 				D44B52CF2DB3ACA500EE213C /* DrawingToolProtocol.swift */,
-				D44B52D22DB3ACA500EE213C /* DrawingToolState.swift */,
 				D44B52D02DB3ACA500EE213C /* DrawingToolType.swift */,
 			);
 			path = DrawingTool;
@@ -1125,7 +1122,6 @@
 				D44B52D72DB3ACA500EE213C /* DrawingToolType.swift in Sources */,
 				D44B52D82DB3ACA500EE213C /* DrawingEraserToolState.swift in Sources */,
 				D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */,
-				D44B52D92DB3ACA500EE213C /* DrawingToolState.swift in Sources */,
 				D44B52DA2DB3ACA500EE213C /* DrawingToolProtocol.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* CanvasContentView.swift in Sources */,
 				D45478CB2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift in Sources */,

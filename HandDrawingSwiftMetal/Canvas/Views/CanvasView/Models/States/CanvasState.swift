@@ -16,21 +16,25 @@ final class CanvasState: ObservableObject {
 
     @Published var textureSize: CGSize = CanvasState.defaultTextureSize
 
-    let drawingToolState = DrawingToolState(
-        configuration: CanvasConfiguration()
-    )
-
     @Published var layers: [TextureLayerModel] = []
 
     @Published var selectedLayerId: UUID?
 
     @Published var backgroundColor: UIColor = .white
 
+    @Published var drawingTool: DrawingToolType = .brush
+
+    let brush = DrawingBrushToolState()
+
+    let eraser = DrawingEraserToolState()
+
     /// Subject to publish updates for the canvas
     let canvasUpdateSubject = PassthroughSubject<Void, Never>()
 
     /// Subject to publish updates for the entire canvas, including all textures
     let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+
+    private(set) var currentDrawingTool: DrawingToolProtocol!
 
     private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
@@ -53,7 +57,7 @@ extension CanvasState {
     }
 
     var drawingToolDiameter: Int? {
-        drawingToolState.currentDrawingTool.diameter
+        currentDrawingTool.diameter
     }
 
     func layer(_ layerId: UUID) -> TextureLayerModel? {
@@ -61,14 +65,31 @@ extension CanvasState {
     }
 
     func setData(_ configuration: CanvasConfiguration) {
+        /*
         projectName = configuration.projectName
         textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
         layers.removeAll()
         layers = configuration.layers
         selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
         drawingToolState.setData(configuration)
-    }
+*/
+        self.projectName = configuration.projectName
+        self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
 
+        self.layers.removeAll()
+        self.layers = configuration.layers
+        self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
+
+        self.brush.color = configuration.brushColor
+        self.brush.setDiameter(configuration.brushDiameter)
+
+        self.eraser.alpha = configuration.eraserAlpha
+        self.eraser.setDiameter(configuration.eraserDiameter)
+
+        self.currentDrawingTool = self.brush
+
+        self.drawingTool = configuration.drawingTool
+    }
 }
 
 extension CanvasState {
@@ -97,5 +118,4 @@ extension CanvasState {
         self.layers[index] = newTextureLayer
         self.selectedLayerId = newTextureLayer.id
     }
-
 }
