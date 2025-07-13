@@ -490,7 +490,7 @@ extension CanvasViewModel {
             case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
-            /// Save textures to the working space
+            /// Remove the working space
             self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: { [weak self] configuration in
@@ -578,8 +578,7 @@ extension CanvasViewModel {
             case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
-
-            /// Delete the working space
+            /// Remove the working space
             self?.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: {})
