@@ -424,7 +424,7 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    // MARK: Toolbar
+
     func didTapUndoButton() {
         undoStack?.undo()
     }
@@ -448,6 +448,133 @@ extension CanvasViewModel {
         initialize(
             using: CanvasConfiguration(textureSize: canvasState.textureSize)
         )
+    }
+
+    func loadFile(zipFileURL: URL) {
+        do {
+            try localFileRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
+        localFileRepository.unzipToWorkingDirectory(
+            from: zipFileURL
+        )
+        .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
+            do {
+                let entity: CanvasEntity = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
+                )
+                let configuration: CanvasConfiguration = .init(
+                    projectName: zipFileURL.fileName,
+                    entity: entity
+                )
+                return self.textureLayerRepository.restoreStorage(
+                    from: workingDirectoryURL,
+                    with: configuration
+               )
+           } catch(let error) {
+               return Fail(error: error).eraseToAnyPublisher()
+           }
+        }
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertSubject.send(error)
+            }
+
+            self?.localFileRepository.removeWorkingDirectory()
+
+        }, receiveValue: { [weak self] configuration in
+            Task { @MainActor in
+                self?.completeInitialization(configuration)
+            }
+        })
+        .store(in: &cancellables)
+    }
+
+    func saveFile() {
+        guard
+            let canvasTexture = renderer.canvasTexture,
+            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+                height: CanvasEntity.thumbnailLength,
+                scale: 1.0
+            )
+        else { return }
+
+        let zipFileURL = FileManager.documentsFileURL(
+            projectName: canvasState.projectName,
+            suffix: CanvasViewModel.fileSuffix
+        )
+        let entity = CanvasEntity(
+            thumbnailName: CanvasEntity.thumbnailName,
+            canvasState: canvasState
+        )
+
+        do {
+            try localFileRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
+        textureLayerRepository.copyTextures(
+            uuids: canvasState.layers.map { $0.id }
+        )
+        .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
+            guard let self else {
+                return Fail(
+                    error: CanvasViewModelError.invalidValue("failed to unwrap")
+                ).eraseToAnyPublisher()
+            }
+
+            return Publishers.CombineLatest(
+                self.localFileRepository.saveToWorkingDirectory(
+                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
+                ),
+                self.localFileRepository.saveAllToWorkingDirectory(
+                    namedItems: identifiedTextures.map {
+                        .init(name: $0.uuid.uuidString, item: $0)
+                    }
+                )
+            )
+            .map { _, _ in () }
+            .eraseToAnyPublisher()
+        }
+        .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
+            self?.localFileRepository.saveToWorkingDirectory(
+                namedItem: .init(
+                    name: CanvasEntity.jsonFileName,
+                    item: entity
+                )
+            ) ?? Fail(
+                error: CanvasViewModelError.invalidValue("failed to unwrap")
+            ).eraseToAnyPublisher()
+        }
+        .tryMap { [weak self] result in
+            try self?.localFileRepository.zipWorkingDirectory(
+                to: zipFileURL
+            )
+        }
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertSubject.send(error)
+            }
+
+            self?.localFileRepository.removeWorkingDirectory()
+
+        }, receiveValue: {})
+        .store(in: &cancellables)
     }
 }
 
@@ -583,136 +710,6 @@ extension CanvasViewModel {
         )
     }
 
-}
-
-extension CanvasViewModel {
-
-    func loadFile(zipFileURL: URL) {
-        do {
-            try localFileRepository.createWorkingDirectory()
-        }
-        catch(let error) {
-            alertSubject.send(error)
-        }
-
-        localFileRepository.unzipToWorkingDirectory(
-            from: zipFileURL
-        )
-        .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
-            do {
-                let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
-                )
-                let configuration: CanvasConfiguration = .init(
-                    projectName: zipFileURL.fileName,
-                    entity: entity
-                )
-                return self.textureLayerRepository.restoreStorage(
-                    from: workingDirectoryURL,
-                    with: configuration
-               )
-           } catch(let error) {
-               return Fail(error: error).eraseToAnyPublisher()
-           }
-        }
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertSubject.send(error)
-            }
-
-            self?.localFileRepository.removeWorkingDirectory()
-
-        }, receiveValue: { [weak self] configuration in
-            Task { @MainActor in
-                self?.completeInitialization(configuration)
-            }
-        })
-        .store(in: &cancellables)
-    }
-
-    func saveFile() {
-        guard
-            let canvasTexture = renderer.canvasTexture,
-            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: CanvasEntity.thumbnailLength,
-                scale: 1.0
-            )
-        else { return }
-
-        let zipFileURL = FileManager.documentsFileURL(
-            projectName: canvasState.projectName,
-            suffix: CanvasViewModel.fileSuffix
-        )
-        let entity = CanvasEntity(
-            thumbnailName: CanvasEntity.thumbnailName,
-            canvasState: canvasState
-        )
-
-        do {
-            try localFileRepository.createWorkingDirectory()
-        }
-        catch(let error) {
-            alertSubject.send(error)
-        }
-
-        textureLayerRepository.copyTextures(
-            uuids: canvasState.layers.map { $0.id }
-        )
-        .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
-            guard let self else {
-                return Fail(
-                    error: CanvasViewModelError.invalidValue("failed to unwrap")
-                ).eraseToAnyPublisher()
-            }
-
-            return Publishers.CombineLatest(
-                self.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
-                ),
-                self.localFileRepository.saveAllToWorkingDirectory(
-                    namedItems: identifiedTextures.map {
-                        .init(name: $0.uuid.uuidString, item: $0)
-                    }
-                )
-            )
-            .map { _, _ in () }
-            .eraseToAnyPublisher()
-        }
-        .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
-            self?.localFileRepository.saveToWorkingDirectory(
-                namedItem: .init(
-                    name: CanvasEntity.jsonFileName,
-                    item: entity
-                )
-            ) ?? Fail(
-                error: CanvasViewModelError.invalidValue("failed to unwrap")
-            ).eraseToAnyPublisher()
-        }
-        .tryMap { [weak self] result in
-            try self?.localFileRepository.zipWorkingDirectory(
-                to: zipFileURL
-            )
-        }
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertSubject.send(error)
-            }
-
-            self?.localFileRepository.removeWorkingDirectory()
-
-        }, receiveValue: {})
-        .store(in: &cancellables)
-    }
 }
 
 enum CanvasViewModelError: Error {
