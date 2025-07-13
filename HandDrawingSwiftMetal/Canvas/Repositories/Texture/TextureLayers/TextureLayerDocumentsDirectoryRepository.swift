@@ -103,7 +103,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 }
 
                 // Delete all existing files
-                self.resetDirectory(&self.directoryUrl)
+                self.resetDirectory(self.directoryUrl)
 
                 // Move all files
                 try configuration.layers.forEach { layer in

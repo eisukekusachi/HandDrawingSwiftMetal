@@ -9,20 +9,16 @@ import Foundation
 
 extension FileManager {
 
-    static func createNewDirectory(url: URL) throws {
+    static func createDirectory(_ url: URL) throws {
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+    }
+
+    static func createNewDirectory(_ url: URL) throws {
         if FileManager.default.fileExists(atPath: url.path) {
-            do {
-                try FileManager.default.removeItem(atPath: url.path)
-            } catch {
-                throw error
-            }
+            try FileManager.default.removeItem(atPath: url.path)
         }
 
-        do {
-            try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
-        } catch {
-            throw error
-        }
+        try FileManager.createDirectory(url)
     }
 
     static func clearContents(of folder: URL) throws {

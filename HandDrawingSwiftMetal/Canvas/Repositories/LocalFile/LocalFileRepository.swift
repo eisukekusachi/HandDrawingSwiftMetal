@@ -11,7 +11,7 @@ import Foundation
 /// A repository responsible for handling local file operations
 final class LocalFileRepository {
 
-    let workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
+    var workingDirectory = URL.applicationSupport.appendingPathComponent("TmpFolder")
 
     static func fileURL(projectName: String, suffix: String) -> URL {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
@@ -22,7 +22,7 @@ extension LocalFileRepository {
 
     func createWorkingDirectory() throws {
         do {
-            try FileManager.createNewDirectory(url: workingDirectory)
+            try FileManager.createNewDirectory(workingDirectory)
         } catch {
             throw DocumentsDirectoryRepositoryError.operationError(
                 "createWorkingDirectory()"

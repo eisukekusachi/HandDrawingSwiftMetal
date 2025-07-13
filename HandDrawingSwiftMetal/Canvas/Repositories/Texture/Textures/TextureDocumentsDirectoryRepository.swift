@@ -15,7 +15,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     /// The directory name where texture files are stored
     let directoryName: String
 
-    /// The URL of the texture storage directory. Define it as `var` to allow modification of its metadata
+    /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     var directoryUrl: URL
 
     /// The IDs of the textures managed by this repository. The IDs are used as file names.
@@ -50,7 +50,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         self.directoryName = directoryName
         self.directoryUrl = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        self.createDirectory(&directoryUrl)
+        do {
+            try FileManager.createDirectory(directoryUrl)
+        } catch {
+            Logger.standard.error("Failed to create the storage: \(error)")
+        }
     }
 
     /// Attempts to restore layers from a given `CanvasConfiguration`
@@ -112,7 +116,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 }
 
                 // Delete all files
-                self.resetDirectory(&self.directoryUrl)
+                self.resetDirectory(self.directoryUrl)
 
                 // Move all files
                 try configuration.layers.forEach { layer in
@@ -145,7 +149,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         }
 
         // Delete all files in the directory
-        resetDirectory(&directoryUrl)
+        resetDirectory(directoryUrl)
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
@@ -299,20 +303,16 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     }
 
     /// Deletes the entire directory and recreates it as an empty folder
-    func resetDirectory(_ url: inout URL) {
+    func resetDirectory(_ url: URL) {
         do {
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.removeItem(at: url)
-            }
-
             // Create a new folder
-            createDirectory(&url)
+            try FileManager.createNewDirectory(url)
 
             // Clear in-memory texture ID data
             textureIds = []
 
         } catch {
-            Logger.standard.error("Failed to reset texture storage directory: \(error)")
+            Logger.standard.error("Failed to reset texture storage: \(error)")
         }
     }
 
@@ -357,23 +357,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             }
         }
         .eraseToAnyPublisher()
-    }
-}
-
-extension TextureDocumentsDirectoryRepository {
-    // If a directory with the same name already exists at url,
-    // this method does nothing and does not throw an error
-    private func createDirectory(_ url: inout URL) {
-        do {
-            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-
-            var resourceValues = URLResourceValues()
-            resourceValues.isExcludedFromBackup = true
-            try url.setResourceValues(resourceValues)
-
-        } catch {
-            Logger.standard.error("Failed to create texture storage directory: \(error)")
-        }
     }
 }
 
