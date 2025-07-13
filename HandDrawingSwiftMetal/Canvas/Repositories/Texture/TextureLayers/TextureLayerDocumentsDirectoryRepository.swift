@@ -32,6 +32,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         )
     }
 
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     override func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
@@ -255,16 +259,20 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         }
         .eraseToAnyPublisher()
     }
-
 }
 
 extension TextureLayerDocumentsDirectoryRepository {
 
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
+    private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
+        guard let texture else {
+            Logger.standard.warning("Failed to unwrap texture for \(uuid)")
+            return
+        }
+        thumbnails[uuid] = texture.makeThumbnail()
+        objectWillChangeSubject.send(())
     }
 
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
+    private func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
         Future { [weak self] promise in
             guard
                 let `self`,
@@ -285,7 +293,6 @@ extension TextureLayerDocumentsDirectoryRepository {
                         Logger.standard.error("Failed to load texture for \(textureId.uuidString): file not found")
                     }
                 }
-
                 promise(.success(()))
 
             } catch {
@@ -294,20 +301,6 @@ extension TextureLayerDocumentsDirectoryRepository {
         }
         .eraseToAnyPublisher()
     }
-
-}
-
-extension TextureLayerDocumentsDirectoryRepository {
-
-    private func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        guard let texture else {
-            Logger.standard.warning("Failed to unwrap texture for \(uuid)")
-            return
-        }
-        thumbnails[uuid] = texture.makeThumbnail()
-        objectWillChangeSubject.send(())
-    }
-
 }
 
 enum TextureLayerDocumentsDirectoryRepositoryError: Error {

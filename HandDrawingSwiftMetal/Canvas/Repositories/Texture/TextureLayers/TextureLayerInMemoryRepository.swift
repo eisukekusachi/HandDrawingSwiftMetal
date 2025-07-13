@@ -23,6 +23,10 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         super.init(textures: textures, renderer: renderer)
     }
 
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
     /// Clears texture ID data and the thumbnails
     override func removeAll() {
         textures = [:]
@@ -169,14 +173,6 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         }
         .eraseToAnyPublisher()
     }
-
-}
-
-extension TextureLayerInMemoryRepository {
-
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
-    }
 }
 
 extension TextureLayerInMemoryRepository {
@@ -185,5 +181,4 @@ extension TextureLayerInMemoryRepository {
         thumbnails[uuid] = texture?.makeThumbnail()
         objectWillChangeSubject.send(())
     }
-
 }
