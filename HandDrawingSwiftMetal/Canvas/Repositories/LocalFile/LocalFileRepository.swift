@@ -17,10 +17,6 @@ final class LocalFileRepository {
     init(workingDirectoryURL: URL) {
         self.workingDirectoryURL = workingDirectoryURL
     }
-
-    static func fileURL(projectName: String, suffix: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + suffix)
-    }
 }
 
 extension LocalFileRepository {

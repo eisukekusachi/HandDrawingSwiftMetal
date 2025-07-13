@@ -644,7 +644,7 @@ extension CanvasViewModel {
             )
         else { return }
 
-        let zipFileURL = LocalFileRepository.fileURL(
+        let zipFileURL = FileManager.documentsFileURL(
             projectName: canvasState.projectName,
             suffix: CanvasViewModel.fileSuffix
         )

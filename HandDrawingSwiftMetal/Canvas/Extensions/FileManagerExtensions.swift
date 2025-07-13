@@ -21,6 +21,11 @@ extension FileManager {
         try FileManager.createDirectory(url)
     }
 
+    /// The URL of a canvas file stored in the Documents directory
+    static func documentsFileURL(projectName: String, suffix: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + suffix)
+    }
+
     static func clearContents(of folder: URL) throws {
         let fileManager = FileManager.default
         let files = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
