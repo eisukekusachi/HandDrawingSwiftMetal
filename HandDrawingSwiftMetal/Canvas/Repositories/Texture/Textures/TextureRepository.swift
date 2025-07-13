@@ -15,6 +15,7 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> { get }
 
     /// The size of the textures managed by this repository
@@ -27,12 +28,14 @@ protocol TextureRepository {
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
-    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error>
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error>
 
     func setTextureSize(_ size: CGSize)
 
     /// Adds a texture using UUID
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
+
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error>
 
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
@@ -59,4 +62,5 @@ enum TextureRepositoryError: Error {
     case fileAlreadyExists
     case fileNotFound(String)
     case invalidTextureSize
+    case invalidValue(String)
 }

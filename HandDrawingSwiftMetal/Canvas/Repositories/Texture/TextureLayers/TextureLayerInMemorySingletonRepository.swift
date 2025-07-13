@@ -14,5 +14,4 @@ final class TextureLayerInMemorySingletonRepository: TextureLayerRepositoryWrapp
     private init() {
         super.init(repository: TextureLayerInMemoryRepository())
     }
-
 }

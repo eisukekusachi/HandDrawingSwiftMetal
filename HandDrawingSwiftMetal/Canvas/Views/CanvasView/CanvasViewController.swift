@@ -81,7 +81,7 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.canvasViewSetupCompletedPublisher
+        canvasViewModel.canvasViewSetupCompleted
             .sink { [weak self] configuration in
                 UIView.animate(withDuration: 0.05) { [weak self] in
                     self?.contentView.alpha = 1.0
@@ -89,26 +89,26 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicatorShowRequestPublisher
+        canvasViewModel.activityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.alertShowRequestPublisher
+        canvasViewModel.alert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
+            .sink { [weak self] error in
                 self?.showAlert(
                     title: "Alert",
-                    message: message
+                    message: error.localizedDescription
                 )
             }
             .store(in: &cancellables)
 
-        canvasViewModel.toastShowRequestPublisher
+        canvasViewModel.toast
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.showToast(configuration)
+            .sink { [weak self] model in
+                self?.showToast(model)
             }
             .store(in: &cancellables)
 
@@ -150,10 +150,10 @@ extension CanvasViewController {
             self?.canvasViewModel.didTapLayerButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.canvasViewModel.didTapSaveButton()
+            self?.canvasViewModel.saveFile()
         }
         contentView.tapLoadButton = { [weak self] in
-            self?.setupFileView()
+            self?.showFileView()
         }
         contentView.tapExportImageButton = { [weak self] in
             self?.contentView.exportImageButton.debounce()
@@ -209,19 +209,15 @@ extension CanvasViewController {
         )
     }
 
-    private func setupFileView() {
-        let zipFilePashArray: [String] = URL.documents.allFileURLs(suffix: URL.zipSuffix).map {
-            $0.lastPathComponent
-        }
-
+    private func showFileView() {
         let fileView = FileView(
-            zipFileList: zipFilePashArray,
-            didTapItem: { [weak self] selectedZipFilePath in
-                self?.canvasViewModel.didTapLoadButton(filePath: selectedZipFilePath)
+            targetURL: URL.documents,
+            suffix: CanvasViewModel.fileSuffix,
+            onTapItem: { [weak self] url in
                 self?.presentedViewController?.dismiss(animated: true)
+                self?.canvasViewModel.loadFile(zipFileURL: url)
             }
         )
-
         present(
             UIHostingController(rootView: fileView),
             animated: true

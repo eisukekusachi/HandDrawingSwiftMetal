@@ -1,5 +1,5 @@
 //
-//  FileOutputManager.swift
+//  FileOutput.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -8,15 +8,7 @@
 import UIKit
 import ZipArchive
 
-enum FileOutputManager {
-
-    static func createDirectory(_ url: URL) throws {
-        do {
-            try FileManager.createNewDirectory(url: url)
-        } catch {
-            throw FileOutputError.failedToCreateDirectory
-        }
-    }
+enum FileOutput {
 
     static func saveTextureAsData(
         bytes: [UInt8],
@@ -55,16 +47,11 @@ enum FileOutputManager {
         )
 
         if !success {
-            throw FileOutputError.failedToZip
+            throw FileOutputError.operationError("zip(:, to:)")
         }
     }
-
 }
 
 enum FileOutputError: Error {
-    case failedToZip
-    case failedToSaveImage
-    case filedToMove
-    case failedToUpdateTexture(Error)
-    case failedToCreateDirectory
+    case operationError(String)
 }

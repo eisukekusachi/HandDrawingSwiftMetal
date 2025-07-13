@@ -11,6 +11,10 @@ import SwiftUI
 
 final class CanvasViewModel {
 
+    static var fileSuffix: String {
+        "zip"
+    }
+
     var frameSize: CGSize = .zero {
         didSet {
             renderer.frameSize = frameSize
@@ -18,18 +22,18 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicatorShowRequestPublisher: AnyPublisher<Bool, Never> {
-        activityIndicatorShowRequestSubject.eraseToAnyPublisher()
+    var activityIndicator: AnyPublisher<Bool, Never> {
+        activityIndicatorSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits a request to show or hide the alert
-    var alertShowRequestPublisher: AnyPublisher<String, Never> {
-        alertShowRequestSubject.eraseToAnyPublisher()
+    /// A publisher that emits a request to show the alert
+    var alert: AnyPublisher<Error, Never> {
+        alertSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the toast
-    var toastShowRequestPublisher: AnyPublisher<ToastModel, Never> {
-        toastShowRequestSubject.eraseToAnyPublisher()
+    var toast: AnyPublisher<ToastModel, Never> {
+        toastSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the layer view
@@ -43,7 +47,7 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompletedPublisher: AnyPublisher<Void, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -99,11 +103,11 @@ final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let screenTouchGesture = CanvasScreenTouchGestureStatus()
 
-    private let activityIndicatorShowRequestSubject: PassthroughSubject<Bool, Never> = .init()
+    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertShowRequestSubject = PassthroughSubject<String, Never>()
+    private let alertSubject = PassthroughSubject<Error, Never>()
 
-    private let toastShowRequestSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -118,7 +122,7 @@ final class CanvasViewModel {
     private var canvasViewControllerUndoButtonsDisplaySubject: PassthroughSubject<Bool, Never> = .init()
 
     /// A repository for loading and saving local files
-    private var localRepository: LocalRepository!
+    private var localFileRepository: LocalFileRepository!
 
     /// A repository for managing texture layers
     private var textureLayerRepository: TextureLayerRepository!
@@ -132,12 +136,12 @@ final class CanvasViewModel {
     init(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
-        localRepository: LocalRepository = DocumentsLocalSingletonRepository.shared
+        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository
     ) {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)
 
-        self.localRepository = localRepository
+        self.localFileRepository = localFileRepository
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
         if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
@@ -231,7 +235,7 @@ final class CanvasViewModel {
 
         canvasStateStorage?.errorDialogSubject
             .sink { [weak self] error in
-                self?.alertShowRequestSubject.send(error.localizedDescription)
+                self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
 
@@ -260,10 +264,11 @@ final class CanvasViewModel {
 extension CanvasViewModel {
 
     func initialize(using configuration: CanvasConfiguration) {
+        // Initialize the texture repository
         textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
-                receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-                receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
+                receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+                receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
             )
             .sink(
                 receiveCompletion: { completion in
@@ -274,14 +279,14 @@ extension CanvasViewModel {
                 },
                 receiveValue: { [weak self] result in
                     Task { @MainActor in
-                        self?.completeInitialization(result)
+                        self?.setupCanvas(result)
                     }
                 }
             )
             .store(in: &cancellables)
     }
 
-    @MainActor private func completeInitialization(_ configuration: CanvasConfiguration) {
+    @MainActor private func setupCanvas(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
             let commandBuffer = canvasView?.commandBuffer
@@ -294,8 +299,6 @@ extension CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
 
-        undoStack?.initialize(textureSize)
-
         renderer.updateDrawingTextures(
             canvasState: canvasState,
             with: commandBuffer
@@ -303,20 +306,11 @@ extension CanvasViewModel {
             self?.updateCanvasView()
         }
 
-        textureLayerRepository
-            .updateAllThumbnails(textureSize: textureSize)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                switch completion {
-                case .finished: break
-                case .failure(let error): Logger.standard.error("Failed to update all thumbnails: \(error)")
-                }
-                self?.canvasViewSetupCompletedSubject.send(())
-                self?.activityIndicatorShowRequestSubject.send(false)
-            }, receiveValue: {})
-            .store(in: &cancellables)
-    }
+        undoStack?.initialize(textureSize)
 
+        canvasViewSetupCompletedSubject.send(())
+        activityIndicatorSubject.send(false)
+    }
 }
 
 extension CanvasViewModel {
@@ -340,7 +334,7 @@ extension CanvasViewModel {
     }
 
     func onViewWillAppear() {
-        activityIndicatorShowRequestSubject.send(true)
+        activityIndicatorSubject.send(true)
     }
 
     func onViewDidAppear(
@@ -427,11 +421,10 @@ extension CanvasViewModel {
 
         drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
     }
-
 }
 
 extension CanvasViewModel {
-    // MARK: Toolbar
+
     func didTapUndoButton() {
         undoStack?.undo()
     }
@@ -457,14 +450,140 @@ extension CanvasViewModel {
         )
     }
 
-    func didTapLoadButton(filePath: String) {
-        loadFile(from: filePath)
-    }
-    func didTapSaveButton() {
-        guard let canvasTexture = renderer.canvasTexture else { return }
-        saveFile(canvasTexture: canvasTexture)
+    func loadFile(zipFileURL: URL) {
+        /// Create the working space
+        do {
+            try localFileRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
+        /// Unzip into the working space
+        localFileRepository.unzipToWorkingDirectory(
+            from: zipFileURL
+        )
+        .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
+            do {
+                let entity: CanvasEntity = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
+                )
+                let configuration: CanvasConfiguration = .init(
+                    projectName: zipFileURL.fileName,
+                    entity: entity
+                )
+                /// Restore the repository from the extracted textures
+                return self.textureLayerRepository.restoreStorage(
+                    from: workingDirectoryURL,
+                    with: configuration
+               )
+           } catch(let error) {
+               return Fail(error: error).eraseToAnyPublisher()
+           }
+        }
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertSubject.send(error)
+            }
+            /// Remove the working space
+            self?.localFileRepository.removeWorkingDirectory()
+
+        }, receiveValue: { [weak self] configuration in
+            Task { @MainActor in
+                self?.setupCanvas(configuration)
+            }
+        })
+        .store(in: &cancellables)
     }
 
+    func saveFile() {
+        guard
+            let canvasTexture = renderer.canvasTexture,
+            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+                height: CanvasEntity.thumbnailLength,
+                scale: 1.0
+            )
+        else { return }
+
+        let zipFileURL = FileManager.documentsFileURL(
+            projectName: canvasState.projectName,
+            suffix: CanvasViewModel.fileSuffix
+        )
+        let entity = CanvasEntity(
+            thumbnailName: CanvasEntity.thumbnailName,
+            canvasState: canvasState
+        )
+
+        /// Create the working space
+        do {
+            try localFileRepository.createWorkingDirectory()
+        }
+        catch(let error) {
+            alertSubject.send(error)
+        }
+
+        textureLayerRepository.copyTextures(
+            uuids: canvasState.layers.map { $0.id }
+        )
+        .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
+            guard let self else {
+                return Fail(
+                    error: CanvasViewModelError.invalidValue("failed to unwrap")
+                ).eraseToAnyPublisher()
+            }
+
+            return Publishers.CombineLatest(
+                /// Save the thumbnail to the working space
+                self.localFileRepository.saveToWorkingDirectory(
+                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
+                ),
+                /// Save the textures to the working space
+                self.localFileRepository.saveAllToWorkingDirectory(
+                    namedItems: identifiedTextures.map {
+                        .init(name: $0.uuid.uuidString, item: $0)
+                    }
+                )
+            )
+            .map { _, _ in () }
+            .eraseToAnyPublisher()
+        }
+        .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
+            /// Save canvas the data to the working space
+            self?.localFileRepository.saveToWorkingDirectory(
+                namedItem: .init(
+                    name: CanvasEntity.jsonFileName,
+                    item: entity
+                )
+            ) ?? Fail(
+                error: CanvasViewModelError.invalidValue("failed to unwrap")
+            ).eraseToAnyPublisher()
+        }
+        .tryMap { [weak self] result in
+            /// Archive the working space as a ZIP file
+            try self?.localFileRepository.zipWorkingDirectory(
+                to: zipFileURL
+            )
+        }
+        .handleEvents(
+            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
+            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
+        )
+        .sink(receiveCompletion: { [weak self] completion in
+            switch completion {
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .failure(let error): self?.alertSubject.send(error)
+            }
+            /// Remove the working space
+            self?.localFileRepository.removeWorkingDirectory()
+
+        }, receiveValue: {})
+        .store(in: &cancellables)
+    }
 }
 
 extension CanvasViewModel {
@@ -550,10 +669,10 @@ extension CanvasViewModel {
                 self?.resetAllInputParameters()
             },
             receiveValue: { [weak self] result in
-                if let canvasState = self?.canvasState, let texture = result.texture {
+                if let canvasState = self?.canvasState {
                     self?.undoStack?.pushUndoDrawingObject(
                         canvasState: canvasState,
-                        texture: texture
+                        texture: result.texture
                     )
                 }
             }
@@ -601,48 +720,6 @@ extension CanvasViewModel {
 
 }
 
-extension CanvasViewModel {
-
-    private func loadFile(from filePath: String) {
-        localRepository.loadDataFromDocuments(
-            sourceURL: URL.documents.appendingPathComponent(filePath),
-            textureRepository: textureLayerRepository
-        )
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
-            }
-        }, receiveValue: { [weak self] configuration in
-            Task { @MainActor in
-                self?.completeInitialization(configuration)
-            }
-        })
-        .store(in: &cancellables)
-    }
-
-    private func saveFile(canvasTexture: MTLTexture) {
-        localRepository.saveDataToDocuments(
-            renderTexture: canvasTexture,
-            canvasState: canvasState,
-            textureRepository: textureLayerRepository,
-            to: URL.zipFileURL(projectName: canvasState.projectName)
-        )
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorShowRequestSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertShowRequestSubject.send(error.localizedDescription)
-            }
-        }, receiveValue: {})
-        .store(in: &cancellables)
-    }
-
+enum CanvasViewModelError: Error {
+    case invalidValue(String)
 }

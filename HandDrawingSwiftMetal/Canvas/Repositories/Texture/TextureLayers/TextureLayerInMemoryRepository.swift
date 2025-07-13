@@ -23,14 +23,25 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         super.init(textures: textures, renderer: renderer)
     }
 
-    /// Clears texture ID data and the thumbnails
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        thumbnails[uuid]?.flatMap { $0 }
+    }
+
+    /// Removes all textures and thumbnails
     override func removeAll() {
         textures = [:]
         thumbnails = [:]
     }
 
-    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasConfiguration, Error> { [weak self] promise in
+    override func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(sourceFolderURL)
+        ) else {
+            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
+        }
+
+        return Future<CanvasConfiguration, Error> { [weak self] promise in
             guard
                 let self,
                 let device = MTLCreateSystemDefaultDevice()
@@ -66,7 +77,6 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                     newThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
 
-                // If all succeeded, apply the new state
                 self.removeAll()
 
                 self.textures = newTextures
@@ -78,6 +88,25 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
             } catch {
                 promise(.failure(error))
             }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    override func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
+            let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+            self.textures[uuid] = texture
+            self.setThumbnail(texture: texture, for: uuid)
+
+            promise(.success(()))
         }
         .eraseToAnyPublisher()
     }
@@ -126,10 +155,14 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                 return
             }
 
-            let newTexture = MTLTextureCreator.duplicateTexture(
+            guard let newTexture = MTLTextureCreator.duplicateTexture(
                 texture: texture,
                 with: device
-            )
+            ) else {
+                promise(.failure(TextureRepositoryError.failedToUnwrap))
+                return
+            }
+
             self.textures[uuid] = newTexture
             self.setThumbnail(texture: newTexture, for: uuid)
 
@@ -139,31 +172,6 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         }
         .eraseToAnyPublisher()
     }
-
-}
-
-extension TextureLayerInMemoryRepository {
-
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        thumbnails[uuid]?.flatMap { $0 }
-    }
-
-    func updateAllThumbnails(textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future { promise in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let `self` else { return }
-
-                for (uuid, texture) in self.textures {
-                    guard let texture else { return }
-                    self.setThumbnail(texture: texture, for: uuid)
-                }
-
-                promise(.success(()))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
 }
 
 extension TextureLayerInMemoryRepository {
@@ -172,5 +180,4 @@ extension TextureLayerInMemoryRepository {
         thumbnails[uuid] = texture?.makeThumbnail()
         objectWillChangeSubject.send(())
     }
-
 }

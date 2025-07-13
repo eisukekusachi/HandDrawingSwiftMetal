@@ -1,25 +1,30 @@
 //
-//  TextureRepositoryWrapper.swift
+//  TextureLayerRepositoryWrapper.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/05/17.
+//  Created by Eisuke Kusachi on 2025/05/04.
 //
 
 import Combine
 import UIKit
 
-class TextureRepositoryWrapper: TextureRepository {
+class TextureLayerRepositoryWrapper: TextureLayerRepository {
 
-    let repository: TextureRepository
+    let repository: TextureLayerRepository
 
-    init(repository: TextureRepository) {
+    init(repository: TextureLayerRepository) {
         self.repository = repository
+    }
+
+    var objectWillChangeSubject: PassthroughSubject<Void, Never> {
+        repository.objectWillChangeSubject
     }
 
     var textureNum: Int {
         repository.textureNum
     }
 
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> {
         repository.textureIds
     }
@@ -32,20 +37,28 @@ class TextureRepositoryWrapper: TextureRepository {
         repository.isInitialized
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.initializeStorage(configuration: configuration)
-    }
-
-    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.resetStorage(configuration: configuration, sourceFolderURL: sourceFolderURL)
-    }
-
     func setTextureSize(_ size: CGSize) {
         repository.setTextureSize(size)
     }
 
+    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.initializeStorage(configuration: configuration)
+    }
+
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        repository.restoreStorage(from: sourceFolderURL, with: configuration)
+    }
+
+    func thumbnail(_ uuid: UUID) -> UIImage? {
+        repository.thumbnail(uuid)
+    }
+
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         repository.addTexture(texture, newTextureUUID: uuid)
+    }
+
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        repository.createTexture(uuid: uuid, textureSize: textureSize)
     }
 
     func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
@@ -67,5 +80,4 @@ class TextureRepositoryWrapper: TextureRepository {
     func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
         repository.updateTexture(texture: texture, for: uuid)
     }
-
 }

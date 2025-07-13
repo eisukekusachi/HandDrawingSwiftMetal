@@ -9,28 +9,29 @@ import Foundation
 
 extension FileManager {
 
-    static func createNewDirectory(url: URL) throws {
+    static func createDirectory(_ url: URL) throws {
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+    }
+
+    static func createNewDirectory(_ url: URL) throws {
         if FileManager.default.fileExists(atPath: url.path) {
-            do {
-                try FileManager.default.removeItem(atPath: url.path)
-            } catch {
-                throw error
-            }
+            try FileManager.default.removeItem(atPath: url.path)
         }
 
-        do {
-            try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
-        } catch {
-            throw error
-        }
+        try FileManager.createDirectory(url)
     }
 
-    static func clearContents(of folder: URL) throws {
-        let fileManager = FileManager.default
-        let files = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-        for file in files {
-            try fileManager.removeItem(at: file)
-        }
+    /// The URL of a canvas file stored in the Documents directory
+    static func documentsFileURL(projectName: String, suffix: String) -> URL {
+        URL.documents.appendingPathComponent(projectName + "." + suffix)
     }
 
+    static func contentsOfDirectory(_ url: URL) -> [URL] {
+        (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+    }
+
+    static func containsAll(fileNames: [String], in fileURLs: [URL]) -> Bool {
+        guard !fileNames.isEmpty else { return false }
+        return Set(fileNames).isSubset(of: Set(fileURLs.map { $0.lastPathComponent }))
+    }
 }
