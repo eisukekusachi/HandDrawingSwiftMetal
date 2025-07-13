@@ -607,9 +607,9 @@ extension CanvasViewModel {
                     projectName: zipFileURL.fileName,
                     entity: entity
                 )
-                return self.textureLayerRepository.resetStorage(
-                    configuration: configuration,
-                    sourceFolderURL: workingDirectoryURL
+                return self.textureLayerRepository.restoreStorage(
+                    from: workingDirectoryURL,
+                    with: configuration
                )
            } catch(let error) {
                return Fail(error: error).eraseToAnyPublisher()

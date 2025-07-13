@@ -60,67 +60,15 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         }
     }
 
-    override func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
-        else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
+    override func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(sourceFolderURL)
+        ) else {
+            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
         }
 
-        // Delete all files in the directory
-        resetDirectory(&directoryUrl)
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
-        )
-
-        return createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            return .init(textureSize: textureSize, layers: [layer])
-        }
-        .eraseToAnyPublisher()
-    }
-
-    override func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
-
-            do {
-                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
-
-                    try FileOutput.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    self.textureIds.insert(uuid)
-                    self.setThumbnail(texture: texture, for: uuid)
-
-                    promise(.success(()))
-                } else {
-                    promise(.failure(TextureRepositoryError.failedToUnwrap))
-                }
-
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasConfiguration, Error> { [weak self] promise in
+        return Future<CanvasConfiguration, Error> { [weak self] promise in
             guard
                 let `self`,
                 let device = MTLCreateSystemDefaultDevice()
@@ -168,6 +116,36 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 self.setTextureSize(textureSize)
 
                 promise(.success(configuration))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    override func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
+
+            do {
+                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+
+                    try FileOutput.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textureIds.insert(uuid)
+                    self.setThumbnail(texture: texture, for: uuid)
+
+                    promise(.success(()))
+                } else {
+                    promise(.failure(TextureRepositoryError.failedToUnwrap))
+                }
+
             } catch {
                 promise(.failure(error))
             }

@@ -44,11 +44,46 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
+        let textureSize = configuration.textureSize ?? .zero
+
+        guard
+            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
+            Int(textureSize.height) > MTLRenderer.threadGroupLength
+        else {
+            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return Fail(error: TextureRepositoryError.invalidTextureSize)
+                .eraseToAnyPublisher()
+        }
+
+        // Delete all files
+        self.removeAll()
+
+        let layer = TextureLayerModel(
+            title: TimeStampFormatter.currentDate
+        )
+
+        return createTexture(
+            uuid: layer.id,
+            textureSize: textureSize
+        )
+        .map { [weak self] _ in
+            // Set the texture size after the initialization of this repository is completed
+            self?.setTextureSize(textureSize)
+
+            return .init(textureSize: textureSize, layers: [layer])
+        }
+        .eraseToAnyPublisher()
     }
 
-    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasConfiguration, Error> { [weak self] promise in
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(sourceFolderURL)
+        ) else {
+            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
+        }
+
+        return Future<CanvasConfiguration, Error> { [weak self] promise in
             guard
                 let self,
                 let device = MTLCreateSystemDefaultDevice()
@@ -202,40 +237,6 @@ class TextureInMemoryRepository: TextureRepository {
             promise(.success(
                 .init(uuid: uuid, texture: newTexture)
             ))
-        }
-        .eraseToAnyPublisher()
-    }
-
-}
-
-extension TextureInMemoryRepository {
-
-    private func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
-        else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize)
-                .eraseToAnyPublisher()
-        }
-
-        // Delete all files
-        self.removeAll()
-
-        let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
-        )
-
-        return createTexture(
-            uuid: layer.id,
-            textureSize: textureSize
-        )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
-
-            return .init(textureSize: textureSize, layers: [layer])
         }
         .eraseToAnyPublisher()
     }

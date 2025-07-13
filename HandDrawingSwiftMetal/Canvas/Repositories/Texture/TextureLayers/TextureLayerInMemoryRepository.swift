@@ -29,8 +29,15 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails = [:]
     }
 
-    override func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasConfiguration, Error> { [weak self] promise in
+    override func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(sourceFolderURL)
+        ) else {
+            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
+        }
+
+        return Future<CanvasConfiguration, Error> { [weak self] promise in
             guard
                 let self,
                 let device = MTLCreateSystemDefaultDevice()

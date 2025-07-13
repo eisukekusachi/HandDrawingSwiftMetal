@@ -104,37 +104,15 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
-
-            do {
-                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
-
-                    try FileOutput.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    self.textureIds.insert(uuid)
-
-                    promise(.success(()))
-                } else {
-                    promise(.failure(TextureRepositoryError.failedToUnwrap))
-                }
-
-            } catch {
-                promise(.failure(error))
-            }
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+        guard FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(sourceFolderURL)
+        ) else {
+            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
         }
-        .eraseToAnyPublisher()
-    }
 
-    func resetStorage(configuration: CanvasConfiguration, sourceFolderURL: URL) -> AnyPublisher<CanvasConfiguration, Error> {
-        Future<CanvasConfiguration, Error> { [weak self] promise in
+        return Future<CanvasConfiguration, Error> { [weak self] promise in
             guard
                 let `self`,
                 let device = MTLCreateSystemDefaultDevice()
@@ -179,6 +157,35 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 self.setTextureSize(textureSize)
 
                 promise(.success(configuration))
+            } catch {
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
+        Future<Void, Error> { [weak self] promise in
+            guard
+                let `self`,
+                let device = MTLCreateSystemDefaultDevice()
+            else { return }
+
+            do {
+                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+
+                    try FileOutput.saveTextureAsData(
+                        bytes: texture.bytes,
+                        to: directoryUrl.appendingPathComponent(uuid.uuidString)
+                    )
+
+                    self.textureIds.insert(uuid)
+
+                    promise(.success(()))
+                } else {
+                    promise(.failure(TextureRepositoryError.failedToUnwrap))
+                }
+
             } catch {
                 promise(.failure(error))
             }
@@ -351,7 +358,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         }
         .eraseToAnyPublisher()
     }
-
 }
 
 extension TextureDocumentsDirectoryRepository {
