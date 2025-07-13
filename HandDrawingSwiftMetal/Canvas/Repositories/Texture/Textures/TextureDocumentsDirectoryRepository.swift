@@ -125,8 +125,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                     tmpTextureIds.insert(layer.id)
                 }
 
-                // Delete all files
-                self.resetDirectory(workingDirectoryURL)
+                // Delete all textures in the repository
+                self.removeAll()
 
                 // Move all files
                 try configuration.layers.forEach { layer in
@@ -152,14 +152,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
         guard
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
+                Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
             Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
         }
 
-        // Delete all files in the repository
-        resetDirectory(workingDirectoryURL)
+        // Delete all textures in the repository
+        removeAll()
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
@@ -285,13 +285,17 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    /// Deletes all files within the directory and clears texture ID data
+    /// Recreate the directory and removes textures and thumbnails
     func removeAll() {
-        // Delete all contents inside the folder
-        try? FileManager.clearContents(of: workingDirectoryURL)
+        do {
+            // Create a new folder
+            try FileManager.createNewDirectory(workingDirectoryURL)
 
-        // Clear the texture ID array
-        textureIds = []
+            // Removes texture IDs
+            textureIds = []
+        } catch {
+            Logger.standard.error("Failed to reset texture storage: \(error)")
+        }
     }
 
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
@@ -309,19 +313,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             promise(.success(uuid))
         }
         .eraseToAnyPublisher()
-    }
-
-    func resetDirectory(_ url: URL) {
-        do {
-            // Create a new folder
-            try FileManager.createNewDirectory(url)
-
-            // Clear in-memory texture ID data
-            textureIds = []
-
-        } catch {
-            Logger.standard.error("Failed to reset texture storage: \(error)")
-        }
     }
 
     /// Updates an existing texture for UUID

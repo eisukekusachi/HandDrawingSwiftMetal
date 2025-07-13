@@ -27,7 +27,7 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    /// Clears texture ID data and the thumbnails
+    /// Removes all textures and thumbnails
     override func removeAll() {
         textures = [:]
         thumbnails = [:]
@@ -77,7 +77,6 @@ final class TextureLayerInMemoryRepository: TextureInMemoryRepository, TextureLa
                     newThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
 
-                // If all succeeded, apply the new state
                 self.removeAll()
 
                 self.textures = newTextures

@@ -57,7 +57,6 @@ class TextureInMemoryRepository: TextureRepository {
                 .eraseToAnyPublisher()
         }
 
-        // Delete all files
         self.removeAll()
 
         let layer = TextureLayerModel(
@@ -119,8 +118,7 @@ class TextureInMemoryRepository: TextureRepository {
                     newTextures[layer.id] = newTexture
                 }
 
-                // If all succeeded, apply the new state
-                self.removeAll()
+                removeAll()
 
                 self.textures = newTextures
                 self.setTextureSize(textureSize)
@@ -204,7 +202,7 @@ class TextureInMemoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    /// Clears texture ID data and the thumbnails
+    /// Removes all textures
     func removeAll() {
         textures = [:]
     }

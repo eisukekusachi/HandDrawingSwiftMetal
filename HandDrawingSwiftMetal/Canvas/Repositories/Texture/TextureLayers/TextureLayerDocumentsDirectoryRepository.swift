@@ -102,9 +102,7 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                     tmpThumbnails[layer.id] = newTexture.makeThumbnail()
                 }
 
-                // Delete all existing files
-                self.resetDirectory(workingDirectoryURL)
-
+                self.removeAll()
 
                 // Move all files
                 try configuration.layers.forEach { layer in
@@ -192,11 +190,19 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         .eraseToAnyPublisher()
     }
 
-    /// Deletes all files within the directory and clears texture ID data and the thumbnails
+    /// Recreate the directory and removes textures and thumbnails
     override func removeAll() {
-        try? FileManager.clearContents(of: workingDirectoryURL)
-        textureIds = []
-        thumbnails = [:]
+        do {
+            // Create a new folder
+            try FileManager.createNewDirectory(workingDirectoryURL)
+
+            // Remove textures and thumbnails
+            textureIds = []
+            thumbnails = [:]
+
+        } catch {
+            Logger.standard.error("Failed to reset texture storage: \(error)")
+        }
     }
 
     override func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {

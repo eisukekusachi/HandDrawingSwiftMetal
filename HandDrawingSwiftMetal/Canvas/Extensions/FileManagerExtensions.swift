@@ -26,14 +26,6 @@ extension FileManager {
         URL.documents.appendingPathComponent(projectName + "." + suffix)
     }
 
-    static func clearContents(of folder: URL) throws {
-        let fileManager = FileManager.default
-        let files = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-        for file in files {
-            try fileManager.removeItem(at: file)
-        }
-    }
-
     static func contentsOfDirectory(_ url: URL) -> [URL] {
         (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
     }
