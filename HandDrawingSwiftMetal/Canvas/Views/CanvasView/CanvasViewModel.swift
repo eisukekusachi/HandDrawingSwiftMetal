@@ -299,14 +299,14 @@ extension CanvasViewModel {
 
         renderer.initTextures(textureSize: textureSize)
 
-        undoStack?.initialize(textureSize)
-
         renderer.updateDrawingTextures(
             canvasState: canvasState,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()
         }
+
+        undoStack?.initialize(textureSize)
 
         canvasViewSetupCompletedSubject.send(())
         activityIndicatorSubject.send(false)
