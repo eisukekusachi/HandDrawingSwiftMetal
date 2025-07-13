@@ -36,8 +36,8 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         thumbnails[uuid]?.flatMap { $0 }
     }
 
-    /// Attempts to restore layers from a given `CanvasConfiguration`
-    /// If that is invalid, creates a new texture and initializes the canvas with it
+    /// Attempts to restore the repository from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the repository with it
     override func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
@@ -45,10 +45,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
         ) {
             let textureSize = configuration.textureSize ?? .zero
 
-            // Retain IDs if texture filenames match the configuration
+            // Retain IDs
             textureIds = Set(configuration.layers.map { $0.id })
 
-            // Set the texture size after the initialization of this repository is completed
+            // Retain the texture size
             setTextureSize(textureSize)
 
             return updateAllThumbnails(textureSize: textureSize)
@@ -103,7 +103,8 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
                 }
 
                 // Delete all existing files
-                self.resetDirectory(self.workingDirectoryURL)
+                self.resetDirectory(workingDirectoryURL)
+
 
                 // Move all files
                 try configuration.layers.forEach { layer in

@@ -15,6 +15,7 @@ protocol TextureRepository {
     /// The number of textures currently managed
     var textureNum: Int { get }
 
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> { get }
 
     /// The size of the textures managed by this repository

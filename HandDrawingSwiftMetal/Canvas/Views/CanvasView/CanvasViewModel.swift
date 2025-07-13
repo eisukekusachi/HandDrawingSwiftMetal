@@ -421,7 +421,6 @@ extension CanvasViewModel {
 
         drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
     }
-
 }
 
 extension CanvasViewModel {

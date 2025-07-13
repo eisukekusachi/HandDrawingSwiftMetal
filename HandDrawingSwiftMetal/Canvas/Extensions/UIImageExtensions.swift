@@ -122,7 +122,6 @@ extension UIImage {
         draw(in: CGRect(origin: .zero, size: newSize))
         return UIGraphicsGetImageFromCurrentImageContext()
     }
-
 }
 
 extension UIImage: LocalFileConvertible {

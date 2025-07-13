@@ -18,7 +18,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     private(set) var workingDirectoryURL: URL!
 
-    /// The IDs of the textures managed by this repository. The IDs are used as file names.
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> = []
 
     var textureNum: Int {
@@ -67,17 +67,17 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         }
     }
 
-    /// Attempts to restore layers from a given `CanvasConfiguration`
-    /// If that is invalid, creates a new texture and initializes the canvas with it
+    /// Attempts to restore the repository from a given `CanvasConfiguration`
+    /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
-            // Retain IDs if texture filenames match the configuration
+            // Retain IDs
             textureIds = Set(configuration.layers.map { $0.id })
 
-            // Set the texture size after the initialization of this repository is completed
+            // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
 
             return Just(configuration)
@@ -126,7 +126,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
                 }
 
                 // Delete all files
-                self.resetDirectory(self.workingDirectoryURL)
+                self.resetDirectory(workingDirectoryURL)
 
                 // Move all files
                 try configuration.layers.forEach { layer in
@@ -158,7 +158,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
         }
 
-        // Delete all files in the directory
+        // Delete all files in the repository
         resetDirectory(workingDirectoryURL)
 
         let layer = TextureLayerModel(
@@ -311,7 +311,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         .eraseToAnyPublisher()
     }
 
-    /// Deletes the entire directory and recreates it as an empty folder
     func resetDirectory(_ url: URL) {
         do {
             // Create a new folder

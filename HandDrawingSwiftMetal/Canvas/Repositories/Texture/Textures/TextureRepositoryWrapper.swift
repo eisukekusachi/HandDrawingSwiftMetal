@@ -20,6 +20,7 @@ class TextureRepositoryWrapper: TextureRepository {
         repository.textureNum
     }
 
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> {
         repository.textureIds
     }

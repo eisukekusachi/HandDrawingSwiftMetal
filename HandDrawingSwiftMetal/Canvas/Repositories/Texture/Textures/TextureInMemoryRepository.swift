@@ -18,6 +18,8 @@ class TextureInMemoryRepository: TextureRepository {
     var textureNum: Int {
         textures.count
     }
+
+    /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> {
         Set(textures.keys.map { $0 })
     }
