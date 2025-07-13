@@ -105,10 +105,10 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.toastShowRequestPublisher
+        canvasViewModel.toast
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.showToast(configuration)
+            .sink { [weak self] model in
+                self?.showToast(model)
             }
             .store(in: &cancellables)
 

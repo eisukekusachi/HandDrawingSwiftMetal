@@ -32,8 +32,8 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show or hide the toast
-    var toastShowRequestPublisher: AnyPublisher<ToastModel, Never> {
-        toastShowRequestSubject.eraseToAnyPublisher()
+    var toast: AnyPublisher<ToastModel, Never> {
+        toastSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the layer view
@@ -107,7 +107,7 @@ final class CanvasViewModel {
 
     private let alertSubject = PassthroughSubject<Error, Never>()
 
-    private let toastShowRequestSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let layerViewShowRequestSubject = CurrentValueSubject<Bool, Never>(false)
 
@@ -621,7 +621,7 @@ extension CanvasViewModel {
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
 
@@ -704,7 +704,7 @@ extension CanvasViewModel {
         )
         .sink(receiveCompletion: { [weak self] completion in
             switch completion {
-            case .finished: self?.toastShowRequestSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             case .failure(let error): self?.alertSubject.send(error)
             }
 
