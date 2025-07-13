@@ -542,7 +542,7 @@ extension CanvasViewModel {
                 self.localFileRepository.saveToWorkingDirectory(
                     namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
                 ),
-                /// Save textures to the working space
+                /// Save the textures to the working space
                 self.localFileRepository.saveAllToWorkingDirectory(
                     namedItems: identifiedTextures.map {
                         .init(name: $0.uuid.uuidString, item: $0)
@@ -553,7 +553,7 @@ extension CanvasViewModel {
             .eraseToAnyPublisher()
         }
         .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
-            /// Save canvas data to the working space
+            /// Save canvas the data to the working space
             self?.localFileRepository.saveToWorkingDirectory(
                 namedItem: .init(
                     name: CanvasEntity.jsonFileName,
