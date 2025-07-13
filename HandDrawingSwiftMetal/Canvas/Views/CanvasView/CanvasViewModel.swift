@@ -587,7 +587,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func loadFile(zipFileURL url: URL) {
+    func loadFile(zipFileURL: URL) {
         do {
             try localFileRepository.createWorkingDirectory()
         }
@@ -596,19 +596,20 @@ extension CanvasViewModel {
         }
 
         localFileRepository.unzipToWorkingDirectory(
-            from: url
+            from: zipFileURL
         )
         .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
             do {
                 let entity: CanvasEntity = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
                 )
+                let configuration: CanvasConfiguration = .init(
+                    projectName: zipFileURL.fileName,
+                    entity: entity
+                )
                 return self.textureLayerRepository.resetStorage(
-                    configuration: .init(
-                        projectName: url.fileName,
-                        entity: entity
-                    ),
-                   sourceFolderURL: workingDirectoryURL
+                    configuration: configuration,
+                    sourceFolderURL: workingDirectoryURL
                )
            } catch(let error) {
                return Fail(error: error).eraseToAnyPublisher()
@@ -643,19 +644,21 @@ extension CanvasViewModel {
             )
         else { return }
 
+        let zipFileURL = LocalFileRepository.fileURL(
+            projectName: canvasState.projectName,
+            suffix: CanvasViewModel.fileSuffix
+        )
+        let entity = CanvasEntity(
+            thumbnailName: CanvasEntity.thumbnailName,
+            canvasState: canvasState
+        )
+
         do {
             try localFileRepository.createWorkingDirectory()
         }
         catch(let error) {
             alertSubject.send(error)
         }
-
-        let canvasState = canvasState
-
-        let zipFileURL = LocalFileRepository.fileURL(
-            projectName: canvasState.projectName,
-            suffix: CanvasViewModel.fileSuffix
-        )
 
         textureLayerRepository.copyTextures(
             uuids: canvasState.layers.map { $0.id }
@@ -681,21 +684,14 @@ extension CanvasViewModel {
             .eraseToAnyPublisher()
         }
         .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
-            guard let self else {
-                return Fail(
-                    error: CanvasViewModelError.invalidValue("failed to unwrap")
-                ).eraseToAnyPublisher()
-            }
-
-            return self.localFileRepository.saveToWorkingDirectory(
+            self?.localFileRepository.saveToWorkingDirectory(
                 namedItem: .init(
                     name: CanvasEntity.jsonFileName,
-                    item: CanvasEntity(
-                        thumbnailName: CanvasEntity.thumbnailName,
-                        canvasState: canvasState
-                    )
+                    item: entity
                 )
-            )
+            ) ?? Fail(
+                error: CanvasViewModelError.invalidValue("failed to unwrap")
+            ).eraseToAnyPublisher()
         }
         .tryMap { [weak self] result in
             try self?.localFileRepository.zipWorkingDirectory(
