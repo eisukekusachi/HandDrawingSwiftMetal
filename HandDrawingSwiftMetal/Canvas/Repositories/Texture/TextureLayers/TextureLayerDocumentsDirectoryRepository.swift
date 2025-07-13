@@ -35,7 +35,10 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     /// Attempts to restore layers from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the canvas with it
     override func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        if FileManager.containsFiles(configuration.layers.map { $0.fileName }, in: directoryUrl) {
+        if FileManager.containsAll(
+            fileNames: configuration.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(directoryUrl)
+        ) {
             let textureSize = configuration.textureSize ?? .zero
 
             // Retain IDs if texture filenames match the configuration

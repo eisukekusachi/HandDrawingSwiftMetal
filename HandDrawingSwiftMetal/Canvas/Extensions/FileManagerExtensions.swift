@@ -33,12 +33,12 @@ extension FileManager {
         }
     }
 
-    static func containsFiles(_ fileNames: [String], in directory: URL) -> Bool {
+    static func contentsOfDirectory(_ url: URL) -> [URL] {
+        (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+    }
+
+    static func containsAll(fileNames: [String], in fileURLs: [URL]) -> Bool {
         guard !fileNames.isEmpty else { return false }
-
-        let fileURLs = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
-        let existingFileNames = Set(fileURLs.map { $0.lastPathComponent })
-
-        return Set(fileNames).isSubset(of: existingFileNames)
+        return Set(fileNames).isSubset(of: Set(fileURLs.map { $0.lastPathComponent }))
     }
 }
