@@ -15,7 +15,6 @@
 		D40B769F2E192B140012BFF5 /* AddLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */; };
 		D40B76A12E192B280012BFF5 /* MoveLayerIndicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */; };
 		D40B76A32E192B3B0012BFF5 /* RemoveLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */; };
-		D40B76F32E21F11A0012BFF5 /* CanvasSaveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */; };
 		D40B76F52E227B070012BFF5 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F42E227B070012BFF5 /* LocalFileConvertible.swift */; };
 		D40B76F72E228CE00012BFF5 /* LocalFileNamedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F62E228CE00012BFF5 /* LocalFileNamedItem.swift */; };
 		D40B76FA2E2349B00012BFF5 /* FileManagerExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F92E2349B00012BFF5 /* FileManagerExtensionsTests.swift */; };
@@ -196,7 +195,6 @@
 		D40B769E2E192B140012BFF5 /* AddLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndexTests.swift; sourceTree = "<group>"; };
 		D40B76A02E192B280012BFF5 /* MoveLayerIndicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndicesTests.swift; sourceTree = "<group>"; };
 		D40B76A22E192B3B0012BFF5 /* RemoveLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndexTests.swift; sourceTree = "<group>"; };
-		D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasSaveData.swift; sourceTree = "<group>"; };
 		D40B76F42E227B070012BFF5 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
 		D40B76F62E228CE00012BFF5 /* LocalFileNamedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileNamedItem.swift; sourceTree = "<group>"; };
 		D40B76F92E2349B00012BFF5 /* FileManagerExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensionsTests.swift; sourceTree = "<group>"; };
@@ -648,7 +646,6 @@
 				D44B52A32DB3928000EE213C /* Textures */,
 				D44B52D42DB3ACA500EE213C /* States */,
 				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
-				D40B76F22E21F11A0012BFF5 /* CanvasSaveData.swift */,
 				D40B769A2E1928280012BFF5 /* CanvasViewControllerConfiguration.swift */,
 			);
 			path = Models;
@@ -1202,7 +1199,6 @@
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D4513AA22AF5D4AC00CA4438 /* URLExtensions.swift in Sources */,
 				D4FE0F322E1126D9001A0E87 /* TextureUndoInMemorySingletonRepository.swift in Sources */,
-				D40B76F32E21F11A0012BFF5 /* CanvasSaveData.swift in Sources */,
 				D4FE0F392E158791001A0E87 /* RemoveLayerIndex.swift in Sources */,
 				D4812E472D1643F400F47DC7 /* Logger.swift in Sources */,
 				D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */,
