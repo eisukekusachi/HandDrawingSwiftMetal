@@ -18,6 +18,7 @@
 		D40B76F52E227B070012BFF5 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F42E227B070012BFF5 /* LocalFileConvertible.swift */; };
 		D40B76F72E228CE00012BFF5 /* LocalFileNamedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F62E228CE00012BFF5 /* LocalFileNamedItem.swift */; };
 		D40B76FA2E2349B00012BFF5 /* FileManagerExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76F92E2349B00012BFF5 /* FileManagerExtensionsTests.swift */; };
+		D40B76FC2E2524300012BFF5 /* UndoRedoButtonState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B76FB2E2524300012BFF5 /* UndoRedoButtonState.swift */; };
 		D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDEFE2B411F450059527E /* TextureLayerView.swift */; };
 		D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF022B411F660059527E /* TextureLayerListView.swift */; };
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
@@ -197,6 +198,7 @@
 		D40B76F42E227B070012BFF5 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
 		D40B76F62E228CE00012BFF5 /* LocalFileNamedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileNamedItem.swift; sourceTree = "<group>"; };
 		D40B76F92E2349B00012BFF5 /* FileManagerExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerExtensionsTests.swift; sourceTree = "<group>"; };
+		D40B76FB2E2524300012BFF5 /* UndoRedoButtonState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoRedoButtonState.swift; sourceTree = "<group>"; };
 		D40CDEFE2B411F450059527E /* TextureLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerView.swift; sourceTree = "<group>"; };
 		D40CDF022B411F660059527E /* TextureLayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerListView.swift; sourceTree = "<group>"; };
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
@@ -561,6 +563,7 @@
 			isa = PBXGroup;
 			children = (
 				D43E70012E0EDCAC006E07CE /* UndoObject */,
+				D40B76FB2E2524300012BFF5 /* UndoRedoButtonState.swift */,
 				D43E700A2E0EDCE2006E07CE /* UndoStack.swift */,
 				D43E70082E0EDCD9006E07CE /* UndoStackModel.swift */,
 			);
@@ -1179,6 +1182,7 @@
 				D43E700F2E0F70F7006E07CE /* TextureUndoDocumentsDirectorySingletonRepository.swift in Sources */,
 				D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */,
 				D48F763D2DA2094A0001C80F /* TextureLayerModel.swift in Sources */,
+				D40B76FC2E2524300012BFF5 /* UndoRedoButtonState.swift in Sources */,
 				D4553DF32DD89F2700037800 /* TextureLayerRepository.swift in Sources */,
 				D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */,
 				D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */,

@@ -36,6 +36,10 @@ final class CanvasViewModel {
         toastSubject.eraseToAnyPublisher()
     }
 
+    var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
+        undoRedoButtonStateSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
     var viewConfigureRequestPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
         viewConfigureRequestSubject.eraseToAnyPublisher()
@@ -44,20 +48,6 @@ final class CanvasViewModel {
     /// A publisher that emits `Void` when the canvas view setup is completed
     var canvasViewSetupCompleted: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
-    }
-
-    /// A publisher that emits when updating the undo button state is needed.
-    var needsUndoButtonStateUpdatePublisher: AnyPublisher<Bool, Never> {
-        needsUndoButtonStateUpdateSubject.eraseToAnyPublisher()
-    }
-
-    /// A publisher that emits when updating the redo button state is needed
-    var needsRedoButtonStateUpdatePublisher: AnyPublisher<Bool, Never> {
-        needsRedoButtonStateUpdateSubject.eraseToAnyPublisher()
-    }
-
-    var canvasViewControllerUndoButtonsDisplayPublisher: AnyPublisher<Bool, Never> {
-        canvasViewControllerUndoButtonsDisplaySubject.eraseToAnyPublisher()
     }
 
     /// A rendering target
@@ -108,11 +98,7 @@ final class CanvasViewModel {
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
-    private let needsUndoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
-
-    private let needsRedoButtonStateUpdateSubject = PassthroughSubject<Bool, Never>()
-
-    private var canvasViewControllerUndoButtonsDisplaySubject: PassthroughSubject<Bool, Never> = .init()
+    private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A repository for loading and saving local files
     private var localFileRepository: LocalFileRepository!
@@ -236,18 +222,10 @@ final class CanvasViewModel {
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
 
-        // Undo
-        undoStack?.undoButtonStateUpdateSubject
+        undoStack?.undoRedoButtonStateSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.needsUndoButtonStateUpdateSubject.send(state)
-            }
-            .store(in: &cancellables)
-
-        undoStack?.redoButtonStateUpdateSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.needsRedoButtonStateUpdateSubject.send(state)
+                self?.undoRedoButtonStateSubject.send(state)
             }
             .store(in: &cancellables)
     }
@@ -320,10 +298,6 @@ extension CanvasViewModel {
                 undoStack: undoStack
             )
         )
-
-        if undoStack != nil {
-            canvasViewControllerUndoButtonsDisplaySubject.send(true)
-        }
     }
 
     func onViewWillAppear() {

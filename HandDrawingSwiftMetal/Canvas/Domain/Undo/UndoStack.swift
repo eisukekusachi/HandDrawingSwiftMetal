@@ -11,8 +11,7 @@ import MetalKit
 
 final class UndoStack {
 
-    let undoButtonStateUpdateSubject: PassthroughSubject<Bool, Never> = .init()
-    let redoButtonStateUpdateSubject: PassthroughSubject<Bool, Never> = .init()
+    let undoRedoButtonStateSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
     private let canvasState: CanvasState
 
@@ -302,9 +301,10 @@ extension UndoStack {
 
     }
 
-    func refreshUndoRedoButtons() {
-        undoButtonStateUpdateSubject.send(undoManager.canUndo)
-        redoButtonStateUpdateSubject.send(undoManager.canRedo)
+    private func refreshUndoRedoButtons() {
+        undoRedoButtonStateSubject.send(
+            .init(isUndoEnabled: undoManager.canUndo, isRedoEnabled: undoManager.canRedo)
+        )
     }
 
 }

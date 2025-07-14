@@ -63,7 +63,6 @@ final class CanvasContentView: UIView {
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
-
 }
 
 extension CanvasContentView {
@@ -127,6 +126,11 @@ extension CanvasContentView {
             guard let slider = action.sender as? UISlider else { return }
             self?.changeEraserDiameter?(slider.value)
         }, for: .valueChanged)
+    }
+
+    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
+        undoButton.isEnabled = state.isUndoEnabled
+        redoButton.isEnabled = state.isRedoEnabled
     }
 
     func showSlider(_ tool: DrawingToolType) {

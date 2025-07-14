@@ -80,7 +80,7 @@ extension CanvasViewController {
             .store(in: &cancellables)
 
         canvasViewModel.canvasViewSetupCompleted
-            .sink { [weak self] configuration in
+            .sink { _ in
                 UIView.animate(withDuration: 0.05) { [weak self] in
                     self?.contentView.alpha = 1.0
                 }
@@ -110,18 +110,9 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.needsUndoButtonStateUpdatePublisher
-            .assign(to: \.isEnabled, on: contentView.undoButton)
-            .store(in: &cancellables)
-
-        canvasViewModel.needsRedoButtonStateUpdatePublisher
-            .assign(to: \.isEnabled, on: contentView.redoButton)
-            .store(in: &cancellables)
-
-        canvasViewModel.canvasViewControllerUndoButtonsDisplayPublisher
-            .sink { [weak self] shown in
-                self?.contentView.undoButton.isHidden = !shown
-                self?.contentView.redoButton.isHidden = !shown
+        canvasViewModel.undoRedoButtonState
+            .sink { [weak self] state in
+                self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
 
