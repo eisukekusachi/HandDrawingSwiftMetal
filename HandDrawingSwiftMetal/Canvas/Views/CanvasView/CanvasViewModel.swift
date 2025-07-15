@@ -300,10 +300,6 @@ extension CanvasViewModel {
         )
     }
 
-    func onViewWillAppear() {
-        activityIndicatorSubject.send(true)
-    }
-
     func onViewDidAppear(
         configuration: CanvasConfiguration,
         drawableTextureSize: CGSize

@@ -47,7 +47,7 @@ class CanvasViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        canvasViewModel.onViewWillAppear()
+        activityIndicatorView.isHidden = false
     }
 
     override func viewDidAppear(_ animated: Bool) {
