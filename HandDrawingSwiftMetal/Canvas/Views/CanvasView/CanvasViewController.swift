@@ -38,7 +38,7 @@ class CanvasViewController: UIViewController {
         setupNewCanvasDialogPresenter()
 
         canvasViewModel.onViewDidLoad(
-            canvasView: contentView.canvasView
+            canvasViewRendering: contentView.canvasView
         )
 
         contentView.alpha = 0.0

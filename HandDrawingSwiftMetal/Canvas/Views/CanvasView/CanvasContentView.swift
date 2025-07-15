@@ -10,7 +10,7 @@ import Combine
 
 final class CanvasContentView: UIView {
 
-    @IBOutlet private(set) weak var canvasView: CanvasView!
+    @IBOutlet private(set) weak var canvasView: CanvasRenderView!
 
     @IBOutlet private weak var resetTransformButton: UIButton!
     @IBOutlet private weak var saveButton: UIButton!

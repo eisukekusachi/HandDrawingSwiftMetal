@@ -59,14 +59,14 @@
 		D44B52B62DB3928000EE213C /* CanvasViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* CanvasViewController.xib */; };
 		D44B52B72DB3928000EE213C /* CanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B22DB3928000EE213C /* CanvasViewModel.swift */; };
 		D44B52B82DB3928000EE213C /* CanvasInputDeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B529C2DB3928000EE213C /* CanvasInputDeviceType.swift */; };
-		D44B52B92DB3928000EE213C /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AF2DB3928000EE213C /* CanvasView.swift */; };
+		D44B52B92DB3928000EE213C /* CanvasRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AF2DB3928000EE213C /* CanvasRenderView.swift */; };
 		D44B52BA2DB3928000EE213C /* CanvasDrawingBrushTextureSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52A02DB3928000EE213C /* CanvasDrawingBrushTextureSet.swift */; };
 		D44B52BB2DB3928000EE213C /* CanvasContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* CanvasContentView.swift */; };
 		D44B52BC2DB3928000EE213C /* CanvasScreenTouchGestureStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B529D2DB3928000EE213C /* CanvasScreenTouchGestureStatus.swift */; };
 		D44B52BE2DB3928000EE213C /* CanvasScreenTouchGestureType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B529E2DB3928000EE213C /* CanvasScreenTouchGestureType.swift */; };
 		D44B52BF2DB3928000EE213C /* CanvasDrawingTextureSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52A22DB3928000EE213C /* CanvasDrawingTextureSet.swift */; };
 		D44B52C02DB3928000EE213C /* IteratorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52962DB3928000EE213C /* IteratorExtensions.swift */; };
-		D44B52C12DB3928000EE213C /* CanvasViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B32DB3928000EE213C /* CanvasViewProtocol.swift */; };
+		D44B52C12DB3928000EE213C /* CanvasViewRendering .swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */; };
 		D44B52C22DB3928000EE213C /* CanvasTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52992DB3928000EE213C /* CanvasTransformer.swift */; };
 		D44B52C42DB3928000EE213C /* CanvasRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */; };
 		D44B52C52DB3928000EE213C /* CanvasDrawingEraserTextureSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52A12DB3928000EE213C /* CanvasDrawingEraserTextureSet.swift */; };
@@ -248,11 +248,11 @@
 		D44B52AC2DB3928000EE213C /* CanvasContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* CanvasContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CanvasContentView.xib; sourceTree = "<group>"; };
 		D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasRenderer.swift; sourceTree = "<group>"; };
-		D44B52AF2DB3928000EE213C /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+		D44B52AF2DB3928000EE213C /* CanvasRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasRenderView.swift; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* CanvasViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewController.swift; sourceTree = "<group>"; };
 		D44B52B12DB3928000EE213C /* CanvasViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CanvasViewController.xib; sourceTree = "<group>"; };
 		D44B52B22DB3928000EE213C /* CanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewModel.swift; sourceTree = "<group>"; };
-		D44B52B32DB3928000EE213C /* CanvasViewProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewProtocol.swift; sourceTree = "<group>"; };
+		D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanvasViewRendering .swift"; sourceTree = "<group>"; };
 		D44B52CD2DB3ACA500EE213C /* DrawingBrushToolState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingBrushToolState.swift; sourceTree = "<group>"; };
 		D44B52CE2DB3ACA500EE213C /* DrawingEraserToolState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingEraserToolState.swift; sourceTree = "<group>"; };
 		D44B52CF2DB3ACA500EE213C /* DrawingToolProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolProtocol.swift; sourceTree = "<group>"; };
@@ -660,11 +660,11 @@
 				D44B52AC2DB3928000EE213C /* CanvasContentView.swift */,
 				D44B52AD2DB3928000EE213C /* CanvasContentView.xib */,
 				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
-				D44B52AF2DB3928000EE213C /* CanvasView.swift */,
+				D44B52AF2DB3928000EE213C /* CanvasRenderView.swift */,
 				D44B52B02DB3928000EE213C /* CanvasViewController.swift */,
 				D44B52B12DB3928000EE213C /* CanvasViewController.xib */,
 				D44B52B22DB3928000EE213C /* CanvasViewModel.swift */,
-				D44B52B32DB3928000EE213C /* CanvasViewProtocol.swift */,
+				D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */,
 			);
 			path = CanvasView;
 			sourceTree = "<group>";
@@ -1116,7 +1116,7 @@
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
 				D44B52B72DB3928000EE213C /* CanvasViewModel.swift in Sources */,
 				D44B52B82DB3928000EE213C /* CanvasInputDeviceType.swift in Sources */,
-				D44B52B92DB3928000EE213C /* CanvasView.swift in Sources */,
+				D44B52B92DB3928000EE213C /* CanvasRenderView.swift in Sources */,
 				D44B52BA2DB3928000EE213C /* CanvasDrawingBrushTextureSet.swift in Sources */,
 				D44B52D52DB3ACA500EE213C /* CanvasState.swift in Sources */,
 				D40B76F52E227B070012BFF5 /* LocalFileConvertible.swift in Sources */,
@@ -1132,7 +1132,7 @@
 				D44B52BE2DB3928000EE213C /* CanvasScreenTouchGestureType.swift in Sources */,
 				D44B52BF2DB3928000EE213C /* CanvasDrawingTextureSet.swift in Sources */,
 				D44B52C02DB3928000EE213C /* IteratorExtensions.swift in Sources */,
-				D44B52C12DB3928000EE213C /* CanvasViewProtocol.swift in Sources */,
+				D44B52C12DB3928000EE213C /* CanvasViewRendering .swift in Sources */,
 				D447D89E2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift in Sources */,
 				D43E700B2E0EDCE2006E07CE /* UndoStack.swift in Sources */,
 				D44B52C22DB3928000EE213C /* CanvasTransformer.swift in Sources */,

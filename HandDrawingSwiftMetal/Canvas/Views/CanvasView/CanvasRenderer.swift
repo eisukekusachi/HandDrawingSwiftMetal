@@ -146,7 +146,7 @@ extension CanvasRenderer {
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     func updateCanvasView(
-        _ canvasView: CanvasViewProtocol?,
+        _ canvasView: CanvasViewRendering?,
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel,
         backgroundColor: UIColor = .white,
@@ -184,7 +184,7 @@ extension CanvasRenderer {
         updateCanvasView(canvasView, with: commandBuffer)
     }
 
-    func updateCanvasView(_ canvasView: CanvasViewProtocol?, with commandBuffer: MTLCommandBuffer) {
+    func updateCanvasView(_ canvasView: CanvasViewRendering?, with commandBuffer: MTLCommandBuffer) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
         renderer.drawTexture(

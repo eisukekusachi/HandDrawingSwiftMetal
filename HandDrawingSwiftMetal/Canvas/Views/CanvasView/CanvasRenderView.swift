@@ -1,5 +1,5 @@
 //
-//  CanvasView.swift
+//  CanvasRenderView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/14.
@@ -9,7 +9,7 @@ import MetalKit
 import Combine
 
 /// A custom view for displaying textures with Metal support.
-class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
+class CanvasRenderView: MTKView, MTKViewDelegate, CanvasViewRendering {
 
     var renderTexture: MTLTexture? {
         _renderTexture
@@ -99,11 +99,7 @@ class CanvasView: MTKView, MTKViewDelegate, CanvasViewProtocol {
         _renderTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
     }
 
-}
-
-extension CanvasView {
     func resetCommandBuffer() {
         commandBuffer = commandQueue?.makeCommandBuffer()
     }
-
 }
