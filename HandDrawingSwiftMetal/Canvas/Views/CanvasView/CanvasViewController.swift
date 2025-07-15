@@ -116,7 +116,7 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.needsTextureRefreshPublisher
+        contentView.canvasView.renderTextureChanged
             .sink { [weak self] in
                 self?.canvasViewModel.updateCanvasView()
             }
