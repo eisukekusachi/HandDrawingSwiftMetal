@@ -140,6 +140,29 @@ final class CanvasViewModel {
         bindData()
     }
 
+    func initialize(
+        canvasViewRendering: CanvasViewRendering,
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) {
+        self.canvasViewRendering = canvasViewRendering
+
+        // Use the size from CoreData if available,
+        // if not, use the size from the configuration,
+        // otherwise, fall back to the default value
+        initialize(
+            using: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
+        )
+
+        viewConfigureRequestSubject.send(
+            .init(
+                canvasState: canvasState,
+                textureLayerRepository: textureLayerRepository,
+                undoStack: undoStack
+            )
+        )
+    }
+
     private func bindData() {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.canvasDrawingPublisher
@@ -285,31 +308,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    func onViewDidLoad(
-        canvasViewRendering: CanvasViewRendering
-    ) {
-        self.canvasViewRendering = canvasViewRendering
-
-        viewConfigureRequestSubject.send(
-            .init(
-                canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository,
-                undoStack: undoStack
-            )
-        )
-    }
-
-    func onViewDidAppear(
-        configuration: CanvasConfiguration,
-        drawableTextureSize: CGSize
-    ) {
-        if !textureLayerRepository.isInitialized {
-            initialize(
-                using: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(drawableTextureSize)
-            )
-        }
-    }
 
     func onFingerGestureDetected(
         touches: Set<UITouch>,

@@ -37,8 +37,15 @@ class CanvasViewController: UIViewController {
 
         setupNewCanvasDialogPresenter()
 
-        canvasViewModel.onViewDidLoad(
-            canvasViewRendering: contentView.canvasView.renderView
+        let scale = UIScreen.main.scale
+        let size = UIScreen.main.bounds.size
+        canvasViewModel.initialize(
+            canvasViewRendering: contentView.canvasView.renderView,
+            configuration: configuration,
+            defaultTextureSize: .init(
+                width: size.width * scale,
+                height: size.height * scale
+            )
         )
 
         contentView.alpha = 0.0
@@ -52,10 +59,7 @@ class CanvasViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        canvasViewModel.onViewDidAppear(
-            configuration: configuration,
-            drawableTextureSize: contentView.canvasView.renderView.drawableSize
-        )
+
     }
 
     override func viewDidLayoutSubviews() {
@@ -68,6 +72,13 @@ class CanvasViewController: UIViewController {
 extension CanvasViewController {
 
     private func bindData() {
+
+        contentView.canvasView.renderView.renderTextureChanged
+            .sink { [weak self] _ in
+                self?.canvasViewModel.updateCanvasView()
+            }
+            .store(in: &cancellables)
+
         canvasViewModel.viewConfigureRequestPublisher
             .sink { [weak self] configuration in
                 self?.setupLayerView(
@@ -113,12 +124,6 @@ extension CanvasViewController {
         canvasViewModel.undoRedoButtonState
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
-            }
-            .store(in: &cancellables)
-
-        contentView.canvasView.renderView.renderTextureChanged
-            .sink { [weak self] _ in
-                self?.canvasViewModel.updateCanvasView()
             }
             .store(in: &cancellables)
     }

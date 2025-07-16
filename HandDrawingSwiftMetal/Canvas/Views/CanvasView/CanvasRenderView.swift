@@ -15,7 +15,7 @@ class CanvasRenderView: MTKView, MTKViewDelegate, CanvasViewRendering {
         _renderTexture
     }
 
-    var renderTextureChanged: AnyPublisher<CGSize?, Never> {
+    var renderTextureChanged: AnyPublisher<CGSize, Never> {
         renderTextureChangedSubject.eraseToAnyPublisher()
     }
 
@@ -25,13 +25,15 @@ class CanvasRenderView: MTKView, MTKViewDelegate, CanvasViewRendering {
     /// Its size changes when the device is rotated.
     private var _renderTexture: MTLTexture? {
         didSet {
-            renderTextureChangedSubject.send(_renderTexture?.size)
+            if let textureSize = _renderTexture?.size {
+                renderTextureChangedSubject.send(textureSize)
+            }
         }
     }
 
     private var flippedTextureBuffers: MTLTextureBuffers?
 
-    private let renderTextureChangedSubject = PassthroughSubject<CGSize?, Never>()
+    private let renderTextureChangedSubject = PassthroughSubject<CGSize, Never>()
 
     private var commandQueue: MTLCommandQueue!
 
