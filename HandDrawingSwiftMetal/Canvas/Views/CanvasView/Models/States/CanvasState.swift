@@ -11,19 +11,6 @@ import UIKit
 /// Manage the state of the canvas
 final class CanvasState: ObservableObject {
 
-    /// A name of the file to be saved
-    @Published var projectName: String = Calendar.currentDate
-
-    @Published var textureSize: CGSize = CanvasState.defaultTextureSize
-
-    @Published var layers: [TextureLayerModel] = []
-
-    @Published var selectedLayerId: UUID?
-
-    @Published var backgroundColor: UIColor = .white
-
-    @Published var drawingTool: DrawingToolType = .brush
-
     let brush = DrawingBrushToolState()
 
     let eraser = DrawingEraserToolState()
@@ -34,7 +21,18 @@ final class CanvasState: ObservableObject {
     /// Subject to publish updates for the entire canvas, including all textures
     let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    private(set) var currentDrawingTool: DrawingToolProtocol!
+    @Published var layers: [TextureLayerModel] = []
+
+    @Published var selectedLayerId: UUID?
+
+    /// A name of the file to be saved
+    @Published private(set) var projectName: String = Calendar.currentDate
+
+    @Published private(set) var textureSize: CGSize = CanvasState.defaultTextureSize
+
+    @Published private(set) var backgroundColor: UIColor = .white
+
+    @Published private(set) var drawingTool: DrawingToolType = .brush
 
     private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
@@ -57,7 +55,10 @@ extension CanvasState {
     }
 
     var drawingToolDiameter: Int? {
-        currentDrawingTool.diameter
+        switch drawingTool {
+        case .brush: brush.diameter
+        case .eraser: eraser.diameter
+        }
     }
 
     func layer(_ layerId: UUID) -> TextureLayerModel? {
@@ -86,9 +87,11 @@ extension CanvasState {
         self.eraser.alpha = configuration.eraserAlpha
         self.eraser.setDiameter(configuration.eraserDiameter)
 
-        self.currentDrawingTool = self.brush
+        self.setDrawingTool(configuration.drawingTool)
+    }
 
-        self.drawingTool = configuration.drawingTool
+    func setDrawingTool(_ drawingToolType: DrawingToolType) {
+        self.drawingTool = drawingToolType
     }
 }
 

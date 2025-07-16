@@ -17,11 +17,6 @@ class CanvasViewController: UIViewController {
 
     private var configuration = CanvasConfiguration()
 
-    private let canvasViewModel = CanvasViewModel(
-        textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared,
-        undoTextureRepository: TextureUndoDocumentsDirectorySingletonRepository.shared
-    )
-
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
@@ -37,74 +32,25 @@ class CanvasViewController: UIViewController {
 
         setupNewCanvasDialogPresenter()
 
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-        canvasViewModel.initialize(
-            canvasViewRendering: contentView.canvasView.renderView,
-            configuration: configuration,
-            defaultTextureSize: .init(
-                width: size.width * scale,
-                height: size.height * scale
-            )
+        contentView.canvasView.initialize(
+            configuration: configuration
         )
 
-        contentView.alpha = 0.0
         view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        activityIndicatorView.isHidden = false
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        canvasViewModel.frameSize = view.frame.size
-    }
-
 }
 
 extension CanvasViewController {
 
     private func bindData() {
 
-        contentView.canvasView.renderView.renderTextureChanged
-            .sink { [weak self] _ in
-                self?.canvasViewModel.updateCanvasView()
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.viewConfigureRequestPublisher
-            .sink { [weak self] configuration in
-                self?.setupLayerView(
-                    canvasState: configuration.canvasState,
-                    textureLayerRepository: configuration.textureLayerRepository,
-                    undoStack: configuration.undoStack
-                )
-                self?.contentView.setup()
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.canvasViewSetupCompleted
-            .sink { _ in
-                UIView.animate(withDuration: 0.05) { [weak self] in
-                    self?.contentView.alpha = 1.0
-                }
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.activityIndicator
+        contentView.canvasView.activityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        canvasViewModel.alert
+        contentView.canvasView.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.showAlert(
@@ -114,14 +60,14 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.toast
+        contentView.canvasView.toast
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.undoRedoButtonState
+        contentView.canvasView.undoRedoButtonState
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
@@ -129,37 +75,16 @@ extension CanvasViewController {
     }
 
     private func addEvents() {
-        contentView.tapResetTransformButton = { [weak self] in
-            self?.canvasViewModel.resetTransforming()
-        }
-
-        contentView.tapBlackButton = { [weak self] in
-            self?.canvasViewModel.setDrawingTool(.brush)
-            self?.canvasViewModel.setBrushColor(UIColor.black.withAlphaComponent(0.75))
-        }
-        contentView.tapRedButton = { [weak self] in
-            self?.canvasViewModel.setDrawingTool(.brush)
-            self?.canvasViewModel.setBrushColor(UIColor.red.withAlphaComponent(0.75))
-        }
-        contentView.tapEraserButton = { [weak self] in
-            self?.canvasViewModel.setDrawingTool(.eraser)
-        }
-        contentView.changeBrushDiameter = { [weak self] value in
-            self?.canvasViewModel.setBrushDiameter(value)
-        }
-        contentView.changeEraserDiameter = { [weak self] value in
-            self?.canvasViewModel.setEraserDiameter(value)
-        }
-
         contentView.tapLayerButton = { [weak self] in
             self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.canvasViewModel.saveFile()
+            self?.contentView.canvasView.saveFile()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
         }
+
         contentView.tapExportImageButton = { [weak self] in
             self?.contentView.exportImageButton.debounce()
             self?.saveImage()
@@ -168,20 +93,6 @@ extension CanvasViewController {
             guard let `self` else { return }
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
-
-        contentView.tapUndoButton = { [weak self] in
-            self?.canvasViewModel.undo()
-        }
-        contentView.tapRedoButton = { [weak self] in
-            self?.canvasViewModel.redo()
-        }
-
-        contentView.canvasView.addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        contentView.canvasView.addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
     }
 }
 
@@ -189,7 +100,12 @@ extension CanvasViewController {
 
     private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
-            self?.canvasViewModel.newCanvas()
+            guard let `self` else { return }
+            self.contentView.canvasView.newCanvas(
+                configuration: CanvasConfiguration(
+                    textureSize: self.contentView.canvasView.currentTextureSize
+                )
+            )
         }
     }
 
@@ -219,7 +135,7 @@ extension CanvasViewController {
             suffix: CanvasViewModel.fileSuffix,
             onTapItem: { [weak self] url in
                 self?.presentedViewController?.dismiss(animated: true)
-                self?.canvasViewModel.loadFile(zipFileURL: url)
+                self?.contentView.canvasView.loadFile(zipFileURL: url)
             }
         )
         present(
@@ -257,37 +173,6 @@ extension CanvasViewController {
         } else {
             showToast(.init(title: "Success", systemName: "hand.thumbsup.fill"))
         }
-    }
-
-}
-
-extension CanvasViewController: FingerInputGestureRecognizerSender {
-
-    func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.onFingerGestureDetected(
-            touches: touches,
-            with: event,
-            view: view
-        )
-    }
-
-}
-
-extension CanvasViewController: PencilInputGestureRecognizerSender {
-
-    func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.onPencilGestureDetected(
-            estimatedTouches: touches,
-            with: event,
-            view: view
-        )
-    }
-
-    func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView) {
-        canvasViewModel.onPencilGestureDetected(
-            actualTouches: touches,
-            view: view
-        )
     }
 
 }

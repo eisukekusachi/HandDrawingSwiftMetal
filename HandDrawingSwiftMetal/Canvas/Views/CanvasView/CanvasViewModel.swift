@@ -11,6 +11,11 @@ import SwiftUI
 
 final class CanvasViewModel {
 
+    /// Maintains the state of the canvas
+    let canvasState: CanvasState = .init(
+        CanvasConfiguration()
+    )
+
     static var fileSuffix: String {
         "zip"
     }
@@ -53,10 +58,6 @@ final class CanvasViewModel {
     /// A rendering target
     private var canvasViewRendering: CanvasViewRendering?
 
-    /// Maintains the state of the canvas
-    private let canvasState: CanvasState = .init(
-        CanvasConfiguration()
-    )
     /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
@@ -112,10 +113,17 @@ final class CanvasViewModel {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    init(
+    init() {
+        bindData()
+    }
+
+    func initialize(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
-        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository
+        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository,
+        canvasViewRendering: CanvasViewRendering,
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
     ) {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)
@@ -137,21 +145,13 @@ final class CanvasViewModel {
             )
         }
 
-        bindData()
-    }
-
-    func initialize(
-        canvasViewRendering: CanvasViewRendering,
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) {
         self.canvasViewRendering = canvasViewRendering
 
         // Use the size from CoreData if available,
         // if not, use the size from the configuration,
         // otherwise, fall back to the default value
         initialize(
-            using: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
+            configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
         )
 
         viewConfigureRequestSubject.send(
@@ -252,12 +252,15 @@ final class CanvasViewModel {
             }
             .store(in: &cancellables)
     }
-
 }
 
 extension CanvasViewModel {
 
-    func initialize(using configuration: CanvasConfiguration) {
+    var currentTextureSize: CGSize {
+        canvasState.textureSize
+    }
+
+    func initialize(configuration: CanvasConfiguration) {
         // Initialize the texture repository
         textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
@@ -392,24 +395,24 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasViewRendering, with: commandBuffer)
     }
 
-    func newCanvas() {
-        transformer.setMatrix(.identity)
-        initialize(
-            using: CanvasConfiguration(textureSize: canvasState.textureSize)
-        )
-    }
-
     func setDrawingTool(_ drawingTool: DrawingToolType) {
-        canvasState.drawingTool = drawingTool
+        canvasState.setDrawingTool(drawingTool)
     }
     func setBrushColor(_ color: UIColor) {
         canvasState.brush.color = color
     }
     func setBrushDiameter(_ value: Float) {
-        canvasState.brush.diameter = DrawingBrushToolState.diameterIntValue(value)
+        canvasState.brush.setDiameter(value)
     }
     func setEraserDiameter(_ value: Float) {
-        canvasState.brush.diameter = DrawingEraserToolState.diameterIntValue(value)
+        canvasState.eraser.setDiameter(value)
+    }
+
+    func newCanvas(configuration: CanvasConfiguration) {
+        transformer.setMatrix(.identity)
+        initialize(
+            configuration: CanvasConfiguration(textureSize: canvasState.textureSize)
+        )
     }
 
     func undo() {
