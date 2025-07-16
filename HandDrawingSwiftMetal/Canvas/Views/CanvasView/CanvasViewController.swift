@@ -38,7 +38,7 @@ class CanvasViewController: UIViewController {
         setupNewCanvasDialogPresenter()
 
         canvasViewModel.onViewDidLoad(
-            canvasViewRendering: contentView.canvasView
+            canvasViewRendering: contentView.canvasView.renderView
         )
 
         contentView.alpha = 0.0
@@ -54,7 +54,7 @@ class CanvasViewController: UIViewController {
         super.viewDidAppear(animated)
         canvasViewModel.onViewDidAppear(
             configuration: configuration,
-            drawableTextureSize: contentView.canvasView.drawableSize
+            drawableTextureSize: contentView.canvasView.renderView.drawableSize
         )
     }
 
@@ -116,7 +116,7 @@ extension CanvasViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.renderTextureChanged
+        contentView.canvasView.renderView.renderTextureChanged
             .sink { [weak self] _ in
                 self?.canvasViewModel.updateCanvasView()
             }
@@ -242,7 +242,7 @@ extension CanvasViewController {
 extension CanvasViewController {
 
     private func saveImage() {
-        if let image = contentView.canvasView.renderTexture?.uiImage {
+        if let image = contentView.canvasView.renderView.renderTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
