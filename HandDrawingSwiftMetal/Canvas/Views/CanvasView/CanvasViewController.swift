@@ -117,7 +117,7 @@ extension CanvasViewController {
             .store(in: &cancellables)
 
         contentView.canvasView.renderTextureChanged
-            .sink { [weak self] in
+            .sink { [weak self] _ in
                 self?.canvasViewModel.updateCanvasView()
             }
             .store(in: &cancellables)
