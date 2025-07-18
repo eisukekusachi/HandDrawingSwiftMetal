@@ -37,7 +37,7 @@ class CanvasViewController: UIViewController {
         setupNewCanvasDialogPresenter()
         setupLayerView()
 
-        view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
+        view.backgroundColor = UIColor(rgb: CanvasView.blankAreaBackgroundColor)
     }
 }
 

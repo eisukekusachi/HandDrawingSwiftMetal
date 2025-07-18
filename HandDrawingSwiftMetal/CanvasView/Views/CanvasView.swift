@@ -10,6 +10,8 @@ import UIKit
 
 class CanvasView: UIView {
 
+    static let blankAreaBackgroundColor: (Int, Int, Int) = (230, 230, 230)
+
     let renderView = CanvasRenderView()
 
     var textureLayerConfiguration: TextureLayerConfiguration {

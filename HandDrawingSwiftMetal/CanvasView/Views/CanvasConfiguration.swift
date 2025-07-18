@@ -36,7 +36,9 @@ extension CanvasConfiguration {
         self.projectName = projectName
 
         self.layerIndex = entity.layerIndex
-        self.layers = entity.layers.map { .init(from: $0) }
+        self.layers = entity.layers.map {
+            .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
+        }
 
         self.textureSize = entity.textureSize
 

@@ -191,7 +191,7 @@ extension CanvasRenderer {
             texture: canvasTexture,
             matrix: matrix,
             frameSize: frameSize,
-            backgroundColor: UIColor(rgb: Constants.blankAreaBackgroundColor),
+            backgroundColor: UIColor(rgb: CanvasView.blankAreaBackgroundColor),
             on: renderTexture,
             device: device,
             with: commandBuffer

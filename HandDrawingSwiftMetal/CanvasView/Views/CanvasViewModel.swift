@@ -45,11 +45,6 @@ final class CanvasViewModel {
         undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `CanvasViewControllerConfiguration`  when subviews need to be configured
-    var viewConfigureRequestPublisher: AnyPublisher<CanvasViewControllerConfiguration, Never> {
-        viewConfigureRequestSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits `Void` when the canvas view setup is completed
     var canvasViewSetupCompleted: AnyPublisher<Void, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
@@ -102,8 +97,6 @@ final class CanvasViewModel {
     private let alertSubject = PassthroughSubject<Error, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
-
-    private var viewConfigureRequestSubject: PassthroughSubject<CanvasViewControllerConfiguration, Never> = .init()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
 
@@ -160,14 +153,6 @@ final class CanvasViewModel {
         // otherwise, fall back to the default value
         initialize(
             configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
-        )
-
-        viewConfigureRequestSubject.send(
-            .init(
-                canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository,
-                undoStack: undoStack
-            )
         )
     }
 

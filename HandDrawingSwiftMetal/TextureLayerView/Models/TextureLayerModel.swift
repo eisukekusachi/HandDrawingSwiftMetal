@@ -22,13 +22,16 @@ struct TextureLayerModel: Identifiable, Equatable {
 extension TextureLayerModel {
 
     init(
-        from textureLayerEntity: TextureLayerEntity
+        textureName: String,
+        title: String,
+        alpha: Int,
+        isVisible: Bool
     ) {
         self.init(
-            id: TextureLayerModel.id(from: textureLayerEntity.textureName),
-            title: textureLayerEntity.title,
-            alpha: textureLayerEntity.alpha,
-            isVisible: textureLayerEntity.isVisible
+            id: TextureLayerModel.id(from: textureName),
+            title: title,
+            alpha: alpha,
+            isVisible: isVisible
         )
     }
 
