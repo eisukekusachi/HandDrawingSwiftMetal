@@ -143,6 +143,7 @@
 		D48F76492DA214E10001C80F /* CollectionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F76482DA214E10001C80F /* CollectionExtensions.swift */; };
 		D48F764B2DA215210001C80F /* CanvasRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F764A2DA215210001C80F /* CanvasRendererTests.swift */; };
 		D48F764D2DA215E60001C80F /* TextureLayerModelDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48F764C2DA215E60001C80F /* TextureLayerModelDummy.swift */; };
+		D49425352E2A92AC0061B769 /* TextureLayerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4B4AAA02B3FBEA700298CFB /* MTLTextureCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */; };
@@ -323,6 +324,7 @@
 		D48F76482DA214E10001C80F /* CollectionExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtensions.swift; sourceTree = "<group>"; };
 		D48F764A2DA215210001C80F /* CanvasRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasRendererTests.swift; sourceTree = "<group>"; };
 		D48F764C2DA215E60001C80F /* TextureLayerModelDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModelDummy.swift; sourceTree = "<group>"; };
+		D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerConfiguration.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureCreator.swift; sourceTree = "<group>"; };
@@ -792,6 +794,7 @@
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */,
+				D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */,
 			);
 			path = TextureLayerView;
 			sourceTree = "<group>";
@@ -1116,6 +1119,7 @@
 				D469A8832C56422D00D10575 /* MTLPipelines.swift in Sources */,
 				D4B65E5F29DD34A000A0542F /* UIImageExtensions.swift in Sources */,
 				D40D977329DAB0AD00A82E6A /* CGAffineTransformExtensions.swift in Sources */,
+				D49425352E2A92AC0061B769 /* TextureLayerConfiguration.swift in Sources */,
 				D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */,
 				D44B52B72DB3928000EE213C /* CanvasViewModel.swift in Sources */,
 				D44B52B82DB3928000EE213C /* CanvasInputDeviceType.swift in Sources */,

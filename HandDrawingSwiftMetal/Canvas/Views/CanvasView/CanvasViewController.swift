@@ -30,11 +30,12 @@ class CanvasViewController: UIViewController {
         addEvents()
         bindData()
 
-        setupNewCanvasDialogPresenter()
-
         contentView.canvasView.initialize(
             configuration: configuration
         )
+
+        setupNewCanvasDialogPresenter()
+        setupLayerView()
 
         view.backgroundColor = UIColor(rgb: Constants.blankAreaBackgroundColor)
     }
@@ -109,15 +110,9 @@ extension CanvasViewController {
         }
     }
 
-    private func setupLayerView(
-        canvasState: CanvasState,
-        textureLayerRepository: TextureLayerRepository,
-        undoStack: UndoStack?
-    ) {
+    private func setupLayerView() {
         textureLayerViewPresenter.setupLayerViewPresenter(
-            canvasState: canvasState,
-            textureLayerRepository: textureLayerRepository,
-            undoStack: undoStack,
+            configuration: contentView.canvasView.textureLayerConfiguration,
             using: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,

@@ -55,6 +55,14 @@ final class CanvasViewModel {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
+    var textureLayerConfiguration: TextureLayerConfiguration {
+        .init(
+            canvasState: canvasState,
+            textureLayerRepository: textureLayerRepository,
+            undoStack: undoStack
+        )
+    }
+
     /// A rendering target
     private var canvasViewRendering: CanvasViewRendering?
 

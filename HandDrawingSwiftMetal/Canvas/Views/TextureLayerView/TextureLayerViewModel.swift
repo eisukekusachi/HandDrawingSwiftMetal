@@ -38,14 +38,11 @@ final class TextureLayerViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        canvasState: CanvasState,
-        textureLayerRepository: TextureLayerRepository,
-        undoStack: UndoStack?
+        configuration: TextureLayerConfiguration
     ) {
-        self.canvasState = canvasState
-        self.textureLayerRepository = textureLayerRepository
-
-        self.undoStack = undoStack
+        self.canvasState = configuration.canvasState
+        self.textureLayerRepository = configuration.textureLayerRepository
+        self.undoStack = configuration.undoStack
 
         subscribe()
     }

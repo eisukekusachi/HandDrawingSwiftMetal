@@ -134,12 +134,12 @@ private struct PreviewView: View {
             ]
         )
     )
-    let viewModel: TextureLayerViewModel
+    let configuration: TextureLayerConfiguration
 
     @StateObject var roundedRectangle = RoundedRectangleWithArrow()
 
     init() {
-        viewModel = .init(
+        configuration = .init(
             canvasState: canvasState,
             textureLayerRepository: MockTextureLayerRepository(),
             undoStack: nil
@@ -147,7 +147,7 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerView(
-            viewModel: viewModel,
+            viewModel: .init(configuration: configuration),
             roundedRectangleWithArrow: roundedRectangle
         )
         .frame(width: 320, height: 300)

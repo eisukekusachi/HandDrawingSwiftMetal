@@ -12,6 +12,10 @@ class CanvasView: UIView {
 
     let renderView = CanvasRenderView()
 
+    var textureLayerConfiguration: TextureLayerConfiguration {
+        canvasViewModel.textureLayerConfiguration
+    }
+
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
