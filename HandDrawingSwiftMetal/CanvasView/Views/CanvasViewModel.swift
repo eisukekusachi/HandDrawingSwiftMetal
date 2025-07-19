@@ -59,7 +59,7 @@ final class CanvasViewModel {
     }
 
     /// A rendering target
-    private var canvasViewRendering: CanvasViewRendering?
+    private var displayView: CanvasDisplayable?
 
     /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
@@ -122,7 +122,7 @@ final class CanvasViewModel {
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository?,
         localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository,
-        canvasViewRendering: CanvasViewRendering,
+        displayView: CanvasDisplayable,
         configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
     ) {
@@ -149,7 +149,7 @@ final class CanvasViewModel {
             )
         }
 
-        self.canvasViewRendering = canvasViewRendering
+        self.displayView = displayView
 
         // Use the size from CoreData if available,
         // if not, use the size from the configuration,
@@ -167,7 +167,7 @@ final class CanvasViewModel {
                     let drawingCurve = self?.drawingCurve,
                     let texture = self?.renderer.selectedTexture,
                     let selectedLayerId = self?.canvasState.selectedLayer?.id,
-                    let commandBuffer = self?.canvasViewRendering?.commandBuffer
+                    let commandBuffer = self?.displayView?.commandBuffer
                 else { return }
 
                 self?.drawingTextureSet?.updateRealTimeDrawingTexture(
@@ -276,7 +276,7 @@ extension CanvasViewModel {
     @MainActor private func setupCanvas(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
-            let commandBuffer = canvasViewRendering?.commandBuffer
+            let commandBuffer = displayView?.commandBuffer
         else { return }
 
         canvasState.setData(configuration)
@@ -380,9 +380,9 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     func resetTransforming() {
-        guard let commandBuffer = canvasViewRendering?.commandBuffer else { return }
+        guard let commandBuffer = displayView?.commandBuffer else { return }
         transformer.setMatrix(.identity)
-        renderer.updateCanvasView(canvasViewRendering, with: commandBuffer)
+        renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
     func setDrawingTool(_ drawingTool: DrawingToolType) {
@@ -552,7 +552,7 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let drawableSize = canvasViewRendering?.renderTexture?.size,
+            let drawableSize = displayView?.displayTexture?.size,
             let diameter = canvasState.drawingToolDiameter
         else { return }
 
@@ -574,7 +574,7 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas() {
-        guard let commandBuffer = canvasViewRendering?.commandBuffer else { return }
+        guard let commandBuffer = displayView?.commandBuffer else { return }
 
         transformer.initTransformingIfNeeded(
             fingerStroke.touchHistories
@@ -592,7 +592,7 @@ extension CanvasViewModel {
             transformer.finishTransforming()
         }
 
-        renderer.updateCanvasView(canvasViewRendering, with: commandBuffer)
+        renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
 }
@@ -600,7 +600,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
-        guard let commandBuffer = canvasViewRendering?.commandBuffer else { return }
+        guard let commandBuffer = displayView?.commandBuffer else { return }
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
@@ -611,9 +611,9 @@ extension CanvasViewModel {
         drawingCurve = nil
         transformer.resetMatrix()
 
-        canvasViewRendering?.resetCommandBuffer()
+        displayView?.resetCommandBuffer()
 
-        renderer.updateCanvasView(canvasViewRendering, with: commandBuffer)
+        renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
@@ -655,7 +655,7 @@ extension CanvasViewModel {
 
     func updateCanvasByMergingAllLayers() {
         guard
-            let commandBuffer = canvasViewRendering?.commandBuffer
+            let commandBuffer = displayView?.commandBuffer
         else { return }
 
         renderer.updateDrawingTextures(
@@ -669,11 +669,11 @@ extension CanvasViewModel {
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,
-            let commandBuffer = canvasViewRendering?.commandBuffer
+            let commandBuffer = displayView?.commandBuffer
         else { return }
 
         renderer.updateCanvasView(
-            canvasViewRendering,
+            displayView,
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer

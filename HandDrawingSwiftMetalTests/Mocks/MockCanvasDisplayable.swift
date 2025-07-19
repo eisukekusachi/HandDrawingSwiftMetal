@@ -1,5 +1,5 @@
 //
-//  MockCanvasViewRendering.swift
+//  MockCanvasDisplayable.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/05/11.
@@ -8,10 +8,10 @@
 import MetalKit
 @testable import HandDrawingSwiftMetal
 
-final class MockCanvasViewRendering: CanvasViewRendering {
+final class MockCanvasDisplayable: CanvasDisplayable {
     var commandBuffer: MTLCommandBuffer? { nil }
 
-    var renderTexture: MTLTexture? { nil }
+    var displayTexture: MTLTexture? { nil }
 
     func resetCommandBuffer() {}
 

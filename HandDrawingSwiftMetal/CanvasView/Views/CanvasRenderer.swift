@@ -149,7 +149,7 @@ extension CanvasRenderer {
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     func updateCanvasView(
-        _ canvasView: CanvasViewRendering?,
+        _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel,
         with commandBuffer: MTLCommandBuffer
@@ -190,17 +190,17 @@ extension CanvasRenderer {
     }
 
     func updateCanvasView(
-        _ canvasView: CanvasViewRendering?,
+        _ canvasView: CanvasDisplayable?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let renderTexture = canvasView?.renderTexture else { return }
+        guard let displayTexture = canvasView?.displayTexture else { return }
 
         renderer.drawTexture(
             texture: canvasTexture,
             matrix: matrix,
             frameSize: frameSize,
             backgroundColor: baseBackgroundColor,
-            on: renderTexture,
+            on: displayTexture,
             device: device,
             with: commandBuffer
         )

@@ -89,7 +89,7 @@ final class CanvasRendererTests: XCTestCase {
 
         let realtimeDrawingTexture = MTLTextureCreator.makeBlankTexture(label: realtimeDrawingTextureLabel, with: device)
 
-        let canvasView = MockCanvasViewRendering()
+        let canvasView = MockCanvasDisplayable()
 
         let commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = "commandBuffer"

@@ -10,7 +10,7 @@ import UIKit
 
 class CanvasView: UIView {
 
-    let renderView = CanvasRenderView()
+    let displayView = CanvasDisplayView()
 
     var textureLayerConfiguration: TextureLayerConfiguration {
         canvasViewModel.textureLayerConfiguration
@@ -79,7 +79,7 @@ class CanvasView: UIView {
         canvasViewModel.initialize(
             textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared,
             undoTextureRepository: TextureUndoDocumentsDirectorySingletonRepository.shared,
-            canvasViewRendering: renderView,
+            displayView: displayView,
             configuration: configuration,
             defaultTextureSize: .init(
                 width: size.width * scale,
@@ -141,7 +141,7 @@ extension CanvasView {
     }
 
     private func bindData() {
-        renderView.renderTextureChanged
+        displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
                 self?.canvasViewModel.updateCanvasView()
             }
@@ -176,14 +176,14 @@ extension CanvasView {
     }
 
     private func layoutView() {
-        addSubview(renderView)
-        renderView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(displayView)
+        displayView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            renderView.topAnchor.constraint(equalTo: topAnchor),
-            renderView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            renderView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            renderView.trailingAnchor.constraint(equalTo: trailingAnchor)
+            displayView.topAnchor.constraint(equalTo: topAnchor),
+            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     }
 }
