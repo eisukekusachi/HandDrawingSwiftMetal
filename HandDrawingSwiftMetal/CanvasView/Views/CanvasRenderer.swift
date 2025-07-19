@@ -15,6 +15,10 @@ final class CanvasRenderer: ObservableObject {
 
     var matrix: CGAffineTransform = .identity
 
+    var backgroundColor: UIColor = .white
+
+    var baseBackgroundColor: UIColor = .lightGray
+
     private let renderer: MTLRendering!
 
     private var textureRepository: TextureRepository?
@@ -81,7 +85,6 @@ final class CanvasRenderer: ObservableObject {
     func setTextureRepository(_ textureRepository: TextureRepository) {
         self.textureRepository = textureRepository
     }
-
 }
 
 extension CanvasRenderer {
@@ -149,7 +152,6 @@ extension CanvasRenderer {
         _ canvasView: CanvasViewRendering?,
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel,
-        backgroundColor: UIColor = .white,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard let canvasTexture else { return }
@@ -181,17 +183,23 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView(canvasView, with: commandBuffer)
+        updateCanvasView(
+            canvasView,
+            with: commandBuffer
+        )
     }
 
-    func updateCanvasView(_ canvasView: CanvasViewRendering?, with commandBuffer: MTLCommandBuffer) {
+    func updateCanvasView(
+        _ canvasView: CanvasViewRendering?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
         guard let renderTexture = canvasView?.renderTexture else { return }
 
         renderer.drawTexture(
             texture: canvasTexture,
             matrix: matrix,
             frameSize: frameSize,
-            backgroundColor: UIColor(rgb: CanvasView.blankAreaBackgroundColor),
+            backgroundColor: baseBackgroundColor,
             on: renderTexture,
             device: device,
             with: commandBuffer
@@ -239,5 +247,4 @@ extension CanvasRenderer {
         }
         .eraseToAnyPublisher()
     }
-
 }

@@ -36,8 +36,6 @@ class HandDrawingViewController: UIViewController {
 
         setupNewCanvasDialogPresenter()
         setupLayerView()
-
-        view.backgroundColor = UIColor(rgb: CanvasView.blankAreaBackgroundColor)
     }
 }
 

@@ -129,6 +129,9 @@ final class CanvasViewModel {
         self.textureLayerRepository = textureLayerRepository
         self.renderer.setTextureRepository(textureLayerRepository)
 
+        self.renderer.backgroundColor = configuration.backgroundColor
+        self.renderer.baseBackgroundColor = configuration.baseBackgroundColor
+
         self.localFileRepository = localFileRepository
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled

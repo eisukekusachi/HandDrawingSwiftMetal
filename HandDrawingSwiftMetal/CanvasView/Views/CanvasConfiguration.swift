@@ -24,6 +24,11 @@ struct CanvasConfiguration {
     var eraserAlpha: Int = 155
     var eraserDiameter: Int = 44
 
+    /// The background color of the canvas
+    var backgroundColor: UIColor = .white
+
+    /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
+    var baseBackgroundColor: UIColor = UIColor(230, 230, 230)
 }
 
 extension CanvasConfiguration {
