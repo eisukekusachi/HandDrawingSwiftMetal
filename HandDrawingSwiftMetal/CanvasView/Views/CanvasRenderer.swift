@@ -15,13 +15,13 @@ final class CanvasRenderer: ObservableObject {
 
     var matrix: CGAffineTransform = .identity
 
+    /// The background color of the canvas
     var backgroundColor: UIColor = .white
 
+    /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     var baseBackgroundColor: UIColor = .lightGray
 
     private let renderer: MTLRendering!
-
-    private var textureRepository: TextureRepository?
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
@@ -50,6 +50,13 @@ final class CanvasRenderer: ObservableObject {
         )
 
         self.renderer = renderer
+    }
+
+    func initialize(
+        configuration: CanvasConfiguration
+    ) {
+        self.backgroundColor = configuration.backgroundColor
+        self.baseBackgroundColor = configuration.baseBackgroundColor
     }
 
     func initTextures(textureSize: CGSize) {
@@ -81,10 +88,6 @@ final class CanvasRenderer: ObservableObject {
         self.unselectedTopTexture?.label = "unselectedTopTexture"
         self.canvasTexture?.label = "canvasTexture"
     }
-
-    func setTextureRepository(_ textureRepository: TextureRepository) {
-        self.textureRepository = textureRepository
-    }
 }
 
 extension CanvasRenderer {
@@ -100,6 +103,7 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
         canvasState: CanvasState,
+        textureLayerRepository: TextureLayerRepository,
         with commandBuffer: MTLCommandBuffer,
         onCompleted: (() -> Void)?
     ) {
@@ -115,19 +119,28 @@ extension CanvasRenderer {
         opaqueLayer.alpha = 255
 
         let bottomPublisher = drawLayerTextures(
-            layers: bottomLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            layers: bottomLayers(
+                selectedIndex: selectedIndex,
+                layers: canvasState.layers
+            ),
+            from: textureLayerRepository,
             on: unselectedBottomTexture,
             with: commandBuffer
         )
 
         let topPublisher = drawLayerTextures(
-            layers: topLayers(selectedIndex: selectedIndex, layers: canvasState.layers),
+            layers: topLayers(
+                selectedIndex: selectedIndex,
+                layers: canvasState.layers
+            ),
+            from: textureLayerRepository,
             on: unselectedTopTexture,
             with: commandBuffer
         )
 
         let selectedPublisher = drawLayerTextures(
             layers: [opaqueLayer],
+            from: textureLayerRepository,
             on: selectedTexture,
             with: commandBuffer
         )
@@ -209,14 +222,10 @@ extension CanvasRenderer {
 
     func drawLayerTextures(
         layers: [TextureLayerModel],
+        from textureLayerRepository: TextureLayerRepository,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) -> AnyPublisher<Void, Error> {
-        guard let textureRepository else {
-            Logger.standard.warning("The texture repository is unavailable")
-            return Fail(error: TextureRepositoryError.failedToUnwrap).eraseToAnyPublisher()
-        }
-
         // Clear the destination texture before merging
         renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
 
@@ -226,7 +235,7 @@ extension CanvasRenderer {
         }
 
         // Copy textures from the repository
-        return textureRepository.copyTextures(
+        return textureLayerRepository.copyTextures(
             uuids: layers.map { $0.id }
         )
         .map { [weak self] results in

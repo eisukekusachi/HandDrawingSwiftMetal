@@ -127,10 +127,10 @@ final class CanvasViewModel {
         defaultTextureSize: CGSize
     ) {
         self.textureLayerRepository = textureLayerRepository
-        self.renderer.setTextureRepository(textureLayerRepository)
 
-        self.renderer.backgroundColor = configuration.backgroundColor
-        self.renderer.baseBackgroundColor = configuration.baseBackgroundColor
+        self.renderer.initialize(
+            configuration: configuration
+        )
 
         self.localFileRepository = localFileRepository
 
@@ -288,6 +288,7 @@ extension CanvasViewModel {
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
+            textureLayerRepository: textureLayerRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()
@@ -660,6 +661,7 @@ extension CanvasViewModel {
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
+            textureLayerRepository: textureLayerRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()
