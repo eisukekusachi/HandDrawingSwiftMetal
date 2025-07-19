@@ -83,17 +83,17 @@ final class CanvasDrawingBrushTextureSetTests: XCTestCase {
         ]
 
         testCases.forEach { testCase in
-            let iterator = MockDrawingCurveIterator()
+            let iterator = MockDrawingCurve()
 
             iterator.touchPhase.send(testCase.key.touchPhase)
 
             var didCallDrawingCompleted = false
 
             subject.updateRealTimeDrawingTexture(
-                singleCurveIterator: iterator,
                 baseTexture: baseTexture,
+                drawingCurve: iterator,
                 with: commandBuffer,
-                onDrawingCompleted: {
+                onDrawingCompleted: { _ in
                     didCallDrawingCompleted = true
                 }
             )

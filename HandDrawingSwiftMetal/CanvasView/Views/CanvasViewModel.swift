@@ -70,7 +70,7 @@ final class CanvasViewModel {
     private let pencilStroke = PencilStroke()
 
     /// An iterator that manages a single curve being drawn in realtime
-    private var singleCurveIterator: SingleCurveIterator?
+    private var drawingCurve: DrawingCurve?
 
     /// A texture set for realtime drawing
     private var drawingTextureSet: CanvasDrawingTextureSet?
@@ -80,7 +80,7 @@ final class CanvasViewModel {
     private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
 
     /// A display link for realtime drawing
-    private var drawingDisplayLink = CanvasDrawingDisplayLink()
+    private var drawingDisplayLink = DrawingDisplayLink()
 
     private var renderer = CanvasRenderer()
 
@@ -158,22 +158,22 @@ final class CanvasViewModel {
 
     private func bindData() {
         // The canvas is updated every frame during drawing
-        drawingDisplayLink.canvasDrawingPublisher
+        drawingDisplayLink.updatePublisher
             .sink { [weak self] in
                 guard
-                    let singleCurveIterator = self?.singleCurveIterator,
+                    let drawingCurve = self?.drawingCurve,
                     let texture = self?.renderer.selectedTexture,
                     let selectedLayerId = self?.canvasState.selectedLayer?.id,
                     let commandBuffer = self?.canvasViewRendering?.commandBuffer
                 else { return }
 
                 self?.drawingTextureSet?.updateRealTimeDrawingTexture(
-                    singleCurveIterator: singleCurveIterator,
                     baseTexture: texture,
+                    drawingCurve: drawingCurve,
                     with: commandBuffer,
-                    onDrawingCompleted: {
+                    onDrawingCompleted: { resultTexture in
                         commandBuffer.addCompletedHandler { [weak self] _ in
-                            self?.completeDrawingProcess(texture: texture, for: selectedLayerId)
+                            self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
                         }
                     }
                 )
@@ -321,8 +321,8 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch screenTouchGesture.update(fingerStroke.touchArrayDictionary) {
         case .drawing:
-            if FingerSingleCurveIterator.shouldCreateInstance(singleCurveIterator: singleCurveIterator) {
-                singleCurveIterator = FingerSingleCurveIterator()
+            if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
+                drawingCurve = SmoothDrawingCurve()
                 undoStack?.setDrawingUndoObject()
             }
 
@@ -365,8 +365,8 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        if PencilSingleCurveIterator.shouldCreateInstance(actualTouches: actualTouches) {
-            singleCurveIterator = PencilSingleCurveIterator()
+        if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
+            drawingCurve = DefaultDrawingCurve()
             undoStack?.setDrawingUndoObject()
         }
 
@@ -559,7 +559,7 @@ extension CanvasViewModel {
             let diameter = canvasState.drawingToolDiameter
         else { return }
 
-        singleCurveIterator?.append(
+        drawingCurve?.append(
             points: screenTouchPoints.map {
                 .init(
                     matrix: transformer.matrix.inverted(flipY: true),
@@ -573,7 +573,7 @@ extension CanvasViewModel {
             touchPhase: screenTouchPoints.lastTouchPhase
         )
 
-        drawingDisplayLink.run(singleCurveIterator?.isCurrentlyDrawing ?? false)
+        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
     }
 
     private func transformCanvas() {
@@ -611,7 +611,7 @@ extension CanvasViewModel {
 
         fingerStroke.reset()
 
-        singleCurveIterator = nil
+        drawingCurve = nil
         transformer.resetMatrix()
 
         canvasViewRendering?.resetCommandBuffer()
@@ -619,7 +619,7 @@ extension CanvasViewModel {
         renderer.updateCanvasView(canvasViewRendering, with: commandBuffer)
     }
 
-    private func completeDrawingProcess(texture: MTLTexture, for selectedTextureId: UUID) {
+    private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
         textureLayerRepository.updateTexture(
             texture: texture,
             for: selectedTextureId
@@ -652,7 +652,7 @@ extension CanvasViewModel {
         fingerStroke.reset()
         pencilStroke.reset()
 
-        singleCurveIterator = nil
+        drawingCurve = nil
         transformer.resetMatrix()
     }
 

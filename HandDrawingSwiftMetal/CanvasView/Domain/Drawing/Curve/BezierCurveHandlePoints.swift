@@ -8,6 +8,6 @@
 import UIKit
 
 struct BezierCurveHandlePoints {
-    let handleA: CGPoint
-    let handleB: CGPoint
+    let startHandle: CGPoint
+    let endHandle: CGPoint
 }

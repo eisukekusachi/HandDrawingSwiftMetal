@@ -1,5 +1,5 @@
 //
-//  FingerSingleCurveIterator.swift
+//  SmoothDrawingCurve.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
@@ -8,12 +8,12 @@
 import Combine
 import UIKit
 
-/// An iterator for realtime finger drawing with `UITouch.Phase`
-final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveIterator {
+/// An iterator for creating a smooth curve in real-time using touch phases
+final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
     let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
-    var latestCurvePoints: [GrayscaleDotPoint] {
+    var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
         if isFirstCurveNeeded {
@@ -34,8 +34,8 @@ final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveI
     private var hasFirstCurveBeenCreated: Bool = false
 
     /// Returns true if `singleCurveIterator` is nil
-    static func shouldCreateInstance(singleCurveIterator: SingleCurveIterator?) -> Bool {
-        singleCurveIterator == nil
+    static func shouldCreateInstance(drawingCurve: DrawingCurve?) -> Bool {
+        drawingCurve == nil
     }
 
     func append(
@@ -56,10 +56,9 @@ final class FingerSingleCurveIterator: Iterator<GrayscaleDotPoint>, SingleCurveI
         touchPhase.send(.cancelled)
         hasFirstCurveBeenCreated = false
     }
-
 }
 
-extension FingerSingleCurveIterator {
+extension SmoothDrawingCurve {
 
     var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
@@ -90,5 +89,4 @@ extension FingerSingleCurveIterator {
             self.append(lastElement)
         }
     }
-
 }

@@ -1,5 +1,5 @@
 //
-//  PencilSingleCurveIteratorTests.swift
+//  DefaultDrawingCurveTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class PencilSingleCurveIteratorTests: XCTestCase {
+final class DefaultDrawingCurveTests: XCTestCase {
 
     func testIsDrawingFinished() {
-        let subject = PencilSingleCurveIterator()
+        let subject = DefaultDrawingCurve()
 
         subject.touchPhase.send(.began)
         XCTAssertFalse(subject.isDrawingFinished)
@@ -31,7 +31,7 @@ final class PencilSingleCurveIteratorTests: XCTestCase {
     }
 
     func testIsFirstCurveNeeded() {
-        let subject = PencilSingleCurveIterator()
+        let subject = DefaultDrawingCurve()
 
         subject.append([
             .generate(),
@@ -46,8 +46,7 @@ final class PencilSingleCurveIteratorTests: XCTestCase {
         XCTAssertTrue(subject.isFirstCurveNeeded)
 
         // The value of the first curve is retrieved only once
-        _ = subject.latestCurvePoints
+        _ = subject.currentCurvePoints
         XCTAssertFalse(subject.isFirstCurveNeeded)
     }
-
 }

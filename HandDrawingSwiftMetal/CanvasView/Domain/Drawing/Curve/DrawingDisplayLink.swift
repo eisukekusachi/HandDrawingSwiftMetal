@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingDisplayLink.swift
+//  DrawingDisplayLink.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/02/04.
@@ -8,16 +8,15 @@
 import UIKit
 import Combine
 
-
 /// A class that manages the displayLink for realtime drawing
-final class CanvasDrawingDisplayLink {
+final class DrawingDisplayLink {
 
-    // Requesting to draw a line on the canvas emits `Void`
-    var canvasDrawingPublisher: AnyPublisher<Void, Never> {
-        canvasDrawingSubject.eraseToAnyPublisher()
+    // Requesting to draw a curve on the canvas emits `Void`
+    var updatePublisher: AnyPublisher<Void, Never> {
+        updateSubject.eraseToAnyPublisher()
     }
 
-    private let canvasDrawingSubject = PassthroughSubject<Void, Never>()
+    private let updateSubject = PassthroughSubject<Void, Never>()
 
     private(set) var displayLink: CADisplayLink?
 
@@ -36,10 +35,9 @@ final class CanvasDrawingDisplayLink {
             updateCanvasWhileDrawing()
         }
     }
-
 }
 
-extension CanvasDrawingDisplayLink {
+extension DrawingDisplayLink {
     private func setupDisplayLink() {
         // Configure the display link for drawing
         displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
@@ -48,7 +46,6 @@ extension CanvasDrawingDisplayLink {
     }
 
     @objc private func updateCanvasWhileDrawing() {
-        canvasDrawingSubject.send(())
+        updateSubject.send(())
     }
-
 }

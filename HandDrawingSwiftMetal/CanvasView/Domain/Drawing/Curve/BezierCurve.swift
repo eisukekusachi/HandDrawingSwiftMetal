@@ -31,13 +31,13 @@ enum BezierCurve {
         )
 
         let duration = Int(round(
-            Calculate.getTotalLength(points: [pointA, handlePoints.handleA, handlePoints.handleB, pointB])
+            Calculate.getTotalLength(points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB])
         ))
 
         return Interpolator.makeCubicCurvePoints(
             movePoint: pointA,
-            controlPoint1: handlePoints.handleA,
-            controlPoint2: handlePoints.handleB,
+            controlPoint1: handlePoints.startHandle,
+            controlPoint2: handlePoints.endHandle,
             endPoint: pointB,
             duration: max(1, duration),
             shouldIncludeEndPoint: shouldIncludeEndPoint
@@ -73,13 +73,13 @@ enum BezierCurve {
         )
 
         let duration = Int(round(
-            Calculate.getTotalLength(points: [startPoint, handlePoints.handleA, handlePoints.handleB, endPoint])
+            Calculate.getTotalLength(points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint])
         ))
 
         return Interpolator.makeCubicCurvePoints(
             movePoint: startPoint,
-            controlPoint1: handlePoints.handleA,
-            controlPoint2: handlePoints.handleB,
+            controlPoint1: handlePoints.startHandle,
+            controlPoint2: handlePoints.endHandle,
             endPoint: endPoint,
             duration: max(1, duration),
             shouldIncludeEndPoint: shouldIncludeEndPoint
@@ -106,19 +106,18 @@ enum BezierCurve {
         )
 
         let duration = Int(round(
-            Calculate.getTotalLength(points: [pointB, handlePoints.handleA, handlePoints.handleB, pointC])
+            Calculate.getTotalLength(points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC])
         ))
 
         return Interpolator.makeCubicCurvePoints(
             movePoint: pointB,
-            controlPoint1: handlePoints.handleA,
-            controlPoint2: handlePoints.handleB,
+            controlPoint1: handlePoints.startHandle,
+            controlPoint2: handlePoints.endHandle,
             endPoint: pointC,
             duration: max(1, duration),
             shouldIncludeEndPoint: shouldIncludeEndPoint
         )
     }
-
 }
 
 extension BezierCurve {
@@ -154,11 +153,11 @@ extension BezierCurve {
         let handleB = Calculate.getResizedVector(vectorCA, length: handleLength)
 
         return .init(
-            handleA: .init(
+            startHandle: .init(
                 x: handleA.dx + pointA.x,
                 y: handleA.dy + pointA.y
             ),
-            handleB: .init(
+            endHandle: .init(
                 x: handleB.dx + pointB.x,
                 y: handleB.dy + pointB.y
             )
@@ -185,11 +184,11 @@ extension BezierCurve {
         let handleB = Calculate.getResizedVector(vectorCB, length: handleLength)
 
         return .init(
-            handleA: .init(
+            startHandle: .init(
                 x: handleA.dx + pointB.x,
                 y: handleA.dy + pointB.y
             ),
-            handleB: .init(
+            endHandle: .init(
                 x: handleB.dx + pointC.x,
                 y: handleB.dy + pointC.y
             )
@@ -221,17 +220,16 @@ extension BezierCurve {
         let handleB = Calculate.getResizedVector(vectorDB, length: handleLengthB)
 
         return .init(
-            handleA: .init(
+            startHandle: .init(
                 x: handleA.dx + startPoint.x,
                 y: handleA.dy + startPoint.y
             ),
-            handleB: .init(
+            endHandle: .init(
                 x: handleB.dx + endPoint.x,
                 y: handleB.dy + endPoint.y
             )
         )
     }
-
 }
 
 private extension CGVector {
@@ -239,5 +237,4 @@ private extension CGVector {
     init(origin: CGPoint, to destination: CGPoint) {
         self.init(dx: destination.x - origin.x, dy: destination.y - origin.y)
     }
-
 }

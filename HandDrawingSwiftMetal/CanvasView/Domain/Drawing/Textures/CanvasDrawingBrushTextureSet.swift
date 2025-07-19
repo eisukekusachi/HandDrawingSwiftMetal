@@ -56,23 +56,25 @@ extension CanvasDrawingBrushTextureSet {
     }
 
     func updateRealTimeDrawingTexture(
-        singleCurveIterator: SingleCurveIterator,
-        baseTexture: MTLTexture?,
+        baseTexture: MTLTexture,
+        drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
-        onDrawingCompleted: (() -> Void)?
+        onDrawingCompleted: ((MTLTexture) -> Void)?
     ) {
         updateRealTimeDrawingTexture(
-            singleCurveIterator: singleCurveIterator,
             baseTexture: baseTexture,
+            drawingCurve: drawingCurve,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
-        if singleCurveIterator.isDrawingFinished {
+        if drawingCurve.isDrawingFinished {
             drawCurrentTexture(
+                texture: realtimeDrawingTexture,
                 on: baseTexture,
                 with: commandBuffer
             )
-            onDrawingCompleted?()
+            onDrawingCompleted?(baseTexture)
         }
 
         realtimeDrawingTextureSubject.send(realtimeDrawingTexture)
@@ -93,15 +95,14 @@ extension CanvasDrawingBrushTextureSet {
 extension CanvasDrawingBrushTextureSet {
 
     private func updateRealTimeDrawingTexture(
-        singleCurveIterator: SingleCurveIterator,
-        baseTexture: MTLTexture?,
+        baseTexture: MTLTexture,
+        drawingCurve: DrawingCurve,
+        on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let baseTexture else { return }
-
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
-                points: singleCurveIterator.latestCurvePoints,
+                points: drawingCurve.currentCurvePoints,
                 alpha: blushColor.alpha,
                 textureSize: drawingTexture.size,
                 with: device
@@ -121,28 +122,27 @@ extension CanvasDrawingBrushTextureSet {
             texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: realtimeDrawingTexture,
+            on: texture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: realtimeDrawingTexture,
+            into: texture,
             with: commandBuffer
         )
     }
 
     private func drawCurrentTexture(
-        on texture: MTLTexture?,
+        texture sourceTexture: MTLTexture,
+        on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let texture else { return }
-
         renderer.drawTexture(
-            texture: realtimeDrawingTexture,
+            texture: sourceTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: texture,
+            on: destinationTexture,
             with: commandBuffer
         )
 

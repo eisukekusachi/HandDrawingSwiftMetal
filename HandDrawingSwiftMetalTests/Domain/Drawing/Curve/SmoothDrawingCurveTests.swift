@@ -1,5 +1,5 @@
 //
-//  FingerSingleCurveIteratorTests.swift
+//  SmoothDrawingCurveTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
@@ -8,10 +8,10 @@
 import XCTest
 @testable import HandDrawingSwiftMetal
 
-final class FingerSingleCurveIteratorTests: XCTestCase {
+final class SmoothDrawingCurveTests: XCTestCase {
 
     func testIsDrawingFinished() {
-        let subject = FingerSingleCurveIterator()
+        let subject = SmoothDrawingCurve()
 
         subject.touchPhase.send(.began)
         XCTAssertFalse(subject.isDrawingFinished)
@@ -31,7 +31,7 @@ final class FingerSingleCurveIteratorTests: XCTestCase {
     }
 
     func testIsFirstCurveNeeded() {
-        let subject = FingerSingleCurveIterator()
+        let subject = SmoothDrawingCurve()
 
         subject.append([
             .generate(),
@@ -46,12 +46,12 @@ final class FingerSingleCurveIteratorTests: XCTestCase {
         XCTAssertTrue(subject.isFirstCurveNeeded)
 
         // The value of the first curve is retrieved only once
-        _ = subject.latestCurvePoints
+        _ = subject.currentCurvePoints
         XCTAssertFalse(subject.isFirstCurveNeeded)
     }
 
     func testAppendToIterator() {
-        let subject = FingerSingleCurveIterator()
+        let subject = SmoothDrawingCurve()
 
         subject.append(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
         subject.append(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)
@@ -74,5 +74,4 @@ final class FingerSingleCurveIteratorTests: XCTestCase {
         /// The last point is added as it is
         XCTAssertEqual(subject.array[4].location, .init(x: 6, y: 6))
     }
-
 }

@@ -19,10 +19,10 @@ protocol CanvasDrawingTextureSet {
 
     /// Updates the realtime drawing texture by curve points from the given iterator
     func updateRealTimeDrawingTexture(
-        singleCurveIterator: SingleCurveIterator,
-        baseTexture: MTLTexture?,
+        baseTexture: MTLTexture,
+        drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
-        onDrawingCompleted: (() -> Void)?
+        onDrawingCompleted: ((MTLTexture) -> Void)?
     )
 
     /// Resets the realtime drawing textures

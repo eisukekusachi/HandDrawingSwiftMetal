@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingDisplayLinkTests.swift
+//  DrawingDisplayLinkTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/02/05.
@@ -9,18 +9,18 @@ import XCTest
 import Combine
 @testable import HandDrawingSwiftMetal
 
-final class CanvasDrawingDisplayLinkTests: XCTestCase {
+final class DrawingDisplayLinkTests: XCTestCase {
 
     var cancellables = Set<AnyCancellable>()
 
     /// Confirms that the displayLink is running and `canvasDrawingPublisher` emits `Void`
     func testEmitRequestDrawingOnCanvasPublisherWhenTouchingScreen() {
-        let subject = CanvasDrawingDisplayLink()
+        let subject = DrawingDisplayLink()
 
         let publisherExpectation = XCTestExpectation()
 
         // Confirm that `canvasDrawingPublisher` emits `Void`
-        subject.canvasDrawingPublisher
+        subject.updatePublisher
             .sink {
                 publisherExpectation.fulfill()
             }
@@ -35,12 +35,12 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
 
     /// Confirms that the displayLink stops and `canvasDrawingPublisher` emits `Void` once
     func testEmitRequestDrawingOnCanvasPublisherWhenFingerIsLifted() {
-        let subject = CanvasDrawingDisplayLink()
+        let subject = DrawingDisplayLink()
 
         let publisherExpectation = XCTestExpectation()
 
         // `canvasDrawingPublisher` emits `Void` to perform the final processing
-        subject.canvasDrawingPublisher
+        subject.updatePublisher
             .sink {
                 publisherExpectation.fulfill()
             }
@@ -52,5 +52,4 @@ final class CanvasDrawingDisplayLinkTests: XCTestCase {
 
         wait(for: [publisherExpectation], timeout: 1.0)
     }
-
 }
