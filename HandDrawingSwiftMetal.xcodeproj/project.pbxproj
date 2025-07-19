@@ -522,11 +522,13 @@
 		D42F40992B4402EC00B32707 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D44B52D12DB3ACA500EE213C /* DrawingTool */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
 				D42F409E2B44035A00B32707 /* IntSlider.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */,
 				D42F409C2B44033300B32707 /* SliderStyle.swift */,
+				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
 			);
@@ -742,6 +744,24 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		D47FD3E52E2B20C600F3F514 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
+				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D47FD3E62E2B20E800F3F514 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		D4837AEB2CC5EC3400BD25F5 /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
@@ -854,17 +874,13 @@
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */,
 				D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */,
-				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
-				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
-				D44B52D12DB3ACA500EE213C /* DrawingTool */,
-				D48A7DD029DAB81800D235B1 /* Toast.swift */,
-				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
-				D4E1ECE52752388E00D4A23D /* Assets.xcassets */,
+				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
+				D47FD3E52E2B20C600F3F514 /* Extensions */,
 				D42F40992B4402EC00B32707 /* Components */,
 				D4A60C712DA257B8008CBD20 /* CanvasView */,
 				D4513AAF2AF63A3C00CA4438 /* FileView */,
 				D46A30492BF858AD0057DB69 /* TextureLayerView */,
-				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
+				D47FD3E62E2B20E800F3F514 /* Resources */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
 			);
 			path = HandDrawingSwiftMetal;
