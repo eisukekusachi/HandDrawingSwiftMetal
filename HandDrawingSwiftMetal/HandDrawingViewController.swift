@@ -1,5 +1,5 @@
 //
-//  CanvasViewController.swift
+//  HandDrawingViewController.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2021/11/27.
@@ -9,9 +9,9 @@ import UIKit
 import SwiftUI
 import Combine
 
-class CanvasViewController: UIViewController {
+class HandDrawingViewController: UIViewController {
 
-    @IBOutlet private weak var contentView: CanvasContentView!
+    @IBOutlet private weak var contentView: HandDrawingContentView!
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
@@ -41,7 +41,7 @@ class CanvasViewController: UIViewController {
     }
 }
 
-extension CanvasViewController {
+extension HandDrawingViewController {
 
     private func bindData() {
 
@@ -97,7 +97,7 @@ extension CanvasViewController {
     }
 }
 
-extension CanvasViewController {
+extension HandDrawingViewController {
 
     private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
@@ -155,7 +155,7 @@ extension CanvasViewController {
 
 }
 
-extension CanvasViewController {
+extension HandDrawingViewController {
 
     private func saveImage() {
         if let image = contentView.canvasView.renderView.renderTexture?.uiImage {
@@ -172,7 +172,7 @@ extension CanvasViewController {
 
 }
 
-extension CanvasViewController {
+extension HandDrawingViewController {
 
     static func create(
         configuration: CanvasConfiguration = .init()

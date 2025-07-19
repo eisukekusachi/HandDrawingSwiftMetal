@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24093.9" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24057"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HandDrawingContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
                 <outlet property="blackColorButton" destination="dMS-qm-Xjc" id="I8s-nR-HYr"/>
                 <outlet property="brushDiameterSlider" destination="UxJ-dV-AbQ" id="bsG-sU-Tdc"/>
@@ -38,12 +38,12 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVg-Dj-hIn">
-                    <rect key="frame" x="16.000000000000007" y="59.333333333333329" width="113.66666666666669" height="34.333333333333329"/>
+                    <rect key="frame" x="16.000000000000007" y="118.33333333333333" width="113.66666666666669" height="34.333333333333329"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="Reset zoom"/>
                 </button>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P50-DK-emi">
-                    <rect key="frame" x="159.66666666666663" y="59" width="217.33333333333337" height="34.666666666666657"/>
+                    <rect key="frame" x="159.66666666666663" y="118.00000000000001" width="217.33333333333337" height="34.666666666666671"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ugs-EZ-K7D">
                             <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.666666666666664"/>
@@ -74,7 +74,7 @@
                     </subviews>
                 </stackView>
                 <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="s4f-db-5LA">
-                    <rect key="frame" x="-108" y="416.66666666666669" width="260" height="45"/>
+                    <rect key="frame" x="-106" y="429" width="256" height="44"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="256" id="6ok-UP-3hK"/>
                         <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="Qzm-ET-xdj"/>
@@ -83,7 +83,7 @@
                     </constraints>
                 </slider>
                 <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="UxJ-dV-AbQ">
-                    <rect key="frame" x="-108" y="416.66666666666669" width="260" height="45"/>
+                    <rect key="frame" x="-106" y="429" width="256" height="44"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="256" id="EjT-Zw-FHw"/>
                         <constraint firstAttribute="height" constant="44" id="JIs-6H-wzL"/>
@@ -92,7 +92,7 @@
                     </constraints>
                 </slider>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qtN-lB-os6">
-                    <rect key="frame" x="76" y="784.33333333333337" width="241" height="33.666666666666629"/>
+                    <rect key="frame" x="76" y="750.33333333333337" width="241" height="33.666666666666629"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dMS-qm-Xjc">
                             <rect key="frame" x="0.0" y="0.0" width="49.666666666666664" height="33.666666666666664"/>

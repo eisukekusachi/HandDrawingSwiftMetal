@@ -1,5 +1,5 @@
 //
-//  CanvasContentView.swift
+//  HandDrawingContentView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/03/09.
@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class CanvasContentView: UIView {
+final class HandDrawingContentView: UIView {
 
     @IBOutlet private(set) weak var canvasView: CanvasView!
 
@@ -53,7 +53,7 @@ final class CanvasContentView: UIView {
     }
 }
 
-extension CanvasContentView {
+extension HandDrawingContentView {
 
     private func addEvents() {
 
@@ -136,7 +136,7 @@ extension CanvasContentView {
     }
 }
 
-extension CanvasContentView {
+extension HandDrawingContentView {
 
     func setBlackBrushColor() {
         showSlider(.brush)
