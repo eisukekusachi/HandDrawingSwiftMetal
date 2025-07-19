@@ -1,5 +1,5 @@
 //
-//  CanvasInputDeviceStatus.swift
+//  InputDeviceStatus.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,13 +7,13 @@
 
 import Foundation
 
-final class CanvasInputDeviceStatus {
+final class InputDeviceStatus {
 
-    typealias T = CanvasInputDeviceType
+    typealias T = InputDeviceType
 
     private(set) var status: T = .undetermined
 
-    /// Update the status if it is not .pencil
+    /// Update the status if it is not `.pencil`
     @discardableResult
     func update(_ newStatus: T) -> T {
         if status != .pencil {
@@ -25,5 +25,4 @@ final class CanvasInputDeviceStatus {
     func reset() {
         status = .undetermined
     }
-
 }

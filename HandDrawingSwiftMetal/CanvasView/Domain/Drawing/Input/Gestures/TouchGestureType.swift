@@ -1,5 +1,5 @@
 //
-//  CanvasScreenTouchGestureType.swift
+//  TouchGestureType.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CanvasScreenTouchGestureType: Int {
+enum TouchGestureType: Int {
     /// The status is still undetermined
     case undetermined
 
@@ -16,21 +16,20 @@ enum CanvasScreenTouchGestureType: Int {
     case transforming
 
     init(from touchPointsDictionary: [TouchHashValue: [TouchPoint]]) {
-        var result: CanvasScreenTouchGestureType = .undetermined
+        var result: TouchGestureType = .undetermined
 
-        if let actionState = CanvasScreenTouchGestureType.isDrawingGesture(touchPointsDictionary) {
+        if let actionState = TouchGestureType.isDrawingGesture(touchPointsDictionary) {
             result = actionState
 
-        } else if let actionState = CanvasScreenTouchGestureType.isTransformingGesture(touchPointsDictionary) {
+        } else if let actionState = TouchGestureType.isTransformingGesture(touchPointsDictionary) {
             result = actionState
         }
 
         self = result
     }
-
 }
 
-extension CanvasScreenTouchGestureType {
+extension TouchGestureType {
 
     static let activatingDrawingCount: Int = 6
     static let activatingTransformingCount: Int = 2
@@ -52,5 +51,4 @@ extension CanvasScreenTouchGestureType {
         }
         return nil
     }
-
 }

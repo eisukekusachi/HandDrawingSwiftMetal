@@ -87,10 +87,10 @@ final class CanvasViewModel {
     private let transformer = CanvasTransformer()
 
     /// Manages input from pen and finger
-    private let inputDevice = CanvasInputDeviceStatus()
+    private let inputDevice = InputDeviceStatus()
 
     /// Manages on-screen gestures such as drag and pinch
-    private let screenTouchGesture = CanvasScreenTouchGestureStatus()
+    private let touchGestureStatus = TouchGestureStatus()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
@@ -313,7 +313,7 @@ extension CanvasViewModel {
         )
 
         // determine the gesture from the dictionary
-        switch screenTouchGesture.update(fingerStroke.touchArrayDictionary) {
+        switch touchGestureStatus.update(fingerStroke.touchArrayDictionary) {
         case .drawing:
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
@@ -641,7 +641,7 @@ extension CanvasViewModel {
 
     private func resetAllInputParameters() {
         inputDevice.reset()
-        screenTouchGesture.reset()
+        touchGestureStatus.reset()
 
         fingerStroke.reset()
         pencilStroke.reset()
