@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingEraserTextureSet.swift
+//  DrawingEraserTextureSet.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -9,12 +9,7 @@ import Combine
 import MetalKit
 
 /// A set of textures for realtime eraser drawing
-final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
-
-    var realtimeDrawingTexturePublisher: AnyPublisher<MTLTexture?, Never> {
-        realtimeDrawingTextureSubject.eraseToAnyPublisher()
-    }
-    private let realtimeDrawingTextureSubject = PassthroughSubject<MTLTexture?, Never>()
+final class DrawingEraserTextureSet: DrawingTextureSet {
 
     private var eraserAlpha: Int = 255
 
@@ -37,10 +32,9 @@ final class CanvasDrawingEraserTextureSet: CanvasDrawingTextureSet {
             with: device
         )
     }
-
 }
 
-extension CanvasDrawingEraserTextureSet {
+extension DrawingEraserTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
@@ -61,6 +55,7 @@ extension CanvasDrawingEraserTextureSet {
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
+        onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?
     ) {
         updateRealTimeDrawingTexture(
@@ -70,6 +65,8 @@ extension CanvasDrawingEraserTextureSet {
             with: commandBuffer
         )
 
+        onDrawing?(realtimeDrawingTexture)
+
         if drawingCurve.isDrawingFinished {
             drawCurrentTexture(
                 texture: realtimeDrawingTexture,
@@ -78,8 +75,6 @@ extension CanvasDrawingEraserTextureSet {
             )
             onDrawingCompleted?(baseTexture)
         }
-
-        realtimeDrawingTextureSubject.send(realtimeDrawingTexture)
     }
 
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
@@ -92,10 +87,9 @@ extension CanvasDrawingEraserTextureSet {
             with: commandBuffer
         )
     }
-
 }
 
-extension CanvasDrawingEraserTextureSet {
+extension DrawingEraserTextureSet {
 
     private func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
@@ -160,5 +154,4 @@ extension CanvasDrawingEraserTextureSet {
 
         clearTextures(with: commandBuffer)
     }
-
 }

@@ -73,11 +73,11 @@ final class CanvasViewModel {
     private var drawingCurve: DrawingCurve?
 
     /// A texture set for realtime drawing
-    private var drawingTextureSet: CanvasDrawingTextureSet?
+    private var drawingTextureSet: DrawingTextureSet?
     /// A brush texture set for realtime drawing
-    private let drawingBrushTextureSet = CanvasDrawingBrushTextureSet()
+    private let drawingBrushTextureSet = DrawingBrushTextureSet()
     /// An eraser texture set for realtime drawing
-    private let drawingEraserTextureSet = CanvasDrawingEraserTextureSet()
+    private let drawingEraserTextureSet = DrawingEraserTextureSet()
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -171,21 +171,15 @@ final class CanvasViewModel {
                     baseTexture: texture,
                     drawingCurve: drawingCurve,
                     with: commandBuffer,
+                    onDrawing: { [weak self] resultTexture in
+                        self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
+                    },
                     onDrawingCompleted: { resultTexture in
                         commandBuffer.addCompletedHandler { [weak self] _ in
                             self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
                         }
                     }
                 )
-            }
-            .store(in: &cancellables)
-
-        Publishers.Merge(
-            drawingBrushTextureSet.realtimeDrawingTexturePublisher,
-            drawingEraserTextureSet.realtimeDrawingTexturePublisher
-        )
-            .sink { [weak self] texture in
-                self?.updateCanvasView(realtimeDrawingTexture: texture)
             }
             .store(in: &cancellables)
 
@@ -203,7 +197,7 @@ final class CanvasViewModel {
         // Update the color of drawingBrushTextureSet when the brush color changes
         canvasState.brush.$color
             .sink { [weak self] color in
-                self?.drawingBrushTextureSet.setBlushColor(color)
+                self?.drawingBrushTextureSet.setBrushColor(color)
             }
             .store(in: &cancellables)
 

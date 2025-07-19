@@ -9,14 +9,7 @@ import Combine
 import MetalKit
 
 /// A set of textures for realtime brush drawing
-final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
-
-    var realtimeDrawingTexturePublisher: AnyPublisher<MTLTexture?, Never> {
-        realtimeDrawingTextureSubject.eraseToAnyPublisher()
-    }
-    private let realtimeDrawingTextureSubject = PassthroughSubject<MTLTexture?, Never>()
-
-    private var blushColor: UIColor = .black
+final class DrawingBrushTextureSet: DrawingTextureSet {
 
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
@@ -25,6 +18,8 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
     private var flippedTextureBuffers: MTLTextureBuffers!
 
     private let renderer: MTLRendering!
+
+    private var brushColor: UIColor = .black
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
@@ -36,10 +31,9 @@ final class CanvasDrawingBrushTextureSet: CanvasDrawingTextureSet {
             with: device
         )
     }
-
 }
 
-extension CanvasDrawingBrushTextureSet {
+extension DrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
@@ -51,14 +45,15 @@ extension CanvasDrawingBrushTextureSet {
         temporaryRenderCommandBuffer.commit()
     }
 
-    func setBlushColor(_ color: UIColor) {
-        blushColor = color
+    func setBrushColor(_ color: UIColor) {
+        brushColor = color
     }
 
     func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
+        onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?
     ) {
         updateRealTimeDrawingTexture(
@@ -68,6 +63,8 @@ extension CanvasDrawingBrushTextureSet {
             with: commandBuffer
         )
 
+        onDrawing?(realtimeDrawingTexture)
+
         if drawingCurve.isDrawingFinished {
             drawCurrentTexture(
                 texture: realtimeDrawingTexture,
@@ -76,8 +73,6 @@ extension CanvasDrawingBrushTextureSet {
             )
             onDrawingCompleted?(baseTexture)
         }
-
-        realtimeDrawingTextureSubject.send(realtimeDrawingTexture)
     }
 
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
@@ -89,10 +84,9 @@ extension CanvasDrawingBrushTextureSet {
             with: commandBuffer
         )
     }
-
 }
 
-extension CanvasDrawingBrushTextureSet {
+extension DrawingBrushTextureSet {
 
     private func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
@@ -103,7 +97,7 @@ extension CanvasDrawingBrushTextureSet {
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
-                alpha: blushColor.alpha,
+                alpha: brushColor.alpha,
                 textureSize: drawingTexture.size,
                 with: device
             ),
@@ -113,7 +107,7 @@ extension CanvasDrawingBrushTextureSet {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: blushColor.rgb,
+            color: brushColor.rgb,
             on: drawingTexture,
             with: commandBuffer
         )
@@ -148,5 +142,4 @@ extension CanvasDrawingBrushTextureSet {
 
         clearTextures(with: commandBuffer)
     }
-
 }

@@ -1,5 +1,5 @@
 //
-//  CanvasDrawingEraserTextureSetTests.swift
+//  DrawingEraserTextureSetTests.swift
 //  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/01/25.
@@ -11,7 +11,7 @@ import Combine
 
 final class CanvasDrawingEraserTextureSetTests: XCTestCase {
 
-    var subject: CanvasDrawingEraserTextureSet!
+    var subject: DrawingEraserTextureSet!
 
     var commandBuffer: MTLCommandBuffer!
     let device = MTLCreateSystemDefaultDevice()!
@@ -33,7 +33,7 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         commandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         commandBuffer.label = commandBufferLabel
 
-        subject = CanvasDrawingEraserTextureSet(renderer: renderer)
+        subject = DrawingEraserTextureSet(renderer: renderer)
         subject.initTextures(.init(width: 1, height: 1))
         renderer.callHistory.removeAll()
 
@@ -93,6 +93,9 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
                 baseTexture: baseTexture,
                 drawingCurve: drawingCurve,
                 with: commandBuffer,
+                onDrawing: { _ in
+
+                },
                 onDrawingCompleted: { _ in
                     didCallDrawingCompleted = true
                 }
@@ -104,5 +107,4 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
             XCTAssertEqual(didCallDrawingCompleted, testCase.value.isDrawingFinished)
         }
     }
-
 }
