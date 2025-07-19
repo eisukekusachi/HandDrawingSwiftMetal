@@ -11,40 +11,39 @@ import UIKit
 final class FingerStroke {
 
     /// A dictionary that manages points input from multiple fingers
-    private(set) var touchArrayDictionary: [TouchHashValue: [TouchPoint]] = [:]
+    private(set) var touchHistories: TouchHistoriesOnScreen = [:]
 
-    /// A key currently in use in the finger touch dictionary
-    private(set) var activeDictionaryKey: TouchHashValue?
+    /// A ID currently in use in the finger touch dictionary
+    private(set) var activeTouchID: TouchID?
 
     /// A variable used to get elements from the array starting from the next element after this point
     private(set) var activeLatestTouchPoint: TouchPoint?
 
     convenience init(
-        touchArrayDictionary: [TouchHashValue: [TouchPoint]],
-        activeDictionaryKey: TouchHashValue? = nil,
+        touchHistories: TouchHistoriesOnScreen,
+        activeTouchID: TouchID? = nil,
         activeLatestTouchPoint: TouchPoint? = nil
     ) {
         self.init()
-        self.touchArrayDictionary = touchArrayDictionary
-        self.activeDictionaryKey = activeDictionaryKey
+        self.touchHistories = touchHistories
+        self.activeTouchID = activeTouchID
         self.activeLatestTouchPoint = activeLatestTouchPoint
     }
-
 }
 
 extension FingerStroke {
 
     var isAllFingersOnScreen: Bool {
-        !touchArrayDictionary.keys.contains { key in
+        !touchHistories.keys.contains { key in
             // If the last element of the array is `ended` or `cancelled`, it means that a finger has been lifted.
-            UITouch.isTouchCompleted(touchArrayDictionary[key]?.last?.phase ?? .cancelled)
+            UITouch.isTouchCompleted(touchHistories[key]?.last?.phase ?? .cancelled)
         }
     }
 
     var latestTouchPoints: [TouchPoint] {
         guard
-            let activeDictionaryKey,
-            let touchArray = touchArrayDictionary[activeDictionaryKey]
+            let activeTouchID,
+            let touchArray = touchHistories[activeTouchID]
         else { return [] }
 
         var latestTouchArray: [TouchPoint] = []
@@ -67,38 +66,37 @@ extension FingerStroke {
         // `touchArrayDictionary` should contain only one element, so the first key is simply set.
         guard
             // The first element of the sorted key array in the Dictionary is set as the active key.
-            let firstKey = touchArrayDictionary.keys.sorted().first,
-            activeDictionaryKey == nil
+            let firstKey = touchHistories.keys.sorted().first,
+            activeTouchID == nil
         else { return }
 
-        activeDictionaryKey = firstKey
+        activeTouchID = firstKey
     }
 
-    func appendTouchPointToDictionary(_ touchPoints: [TouchHashValue: TouchPoint]) {
-        touchPoints.keys.forEach { key in
-            if !touchArrayDictionary.keys.contains(key) {
-                touchArrayDictionary[key] = []
+    func appendTouchPointToDictionary(_ touches: TouchesOnScreen) {
+        touches.keys.forEach { key in
+            if !touchHistories.keys.contains(key) {
+                touchHistories[key] = []
             }
-            if let value = touchPoints[key] {
-                touchArrayDictionary[key]?.append(value)
+            if let value = touches[key] {
+                touchHistories[key]?.append(value)
             }
         }
     }
 
     func removeEndedTouchArrayFromDictionary() {
-        touchArrayDictionary.keys
+        touchHistories.keys
             .filter {
-                UITouch.isTouchCompleted(touchArrayDictionary[$0]?.lastTouchPhase ?? .cancelled)
+                UITouch.isTouchCompleted(touchHistories[$0]?.lastTouchPhase ?? .cancelled)
             }
             .forEach {
-                touchArrayDictionary.removeValue(forKey: $0)
+                touchHistories.removeValue(forKey: $0)
             }
     }
 
     func reset() {
-        touchArrayDictionary = [:]
-        activeDictionaryKey = nil
+        touchHistories = [:]
+        activeTouchID = nil
         activeLatestTouchPoint = nil
     }
-
 }

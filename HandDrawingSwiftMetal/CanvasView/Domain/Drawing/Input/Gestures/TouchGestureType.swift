@@ -15,13 +15,13 @@ enum TouchGestureType: Int {
 
     case transforming
 
-    init(from touchPointsDictionary: [TouchHashValue: [TouchPoint]]) {
+    init(from touchHistories: TouchHistoriesOnScreen) {
         var result: TouchGestureType = .undetermined
 
-        if let actionState = TouchGestureType.isDrawingGesture(touchPointsDictionary) {
+        if let actionState = TouchGestureType.isDrawingGesture(touchHistories) {
             result = actionState
 
-        } else if let actionState = TouchGestureType.isTransformingGesture(touchPointsDictionary) {
+        } else if let actionState = TouchGestureType.isTransformingGesture(touchHistories) {
             result = actionState
         }
 
@@ -34,19 +34,19 @@ extension TouchGestureType {
     static let activatingDrawingCount: Int = 6
     static let activatingTransformingCount: Int = 2
 
-    static func isDrawingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
-        if touchPointsDictionary.count != 1 { return nil }
+    static func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> Self? {
+        if touchHistories.count != 1 { return nil }
 
-        if let count = touchPointsDictionary.first?.count, count > activatingDrawingCount {
+        if let count = touchHistories.first?.count, count > activatingDrawingCount {
             return .drawing
         }
         return nil
     }
-    static func isTransformingGesture(_ touchPointsDictionary: [TouchHashValue: [TouchPoint]]) -> Self? {
-        if touchPointsDictionary.count != 2 { return nil }
+    static func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> Self? {
+        if touchHistories.count != 2 { return nil }
 
-        if let countA = touchPointsDictionary.first?.count, countA > activatingTransformingCount,
-           let countB = touchPointsDictionary.last?.count, countB > activatingTransformingCount {
+        if let countA = touchHistories.first?.count, countA > activatingTransformingCount,
+           let countB = touchHistories.last?.count, countB > activatingTransformingCount {
             return .transforming
         }
         return nil

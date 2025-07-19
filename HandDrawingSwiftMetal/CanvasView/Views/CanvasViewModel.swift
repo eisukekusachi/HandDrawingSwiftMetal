@@ -313,7 +313,7 @@ extension CanvasViewModel {
         )
 
         // determine the gesture from the dictionary
-        switch touchGestureStatus.update(fingerStroke.touchArrayDictionary) {
+        switch touchGestureStatus.update(fingerStroke.touchHistories) {
         case .drawing:
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
@@ -574,7 +574,7 @@ extension CanvasViewModel {
         guard let commandBuffer = canvasViewRendering?.commandBuffer else { return }
 
         transformer.initTransformingIfNeeded(
-            fingerStroke.touchArrayDictionary
+            fingerStroke.touchHistories
         )
 
         if fingerStroke.isAllFingersOnScreen {
@@ -583,7 +583,7 @@ extension CanvasViewModel {
                     x: renderer.frameSize.width * 0.5,
                     y: renderer.frameSize.height * 0.5
                 ),
-                fingerStroke.touchArrayDictionary
+                touchHistories: fingerStroke.touchHistories
             )
         } else {
             transformer.finishTransforming()

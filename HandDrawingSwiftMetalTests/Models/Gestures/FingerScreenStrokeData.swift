@@ -12,7 +12,7 @@ final class FingerStrokeTests: XCTestCase {
     /// Confirms finger input
     func testLatestTouchPoints() {
         let subject = FingerStroke(
-            touchArrayDictionary:[
+            touchHistories: [
                 1: [
                     .generate(location: .init(x: 0, y: 0), phase: .began),
                     .generate(location: .init(x: 1, y: 1), phase: .moved)
@@ -53,14 +53,14 @@ final class FingerStrokeTests: XCTestCase {
 
         // If the phase is ended, the element is removed from the dictionary
         subject.removeEndedTouchArrayFromDictionary()
-        XCTAssertFalse(subject.touchArrayDictionary.keys.contains(0))
-        XCTAssertTrue(subject.touchArrayDictionary.keys.contains(1))
+        XCTAssertFalse(subject.touchHistories.keys.contains(0))
+        XCTAssertTrue(subject.touchHistories.keys.contains(1))
     }
 
     /// Confirms that all fingers are on the screen
     func testIsAllFingersOnScreen() {
         struct Condition {
-            let fingers: [TouchHashValue: [TouchPoint]]
+            let touchHistories: TouchHistoriesOnScreen
         }
         struct Expectation {
             let result: Bool
@@ -69,7 +69,7 @@ final class FingerStrokeTests: XCTestCase {
         let testCases: [(condition: Condition, expectation: Expectation)] = [
             (
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began)
                         ],
@@ -82,7 +82,7 @@ final class FingerStrokeTests: XCTestCase {
             ),
             (
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved)
@@ -96,7 +96,7 @@ final class FingerStrokeTests: XCTestCase {
             ),
             (
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved)
@@ -112,7 +112,7 @@ final class FingerStrokeTests: XCTestCase {
             (
                 // When the last element of the dictionary array is ‘ended’, it will be false.
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved),
@@ -129,7 +129,7 @@ final class FingerStrokeTests: XCTestCase {
             (
                 // When the last element of the dictionary array is ‘cancelled’, it will be false.
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved),
@@ -146,7 +146,7 @@ final class FingerStrokeTests: XCTestCase {
             (
                 // This case does not occur, but if the last element of the dictionary array is not ‘cancelled’, it will be true.
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved),
@@ -164,7 +164,7 @@ final class FingerStrokeTests: XCTestCase {
             (
                 // This case does not occur, but if the last element of the dictionary array is not ‘ended’, it will be true.
                 condition: .init(
-                    fingers: [
+                    touchHistories: [
                         0: [
                             .generate(phase: .began),
                             .generate(phase: .moved),
@@ -186,7 +186,7 @@ final class FingerStrokeTests: XCTestCase {
             let expectation = testCase.expectation
 
             let subject = FingerStroke(
-                touchArrayDictionary: condition.fingers
+                touchHistories: condition.touchHistories
             )
 
             XCTAssertEqual(subject.isAllFingersOnScreen, expectation.result)
@@ -194,7 +194,7 @@ final class FingerStrokeTests: XCTestCase {
     }
 
     func testUpdateDictionaryKeyIfKeyIsNil() {
-        let dictionary: [TouchHashValue: [TouchPoint]] =
+        let touchHistories: TouchHistoriesOnScreen =
         [
             2: [
                 .generate(location: .init(x: 0, y: 0)),
@@ -210,7 +210,7 @@ final class FingerStrokeTests: XCTestCase {
             ]
         ]
 
-        let subject = FingerStroke(touchArrayDictionary: dictionary)
+        let subject = FingerStroke(touchHistories: touchHistories)
 
         subject.setActiveDictionaryKeyIfNil()
 
@@ -220,7 +220,7 @@ final class FingerStrokeTests: XCTestCase {
 
     func testReset() {
         let subject = FingerStroke(
-            touchArrayDictionary: [
+            touchHistories: [
                 1: [
                     .generate(location: .init(x: 0, y: 0)),
                     .generate(location: .init(x: 1, y: 1))
@@ -233,15 +233,14 @@ final class FingerStrokeTests: XCTestCase {
             activeLatestTouchPoint: .generate(location: .init(x: 0, y: 0))
         )
 
-        XCTAssertFalse(subject.touchArrayDictionary.isEmpty)
+        XCTAssertFalse(subject.touchHistories.isEmpty)
         XCTAssertNotNil(subject.activeDictionaryKey)
         XCTAssertNotNil(subject.activeLatestTouchPoint)
 
         subject.reset()
 
-        XCTAssertTrue(subject.touchArrayDictionary.isEmpty)
+        XCTAssertTrue(subject.touchHistories.isEmpty)
         XCTAssertNil(subject.activeDictionaryKey)
         XCTAssertNil(subject.activeLatestTouchPoint)
     }
-
 }

@@ -12,9 +12,9 @@ final class TouchGestureStatus {
     private(set) var status: TouchGestureType = .undetermined
 
     func update(
-        _ touchArrayDictionary: [TouchHashValue: [TouchPoint]]
+        _ touchHistories: TouchHistoriesOnScreen
     ) -> TouchGestureType {
-        update(.init(from: touchArrayDictionary))
+        update(.init(from: touchHistories))
     }
 
     /// Update the status if the status is not yet determined.

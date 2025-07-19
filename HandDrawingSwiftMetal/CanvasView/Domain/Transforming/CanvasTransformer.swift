@@ -22,8 +22,8 @@ final class CanvasTransformer {
 
     private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    private var keyA: TouchHashValue?
-    private var keyB: TouchHashValue?
+    private var keyA: TouchID?
+    private var keyB: TouchID?
     private var firstTouchPointA: CGPoint?
     private var firstTouchPointB: CGPoint?
 
@@ -35,14 +35,14 @@ extension CanvasTransformer {
         keyA != nil && keyB != nil
     }
 
-    func initTransformingIfNeeded(_ dictionary: [TouchHashValue: [TouchPoint]]) {
+    func initTransformingIfNeeded(_ touchHistories: TouchHistoriesOnScreen) {
         guard
             !isKeysInitialized,
-            dictionary.count == 2,
-            let keyA = dictionary.keys.sorted().first,
-            let keyB = dictionary.keys.sorted().last,
-            let pointA = dictionary[keyA]?.first?.location,
-            let pointB = dictionary[keyB]?.first?.location
+            touchHistories.count == 2,
+            let keyA = touchHistories.keys.sorted().first,
+            let keyB = touchHistories.keys.sorted().last,
+            let pointA = touchHistories[keyA]?.first?.location,
+            let pointB = touchHistories[keyB]?.first?.location
         else { return }
 
         self.keyA = keyA
@@ -51,15 +51,15 @@ extension CanvasTransformer {
         self.firstTouchPointB = pointB
     }
 
-    func transformCanvas(screenCenter: CGPoint, _ dictionary: [TouchHashValue: [TouchPoint]]) {
+    func transformCanvas(screenCenter: CGPoint, touchHistories: TouchHistoriesOnScreen) {
         guard
-            dictionary.count == 2,
+            touchHistories.count == 2,
             let keyA,
             let keyB,
             let firstTouchPointA,
             let firstTouchPointB,
-            let lastTouchPointA = dictionary[keyA]?.last?.location,
-            let lastTouchPointB = dictionary[keyB]?.last?.location,
+            let lastTouchPointA = touchHistories[keyA]?.last?.location,
+            let lastTouchPointB = touchHistories[keyB]?.last?.location,
             let newMatrix = CGAffineTransform.makeMatrix(
                 center: screenCenter,
                 pointsA: (firstTouchPointA, lastTouchPointA),
