@@ -46,7 +46,7 @@ final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<Void, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -100,7 +100,7 @@ final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<Void, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -289,7 +289,7 @@ extension CanvasViewModel {
 
         undoStack?.initialize(textureSize)
 
-        canvasViewSetupCompletedSubject.send(())
+        canvasViewSetupCompletedSubject.send(configuration)
         activityIndicatorSubject.send(false)
     }
 }

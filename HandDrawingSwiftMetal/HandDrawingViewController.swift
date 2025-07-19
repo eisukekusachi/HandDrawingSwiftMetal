@@ -43,6 +43,13 @@ extension HandDrawingViewController {
 
     private func bindData() {
 
+        contentView.canvasView.canvasViewSetupCompleted
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] configuration in
+                self?.contentView.setup(configuration)
+            }
+            .store(in: &cancellables)
+
         contentView.canvasView.activityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)

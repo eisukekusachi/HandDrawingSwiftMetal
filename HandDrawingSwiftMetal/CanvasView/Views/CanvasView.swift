@@ -29,6 +29,11 @@ class CanvasView: UIView {
         toastSubject.eraseToAnyPublisher()
     }
 
+    /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
+    var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
+        canvasViewSetupCompletedSubject.eraseToAnyPublisher()
+    }
+
     var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
         undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
@@ -55,6 +60,8 @@ class CanvasView: UIView {
     private let alertSubject = PassthroughSubject<Error, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
+
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
     private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -150,6 +157,12 @@ extension CanvasView {
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
                 self?.canvasViewModel.updateCanvasView()
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.canvasViewSetupCompleted
+            .sink { [weak self] value in
+                self?.canvasViewSetupCompletedSubject.send(value)
             }
             .store(in: &cancellables)
 

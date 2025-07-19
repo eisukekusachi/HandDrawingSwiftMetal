@@ -49,7 +49,9 @@ final class HandDrawingContentView: UIView {
 
     private func commonInit() {
         addEvents()
-        setup()
+
+        brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+        eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
 }
 
@@ -112,23 +114,6 @@ extension HandDrawingContentView {
             self?.canvasView.setEraserDiameter(slider.value)
         }, for: .valueChanged)
     }
-    private func setup() {
-        setBlackBrushColor()
-
-        brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-        eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        brushDiameterSlider.setValue(
-            DrawingBrushToolState.diameterFloatValue(canvasView.brushDiameter),
-            animated: false
-        )
-        eraserDiameterSlider.setValue(
-            DrawingEraserToolState.diameterFloatValue(canvasView.eraserDiameter),
-            animated: false
-        )
-
-        backgroundColor = .white
-    }
 
     private func showSlider(_ tool: DrawingToolType) {
         brushDiameterSlider.isHidden = tool != .brush
@@ -137,6 +122,25 @@ extension HandDrawingContentView {
 }
 
 extension HandDrawingContentView {
+
+    func setup(_ configuration: CanvasConfiguration) {
+
+        brushDiameterSlider.setValue(
+            DrawingBrushToolState.diameterFloatValue(configuration.brushDiameter),
+            animated: false
+        )
+        eraserDiameterSlider.setValue(
+            DrawingEraserToolState.diameterFloatValue(configuration.eraserDiameter),
+            animated: false
+        )
+
+        canvasView.setBrushColor(configuration.brushColor)
+        canvasView.setDrawingTool(configuration.drawingTool)
+
+        showSlider(configuration.drawingTool)
+
+        backgroundColor = .white
+    }
 
     func setBlackBrushColor() {
         showSlider(.brush)
