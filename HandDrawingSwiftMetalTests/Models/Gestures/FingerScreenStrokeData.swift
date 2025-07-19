@@ -28,7 +28,7 @@ final class FingerStrokeTests: XCTestCase {
 
         // When `activeDictionaryKey` is set, the values with `activeDictionaryKey` are returned.
         subject.setActiveDictionaryKeyIfNil()
-        XCTAssertEqual(subject.activeDictionaryKey, 0)
+        XCTAssertEqual(subject.activeTouchID, 0)
         XCTAssertEqual(
             subject.latestTouchPoints.map { $0.location },
             [
@@ -215,7 +215,7 @@ final class FingerStrokeTests: XCTestCase {
         subject.setActiveDictionaryKeyIfNil()
 
         // After sorting by key, the first element is set as `activeDictionaryKey`
-        XCTAssertEqual(subject.activeDictionaryKey, 0)
+        XCTAssertEqual(subject.activeTouchID, 0)
     }
 
     func testReset() {
@@ -229,18 +229,18 @@ final class FingerStrokeTests: XCTestCase {
                     .generate(location: .init(x: 0, y: 0))
                 ]
             ],
-            activeDictionaryKey: 0,
+            activeTouchID: 0,
             activeLatestTouchPoint: .generate(location: .init(x: 0, y: 0))
         )
 
         XCTAssertFalse(subject.touchHistories.isEmpty)
-        XCTAssertNotNil(subject.activeDictionaryKey)
+        XCTAssertNotNil(subject.activeTouchID)
         XCTAssertNotNil(subject.activeLatestTouchPoint)
 
         subject.reset()
 
         XCTAssertTrue(subject.touchHistories.isEmpty)
-        XCTAssertNil(subject.activeDictionaryKey)
+        XCTAssertNil(subject.activeTouchID)
         XCTAssertNil(subject.activeLatestTouchPoint)
     }
 }
