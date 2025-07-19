@@ -10,10 +10,8 @@ import UIKit
 
 class CanvasView: UIView {
 
-    let displayView = CanvasDisplayView()
-
-    var textureLayerConfiguration: TextureLayerConfiguration {
-        canvasViewModel.textureLayerConfiguration
+    var displayTexture: MTLTexture? {
+        displayView.displayTexture
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
@@ -45,6 +43,12 @@ class CanvasView: UIView {
     var eraserDiameter: Int {
         canvasViewModel.canvasState.eraser.diameter
     }
+
+    var textureLayerConfiguration: TextureLayerConfiguration {
+        canvasViewModel.textureLayerConfiguration
+    }
+
+    private let displayView = CanvasDisplayView()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
