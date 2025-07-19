@@ -73,7 +73,7 @@ extension DrawingEraserTextureSet {
                 on: baseTexture,
                 with: commandBuffer
             )
-            onDrawingCompleted?(baseTexture)
+            onDrawingCompleted?(realtimeDrawingTexture)
         }
     }
 

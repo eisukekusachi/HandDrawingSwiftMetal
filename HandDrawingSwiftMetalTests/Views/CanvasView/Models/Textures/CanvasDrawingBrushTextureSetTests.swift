@@ -87,24 +87,30 @@ final class DrawingBrushTextureSetTests: XCTestCase {
 
             iterator.touchPhase.send(testCase.key.touchPhase)
 
-            var didCallDrawingCompleted = false
+            var didCallDrawingTexture: MTLTexture?
+            var didCallDrawingCompletedTexture: MTLTexture?
 
             subject.updateRealTimeDrawingTexture(
                 baseTexture: baseTexture,
                 drawingCurve: iterator,
                 with: commandBuffer,
-                onDrawing: { _ in
-
+                onDrawing: { resultTexture in
+                    didCallDrawingTexture = resultTexture
                 },
-                onDrawingCompleted: { _ in
-                    didCallDrawingCompleted = true
+                onDrawingCompleted: { resultTexture in
+                    didCallDrawingCompletedTexture = resultTexture
                 }
             )
+
 
             XCTAssertEqual(renderer.callHistory, testCase.value.result)
             renderer.callHistory.removeAll()
 
-            XCTAssertEqual(didCallDrawingCompleted, testCase.value.isDrawingFinished)
+            /// The texture is sent while drawing
+            XCTAssertEqual(didCallDrawingTexture?.label, realtimeDrawingTextureLabel)
+
+            /// The texture is sent when the drawing is completed
+            XCTAssertEqual(didCallDrawingCompletedTexture?.label, testCase.value.isDrawingFinished ? realtimeDrawingTextureLabel : nil)
         }
     }
 }
