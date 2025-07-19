@@ -7,6 +7,11 @@
 
 import UIKit
 
+enum StorageType {
+    case disk
+    case memory
+}
+
 struct CanvasConfiguration {
 
     var projectName: String = Calendar.currentDate
@@ -29,6 +34,12 @@ struct CanvasConfiguration {
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     var baseBackgroundColor: UIColor = UIColor(230, 230, 230)
+
+    /// For the canvas’s textureLayerRepository type: if `.disk` is selected, Core Data is automatically created and textures are persisted
+    var textureLayerRepository: StorageType = .disk
+
+    /// For the repository type used to store undo textures. even if `.disk` is selected, it only uses disk storage temporarily and textures are not persisted.
+    var undoTextureRepository: StorageType? = .disk
 }
 
 extension CanvasConfiguration {

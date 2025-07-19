@@ -53,13 +53,15 @@ final class CanvasViewModel {
     var textureLayerConfiguration: TextureLayerConfiguration {
         .init(
             canvasState: canvasState,
-            textureLayerRepository: textureLayerRepository,
+            textureLayerRepository: self.dependencies.textureLayerRepository,
             undoStack: undoStack
         )
     }
 
     /// A rendering target
     private var displayView: CanvasDisplayable?
+
+    private var dependencies: CanvasViewDependencies!
 
     /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
@@ -102,12 +104,6 @@ final class CanvasViewModel {
 
     private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A repository for loading and saving local files
-    private var localFileRepository: LocalFileRepository!
-
-    /// A repository for managing texture layers
-    private var textureLayerRepository: TextureLayerRepository!
-
     private var undoStack: UndoStack? = nil
 
     private var cancellables = Set<AnyCancellable>()
@@ -119,29 +115,26 @@ final class CanvasViewModel {
     }
 
     func initialize(
-        textureLayerRepository: TextureLayerRepository,
-        undoTextureRepository: TextureRepository?,
-        localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository,
-        displayView: CanvasDisplayable,
+        dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
+        defaultTextureSize: CGSize,
+        displayView: CanvasDisplayable
     ) {
-        self.textureLayerRepository = textureLayerRepository
+        self.dependencies = dependencies
 
         self.renderer.initialize(
             configuration: configuration
         )
 
-        self.localFileRepository = localFileRepository
-
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
+        if self.dependencies.textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }
 
         // If `undoTextureRepository` is used, undo functionality is enabled
-        if let undoTextureRepository {
+        if let undoTextureRepository = self.dependencies.undoTextureRepository {
+            let textureLayerRepository = self.dependencies.textureLayerRepository
             undoStack = .init(
                 canvasState: canvasState,
                 textureLayerRepository: textureLayerRepository,
@@ -252,7 +245,7 @@ extension CanvasViewModel {
 
     func initialize(configuration: CanvasConfiguration) {
         // Initialize the texture repository
-        textureLayerRepository.initializeStorage(configuration: configuration)
+        dependencies.textureLayerRepository.initializeStorage(configuration: configuration)
             .handleEvents(
                 receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
                 receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
@@ -278,6 +271,8 @@ extension CanvasViewModel {
             let textureSize = configuration.textureSize,
             let commandBuffer = displayView?.commandBuffer
         else { return }
+
+        let textureLayerRepository = dependencies.textureLayerRepository
 
         canvasState.setData(configuration)
 
@@ -416,17 +411,23 @@ extension CanvasViewModel {
     func loadFile(zipFileURL: URL) {
         /// Create the working space
         do {
-            try localFileRepository.createWorkingDirectory()
+            try dependencies.localFileRepository.createWorkingDirectory()
         }
         catch(let error) {
             alertSubject.send(error)
         }
 
         /// Unzip into the working space
-        localFileRepository.unzipToWorkingDirectory(
+        dependencies.localFileRepository.unzipToWorkingDirectory(
             from: zipFileURL
         )
-        .flatMap { workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
+        .flatMap { [weak self] workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
+            guard let self else {
+                return Fail(
+                    error: CanvasViewModelError.invalidValue("failed to unwrap")
+                ).eraseToAnyPublisher()
+            }
+
             do {
                 let entity: CanvasEntity = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
@@ -436,7 +437,7 @@ extension CanvasViewModel {
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                return self.textureLayerRepository.restoreStorage(
+                return self.dependencies.textureLayerRepository.restoreStorage(
                     from: workingDirectoryURL,
                     with: configuration
                )
@@ -454,7 +455,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertSubject.send(error)
             }
             /// Remove the working space
-            self?.localFileRepository.removeWorkingDirectory()
+            self?.dependencies.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: { [weak self] configuration in
             Task { @MainActor in
@@ -484,13 +485,13 @@ extension CanvasViewModel {
 
         /// Create the working space
         do {
-            try localFileRepository.createWorkingDirectory()
+            try dependencies.localFileRepository.createWorkingDirectory()
         }
         catch(let error) {
             alertSubject.send(error)
         }
 
-        textureLayerRepository.copyTextures(
+        dependencies.textureLayerRepository.copyTextures(
             uuids: canvasState.layers.map { $0.id }
         )
         .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
@@ -502,11 +503,11 @@ extension CanvasViewModel {
 
             return Publishers.CombineLatest(
                 /// Save the thumbnail to the working space
-                self.localFileRepository.saveToWorkingDirectory(
+                self.dependencies.localFileRepository.saveToWorkingDirectory(
                     namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
                 ),
                 /// Save the textures to the working space
-                self.localFileRepository.saveAllToWorkingDirectory(
+                self.dependencies.localFileRepository.saveAllToWorkingDirectory(
                     namedItems: identifiedTextures.map {
                         .init(name: $0.uuid.uuidString, item: $0)
                     }
@@ -517,7 +518,7 @@ extension CanvasViewModel {
         }
         .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
             /// Save canvas the data to the working space
-            self?.localFileRepository.saveToWorkingDirectory(
+            self?.dependencies.localFileRepository.saveToWorkingDirectory(
                 namedItem: .init(
                     name: CanvasEntity.jsonFileName,
                     item: entity
@@ -528,7 +529,7 @@ extension CanvasViewModel {
         }
         .tryMap { [weak self] result in
             /// Archive the working space as a ZIP file
-            try self?.localFileRepository.zipWorkingDirectory(
+            try self?.dependencies.localFileRepository.zipWorkingDirectory(
                 to: zipFileURL
             )
         }
@@ -542,7 +543,7 @@ extension CanvasViewModel {
             case .failure(let error): self?.alertSubject.send(error)
             }
             /// Remove the working space
-            self?.localFileRepository.removeWorkingDirectory()
+            self?.dependencies.localFileRepository.removeWorkingDirectory()
 
         }, receiveValue: {})
         .store(in: &cancellables)
@@ -618,7 +619,7 @@ extension CanvasViewModel {
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
-        textureLayerRepository.updateTexture(
+        dependencies.textureLayerRepository.updateTexture(
             texture: texture,
             for: selectedTextureId
         )
@@ -661,7 +662,7 @@ extension CanvasViewModel {
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureLayerRepository: textureLayerRepository,
+            textureLayerRepository: dependencies.textureLayerRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()

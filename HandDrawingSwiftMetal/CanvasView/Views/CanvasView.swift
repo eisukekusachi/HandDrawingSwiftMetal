@@ -80,15 +80,17 @@ class CanvasView: UIView {
     ) {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
+
         canvasViewModel.initialize(
-            textureLayerRepository: TextureLayerDocumentsDirectorySingletonRepository.shared,
-            undoTextureRepository: TextureUndoDocumentsDirectorySingletonRepository.shared,
-            displayView: displayView,
+            dependencies: .init(
+                configuration: configuration
+            ),
             configuration: configuration,
             defaultTextureSize: .init(
                 width: size.width * scale,
                 height: size.height * scale
-            )
+            ),
+            displayView: displayView
         )
     }
 

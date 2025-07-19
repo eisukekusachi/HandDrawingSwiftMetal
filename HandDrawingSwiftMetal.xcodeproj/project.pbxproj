@@ -121,6 +121,7 @@
 		D469A8872C56430D00D10575 /* MTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D469A8862C56430D00D10575 /* MTLRenderer.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
 		D46C036D2C96B22D001658C5 /* MTLCommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */; };
+		D47FD3EC2E2B954E00F3F514 /* CanvasViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */; };
 		D4812E472D1643F400F47DC7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4812E462D1643F400F47DC7 /* Logger.swift */; };
 		D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F8132E17FACA00B8DE41 /* SliderValue.swift */; };
 		D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */; };
@@ -298,6 +299,7 @@
 		D469A8862C56430D00D10575 /* MTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLRenderer.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedRectangleWithArrow.swift; sourceTree = "<group>"; };
 		D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLCommandManager.swift; sourceTree = "<group>"; };
+		D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewDependencies.swift; sourceTree = "<group>"; };
 		D4812E462D1643F400F47DC7 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		D481F8132E17FACA00B8DE41 /* SliderValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderValue.swift; sourceTree = "<group>"; };
 		D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITouchExtensions.swift; sourceTree = "<group>"; };
@@ -619,6 +621,7 @@
 				D44B52AF2DB3928000EE213C /* CanvasDisplayView.swift */,
 				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
 				D40B76FD2E27C76B0012BFF5 /* CanvasView.swift */,
+				D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */,
 				D44B52B22DB3928000EE213C /* CanvasViewModel.swift */,
 				D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */,
 			);
@@ -1140,6 +1143,7 @@
 				D44B52C22DB3928000EE213C /* CanvasTransformer.swift in Sources */,
 				D4FE0F3D2E16ABB1001A0E87 /* AddLayerIndex.swift in Sources */,
 				D44B52C42DB3928000EE213C /* CanvasRenderer.swift in Sources */,
+				D47FD3EC2E2B954E00F3F514 /* CanvasViewDependencies.swift in Sources */,
 				D44B52C52DB3928000EE213C /* DrawingEraserTextureSet.swift in Sources */,
 				D44B52C72DB3928000EE213C /* CanvasConfiguration.swift in Sources */,
 				D44B52C92DB3928000EE213C /* DrawingDisplayLink.swift in Sources */,
