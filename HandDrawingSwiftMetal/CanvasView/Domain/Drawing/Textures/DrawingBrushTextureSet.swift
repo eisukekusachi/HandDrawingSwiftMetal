@@ -71,7 +71,7 @@ extension DrawingBrushTextureSet {
                 on: baseTexture,
                 with: commandBuffer
             )
-            onDrawingCompleted?(baseTexture)
+            onDrawingCompleted?(realtimeDrawingTexture)
         }
     }
 
