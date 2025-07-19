@@ -110,10 +110,6 @@ final class CanvasViewModel {
 
     private let device = MTLCreateSystemDefaultDevice()!
 
-    init() {
-        bindData()
-    }
-
     func initialize(
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
@@ -150,6 +146,8 @@ final class CanvasViewModel {
         initialize(
             configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
         )
+
+        bindData()
     }
 
     private func bindData() {
