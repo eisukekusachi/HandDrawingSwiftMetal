@@ -613,21 +613,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D44B52B42DB3928000EE213C /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				D44B52AB2DB3928000EE213C /* Models */,
-				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
-				D44B52AF2DB3928000EE213C /* CanvasDisplayView.swift */,
-				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
-				D40B76FD2E27C76B0012BFF5 /* CanvasView.swift */,
-				D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */,
-				D44B52B22DB3928000EE213C /* CanvasViewModel.swift */,
-				D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
 		D44B52D12DB3ACA500EE213C /* DrawingTool */ = {
 			isa = PBXGroup;
 			children = (
@@ -857,14 +842,21 @@
 		D4A60C712DA257B8008CBD20 /* CanvasView */ = {
 			isa = PBXGroup;
 			children = (
-				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
 				D43E6FFB2E0EDC9B006E07CE /* Domain */,
 				D44D195E2BE5D1390069D4A9 /* Entities */,
 				D40D975529DAB03E00A82E6A /* Extensions */,
 				D40D975829DAB05F00A82E6A /* Metal */,
+				D44B52AB2DB3928000EE213C /* Models */,
 				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
 				D46D07D92ADBEB160093D861 /* Utils */,
-				D44B52B42DB3928000EE213C /* Views */,
+				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
+				D44B52AF2DB3928000EE213C /* CanvasDisplayView.swift */,
+				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
+				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
+				D40B76FD2E27C76B0012BFF5 /* CanvasView.swift */,
+				D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */,
+				D44B52B22DB3928000EE213C /* CanvasViewModel.swift */,
+				D44B52B32DB3928000EE213C /* CanvasViewRendering .swift */,
 			);
 			path = CanvasView;
 			sourceTree = "<group>";
