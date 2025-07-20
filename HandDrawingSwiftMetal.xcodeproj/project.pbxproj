@@ -34,7 +34,6 @@
 		D40D979D29DAB0DF00A82E6A /* Texture.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979629DAB0DE00A82E6A /* Texture.metal */; };
 		D40D979E29DAB0DF00A82E6A /* Drawing.metal in Sources */ = {isa = PBXBuildFile; fileRef = D40D979729DAB0DE00A82E6A /* Drawing.metal */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
-		D422D9D02AF50957004E058B /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = D422D9CF2AF50957004E058B /* ZipArchive */; };
 		D422D9D22AF50AE4004E058B /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D422D9D12AF50AE4004E058B /* FileManagerExtensions.swift */; };
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
 		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
@@ -122,6 +121,7 @@
 		D46B8F702BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* RoundedRectangleWithArrow.swift */; };
 		D46C036D2C96B22D001658C5 /* MTLCommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46C036C2C96B22D001658C5 /* MTLCommandManager.swift */; };
 		D47FD3EC2E2B954E00F3F514 /* CanvasViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */; };
+		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D4812E472D1643F400F47DC7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4812E462D1643F400F47DC7 /* Logger.swift */; };
 		D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F8132E17FACA00B8DE41 /* SliderValue.swift */; };
 		D4837AEA2CC5E7E200BD25F5 /* UITouchExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4837AE92CC5E7E200BD25F5 /* UITouchExtensions.swift */; };
@@ -355,7 +355,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D422D9D02AF50957004E058B /* ZipArchive in Frameworks */,
+				D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +792,13 @@
 			path = Curve;
 			sourceTree = "<group>";
 		};
+		D47FD5C12E2D1CE100F3F514 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D4888C962D6AB15300BB922A /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
@@ -867,6 +874,7 @@
 				D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */,
 				D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */,
 				D4E1ECFC2752388E00D4A23D /* HandDrawingSwiftMetalUITests */,
+				D47FD5C12E2D1CE100F3F514 /* Frameworks */,
 				D4E1ECDA2752388C00D4A23D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -962,7 +970,7 @@
 			);
 			name = HandDrawingSwiftMetal;
 			packageProductDependencies = (
-				D422D9CF2AF50957004E058B /* ZipArchive */,
+				D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */,
 			);
 			productName = HandDrawingSwiftMetal;
 			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
@@ -1037,7 +1045,7 @@
 			);
 			mainGroup = D4E1ECD02752388C00D4A23D;
 			packageReferences = (
-				D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */,
+				D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
 			projectDirPath = "";
@@ -1619,21 +1627,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+		D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ZipArchive/ZipArchive";
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.5.5;
+				minimumVersion = 0.9.19;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D422D9CF2AF50957004E058B /* ZipArchive */ = {
+		D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D422D9CE2AF50957004E058B /* XCRemoteSwiftPackageReference "ZipArchive" */;
-			productName = ZipArchive;
+			package = D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 /* End XCSwiftPackageProductDependency section */
 

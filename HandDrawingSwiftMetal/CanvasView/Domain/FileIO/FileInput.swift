@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import ZipArchive
+import ZIPFoundation
 
 enum FileInput {
 
@@ -29,13 +29,8 @@ enum FileInput {
         return try JSONDecoder().decode(T.self, from: dataJson)
     }
 
-    static func unzip(_ sourceZipURL: URL, to destinationFolderURL: URL) async throws {
-        if !SSZipArchive.unzipFile(
-            atPath: sourceZipURL.path,
-            toDestination: destinationFolderURL.path
-        ) {
-            throw FileInputError.operationError("unzip(:, to:)")
-        }
+    static func unzip(sourceURL: URL, to destinationURL: URL) throws {
+        try FileManager.default.unzipItem(at: sourceURL, to: destinationURL)
     }
 }
 

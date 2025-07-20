@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import ZipArchive
+import ZIPFoundation
 
 enum FileOutput {
 
@@ -37,17 +37,14 @@ enum FileOutput {
         )
     }
 
-    static func zip(
-        _ sourceFolderURL: URL,
-        to destinationZipURL: URL
-    ) throws {
-        let success = SSZipArchive.createZipFile(
-            atPath: destinationZipURL.path,
-            withContentsOfDirectory: sourceFolderURL.path
-        )
-
-        if !success {
-            throw FileOutputError.operationError("zip(:, to:)")
+    static func zip(sourceURLs: [URL], to zipFileURL: URL) throws {
+        let archive = try Archive(url: zipFileURL, accessMode: .create)
+        try sourceURLs.forEach { url in
+            try archive.addEntry(
+                with: url.lastPathComponent,
+                fileURL: url,
+                compressionMethod: .deflate
+            )
         }
     }
 }

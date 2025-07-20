@@ -40,11 +40,23 @@ extension LocalFileRepository {
     func zipWorkingDirectory(
         to zipFileURL: URL
     ) throws {
-        try FileOutput.zip(
-            workingDirectoryURL,
-            to: zipFileURL
+        let fileURLs = try FileManager.default.contentsOfDirectory(
+            at: workingDirectoryURL,
+            includingPropertiesForKeys: nil
         )
+
+        let fileName = zipFileURL.lastPathComponent
+        let tempZipURL = workingDirectoryURL.appendingPathComponent(fileName)
+
+        try FileOutput.zip(
+            sourceURLs: fileURLs,
+            to: tempZipURL
+        )
+
+        // Overwrite if a file with the same name exists
+        try moveFiles(from: tempZipURL, to: zipFileURL)
     }
+
     /// Unzips a file into the working directory
     func unzipToWorkingDirectory(
         from zipFileURL: URL
@@ -53,11 +65,13 @@ extension LocalFileRepository {
         return Future<URL, Error> { promise in
             Task {
                 do {
-                    try await FileInput.unzip(zipFileURL, to: workingDirectoryURL)
+                    try FileInput.unzip(
+                        sourceURL: zipFileURL,
+                        to: workingDirectoryURL
+                    )
                     promise(
                         .success(workingDirectoryURL)
                     )
-
                 } catch {
                     promise(.failure(error))
                 }
@@ -95,6 +109,16 @@ extension LocalFileRepository {
         )
         .collect()
         .eraseToAnyPublisher()
+    }
+}
+
+extension LocalFileRepository {
+
+    private func moveFiles(from sourceURL: URL, to destinationURL: URL) throws {
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            try FileManager.default.removeItem(at: destinationURL)
+        }
+        try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
     }
 }
 

@@ -15,7 +15,7 @@ final class LocalFileSingletonRepository {
 
     private init() {
         self.repository = LocalFileRepository(
-            workingDirectoryURL: URL.applicationSupport.appendingPathComponent("TmpFolder")
+            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
         )
     }
 }
