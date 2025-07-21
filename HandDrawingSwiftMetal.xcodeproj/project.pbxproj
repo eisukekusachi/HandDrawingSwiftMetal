@@ -524,7 +524,6 @@
 		D42F40992B4402EC00B32707 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				D44B52D12DB3ACA500EE213C /* DrawingTool */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
 				D42F409E2B44035A00B32707 /* IntSlider.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
@@ -541,6 +540,7 @@
 			isa = PBXGroup;
 			children = (
 				D49425362E2AAD440061B769 /* Drawing */,
+				D44B52D12DB3ACA500EE213C /* DrawingTool */,
 				D40B76ED2E2131AC0012BFF5 /* FileIO */,
 				D4FE0F352E156C96001A0E87 /* Layers */,
 				D43E70072E0EDCB0006E07CE /* Undo */,
