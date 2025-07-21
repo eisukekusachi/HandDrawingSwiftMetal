@@ -713,7 +713,6 @@
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* TextureLayerViewSettings.swift */,
-				D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */,
 			);
 			path = TextureLayerView;
 			sourceTree = "<group>";
@@ -948,6 +947,7 @@
 				D4FE0F3C2E16ABB1001A0E87 /* AddLayerIndex.swift */,
 				D4FE0F362E156CAC001A0E87 /* MoveLayerIndices.swift */,
 				D4FE0F382E158791001A0E87 /* RemoveLayerIndex.swift */,
+				D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
