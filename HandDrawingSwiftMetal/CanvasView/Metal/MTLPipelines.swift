@@ -9,12 +9,12 @@ import MetalKit
 
 final class MTLPipelines {
 
-    private(set) var drawGrayPointsWithMaxBlendMode: MTLRenderPipelineState
-    private(set) var drawTexture: MTLRenderPipelineState
-    private(set) var eraseTexture: MTLRenderPipelineState
-    private(set) var colorize: MTLComputePipelineState
-    private(set) var mergeTextures: MTLComputePipelineState
-    private(set) var fillColor: MTLComputePipelineState
+    let drawGrayPointsWithMaxBlendMode: MTLRenderPipelineState
+    let drawTexture: MTLRenderPipelineState
+    let eraseTexture: MTLRenderPipelineState
+    let colorize: MTLComputePipelineState
+    let mergeTextures: MTLComputePipelineState
+    let fillColor: MTLComputePipelineState
 
     init() {
         guard
@@ -112,5 +112,4 @@ final class MTLPipelines {
             shaderName: "add_color_to_texture"
         )
     }
-
 }
