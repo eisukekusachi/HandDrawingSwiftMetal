@@ -17,7 +17,7 @@ final class DrawingBrushTextureSet: DrawingTextureSet {
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
-    private let renderer: MTLRendering!
+    private let renderer: MTLRendering
 
     private var brushColor: UIColor = .black
 

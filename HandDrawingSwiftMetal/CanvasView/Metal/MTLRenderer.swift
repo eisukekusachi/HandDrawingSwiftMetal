@@ -7,7 +7,7 @@
 
 import MetalKit
 
-protocol MTLRendering {
+protocol MTLRendering: Sendable {
 
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
@@ -81,10 +81,9 @@ protocol MTLRendering {
         texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
-
 }
 
-final class MTLRenderer: MTLRendering {
+final class MTLRenderer: Sendable, MTLRendering {
 
     static let shared = MTLRenderer()
 

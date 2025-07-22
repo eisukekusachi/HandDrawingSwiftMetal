@@ -9,7 +9,7 @@ import XCTest
 import Metal
 @testable import HandDrawingSwiftMetal
 
-final class MockMTLRenderer: MTLRendering {
+final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     var callHistory: [String] = []
 
@@ -229,5 +229,4 @@ final class MockMTLRenderer: MTLRendering {
             ].joined()
         )
     }
-
 }

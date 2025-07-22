@@ -32,7 +32,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         _textureSize != .zero
     }
 
-    private let renderer: MTLRendering!
+    private let renderer: MTLRendering
 
     private var cancellables = Set<AnyCancellable>()
 

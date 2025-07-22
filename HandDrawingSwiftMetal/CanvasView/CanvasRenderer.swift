@@ -21,7 +21,7 @@ final class CanvasRenderer: ObservableObject {
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     var baseBackgroundColor: UIColor = .lightGray
 
-    private let renderer: MTLRendering!
+    private let renderer: MTLRendering
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
