@@ -8,7 +8,7 @@
 import UIKit
 
 /// A class that manages the pen position information sent from the Apple Pencil
-final class PencilStroke {
+@MainActor final class PencilStroke {
 
     /// An array that stores real values.
     /// https://developer.apple.com/documentation/uikit/apple_pencil_interactions/handling_input_from_apple_pencil/

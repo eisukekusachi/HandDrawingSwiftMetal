@@ -6,10 +6,10 @@
 //
 
 import Combine
-import MetalKit
-import SwiftUI
 
-final class CanvasViewModel {
+@preconcurrency import MetalKit
+
+@MainActor final class CanvasViewModel {
 
     /// Maintains the state of the canvas
     let canvasState: CanvasState = .init(
@@ -170,7 +170,9 @@ final class CanvasViewModel {
                     },
                     onDrawingCompleted: { resultTexture in
                         commandBuffer.addCompletedHandler { [weak self] _ in
-                            self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
+                            Task { @MainActor in
+                                self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
+                            }
                         }
                     }
                 )

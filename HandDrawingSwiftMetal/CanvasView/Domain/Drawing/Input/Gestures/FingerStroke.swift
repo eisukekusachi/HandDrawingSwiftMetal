@@ -8,7 +8,7 @@
 import UIKit
 
 /// A class that manages the finger position information sent from the device
-final class FingerStroke {
+@MainActor final class FingerStroke {
 
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchHistories: TouchHistoriesOnScreen = [:]

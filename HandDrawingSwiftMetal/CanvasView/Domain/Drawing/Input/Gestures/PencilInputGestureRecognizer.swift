@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol PencilInputGestureRecognizerSender {
+@MainActor protocol PencilInputGestureRecognizerSender {
     func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView)
 }

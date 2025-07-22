@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol FingerInputGestureRecognizerSender: AnyObject {
+@MainActor protocol FingerInputGestureRecognizerSender: AnyObject {
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
 }
 
