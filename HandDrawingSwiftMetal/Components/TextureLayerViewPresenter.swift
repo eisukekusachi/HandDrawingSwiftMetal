@@ -19,7 +19,7 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
     }
 
-    func setupLayerViewPresenter(
+    @MainActor func setupLayerViewPresenter(
         configuration: TextureLayerConfiguration,
         using viewSettings: TextureLayerViewSettings
     ) {

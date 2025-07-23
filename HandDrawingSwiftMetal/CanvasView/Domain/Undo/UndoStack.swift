@@ -9,13 +9,13 @@ import Combine
 import Foundation
 import MetalKit
 
-final class UndoStack {
+@MainActor final class UndoStack {
 
     let undoRedoButtonStateSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
-    private let canvasState: CanvasState
+    @MainActor private let undoManager = UndoManager()
 
-    private let undoManager = UndoManager()
+    private let canvasState: CanvasState
 
     private let textureLayerRepository: TextureLayerRepository!
 

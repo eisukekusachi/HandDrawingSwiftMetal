@@ -8,7 +8,7 @@
 import Combine
 import MetalKit
 
-final class TextureLayerViewModel: ObservableObject {
+@MainActor final class TextureLayerViewModel: ObservableObject {
 
     let alphaSliderValue = SliderValue()
 
