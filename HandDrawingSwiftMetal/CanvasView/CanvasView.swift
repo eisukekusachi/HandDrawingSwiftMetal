@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-class CanvasView: UIView {
+public class CanvasView: UIView {
 
     var displayTexture: MTLTexture? {
         displayView.displayTexture
@@ -69,16 +69,16 @@ class CanvasView: UIView {
 
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    public init() {
         super.init(frame: .zero)
         setup()
     }
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         setup()
     }
 
-    override func layoutSubviews() {
+    public override func layoutSubviews() {
         canvasViewModel.frameSize = frame.size
     }
 
