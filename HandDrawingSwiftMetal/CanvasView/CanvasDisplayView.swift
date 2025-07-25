@@ -9,7 +9,7 @@ import MetalKit
 import Combine
 
 /// A custom view for displaying textures with Metal support
-@MainActor class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
+class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
     var displayTexture: MTLTexture? {
         _displayTexture
