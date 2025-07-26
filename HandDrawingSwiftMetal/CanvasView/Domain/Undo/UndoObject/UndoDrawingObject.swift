@@ -37,14 +37,21 @@ final class UndoDrawingObject: UndoObject {
         let textureUUID = textureLayer.id
         return undoTextureRepository
             .copyTexture(uuid: undoTextureUUID)
-            .flatMap { result -> AnyPublisher<IdentifiedTexture, Error> in
-                textureLayerRepository.updateTexture(
-                    texture: result.texture,
-                    for: textureUUID
-                )
+            .flatMap { result in
+                Future<Void, Error> { promise in
+                    Task {
+                        do {
+                            _ = try await textureLayerRepository.updateTexture(
+                                texture: result.texture,
+                                for: textureUUID
+                            )
+                            promise(.success(()))
+                        } catch {
+                            promise(.failure(error))
+                        }
+                    }
+                }
             }
-            .map { _ in return }
             .eraseToAnyPublisher()
     }
-
 }

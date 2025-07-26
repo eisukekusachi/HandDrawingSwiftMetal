@@ -619,29 +619,21 @@ extension CanvasViewModel {
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
-        dependencies.textureLayerRepository.updateTexture(
-            texture: texture,
-            for: selectedTextureId
-        )
-        .sink(
-            receiveCompletion: { [weak self] result in
-                switch result {
-                case .finished: break
-                case .failure(let error):
-                    Logger.standard.error("Failed to complete the drawing process: \(error)")
-                }
-                self?.resetAllInputParameters()
-            },
-            receiveValue: { [weak self] result in
-                if let canvasState = self?.canvasState {
-                    self?.undoStack?.pushUndoDrawingObject(
-                        canvasState: canvasState,
-                        texture: result.texture
-                    )
-                }
+        Task {
+            do {
+                let resultTexture = try await dependencies.textureLayerRepository.updateTexture(
+                    texture: texture,
+                    for: selectedTextureId
+                )
+                undoStack?.pushUndoDrawingObject(
+                    canvasState: canvasState,
+                    texture: resultTexture.texture
+                )
+            } catch {
+                // No action on error
+                Logger.standard.error("Failed to complete the drawing process: \(error)")
             }
-        )
-        .store(in: &cancellables)
+        }
     }
 
     private func resetAllInputParameters() {

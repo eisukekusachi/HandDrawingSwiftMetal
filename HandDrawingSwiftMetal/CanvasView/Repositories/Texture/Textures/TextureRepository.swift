@@ -50,8 +50,7 @@ protocol TextureRepository {
     func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error>
 
     /// Updates an existing texture for UUID
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error>
-
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture
 }
 
 enum TextureRepositoryError: Error {

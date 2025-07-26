@@ -119,16 +119,12 @@ final class MockTextureRepository: TextureRepository {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         let device = MTLCreateSystemDefaultDevice()!
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
-        return Just(
-            .init(
-                uuid: UUID(),
-                texture: MTLTextureCreator.makeBlankTexture(with: device)!
-            )
+        return  .init(
+            uuid: UUID(),
+            texture: MTLTextureCreator.makeBlankTexture(with: device)!
         )
-        .setFailureType(to: Error.self)
-        .eraseToAnyPublisher()
     }
 }

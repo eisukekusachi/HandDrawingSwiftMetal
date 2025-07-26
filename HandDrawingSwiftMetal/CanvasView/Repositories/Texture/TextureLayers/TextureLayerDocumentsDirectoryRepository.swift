@@ -224,47 +224,41 @@ final class TextureLayerDocumentsDirectoryRepository: TextureDocumentsDirectoryR
     }
 
     /// Updates an existing texture for UUID
-    override func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Future { [weak self] promise in
-            guard
-                let `self`,
-                let texture,
-                let device = MTLCreateSystemDefaultDevice()
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
-
-            guard FileManager.default.fileExists(atPath: fileURL.path) else {
-                promise(.failure(TextureRepositoryError.fileNotFound(fileURL.path)))
-                return
-            }
-
-            guard let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
-            ) else {
-                promise(.failure(TextureDocumentsDirectoryRepositoryError.failedToCreateNewTexture))
-                return
-            }
-
-            do {
-                try FileOutput.saveTextureAsData(
-                    bytes: newTexture.bytes,
-                    to: fileURL
-                )
-                self.setThumbnail(texture: texture, for: uuid)
-
-                promise(.success(
-                    .init(uuid: uuid, texture: newTexture)
-                ))
-            } catch {
-                promise(.failure(TextureLayerDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
-            }
+    @discardableResult override func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+        guard
+            let texture,
+            let device = MTLCreateSystemDefaultDevice()
+        else {
+            throw TextureRepositoryError.failedToUnwrap
         }
-        .eraseToAnyPublisher()
+
+        let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            throw TextureRepositoryError.fileNotFound(fileURL.path)
+        }
+
+        guard let newTexture = MTLTextureCreator.duplicateTexture(
+            texture: texture,
+            with: device
+        ) else {
+            throw TextureDocumentsDirectoryRepositoryError.failedToCreateNewTexture
+        }
+
+        do {
+            try FileOutput.saveTextureAsData(
+                bytes: newTexture.bytes,
+                to: fileURL
+            )
+            self.setThumbnail(texture: texture, for: uuid)
+
+            return .init(
+                uuid: uuid,
+                texture: newTexture
+            )
+        } catch {
+            throw TextureLayerDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)
+        }
     }
 }
 

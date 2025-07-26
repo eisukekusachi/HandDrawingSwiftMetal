@@ -212,32 +212,24 @@ class TextureInMemoryRepository: TextureRepository {
         return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Future { [weak self] promise in
-            guard
-                let `self`,
-                let texture,
-                let device = MTLCreateSystemDefaultDevice(),
-                let newTexture = MTLTextureCreator.duplicateTexture(
-                    texture: texture,
-                    with: device
-                )
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            guard self.textures[uuid] != nil else {
-                promise(.failure(TextureRepositoryError.fileNotFound(uuid.uuidString)))
-                return
-            }
-
-            self.textures[uuid] = newTexture
-
-            promise(.success(
-                .init(uuid: uuid, texture: newTexture)
-            ))
+    @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+        guard
+            let texture,
+            let device = MTLCreateSystemDefaultDevice(),
+            let newTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                with: device
+            )
+        else {
+            throw TextureRepositoryError.failedToUnwrap
         }
-        .eraseToAnyPublisher()
+
+        guard self.textures[uuid] != nil else {
+            throw TextureRepositoryError.fileNotFound(uuid.uuidString)
+        }
+
+        textures[uuid] = newTexture
+
+        return .init(uuid: uuid, texture: newTexture)
     }
 }

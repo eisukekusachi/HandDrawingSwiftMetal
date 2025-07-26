@@ -69,8 +69,7 @@ class TextureRepositoryWrapper: TextureRepository {
         repository.removeAll()
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        repository.updateTexture(texture: texture, for: uuid)
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+        try await repository.updateTexture(texture: texture, for: uuid)
     }
-
 }

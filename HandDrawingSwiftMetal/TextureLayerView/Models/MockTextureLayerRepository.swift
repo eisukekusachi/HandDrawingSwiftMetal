@@ -102,21 +102,16 @@ final class MockTextureLayerRepository: TextureLayerRepository {
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {}
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+    @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let device = MTLCreateSystemDefaultDevice(),
             let texture = MTLTextureCreator.makeBlankTexture(with: device)
         else {
-            return Fail(error: NSError(domain: "AddTextureError", code: -1, userInfo: nil))
-                .eraseToAnyPublisher()
+            throw NSError(domain: "MockTextureLayerRepository", code: -1, userInfo: nil)
         }
-        return Just(
-            .init(
-                uuid: UUID(),
-                texture: texture
-            )
+        return .init(
+            uuid: UUID(),
+            texture: texture
         )
-        .setFailureType(to: Error.self)
-        .eraseToAnyPublisher()
     }
 }
