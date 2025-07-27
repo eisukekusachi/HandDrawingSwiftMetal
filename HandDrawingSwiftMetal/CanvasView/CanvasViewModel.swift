@@ -123,7 +123,7 @@ import Combine
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if self.dependencies.textureLayerRepository is TextureLayerDocumentsDirectorySingletonRepository {
+        if self.dependencies.textureLayerRepository is TextureLayerDocumentsDirectoryRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }

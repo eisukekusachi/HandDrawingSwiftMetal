@@ -21,14 +21,20 @@ struct CanvasViewDependencies {
 extension CanvasViewDependencies {
     init(configuration: CanvasConfiguration) {
         switch configuration.textureLayerRepository {
-        case .disk: textureLayerRepository = TextureLayerDocumentsDirectorySingletonRepository.shared
-        case .memory: textureLayerRepository = TextureLayerInMemorySingletonRepository.shared
+        case .disk: textureLayerRepository = TextureLayerDocumentsDirectoryRepository(
+            storageDirectoryURL: URL.applicationSupport,
+            directoryName: "TextureStorage"
+        )
+        case .memory: textureLayerRepository = TextureLayerInMemoryRepository()
         }
 
         if let undoRepository = configuration.undoTextureRepository {
             switch undoRepository {
-            case .disk: undoTextureRepository = TextureUndoDocumentsDirectorySingletonRepository.shared
-            case .memory: undoTextureRepository = TextureUndoInMemorySingletonRepository.shared
+            case .disk: undoTextureRepository = TextureDocumentsDirectoryRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "UndoStorage"
+            )
+            case .memory: undoTextureRepository = TextureLayerInMemoryRepository()
             }
         } else {
             undoTextureRepository = nil
