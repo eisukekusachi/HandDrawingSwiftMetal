@@ -21,7 +21,10 @@ final class CanvasStateStorage {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        coreDataRepository: CoreDataRepository = DefaultCoreDataSingletonRepository.shared
+        coreDataRepository: CoreDataRepository = DefaultCoreDataRepository(
+            entityName: "CanvasStorageEntity",
+            persistentContainerName: "CanvasStorage"
+        )
     ) {
         self.coreDataRepository = coreDataRepository
     }

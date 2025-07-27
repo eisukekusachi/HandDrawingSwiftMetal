@@ -15,7 +15,7 @@ struct CanvasViewDependencies {
     let undoTextureRepository: TextureRepository?
 
     /// Repository that manages files in the Documents directory
-    let localFileRepository: LocalFileRepository = LocalFileSingletonRepository.shared.repository
+    let localFileRepository: LocalFileRepository
 }
 
 extension CanvasViewDependencies {
@@ -39,5 +39,9 @@ extension CanvasViewDependencies {
         } else {
             undoTextureRepository = nil
         }
+
+        localFileRepository = LocalFileRepository(
+            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
+        )
     }
 }

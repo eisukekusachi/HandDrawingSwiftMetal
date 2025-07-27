@@ -49,7 +49,6 @@
 		D440DF732ADA9E7D00A4E425 /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */; };
 		D447D88A2DC5CE5200007210 /* CanvasStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */; };
 		D447D88C2DC5D2D700007210 /* CanvasStateStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D88B2DC5D2D700007210 /* CanvasStateStorage.swift */; };
-		D447D8962DC6266600007210 /* DefaultCoreDataSingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D8952DC6266600007210 /* DefaultCoreDataSingletonRepository.swift */; };
 		D447D8982DC6267100007210 /* CoreDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D8972DC6267100007210 /* CoreDataRepository.swift */; };
 		D447D89A2DC6267B00007210 /* DefaultCoreDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D8992DC6267B00007210 /* DefaultCoreDataRepository.swift */; };
 		D447D89E2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */; };
@@ -143,7 +142,6 @@
 		D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */; };
 		D4BB3ABE2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */; };
 		D4BCB3032AF7383B00EA650D /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BCB3022AF7383B00EA650D /* DataExtensions.swift */; };
-		D4CACC862DBE680700E70E18 /* LocalFileSingletonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CACC852DBE680700E70E18 /* LocalFileSingletonRepository.swift */; };
 		D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */; };
 		D4CE84102C8B42BF00DEABC5 /* ViewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CE840F2C8B42BF00DEABC5 /* ViewSize.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
@@ -222,7 +220,6 @@
 		D440DF722ADA9E7D00A4E425 /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
 		D447D8892DC5CE5200007210 /* CanvasStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CanvasStorage.xcdatamodel; sourceTree = "<group>"; };
 		D447D88B2DC5D2D700007210 /* CanvasStateStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStateStorage.swift; sourceTree = "<group>"; };
-		D447D8952DC6266600007210 /* DefaultCoreDataSingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCoreDataSingletonRepository.swift; sourceTree = "<group>"; };
 		D447D8972DC6267100007210 /* CoreDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataRepository.swift; sourceTree = "<group>"; };
 		D447D8992DC6267B00007210 /* DefaultCoreDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCoreDataRepository.swift; sourceTree = "<group>"; };
 		D447D89D2DC65A3600007210 /* TextureLayerDocumentsDirectoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerDocumentsDirectoryRepository.swift; sourceTree = "<group>"; };
@@ -315,7 +312,6 @@
 		D4BB3ABB2BB973F100C04A3D /* FingerInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerInputGestureRecognizer.swift; sourceTree = "<group>"; };
 		D4BB3ABD2BB973FD00C04A3D /* PencilInputGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilInputGestureRecognizer.swift; sourceTree = "<group>"; };
 		D4BCB3022AF7383B00EA650D /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
-		D4CACC852DBE680700E70E18 /* LocalFileSingletonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSingletonRepository.swift; sourceTree = "<group>"; };
 		D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CE840F2C8B42BF00DEABC5 /* ViewSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSize.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
@@ -565,7 +561,6 @@
 			children = (
 				D447D8972DC6267100007210 /* CoreDataRepository.swift */,
 				D447D8992DC6267B00007210 /* DefaultCoreDataRepository.swift */,
-				D447D8952DC6266600007210 /* DefaultCoreDataSingletonRepository.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -585,7 +580,6 @@
 				D40B76F42E227B070012BFF5 /* LocalFileConvertible.swift */,
 				D40B76F62E228CE00012BFF5 /* LocalFileNamedItem.swift */,
 				D44D19712BE5DBF60069D4A9 /* LocalFileRepository.swift */,
-				D4CACC852DBE680700E70E18 /* LocalFileSingletonRepository.swift */,
 			);
 			path = LocalFile;
 			sourceTree = "<group>";
@@ -1129,7 +1123,6 @@
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,
 				D40B76F72E228CE00012BFF5 /* LocalFileNamedItem.swift in Sources */,
-				D4CACC862DBE680700E70E18 /* LocalFileSingletonRepository.swift in Sources */,
 				D40CDF0B2B4130A40059527E /* TimeStampFormatter.swift in Sources */,
 				D4FE0F292E0FDA24001A0E87 /* UndoAlphaChangedObject.swift in Sources */,
 				D469A85F2C5620FB00D10575 /* GrayscaleDotPoint.swift in Sources */,
@@ -1178,7 +1171,6 @@
 				D4812E472D1643F400F47DC7 /* Logger.swift in Sources */,
 				D4517A032CC3686F0047C274 /* BezierCurveHandlePoints.swift in Sources */,
 				D4553DED2DD8279900037800 /* TextureDocumentsDirectoryRepository.swift in Sources */,
-				D447D8962DC6266600007210 /* DefaultCoreDataSingletonRepository.swift in Sources */,
 				D4F1BB3E2B2D436F006EA102 /* TextureLayerViewModel.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */,
