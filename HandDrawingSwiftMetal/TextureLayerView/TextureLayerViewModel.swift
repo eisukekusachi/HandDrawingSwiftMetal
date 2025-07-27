@@ -89,7 +89,12 @@ extension TextureLayerViewModel {
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
-        let layer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate)
+        let layer: TextureLayerModel = .init(
+            id: UUID(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
         Task {
@@ -215,18 +220,19 @@ extension TextureLayerViewModel {
         alpha: Int? = nil
     ) {
         guard let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id) else { return }
+        let layer = canvasState.layers[selectedIndex]
 
         if let title {
-            canvasState.layers[selectedIndex].title = title
+            canvasState.layers[selectedIndex] = .init(model: layer, title: title)
         }
         if let isVisible {
-            canvasState.layers[selectedIndex].isVisible = isVisible
+            canvasState.layers[selectedIndex] = .init(model: layer, isVisible: isVisible)
 
             // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
             canvasState.fullCanvasUpdateSubject.send(())
         }
         if let alpha {
-            canvasState.layers[selectedIndex].alpha = alpha
+            canvasState.layers[selectedIndex] = .init(model: layer, alpha: alpha)
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
             canvasState.canvasUpdateSubject.send(())

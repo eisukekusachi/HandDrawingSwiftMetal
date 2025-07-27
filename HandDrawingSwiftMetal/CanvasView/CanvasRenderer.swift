@@ -115,11 +115,7 @@ extension CanvasRenderer {
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
-        let opaqueLayer = {
-            var tmp = selectedLayer
-            tmp.alpha = 255
-            return tmp
-        }()
+        let opaqueLayer: TextureLayerModel = .init(model: selectedLayer, alpha: 255)
 
         Task {
             let textures = try await textureLayerRepository.copyTextures(

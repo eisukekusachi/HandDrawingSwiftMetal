@@ -653,7 +653,6 @@
 			children = (
 				D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */,
 				D481F8132E17FACA00B8DE41 /* SliderValue.swift */,
-				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -922,6 +921,7 @@
 				D4FE0F362E156CAC001A0E87 /* MoveLayerIndices.swift */,
 				D4FE0F382E158791001A0E87 /* RemoveLayerIndex.swift */,
 				D49425342E2A92AC0061B769 /* TextureLayerConfiguration.swift */,
+				D48F763C2DA2094A0001C80F /* TextureLayerModel.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";

@@ -7,25 +7,23 @@
 
 import Foundation
 
-struct TextureLayerModel: Identifiable, Equatable {
+struct TextureLayerModel: Identifiable, Equatable, Sendable {
     /// The unique identifier for the layer
-    var id: UUID = UUID()
+    let id: UUID
     /// The name of the layer
-    var title: String
+    let title: String
     /// The opacity of the layer
-    var alpha: Int = 255
+    let alpha: Int
     /// Whether the layer is visible or not
-    var isVisible: Bool = true
-
+    let isVisible: Bool
 }
 
 extension TextureLayerModel {
-
-    init(
+    public init(
         textureName: String,
         title: String,
-        alpha: Int,
-        isVisible: Bool
+        alpha: Int = 255,
+        isVisible: Bool = true
     ) {
         self.init(
             id: TextureLayerModel.id(from: textureName),
@@ -33,6 +31,18 @@ extension TextureLayerModel {
             alpha: alpha,
             isVisible: isVisible
         )
+    }
+    public init(
+        model: TextureLayerModel,
+        id: UUID? = nil,
+        title: String? = nil,
+        alpha: Int? = nil,
+        isVisible: Bool? = nil
+    ) {
+        self.id = id ?? model.id
+        self.title = title ?? model.title
+        self.alpha = alpha ?? model.alpha
+        self.isVisible = isVisible ?? model.isVisible
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -44,9 +54,8 @@ extension TextureLayerModel {
         id.uuidString
     }
 
-    /// Uses the filename as the ID, and generates a new one if it is not valid
+    /// Retrieve the UUID from the file name since it uses a UUID
     static func id(from string: String?) -> UUID {
         UUID.init(uuidString: string ?? "") ?? UUID()
     }
-
 }

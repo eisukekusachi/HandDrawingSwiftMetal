@@ -126,11 +126,11 @@ private struct PreviewView: View {
             textureSize: .init(width: 44, height: 44),
             layerIndex: 1,
             layers: [
-                .init(title: "Layer0", alpha: 255),
-                .init(title: "Layer1", alpha: 200),
-                .init(title: "Layer2", alpha: 150),
-                .init(title: "Layer3", alpha: 100),
-                .init(title: "Layer4", alpha: 50),
+                .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
+                .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
+                .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
+                .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
+                .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
             ]
         )
     )

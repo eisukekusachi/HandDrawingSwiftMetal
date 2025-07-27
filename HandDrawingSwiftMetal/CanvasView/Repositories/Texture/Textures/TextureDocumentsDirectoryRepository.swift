@@ -152,7 +152,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         removeAll()
 
         let layer = TextureLayerModel(
-            title: TimeStampFormatter.currentDate
+            id: UUID(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
         )
 
         try await createTexture(

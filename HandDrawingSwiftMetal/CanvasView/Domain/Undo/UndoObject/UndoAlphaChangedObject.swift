@@ -27,10 +27,7 @@ final class UndoAlphaChangedObject: UndoObject {
         alpha: Int,
         textureLayer: TextureLayerModel
     ) {
-        var textureLayer = textureLayer
-        textureLayer.alpha = alpha
-
-        self.textureLayer = textureLayer
+        self.textureLayer = .init(model: textureLayer, alpha: alpha)
     }
 
     init(
@@ -38,9 +35,7 @@ final class UndoAlphaChangedObject: UndoObject {
         withNewAlpha newAlpha: Int
     ) {
         var textureLayer = object.textureLayer
-        textureLayer.alpha = newAlpha
-
-        self.textureLayer = textureLayer
+        self.textureLayer = .init(model: textureLayer, alpha: newAlpha)
     }
 
     func performUndo(
