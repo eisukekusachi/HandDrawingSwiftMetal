@@ -10,6 +10,7 @@ import XCTest
 
 final class PencilStrokeTests: XCTestCase {
     /// Confirms pencil input
+    @MainActor
     func testActualTouchPointArray() {
         let subject = PencilStroke()
 
@@ -74,6 +75,7 @@ final class PencilStrokeTests: XCTestCase {
     }
 
     /// Confirms that a pen has left the screen
+    @MainActor
     func testIsPenOffScreen() {
         let subject = PencilStroke()
 
@@ -101,6 +103,7 @@ final class PencilStrokeTests: XCTestCase {
         XCTAssertTrue(subject.isPenOffScreen(actualTouches: actualTouches))
     }
 
+    @MainActor
     func testReset() {
         let subject = PencilStroke(
             actualTouchPointArray: [
@@ -121,5 +124,4 @@ final class PencilStrokeTests: XCTestCase {
         XCTAssertNil(subject.latestEstimatedTouchPoint)
         XCTAssertNil(subject.latestActualTouchPoint)
     }
-
 }

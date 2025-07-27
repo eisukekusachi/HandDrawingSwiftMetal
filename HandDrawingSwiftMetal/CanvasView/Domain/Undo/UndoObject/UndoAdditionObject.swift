@@ -42,21 +42,16 @@ final class UndoAdditionObject: UndoObject {
     }
 
     /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
-    func updateTextureLayerRepositoryIfNeeded(
-        _ textureLayerRepository: TextureLayerRepository,
-        using undoTextureRepository: TextureRepository
-    ) -> AnyPublisher<Void, Error> {
-        let textureUUID = textureLayer.id
-        return undoTextureRepository
+    func performUndo(
+        textureLayerRepository: TextureLayerRepository,
+        undoTextureRepository: TextureRepository
+    ) async throws {
+        let result = try await undoTextureRepository
             .copyTexture(uuid: undoTextureUUID)
-            .flatMap { result in
-                textureLayerRepository.addTexture(
-                    result.texture,
-                    newTextureUUID: textureUUID
-                )
-            }
-            .map { _ in return }
-            .eraseToAnyPublisher()
-    }
 
+        try await textureLayerRepository.addTexture(
+            result.texture,
+            newTextureUUID: textureLayer.id
+        )
+    }
 }

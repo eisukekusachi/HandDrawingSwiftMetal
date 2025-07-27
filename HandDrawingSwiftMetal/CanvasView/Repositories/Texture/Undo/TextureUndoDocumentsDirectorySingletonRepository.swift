@@ -8,7 +8,7 @@
 import Foundation
 
 /// Only saves textures to the documents directory, but does not restore them
-final class TextureUndoDocumentsDirectorySingletonRepository: TextureRepositoryWrapper {
+final class TextureUndoDocumentsDirectorySingletonRepository: TextureRepositoryWrapper, @unchecked Sendable {
 
     static let shared = TextureUndoDocumentsDirectorySingletonRepository()
 
@@ -20,5 +20,4 @@ final class TextureUndoDocumentsDirectorySingletonRepository: TextureRepositoryW
             )
         )
     }
-
 }

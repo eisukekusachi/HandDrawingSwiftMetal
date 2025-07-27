@@ -10,7 +10,7 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages in-memory textures
-class TextureInMemoryRepository: TextureRepository {
+class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
@@ -45,7 +45,7 @@ class TextureInMemoryRepository: TextureRepository {
         self.renderer = renderer
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
         let textureSize = configuration.textureSize ?? .zero
 
         guard
@@ -53,153 +53,85 @@ class TextureInMemoryRepository: TextureRepository {
             Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
             Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize)
-                .eraseToAnyPublisher()
+            throw TextureRepositoryError.invalidTextureSize
         }
 
-        self.removeAll()
+        removeAll()
 
         let layer = TextureLayerModel(
             title: TimeStampFormatter.currentDate
         )
 
-        return createTexture(
+        try await createTexture(
             uuid: layer.id,
             textureSize: textureSize
         )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
 
-            return .init(textureSize: textureSize, layers: [layer])
-        }
-        .eraseToAnyPublisher()
+        // Set the texture size after the initialization of this repository is completed
+        setTextureSize(textureSize)
+
+        return .init(textureSize: textureSize, layers: [layer])
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
-            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
+            throw TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")
         }
 
-        return Future<CanvasConfiguration, Error> { [weak self] promise in
-            guard
-                let self,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
+        guard
+            let device = MTLCreateSystemDefaultDevice()
+        else {
+            throw TextureRepositoryError.failedToUnwrap
+        }
 
-            do {
-                // Temporary dictionary to hold new textures before applying
-                var newTextures: [UUID: MTLTexture] = [:]
+        // Temporary dictionary to hold new textures before applying
+        var newTextures: [UUID: MTLTexture] = [:]
 
-                guard let textureSize = configuration.textureSize else {
-                    throw TextureRepositoryError.invalidTextureSize
-                }
+        guard let textureSize = configuration.textureSize else {
+            throw TextureRepositoryError.invalidTextureSize
+        }
 
-                try configuration.layers.forEach { layer in
-                    let textureData = try Data(
-                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
-                    )
+        try configuration.layers.forEach { layer in
+            let textureData = try Data(
+                contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
+            )
 
-                    guard let hexadecimalData = textureData.encodedHexadecimals else {
-                        throw TextureRepositoryError.failedToUnwrap
-                    }
-
-                    guard let newTexture = MTLTextureCreator.makeTexture(
-                        size: textureSize,
-                        colorArray: hexadecimalData,
-                        with: device
-                    ) else {
-                        throw TextureRepositoryError.failedToLoadTexture
-                    }
-
-                    newTextures[layer.id] = newTexture
-                }
-
-                removeAll()
-
-                self.textures = newTextures
-                self.setTextureSize(textureSize)
-
-                promise(.success(configuration))
-            } catch {
-                promise(.failure(error))
+            guard let hexadecimalData = textureData.encodedHexadecimals else {
+                throw TextureRepositoryError.failedToUnwrap
             }
+
+            guard let newTexture = MTLTextureCreator.makeTexture(
+                size: textureSize,
+                colorArray: hexadecimalData,
+                with: device
+            ) else {
+                throw TextureRepositoryError.failedToLoadTexture
+            }
+
+            newTextures[layer.id] = newTexture
         }
-        .eraseToAnyPublisher()
+
+        removeAll()
+
+        textures = newTextures
+        setTextureSize(textureSize)
     }
 
     func setTextureSize(_ size: CGSize) {
         _textureSize = size
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Future { [weak self] promise in
-            guard let `self`, let texture else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            guard self.textures[uuid] == nil else {
-                promise(.failure(TextureRepositoryError.fileAlreadyExists))
-                return
-            }
-
-            self.textures[uuid] = texture
-
-            promise(.success(
-                .init(uuid: uuid, texture: texture)
-            ))
+    func createTexture(uuid: UUID, textureSize: CGSize) async throws {
+        guard
+            let device = MTLCreateSystemDefaultDevice()
+        else {
+            throw TextureRepositoryError.failedToUnwrap
         }
-        .eraseToAnyPublisher()
-    }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            self.textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
-
-            promise(.success(()))
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Future<IdentifiedTexture, Error> { [weak self] promise in
-            guard
-                let texture = self?.textures[uuid],
-                let device = MTLCreateSystemDefaultDevice(),
-                let newTexture = MTLTextureCreator.duplicateTexture(
-                    texture: texture,
-                    with: device
-                )
-            else {
-                promise(.failure(TextureRepositoryError.failedToLoadTexture))
-                return
-            }
-
-            promise(.success(
-                .init(uuid: uuid, texture: newTexture)
-            ))
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        Publishers.MergeMany(
-            uuids.map { copyTexture(uuid: $0) }
-        )
-        .collect()
-        .eraseToAnyPublisher()
+        textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
     }
 
     /// Removes all textures
@@ -207,9 +139,56 @@ class TextureInMemoryRepository: TextureRepository {
         textures = [:]
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
+    /// Removes a texture with UUID
+    func removeTexture(_ uuid: UUID) throws -> UUID {
         textures.removeValue(forKey: uuid)
-        return Just(uuid).setFailureType(to: Error.self).eraseToAnyPublisher()
+        return uuid
+    }
+
+    /// Copies a texture for the given UUID
+    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+        guard
+            let texture = textures[uuid],
+            let device = MTLCreateSystemDefaultDevice(),
+            let newTexture = MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                with: device
+            )
+        else {
+            throw TextureRepositoryError.failedToLoadTexture
+        }
+
+        return .init(uuid: uuid, texture: newTexture)
+    }
+
+    /// Copies multiple textures for the given UUIDs
+    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+        try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
+            for id in uuids {
+                group.addTask { try await self.copyTexture(uuid: id) }
+            }
+
+            var results: [IdentifiedTexture] = []
+            for try await result in group {
+                results.append(result)
+            }
+            return results
+        }
+    }
+
+
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        guard let texture else {
+            throw TextureRepositoryError.failedToUnwrap
+        }
+
+        guard textures[uuid] == nil else {
+            throw TextureRepositoryError.fileAlreadyExists
+        }
+
+        textures[uuid] = texture
+
+        return .init(uuid: uuid, texture: texture)
     }
 
     @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {

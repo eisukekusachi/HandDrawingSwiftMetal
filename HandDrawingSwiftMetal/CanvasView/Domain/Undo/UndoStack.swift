@@ -65,7 +65,7 @@ import MetalKit
 
 extension UndoStack {
 
-    func setDrawingUndoObject() {
+    func setDrawingUndoObject() async {
         guard
             let textureLayerId = canvasState.selectedLayerId,
             let undoLayer = canvasState.selectedLayer
@@ -75,29 +75,27 @@ extension UndoStack {
             textureLayer: undoLayer
         )
 
-        // Add a texture to the UndoTextureRepository for restoration
-        textureLayerRepository
-            .copyTexture(uuid: textureLayerId)
-            .flatMap { [weak self] result in
-                self?.undoTextureRepository.addTexture(
-                    result.texture,
-                    newTextureUUID: undoObject.undoTextureUUID
-                )
-                ?? Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
-            }
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { [weak self] _ in
-                    self?.drawingUndoObject = undoObject
-                }
+        do {
+            let result = try await textureLayerRepository
+                .copyTexture(uuid: textureLayerId)
+
+            try await undoTextureRepository.addTexture(
+                result.texture,
+                newTextureUUID: undoObject.undoTextureUUID
             )
-            .store(in: &cancellables)
+
+            drawingUndoObject = undoObject
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
     }
 
-    func pushUndoDrawingObject(
+    func pushUndoDrawingObjectAsync(
         canvasState: CanvasState,
         texture: MTLTexture
-    ) {
+    ) async {
         guard
             let undoObject = drawingUndoObject,
             let redoLayer = canvasState.selectedLayer
@@ -107,76 +105,99 @@ extension UndoStack {
             textureLayer: redoLayer
         )
 
-        // Add a texture to the UndoTextureRepository for restoration
-        undoTextureRepository
-            .addTexture(
-                texture,
-                newTextureUUID: redoObject.undoTextureUUID
+        do {
+            try await undoTextureRepository
+                .addTexture(
+                    texture,
+                    newTextureUUID: redoObject.undoTextureUUID
+                )
+
+            pushUndoObject(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: redoObject
+                )
             )
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("pushUndoDrawingObject(canvasState:, texture:) undoTextureRepository.addTexture(, using:) \(error)")
-                    }
-                },
-                receiveValue: { [weak self] _ in
-                    self?.pushUndoObject(
-                        .init(
-                            undoObject: undoObject,
-                            redoObject: redoObject
-                        )
-                    )
-                    self?.drawingUndoObject = nil
-                }
+            drawingUndoObject = nil
+
+        } catch {
+            // No action on error
+            Logger.standard.error("UndoStack pushUndoDrawingObject() \(error)")
+        }
+    }
+
+    func pushUndoDrawingObject(
+        canvasState: CanvasState,
+        texture: MTLTexture
+    ) async {
+        guard
+            let undoObject = drawingUndoObject,
+            let redoLayer = canvasState.selectedLayer
+        else { return }
+
+        let redoObject = UndoDrawingObject(
+            textureLayer: redoLayer
+        )
+
+        do {
+            // Add a texture to the UndoTextureRepository for restoration
+            try await undoTextureRepository
+                .addTexture(
+                    texture,
+                    newTextureUUID: redoObject.undoTextureUUID
+                )
+
+            pushUndoObject(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: redoObject
+                )
             )
-            .store(in: &cancellables)
+
+            drawingUndoObject = nil
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
     }
 
     func pushUndoAdditionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
-    ) {
-        // Add a texture to the UndoTextureRepository for restoration
-        undoTextureRepository
-            .addTexture(
-                undoRedoObject.texture,
-                newTextureUUID: undoRedoObject.redoObject.undoTextureUUID
-            )
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("pushUndoAdditionObject(:) undoTextureRepository.addTexture(, using:) \(error)")
-                    }
-                },
-                receiveValue: { [weak self] _ in
-                    self?.pushUndoObject(undoRedoObject)
-                }
-            )
-            .store(in: &cancellables)
+    ) async {
+        do {
+            // Add a texture to the UndoTextureRepository for restoration
+            try await undoTextureRepository
+                .addTexture(
+                    undoRedoObject.texture,
+                    newTextureUUID: undoRedoObject.redoObject.undoTextureUUID
+                )
+
+            pushUndoObject(undoRedoObject)
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
     }
 
     func pushUndoDeletionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
-    ) {
-        // Add a texture to the UndoTextureRepository for restoration
-        undoTextureRepository
-            .addTexture(
-                undoRedoObject.texture,
-                newTextureUUID: undoRedoObject.undoObject.undoTextureUUID
-            )
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("pushUndoDeletionObject(:) undoTextureRepository.addTexture(, using:) \(error)")
-                    }
-                },
-                receiveValue: { [weak self] result in
-                    self?.pushUndoObject(undoRedoObject)
-                }
-            )
-            .store(in: &cancellables)
+    ) async {
+        do {
+            // Add a texture to the UndoTextureRepository for restoration
+            try await undoTextureRepository
+                .addTexture(
+                    undoRedoObject.texture,
+                    newTextureUUID: undoRedoObject.undoObject.undoTextureUUID
+                )
+
+            pushUndoObject(undoRedoObject)
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
     }
 
     func pushUndoObject(
@@ -186,37 +207,27 @@ extension UndoStack {
         let redoObject = undoRedoObject.redoObject
 
         undoObject.deinitSubject
-            .flatMap { [weak self] result -> AnyPublisher<UUID, Error> in
-                self?.undoTextureRepository.removeTexture(
-                    result.undoTextureUUID
-                )
-                ?? Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
-            }
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("pushUndoObject(canvasState:, texture:) undoObject \(error)")
-                    }
-                },
-                receiveValue: { _ in }
-            )
+            .sink(receiveValue: { [weak self] result in
+                do {
+                    try self?.undoTextureRepository.removeTexture(
+                        result.undoTextureUUID
+                    )
+                } catch {
+                    Logger.error(error)
+                }
+            })
             .store(in: &cancellables)
 
         redoObject.deinitSubject
-            .flatMap { [weak self] result -> AnyPublisher<UUID, Error> in
-                self?.undoTextureRepository.removeTexture(
-                    result.undoTextureUUID
-                )
-                ?? Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
-            }
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("pushUndoObject(canvasState:, texture:) redoObject \(error)")
-                    }
-                },
-                receiveValue: { _ in }
-            )
+            .sink(receiveValue: { [weak self] result in
+                do {
+                    try self?.undoTextureRepository.removeTexture(
+                        result.undoTextureUUID
+                    )
+                } catch {
+                    Logger.error(error)
+                }
+            })
             .store(in: &cancellables)
 
         pushUndoObjectToUndoStack(
@@ -249,21 +260,17 @@ extension UndoStack {
     private func performUndo(
         _ undoObject: UndoObject
     ) {
-        undoObject.updateTextureLayerRepositoryIfNeeded(
-            textureLayerRepository,
-            using: undoTextureRepository
-        )
-        .sink(
-            receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    Logger.standard.error("performUndo(:) \(error)")
-                }
-            },
-            receiveValue: { [weak self] in
-                self?.completeUndoAction(undoObject)
+        Task {
+            do {
+                try await undoObject.performUndo(
+                    textureLayerRepository: textureLayerRepository,
+                    undoTextureRepository: undoTextureRepository
+                )
+                completeUndoAction(undoObject)
+            } catch {
+                Logger.standard.error("performUndo(:) \(error)")
             }
-        )
-        .store(in: &cancellables)
+        }
     }
 
     private func completeUndoAction(_ undoObject: UndoObject) {

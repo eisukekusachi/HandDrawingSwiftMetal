@@ -23,84 +23,58 @@ final class MockTextureLayerRepository: TextureLayerRepository {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
+        .init()
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {}
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func createTextures(layers: [TextureLayerModel], textureSize: CGSize, folderURL: URL) -> AnyPublisher<Void, Error> {
-        Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
+    func createTexture(uuid: UUID, textureSize: CGSize) async throws {}
 
     func thumbnail(_ uuid: UUID) -> UIImage? {
         nil
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        guard
-            let device = MTLCreateSystemDefaultDevice(),
-            let texture = MTLTextureCreator.makeBlankTexture(with: device)
-        else {
-            return Fail(error: NSError(domain: "AddTextureError", code: -1, userInfo: nil))
-                .eraseToAnyPublisher()
-        }
-        return Just(
-            .init(
-                uuid: UUID(),
-                texture: texture
-            )
-        )
-        .setFailureType(to: Error.self)
-        .eraseToAnyPublisher()
-    }
-
-    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        guard
-            let device = MTLCreateSystemDefaultDevice(),
-            let texture = MTLTextureCreator.makeBlankTexture(with: device)
-        else {
-            return Fail(error: NSError(domain: "AddTextureError", code: -1, userInfo: nil))
-                .eraseToAnyPublisher()
-        }
-        return Just(
-            .init(
-                uuid: UUID(),
-                texture: texture
-            )
-        )
-        .setFailureType(to: Error.self)
-        .eraseToAnyPublisher()
-    }
-
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        Just([])
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Just(uuid).setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
-    }
-
     func removeAll() {}
 
     func setThumbnail(texture: MTLTexture?, for uuid: UUID) {}
+
+    /// Copies a texture for the given UUID
+    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let texture = MTLTextureCreator.makeBlankTexture(with: device)
+        else {
+            throw NSError(domain: "AddTextureError", code: -1, userInfo: nil)
+        }
+        return .init(
+            uuid: UUID(),
+            texture: texture
+        )
+    }
+
+    /// Copies multiple textures for the given UUIDs
+    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+        []
+    }
+
+
+    func removeTexture(_ uuid: UUID) throws -> UUID {
+        uuid
+    }
+
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let texture = MTLTextureCreator.makeBlankTexture(with: device)
+        else {
+            throw NSError(domain: "AddTextureError", code: -1, userInfo: nil)
+        }
+        return .init(
+            uuid: UUID(),
+            texture: texture
+        )
+    }
 
     @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard

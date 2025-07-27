@@ -7,12 +7,11 @@
 
 import Foundation
 
-final class TextureUndoInMemorySingletonRepository: TextureRepositoryWrapper {
+final class TextureUndoInMemorySingletonRepository: TextureRepositoryWrapper, @unchecked Sendable {
 
     static let shared = TextureUndoInMemorySingletonRepository()
 
     private init() {
         super.init(repository: TextureLayerInMemoryRepository())
     }
-
 }

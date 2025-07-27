@@ -10,6 +10,7 @@ import XCTest
 
 final class FingerStrokeTests: XCTestCase {
     /// Confirms finger input
+    @MainActor
     func testLatestTouchPoints() {
         let subject = FingerStroke(
             touchHistories: [
@@ -58,6 +59,7 @@ final class FingerStrokeTests: XCTestCase {
     }
 
     /// Confirms that all fingers are on the screen
+    @MainActor
     func testIsAllFingersOnScreen() {
         struct Condition {
             let touchHistories: TouchHistoriesOnScreen
@@ -193,6 +195,7 @@ final class FingerStrokeTests: XCTestCase {
         }
     }
 
+    @MainActor
     func testUpdateDictionaryKeyIfKeyIsNil() {
         let touchHistories: TouchHistoriesOnScreen =
         [
@@ -218,6 +221,7 @@ final class FingerStrokeTests: XCTestCase {
         XCTAssertEqual(subject.activeTouchID, 0)
     }
 
+    @MainActor
     func testReset() {
         let subject = FingerStroke(
             touchHistories: [

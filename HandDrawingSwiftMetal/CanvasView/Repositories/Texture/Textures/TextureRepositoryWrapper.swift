@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-class TextureRepositoryWrapper: TextureRepository {
+class TextureRepositoryWrapper: TextureRepository, @unchecked Sendable {
 
     let repository: TextureRepository
 
@@ -33,40 +33,44 @@ class TextureRepositoryWrapper: TextureRepository {
         repository.isInitialized
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.initializeStorage(configuration: configuration)
+    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
+        try await repository.initializeStorage(configuration: configuration)
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
-        repository.restoreStorage(from: sourceFolderURL, with: configuration)
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {
+        try await repository.restoreStorage(from: sourceFolderURL, with: configuration)
     }
 
     func setTextureSize(_ size: CGSize) {
         repository.setTextureSize(size)
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        repository.addTexture(texture, newTextureUUID: uuid)
-    }
-
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, any Error> {
-        repository.createTexture(uuid: uuid, textureSize: textureSize)
-    }
-
-    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        repository.copyTexture(uuid: uuid)
-    }
-
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        repository.copyTextures(uuids: uuids)
-    }
-
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        repository.removeTexture(uuid)
+    func createTexture(uuid: UUID, textureSize: CGSize) async throws {
+        try await repository.createTexture(uuid: uuid, textureSize: textureSize)
     }
 
     func removeAll() {
         repository.removeAll()
+    }
+
+    /// Copies a texture for the given UUID
+    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+        try await repository.copyTexture(uuid: uuid)
+    }
+
+    /// Copies multiple textures for the given UUIDs
+    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+        try await repository.copyTextures(uuids: uuids)
+    }
+
+
+    /// Adds a texture using UUID
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        try await repository.addTexture(texture, newTextureUUID: uuid)
+    }
+
+    func removeTexture(_ uuid: UUID) throws -> UUID {
+        try repository.removeTexture(uuid)
     }
 
     func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {

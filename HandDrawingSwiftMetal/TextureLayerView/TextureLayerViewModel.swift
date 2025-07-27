@@ -92,22 +92,14 @@ extension TextureLayerViewModel {
         let layer: TextureLayerModel = .init(title: TimeStampFormatter.currentDate)
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
-        textureLayerRepository
-            .addTexture(
-                MTLTextureCreator.makeBlankTexture(size: canvasState.textureSize, with: device),
-                newTextureUUID: layer.id
-            )
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("insertLayer(textureSize:, at:) \(error)")
-                    }
-                },
-                receiveValue: { [weak self] result in
-                    self?.insertLayer(layer: layer, at: index, undoTexture: result.texture)
-                }
-            )
-            .store(in: &cancellables)
+        Task {
+            let result = try await textureLayerRepository
+                .addTexture(
+                    MTLTextureCreator.makeBlankTexture(size: canvasState.textureSize, with: device),
+                    newTextureUUID: layer.id
+                )
+            insertLayer(layer: layer, at: index, undoTexture: result.texture)
+        }
     }
 
     func onTapDeleteButton() {
@@ -117,30 +109,16 @@ extension TextureLayerViewModel {
             let selectedIndex = canvasState.selectedIndex
         else { return }
 
-        textureLayerRepository
-            .copyTexture(
+        Task {
+            let result = try await textureLayerRepository.copyTexture(
                 uuid: canvasState.layers[selectedIndex].id
             )
-            .flatMap { [weak self] result -> AnyPublisher<IdentifiedTexture, Error> in
-                guard let self else {
-                    return Fail(error: TextureLayerError.failedToUnwrap).eraseToAnyPublisher()
-                }
-                return self.textureLayerRepository
-                    .removeTexture(selectedLayer.id)
-                    .map { _ in result }
-                    .eraseToAnyPublisher()
-            }
-            .sink(
-                receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        Logger.standard.error("removeLayer() \(error)")
-                    }
-                },
-                receiveValue: { [weak self] result in
-                    self?.removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
-                }
-            )
-            .store(in: &cancellables)
+
+            try textureLayerRepository
+                .removeTexture(selectedLayer.id)
+
+            removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
+        }
     }
 
     func onTapTitleButton(id: UUID, title: String) {
@@ -167,36 +145,40 @@ extension TextureLayerViewModel {
     private func insertLayer(layer: TextureLayerModel, at index: Int, undoTexture: MTLTexture?) {
         let previousLayerIndex = self.canvasState.selectedIndex ?? 0
 
-        // MARK: Perform a layer operation
-        self.canvasState.layers.insert(layer, at: index)
-        self.canvasState.selectedLayerId = layer.id
-        self.canvasState.fullCanvasUpdateSubject.send(())
+        // Perform a layer operation
+        canvasState.layers.insert(layer, at: index)
+        canvasState.selectedLayerId = layer.id
+        canvasState.fullCanvasUpdateSubject.send(())
 
-        // MARK: Push an UndoObject onto the stack
-        let currentLayerIndex = self.canvasState.selectedIndex ?? 0
-        self.addUndoAdditionObject(
-            previousLayerIndex: previousLayerIndex,
-            currentLayerIndex: currentLayerIndex,
-            layer: layer,
-            texture: undoTexture
-        )
+        // Push an UndoObject onto the stack
+        Task {
+            let currentLayerIndex = canvasState.selectedIndex ?? 0
+            await addUndoAdditionObject(
+                previousLayerIndex: previousLayerIndex,
+                currentLayerIndex: currentLayerIndex,
+                layer: layer,
+                texture: undoTexture
+            )
+        }
     }
 
     private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
 
-        // MARK: Perform a layer operation
+        // Perform a layer operation
         self.canvasState.layers.remove(at: selectedLayerIndex)
         self.canvasState.selectedLayerId = self.canvasState.layers[newLayerIndex].id
         self.canvasState.fullCanvasUpdateSubject.send(())
 
-        // MARK: Push an UndoObject onto the stack
-        addUndoDeletionObject(
-            previousLayerIndex: selectedLayerIndex,
-            currentLayerIndex: newLayerIndex,
-            layer: selectedLayer,
-            texture: undoTexture
-        )
+        // Push an UndoObject onto the stack
+        Task {
+            await addUndoDeletionObject(
+                previousLayerIndex: selectedLayerIndex,
+                currentLayerIndex: newLayerIndex,
+                layer: selectedLayer,
+                texture: undoTexture
+            )
+        }
     }
 
     private func moveLayer(
@@ -265,7 +247,7 @@ extension TextureLayerViewModel {
         currentLayerIndex: Int,
         layer: TextureLayerModel,
         texture: MTLTexture?
-    ) {
+    ) async {
         let redoObject = UndoAdditionObject(
             layerToBeAdded: layer,
             insertIndex: currentLayerIndex
@@ -277,7 +259,7 @@ extension TextureLayerViewModel {
             selectedLayerIdAfterDeletion: canvasState.layers[previousLayerIndex].id
         )
 
-        undoStack?.pushUndoAdditionObject(
+        await undoStack?.pushUndoAdditionObject(
             .init(
                 undoObject: undoObject,
                 redoObject: redoObject,
@@ -291,7 +273,7 @@ extension TextureLayerViewModel {
         currentLayerIndex: Int,
         layer: TextureLayerModel,
         texture: MTLTexture?
-    ) {
+    ) async {
         // Add an undo object to the undo stack
         let redoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
@@ -304,7 +286,7 @@ extension TextureLayerViewModel {
             insertIndex: previousLayerIndex
         )
 
-        undoStack?.pushUndoDeletionObject(
+        await undoStack?.pushUndoDeletionObject(
             .init(
                 undoObject: undoObject,
                 redoObject: redoObject,

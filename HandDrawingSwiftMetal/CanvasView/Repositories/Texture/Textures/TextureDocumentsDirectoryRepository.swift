@@ -10,13 +10,12 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages on-disk textures
-class TextureDocumentsDirectoryRepository: TextureRepository {
-
+class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendable {
     /// The directory name where texture files are stored
     let directoryName: String
 
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
-    private(set) var workingDirectoryURL: URL!
+    let workingDirectoryURL: URL
 
     /// IDs of the textures stored in the repository
     var textureIds: Set<UUID> = []
@@ -51,25 +50,26 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
 
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        // Do not back up because this is an intermediate directory
-        do {
-            var resourceValues = URLResourceValues()
-            resourceValues.isExcludedFromBackup = true
-            try workingDirectoryURL.setResourceValues(resourceValues)
-        } catch {
-            Logger.standard.error("LocalFileRepository: \(error)")
-        }
-
         do {
             try FileManager.createDirectory(workingDirectoryURL)
         } catch {
-            Logger.standard.error("Failed to create the storage: \(error)")
+            Logger.error(error)
+        }
+
+        // Do not back up because this is an intermediate directory
+        do {
+            var url = workingDirectoryURL
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try url.setResourceValues(resourceValues)
+        } catch {
+            Logger.error(error)
         }
     }
 
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
-    func initializeStorage(configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
@@ -80,82 +80,72 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
 
-            return Just(configuration)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
+            return configuration
         } else {
-            return initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
-                .eraseToAnyPublisher()
+            let configuration = try await initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
+            return configuration
         }
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) -> AnyPublisher<CanvasConfiguration, Error> {
+    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
-            return Fail(error: TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")).eraseToAnyPublisher()
+            throw TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")
         }
 
-        return Future<CanvasConfiguration, Error> { [weak self] promise in
+        guard
+            let device = MTLCreateSystemDefaultDevice()
+        else {
+            throw TextureRepositoryError.failedToUnwrap
+        }
+
+        var tmpTextureIds: Set<UUID> = []
+
+        try configuration.layers.forEach { layer in
+            let textureData = try Data(
+                contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
+            )
             guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
-
-            do {
-                var tmpTextureIds: Set<UUID> = []
-
-                try configuration.layers.forEach { layer in
-                    let textureData = try Data(
-                        contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
-                    )
-                    guard
-                        let textureSize = configuration.textureSize,
-                        let hexadecimalData = textureData.encodedHexadecimals,
-                        let _ = MTLTextureCreator.makeTexture(
-                            size: textureSize,
-                            colorArray: hexadecimalData,
-                            with: device
-                        )
-                    else {
-                        throw TextureRepositoryError.failedToUnwrap
-                    }
-
-                    tmpTextureIds.insert(layer.id)
-                }
-
-                // Delete all textures in the repository
-                self.removeAll()
-
-                // Move all files
-                try configuration.layers.forEach { layer in
-                    try FileManager.default.moveItem(
-                        at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
-                        to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
-                    )
-                }
-
-                self.textureIds = tmpTextureIds
-
-                // Set the texture size after the initialization of this repository is completed
-                self.setTextureSize(textureSize)
-
-                promise(.success(configuration))
-            } catch {
-                promise(.failure(error))
+                let textureSize = configuration.textureSize,
+                let hexadecimalData = textureData.encodedHexadecimals,
+                let _ = MTLTextureCreator.makeTexture(
+                    size: textureSize,
+                    colorArray: hexadecimalData,
+                    with: device
+                )
+            else {
+                throw TextureRepositoryError.failedToUnwrap
             }
+
+            tmpTextureIds.insert(layer.id)
         }
-        .eraseToAnyPublisher()
+
+        // Delete all textures in the repository
+        self.removeAll()
+
+        // Move all files
+        try configuration.layers.forEach { layer in
+            try FileManager.default.moveItem(
+                at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
+                to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
+            )
+        }
+
+        textureIds = tmpTextureIds
+
+        // Set the texture size after the initialization of this repository is completed
+        setTextureSize(textureSize)
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
+    func initializeStorageWithNewTexture(_ textureSize: CGSize) async throws -> CanvasConfiguration {
         guard
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
                 Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
             Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return Fail(error: TextureRepositoryError.invalidTextureSize).eraseToAnyPublisher()
+            throw TextureRepositoryError.invalidTextureSize
         }
 
         // Delete all textures in the repository
@@ -165,125 +155,71 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
             title: TimeStampFormatter.currentDate
         )
 
-        return createTexture(
+        try await createTexture(
             uuid: layer.id,
             textureSize: textureSize
         )
-        .map { [weak self] _ in
-            // Set the texture size after the initialization of this repository is completed
-            self?.setTextureSize(textureSize)
 
-            return .init(textureSize: textureSize, layers: [layer])
-        }
-        .eraseToAnyPublisher()
+        // Set the texture size after the initialization of this repository is completed
+        setTextureSize(textureSize)
+
+        return .init(textureSize: textureSize, layers: [layer])
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) -> AnyPublisher<Void, Error> {
-        Future<Void, Error> { [weak self] promise in
-            guard
-                let `self`,
-                let device = MTLCreateSystemDefaultDevice()
-            else { return }
+    func createTexture(uuid: UUID, textureSize: CGSize) async throws {
+        guard
+            let device = MTLCreateSystemDefaultDevice()
+        else { return }
 
-            do {
-                if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
-                    try FileOutput.saveTextureAsData(
-                        bytes: texture.bytes,
-                        to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
-                    )
-
-                    self.textureIds.insert(uuid)
-
-                    promise(.success(()))
-                } else {
-                    promise(.failure(TextureRepositoryError.failedToUnwrap))
-                }
-
-            } catch {
-                promise(.failure(error))
-            }
+        if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+            try FileOutput.saveTextureAsData(
+                bytes: texture.bytes,
+                to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+            )
+            textureIds.insert(uuid)
         }
-        .eraseToAnyPublisher()
     }
-
     func setTextureSize(_ size: CGSize) {
         _textureSize = size
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
-        Future { [weak self] promise in
-            guard let `self`, let texture else {
-                promise(.failure(TextureRepositoryError.failedToUnwrap))
-                return
-            }
-
-            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
-
-            guard !FileManager.default.fileExists(atPath: fileURL.path) else {
-                promise(.failure(TextureRepositoryError.fileAlreadyExists))
-                return
-            }
-
-            do {
-                try FileOutput.saveTextureAsData(
-                    bytes: texture.bytes,
-                    to: fileURL
-                )
-
-                promise(.success(
-                    .init(uuid: uuid, texture: texture)
-                ))
-
-            } catch {
-                promise(.failure(TextureDocumentsDirectoryRepositoryError.failedToUpdateTexture(error)))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-
-    func copyTexture(uuid: UUID) -> AnyPublisher<IdentifiedTexture, Error> {
+    /// Copies a texture for the given UUID
+    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
         if textureSize == .zero {
-            return Fail(
-                error: TextureDocumentsDirectoryRepositoryError.textureSizeIsZero
-            )
-            .eraseToAnyPublisher()
+            throw TextureDocumentsDirectoryRepositoryError.textureSizeIsZero
         }
 
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
-        return Future<IdentifiedTexture, Error> { [weak self] promise in
-            do {
-                guard
-                    let `self`,
-                    let device = MTLCreateSystemDefaultDevice(),
-                    let newTexture: MTLTexture = try FileInput.loadTexture(
-                        url: destinationUrl,
-                        textureSize: self.textureSize,
-                        device: device
-                    )
-                else {
-                    return promise(.failure(TextureDocumentsDirectoryRepositoryError.fileNotFound(destinationUrl.path)))
-                }
-
-                promise(
-                    .success(
-                        .init(uuid: uuid, texture: newTexture)
-                    )
-                )
-            } catch {
-                promise(.failure(error))
-            }
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let newTexture: MTLTexture = try FileInput.loadTexture(
+                url: destinationUrl,
+                textureSize: self.textureSize,
+                device: device
+            )
+        else {
+            throw TextureDocumentsDirectoryRepositoryError.fileNotFound(destinationUrl.path)
         }
-        .eraseToAnyPublisher()
+
+        return .init(uuid: uuid, texture: newTexture)
     }
 
-    func copyTextures(uuids: [UUID]) -> AnyPublisher<[IdentifiedTexture], Error> {
-        Publishers.MergeMany(
-            uuids.map { copyTexture(uuid: $0) }
-        )
-        .collect()
-        .eraseToAnyPublisher()
+    /// Copies multiple textures for the given UUIDs
+    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+        try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
+            for id in uuids {
+                group.addTask { try await self.copyTexture(uuid: id) }
+            }
+
+            var results: [IdentifiedTexture] = []
+            for try await result in group {
+                results.append(result)
+            }
+            return results
+        }
     }
+
 
     /// Recreate the directory and removes textures and thumbnails
     func removeAll() {
@@ -298,23 +234,37 @@ class TextureDocumentsDirectoryRepository: TextureRepository {
         }
     }
 
-    func removeTexture(_ uuid: UUID) -> AnyPublisher<UUID, Error> {
-        Future { [weak self] promise in
-            guard let `self` else { return }
+    func removeTexture(_ uuid: UUID) throws -> UUID {
+        let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
-            let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
-
-            if FileManager.default.fileExists(atPath: fileURL.path) {
-                try? FileManager.default.removeItem(at: fileURL)
-            }
-
-            textureIds.remove(uuid)
-
-            promise(.success(uuid))
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            try? FileManager.default.removeItem(at: fileURL)
         }
-        .eraseToAnyPublisher()
+
+        textureIds.remove(uuid)
+        return uuid
     }
-    @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+
+    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        guard let texture else {
+            throw TextureRepositoryError.failedToUnwrap
+        }
+
+        let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+
+        guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+            throw TextureRepositoryError.fileAlreadyExists
+        }
+
+        try FileOutput.saveTextureAsData(
+            bytes: texture.bytes,
+            to: fileURL
+        )
+        return .init(uuid: uuid, texture: texture)
+    }
+
+    @discardableResult
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture,
             let device = MTLCreateSystemDefaultDevice()

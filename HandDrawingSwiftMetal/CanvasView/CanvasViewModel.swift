@@ -143,11 +143,13 @@ import Combine
         // Use the size from CoreData if available,
         // if not, use the size from the configuration,
         // otherwise, fall back to the default value
-        initialize(
-            configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
-        )
+        Task {
+            try await initializeCanvas(
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
+            )
 
-        bindData()
+            bindData()
+        }
     }
 
     private func bindData() {
@@ -243,30 +245,15 @@ extension CanvasViewModel {
         canvasState.textureSize
     }
 
-    func initialize(configuration: CanvasConfiguration) {
+    func initializeCanvas(configuration: CanvasConfiguration) async throws {
         // Initialize the texture repository
-        dependencies.textureLayerRepository.initializeStorage(configuration: configuration)
-            .handleEvents(
-                receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
-                receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
-            )
-            .sink(
-                receiveCompletion: { completion in
-                    switch completion {
-                    case .finished: break
-                    case .failure(let error): Logger.standard.error("Initialization failed. Please set an appropriate texture size and restart the application: \(error)")
-                    }
-                },
-                receiveValue: { [weak self] result in
-                    Task { @MainActor in
-                        self?.setupCanvas(result)
-                    }
-                }
-            )
-            .store(in: &cancellables)
+        let resultConfiguration = try await dependencies.textureLayerRepository.initializeStorage(
+            configuration: configuration
+        )
+        setupCanvas(resultConfiguration)
     }
 
-    @MainActor private func setupCanvas(_ configuration: CanvasConfiguration) {
+    private func setupCanvas(_ configuration: CanvasConfiguration) {
         guard
             let textureSize = configuration.textureSize,
             let commandBuffer = displayView?.commandBuffer
@@ -276,9 +263,6 @@ extension CanvasViewModel {
 
         canvasState.setData(configuration)
 
-        drawingBrushTextureSet.initTextures(textureSize)
-        drawingEraserTextureSet.initTextures(textureSize)
-
         renderer.initTextures(textureSize: textureSize)
 
         renderer.updateDrawingTextures(
@@ -286,13 +270,20 @@ extension CanvasViewModel {
             textureLayerRepository: textureLayerRepository,
             with: commandBuffer
         ) { [weak self] in
-            self?.updateCanvasView()
+            self?.completeCanvasSetup(textureSize: textureSize, configuration: configuration)
         }
+    }
+
+    private func completeCanvasSetup(textureSize: CGSize, configuration: CanvasConfiguration) {
+
+        drawingBrushTextureSet.initTextures(textureSize)
+        drawingEraserTextureSet.initTextures(textureSize)
 
         undoStack?.initialize(textureSize)
 
+        updateCanvasView()
+
         canvasViewSetupCompletedSubject.send(configuration)
-        activityIndicatorSubject.send(false)
     }
 }
 
@@ -316,7 +307,9 @@ extension CanvasViewModel {
         case .drawing:
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
-                undoStack?.setDrawingUndoObject()
+                Task {
+                    await undoStack?.setDrawingUndoObject()
+                }
             }
 
             fingerStroke.setActiveDictionaryKeyIfNil()
@@ -360,7 +353,9 @@ extension CanvasViewModel {
     ) {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
-            undoStack?.setDrawingUndoObject()
+            Task {
+                await undoStack?.setDrawingUndoObject()
+            }
         }
 
         pencilStroke.appendActualTouches(
@@ -394,11 +389,11 @@ extension CanvasViewModel {
         canvasState.eraser.setDiameter(value)
     }
 
-    func newCanvas(configuration: CanvasConfiguration) {
-        transformer.setMatrix(.identity)
-        initialize(
+    func newCanvas(configuration: CanvasConfiguration) async throws {
+        try await initializeCanvas(
             configuration: CanvasConfiguration(textureSize: canvasState.textureSize)
         )
+        transformer.setMatrix(.identity)
     }
 
     func undo() {
@@ -409,26 +404,17 @@ extension CanvasViewModel {
     }
 
     func loadFile(zipFileURL: URL) {
-        /// Create the working space
-        do {
-            try dependencies.localFileRepository.createWorkingDirectory()
-        }
-        catch(let error) {
-            alertSubject.send(error)
-        }
-
-        /// Unzip into the working space
-        dependencies.localFileRepository.unzipToWorkingDirectory(
-            from: zipFileURL
-        )
-        .flatMap { [weak self] workingDirectoryURL -> AnyPublisher<CanvasConfiguration, Error> in
-            guard let self else {
-                return Fail(
-                    error: CanvasViewModelError.invalidValue("failed to unwrap")
-                ).eraseToAnyPublisher()
-            }
+        Task {
+            defer { activityIndicatorSubject.send(false) }
+            activityIndicatorSubject.send(true)
 
             do {
+                try dependencies.localFileRepository.createWorkingDirectory()
+
+                let workingDirectoryURL = try await dependencies.localFileRepository.unzipToWorkingDirectoryAsync(
+                    from: zipFileURL
+                )
+
                 let entity: CanvasEntity = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
                 )
@@ -437,32 +423,22 @@ extension CanvasViewModel {
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                return self.dependencies.textureLayerRepository.restoreStorage(
+                try await dependencies.textureLayerRepository.restoreStorage(
                     from: workingDirectoryURL,
                     with: configuration
-               )
-           } catch(let error) {
-               return Fail(error: error).eraseToAnyPublisher()
-           }
-        }
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertSubject.send(error)
-            }
-            /// Remove the working space
-            self?.dependencies.localFileRepository.removeWorkingDirectory()
+                )
 
-        }, receiveValue: { [weak self] configuration in
-            Task { @MainActor in
-                self?.setupCanvas(configuration)
+                setupCanvas(configuration)
+
+                /// Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
             }
-        })
-        .store(in: &cancellables)
+            catch {
+                alertSubject.send(error)
+            }
+        }
     }
 
     func saveFile() {
@@ -483,70 +459,47 @@ extension CanvasViewModel {
             canvasState: canvasState
         )
 
-        /// Create the working space
-        do {
-            try dependencies.localFileRepository.createWorkingDirectory()
-        }
-        catch(let error) {
-            alertSubject.send(error)
-        }
+        Task {
+            defer { activityIndicatorSubject.send(false) }
+            activityIndicatorSubject.send(true)
 
-        dependencies.textureLayerRepository.copyTextures(
-            uuids: canvasState.layers.map { $0.id }
-        )
-        .flatMap { [weak self] identifiedTextures -> AnyPublisher<Void, Error> in
-            guard let self else {
-                return Fail(
-                    error: CanvasViewModelError.invalidValue("failed to unwrap")
-                ).eraseToAnyPublisher()
-            }
+            do {
+                try dependencies.localFileRepository.createWorkingDirectory()
 
-            return Publishers.CombineLatest(
-                /// Save the thumbnail to the working space
-                self.dependencies.localFileRepository.saveToWorkingDirectory(
+                let result = try await dependencies.textureLayerRepository.copyTextures(
+                    uuids: canvasState.layers.map { $0.id }
+                )
+
+                async let resultThumbnail = try await dependencies.localFileRepository.saveToWorkingDirectoryAsync(
                     namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
-                ),
-                /// Save the textures to the working space
-                self.dependencies.localFileRepository.saveAllToWorkingDirectory(
-                    namedItems: identifiedTextures.map {
+                )
+                async let resultURLs: [URL] = try await dependencies.localFileRepository.saveAllToWorkingDirectoryAsync(
+                    namedItems: result.map {
                         .init(name: $0.uuid.uuidString, item: $0)
                     }
                 )
-            )
-            .map { _, _ in () }
-            .eraseToAnyPublisher()
-        }
-        .flatMap { [weak self] _ -> AnyPublisher<URL, Error> in
-            /// Save canvas the data to the working space
-            self?.dependencies.localFileRepository.saveToWorkingDirectory(
-                namedItem: .init(
-                    name: CanvasEntity.jsonFileName,
-                    item: entity
-                )
-            ) ?? Fail(
-                error: CanvasViewModelError.invalidValue("failed to unwrap")
-            ).eraseToAnyPublisher()
-        }
-        .tryMap { [weak self] result in
-            /// Archive the working space as a ZIP file
-            try self?.dependencies.localFileRepository.zipWorkingDirectory(
-                to: zipFileURL
-            )
-        }
-        .handleEvents(
-            receiveSubscription: { [weak self] _ in self?.activityIndicatorSubject.send(true) },
-            receiveCompletion: { [weak self] _ in self?.activityIndicatorSubject.send(false) }
-        )
-        .sink(receiveCompletion: { [weak self] completion in
-            switch completion {
-            case .finished: self?.toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
-            case .failure(let error): self?.alertSubject.send(error)
-            }
-            /// Remove the working space
-            self?.dependencies.localFileRepository.removeWorkingDirectory()
+                _ = try await (resultThumbnail, resultURLs)
 
-        }, receiveValue: {})
-        .store(in: &cancellables)
+                async let resultEntity = try await dependencies.localFileRepository.saveToWorkingDirectoryAsync(
+                    namedItem: .init(
+                        name: CanvasEntity.jsonFileName,
+                        item: entity
+                    )
+                )
+                _ = try await (resultEntity)
+
+                try dependencies.localFileRepository.zipWorkingDirectory(
+                    to: zipFileURL
+                )
+
+                /// Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+            } catch {
+                alertSubject.send(error)
+            }
+        }
     }
 }
 
@@ -625,13 +578,13 @@ extension CanvasViewModel {
                     texture: texture,
                     for: selectedTextureId
                 )
-                undoStack?.pushUndoDrawingObject(
+                await undoStack?.pushUndoDrawingObject(
                     canvasState: canvasState,
                     texture: resultTexture.texture
                 )
             } catch {
                 // No action on error
-                Logger.standard.error("Failed to complete the drawing process: \(error)")
+                Logger.error(error)
             }
         }
     }
@@ -661,6 +614,7 @@ extension CanvasViewModel {
         }
     }
 
+    @MainActor
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,

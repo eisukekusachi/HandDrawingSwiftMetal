@@ -58,6 +58,17 @@ extension LocalFileRepository {
     }
 
     /// Unzips a file into the working directory
+    func unzipToWorkingDirectoryAsync(
+        from zipFileURL: URL
+    ) async throws -> URL {
+        try FileInput.unzip(
+            sourceURL: zipFileURL,
+            to: workingDirectoryURL
+        )
+        return workingDirectoryURL
+    }
+
+    /// Unzips a file into the working directory
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) -> AnyPublisher<URL, Error> {
@@ -82,6 +93,34 @@ extension LocalFileRepository {
 }
 
 extension LocalFileRepository {
+    /// Saves a single file item to the working directory
+    func saveToWorkingDirectoryAsync<T: LocalFileConvertible>(
+        namedItem: LocalFileNamedItem<T>
+    ) async throws -> URL {
+        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.name)
+        try namedItem.item.write(to: fileURL)
+        return fileURL
+    }
+
+    /// Saves multiple file items to the working directory
+    func saveAllToWorkingDirectoryAsync<T: LocalFileConvertible>(
+        namedItems: [LocalFileNamedItem<T>]
+    ) async throws -> [URL] {
+        return try await withThrowingTaskGroup(of: URL.self) { group in
+            for namedItem in namedItems {
+                group.addTask {
+                    try await self.saveToWorkingDirectoryAsync(namedItem: namedItem)
+                }
+            }
+
+            var urls: [URL] = []
+            for try await url in group {
+                urls.append(url)
+            }
+            return urls
+        }
+    }
+
     /// Saves a single file item to the working directory
     func saveToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>

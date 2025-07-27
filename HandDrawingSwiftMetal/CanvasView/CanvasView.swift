@@ -102,7 +102,12 @@ public class CanvasView: UIView {
     }
 
     func newCanvas(configuration: CanvasConfiguration) {
-        canvasViewModel.newCanvas(configuration: configuration)
+        Task {
+            defer { activityIndicatorSubject.send(false) }
+            activityIndicatorSubject.send(true)
+
+            try await canvasViewModel.newCanvas(configuration: configuration)
+        }
     }
 
     func resetTransforming() {

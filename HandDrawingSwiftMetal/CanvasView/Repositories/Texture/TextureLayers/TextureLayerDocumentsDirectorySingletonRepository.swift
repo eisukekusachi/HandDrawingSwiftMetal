@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TextureLayerDocumentsDirectorySingletonRepository: TextureLayerRepositoryWrapper {
+final class TextureLayerDocumentsDirectorySingletonRepository: TextureLayerRepositoryWrapper, @unchecked Sendable {
 
     static let shared = TextureLayerDocumentsDirectorySingletonRepository()
 
@@ -19,5 +19,4 @@ final class TextureLayerDocumentsDirectorySingletonRepository: TextureLayerRepos
             )
         )
     }
-
 }

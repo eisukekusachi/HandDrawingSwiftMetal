@@ -43,14 +43,10 @@ final class UndoAlphaChangedObject: UndoObject {
         self.textureLayer = textureLayer
     }
 
-    func updateTextureLayerRepositoryIfNeeded(
-        _ textureLayerRepository: TextureLayerRepository,
-        using undoTextureRepository: TextureRepository
-    ) -> AnyPublisher<Void, Error> {
-        // Do not update the texture repository
-        Just(())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+    func performUndo(
+        textureLayerRepository: TextureLayerRepository,
+        undoTextureRepository: TextureRepository
+    ) async throws {
+        // Do nothing
     }
-
 }

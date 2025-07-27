@@ -115,49 +115,50 @@ extension CanvasRenderer {
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
-        var opaqueLayer = selectedLayer
-        opaqueLayer.alpha = 255
+        let opaqueLayer = {
+            var tmp = selectedLayer
+            tmp.alpha = 255
+            return tmp
+        }()
 
-        let bottomPublisher = drawLayerTextures(
-            layers: bottomLayers(
-                selectedIndex: selectedIndex,
-                layers: canvasState.layers
-            ),
-            from: textureLayerRepository,
-            on: unselectedBottomTexture,
-            with: commandBuffer
-        )
+        Task {
+            let textures = try await textureLayerRepository.copyTextures(
+                uuids: canvasState.layers.map { $0.id }
+            )
 
-        let topPublisher = drawLayerTextures(
-            layers: topLayers(
-                selectedIndex: selectedIndex,
-                layers: canvasState.layers
-            ),
-            from: textureLayerRepository,
-            on: unselectedTopTexture,
-            with: commandBuffer
-        )
+            Task { @MainActor in
+                async let bottomTexture: Void = try await drawLayerTextures(
+                    textures: textures,
+                    layers: bottomLayers(
+                        selectedIndex: selectedIndex,
+                        layers: canvasState.layers
+                    ),
+                    on: unselectedBottomTexture,
+                    with: commandBuffer
+                )
 
-        let selectedPublisher = drawLayerTextures(
-            layers: [opaqueLayer],
-            from: textureLayerRepository,
-            on: selectedTexture,
-            with: commandBuffer
-        )
+                async let selectedTexture: Void = try await drawLayerTextures(
+                    textures: textures,
+                    layers: [opaqueLayer],
+                    on: selectedTexture,
+                    with: commandBuffer
+                )
 
-        Publishers.CombineLatest3(
-            bottomPublisher,
-            selectedPublisher,
-            topPublisher
-        )
-        .receive(on: DispatchQueue.main)
-        .sink(
-            receiveCompletion: { _ in
+                async let topTexture: Void = try await drawLayerTextures(
+                    textures: textures,
+                    layers: topLayers(
+                        selectedIndex: selectedIndex,
+                        layers: canvasState.layers
+                    ),
+                    on: unselectedTopTexture,
+                    with: commandBuffer
+                )
+
+                _ = try await (bottomTexture, selectedTexture, topTexture)
+
                 onCompleted?()
-            },
-            receiveValue: { _ in }
-        )
-        .store(in: &cancellables)
+            }
+        }
     }
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
@@ -221,39 +222,35 @@ extension CanvasRenderer {
     }
 
     func drawLayerTextures(
+        textures: [IdentifiedTexture],
         layers: [TextureLayerModel],
-        from textureLayerRepository: TextureLayerRepository,
-        on destinationTexture: MTLTexture,
+        on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
-    ) -> AnyPublisher<Void, Error> {
-        // Clear the destination texture before merging
-        renderer.clearTexture(texture: destinationTexture, with: commandBuffer)
-
-        // If no layers, return immediately as success
-        guard !layers.isEmpty else {
-            return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
+    ) async throws {
+        guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else {
+            throw TextureLayerError.failedToUnwrap
         }
 
-        // Copy textures from the repository
-        return textureLayerRepository.copyTextures(
-            uuids: layers.map { $0.id }
-        )
-        .map { [weak self] results in
-            for layer in layers {
-                // Convert entities to a dictionary for easy lookup
-                let textureDictionary = IdentifiedTexture.dictionary(from: Set(results))
+        renderer.clearTexture(texture: destination, with: commandBuffer)
 
-                if let resultTexture = textureDictionary[layer.id].flatMap({ $0 }) {
-                    self?.renderer.mergeTexture(
-                        texture: resultTexture,
-                        alpha: layer.alpha,
-                        into: destinationTexture,
-                        with: commandBuffer
-                    )
-                }
+        let textureDictionary = IdentifiedTexture.dictionary(from: Set(textures))
+
+        for layer in layers {
+            if let resultTexture = textureDictionary[layer.id] {
+                renderer.mergeTexture(
+                    texture: resultTexture,
+                    alpha: layer.alpha,
+                    into: destination,
+                    with: commandBuffer
+                )
             }
-            return ()
         }
-        .eraseToAnyPublisher()
+
+        try await withCheckedThrowingContinuation { continuation in
+            commandBuffer.addCompletedHandler { _ in
+                continuation.resume()
+            }
+            commandBuffer.commit()
+        }
     }
 }
