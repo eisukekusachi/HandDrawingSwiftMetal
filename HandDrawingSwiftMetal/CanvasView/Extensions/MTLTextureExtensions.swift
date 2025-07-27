@@ -75,6 +75,9 @@ extension MTLTexture {
     }
 
     func makeThumbnail(length: Int = 64) -> UIImage? {
-        upsideDownUIImage?.resizeWithAspectRatio(width: CGFloat(length))
+        upsideDownUIImage?.resizeWithAspectRatio(
+            width: CGFloat(length),
+            scale: UIScreen.main.scale
+        )
     }
 }
