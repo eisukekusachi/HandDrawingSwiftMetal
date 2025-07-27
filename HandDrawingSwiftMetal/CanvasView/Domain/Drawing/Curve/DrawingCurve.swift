@@ -38,6 +38,7 @@ extension DrawingCurve {
     }
 
     /// Makes an array of first curve points from an iterator
+    @MainActor
     func makeFirstCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
@@ -63,6 +64,7 @@ extension DrawingCurve {
     }
 
     /// Makes an array of intermediate curve points from an iterator, setting the range to 4
+    @MainActor
     func makeIntermediateCurvePoints(
         shouldIncludeEndPoint: Bool
     ) -> [GrayscaleDotPoint] {
@@ -93,6 +95,7 @@ extension DrawingCurve {
     }
 
     /// Makes an array of last curve points from an iterator
+    @MainActor
     func makeLastCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 

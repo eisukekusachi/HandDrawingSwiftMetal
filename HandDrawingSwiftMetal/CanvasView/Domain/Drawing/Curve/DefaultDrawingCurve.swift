@@ -13,6 +13,7 @@ final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
     let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
+    @MainActor
     var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 

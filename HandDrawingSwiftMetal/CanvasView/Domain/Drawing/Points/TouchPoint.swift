@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 struct TouchPoint: Equatable {
 
     let location: CGPoint
@@ -21,6 +22,7 @@ struct TouchPoint: Equatable {
 
 extension TouchPoint {
 
+    @MainActor
     init(
         touch: UITouch,
         view: UIView
@@ -33,6 +35,7 @@ extension TouchPoint {
         self.timestamp = touch.timestamp
     }
 
+    @MainActor
     init(
         location: CGPoint,
         touch: TouchPoint
@@ -44,7 +47,6 @@ extension TouchPoint {
         self.estimationUpdateIndex = touch.estimationUpdateIndex
         self.timestamp = touch.timestamp
     }
-
 }
 
 extension Array where Element == TouchPoint {
@@ -60,5 +62,4 @@ extension Array where Element == TouchPoint {
             .moved
         }
     }
-
 }
