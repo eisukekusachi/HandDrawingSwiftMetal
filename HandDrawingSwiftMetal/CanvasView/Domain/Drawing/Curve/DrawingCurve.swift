@@ -9,6 +9,7 @@ import Combine
 import UIKit
 
 /// An iterator for realtime drawing with `UITouch.Phase`
+@MainActor
 protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
     /// Points that have not yet been drawn

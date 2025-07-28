@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 
 /// A set of textures for realtime eraser drawing
+@MainActor
 final class DrawingEraserTextureSet: DrawingTextureSet {
 
     private var eraserAlpha: Int = 255

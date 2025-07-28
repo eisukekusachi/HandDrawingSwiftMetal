@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 
 /// A protocol for a set of textures for realtime drawing
+@MainActor
 protocol DrawingTextureSet {
 
     /// Initializes the textures for realtime drawing with the specified texture size.
