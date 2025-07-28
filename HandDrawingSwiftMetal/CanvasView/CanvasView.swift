@@ -82,7 +82,7 @@ public class CanvasView: UIView {
         canvasViewModel.frameSize = frame.size
     }
 
-    func initialize(
+    public func initialize(
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
