@@ -31,6 +31,26 @@ final class DefaultCoreDataRepository: CoreDataRepository {
         return container
     }()
 
+    /*
+    // Use `module` when working with Swift Package Manager
+    private lazy var persistentContainer: NSPersistentContainer = {
+        guard let modelURL = Bundle.module.url(forResource: persistentContainerName, withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to load Core Data model from module bundle")
+        }
+
+        let container = NSPersistentContainer(name: persistentContainerName, managedObjectModel: model)
+
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("CoreData Load Error: \(error), \(error.userInfo)")
+            }
+        }
+
+        return container
+    }()
+    */
+
     var context: NSManagedObjectContext {
         persistentContainer.viewContext
     }
