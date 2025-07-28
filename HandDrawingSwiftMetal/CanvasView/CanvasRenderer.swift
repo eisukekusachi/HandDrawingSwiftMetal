@@ -102,6 +102,7 @@ extension CanvasRenderer {
     /// Updates `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
+    @MainActor
     func updateDrawingTextures(
         canvasState: CanvasState,
         textureLayerRepository: TextureLayerRepository,
@@ -159,6 +160,7 @@ extension CanvasRenderer {
     }
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
+    @MainActor
     func updateCanvasView(
         _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
@@ -200,6 +202,7 @@ extension CanvasRenderer {
         )
     }
 
+    @MainActor
     func updateCanvasView(
         _ canvasView: CanvasDisplayable?,
         with commandBuffer: MTLCommandBuffer
