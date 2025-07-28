@@ -9,8 +9,8 @@
 
 /// A struct that represents a texture entity with `UUID` and `MTLTexture`
 struct IdentifiedTexture: Hashable, @unchecked Sendable {
-    var uuid: UUID
-    var texture: MTLTexture
+    let uuid: UUID
+    let texture: MTLTexture
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(uuid)
