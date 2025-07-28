@@ -9,10 +9,10 @@ import Combine
 import Foundation
 
 /// A repository responsible for handling local file operations
-final class LocalFileRepository {
+final class LocalFileRepository: Sendable {
 
     /// The URL of the directory for storing temporary files
-    private var workingDirectoryURL: URL
+    let workingDirectoryURL: URL
 
     init(workingDirectoryURL: URL) {
         self.workingDirectoryURL = workingDirectoryURL
