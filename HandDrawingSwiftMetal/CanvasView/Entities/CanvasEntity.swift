@@ -82,7 +82,7 @@ extension CanvasEntity {
 }
 
 extension CanvasEntity: LocalFileConvertible {
-    func write(to url: URL) throws {
+    public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
     }
 }

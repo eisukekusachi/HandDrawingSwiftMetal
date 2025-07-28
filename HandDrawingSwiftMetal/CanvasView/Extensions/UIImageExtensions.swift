@@ -125,7 +125,7 @@ extension UIImage {
 }
 
 extension UIImage: LocalFileConvertible {
-    func write(to url: URL) throws {
+    public func write(to url: URL) throws {
         try FileOutput.saveImage(image: self, to: url)
     }
 }

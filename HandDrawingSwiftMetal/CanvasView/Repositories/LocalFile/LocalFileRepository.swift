@@ -67,34 +67,11 @@ extension LocalFileRepository {
         )
         return workingDirectoryURL
     }
-
-    /// Unzips a file into the working directory
-    func unzipToWorkingDirectory(
-        from zipFileURL: URL
-    ) -> AnyPublisher<URL, Error> {
-        let workingDirectoryURL = workingDirectoryURL
-        return Future<URL, Error> { promise in
-            Task {
-                do {
-                    try FileInput.unzip(
-                        sourceURL: zipFileURL,
-                        to: workingDirectoryURL
-                    )
-                    promise(
-                        .success(workingDirectoryURL)
-                    )
-                } catch {
-                    promise(.failure(error))
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-    }
 }
 
 extension LocalFileRepository {
     /// Saves a single file item to the working directory
-    func saveToWorkingDirectoryAsync<T: LocalFileConvertible>(
+    func saveToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>
     ) async throws -> URL {
         let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.name)
@@ -103,13 +80,14 @@ extension LocalFileRepository {
     }
 
     /// Saves multiple file items to the working directory
-    func saveAllToWorkingDirectoryAsync<T: LocalFileConvertible>(
+    func saveAllToWorkingDirectory<T: LocalFileConvertible & Sendable>(
         namedItems: [LocalFileNamedItem<T>]
     ) async throws -> [URL] {
         return try await withThrowingTaskGroup(of: URL.self) { group in
             for namedItem in namedItems {
+                let item = namedItem
                 group.addTask {
-                    try await self.saveToWorkingDirectoryAsync(namedItem: namedItem)
+                    try await self.saveToWorkingDirectory(namedItem: item)
                 }
             }
 
@@ -119,35 +97,6 @@ extension LocalFileRepository {
             }
             return urls
         }
-    }
-
-    /// Saves a single file item to the working directory
-    func saveToWorkingDirectory<T: LocalFileConvertible>(
-        namedItem: LocalFileNamedItem<T>
-    ) -> AnyPublisher<URL, Error> {
-        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.name)
-
-        return Future<URL, Error> { promise in
-            do {
-                try namedItem.item.write(to: fileURL)
-                promise(.success(fileURL))
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    /// Saves multiple file items to the working directory
-    func saveAllToWorkingDirectory<T: LocalFileConvertible>(
-        namedItems: [LocalFileNamedItem<T>]
-    ) -> AnyPublisher<[URL], Error> {
-        Publishers.MergeMany(
-            namedItems.map { namedItem in
-                saveToWorkingDirectory(namedItem: namedItem)
-            }
-        )
-        .collect()
-        .eraseToAnyPublisher()
     }
 }
 

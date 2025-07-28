@@ -471,17 +471,17 @@ extension CanvasViewModel {
                     uuids: canvasState.layers.map { $0.id }
                 )
 
-                async let resultThumbnail = try await dependencies.localFileRepository.saveToWorkingDirectoryAsync(
+                async let resultThumbnail = try await dependencies.localFileRepository.saveToWorkingDirectory(
                     namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
                 )
-                async let resultURLs: [URL] = try await dependencies.localFileRepository.saveAllToWorkingDirectoryAsync(
+                async let resultURLs: [URL] = try await dependencies.localFileRepository.saveAllToWorkingDirectory(
                     namedItems: result.map {
                         .init(name: $0.uuid.uuidString, item: $0)
                     }
                 )
                 _ = try await (resultThumbnail, resultURLs)
 
-                async let resultEntity = try await dependencies.localFileRepository.saveToWorkingDirectoryAsync(
+                async let resultEntity = try await dependencies.localFileRepository.saveToWorkingDirectory(
                     namedItem: .init(
                         name: CanvasEntity.jsonFileName,
                         item: entity

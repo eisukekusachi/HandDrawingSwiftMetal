@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LocalFileNamedItem<T: LocalFileConvertible> {
+public struct LocalFileNamedItem<T: LocalFileConvertible & Sendable>: Sendable {
     let name: String
     let item: T
 }
