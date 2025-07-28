@@ -225,7 +225,7 @@ extension CanvasRenderer {
         with commandBuffer: MTLCommandBuffer
     ) async throws {
         guard let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else {
-            throw TextureLayerError.failedToUnwrap
+            throw TextureRepositoryError.failedToUnwrap
         }
 
         renderer.clearTexture(texture: destination, with: commandBuffer)
