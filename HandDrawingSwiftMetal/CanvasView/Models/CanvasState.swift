@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 /// Manage the state of the canvas
-final class CanvasState: ObservableObject {
+final class CanvasState: ObservableObject, @unchecked Sendable {
 
     let brush = DrawingBrushToolState()
 
