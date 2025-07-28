@@ -499,7 +499,6 @@
 				D469A8862C56430D00D10575 /* MTLRenderer.swift */,
 				D4B4AA9F2B3FBEA700298CFB /* MTLTextureCreator.swift */,
 				D459F5E82CDCF7EF00BEA5CD /* MTLTextureNodes.swift */,
-				D48FECC12C5A6AD300221212 /* Shaders */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -640,6 +639,23 @@
 				D4553DF22DD89F2700037800 /* TextureLayerRepository.swift */,
 			);
 			path = TextureLayers;
+			sourceTree = "<group>";
+		};
+		D46386562E37518E00895B2D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D46386572E37519E00895B2D /* CoreData */,
+				D48FECC12C5A6AD300221212 /* Shaders */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D46386572E37519E00895B2D /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
+			);
+			path = CoreData;
 			sourceTree = "<group>";
 		};
 		D463A5F02C6E346500D102AD /* Models */ = {
@@ -830,11 +846,11 @@
 				D40D975829DAB05F00A82E6A /* Metal */,
 				D44B52AB2DB3928000EE213C /* Models */,
 				D44D196A2BE5DAEB0069D4A9 /* Repositories */,
+				D46386562E37518E00895B2D /* Resources */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
 				D44B52AF2DB3928000EE213C /* CanvasDisplayView.swift */,
 				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
-				D447D8882DC5CE5200007210 /* CanvasStorage.xcdatamodeld */,
 				D40B76FD2E27C76B0012BFF5 /* CanvasView.swift */,
 				D47FD3EB2E2B954E00F3F514 /* CanvasViewDependencies.swift */,
 				D44B52B22DB3928000EE213C /* CanvasViewModel.swift */,
