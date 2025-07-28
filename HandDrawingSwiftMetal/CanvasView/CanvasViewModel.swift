@@ -9,7 +9,8 @@ import Combine
 
 @preconcurrency import MetalKit
 
-@MainActor final class CanvasViewModel {
+@MainActor
+final class CanvasViewModel {
 
     /// Maintains the state of the canvas
     let canvasState: CanvasState = .init(

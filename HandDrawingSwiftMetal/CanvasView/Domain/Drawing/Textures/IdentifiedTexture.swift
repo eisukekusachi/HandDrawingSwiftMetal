@@ -5,10 +5,10 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import MetalKit
+@preconcurrency import MetalKit
 
 /// A struct that represents a texture entity with `UUID` and `MTLTexture`
-struct IdentifiedTexture: Hashable {
+struct IdentifiedTexture: Hashable, @unchecked Sendable {
     var uuid: UUID
     var texture: MTLTexture
 

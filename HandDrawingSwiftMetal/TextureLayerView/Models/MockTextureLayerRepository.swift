@@ -5,11 +5,11 @@
 //  Created by Eisuke Kusachi on 2025/04/21.
 //
 
-import Combine
+@preconcurrency import Combine
 import UIKit
 import Metal
 
-final class MockTextureLayerRepository: TextureLayerRepository {
+final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Sendable {
 
     let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 

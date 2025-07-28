@@ -9,6 +9,7 @@ import Combine
 import MetalKit
 
 /// A class that renders textures from `TextureRepository` onto the canvas
+@MainActor
 final class CanvasRenderer: ObservableObject {
 
     var frameSize: CGSize = .zero
