@@ -6,7 +6,7 @@
 //
 
 import Combine
-import MetalKit
+@preconcurrency import MetalKit
 
 /// A class that renders textures from `TextureRepository` onto the canvas
 @MainActor
