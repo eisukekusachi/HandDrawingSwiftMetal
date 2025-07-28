@@ -5,9 +5,10 @@
 //  Created by Eisuke Kusachi on 2025/04/21.
 //
 
-@preconcurrency import Combine
+import CanvasView
 import UIKit
 import Metal
+@preconcurrency import Combine
 
 final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Sendable {
 

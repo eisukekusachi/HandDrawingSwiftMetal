@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TextureLayerConfiguration {
+public struct TextureLayerConfiguration {
     let canvasState: CanvasState
     let textureLayerRepository: TextureLayerRepository
     let undoStack: UndoStack?
