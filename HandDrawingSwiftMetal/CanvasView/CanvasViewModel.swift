@@ -113,13 +113,14 @@ import Combine
     func initialize(
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
+        environmentConfiguration: CanvasEnvironmentConfiguration,
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
         self.dependencies = dependencies
 
         self.renderer.initialize(
-            configuration: configuration
+            environmentConfiguration: environmentConfiguration
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled

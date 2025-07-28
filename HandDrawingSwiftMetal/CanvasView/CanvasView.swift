@@ -83,16 +83,19 @@ public class CanvasView: UIView {
     }
 
     func initialize(
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration,
+        environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
 
         canvasViewModel.initialize(
             dependencies: .init(
-                configuration: configuration
+                configuration: configuration,
+                environmentConfiguration: environmentConfiguration
             ),
             configuration: configuration,
+            environmentConfiguration: environmentConfiguration,
             defaultTextureSize: .init(
                 width: size.width * scale,
                 height: size.height * scale

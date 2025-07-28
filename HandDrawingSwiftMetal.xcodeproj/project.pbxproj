@@ -102,6 +102,7 @@
 		D45ACBE02C57C115000002BE /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */; };
 		D45ACBE22C57C2C3000002BE /* FingerStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE12C57C2C3000002BE /* FingerStroke.swift */; };
 		D45ACBE42C57C2D9000002BE /* PencilStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45ACBE32C57C2D9000002BE /* PencilStroke.swift */; };
+		D46386762E37900E00895B2D /* CanvasEnvironmentConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46386752E37900E00895B2D /* CanvasEnvironmentConfiguration.swift */; };
 		D4650CA72D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */; };
 		D4650CAA2D447ED900E7D60E /* MockMTLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */; };
 		D4650CAC2D447F8900E7D60E /* MockDrawingCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4650CAB2D447F8900E7D60E /* MockDrawingCurve.swift */; };
@@ -273,6 +274,7 @@
 		D45ACBDF2C57C115000002BE /* ArrayExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtensions.swift; sourceTree = "<group>"; };
 		D45ACBE12C57C2C3000002BE /* FingerStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerStroke.swift; sourceTree = "<group>"; };
 		D45ACBE32C57C2D9000002BE /* PencilStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilStroke.swift; sourceTree = "<group>"; };
+		D46386752E37900E00895B2D /* CanvasEnvironmentConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasEnvironmentConfiguration.swift; sourceTree = "<group>"; };
 		D4650CA62D447E2A00E7D60E /* CanvasDrawingBrushTextureSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasDrawingBrushTextureSetTests.swift; sourceTree = "<group>"; };
 		D4650CA92D447ED900E7D60E /* MockMTLRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockMTLRenderer.swift; sourceTree = "<group>"; };
 		D4650CAB2D447F8900E7D60E /* MockDrawingCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDrawingCurve.swift; sourceTree = "<group>"; };
@@ -849,6 +851,7 @@
 				D46386562E37518E00895B2D /* Resources */,
 				D46D07D92ADBEB160093D861 /* Utils */,
 				D44B52AA2DB3928000EE213C /* CanvasConfiguration.swift */,
+				D46386752E37900E00895B2D /* CanvasEnvironmentConfiguration.swift */,
 				D44B52AF2DB3928000EE213C /* CanvasDisplayView.swift */,
 				D44B52AE2DB3928000EE213C /* CanvasRenderer.swift */,
 				D40B76FD2E27C76B0012BFF5 /* CanvasView.swift */,
@@ -1135,6 +1138,7 @@
 				D44B52CA2DB3928000EE213C /* InputDeviceStatus.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */,
 				D44D19692BE5DA4D0069D4A9 /* FileOutput.swift in Sources */,
+				D46386762E37900E00895B2D /* CanvasEnvironmentConfiguration.swift in Sources */,
 				D447D88C2DC5D2D700007210 /* CanvasStateStorage.swift in Sources */,
 				D40D976229DAB09400A82E6A /* Iterator.swift in Sources */,
 				D4BB3ABC2BB973F100C04A3D /* FingerInputGestureRecognizer.swift in Sources */,

@@ -19,8 +19,11 @@ struct CanvasViewDependencies {
 }
 
 extension CanvasViewDependencies {
-    init(configuration: CanvasConfiguration) {
-        switch configuration.textureLayerRepository {
+    init(
+        configuration: CanvasConfiguration,
+        environmentConfiguration: CanvasEnvironmentConfiguration
+    ) {
+        switch environmentConfiguration.textureLayerRepositoryType {
         case .disk: textureLayerRepository = TextureLayerDocumentsDirectoryRepository(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage"
@@ -28,7 +31,7 @@ extension CanvasViewDependencies {
         case .memory: textureLayerRepository = TextureLayerInMemoryRepository()
         }
 
-        if let undoRepository = configuration.undoTextureRepository {
+        if let undoRepository = environmentConfiguration.undoTextureRepositoryType {
             switch undoRepository {
             case .disk: undoTextureRepository = TextureDocumentsDirectoryRepository(
                 storageDirectoryURL: URL.applicationSupport,
