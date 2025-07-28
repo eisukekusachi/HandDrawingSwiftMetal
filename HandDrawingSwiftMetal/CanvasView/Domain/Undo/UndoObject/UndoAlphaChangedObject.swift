@@ -34,7 +34,7 @@ final class UndoAlphaChangedObject: UndoObject {
         _ object: UndoAlphaChangedObject,
         withNewAlpha newAlpha: Int
     ) {
-        var textureLayer = object.textureLayer
+        let textureLayer = object.textureLayer
         self.textureLayer = .init(model: textureLayer, alpha: newAlpha)
     }
 
