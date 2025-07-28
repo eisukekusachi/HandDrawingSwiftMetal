@@ -7,44 +7,74 @@
 
 import UIKit
 
-enum StorageType {
+public enum StorageType: Sendable {
     case disk
     case memory
 }
 
-struct CanvasConfiguration {
+public struct CanvasConfiguration: Sendable {
 
-    var projectName: String = Calendar.currentDate
+    let projectName: String
 
-    var textureSize: CGSize?
+    let textureSize: CGSize?
 
-    var layerIndex: Int = 0
-    var layers: [TextureLayerModel] = []
+    let layerIndex: Int
+    let layers: [TextureLayerModel]
 
-    var drawingTool: DrawingToolType = .brush
+    let drawingTool: DrawingToolType
 
-    var brushColor: UIColor = UIColor.black.withAlphaComponent(0.75)
-    var brushDiameter: Int = 8
+    let brushColor: UIColor
+    let brushDiameter: Int
 
-    var eraserAlpha: Int = 155
-    var eraserDiameter: Int = 44
+    let eraserAlpha: Int
+    let eraserDiameter: Int
 
     /// The background color of the canvas
-    var backgroundColor: UIColor = .white
+    let backgroundColor: UIColor
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
-    var baseBackgroundColor: UIColor = UIColor(230, 230, 230)
+    let baseBackgroundColor: UIColor
 
     /// For the canvas’s textureLayerRepository type: if `.disk` is selected, Core Data is automatically created and textures are persisted
-    var textureLayerRepository: StorageType = .disk
+    let textureLayerRepository: StorageType
 
     /// For the repository type used to store undo textures. even if `.disk` is selected, it only uses disk storage temporarily and textures are not persisted.
-    var undoTextureRepository: StorageType? = .disk
+    let undoTextureRepository: StorageType?
+
+    public init(
+        projectName: String = Calendar.currentDate,
+        textureSize: CGSize? = nil,
+        layerIndex: Int = 0,
+        layers: [TextureLayerModel] = [],
+        drawingTool: DrawingToolType = .brush,
+        brushColor: UIColor = UIColor.black.withAlphaComponent(0.75),
+        brushDiameter: Int = 8,
+        eraserAlpha: Int = 155,
+        eraserDiameter: Int = 44,
+        backgroundColor: UIColor = .white,
+        baseBackgroundColor: UIColor = UIColor(230, 230, 230),
+        textureLayerRepository: StorageType = .disk,
+        undoTextureRepository: StorageType? = .disk
+    ) {
+        self.projectName = projectName
+        self.textureSize = textureSize
+        self.layerIndex = layerIndex
+        self.layers = layers
+        self.drawingTool = drawingTool
+        self.brushColor = brushColor
+        self.brushDiameter = brushDiameter
+        self.eraserAlpha = eraserAlpha
+        self.eraserDiameter = eraserDiameter
+        self.backgroundColor = backgroundColor
+        self.baseBackgroundColor = baseBackgroundColor
+        self.textureLayerRepository = textureLayerRepository
+        self.undoTextureRepository = undoTextureRepository
+    }
 }
 
 extension CanvasConfiguration {
 
-    init(
+    public init(
         projectName: String,
         entity: CanvasEntity
     ) {
@@ -62,12 +92,20 @@ extension CanvasConfiguration {
 
         self.brushDiameter = entity.brushDiameter
         self.eraserDiameter = entity.eraserDiameter
+
+        self.brushColor = UIColor.black.withAlphaComponent(0.75)
+        self.eraserAlpha = 155
+
+        self.textureLayerRepository = .disk
+        self.undoTextureRepository = .disk
+        self.backgroundColor = .white
+        self.baseBackgroundColor = UIColor(230, 230, 230)
     }
 
-    init(
+    public init(
         entity: CanvasStorageEntity
     ) {
-        self.projectName = entity.projectName ?? ""
+        self.projectName = entity.projectName ?? Calendar.currentDate
 
         self.textureSize = .init(
             width: CGFloat(entity.textureWidth),
@@ -78,11 +116,17 @@ extension CanvasConfiguration {
            let colorHexString = brush.colorHex {
             self.brushColor = UIColor(hex: colorHexString)
             self.brushDiameter = Int(brush.diameter)
+        } else {
+            self.brushColor = UIColor.black.withAlphaComponent(0.75)
+            self.brushDiameter = 8
         }
 
         if let eraser = entity.drawingTool?.eraser {
             self.eraserAlpha = Int(eraser.alpha)
             self.eraserDiameter = Int(eraser.diameter)
+        } else {
+            self.eraserAlpha = 155
+            self.eraserDiameter = 44
         }
 
         if let layers = entity.textureLayers as? Set<TextureLayerStorageEntity> {
@@ -97,18 +141,41 @@ extension CanvasConfiguration {
                         isVisible: layer.isVisible
                     )
                 }
+        } else {
+            self.layers = []
         }
 
         self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
+
+        self.drawingTool = .brush
+
+        self.backgroundColor = .white
+        self.baseBackgroundColor = UIColor(230, 230, 230)
+        self.textureLayerRepository = .disk
+        self.undoTextureRepository = .disk
     }
 
     /// Returns an instance with the provided texture size if it was previously nil
     func resolvedTextureSize(_ textureSize: CGSize) -> Self {
         var newInstance = self
         if newInstance.textureSize == nil {
-            newInstance.textureSize = textureSize
+            //newInstance.textureSize = textureSize
+            return .init(
+                projectName: newInstance.projectName,
+                textureSize: textureSize,
+                layerIndex: newInstance.layerIndex,
+                layers: newInstance.layers,
+                drawingTool: newInstance.drawingTool,
+                brushColor: newInstance.brushColor,
+                brushDiameter: newInstance.brushDiameter,
+                eraserAlpha: newInstance.eraserAlpha,
+                eraserDiameter: newInstance.eraserDiameter,
+                backgroundColor: newInstance.backgroundColor,
+                baseBackgroundColor: newInstance.baseBackgroundColor,
+                textureLayerRepository: newInstance.textureLayerRepository,
+                undoTextureRepository: newInstance.undoTextureRepository
+            )
         }
         return newInstance
     }
-
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UIColor {
+public extension UIColor {
 
     var alpha: Int {
         var alpha: CGFloat = 0
@@ -100,5 +100,4 @@ extension UIColor {
 
         self.init(red: r, green: g, blue: b, alpha: a)
     }
-
 }

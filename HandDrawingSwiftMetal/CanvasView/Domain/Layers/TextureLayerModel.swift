@@ -7,15 +7,15 @@
 
 import Foundation
 
-struct TextureLayerModel: Identifiable, Equatable, Sendable {
+public struct TextureLayerModel: Identifiable, Equatable, Sendable {
     /// The unique identifier for the layer
-    let id: UUID
+    public let id: UUID
     /// The name of the layer
-    let title: String
+    public let title: String
     /// The opacity of the layer
-    let alpha: Int
+    public let alpha: Int
     /// Whether the layer is visible or not
-    let isVisible: Bool
+    public let isVisible: Bool
 }
 
 extension TextureLayerModel {
@@ -45,7 +45,7 @@ extension TextureLayerModel {
         self.isVisible = isVisible ?? model.isVisible
     }
 
-    static func == (lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CanvasEntity: Codable, Equatable {
+public struct CanvasEntity: Codable, Equatable {
 
     let textureSize: CGSize
     let layerIndex: Int
