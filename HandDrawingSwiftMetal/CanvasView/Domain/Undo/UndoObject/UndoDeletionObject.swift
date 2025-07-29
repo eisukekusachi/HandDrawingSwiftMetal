@@ -10,22 +10,22 @@ import Foundation
 import MetalKit
 
 /// An undo object for removing a texture layer
-final class UndoDeletionObject: UndoObject {
+public final class UndoDeletionObject: UndoObject {
 
     /// Not used
-    let undoTextureUUID: UUID = UUID()
+    public let undoTextureUUID: UUID = UUID()
 
-    let textureLayer: TextureLayerModel
+    public let textureLayer: TextureLayerModel
 
-    let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    let selectedLayerIdAfterDeletion: UUID
+    public let selectedLayerIdAfterDeletion: UUID
 
     deinit {
         deinitSubject.send(self)
     }
 
-    init(
+    public init(
         layerToBeDeleted textureLayer: TextureLayerModel,
         selectedLayerIdAfterDeletion layerId: UUID
     ) {
@@ -33,7 +33,7 @@ final class UndoDeletionObject: UndoObject {
         self.selectedLayerIdAfterDeletion = layerId
     }
 
-    func performUndo(
+    public func performUndo(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

@@ -8,7 +8,7 @@
 import MetalKit
 import Accelerate
 
-extension MTLTexture {
+public extension MTLTexture {
 
     var size: CGSize {
         return CGSize(width: self.width, height: self.height)

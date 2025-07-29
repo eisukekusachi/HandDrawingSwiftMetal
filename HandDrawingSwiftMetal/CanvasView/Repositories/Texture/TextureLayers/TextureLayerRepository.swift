@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 /// A protocol that defines a repository for managing textures and in-memory thumbnails
-protocol TextureLayerRepository: TextureRepository {
+public protocol TextureLayerRepository: TextureRepository {
 
     /// A subject that notifies SwiftUI of upcoming changes
     var objectWillChangeSubject: PassthroughSubject<Void, Never> { get }

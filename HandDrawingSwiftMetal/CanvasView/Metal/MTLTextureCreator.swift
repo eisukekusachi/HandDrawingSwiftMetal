@@ -8,13 +8,13 @@
 import MetalKit
 import Accelerate
 
-enum MTLTextureCreator {
+public enum MTLTextureCreator {
 
-    static let pixelFormat: MTLPixelFormat = .bgra8Unorm
-    static let bytesPerPixel = 4
-    static let bitsPerComponent = 8
+    public static let pixelFormat: MTLPixelFormat = .bgra8Unorm
+    public static let bytesPerPixel = 4
+    public static let bitsPerComponent = 8
 
-    static func makeTexture(
+    public static func makeTexture(
         label: String? = nil,
         size: CGSize,
         pixelFormat: MTLPixelFormat = pixelFormat,
@@ -27,7 +27,7 @@ enum MTLTextureCreator {
         return texture
     }
 
-    static func makeTexture(
+    public static func makeTexture(
         label: String? = nil,
         image: UIImage?,
         with device: MTLDevice
@@ -95,7 +95,7 @@ enum MTLTextureCreator {
         return texture
     }
 
-    static func makeTexture(
+    public static func makeTexture(
         label: String? = nil,
         size: CGSize,
         colorArray: [UInt8],
@@ -120,7 +120,7 @@ enum MTLTextureCreator {
         return texture
     }
 
-    static func makeBlankTexture(
+    public static func makeBlankTexture(
         label: String? = nil,
         size: CGSize = MTLRenderer.minimumTextureSize,
         with device: MTLDevice

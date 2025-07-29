@@ -9,20 +9,20 @@ import UIKit
 
 public struct CanvasConfiguration: Sendable {
 
-    let projectName: String
+    public let projectName: String
 
-    let textureSize: CGSize?
+    public let textureSize: CGSize?
 
-    let layerIndex: Int
-    let layers: [TextureLayerModel]
+    public let layerIndex: Int
+    public let layers: [TextureLayerModel]
 
-    let drawingTool: DrawingToolType
+    public let drawingTool: DrawingToolType
 
-    let brushColor: UIColor
-    let brushDiameter: Int
+    public let brushColor: UIColor
+    public let brushDiameter: Int
 
-    let eraserAlpha: Int
-    let eraserDiameter: Int
+    public let eraserAlpha: Int
+    public let eraserDiameter: Int
 
     public init(
         projectName: String = Calendar.currentDate,

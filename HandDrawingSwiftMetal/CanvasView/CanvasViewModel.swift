@@ -10,14 +10,14 @@ import Combine
 @preconcurrency import MetalKit
 
 @MainActor
-final class CanvasViewModel {
+public final class CanvasViewModel {
 
     /// Maintains the state of the canvas
     let canvasState: CanvasState = .init(
         CanvasConfiguration()
     )
 
-    static var fileSuffix: String {
+    public static var fileSuffix: String {
         "zip"
     }
 
@@ -241,7 +241,7 @@ final class CanvasViewModel {
     }
 }
 
-extension CanvasViewModel {
+public extension CanvasViewModel {
 
     var currentTextureSize: CGSize {
         canvasState.textureSize

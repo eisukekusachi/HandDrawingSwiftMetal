@@ -7,7 +7,7 @@
 
 import MetalKit
 
-struct MTLGrayscalePointBuffers {
+public struct MTLGrayscalePointBuffers {
     let vertexBuffer: MTLBuffer
     let diameterIncludingBlurBuffer: MTLBuffer
     let brightnessBuffer: MTLBuffer
@@ -15,14 +15,14 @@ struct MTLGrayscalePointBuffers {
     let numberOfPoints: Int
 }
 
-struct MTLTextureBuffers {
+public struct MTLTextureBuffers {
     let vertexBuffer: MTLBuffer
     let texCoordsBuffer: MTLBuffer
     let indexBuffer: MTLBuffer
     let indicesCount: Int
 }
 
-enum MTLBuffers {
+public enum MTLBuffers {
     static func makeGrayscalePointBuffers(
         points: [GrayscaleDotPoint],
         alpha: Int,

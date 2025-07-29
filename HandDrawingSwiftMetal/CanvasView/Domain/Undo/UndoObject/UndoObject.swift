@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-protocol UndoObject {
+public protocol UndoObject {
     /// The texture ID used for the undo operation
     var undoTextureUUID: UUID { get }
 

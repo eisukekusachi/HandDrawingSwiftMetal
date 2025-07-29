@@ -9,7 +9,7 @@ import Foundation
 import MetalKit
 
 /// A structure that holds both `undo` and `redo` objects
-struct UndoStackModel<T> {
+public struct UndoStackModel<T> {
 
     let undoObject: T
     let redoObject: T
@@ -24,4 +24,9 @@ struct UndoStackModel<T> {
         )
     }
 
+    public init(undoObject: T, redoObject: T, texture: MTLTexture? = nil) {
+        self.undoObject = undoObject
+        self.redoObject = redoObject
+        self.texture = texture
+    }
 }

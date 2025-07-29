@@ -7,7 +7,7 @@
 
 import MetalKit
 
-protocol MTLRendering: Sendable {
+public protocol MTLRendering: Sendable {
 
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
@@ -83,13 +83,13 @@ protocol MTLRendering: Sendable {
     )
 }
 
-final class MTLRenderer: Sendable, MTLRendering {
+public final class MTLRenderer: Sendable, MTLRendering {
 
-    static let shared = MTLRenderer()
+    public static let shared = MTLRenderer()
 
-    static let threadGroupLength: Int = 16
+    public static let threadGroupLength: Int = 16
 
-    static let minimumTextureSize: CGSize = .init(
+    public static let minimumTextureSize: CGSize = .init(
         width: threadGroupLength,
         height: threadGroupLength
     )
@@ -98,7 +98,7 @@ final class MTLRenderer: Sendable, MTLRendering {
 
     private init() {}
 
-    func drawGrayPointBuffersWithMaxBlendMode(
+    public func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
@@ -119,7 +119,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func drawTexture(
+    public func drawTexture(
         texture: MTLTexture?,
         matrix: CGAffineTransform,
         frameSize: CGSize,
@@ -154,7 +154,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         )
     }
 
-    func drawTexture(
+    public func drawTexture(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
         withBackgroundColor color: UIColor? = nil,
@@ -190,7 +190,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func drawTexture(
+    public func drawTexture(
         grayscaleTexture: MTLTexture,
         color rgb: (Int, Int, Int),
         on destinationTexture: MTLTexture,
@@ -223,7 +223,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func subtractTextureWithEraseBlendMode(
+    public func subtractTextureWithEraseBlendMode(
         texture: MTLTexture,
         buffers: MTLTextureBuffers,
         from destinationTexture: MTLTexture,
@@ -248,7 +248,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func mergeTexture(
+    public func mergeTexture(
         texture: MTLTexture,
         into destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
@@ -261,7 +261,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         )
     }
 
-    func mergeTexture(
+    public func mergeTexture(
         texture: MTLTexture,
         alpha: Int = 255,
         into destinationTexture: MTLTexture,
@@ -297,7 +297,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func fillTexture(
+    public func fillTexture(
         texture: MTLTexture,
         withRGB rgb: (Int, Int, Int),
         with commandBuffer: MTLCommandBuffer
@@ -309,7 +309,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         )
     }
 
-    func fillTexture(
+    public func fillTexture(
         texture: MTLTexture,
         withRGBA rgba: (Int, Int, Int, Int),
         with commandBuffer: MTLCommandBuffer
@@ -340,7 +340,7 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    func clearTextures(
+    public func clearTextures(
         textures: [MTLTexture?],
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -353,7 +353,7 @@ final class MTLRenderer: Sendable, MTLRendering {
             }
         }
     }
-    func clearTexture(
+    public func clearTexture(
         texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -382,5 +382,4 @@ final class MTLRenderer: Sendable, MTLRendering {
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
     }
-
 }

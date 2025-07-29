@@ -9,7 +9,8 @@ import Combine
 import Foundation
 import MetalKit
 
-@MainActor final class UndoStack {
+@MainActor
+public final class UndoStack {
 
     let undoRedoButtonStateSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
@@ -63,7 +64,7 @@ import MetalKit
 
 }
 
-extension UndoStack {
+public extension UndoStack {
 
     func setDrawingUndoObject() async {
         guard

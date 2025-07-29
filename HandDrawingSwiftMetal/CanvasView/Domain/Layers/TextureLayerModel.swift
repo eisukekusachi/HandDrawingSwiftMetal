@@ -16,6 +16,13 @@ public struct TextureLayerModel: Identifiable, Equatable, Sendable {
     public let alpha: Int
     /// Whether the layer is visible or not
     public let isVisible: Bool
+
+    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
+        self.id = id
+        self.title = title
+        self.alpha = alpha
+        self.isVisible = isVisible
+    }
 }
 
 extension TextureLayerModel {

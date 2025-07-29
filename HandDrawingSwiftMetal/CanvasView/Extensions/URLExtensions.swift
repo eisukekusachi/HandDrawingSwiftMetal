@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension URL {
+public extension URL {
 
     static var documents: URL {
         URL(fileURLWithPath: NSHomeDirectory() + "/Documents")

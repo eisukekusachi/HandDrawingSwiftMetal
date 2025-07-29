@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UndoRedoButtonState {
-    let isUndoEnabled: Bool
-    let isRedoEnabled: Bool
+public struct UndoRedoButtonState: Sendable {
+    public let isUndoEnabled: Bool
+    public let isRedoEnabled: Bool
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DrawingBrushToolState: ObservableObject, DrawingToolProtocol {
+public final class DrawingBrushToolState: ObservableObject, DrawingToolProtocol {
 
     @Published var diameter: Int = 0
 
@@ -36,10 +36,10 @@ extension DrawingBrushToolState {
 
     static private let initBrushSize: Int = 8
 
-    static func diameterIntValue(_ value: Float) -> Int {
+    public static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter
     }
-    static func diameterFloatValue(_ value: Int) -> Float {
+    public static func diameterFloatValue(_ value: Int) -> Float {
         Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol {
+public final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol {
 
     @Published var diameter: Int = 0
 
@@ -37,7 +37,7 @@ extension DrawingEraserToolState {
 
 }
 
-extension DrawingEraserToolState {
+public extension DrawingEraserToolState {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 

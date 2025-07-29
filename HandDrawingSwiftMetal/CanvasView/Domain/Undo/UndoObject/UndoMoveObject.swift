@@ -10,20 +10,20 @@ import Foundation
 import MetalKit
 
 /// An undo object for moving a texture layer
-final class UndoMoveObject: UndoObject {
+public final class UndoMoveObject: UndoObject {
 
     /// Not used
-    let undoTextureUUID: UUID = UUID()
+    public let undoTextureUUID: UUID = UUID()
 
-    let textureLayer: TextureLayerModel
+    public let textureLayer: TextureLayerModel
 
-    let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    let selectedLayerId: UUID
+    public let selectedLayerId: UUID
 
-    let indices: MoveLayerIndices
+    public let indices: MoveLayerIndices
 
-    var reversedObject: UndoMoveObject {
+    public var reversedObject: UndoMoveObject {
         let sourceIndex = indices.sourceIndex
         let destinationIndex = MoveLayerIndices.arrayDestinationIndex(
             moveLayerSourceIndex: sourceIndex,
@@ -51,7 +51,7 @@ final class UndoMoveObject: UndoObject {
         deinitSubject.send(self)
     }
 
-    init(
+    public init(
         indices: MoveLayerIndices,
         selectedLayerId: UUID,
         layer: TextureLayerModel
@@ -61,7 +61,7 @@ final class UndoMoveObject: UndoObject {
         self.textureLayer = layer
     }
 
-    func performUndo(
+    public func performUndo(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

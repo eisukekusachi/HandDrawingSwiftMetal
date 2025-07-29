@@ -7,18 +7,18 @@
 
 import Foundation
 
-struct MoveLayerIndices {
+public struct MoveLayerIndices {
 
-    let sourceIndexSet: IndexSet
+    public let sourceIndexSet: IndexSet
 
-    let destinationIndex: Int
+    public let destinationIndex: Int
 
-    var sourceIndex: Int {
+    public var sourceIndex: Int {
         sourceIndexSet.first ?? 0
     }
 
     /// Converts a move operation destination index to the array index
-    static func arrayDestinationIndex(moveLayerSourceIndex: Int, moveLayerDestinationIndex: Int) -> Int {
+    public static func arrayDestinationIndex(moveLayerSourceIndex: Int, moveLayerDestinationIndex: Int) -> Int {
         // In an array move operation, the value is inserted before it is removed.
         // When moving a value to a higher index, the insertion shifts the array,
         // so the destination index becomes one position ahead of the expected array index.
@@ -31,12 +31,12 @@ struct MoveLayerIndices {
     }
 
     /// Converts an array index to the index used in a move operation
-    static func moveLayerDestinationIndex(arraySourceIndex: Int, arrayDestinationIndex: Int) -> Int {
+    public static func moveLayerDestinationIndex(arraySourceIndex: Int, arrayDestinationIndex: Int) -> Int {
         // Add 1 to the destination index when moving a value to a higher position
         arrayDestinationIndex > arraySourceIndex ? arrayDestinationIndex + 1 : arrayDestinationIndex
     }
 
-    static func reversedIndices(indices: Self, layerCount: Int) -> Self {
+    public static func reversedIndices(indices: Self, layerCount: Int) -> Self {
         let sourceIndex = indices.sourceIndex
         let destinationIndex = arrayDestinationIndex(
             moveLayerSourceIndex: sourceIndex,
@@ -56,4 +56,8 @@ struct MoveLayerIndices {
         )
     }
 
+    public init(sourceIndexSet: IndexSet, destinationIndex: Int) {
+        self.sourceIndexSet = sourceIndexSet
+        self.destinationIndex = destinationIndex
+    }
 }

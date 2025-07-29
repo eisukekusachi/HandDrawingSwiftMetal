@@ -8,15 +8,15 @@
 @preconcurrency import MetalKit
 
 /// A struct that represents a texture entity with `UUID` and `MTLTexture`
-struct IdentifiedTexture: Hashable, @unchecked Sendable {
-    let uuid: UUID
-    let texture: MTLTexture
+public struct IdentifiedTexture: Hashable, @unchecked Sendable {
+    public let uuid: UUID
+    public let texture: MTLTexture
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(uuid)
     }
 
-    static func == (lhs: IdentifiedTexture, rhs: IdentifiedTexture) -> Bool {
+    public static func == (lhs: IdentifiedTexture, rhs: IdentifiedTexture) -> Bool {
         lhs.uuid == rhs.uuid
     }
 
@@ -33,10 +33,15 @@ struct IdentifiedTexture: Hashable, @unchecked Sendable {
             }
         )
     }
+
+    public init(uuid: UUID, texture: MTLTexture) {
+        self.uuid = uuid
+        self.texture = texture
+    }
 }
 
 extension IdentifiedTexture: LocalFileConvertible {
-    func write(to url: URL) throws {
+    public func write(to url: URL) throws {
         try FileOutput.saveTextureAsData(bytes: self.texture.bytes, to: url)
     }
 }

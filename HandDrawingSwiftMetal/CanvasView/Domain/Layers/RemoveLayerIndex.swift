@@ -7,10 +7,9 @@
 
 import Foundation
 
-enum RemoveLayerIndex {
+public enum RemoveLayerIndex {
 
-    static func selectedIndexAfterDeletion(selectedIndex: Int) -> Int {
+    public  static func selectedIndexAfterDeletion(selectedIndex: Int) -> Int {
         max(selectedIndex - 1, 0)
     }
-
 }

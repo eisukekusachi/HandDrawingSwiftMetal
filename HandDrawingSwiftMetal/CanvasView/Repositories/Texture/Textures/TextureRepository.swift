@@ -10,7 +10,7 @@ import Foundation
 import MetalKit
 
 /// A protocol that defines a repository for managing textures
-protocol TextureRepository: Sendable {
+public protocol TextureRepository: Sendable {
 
     /// The number of textures currently managed
     var textureNum: Int { get }

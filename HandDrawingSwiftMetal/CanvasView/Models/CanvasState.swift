@@ -9,21 +9,21 @@ import Combine
 import UIKit
 
 /// Manage the state of the canvas
-final class CanvasState: ObservableObject, @unchecked Sendable {
+public final class CanvasState: ObservableObject, @unchecked Sendable {
 
     let brush = DrawingBrushToolState()
 
     let eraser = DrawingEraserToolState()
 
     /// Subject to publish updates for the canvas
-    let canvasUpdateSubject = PassthroughSubject<Void, Never>()
+    public let canvasUpdateSubject = PassthroughSubject<Void, Never>()
 
     /// Subject to publish updates for the entire canvas, including all textures
-    let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
+    public let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    @Published var layers: [TextureLayerModel] = []
+    @Published public var layers: [TextureLayerModel] = []
 
-    @Published var selectedLayerId: UUID?
+    @Published public var selectedLayerId: UUID?
 
     /// A name of the file to be saved
     @Published private(set) var projectName: String = Calendar.currentDate
@@ -36,13 +36,12 @@ final class CanvasState: ObservableObject, @unchecked Sendable {
 
     private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
-    init(_ configuration: CanvasConfiguration) {
+    public init(_ configuration: CanvasConfiguration) {
         setData(configuration)
     }
-
 }
 
-extension CanvasState {
+public extension CanvasState {
 
     var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
@@ -65,15 +64,12 @@ extension CanvasState {
         layers.first(where: { $0.id == layerId })
     }
 
+    func getTextureSize() -> CGSize {
+        textureSize
+    }
+
     func setData(_ configuration: CanvasConfiguration) {
-        /*
-        projectName = configuration.projectName
-        textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
-        layers.removeAll()
-        layers = configuration.layers
-        selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
-        drawingToolState.setData(configuration)
-*/
+
         self.projectName = configuration.projectName
         self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
 

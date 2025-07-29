@@ -11,46 +11,46 @@ import UIKit
 @MainActor
 @objc public class CanvasView: UIView {
 
-    var displayTexture: MTLTexture? {
+    public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicator: AnyPublisher<Bool, Never> {
+    public var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show the alert
-    var alert: AnyPublisher<Error, Never> {
+    public var alert: AnyPublisher<Error, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the toast
-    var toast: AnyPublisher<ToastModel, Never> {
+    public var toast: AnyPublisher<ToastModel, Never> {
         toastSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
+    public var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
+    public var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
         undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
 
-    var currentTextureSize: CGSize {
+    public var currentTextureSize: CGSize {
         canvasViewModel.currentTextureSize
     }
 
-    var brushDiameter: Int {
+    public var brushDiameter: Int {
         canvasViewModel.canvasState.brush.diameter
     }
-    var eraserDiameter: Int {
+    public var eraserDiameter: Int {
         canvasViewModel.canvasState.eraser.diameter
     }
 
-    var textureLayerConfiguration: TextureLayerConfiguration {
+    public var textureLayerConfiguration: TextureLayerConfiguration {
         canvasViewModel.textureLayerConfiguration
     }
 
@@ -105,7 +105,7 @@ import UIKit
         )
     }
 
-    func newCanvas(configuration: CanvasConfiguration) {
+    public func newCanvas(configuration: CanvasConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -114,36 +114,36 @@ import UIKit
         }
     }
 
-    func resetTransforming() {
+    public func resetTransforming() {
         canvasViewModel.resetTransforming()
     }
 
-    func setDrawingTool(_ drawingTool: DrawingToolType) {
+    public func setDrawingTool(_ drawingTool: DrawingToolType) {
         canvasViewModel.setDrawingTool(drawingTool)
     }
 
-    func setBrushColor(_ color: UIColor) {
+    public func setBrushColor(_ color: UIColor) {
         canvasViewModel.setBrushColor(color)
     }
 
-    func setBrushDiameter(_ diameter: Float) {
+    public func setBrushDiameter(_ diameter: Float) {
         canvasViewModel.setBrushDiameter(diameter)
     }
-    func setEraserDiameter(_ diameter: Float) {
+    public func setEraserDiameter(_ diameter: Float) {
         canvasViewModel.setEraserDiameter(diameter)
     }
 
-    func saveFile() {
+    public func saveFile() {
         canvasViewModel.saveFile()
     }
-    func loadFile(zipFileURL: URL) {
+    public func loadFile(zipFileURL: URL) {
         canvasViewModel.loadFile(zipFileURL: zipFileURL)
     }
 
-    func undo() {
+    public func undo() {
         canvasViewModel.undo()
     }
-    func redo() {
+    public func redo() {
         canvasViewModel.redo()
     }
 }

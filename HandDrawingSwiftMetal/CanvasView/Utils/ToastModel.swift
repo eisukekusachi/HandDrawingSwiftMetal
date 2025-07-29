@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct ToastModel {
-    let title: String
-    let systemName: String
-    let duration: Double
+public struct ToastModel {
+    public let title: String
+    public let systemName: String
+    public let duration: Double
 
-    init(
+    public init(
         title: String,
         systemName: String,
         duration: Double = 2.0
@@ -21,5 +21,4 @@ struct ToastModel {
         self.systemName = systemName
         self.duration = duration
     }
-
 }

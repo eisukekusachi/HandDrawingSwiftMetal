@@ -10,23 +10,23 @@ import Foundation
 import MetalKit
 
 /// An undo object for adding a texture layer
-final class UndoAdditionObject: UndoObject {
+public final class UndoAdditionObject: UndoObject {
 
-    let undoTextureUUID: UUID
+    public let undoTextureUUID: UUID
 
     /// The layer added by undo
-    let textureLayer: TextureLayerModel
+    public let textureLayer: TextureLayerModel
 
-    let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
     /// The insertion index for the undo-added layer
-    let insertIndex: Int
+    public let insertIndex: Int
 
     deinit {
         deinitSubject.send(self)
     }
 
-    init(
+    public init(
         layerToBeAdded textureLayer: TextureLayerModel,
         insertIndex: Int
     ) {
@@ -35,14 +35,14 @@ final class UndoAdditionObject: UndoObject {
         self.insertIndex = insertIndex
     }
 
-    init(_ object: UndoDeletionObject, insertIndex: Int) {
+    public init(_ object: UndoDeletionObject, insertIndex: Int) {
         self.undoTextureUUID = object.undoTextureUUID
         self.textureLayer = object.textureLayer
         self.insertIndex = insertIndex
     }
 
     /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
-    func performUndo(
+    public func performUndo(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {
