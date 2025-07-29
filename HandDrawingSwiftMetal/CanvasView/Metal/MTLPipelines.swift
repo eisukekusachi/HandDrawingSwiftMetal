@@ -18,10 +18,25 @@ final class MTLPipelines: Sendable {
 
     init() {
         guard
-            let device = MTLCreateSystemDefaultDevice(),
-            let library = device.makeDefaultLibrary() else {
+            let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("device is nil.")
+        }
+
+        // Use the main bundle in the main app
+        guard
+            let library = device.makeDefaultLibrary()
+        else {
             fatalError("Failed to create default library with device.")
         }
+
+        /*
+        // Use `module` when working with Swift Package Manager
+        guard
+            let library = try? device.makeDefaultLibrary(bundle: .module)
+        else {
+            fatalError("Failed to create default library with device.")
+        }
+        */
 
         func makeComputePipeline(
             device: MTLDevice,
