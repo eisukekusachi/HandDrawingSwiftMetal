@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2023/12/16.
 //
 
+import CanvasView
 import Combine
 import MetalKit
 
@@ -100,7 +101,7 @@ extension TextureLayerViewModel {
         Task {
             let result = try await textureLayerRepository
                 .addTexture(
-                    MTLTextureCreator.makeBlankTexture(size: canvasState.textureSize, with: device),
+                    MTLTextureCreator.makeBlankTexture(size: canvasState.getTextureSize(), with: device),
                     newTextureUUID: layer.id
                 )
             insertLayer(layer: layer, at: index, undoTexture: result.texture)

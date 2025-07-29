@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2023/03/26.
 //
 
+import CanvasView
 import UIKit
 
 class Toast: UIView {

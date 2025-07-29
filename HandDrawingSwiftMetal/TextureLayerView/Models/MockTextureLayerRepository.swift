@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/04/21.
 //
 
+import CanvasView
 @preconcurrency import Combine
 import UIKit
 import Metal
