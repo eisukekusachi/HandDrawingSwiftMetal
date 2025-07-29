@@ -21,6 +21,7 @@ final class DefaultCoreDataRepository: CoreDataRepository {
         self.persistentContainerName = persistentContainerName
     }
 
+    /*
     // Use the main bundle in the main app
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: persistentContainerName)
@@ -31,8 +32,8 @@ final class DefaultCoreDataRepository: CoreDataRepository {
         }
         return container
     }()
+    */
 
-    /*
     // Use `module` when working with Swift Package Manager
     private lazy var persistentContainer: NSPersistentContainer = {
         guard let modelURL = Bundle.module.url(forResource: persistentContainerName, withExtension: "momd"),
@@ -50,7 +51,6 @@ final class DefaultCoreDataRepository: CoreDataRepository {
 
         return container
     }()
-    */
 
     var context: NSManagedObjectContext {
         persistentContainer.viewContext
