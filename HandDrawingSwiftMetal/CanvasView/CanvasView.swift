@@ -8,7 +8,8 @@
 import Combine
 import UIKit
 
-public class CanvasView: UIView {
+@MainActor
+@objc public class CanvasView: UIView {
 
     var displayTexture: MTLTexture? {
         displayView.displayTexture
