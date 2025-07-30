@@ -9,12 +9,12 @@ import Combine
 import UIKit
 
 /// An iterator for creating a smooth curve in real-time using touch phases
-final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
+public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
+    public let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
     @MainActor
-    var currentCurvePoints: [GrayscaleDotPoint] {
+    public var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
         if isFirstCurveNeeded {
@@ -35,12 +35,12 @@ final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     private var hasFirstCurveBeenCreated: Bool = false
 
     /// Returns true if `singleCurveIterator` is nil
-    static func shouldCreateInstance(drawingCurve: DrawingCurve?) -> Bool {
+    public static func shouldCreateInstance(drawingCurve: DrawingCurve?) -> Bool {
         drawingCurve == nil
     }
 
     @MainActor
-    func append(
+    public func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
@@ -50,7 +50,7 @@ final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
         self.makeSmoothCurve()
     }
 
-    override func reset() {
+    override public func reset() {
         super.reset()
 
         tmpIterator.reset()
@@ -60,7 +60,7 @@ final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     }
 }
 
-extension SmoothDrawingCurve {
+public extension SmoothDrawingCurve {
 
     var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated

@@ -8,19 +8,35 @@
 import UIKit
 
 @MainActor
-struct TouchPoint: Equatable {
+public struct TouchPoint: Equatable {
 
     let location: CGPoint
     let phase: UITouch.Phase
     let force: CGFloat
     let maximumPossibleForce: CGFloat
     /// Index for identifying the estimated value
-    var estimationUpdateIndex: NSNumber? = nil
+    let estimationUpdateIndex: NSNumber?
 
     let timestamp: TimeInterval
+
+    public init(
+        location: CGPoint,
+        phase: UITouch.Phase,
+        force: CGFloat,
+        maximumPossibleForce: CGFloat,
+        estimationUpdateIndex: NSNumber? = nil,
+        timestamp: TimeInterval
+    ) {
+        self.location = location
+        self.phase = phase
+        self.force = force
+        self.maximumPossibleForce = maximumPossibleForce
+        self.estimationUpdateIndex = estimationUpdateIndex
+        self.timestamp = timestamp
+    }
 }
 
-extension TouchPoint {
+public extension TouchPoint {
 
     @MainActor
     init(

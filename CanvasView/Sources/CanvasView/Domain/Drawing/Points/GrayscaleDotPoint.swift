@@ -8,7 +8,7 @@
 import UIKit
 
 @MainActor
-struct GrayscaleDotPoint: DotPoint {
+public struct GrayscaleDotPoint: DotPoint {
 
     let location: CGPoint
     let diameter: CGFloat
@@ -16,19 +16,33 @@ struct GrayscaleDotPoint: DotPoint {
     /// Grayscale brightness (0.0 ~ 1.0)
     let brightness: CGFloat
 
-    var blurSize: CGFloat = 2.0
+    let blurSize: CGFloat
+
+    public init(
+        location: CGPoint,
+        diameter: CGFloat,
+        brightness: CGFloat,
+        blurSize: CGFloat = 2.0
+    ) {
+        self.location = location
+        self.diameter = diameter
+        self.brightness = brightness
+        self.blurSize = blurSize
+    }
 }
 
-extension GrayscaleDotPoint {
+public extension GrayscaleDotPoint {
 
     @MainActor
     init(
         touchPoint: TouchPoint,
-        diameter: CGFloat
+        diameter: CGFloat,
+        blurSize: CGFloat = 2.0
     ) {
         self.location = touchPoint.location
         self.diameter = diameter
         self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
+        self.blurSize = blurSize
     }
 
     @MainActor
@@ -38,7 +52,8 @@ extension GrayscaleDotPoint {
         textureSize: CGSize,
         drawableSize: CGSize,
         frameSize: CGSize,
-        diameter: CGFloat
+        diameter: CGFloat,
+        blurSize: CGFloat = 2.0
     ) {
         let textureMatrix = ViewSize.convertScreenMatrixToTextureMatrix(
             matrix: matrix,
@@ -64,10 +79,11 @@ extension GrayscaleDotPoint {
         self.location = touchPoint.location
         self.diameter = diameter
         self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
+        self.blurSize = blurSize
     }
 }
 
-extension GrayscaleDotPoint {
+public extension GrayscaleDotPoint {
 
     static func average(_ left: Self, _ right: Self) -> Self {
         .init(
@@ -130,5 +146,4 @@ extension GrayscaleDotPoint {
 
         return curve
     }
-
 }

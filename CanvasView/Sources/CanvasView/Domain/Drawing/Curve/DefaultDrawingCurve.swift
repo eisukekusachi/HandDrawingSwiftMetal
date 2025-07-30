@@ -9,12 +9,12 @@ import Combine
 import UIKit
 
 /// An iterator for creating a curve in real-time using touch phases
-final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
+public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
+    public let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
 
     @MainActor
-    var currentCurvePoints: [GrayscaleDotPoint] {
+    public var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
         if isFirstCurveNeeded {
@@ -30,15 +30,19 @@ final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
         return array
     }
 
-    private var hasFirstCurveBeenCreated: Bool = false
+    private var hasFirstCurveBeenCreated: Bool
 
     // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
     // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
-    static func shouldCreateInstance(actualTouches: Set<UITouch>) -> Bool {
+    public static func shouldCreateInstance(actualTouches: Set<UITouch>) -> Bool {
         actualTouches.contains(where: { $0.phase == .began })
     }
 
-    func append(
+    public init(hasFirstCurveBeenCreated: Bool = false) {
+        self.hasFirstCurveBeenCreated = hasFirstCurveBeenCreated
+    }
+
+    public func append(
         points: [GrayscaleDotPoint],
         touchPhase: UITouch.Phase
     ) {
@@ -46,7 +50,7 @@ final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
         self.touchPhase.send(touchPhase)
     }
 
-    override func reset() {
+    override public func reset() {
         super.reset()
 
         touchPhase.send(.cancelled)
@@ -54,7 +58,7 @@ final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     }
 }
 
-extension DefaultDrawingCurve {
+public extension DefaultDrawingCurve {
 
     var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated

@@ -9,22 +9,24 @@ import UIKit
 import Combine
 
 /// A class that manages the displayLink for realtime drawing
-final class DrawingDisplayLink {
+public final class DrawingDisplayLink {
 
     // Requesting to draw a curve on the canvas emits `Void`
-    var updatePublisher: AnyPublisher<Void, Never> {
+    public var updatePublisher: AnyPublisher<Void, Never> {
         updateSubject.eraseToAnyPublisher()
     }
 
     private let updateSubject = PassthroughSubject<Void, Never>()
 
-    private(set) var displayLink: CADisplayLink?
+    public var displayLink: CADisplayLink?
 
-    init() {
-        setupDisplayLink()
+    public init() {
+        displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
+        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.isPaused = true
     }
 
-    func run(_ running: Bool) {
+    public func run(_ running: Bool) {
         if running {
             displayLink?.isPaused = false
         } else {
@@ -38,12 +40,6 @@ final class DrawingDisplayLink {
 }
 
 extension DrawingDisplayLink {
-    private func setupDisplayLink() {
-        // Configure the display link for drawing
-        displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
-        displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
-    }
 
     @objc private func updateCanvasWhileDrawing() {
         updateSubject.send(())

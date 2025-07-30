@@ -9,7 +9,8 @@ import Combine
 import MetalKit
 
 /// A set of textures for realtime brush drawing
-final class DrawingBrushTextureSet: DrawingTextureSet {
+@MainActor
+public final class DrawingBrushTextureSet: DrawingTextureSet {
 
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
@@ -23,7 +24,7 @@ final class DrawingBrushTextureSet: DrawingTextureSet {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init(renderer: MTLRendering = MTLRenderer.shared) {
+    required public init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -33,7 +34,7 @@ final class DrawingBrushTextureSet: DrawingTextureSet {
     }
 }
 
-extension DrawingBrushTextureSet {
+public extension DrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
