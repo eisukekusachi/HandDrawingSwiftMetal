@@ -20,7 +20,6 @@ struct CanvasViewDependencies {
 
 extension CanvasViewDependencies {
     init(
-        configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration
     ) {
         switch environmentConfiguration.textureLayerRepositoryType {

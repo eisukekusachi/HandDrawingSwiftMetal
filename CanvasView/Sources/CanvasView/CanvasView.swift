@@ -92,7 +92,6 @@ import UIKit
 
         canvasViewModel.initialize(
             dependencies: .init(
-                configuration: configuration,
                 environmentConfiguration: environmentConfiguration
             ),
             configuration: configuration,
