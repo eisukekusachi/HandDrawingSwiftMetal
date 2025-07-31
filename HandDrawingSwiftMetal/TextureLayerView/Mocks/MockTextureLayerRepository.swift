@@ -6,9 +6,10 @@
 //
 
 import CanvasView
-@preconcurrency import Combine
 import UIKit
 import Metal
+
+@preconcurrency import Combine
 
 final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Sendable {
 

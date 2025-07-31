@@ -151,7 +151,6 @@
 		D463A5F02C6E346500D102AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */,
 				D481F8132E17FACA00B8DE41 /* SliderValue.swift */,
 			);
 			path = Models;
@@ -162,6 +161,7 @@
 			children = (
 				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
 				D488B59C2DD0803400089B3D /* ButtonThrottle.swift */,
+				D4E0EC292E3B680800AFE6C5 /* Mocks */,
 				D463A5F02C6E346500D102AD /* Models */,
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
@@ -194,6 +194,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D4E0EC292E3B680800AFE6C5 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */,
+			);
+			path = Mocks;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
