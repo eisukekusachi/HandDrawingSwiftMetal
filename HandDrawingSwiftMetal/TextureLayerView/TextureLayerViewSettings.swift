@@ -19,6 +19,13 @@ struct TextureLayerViewSettings {
     /// The size of the layer view
     let size: CGSize
 
+    var arrowX: CGFloat {
+        let targetViewCenterX = anchorButton.convert(anchorButton.bounds, to: destinationView).midX
+        let layerViewX = targetViewCenterX - size.width * 0.5
+        let centerX = targetViewCenterX - layerViewX
+        return centerX
+    }
+
     init(
         anchorButton: UIView,
         destinationView: UIView,
@@ -46,12 +53,5 @@ struct TextureLayerViewSettings {
         ])
 
         sourceView.setNeedsLayout()
-    }
-
-    func arrowX() -> CGFloat {
-        let targetViewCenterX = anchorButton.convert(anchorButton.bounds, to: destinationView).midX
-        let layerViewX = targetViewCenterX - size.width * 0.5
-        let centerX = targetViewCenterX - layerViewX
-        return centerX
     }
 }

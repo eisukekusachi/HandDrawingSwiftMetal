@@ -9,21 +9,23 @@ import CanvasView
 import SwiftUI
 
 struct TextureLayerView: View {
+    var arrowPointX: CGFloat
 
     @ObservedObject var viewModel: TextureLayerViewModel
-
-    @ObservedObject var roundedRectangleWithArrow: RoundedRectangleWithArrow
 
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
     private let buttonThrottle = ButtonThrottle()
 
+    private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
+
     private let range = 0 ... 255
 
     var body: some View {
         ZStack {
             roundedRectangleWithArrow.viewWithTopArrow(
+                arrowPointX: arrowPointX,
                 arrowSize: roundedRectangleWithArrow.arrowSize,
                 roundedCorner: roundedRectangleWithArrow.roundedCorner
             )
@@ -114,7 +116,6 @@ extension TextureLayerView {
         }
         .padding(8)
     }
-
 }
 
 #Preview {
@@ -137,7 +138,7 @@ private struct PreviewView: View {
     )
     let configuration: TextureLayerConfiguration
 
-    @StateObject var roundedRectangle = RoundedRectangleWithArrow()
+    let arrowPointX: CGFloat = 160
 
     init() {
         configuration = .init(
@@ -148,10 +149,9 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerView(
-            viewModel: .init(configuration: configuration),
-            roundedRectangleWithArrow: roundedRectangle
+            arrowPointX: arrowPointX,
+            viewModel: .init(configuration: configuration)
         )
         .frame(width: 320, height: 300)
     }
-
 }

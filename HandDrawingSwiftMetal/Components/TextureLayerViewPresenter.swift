@@ -14,8 +14,6 @@ final class TextureLayerViewPresenter {
     private var layerViewController: UIHostingController<TextureLayerView>!
     private var layerView: TextureLayerView!
 
-    private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
-
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
     }
@@ -25,10 +23,10 @@ final class TextureLayerViewPresenter {
         using viewSettings: TextureLayerViewSettings
     ) {
         layerView = TextureLayerView(
+            arrowPointX: viewSettings.arrowX,
             viewModel: .init(
                 configuration: configuration
-            ),
-            roundedRectangleWithArrow: roundedRectangleWithArrow
+            )
         )
 
         layerViewController = UIHostingController(rootView: layerView)
@@ -38,8 +36,6 @@ final class TextureLayerViewPresenter {
         viewSettings.configureViewLayout(
             sourceView: layerViewController.view
         )
-
-        roundedRectangleWithArrow.arrowPointX = viewSettings.arrowX()
     }
 
 }

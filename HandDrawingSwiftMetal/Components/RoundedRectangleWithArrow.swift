@@ -8,10 +8,7 @@
 import SwiftUI
 
 /// A rounded rectangle model with an arrow at the top
-class RoundedRectangleWithArrow: ObservableObject {
-
-    @Published
-    var arrowPointX: CGFloat = 0.0
+final class RoundedRectangleWithArrow: ObservableObject {
 
     let arrowSize: CGSize = .init(width: 18, height: 14)
     let roundedCorner: CGFloat = 12
@@ -25,11 +22,8 @@ class RoundedRectangleWithArrow: ObservableObject {
         )
     }
 
-}
-
-extension RoundedRectangleWithArrow {
-
     func viewWithTopArrow(
+        arrowPointX: CGFloat,
         arrowSize: CGSize,
         roundedCorner: CGFloat
     ) -> some View {
@@ -46,7 +40,7 @@ extension RoundedRectangleWithArrow {
 
             let pointMinX = minX1 + arrowSize.width * 0.5
             let pointMaxX = maxX1 - arrowSize.width * 0.5
-            let pointX = min(max(pointMinX, self.arrowPointX), pointMaxX)
+            let pointX = min(max(pointMinX, arrowPointX), pointMaxX)
 
             let arrowStartX = pointX - arrowSize.width * 0.5
             let arrowEndX = pointX + arrowSize.width * 0.5
@@ -108,5 +102,4 @@ extension RoundedRectangleWithArrow {
             .fill(Color.black)
         }
     }
-
 }

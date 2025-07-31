@@ -48,6 +48,10 @@ import MetalKit
         subscribe()
     }
 
+    func initialization() {
+
+    }
+
     private func subscribe() {
         // Update the SwiftUI layout
         textureLayerRepository.objectWillChangeSubject
