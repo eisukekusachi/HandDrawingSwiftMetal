@@ -43,7 +43,7 @@ extension CanvasViewDependencies {
             undoTextureRepository = nil
         }
 
-        localFileRepository = LocalFileRepository(
+        localFileRepository = DefaultLocalFileRepository(
             workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
         )
     }

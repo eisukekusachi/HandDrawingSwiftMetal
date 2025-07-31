@@ -9,8 +9,6 @@ import CoreData
 import UIKit
 
 protocol CoreDataRepository {
-    var entityName: String { get }
-    var persistentContainerName: String { get }
 
     var context: NSManagedObjectContext { get }
 
