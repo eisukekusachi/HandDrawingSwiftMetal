@@ -18,24 +18,23 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
     }
 
-    @MainActor func setupLayerViewPresenter(
+    @MainActor
+    func initialize(
         configuration: TextureLayerConfiguration,
-        using viewSettings: TextureLayerViewSettings
+        popupConfiguration: PopupWithArrowConfiguration
     ) {
         layerView = TextureLayerView(
-            arrowPointX: viewSettings.arrowX,
-            viewModel: .init(
-                configuration: configuration
-            )
+            configuration: configuration
         )
 
         layerViewController = UIHostingController(rootView: layerView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
 
-        viewSettings.configureViewLayout(
+        popupConfiguration.initialize(
             sourceView: layerViewController.view
         )
-    }
 
+        layerView.updateArrowX(popupConfiguration.arrowX)
+    }
 }

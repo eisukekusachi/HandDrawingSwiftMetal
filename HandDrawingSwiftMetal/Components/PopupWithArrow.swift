@@ -1,5 +1,5 @@
 //
-//  RoundedRectangleWithArrow.swift
+//  PopupWithArrow.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/04/26.
@@ -8,12 +8,27 @@
 import SwiftUI
 
 /// A rounded rectangle model with an arrow at the top
-final class RoundedRectangleWithArrow: ObservableObject {
+final class PopupWithArrow: ObservableObject {
 
-    let arrowSize: CGSize = .init(width: 18, height: 14)
-    let roundedCorner: CGFloat = 12
+    private let arrowSize: CGSize
+    private let roundedCorner: CGFloat
+    private let lineWidth: CGFloat
 
-    func edgeInsets() -> EdgeInsets {
+    private let backgroundColor: UIColor
+
+    init(
+        arrowSize: CGSize = .init(width: 18, height: 14),
+        roundedCorner: CGFloat = 12,
+        lineWidth: CGFloat = 0.5,
+        backgroundColor: UIColor = .white.withAlphaComponent(0.9)
+    ) {
+        self.arrowSize = arrowSize
+        self.roundedCorner = roundedCorner
+        self.lineWidth = lineWidth
+        self.backgroundColor = backgroundColor
+    }
+
+    var edgeInsets: EdgeInsets {
         .init(
             top: roundedCorner + arrowSize.height,
             leading: roundedCorner,
@@ -22,28 +37,26 @@ final class RoundedRectangleWithArrow: ObservableObject {
         )
     }
 
-    func viewWithTopArrow(
-        arrowPointX: CGFloat,
-        arrowSize: CGSize,
-        roundedCorner: CGFloat
+    func view(
+        arrowPointX: CGFloat
     ) -> some View {
         GeometryReader { geometry in
             let minX0 = 0.0
-            let minX1 = roundedCorner
-            let maxX1 = geometry.size.width - roundedCorner
+            let minX1 = self.roundedCorner
+            let maxX1 = geometry.size.width - self.roundedCorner
             let maxX0 = geometry.size.width
 
-            let minY0 = arrowSize.height
-            let minY1 = arrowSize.height + roundedCorner
-            let maxY1 = geometry.size.height - roundedCorner
+            let minY0 = self.arrowSize.height
+            let minY1 = self.arrowSize.height + self.roundedCorner
+            let maxY1 = geometry.size.height - self.roundedCorner
             let maxY0 = geometry.size.height
 
-            let pointMinX = minX1 + arrowSize.width * 0.5
-            let pointMaxX = maxX1 - arrowSize.width * 0.5
+            let pointMinX = minX1 + self.arrowSize.width * 0.5
+            let pointMaxX = maxX1 - self.arrowSize.width * 0.5
             let pointX = min(max(pointMinX, arrowPointX), pointMaxX)
 
-            let arrowStartX = pointX - arrowSize.width * 0.5
-            let arrowEndX = pointX + arrowSize.width * 0.5
+            let arrowStartX = pointX - self.arrowSize.width * 0.5
+            let arrowEndX = pointX + self.arrowSize.width * 0.5
 
             let minX0minY1: CGPoint = .init(x: minX0, y: minY1)
             let minX1minY0: CGPoint = .init(x: minX1, y: minY0)
@@ -75,7 +88,7 @@ final class RoundedRectangleWithArrow: ObservableObject {
                                   control: .init(x: minX0, y: maxY0))
                 path.closeSubpath()
             }
-            .fill(Color.white.opacity(0.9))
+            .fill(Color(self.backgroundColor))
 
             // For iOS 15 compatibility
             Path { path in
@@ -98,7 +111,7 @@ final class RoundedRectangleWithArrow: ObservableObject {
                                   control: .init(x: minX0, y: maxY0))
                 path.closeSubpath()
             }
-            .stroke(lineWidth: 0.5)
+            .stroke(lineWidth: self.lineWidth)
             .fill(Color.black)
         }
     }

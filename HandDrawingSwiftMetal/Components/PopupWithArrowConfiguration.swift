@@ -1,5 +1,5 @@
 //
-//  TextureLayerViewSettings.swift
+//  PopupWithArrowConfiguration.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/26.
@@ -7,8 +7,7 @@
 
 import UIKit
 
-/// A settings container for configuring the layout and positioning of `TextureLayerView`
-struct TextureLayerViewSettings {
+struct PopupWithArrowConfiguration {
 
     /// The button that serves as an anchor point, positioning the layer view directly below it
     let anchorButton: UIView
@@ -38,9 +37,7 @@ struct TextureLayerViewSettings {
         self.size = size
     }
 
-    func configureViewLayout(
-        sourceView: UIView
-    ) {
+    func initialize(sourceView: UIView) {
         destinationView.addSubview(sourceView)
 
         sourceView.translatesAutoresizingMaskIntoConstraints = false

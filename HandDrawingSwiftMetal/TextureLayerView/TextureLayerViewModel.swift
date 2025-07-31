@@ -9,24 +9,27 @@ import CanvasView
 import Combine
 import MetalKit
 
-@MainActor final class TextureLayerViewModel: ObservableObject {
+@MainActor
+final class TextureLayerViewModel: ObservableObject {
+
+    @Published var arrowX: CGFloat = 0
 
     let alphaSliderValue = SliderValue()
 
     var selectedLayer: TextureLayerModel? {
-        canvasState.selectedLayer
+        canvasState?.selectedLayer
     }
 
     func thumbnail(_ uuid: UUID) -> UIImage? {
         textureLayerRepository?.thumbnail(uuid)
     }
 
-    private(set) var canvasState: CanvasState
+    private(set) var canvasState: CanvasState?
 
     @Published private var selectedLayerId: UUID? {
         didSet {
             // Update the slider value when selectedLayerId changes
-            if let selectedLayerId, let layer = canvasState.layer(selectedLayerId) {
+            if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
                 alphaSliderValue.value = layer.alpha
             }
         }
@@ -38,7 +41,7 @@ import MetalKit
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(
+    func initialize(
         configuration: TextureLayerConfiguration
     ) {
         self.canvasState = configuration.canvasState
@@ -46,10 +49,6 @@ import MetalKit
         self.undoStack = configuration.undoStack
 
         subscribe()
-    }
-
-    func initialization() {
-
     }
 
     private func subscribe() {
@@ -80,7 +79,7 @@ import MetalKit
             .store(in: &cancellables)
 
         // Bind `canvasState.selectedLayerId` to `selectedLayerId`
-        canvasState.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
+        canvasState?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
     }
 
@@ -90,7 +89,8 @@ extension TextureLayerViewModel {
 
     func onTapInsertButton() {
         guard
-            let selectedIndex = canvasState.selectedIndex,
+            let selectedIndex = canvasState?.selectedIndex,
+            let textureSize = canvasState?.getTextureSize(),
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
@@ -105,7 +105,7 @@ extension TextureLayerViewModel {
         Task {
             let result = try await textureLayerRepository
                 .addTexture(
-                    MTLTextureCreator.makeBlankTexture(size: canvasState.getTextureSize(), with: device),
+                    MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     newTextureUUID: layer.id
                 )
             insertLayer(layer: layer, at: index, undoTexture: result.texture)
@@ -114,14 +114,15 @@ extension TextureLayerViewModel {
 
     func onTapDeleteButton() {
         guard
-            canvasState.layers.count > 1,
-            let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex
+            canvasState?.layers.count ?? 0 > 1,
+            let selectedLayer = canvasState?.selectedLayer,
+            let selectedIndex = canvasState?.selectedIndex,
+            let textureLayerId = canvasState?.layers[selectedIndex].id
         else { return }
 
         Task {
             let result = try await textureLayerRepository.copyTexture(
-                uuid: canvasState.layers[selectedIndex].id
+                uuid: textureLayerId
             )
 
             try textureLayerRepository
@@ -153,16 +154,16 @@ extension TextureLayerViewModel {
 extension TextureLayerViewModel {
 
     private func insertLayer(layer: TextureLayerModel, at index: Int, undoTexture: MTLTexture?) {
-        let previousLayerIndex = self.canvasState.selectedIndex ?? 0
+        let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
 
         // Perform a layer operation
-        canvasState.layers.insert(layer, at: index)
-        canvasState.selectedLayerId = layer.id
-        canvasState.fullCanvasUpdateSubject.send(())
+        canvasState?.layers.insert(layer, at: index)
+        canvasState?.selectedLayerId = layer.id
+        canvasState?.fullCanvasUpdateSubject.send(())
 
         // Push an UndoObject onto the stack
         Task {
-            let currentLayerIndex = canvasState.selectedIndex ?? 0
+            let currentLayerIndex = canvasState?.selectedIndex ?? 0
             await addUndoAdditionObject(
                 previousLayerIndex: previousLayerIndex,
                 currentLayerIndex: currentLayerIndex,
@@ -173,12 +174,14 @@ extension TextureLayerViewModel {
     }
 
     private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
+        guard let canvasState else { return }
+
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
 
         // Perform a layer operation
-        self.canvasState.layers.remove(at: selectedLayerIndex)
-        self.canvasState.selectedLayerId = self.canvasState.layers[newLayerIndex].id
-        self.canvasState.fullCanvasUpdateSubject.send(())
+        canvasState.layers.remove(at: selectedLayerIndex)
+        canvasState.selectedLayerId = canvasState.layers[newLayerIndex].id
+        canvasState.fullCanvasUpdateSubject.send(())
 
         // Push an UndoObject onto the stack
         Task {
@@ -194,6 +197,8 @@ extension TextureLayerViewModel {
     private func moveLayer(
         indices: MoveLayerIndices
     ) {
+        guard let canvasState else { return }
+
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
             layerCount: canvasState.layers.count
@@ -224,7 +229,11 @@ extension TextureLayerViewModel {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id) else { return }
+        guard
+            let canvasState,
+            let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id)
+        else { return }
+
         let layer = canvasState.layers[selectedIndex]
 
         if let title {
@@ -245,8 +254,8 @@ extension TextureLayerViewModel {
     }
 
     private func selectLayer(layerId: UUID) {
-        canvasState.selectedLayerId = layerId
-        canvasState.fullCanvasUpdateSubject.send(())
+        canvasState?.selectedLayerId = layerId
+        canvasState?.fullCanvasUpdateSubject.send(())
     }
 
 }
@@ -259,6 +268,8 @@ extension TextureLayerViewModel {
         layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
+        guard let canvasState else { return }
+
         let redoObject = UndoAdditionObject(
             layerToBeAdded: layer,
             insertIndex: currentLayerIndex
@@ -285,6 +296,8 @@ extension TextureLayerViewModel {
         layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
+        guard let canvasState else { return }
+
         // Add an undo object to the undo stack
         let redoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
@@ -328,11 +341,13 @@ extension TextureLayerViewModel {
     }
 
     private func addUndoAlphaObject(dragging: Bool) {
+        guard let canvasState else { return }
+
         if dragging {
-            self.alphaSliderValue.temporaryStoredValue = self.canvasState.selectedLayer?.alpha
+            self.alphaSliderValue.temporaryStoredValue = canvasState.selectedLayer?.alpha
         } else {
             if let oldAlpha = self.alphaSliderValue.temporaryStoredValue,
-               let newAlpha = self.canvasState.selectedLayer?.alpha,
+               let newAlpha = canvasState.selectedLayer?.alpha,
                let selectedLayer = canvasState.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(

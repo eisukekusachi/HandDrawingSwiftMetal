@@ -9,25 +9,29 @@ import CanvasView
 import SwiftUI
 
 struct TextureLayerView: View {
-    var arrowPointX: CGFloat
-
-    @ObservedObject var viewModel: TextureLayerViewModel
+    @State private var arrowPointX: CGFloat = 0
 
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
     private let buttonThrottle = ButtonThrottle()
 
-    private let roundedRectangleWithArrow = RoundedRectangleWithArrow()
+    private let popupWithArrow = PopupWithArrow()
 
     private let range = 0 ... 255
 
+    private var viewModel = TextureLayerViewModel()
+
+    init(
+        configuration: TextureLayerConfiguration
+    ) {
+        viewModel.initialize(configuration: configuration)
+    }
+
     var body: some View {
         ZStack {
-            roundedRectangleWithArrow.viewWithTopArrow(
-                arrowPointX: arrowPointX,
-                arrowSize: roundedRectangleWithArrow.arrowSize,
-                roundedCorner: roundedRectangleWithArrow.roundedCorner
+            popupWithArrow.view(
+                arrowPointX: viewModel.arrowX
             )
 
             VStack {
@@ -39,8 +43,7 @@ struct TextureLayerView: View {
                 )
 
                 TextureLayerListView(
-                    viewModel: viewModel,
-                    canvasState: viewModel.canvasState
+                    viewModel: viewModel
                 )
 
                 TwoRowsSliderView(
@@ -51,10 +54,13 @@ struct TextureLayerView: View {
                 .padding(.top, 4)
                 .padding([.leading, .trailing, .bottom], 8)
             }
-            .padding(roundedRectangleWithArrow.edgeInsets())
+            .padding(popupWithArrow.edgeInsets)
         }
     }
 
+    func updateArrowX(_ value: CGFloat) {
+        viewModel.arrowX = value
+    }
 }
 
 extension TextureLayerView {
@@ -138,8 +144,6 @@ private struct PreviewView: View {
     )
     let configuration: TextureLayerConfiguration
 
-    let arrowPointX: CGFloat = 160
-
     init() {
         configuration = .init(
             canvasState: canvasState,
@@ -149,8 +153,7 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerView(
-            arrowPointX: arrowPointX,
-            viewModel: .init(configuration: configuration)
+            configuration: configuration
         )
         .frame(width: 320, height: 300)
     }

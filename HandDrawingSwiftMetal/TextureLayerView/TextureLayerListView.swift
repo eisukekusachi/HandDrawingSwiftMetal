@@ -11,39 +11,39 @@ import SwiftUI
 struct TextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
-    @ObservedObject var canvasState: CanvasState
 
     var body: some View {
-        List {
-            ForEach(
-                Array(canvasState.layers.reversed()),
-                id: \.id
-            ) { layer in
-                layerRow(
-                    layer: layer,
-                    thumbnail: viewModel.thumbnail(layer.id),
-                    selected: viewModel.selectedLayer?.id == layer.id,
-                    didTapRow: { targetLayer in
-                        viewModel.onTapCell(id: targetLayer.id)
-                    },
-                    didTapVisibleButton: { targetLayer in
-                        viewModel.onTapVisibleButton(
-                            id: targetLayer.id,
-                            isVisible: !targetLayer.isVisible
-                        )
-                    }
-                )
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+        if let canvasState = viewModel.canvasState {
+            List {
+                ForEach(
+                    Array(canvasState.layers.reversed()),
+                    id: \.id
+                ) { layer in
+                    layerRow(
+                        layer: layer,
+                        thumbnail: viewModel.thumbnail(layer.id),
+                        selected: viewModel.selectedLayer?.id == layer.id,
+                        didTapRow: { targetLayer in
+                            viewModel.onTapCell(id: targetLayer.id)
+                        },
+                        didTapVisibleButton: { targetLayer in
+                            viewModel.onTapVisibleButton(
+                                id: targetLayer.id,
+                                isVisible: !targetLayer.isVisible
+                            )
+                        }
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+                .onMove(perform: { source, destination in
+                    viewModel.onMoveLayer(source: source, destination: destination)
+                })
+                .listRowSeparator(.hidden)
             }
-            .onMove(perform: { source, destination in
-                viewModel.onMoveLayer(source: source, destination: destination)
-            })
-            .listRowSeparator(.hidden)
+            .listStyle(PlainListStyle())
         }
-        .listStyle(PlainListStyle())
     }
-
 }
 
 extension TextureLayerListView {
@@ -154,10 +154,10 @@ private struct PreviewView: View {
             ]
         )
     )
-    let viewModel: TextureLayerViewModel
+    let viewModel = TextureLayerViewModel()
 
     init() {
-        viewModel = .init(
+        viewModel.initialize(
             configuration: .init(
                 canvasState: canvasState,
                 textureLayerRepository: MockTextureLayerRepository(),
@@ -167,8 +167,7 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerListView(
-            viewModel: viewModel,
-            canvasState: canvasState
+            viewModel: viewModel
         )
         .frame(width: 256, height: 300)
     }
