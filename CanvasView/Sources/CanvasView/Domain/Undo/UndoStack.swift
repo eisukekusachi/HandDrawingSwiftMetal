@@ -22,6 +22,7 @@ public final class UndoStack {
 
     private let undoTextureRepository: TextureRepository
 
+    /// An undo object captured at the start of the stroke, shown when undo is triggered.
     private var drawingUndoObject: UndoObject?
 
     private var cancellables = Set<AnyCancellable>()
