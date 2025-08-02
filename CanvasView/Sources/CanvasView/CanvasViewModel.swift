@@ -13,9 +13,7 @@ import Combine
 public final class CanvasViewModel {
 
     /// Maintains the state of the canvas
-    let canvasState: CanvasState = .init(
-        CanvasConfiguration()
-    )
+    let canvasState = CanvasState()
 
     public static var fileSuffix: String {
         "zip"
@@ -263,7 +261,10 @@ public extension CanvasViewModel {
 
         let textureLayerRepository = dependencies.textureLayerRepository
 
-        canvasState.setData(configuration)
+        canvasState.initialize(
+            configuration: configuration,
+            textureRepository: textureLayerRepository
+        )
 
         renderer.initTextures(textureSize: textureSize)
 
@@ -588,6 +589,10 @@ extension CanvasViewModel {
                 Logger.error(error)
             }
         }
+
+        canvasState.updateThumbnail(
+            .init(uuid: selectedTextureId, texture: texture)
+        )
     }
 
     private func resetAllInputParameters() {

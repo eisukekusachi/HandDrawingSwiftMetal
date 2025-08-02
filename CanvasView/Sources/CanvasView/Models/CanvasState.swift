@@ -36,8 +36,37 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
     private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
-    public init(_ configuration: CanvasConfiguration) {
-        setData(configuration)
+    public init() {}
+
+    public func initialize(
+        configuration: CanvasConfiguration,
+        textureRepository: TextureRepository? = nil
+    ) {
+
+        self.projectName = configuration.projectName
+        self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
+
+        self.layers.removeAll()
+        self.layers = configuration.layers.map {
+            .init(
+                item: $0,
+                thumbnail: nil
+            )
+        }
+        self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
+
+        self.brush.color = configuration.brushColor
+        self.brush.setDiameter(configuration.brushDiameter)
+
+        self.eraser.alpha = configuration.eraserAlpha
+        self.eraser.setDiameter(configuration.eraserDiameter)
+
+        self.setDrawingTool(configuration.drawingTool)
+
+        Task {
+            let results = try await textureRepository?.copyTextures(uuids: layers.map { $0.id })
+            await updateAllThumbnails(results ?? [])
+        }
     }
 }
 
@@ -68,40 +97,22 @@ public extension CanvasState {
         textureSize
     }
 
-    func setData(_ configuration: CanvasConfiguration) {
-
-        self.projectName = configuration.projectName
-        self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
-
-        self.layers.removeAll()
-        self.layers = configuration.layers.map { .init(item: $0) }
-        self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
-
-        self.brush.color = configuration.brushColor
-        self.brush.setDiameter(configuration.brushDiameter)
-
-        self.eraser.alpha = configuration.eraserAlpha
-        self.eraser.setDiameter(configuration.eraserDiameter)
-
-        self.setDrawingTool(configuration.drawingTool)
-    }
-
     func setDrawingTool(_ drawingToolType: DrawingToolType) {
         self.drawingTool = drawingToolType
     }
 }
 
-extension CanvasState {
+public extension CanvasState {
 
     func addLayer(newTextureLayer textureLayer: TextureLayerModel, at index: Int) {
         self.layers.insert(textureLayer, at: index)
         self.selectedLayerId = textureLayer.id
     }
 
-    func removeLayer(textureLayer: TextureLayerModel, newSelectedLayerId: UUID) {
-        guard let index = layers.firstIndex(where: { $0.id == textureLayer.id }) else { return }
+    func removeLayer(layerIdToDelete: UUID, newLayerId: UUID) {
+        guard let index = layers.firstIndex(where: { $0.id == layerIdToDelete }) else { return }
         self.layers.remove(at: index)
-        self.selectedLayerId = newSelectedLayerId
+        self.selectedLayerId = newLayerId
     }
 
     func moveLayer(
@@ -116,5 +127,18 @@ extension CanvasState {
         guard let index = layers.firstIndex(where: { $0.id == newTextureLayer.id }) else { return }
         self.layers[index] = newTextureLayer
         self.selectedLayerId = newTextureLayer.id
+    }
+
+    @MainActor
+    func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
+        guard let index = layers.firstIndex(where: { $0.id == identifiedTexture.uuid }) else { return }
+        self.layers[index].thumbnail = identifiedTexture.texture.makeThumbnail()
+    }
+
+    @MainActor
+    func updateAllThumbnails(_ identifiedTextures: [IdentifiedTexture]) {
+        for identifiedTexture in identifiedTextures {
+            updateThumbnail(identifiedTexture)
+        }
     }
 }

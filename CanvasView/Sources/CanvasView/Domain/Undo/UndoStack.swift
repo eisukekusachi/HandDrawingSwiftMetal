@@ -267,29 +267,44 @@ extension UndoStack {
                     textureLayerRepository: textureLayerRepository,
                     undoTextureRepository: undoTextureRepository
                 )
-                didPerformUndo(undoObject)
+
+                try await didPerformUndo(
+                    undoObject: undoObject,
+                    textureRepository: textureLayerRepository
+                )
             } catch {
                 Logger.error(error)
             }
         }
     }
 
-    private func didPerformUndo(_ undoObject: UndoObject) {
+    private func didPerformUndo(
+        undoObject: UndoObject,
+        textureRepository: TextureRepository
+    ) async throws {
         if let undoObject = undoObject as? UndoDrawingObject {
+            let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
+
+            canvasState.updateThumbnail(result)
             canvasState.selectedLayerId = undoObject.textureLayer.id
             canvasState.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
+            let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
+
             canvasState.addLayer(
-                newTextureLayer: .init(item: undoObject.textureLayer),
+                newTextureLayer: .init(
+                    item: undoObject.textureLayer,
+                    thumbnail: result.texture.makeThumbnail()
+                ),
                 at: undoObject.insertIndex
             )
             canvasState.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
             canvasState.removeLayer(
-                textureLayer: .init(item: undoObject.textureLayer),
-                newSelectedLayerId: undoObject.selectedLayerIdAfterDeletion
+                layerIdToDelete: undoObject.textureLayer.id,
+                newLayerId: undoObject.selectedLayerIdAfterDeletion
             )
             canvasState.fullCanvasUpdateSubject.send()
 
@@ -301,8 +316,13 @@ extension UndoStack {
             canvasState.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
+            let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
+
             canvasState.updateLayer(
-                newTextureLayer: .init(item: undoObject.textureLayer)
+                newTextureLayer: .init(
+                    item: undoObject.textureLayer,
+                    thumbnail: result.texture.makeThumbnail()
+                )
             )
             canvasState.canvasUpdateSubject.send()
         }
