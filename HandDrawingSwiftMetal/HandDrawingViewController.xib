@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24093.9" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24057"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HandDrawingViewController" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
+            <connections>
+                <outlet property="activityIndicatorView" destination="R1e-kl-sI1" id="8L1-6K-oZj"/>
+                <outlet property="contentView" destination="BPH-O1-Mzr" id="oXA-KF-xiY"/>
+                <outlet property="view" destination="iN0-l3-epB" id="15E-cg-y6y"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BPH-O1-Mzr" customClass="HandDrawingContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                </view>
+                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="R1e-kl-sI1" userLabel="ActivityIndicatorView">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <subviews>
+                        <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i0b-kf-yuL">
+                            <rect key="frame" x="164.66666666666666" y="394" width="64" height="64"/>
+                            <subviews>
+                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="isd-CW-HUu">
+                                    <rect key="frame" x="22" y="22" width="20" height="20"/>
+                                </activityIndicatorView>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="64" id="6Fh-zz-tAG"/>
+                                <constraint firstItem="isd-CW-HUu" firstAttribute="centerX" secondItem="i0b-kf-yuL" secondAttribute="centerX" id="I8N-J1-jTM"/>
+                                <constraint firstAttribute="height" constant="64" id="lbJ-zs-nsI"/>
+                                <constraint firstItem="isd-CW-HUu" firstAttribute="centerY" secondItem="i0b-kf-yuL" secondAttribute="centerY" id="r7L-lZ-Hjs"/>
+                            </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                    <integer key="value" value="8"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="i0b-kf-yuL" firstAttribute="centerY" secondItem="R1e-kl-sI1" secondAttribute="centerY" id="76I-L4-2aZ"/>
+                        <constraint firstItem="i0b-kf-yuL" firstAttribute="centerX" secondItem="R1e-kl-sI1" secondAttribute="centerX" id="JvY-3v-i7t"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="BPH-O1-Mzr" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="0lH-CJ-Ywc"/>
+                <constraint firstAttribute="bottom" secondItem="BPH-O1-Mzr" secondAttribute="bottom" id="2Kj-Ta-oga"/>
+                <constraint firstAttribute="bottom" secondItem="R1e-kl-sI1" secondAttribute="bottom" id="HNI-l7-8jm"/>
+                <constraint firstAttribute="trailing" secondItem="BPH-O1-Mzr" secondAttribute="trailing" id="P4n-gg-qXK"/>
+                <constraint firstItem="R1e-kl-sI1" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="Y35-rA-ViO"/>
+                <constraint firstItem="BPH-O1-Mzr" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="eJg-Ul-hcP"/>
+                <constraint firstAttribute="trailing" secondItem="R1e-kl-sI1" secondAttribute="trailing" id="jyW-8K-gxt"/>
+                <constraint firstItem="R1e-kl-sI1" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="oCI-ee-UwF"/>
+            </constraints>
+            <point key="canvasLocation" x="63" y="21"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
