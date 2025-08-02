@@ -87,7 +87,7 @@ public final class CanvasViewModel {
 
     private var renderer = CanvasRenderer()
 
-    private let transformer = CanvasTransformer()
+    private let transformer = Transformer()
 
     /// Manages input from pen and finger
     private let inputDevice = InputDeviceStatus()

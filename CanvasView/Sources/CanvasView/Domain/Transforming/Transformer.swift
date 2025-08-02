@@ -1,5 +1,5 @@
 //
-//  CanvasTransformer.swift
+//  Transformer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 /// A class for canvas rotation
-final class CanvasTransformer {
+final class Transformer {
 
     var matrix: CGAffineTransform {
         matrixSubject.value
@@ -26,10 +26,9 @@ final class CanvasTransformer {
     private var keyB: TouchID?
     private var firstTouchPointA: CGPoint?
     private var firstTouchPointB: CGPoint?
-
 }
 
-extension CanvasTransformer {
+extension Transformer {
 
     var isKeysInitialized: Bool {
         keyA != nil && keyB != nil
@@ -89,10 +88,9 @@ extension CanvasTransformer {
         storedMatrix = matrixSubject.value
         resetParameters()
     }
-
 }
 
-extension CanvasTransformer {
+extension Transformer {
 
     private func resetParameters() {
         keyA = nil
@@ -100,5 +98,4 @@ extension CanvasTransformer {
         firstTouchPointA = nil
         firstTouchPointB = nil
     }
-
 }
