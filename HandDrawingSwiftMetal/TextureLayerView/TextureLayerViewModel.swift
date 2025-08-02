@@ -320,7 +320,7 @@ extension TextureLayerViewModel {
 
         // Create a addition undo object to cancel the deletion
         let undoObject = UndoAdditionObject(
-            redoObject,
+            layerToBeAdded: redoObject.textureLayer,
             insertIndex: previousLayerIndex
         )
 
@@ -365,14 +365,17 @@ extension TextureLayerViewModel {
                let selectedLayer = canvasState.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(
-                    alpha: oldAlpha,
-                    textureLayer: selectedLayer
+                    layer: .init(model: selectedLayer),
+                    withNewAlpha: oldAlpha
                 )
 
                 undoStack?.pushUndoObject(
                     .init(
                         undoObject: undoObject,
-                        redoObject: UndoAlphaChangedObject(undoObject, withNewAlpha: newAlpha)
+                        redoObject: UndoAlphaChangedObject(
+                            layer: undoObject.textureLayer,
+                            withNewAlpha: newAlpha
+                        )
                     )
                 )
             }

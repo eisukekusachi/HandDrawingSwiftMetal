@@ -35,14 +35,8 @@ public final class UndoAdditionObject: UndoObject {
         self.insertIndex = insertIndex
     }
 
-    public init(_ object: UndoDeletionObject, insertIndex: Int) {
-        self.undoTextureUUID = object.undoTextureUUID
-        self.textureLayer = object.textureLayer
-        self.insertIndex = insertIndex
-    }
-
     /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
-    public func performUndo(
+    public func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

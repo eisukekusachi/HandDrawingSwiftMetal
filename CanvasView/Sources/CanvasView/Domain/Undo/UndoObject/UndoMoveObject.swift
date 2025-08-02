@@ -61,7 +61,7 @@ public final class UndoMoveObject: UndoObject {
         self.textureLayer = layer
     }
 
-    public func performUndo(
+    public func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

@@ -19,7 +19,7 @@ public protocol UndoObject {
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
 
     /// A method called when the undo operation is performed
-    func performUndo(
+    func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws

@@ -23,14 +23,14 @@ final class UndoDrawingObject: UndoObject {
     }
 
     init(
-        textureLayer: TextureLayerModel
+        layer: TextureLayerItem
     ) {
         self.undoTextureUUID = UUID()
-        self.textureLayer = .init(model: textureLayer)
+        self.textureLayer = layer
     }
 
     /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
-    func performUndo(
+    func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

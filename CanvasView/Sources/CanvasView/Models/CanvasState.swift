@@ -98,7 +98,7 @@ extension CanvasState {
         self.selectedLayerId = textureLayer.id
     }
 
-    func removeLayer(textureLayer: TextureLayerItem, newSelectedLayerId: UUID) {
+    func removeLayer(textureLayer: TextureLayerModel, newSelectedLayerId: UUID) {
         guard let index = layers.firstIndex(where: { $0.id == textureLayer.id }) else { return }
         self.layers.remove(at: index)
         self.selectedLayerId = newSelectedLayerId

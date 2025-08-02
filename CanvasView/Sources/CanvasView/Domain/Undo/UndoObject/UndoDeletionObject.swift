@@ -33,7 +33,7 @@ public final class UndoDeletionObject: UndoObject {
         self.selectedLayerIdAfterDeletion = layerId
     }
 
-    public func performUndo(
+    public func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

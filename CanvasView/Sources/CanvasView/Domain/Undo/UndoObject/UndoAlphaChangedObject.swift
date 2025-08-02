@@ -24,28 +24,18 @@ public final class UndoAlphaChangedObject: UndoObject {
     }
 
     public init(
-        alpha: Int,
-        textureLayer: TextureLayerModel
+        layer: TextureLayerItem,
+        withNewAlpha alpha: Int
     ) {
-        self.textureLayer = .init(model: textureLayer, alpha: alpha)
-    }
-
-    public init(
-        _ object: UndoAlphaChangedObject,
-        withNewAlpha newAlpha: Int
-    ) {
-        let textureLayer = object.textureLayer
         self.textureLayer = .init(
-            model: .init(
-                id: textureLayer.id,
-                title: textureLayer.title,
-                alpha: textureLayer.alpha,
-                isVisible: textureLayer.isVisible
-            ),
-            alpha: newAlpha)
+            id: layer.id,
+            title: layer.title,
+            alpha: alpha,
+            isVisible: layer.isVisible
+        )
     }
 
-    public func performUndo(
+    public func performTextureOperation(
         textureLayerRepository: TextureLayerRepository,
         undoTextureRepository: TextureRepository
     ) async throws {

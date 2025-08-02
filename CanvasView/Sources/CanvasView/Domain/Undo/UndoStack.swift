@@ -73,7 +73,7 @@ public extension UndoStack {
         else { return }
 
         let undoObject = UndoDrawingObject(
-            textureLayer: undoLayer
+            layer: .init(model: undoLayer)
         )
 
         do {
@@ -103,7 +103,7 @@ public extension UndoStack {
         else { return }
 
         let redoObject = UndoDrawingObject(
-            textureLayer: redoLayer
+            layer: .init(model: redoLayer)
         )
 
         do {
@@ -137,7 +137,7 @@ public extension UndoStack {
         else { return }
 
         let redoObject = UndoDrawingObject(
-            textureLayer: redoLayer
+            layer: .init(model: redoLayer)
         )
 
         do {
@@ -263,7 +263,7 @@ extension UndoStack {
     ) {
         Task {
             do {
-                try await undoObject.performUndo(
+                try await undoObject.performTextureOperation(
                     textureLayerRepository: textureLayerRepository,
                     undoTextureRepository: undoTextureRepository
                 )
@@ -288,7 +288,7 @@ extension UndoStack {
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
             canvasState.removeLayer(
-                textureLayer: undoObject.textureLayer,
+                textureLayer: .init(item: undoObject.textureLayer),
                 newSelectedLayerId: undoObject.selectedLayerIdAfterDeletion
             )
             canvasState.fullCanvasUpdateSubject.send()
