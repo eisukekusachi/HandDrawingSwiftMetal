@@ -9,7 +9,10 @@ import CanvasView
 import UIKit
 import SwiftUI
 
+@MainActor
 final class TextureLayerViewPresenter {
+
+    private let viewModel = TextureLayerViewModel()
 
     private var layerViewController: UIHostingController<TextureLayerView>!
     private var layerView: TextureLayerView!
@@ -23,8 +26,10 @@ final class TextureLayerViewPresenter {
         configuration: TextureLayerConfiguration,
         popupConfiguration: PopupWithArrowConfiguration
     ) {
+        viewModel.initialize(configuration: configuration)
+
         layerView = TextureLayerView(
-            configuration: configuration
+            viewModel: viewModel
         )
 
         layerViewController = UIHostingController(rootView: layerView)
@@ -35,6 +40,6 @@ final class TextureLayerViewPresenter {
             sourceView: layerViewController.view
         )
 
-        layerView.updateArrowX(popupConfiguration.arrowX)
+        viewModel.arrowX = popupConfiguration.arrowX
     }
 }

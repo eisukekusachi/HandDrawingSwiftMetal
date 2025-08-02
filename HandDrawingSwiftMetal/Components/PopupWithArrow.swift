@@ -7,28 +7,82 @@
 
 import SwiftUI
 
-/// A rounded rectangle model with an arrow at the top
-final class PopupWithArrow: ObservableObject {
+struct PopupWithArrowView<Content: View>: View {
 
-    private let arrowSize: CGSize
-    private let roundedCorner: CGFloat
-    private let lineWidth: CGFloat
+    @Binding var arrowPointX: CGFloat
 
-    private let backgroundColor: UIColor
+    let arrowSize: CGSize
+    let roundedCorner: CGFloat
+    let lineWidth: CGFloat
+    let backgroundColor: UIColor
 
-    init(
-        arrowSize: CGSize = .init(width: 18, height: 14),
-        roundedCorner: CGFloat = 12,
-        lineWidth: CGFloat = 0.5,
-        backgroundColor: UIColor = .white.withAlphaComponent(0.9)
-    ) {
-        self.arrowSize = arrowSize
-        self.roundedCorner = roundedCorner
-        self.lineWidth = lineWidth
-        self.backgroundColor = backgroundColor
+    let content: () -> Content
+
+    var body: some View {
+        ZStack {
+            GeometryReader { geometry in
+                popupShape(in: geometry.size)
+                    .fill(Color(backgroundColor))
+                    .overlay(
+                        popupShape(in: geometry.size)
+                            .stroke(Color.black, lineWidth: lineWidth)
+                    )
+            }
+            .id(arrowPointX)
+
+            VStack {
+                content()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(edgeInsets)
+            }
+        }
     }
 
-    var edgeInsets: EdgeInsets {
+    private func popupShape(in size: CGSize) -> Path {
+        let minX0 = 0.0
+        let minX1 = roundedCorner
+        let maxX1 = size.width - roundedCorner
+        let maxX0 = size.width
+
+        let minY0 = arrowSize.height
+        let minY1 = arrowSize.height + roundedCorner
+        let maxY1 = size.height - roundedCorner
+        let maxY0 = size.height
+
+        let pointMinX = minX1 + arrowSize.width * 0.5
+        let pointMaxX = maxX1 - arrowSize.width * 0.5
+        let pointX = min(max(pointMinX, arrowPointX), pointMaxX)
+
+        let arrowStartX = pointX - arrowSize.width * 0.5
+        let arrowEndX = pointX + arrowSize.width * 0.5
+
+        let minX0minY1 = CGPoint(x: minX0, y: minY1)
+        let minX1minY0 = CGPoint(x: minX1, y: minY0)
+        let maxX1minY0 = CGPoint(x: maxX1, y: minY0)
+        let maxX0minY1 = CGPoint(x: maxX0, y: minY1)
+
+        let maxX0maxY1 = CGPoint(x: maxX0, y: maxY1)
+        let maxX1maxY0 = CGPoint(x: maxX1, y: maxY0)
+        let minX1maxY0 = CGPoint(x: minX1, y: maxY0)
+        let minX0maxY1 = CGPoint(x: minX0, y: maxY0)
+
+        var path = Path()
+        path.move(to: minX0minY1)
+        path.addQuadCurve(to: minX1minY0, control: CGPoint(x: minX0, y: minY0))
+        path.addLine(to: CGPoint(x: arrowStartX, y: minY0))
+        path.addLine(to: CGPoint(x: pointX, y: 0.0))
+        path.addLine(to: CGPoint(x: arrowEndX, y: minY0))
+        path.addLine(to: maxX1minY0)
+        path.addQuadCurve(to: maxX0minY1, control: CGPoint(x: maxX0, y: minY0))
+        path.addLine(to: maxX0maxY1)
+        path.addQuadCurve(to: maxX1maxY0, control: CGPoint(x: maxX0, y: maxY0))
+        path.addLine(to: minX1maxY0)
+        path.addQuadCurve(to: minX0maxY1, control: CGPoint(x: minX0, y: maxY0))
+        path.closeSubpath()
+        return path
+    }
+
+    private var edgeInsets: EdgeInsets {
         .init(
             top: roundedCorner + arrowSize.height,
             leading: roundedCorner,
@@ -36,83 +90,29 @@ final class PopupWithArrow: ObservableObject {
             trailing: roundedCorner
         )
     }
+}
 
-    func view(
-        arrowPointX: CGFloat
-    ) -> some View {
-        GeometryReader { geometry in
-            let minX0 = 0.0
-            let minX1 = self.roundedCorner
-            let maxX1 = geometry.size.width - self.roundedCorner
-            let maxX0 = geometry.size.width
+private struct PreviewView: View {
+    @State var arrowX: CGFloat = 100
 
-            let minY0 = self.arrowSize.height
-            let minY1 = self.arrowSize.height + self.roundedCorner
-            let maxY1 = geometry.size.height - self.roundedCorner
-            let maxY0 = geometry.size.height
-
-            let pointMinX = minX1 + self.arrowSize.width * 0.5
-            let pointMaxX = maxX1 - self.arrowSize.width * 0.5
-            let pointX = min(max(pointMinX, arrowPointX), pointMaxX)
-
-            let arrowStartX = pointX - self.arrowSize.width * 0.5
-            let arrowEndX = pointX + self.arrowSize.width * 0.5
-
-            let minX0minY1: CGPoint = .init(x: minX0, y: minY1)
-            let minX1minY0: CGPoint = .init(x: minX1, y: minY0)
-            let maxX1minY0: CGPoint = .init(x: maxX1, y: minY0)
-            let maxX0minY1: CGPoint = .init(x: maxX0, y: minY1)
-
-            let maxX0maxY1: CGPoint = .init(x: maxX0, y: maxY1)
-            let maxX1maxY0: CGPoint = .init(x: maxX1, y: maxY0)
-            let minX1maxY0: CGPoint = .init(x: minX1, y: maxY0)
-            let minX0maxY1: CGPoint = .init(x: minX0, y: maxY1)
-
-            Path { path in
-                path.move(to: minX0minY1)
-                path.addQuadCurve(to: minX1minY0,
-                                  control: .init(x: minX0, y: minY0))
-
-                path.addLine(to: .init(x: arrowStartX, y: minY0))
-                path.addLine(to: .init(x: pointX, y: 0.0))
-                path.addLine(to: .init(x: arrowEndX, y: minY0))
-
-                path.addLine(to: maxX1minY0)
-                path.addQuadCurve(to: maxX0minY1,
-                                  control: .init(x: maxX0, y: minY0))
-                path.addLine(to: maxX0maxY1)
-                path.addQuadCurve(to: maxX1maxY0,
-                                  control: .init(x: maxX0, y: maxY0))
-                path.addLine(to: minX1maxY0)
-                path.addQuadCurve(to: minX0maxY1,
-                                  control: .init(x: minX0, y: maxY0))
-                path.closeSubpath()
+    var body: some View {
+        PopupWithArrowView(
+            arrowPointX: $arrowX,
+            arrowSize: CGSize(width: 20, height: 10),
+            roundedCorner: 8,
+            lineWidth: 0.5,
+            backgroundColor: UIColor.white.withAlphaComponent(0.95)
+        ) {
+            VStack(spacing: 8) {
+                Text("Popup View")
+                    .font(.headline)
             }
-            .fill(Color(self.backgroundColor))
-
-            // For iOS 15 compatibility
-            Path { path in
-                path.move(to: minX0minY1)
-                path.addQuadCurve(to: minX1minY0,
-                                  control: .init(x: minX0, y: minY0))
-
-                path.addLine(to: .init(x: arrowStartX, y: minY0))
-                path.addLine(to: .init(x: pointX, y: 0.0))
-                path.addLine(to: .init(x: arrowEndX, y: minY0))
-
-                path.addLine(to: maxX1minY0)
-                path.addQuadCurve(to: maxX0minY1,
-                                  control: .init(x: maxX0, y: minY0))
-                path.addLine(to: maxX0maxY1)
-                path.addQuadCurve(to: maxX1maxY0,
-                                  control: .init(x: maxX0, y: maxY0))
-                path.addLine(to: minX1maxY0)
-                path.addQuadCurve(to: minX0maxY1,
-                                  control: .init(x: minX0, y: maxY0))
-                path.closeSubpath()
-            }
-            .stroke(lineWidth: self.lineWidth)
-            .fill(Color.black)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.gray)
         }
+        .frame(width: 200, height: 150)
     }
+}
+#Preview {
+    PreviewView()
 }

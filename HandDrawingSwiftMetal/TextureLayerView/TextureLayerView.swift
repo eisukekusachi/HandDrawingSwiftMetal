@@ -9,57 +9,54 @@ import CanvasView
 import SwiftUI
 
 struct TextureLayerView: View {
-    @State private var arrowPointX: CGFloat = 0
 
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
     private let buttonThrottle = ButtonThrottle()
 
-    private let popupWithArrow = PopupWithArrow()
-
     private let range = 0 ... 255
 
-    private var viewModel = TextureLayerViewModel()
+    @ObservedObject private var viewModel: TextureLayerViewModel
 
     init(
-        configuration: TextureLayerConfiguration
+        viewModel: TextureLayerViewModel
     ) {
-        viewModel.initialize(configuration: configuration)
+        self.viewModel = viewModel
     }
 
     var body: some View {
         ZStack {
-            popupWithArrow.view(
-                arrowPointX: viewModel.arrowX
-            )
+            PopupWithArrowView(
+                arrowPointX: $viewModel.arrowX,
+                arrowSize: CGSize(width: 18, height: 14),
+                roundedCorner: 12,
+                lineWidth: 0.5,
+                backgroundColor: .white.withAlphaComponent(0.9),
+                content: {
+                    VStack {
+                        toolbar(
+                            viewModel,
+                            changeTitle: { layer, title in
+                                viewModel.onTapTitleButton(id: layer.id, title: title)
+                            }
+                        )
 
-            VStack {
-                toolbar(
-                    viewModel,
-                    changeTitle: { layer, title in
-                        viewModel.onTapTitleButton(id: layer.id, title: title)
+                        TextureLayerListView(
+                            viewModel: viewModel
+                        )
+
+                        TwoRowsSliderView(
+                            sliderValue: viewModel.alphaSliderValue,
+                            title: "Alpha",
+                            range: range
+                        )
+                        .padding(.top, 4)
+                        .padding([.leading, .trailing, .bottom], 8)
                     }
-                )
-
-                TextureLayerListView(
-                    viewModel: viewModel
-                )
-
-                TwoRowsSliderView(
-                    sliderValue: viewModel.alphaSliderValue,
-                    title: "Alpha",
-                    range: range
-                )
-                .padding(.top, 4)
-                .padding([.leading, .trailing, .bottom], 8)
-            }
-            .padding(popupWithArrow.edgeInsets)
+                }
+            )
         }
-    }
-
-    func updateArrowX(_ value: CGFloat) {
-        viewModel.arrowX = value
     }
 }
 
@@ -153,7 +150,7 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerView(
-            configuration: configuration
+            viewModel: TextureLayerViewModel()
         )
         .frame(width: 320, height: 300)
     }
