@@ -30,13 +30,13 @@ import UIKit
         toastSubject.eraseToAnyPublisher()
     }
 
+    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+        undoRedoButtonStateSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
     public var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
-    }
-
-    public var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
-        undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
 
     public var currentTextureSize: CGSize {
@@ -195,7 +195,7 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.undoRedoButtonState
+        canvasViewModel.didUndo
             .sink { [weak self] value in
                 self?.undoRedoButtonStateSubject.send(value)
             }

@@ -42,7 +42,7 @@ public final class CanvasViewModel {
         toastSubject.eraseToAnyPublisher()
     }
 
-    var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
+    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
 
@@ -232,7 +232,7 @@ public final class CanvasViewModel {
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
 
-        undoStack?.undoRedoButtonStateSubject
+        undoStack?.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.undoRedoButtonStateSubject.send(state)

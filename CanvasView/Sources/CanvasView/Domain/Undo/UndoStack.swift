@@ -12,7 +12,10 @@ import MetalKit
 @MainActor
 public final class UndoStack {
 
-    let undoRedoButtonStateSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
+    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+        didUndoSubject.eraseToAnyPublisher()
+    }
+    private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
     @MainActor private let undoManager = UndoManager()
 
@@ -41,7 +44,7 @@ public final class UndoStack {
         self.textureLayerRepository = textureLayerRepository
         self.undoTextureRepository = undoTextureRepository
 
-        refreshUndoRedoButtons()
+        didUndoSubject.send(.init(undoManager))
     }
 
     func initialize(_ size: CGSize) {
@@ -51,16 +54,16 @@ public final class UndoStack {
 
     func undo() {
         undoManager.undo()
-        refreshUndoRedoButtons()
+        didUndoSubject.send(.init(undoManager))
     }
     func redo() {
         undoManager.redo()
-        refreshUndoRedoButtons()
+        didUndoSubject.send(.init(undoManager))
     }
     func reset() {
         undoManager.removeAllActions()
         undoTextureRepository.removeAll()
-        refreshUndoRedoButtons()
+        didUndoSubject.send(.init(undoManager))
     }
 }
 
@@ -254,8 +257,7 @@ extension UndoStack {
             self?.pushUndoObject(undoStack.reversedObject)
         }
         undoManager.endUndoGrouping()
-
-        refreshUndoRedoButtons()
+        didUndoSubject.send(.init(undoManager))
     }
 
     private func performUndo(
@@ -306,12 +308,5 @@ extension UndoStack {
             )
             canvasState.canvasUpdateSubject.send()
         }
-
-    }
-
-    private func refreshUndoRedoButtons() {
-        undoRedoButtonStateSubject.send(
-            .init(isUndoEnabled: undoManager.canUndo, isRedoEnabled: undoManager.canRedo)
-        )
     }
 }
