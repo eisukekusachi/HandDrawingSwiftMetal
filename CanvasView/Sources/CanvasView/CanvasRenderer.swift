@@ -92,10 +92,10 @@ final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-    func bottomLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
+    func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
-    func topLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
+    func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
@@ -117,20 +117,30 @@ extension CanvasRenderer {
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
-        let opaqueLayer: TextureLayerItem = .init(model: selectedLayer, alpha: 255)
+        let opaqueLayer: TextureLayerModel = .init(
+            id: selectedLayer.id,
+            title: selectedLayer.title,
+            alpha: 255,
+            isVisible: selectedLayer.isVisible
+        )
 
         Task {
             let textures = try await textureLayerRepository.copyTextures(
                 uuids: canvasState.layers.map { $0.id }
             )
+            let bottomLayers = bottomLayers(
+                selectedIndex: selectedIndex,
+                layers: canvasState.layers
+            )
+            let topLayers = topLayers(
+                selectedIndex: selectedIndex,
+                layers: canvasState.layers
+            )
 
             Task { @MainActor in
                 async let bottomTexture: Void = try await drawLayerTextures(
                     textures: textures,
-                    layers: bottomLayers(
-                        selectedIndex: selectedIndex,
-                        layers: canvasState.layers
-                    ),
+                    layers: bottomLayers,
                     on: unselectedBottomTexture,
                     with: commandBuffer
                 )
@@ -144,10 +154,7 @@ extension CanvasRenderer {
 
                 async let topTexture: Void = try await drawLayerTextures(
                     textures: textures,
-                    layers: topLayers(
-                        selectedIndex: selectedIndex,
-                        layers: canvasState.layers
-                    ),
+                    layers: topLayers,
                     on: unselectedTopTexture,
                     with: commandBuffer
                 )
@@ -164,7 +171,7 @@ extension CanvasRenderer {
     func updateCanvasView(
         _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerItem,
+        selectedLayer: TextureLayerModel,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard let canvasTexture else { return }
@@ -223,7 +230,7 @@ extension CanvasRenderer {
 
     func drawLayerTextures(
         textures: [IdentifiedTexture],
-        layers: [TextureLayerItem],
+        layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {

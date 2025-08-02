@@ -93,7 +93,7 @@ extension CanvasStateStorage {
             for (index, layer) in canvasState.layers.enumerated() {
                 let texture = TextureLayerStorageEntity(context: coreDataRepository.context)
                 texture.title = layer.title
-                texture.fileName = layer.fileName
+                texture.fileName = TextureLayerModel.fileName(id: layer.id)
                 texture.alpha = Int16(layer.alpha)
                 texture.orderIndex = Int16(index)
                 texture.canvas = newStorage
@@ -198,7 +198,7 @@ extension CanvasStateStorage {
 
     /// Saves all texture layers to Core Data instead of saving only the differences,
     /// assuming the number of layers stays below 100.
-    private func updateAllTextureLayerEntities(_ layers: [TextureLayerItem]) {
+    private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
@@ -212,12 +212,11 @@ extension CanvasStateStorage {
         layers.enumerated().forEach { index, model in
             let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
-            newLayer.fileName = model.fileName
+            newLayer.fileName = TextureLayerModel.fileName(id: model.id)
             newLayer.isVisible = model.isVisible
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)
             newLayer.canvas = canvasStorageEntity
         }
     }
-
 }

@@ -49,11 +49,11 @@ struct TextureLayerListView: View {
 extension TextureLayerListView {
 
     private func layerRow(
-        layer: TextureLayerItem,
+        layer: TextureLayerModel,
         thumbnail: UIImage?,
         selected: Bool,
-        didTapRow: @escaping ((TextureLayerItem) -> Void),
-        didTapVisibleButton: @escaping ((TextureLayerItem) -> Void)
+        didTapRow: @escaping ((TextureLayerModel) -> Void),
+        didTapVisibleButton: @escaping ((TextureLayerModel) -> Void)
     ) -> some View {
         ZStack {
             Color(backgroundColor(selected))
@@ -120,7 +120,7 @@ extension TextureLayerListView {
             return UIColor(named: "component") ?? .clear
         }
     }
-    private func iconColor(layer: TextureLayerItem, _ selected: Bool) -> UIColor {
+    private func iconColor(layer: TextureLayerModel, _ selected: Bool) -> UIColor {
         if selected {
             if layer.isVisible {
                 return .white
@@ -135,7 +135,6 @@ extension TextureLayerListView {
             }
         }
     }
-
 }
 
 #Preview {

@@ -630,7 +630,6 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
-
 }
 
 enum CanvasViewModelError: Error {

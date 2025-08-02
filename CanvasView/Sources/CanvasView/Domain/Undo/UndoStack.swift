@@ -281,7 +281,7 @@ extension UndoStack {
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
             canvasState.addLayer(
-                newTextureLayer: undoObject.textureLayer,
+                newTextureLayer: .init(item: undoObject.textureLayer),
                 at: undoObject.insertIndex
             )
             canvasState.fullCanvasUpdateSubject.send()
@@ -302,7 +302,7 @@ extension UndoStack {
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
             canvasState.updateLayer(
-                newTextureLayer: undoObject.textureLayer
+                newTextureLayer: .init(item: undoObject.textureLayer)
             )
             canvasState.canvasUpdateSubject.send()
         }

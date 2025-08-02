@@ -26,6 +26,13 @@ public struct TextureLayerItem: Identifiable, Equatable, Sendable {
 }
 
 extension TextureLayerItem {
+    public init(model: TextureLayerModel) {
+        self.id = model.id
+        self.title = model.title
+        self.alpha = model.alpha
+        self.isVisible = model.isVisible
+    }
+
     public init(
         textureName: String,
         title: String,
@@ -39,8 +46,9 @@ extension TextureLayerItem {
             isVisible: isVisible
         )
     }
+
     public init(
-        model: TextureLayerItem,
+        model: TextureLayerModel,
         id: UUID? = nil,
         title: String? = nil,
         alpha: Int? = nil,

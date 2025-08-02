@@ -21,7 +21,7 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
     /// Subject to publish updates for the entire canvas, including all textures
     public let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    @Published public var layers: [TextureLayerItem] = []
+    @Published public var layers: [TextureLayerModel] = []
 
     @Published public var selectedLayerId: UUID?
 
@@ -43,7 +43,7 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
 public extension CanvasState {
 
-    var selectedLayer: TextureLayerItem? {
+    var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
         return layers.first(where: { $0.id == selectedLayerId })
     }
@@ -60,7 +60,7 @@ public extension CanvasState {
         }
     }
 
-    func layer(_ layerId: UUID) -> TextureLayerItem? {
+    func layer(_ layerId: UUID) -> TextureLayerModel? {
         layers.first(where: { $0.id == layerId })
     }
 
@@ -74,7 +74,7 @@ public extension CanvasState {
         self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
 
         self.layers.removeAll()
-        self.layers = configuration.layers
+        self.layers = configuration.layers.map { .init(item: $0) }
         self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
 
         self.brush.color = configuration.brushColor
@@ -93,7 +93,7 @@ public extension CanvasState {
 
 extension CanvasState {
 
-    func addLayer(newTextureLayer textureLayer: TextureLayerItem, at index: Int) {
+    func addLayer(newTextureLayer textureLayer: TextureLayerModel, at index: Int) {
         self.layers.insert(textureLayer, at: index)
         self.selectedLayerId = textureLayer.id
     }
@@ -112,7 +112,7 @@ extension CanvasState {
         self.selectedLayerId = selectedLayerId
     }
 
-    func updateLayer(newTextureLayer: TextureLayerItem) {
+    func updateLayer(newTextureLayer: TextureLayerModel) {
         guard let index = layers.firstIndex(where: { $0.id == newTextureLayer.id }) else { return }
         self.layers[index] = newTextureLayer
         self.selectedLayerId = newTextureLayer.id

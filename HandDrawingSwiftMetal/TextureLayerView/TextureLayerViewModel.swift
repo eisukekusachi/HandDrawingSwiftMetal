@@ -16,7 +16,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     let alphaSliderValue = SliderValue()
 
-    var selectedLayer: TextureLayerItem? {
+    var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
     }
 
@@ -157,7 +157,7 @@ extension TextureLayerViewModel {
         let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
 
         // Perform a layer operation
-        canvasState?.layers.insert(layer, at: index)
+        canvasState?.layers.insert(.init(item: layer), at: index)
         canvasState?.selectedLayerId = layer.id
         canvasState?.fullCanvasUpdateSubject.send(())
 
@@ -173,7 +173,7 @@ extension TextureLayerViewModel {
         }
     }
 
-    private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerItem, undoTexture: MTLTexture?) {
+    private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
         guard let canvasState else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
@@ -188,7 +188,7 @@ extension TextureLayerViewModel {
             await addUndoDeletionObject(
                 previousLayerIndex: selectedLayerIndex,
                 currentLayerIndex: newLayerIndex,
-                layer: selectedLayer,
+                layer: .init(model: selectedLayer),
                 texture: undoTexture
             )
         }
@@ -219,7 +219,7 @@ extension TextureLayerViewModel {
         addUndoMoveObject(
             indices: reversedIndices,
             selectedLayerId: selectedLayerId,
-            textureLayer: textureLayer
+            textureLayer: .init(model: textureLayer)
         )
     }
 
@@ -237,16 +237,31 @@ extension TextureLayerViewModel {
         let layer = canvasState.layers[selectedIndex]
 
         if let title {
-            canvasState.layers[selectedIndex] = .init(model: layer, title: title)
+            canvasState.layers[selectedIndex] = .init(
+                id: layer.id,
+                title: title,
+                alpha: layer.alpha,
+                isVisible: layer.isVisible
+            )
         }
         if let isVisible {
-            canvasState.layers[selectedIndex] = .init(model: layer, isVisible: isVisible)
+            canvasState.layers[selectedIndex] = .init(
+                id: layer.id,
+                title: layer.title,
+                alpha: layer.alpha,
+                isVisible: isVisible
+            )
 
             // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
             canvasState.fullCanvasUpdateSubject.send(())
         }
         if let alpha {
-            canvasState.layers[selectedIndex] = .init(model: layer, alpha: alpha)
+            canvasState.layers[selectedIndex] = .init(
+                id: layer.id,
+                title: layer.title,
+                alpha: alpha,
+                isVisible: layer.isVisible
+            )
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
             canvasState.canvasUpdateSubject.send(())
