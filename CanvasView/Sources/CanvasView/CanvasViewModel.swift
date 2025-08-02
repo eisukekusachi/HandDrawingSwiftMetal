@@ -581,7 +581,6 @@ extension CanvasViewModel {
                     for: selectedTextureId
                 )
                 await undoStack?.pushUndoDrawingObject(
-                    canvasState: canvasState,
                     texture: resultTexture.texture
                 )
             } catch {

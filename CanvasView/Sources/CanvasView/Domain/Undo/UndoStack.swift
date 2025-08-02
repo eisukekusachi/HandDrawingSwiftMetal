@@ -17,7 +17,7 @@ public final class UndoStack {
     }
     private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
-    @MainActor private let undoManager = UndoManager()
+    private let undoManager = UndoManager()
 
     private let canvasState: CanvasState
 
@@ -97,7 +97,6 @@ public extension UndoStack {
     }
 
     func pushUndoDrawingObjectAsync(
-        canvasState: CanvasState,
         texture: MTLTexture
     ) async {
         guard
@@ -132,7 +131,6 @@ public extension UndoStack {
     }
 
     func pushUndoDrawingObject(
-        canvasState: CanvasState,
         texture: MTLTexture
     ) async {
         guard
@@ -269,14 +267,14 @@ extension UndoStack {
                     textureLayerRepository: textureLayerRepository,
                     undoTextureRepository: undoTextureRepository
                 )
-                completeUndoAction(undoObject)
+                didPerformUndo(undoObject)
             } catch {
                 Logger.error(error)
             }
         }
     }
 
-    private func completeUndoAction(_ undoObject: UndoObject) {
+    private func didPerformUndo(_ undoObject: UndoObject) {
         if let undoObject = undoObject as? UndoDrawingObject {
             canvasState.selectedLayerId = undoObject.textureLayer.id
             canvasState.fullCanvasUpdateSubject.send()
