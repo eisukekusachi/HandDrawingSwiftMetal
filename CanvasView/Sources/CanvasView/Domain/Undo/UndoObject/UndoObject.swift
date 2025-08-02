@@ -24,7 +24,3 @@ public protocol UndoObject {
         undoTextureRepository: TextureRepository
     ) async throws
 }
-
-enum UndoObjectError: Error {
-    case failedToUnwrap
-}

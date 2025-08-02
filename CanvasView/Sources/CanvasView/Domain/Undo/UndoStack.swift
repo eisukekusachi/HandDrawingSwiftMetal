@@ -62,7 +62,6 @@ public final class UndoStack {
         undoTextureRepository.removeAll()
         refreshUndoRedoButtons()
     }
-
 }
 
 public extension UndoStack {
@@ -120,11 +119,12 @@ public extension UndoStack {
                     redoObject: redoObject
                 )
             )
+
             drawingUndoObject = nil
 
         } catch {
             // No action on error
-            Logger.standard.error("UndoStack pushUndoDrawingObject() \(error)")
+            Logger.error(error)
         }
     }
 
@@ -239,7 +239,6 @@ public extension UndoStack {
             )
         )
     }
-
 }
 
 extension UndoStack {
@@ -270,7 +269,7 @@ extension UndoStack {
                 )
                 completeUndoAction(undoObject)
             } catch {
-                Logger.standard.error("performUndo(:) \(error)")
+                Logger.error(error)
             }
         }
     }
@@ -315,9 +314,4 @@ extension UndoStack {
             .init(isUndoEnabled: undoManager.canUndo, isRedoEnabled: undoManager.canRedo)
         )
     }
-
-}
-
-enum UndoStackError: Error {
-    case failedToUnwrap
 }
