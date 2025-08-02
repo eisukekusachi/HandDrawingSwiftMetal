@@ -82,7 +82,6 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
     }
-
 }
 
 extension TextureLayerViewModel {
@@ -381,7 +380,6 @@ extension TextureLayerViewModel {
             self.alphaSliderValue.temporaryStoredValue = nil
         }
     }
-
 }
 
 enum TextureLayerError: Error {

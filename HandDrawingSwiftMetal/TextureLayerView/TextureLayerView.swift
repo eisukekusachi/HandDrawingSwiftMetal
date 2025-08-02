@@ -17,6 +17,8 @@ struct TextureLayerView: View {
 
     private let range = 0 ... 255
 
+    private let buttonSize: CGFloat = 20
+
     @ObservedObject private var viewModel: TextureLayerViewModel
 
     init(
@@ -26,36 +28,36 @@ struct TextureLayerView: View {
     }
 
     var body: some View {
-        ZStack {
-            PopupWithArrowView(
-                arrowPointX: $viewModel.arrowX,
-                arrowSize: CGSize(width: 18, height: 14),
-                roundedCorner: 12,
-                lineWidth: 0.5,
-                backgroundColor: .white.withAlphaComponent(0.9),
-                content: {
-                    VStack {
-                        toolbar(
-                            viewModel,
-                            changeTitle: { layer, title in
-                                viewModel.onTapTitleButton(id: layer.id, title: title)
-                            }
-                        )
+        if let canvasState = viewModel.canvasState {
+            ZStack {
+                PopupWithArrowView(
+                    arrowPointX: $viewModel.arrowX,
+                    arrowSize: CGSize(width: 18, height: 14),
+                    roundedCorner: 12,
+                    lineWidth: 0.5,
+                    backgroundColor: .white.withAlphaComponent(0.9),
+                    content: {
+                        VStack {
+                            toolbar(viewModel)
 
-                        TextureLayerListView(
-                            viewModel: viewModel
-                        )
+                            TextureLayerListView(
+                                viewModel: viewModel,
+                                canvasState: canvasState
+                            )
 
-                        TwoRowsSliderView(
-                            sliderValue: viewModel.alphaSliderValue,
-                            title: "Alpha",
-                            range: range
-                        )
-                        .padding(.top, 4)
-                        .padding([.leading, .trailing, .bottom], 8)
+                            TwoRowsSliderView(
+                                sliderValue: viewModel.alphaSliderValue,
+                                title: "Alpha",
+                                range: range
+                            )
+                            .padding(.top, 4)
+                            .padding([.leading, .trailing, .bottom], 8)
+                        }
                     }
-                }
-            )
+                )
+            }
+        } else {
+            EmptyView()
         }
     }
 }
@@ -63,12 +65,9 @@ struct TextureLayerView: View {
 extension TextureLayerView {
 
     private func toolbar(
-        _ viewModel: TextureLayerViewModel,
-        changeTitle: ((TextureLayerModel, String) -> Void)? = nil
+        _ viewModel: TextureLayerViewModel
     ) -> some View {
-        let buttonSize: CGFloat = 20
-
-        return HStack {
+        HStack {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
@@ -111,7 +110,7 @@ extension TextureLayerView {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = viewModel.selectedLayer else { return }
-                    changeTitle?(selectedLayer, textFieldTitle)
+                    viewModel.onTapTitleButton(id: selectedLayer.id, title: textFieldTitle)
                 })
                 Button("Cancel", action: {})
             }
