@@ -92,10 +92,10 @@ final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-    func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+    func bottomLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
-    func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+    func topLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
         layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
@@ -117,7 +117,7 @@ extension CanvasRenderer {
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
-        let opaqueLayer: TextureLayerModel = .init(model: selectedLayer, alpha: 255)
+        let opaqueLayer: TextureLayerItem = .init(model: selectedLayer, alpha: 255)
 
         Task {
             let textures = try await textureLayerRepository.copyTextures(
@@ -164,7 +164,7 @@ extension CanvasRenderer {
     func updateCanvasView(
         _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel,
+        selectedLayer: TextureLayerItem,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard let canvasTexture else { return }
@@ -223,7 +223,7 @@ extension CanvasRenderer {
 
     func drawLayerTextures(
         textures: [IdentifiedTexture],
-        layers: [TextureLayerModel],
+        layers: [TextureLayerItem],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {

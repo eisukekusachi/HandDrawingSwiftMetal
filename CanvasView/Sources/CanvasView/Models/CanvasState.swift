@@ -21,7 +21,7 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
     /// Subject to publish updates for the entire canvas, including all textures
     public let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
-    @Published public var layers: [TextureLayerModel] = []
+    @Published public var layers: [TextureLayerItem] = []
 
     @Published public var selectedLayerId: UUID?
 
@@ -43,7 +43,7 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
 public extension CanvasState {
 
-    var selectedLayer: TextureLayerModel? {
+    var selectedLayer: TextureLayerItem? {
         guard let selectedLayerId else { return nil }
         return layers.first(where: { $0.id == selectedLayerId })
     }
@@ -60,7 +60,7 @@ public extension CanvasState {
         }
     }
 
-    func layer(_ layerId: UUID) -> TextureLayerModel? {
+    func layer(_ layerId: UUID) -> TextureLayerItem? {
         layers.first(where: { $0.id == layerId })
     }
 
@@ -93,12 +93,12 @@ public extension CanvasState {
 
 extension CanvasState {
 
-    func addLayer(newTextureLayer textureLayer: TextureLayerModel, at index: Int) {
+    func addLayer(newTextureLayer textureLayer: TextureLayerItem, at index: Int) {
         self.layers.insert(textureLayer, at: index)
         self.selectedLayerId = textureLayer.id
     }
 
-    func removeLayer(textureLayer: TextureLayerModel, newSelectedLayerId: UUID) {
+    func removeLayer(textureLayer: TextureLayerItem, newSelectedLayerId: UUID) {
         guard let index = layers.firstIndex(where: { $0.id == textureLayer.id }) else { return }
         self.layers.remove(at: index)
         self.selectedLayerId = newSelectedLayerId
@@ -112,7 +112,7 @@ extension CanvasState {
         self.selectedLayerId = selectedLayerId
     }
 
-    func updateLayer(newTextureLayer: TextureLayerModel) {
+    func updateLayer(newTextureLayer: TextureLayerItem) {
         guard let index = layers.firstIndex(where: { $0.id == newTextureLayer.id }) else { return }
         self.layers[index] = newTextureLayer
         self.selectedLayerId = newTextureLayer.id

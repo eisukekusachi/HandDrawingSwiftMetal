@@ -14,7 +14,7 @@ public struct CanvasConfiguration: Sendable {
     public let textureSize: CGSize?
 
     public let layerIndex: Int
-    public let layers: [TextureLayerModel]
+    public let layers: [TextureLayerItem]
 
     public let drawingTool: DrawingToolType
 
@@ -28,7 +28,7 @@ public struct CanvasConfiguration: Sendable {
         projectName: String = Calendar.currentDate,
         textureSize: CGSize? = nil,
         layerIndex: Int = 0,
-        layers: [TextureLayerModel] = [],
+        layers: [TextureLayerItem] = [],
         drawingTool: DrawingToolType = .brush,
         brushColor: UIColor = UIColor.black.withAlphaComponent(0.75),
         brushDiameter: Int = 8,
@@ -104,8 +104,8 @@ extension CanvasConfiguration {
                 .sorted { $0.orderIndex < $1.orderIndex }
                 .enumerated()
                 .map { index, layer in
-                    TextureLayerModel(
-                        id: TextureLayerModel.id(from: layer.fileName),
+                    TextureLayerItem(
+                        id: TextureLayerItem.id(from: layer.fileName),
                         title: layer.title ?? "",
                         alpha: Int(layer.alpha),
                         isVisible: layer.isVisible

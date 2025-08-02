@@ -15,7 +15,7 @@ public final class UndoAdditionObject: UndoObject {
     public let undoTextureUUID: UUID
 
     /// The layer added by undo
-    public let textureLayer: TextureLayerModel
+    public let textureLayer: TextureLayerItem
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
@@ -27,7 +27,7 @@ public final class UndoAdditionObject: UndoObject {
     }
 
     public init(
-        layerToBeAdded textureLayer: TextureLayerModel,
+        layerToBeAdded textureLayer: TextureLayerItem,
         insertIndex: Int
     ) {
         self.undoTextureUUID = UUID()

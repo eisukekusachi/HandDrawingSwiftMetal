@@ -16,7 +16,7 @@ final class TextureLayerViewModel: ObservableObject {
 
     let alphaSliderValue = SliderValue()
 
-    var selectedLayer: TextureLayerModel? {
+    var selectedLayer: TextureLayerItem? {
         canvasState?.selectedLayer
     }
 
@@ -94,7 +94,7 @@ extension TextureLayerViewModel {
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
-        let layer: TextureLayerModel = .init(
+        let layer: TextureLayerItem = .init(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
@@ -153,7 +153,7 @@ extension TextureLayerViewModel {
 // MARK: CRUD
 extension TextureLayerViewModel {
 
-    private func insertLayer(layer: TextureLayerModel, at index: Int, undoTexture: MTLTexture?) {
+    private func insertLayer(layer: TextureLayerItem, at index: Int, undoTexture: MTLTexture?) {
         let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
 
         // Perform a layer operation
@@ -173,7 +173,7 @@ extension TextureLayerViewModel {
         }
     }
 
-    private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
+    private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerItem, undoTexture: MTLTexture?) {
         guard let canvasState else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
@@ -265,7 +265,7 @@ extension TextureLayerViewModel {
     private func addUndoAdditionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
-        layer: TextureLayerModel,
+        layer: TextureLayerItem,
         texture: MTLTexture?
     ) async {
         guard let canvasState else { return }
@@ -293,7 +293,7 @@ extension TextureLayerViewModel {
     private func addUndoDeletionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
-        layer: TextureLayerModel,
+        layer: TextureLayerItem,
         texture: MTLTexture?
     ) async {
         guard let canvasState else { return }
@@ -322,7 +322,7 @@ extension TextureLayerViewModel {
     private func addUndoMoveObject(
         indices: MoveLayerIndices,
         selectedLayerId: UUID,
-        textureLayer: TextureLayerModel
+        textureLayer: TextureLayerItem
     ) {
         let redoObject = UndoMoveObject(
             indices: indices,

@@ -1,5 +1,5 @@
 //
-//  TextureLayerModel.swift
+//  TextureLayerItem.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TextureLayerModel: Identifiable, Equatable, Sendable {
+public struct TextureLayerItem: Identifiable, Equatable, Sendable {
     /// The unique identifier for the layer
     public let id: UUID
     /// The name of the layer
@@ -25,7 +25,7 @@ public struct TextureLayerModel: Identifiable, Equatable, Sendable {
     }
 }
 
-extension TextureLayerModel {
+extension TextureLayerItem {
     public init(
         textureName: String,
         title: String,
@@ -33,14 +33,14 @@ extension TextureLayerModel {
         isVisible: Bool = true
     ) {
         self.init(
-            id: TextureLayerModel.id(from: textureName),
+            id: TextureLayerItem.id(from: textureName),
             title: title,
             alpha: alpha,
             isVisible: isVisible
         )
     }
     public init(
-        model: TextureLayerModel,
+        model: TextureLayerItem,
         id: UUID? = nil,
         title: String? = nil,
         alpha: Int? = nil,

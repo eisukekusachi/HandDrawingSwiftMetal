@@ -13,7 +13,7 @@ public protocol UndoObject {
     var undoTextureUUID: UUID { get }
 
     /// The texture layer targeted by the undo operation
-    var textureLayer: TextureLayerModel { get }
+    var textureLayer: TextureLayerItem { get }
 
     /// A subject that emits an UndoObjectProtocol instance when the undo object is deallocated
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }

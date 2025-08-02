@@ -67,7 +67,7 @@ extension TextureLayerView {
 
     private func toolbar(
         _ viewModel: TextureLayerViewModel,
-        changeTitle: ((TextureLayerModel, String) -> Void)? = nil
+        changeTitle: ((TextureLayerItem, String) -> Void)? = nil
     ) -> some View {
         let buttonSize: CGFloat = 20
 

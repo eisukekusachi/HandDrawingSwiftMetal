@@ -14,7 +14,7 @@ final class UndoDrawingObject: UndoObject {
 
     let undoTextureUUID: UUID
 
-    let textureLayer: TextureLayerModel
+    let textureLayer: TextureLayerItem
 
     let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
@@ -23,7 +23,7 @@ final class UndoDrawingObject: UndoObject {
     }
 
     init(
-        textureLayer: TextureLayerModel
+        textureLayer: TextureLayerItem
     ) {
         self.undoTextureUUID = UUID()
         self.textureLayer = textureLayer

@@ -15,7 +15,7 @@ public final class UndoMoveObject: UndoObject {
     /// Not used
     public let undoTextureUUID: UUID = UUID()
 
-    public let textureLayer: TextureLayerModel
+    public let textureLayer: TextureLayerItem
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
@@ -54,7 +54,7 @@ public final class UndoMoveObject: UndoObject {
     public init(
         indices: MoveLayerIndices,
         selectedLayerId: UUID,
-        layer: TextureLayerModel
+        layer: TextureLayerItem
     ) {
         self.indices = indices
         self.selectedLayerId = selectedLayerId

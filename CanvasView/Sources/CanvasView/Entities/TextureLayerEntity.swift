@@ -23,7 +23,7 @@ struct TextureLayerEntity: Codable, Equatable {
 
 extension TextureLayerEntity {
 
-    init(from model: TextureLayerModel) {
+    init(from model: TextureLayerItem) {
         self.textureName = model.id.uuidString
         self.title = model.title
         self.alpha = model.alpha

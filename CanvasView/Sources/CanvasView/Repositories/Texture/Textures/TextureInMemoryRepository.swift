@@ -58,7 +58,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
         removeAll()
 
-        let layer = TextureLayerModel(
+        let layer = TextureLayerItem(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,

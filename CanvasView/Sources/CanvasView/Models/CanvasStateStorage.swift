@@ -198,7 +198,7 @@ extension CanvasStateStorage {
 
     /// Saves all texture layers to Core Data instead of saving only the differences,
     /// assuming the number of layers stays below 100.
-    private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
+    private func updateAllTextureLayerEntities(_ layers: [TextureLayerItem]) {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
