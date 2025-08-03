@@ -9,7 +9,7 @@ import Foundation
 
 struct CanvasViewDependencies {
     /// Repository that manages textures for canvas layers
-    let textureLayerRepository: TextureLayerRepository
+    let textureRepository: TextureRepository
 
     /// Repository that manages textures used for undo
     let undoTextureRepository: TextureRepository?
@@ -22,12 +22,12 @@ extension CanvasViewDependencies {
     init(
         environmentConfiguration: CanvasEnvironmentConfiguration
     ) {
-        switch environmentConfiguration.textureLayerRepositoryType {
-        case .disk: textureLayerRepository = TextureLayerDocumentsDirectoryRepository(
+        switch environmentConfiguration.textureRepositoryType {
+        case .disk: textureRepository = TextureDocumentsDirectoryRepository(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage"
         )
-        case .memory: textureLayerRepository = TextureLayerInMemoryRepository()
+        case .memory: textureRepository = TextureInMemoryRepository()
         }
 
         if let undoRepository = environmentConfiguration.undoTextureRepositoryType {
@@ -36,7 +36,7 @@ extension CanvasViewDependencies {
                 storageDirectoryURL: URL.applicationSupport,
                 directoryName: "UndoStorage"
             )
-            case .memory: undoTextureRepository = TextureLayerInMemoryRepository()
+            case .memory: undoTextureRepository = TextureInMemoryRepository()
             }
         } else {
             undoTextureRepository = nil

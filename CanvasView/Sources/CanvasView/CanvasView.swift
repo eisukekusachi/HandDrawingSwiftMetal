@@ -21,7 +21,7 @@ import UIKit
     }
 
     /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<Error, Never> {
+    public var alert: AnyPublisher<ErrorModel, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -30,13 +30,13 @@ import UIKit
         toastSubject.eraseToAnyPublisher()
     }
 
+    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+        didUndoSubject.eraseToAnyPublisher()
+    }
+
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
     public var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
-    }
-
-    public var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
-        undoRedoButtonStateSubject.eraseToAnyPublisher()
     }
 
     public var currentTextureSize: CGSize {
@@ -58,13 +58,13 @@ import UIKit
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<Error, Never>()
+    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     private let canvasViewModel = CanvasViewModel()
 
@@ -183,8 +183,8 @@ extension CanvasView {
 
         canvasViewModel.alert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.alertSubject.send(value)
+            .sink { [weak self] error in
+                self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
 
@@ -195,9 +195,9 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.undoRedoButtonState
+        canvasViewModel.didUndo
             .sink { [weak self] value in
-                self?.undoRedoButtonStateSubject.send(value)
+                self?.didUndoSubject.send(value)
             }
             .store(in: &cancellables)
     }
@@ -214,7 +214,6 @@ extension CanvasView {
         ])
     }
 }
-
 
 extension CanvasView: FingerInputGestureRecognizerSender {
 

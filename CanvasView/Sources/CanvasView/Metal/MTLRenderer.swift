@@ -141,7 +141,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
                 with: device
             )
         else {
-            Logger.standard.error("Failed to create textureBuffers")
+            Logger.error(String(localized: "Unable to load required data", bundle: .module))
             return
         }
 
@@ -270,7 +270,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
         guard
             texture.size == destinationTexture.size
         else {
-            Logger.standard.error("Texture size mismatch")
+            Logger.error(String(localized: "Texture size mismatch", bundle: .module))
             return
         }
 

@@ -19,12 +19,8 @@ public protocol UndoObject {
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
 
     /// A method called when the undo operation is performed
-    func performUndo(
-        textureLayerRepository: TextureLayerRepository,
+    func performTextureOperation(
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws
-}
-
-enum UndoObjectError: Error {
-    case failedToUnwrap
 }

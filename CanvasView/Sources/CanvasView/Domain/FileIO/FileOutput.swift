@@ -48,7 +48,3 @@ enum FileOutput {
         }
     }
 }
-
-enum FileOutputError: Error {
-    case operationError(String)
-}

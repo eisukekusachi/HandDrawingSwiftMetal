@@ -47,7 +47,7 @@ public protocol TextureRepository: Sendable {
 
     /// Removes a texture with UUID
     @discardableResult
-    func removeTexture(_ uuid: UUID) throws -> UUID
+    func removeTexture(_ uuid: UUID) -> UUID
 
     /// Removes all managed textures
     func removeAll()
@@ -55,15 +55,4 @@ public protocol TextureRepository: Sendable {
     /// Updates an existing texture for UUID
     @discardableResult
     func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture
-}
-
-enum TextureRepositoryError: Error {
-    case failedToUnwrap
-    case failedToLoadTexture
-    case failedToAddTexture
-    case failedToUpdateTexture
-    case fileAlreadyExists
-    case fileNotFound(String)
-    case invalidTextureSize
-    case invalidValue(String)
 }

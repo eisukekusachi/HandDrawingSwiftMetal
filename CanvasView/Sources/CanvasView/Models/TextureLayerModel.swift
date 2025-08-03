@@ -28,15 +28,17 @@ public final class TextureLayerModel: Identifiable, Equatable, ObservableObject 
     /// Whether the layer is visible or not
     @Published public var isVisible: Bool
 
-    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
+    public init(id: UUID, thumbnail: UIImage?, title: String, alpha: Int, isVisible: Bool) {
         self.id = id
+        self.thumbnail = thumbnail
         self.title = title
         self.alpha = alpha
         self.isVisible = isVisible
     }
 
-    public init(item: TextureLayerItem) {
+    public init(item: TextureLayerItem, thumbnail: UIImage?) {
         self.id = item.id
+        self.thumbnail = thumbnail
         self.title = item.title
         self.alpha = item.alpha
         self.isVisible = item.isVisible

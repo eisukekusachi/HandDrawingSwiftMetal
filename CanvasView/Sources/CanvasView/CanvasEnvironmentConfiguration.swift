@@ -19,8 +19,8 @@ public struct CanvasEnvironmentConfiguration: Sendable {
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     let baseBackgroundColor: UIColor
 
-    /// For the canvas’s textureLayerRepository type: if `.disk` is selected, Core Data is automatically created and textures are persisted
-    let textureLayerRepositoryType: StorageType
+    /// For the canvas’s textureRepository type: if `.disk` is selected, Core Data is automatically created and textures are persisted
+    let textureRepositoryType: StorageType
 
     /// For the repository type used to store undo textures. even if `.disk` is selected, it only uses disk storage temporarily and textures are not persisted.
     let undoTextureRepositoryType: StorageType?
@@ -28,12 +28,12 @@ public struct CanvasEnvironmentConfiguration: Sendable {
     public init(
         backgroundColor: UIColor = .white,
         baseBackgroundColor: UIColor = UIColor(230, 230, 230),
-        textureLayerRepositoryType: StorageType = .disk,
+        textureRepositoryType: StorageType = .disk,
         undoTextureRepositoryType: StorageType? = .disk
     ) {
         self.backgroundColor = backgroundColor
         self.baseBackgroundColor = baseBackgroundColor
-        self.textureLayerRepositoryType = textureLayerRepositoryType
+        self.textureRepositoryType = textureRepositoryType
         self.undoTextureRepositoryType = undoTextureRepositoryType
     }
 }

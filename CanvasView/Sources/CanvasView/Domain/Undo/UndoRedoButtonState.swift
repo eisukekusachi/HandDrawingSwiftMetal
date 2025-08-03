@@ -7,7 +7,13 @@
 
 import Foundation
 
+@MainActor
 public struct UndoRedoButtonState: Sendable {
     public let isUndoEnabled: Bool
     public let isRedoEnabled: Bool
+
+    public init(_ undoManager: UndoManager) {
+        isUndoEnabled = undoManager.canUndo
+        isRedoEnabled = undoManager.canRedo
+    }
 }

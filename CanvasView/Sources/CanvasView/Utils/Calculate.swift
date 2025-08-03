@@ -60,5 +60,4 @@ enum Calculate {
             return vector
         }
     }
-
 }

@@ -9,12 +9,12 @@ import Foundation
 
 public struct TextureLayerConfiguration {
     public let canvasState: CanvasState
-    public let textureLayerRepository: TextureLayerRepository
+    public let textureRepository: TextureRepository
     public let undoStack: UndoStack?
 
-    public init(canvasState: CanvasState, textureLayerRepository: TextureLayerRepository, undoStack: UndoStack?) {
+    public init(canvasState: CanvasState, textureRepository: TextureRepository, undoStack: UndoStack?) {
         self.canvasState = canvasState
-        self.textureLayerRepository = textureLayerRepository
+        self.textureRepository = textureRepository
         self.undoStack = undoStack
     }
 }

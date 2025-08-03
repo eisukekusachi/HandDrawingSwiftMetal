@@ -76,7 +76,12 @@ extension CanvasEntity {
             self.eraserDiameter = entity.eraserDiameter ?? 8
 
         } else {
-            throw CanvasEntityError.operationError("getCanvasEntity(fileURL:)")
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
         }
     }
 }
@@ -85,8 +90,4 @@ extension CanvasEntity: LocalFileConvertible {
     public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
     }
-}
-
-enum CanvasEntityError: Error {
-    case operationError(String)
 }

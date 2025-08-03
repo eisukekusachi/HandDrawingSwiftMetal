@@ -125,25 +125,27 @@ extension TextureLayerView {
 }
 
 private struct PreviewView: View {
-    let canvasState = CanvasState(
-        .init(
-            textureSize: .init(width: 44, height: 44),
-            layerIndex: 1,
-            layers: [
-                .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
-                .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
-            ]
-        )
-    )
+    let canvasState = CanvasState()
     let configuration: TextureLayerConfiguration
 
     init() {
+        canvasState.initialize(
+            configuration: .init(
+                textureSize: .init(width: 44, height: 44),
+                layerIndex: 1,
+                layers: [
+                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
+                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
+                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
+                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
+                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
+                ]
+            )
+        )
+
         configuration = .init(
             canvasState: canvasState,
-            textureLayerRepository: MockTextureLayerRepository(),
+            textureRepository: MockTextureRepository(),
             undoStack: nil
         )
     }

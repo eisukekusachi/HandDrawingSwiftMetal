@@ -1,5 +1,5 @@
 //
-//  MockTextureLayerRepository.swift
+//  MockTextureRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/21.
@@ -11,7 +11,7 @@ import Metal
 
 @preconcurrency import Combine
 
-final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Sendable {
+final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
 
@@ -33,13 +33,7 @@ final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Senda
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {}
 
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        nil
-    }
-
     func removeAll() {}
-
-    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {}
 
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
@@ -61,7 +55,7 @@ final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Senda
     }
 
 
-    func removeTexture(_ uuid: UUID) throws -> UUID {
+    func removeTexture(_ uuid: UUID) -> UUID {
         uuid
     }
 
@@ -83,7 +77,7 @@ final class MockTextureLayerRepository: TextureLayerRepository, @unchecked Senda
             let device = MTLCreateSystemDefaultDevice(),
             let texture = MTLTextureCreator.makeBlankTexture(with: device)
         else {
-            throw NSError(domain: "MockTextureLayerRepository", code: -1, userInfo: nil)
+            throw NSError(domain: "MockTextureRepository", code: -1, userInfo: nil)
         }
         return .init(
             uuid: UUID(),

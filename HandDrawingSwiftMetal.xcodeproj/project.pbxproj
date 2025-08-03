@@ -19,7 +19,7 @@
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
 		D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */; };
-		D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */; };
+		D44B52DC2DB6752E00EE213C /* MockTextureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52DB2DB6752E00EE213C /* MockTextureRepository.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
@@ -72,7 +72,7 @@
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
 		D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingViewController.xib; sourceTree = "<group>"; };
-		D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureLayerRepository.swift; sourceTree = "<group>"; };
+		D44B52DB2DB6752E00EE213C /* MockTextureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTextureRepository.swift; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrowConfiguration.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
@@ -199,7 +199,7 @@
 		D4E0EC292E3B680800AFE6C5 /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
-				D44B52DB2DB6752E00EE213C /* MockTextureLayerRepository.swift */,
+				D44B52DB2DB6752E00EE213C /* MockTextureRepository.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -444,7 +444,7 @@
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
-				D44B52DC2DB6752E00EE213C /* MockTextureLayerRepository.swift in Sources */,
+				D44B52DC2DB6752E00EE213C /* MockTextureRepository.swift in Sources */,
 				D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,

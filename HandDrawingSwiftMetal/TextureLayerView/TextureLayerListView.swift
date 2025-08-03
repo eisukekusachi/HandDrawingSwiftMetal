@@ -20,10 +20,9 @@ struct TextureLayerListView: View {
                 Array(canvasState.layers.reversed()),
                 id: \.id
             ) { layer in
-                layerRow(
+                TextureLayerRowView(
                     layer: layer,
-                    thumbnail: viewModel.thumbnail(layer.id),
-                    selected: viewModel.selectedLayer?.id == layer.id,
+                    isSelected: viewModel.selectedLayer?.id == layer.id,
                     didTapRow: { targetLayer in
                         viewModel.onTapCell(id: targetLayer.id)
                     },
@@ -46,23 +45,36 @@ struct TextureLayerListView: View {
     }
 }
 
-extension TextureLayerListView {
+private struct TextureLayerRowView: View {
+    @ObservedObject var layer: TextureLayerModel
 
-    private func layerRow(
+    private let isSelected: Bool
+    private let didTapRow: (TextureLayerModel) -> Void
+    private let didTapVisibleButton: (TextureLayerModel) -> Void
+
+    init(
         layer: TextureLayerModel,
-        thumbnail: UIImage?,
-        selected: Bool,
-        didTapRow: @escaping ((TextureLayerModel) -> Void),
-        didTapVisibleButton: @escaping ((TextureLayerModel) -> Void)
-    ) -> some View {
+        isSelected: Bool,
+        didTapRow: @escaping (TextureLayerModel) -> Void,
+        didTapVisibleButton: @escaping (TextureLayerModel) -> Void
+    ) {
+        self.layer = layer
+        self.isSelected = isSelected
+        self.didTapRow = didTapRow
+        self.didTapVisibleButton = didTapVisibleButton
+    }
+
+    var body: some View {
         ZStack {
-            Color(backgroundColor(selected))
+            Color(
+                backgroundColor(isSelected)
+            )
 
             HStack {
                 Spacer()
                     .frame(width: 8)
 
-                if let thumbnail {
+                if let thumbnail = layer.thumbnail {
                     Image(uiImage: thumbnail)
                         .resizable()
                         .frame(width: 32, height: 32)
@@ -77,7 +89,11 @@ extension TextureLayerListView {
 
                 Text(layer.title)
                     .font(.subheadline)
-                    .foregroundColor(Color(textColor(selected)))
+                    .foregroundColor(
+                        Color(
+                            textColor(isSelected)
+                        )
+                    )
 
                 Spacer()
 
@@ -87,7 +103,11 @@ extension TextureLayerListView {
 
                 Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
                     .frame(width: 32, height: 32)
-                    .foregroundColor(Color(iconColor(layer: layer, selected)))
+                    .foregroundColor(
+                        Color(
+                            iconColor(layer: layer, isSelected)
+                        )
+                    )
                     .onTapGesture {
                         didTapVisibleButton(layer)
                     }
@@ -100,11 +120,6 @@ extension TextureLayerListView {
             didTapRow(layer)
         }
     }
-
-}
-
-// Colors
-extension TextureLayerListView {
 
     private func backgroundColor(_ selected: Bool) -> UIColor {
         if selected {
@@ -122,17 +137,9 @@ extension TextureLayerListView {
     }
     private func iconColor(layer: TextureLayerModel, _ selected: Bool) -> UIColor {
         if selected {
-            if layer.isVisible {
-                return .white
-            } else {
-                return .lightGray
-            }
+            return layer.isVisible ? .white : .lightGray
         } else {
-            if layer.isVisible {
-                return .black
-            } else {
-                return .darkGray
-            }
+            return layer.isVisible ? .black : .darkGray
         }
     }
 }
@@ -142,24 +149,27 @@ extension TextureLayerListView {
 }
 
 private struct PreviewView: View {
-    let canvasState = CanvasState(
-        CanvasConfiguration(
-            layers: [
-                .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
-                .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
-            ]
-        )
-    )
+    let canvasState = CanvasState()
+
     let viewModel = TextureLayerViewModel()
 
     init() {
+        canvasState.initialize(
+            configuration: CanvasConfiguration(
+                layers: [
+                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
+                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
+                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
+                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
+                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50)
+                ]
+            )
+        )
+
         viewModel.initialize(
             configuration: .init(
                 canvasState: canvasState,
-                textureLayerRepository: MockTextureLayerRepository(),
+                textureRepository: MockTextureRepository(),
                 undoStack: nil
             )
         )
@@ -171,5 +181,4 @@ private struct PreviewView: View {
         )
         .frame(width: 256, height: 300)
     }
-
 }

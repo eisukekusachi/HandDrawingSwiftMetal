@@ -1,0 +1,42 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Error" : {
+      "extractionState" : "manual"
+    },
+    "Failed to create new texture" : {
+      "extractionState" : "manual"
+    },
+    "Failed to update texture" : {
+      "extractionState" : "manual"
+    },
+    "File already exists" : {
+      "extractionState" : "manual"
+    },
+    "File not found" : {
+      "extractionState" : "manual"
+    },
+    "Invalid value" : {
+      "extractionState" : "manual"
+    },
+    "Loading Error" : {
+      "extractionState" : "manual"
+    },
+    "Saving Error" : {
+      "extractionState" : "manual"
+    },
+    "Texture size is below the minimum" : {
+      "extractionState" : "manual"
+    },
+    "Texture size is zero" : {
+      "extractionState" : "manual"
+    },
+    "Texture size mismatch" : {
+      "extractionState" : "manual"
+    },
+    "Unable to load required data" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.1"
+}

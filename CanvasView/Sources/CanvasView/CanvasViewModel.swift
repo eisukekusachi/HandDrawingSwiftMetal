@@ -13,9 +13,7 @@ import Combine
 public final class CanvasViewModel {
 
     /// Maintains the state of the canvas
-    let canvasState: CanvasState = .init(
-        CanvasConfiguration()
-    )
+    let canvasState = CanvasState()
 
     public static var fileSuffix: String {
         "zip"
@@ -33,7 +31,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show the alert
-    var alert: AnyPublisher<Error, Never> {
+    var alert: AnyPublisher<ErrorModel, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -42,8 +40,8 @@ public final class CanvasViewModel {
         toastSubject.eraseToAnyPublisher()
     }
 
-    var undoRedoButtonState: AnyPublisher<UndoRedoButtonState, Never> {
-        undoRedoButtonStateSubject.eraseToAnyPublisher()
+    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+        didUndoSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
@@ -54,7 +52,7 @@ public final class CanvasViewModel {
     var textureLayerConfiguration: TextureLayerConfiguration {
         .init(
             canvasState: canvasState,
-            textureLayerRepository: self.dependencies.textureLayerRepository,
+            textureRepository: self.dependencies.textureRepository,
             undoStack: undoStack
         )
     }
@@ -64,7 +62,7 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies!
 
-    /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
+    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
     /// Handles input from finger touches
@@ -87,7 +85,7 @@ public final class CanvasViewModel {
 
     private var renderer = CanvasRenderer()
 
-    private let transformer = CanvasTransformer()
+    private let transformer = Transformer()
 
     /// Manages input from pen and finger
     private let inputDevice = InputDeviceStatus()
@@ -97,13 +95,13 @@ public final class CanvasViewModel {
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<Error, Never>()
+    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     private var undoStack: UndoStack? = nil
 
@@ -125,17 +123,17 @@ public final class CanvasViewModel {
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if self.dependencies.textureLayerRepository is TextureLayerDocumentsDirectoryRepository {
+        if self.dependencies.textureRepository is TextureDocumentsDirectoryRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }
 
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            let textureLayerRepository = self.dependencies.textureLayerRepository
+            let textureRepository = self.dependencies.textureRepository
             undoStack = .init(
                 canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository,
+                textureRepository: textureRepository,
                 undoTextureRepository: undoTextureRepository
             )
         }
@@ -222,9 +220,11 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        canvasStateStorage?.errorDialogSubject
+        canvasStateStorage?.alertSubject
             .sink { [weak self] error in
-                self?.alertSubject.send(error)
+                self?.alertSubject.send(
+                    ErrorModel.create(error)
+                )
             }
             .store(in: &cancellables)
 
@@ -232,10 +232,10 @@ public final class CanvasViewModel {
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
 
-        undoStack?.undoRedoButtonStateSubject
+        undoStack?.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.undoRedoButtonStateSubject.send(state)
+                self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
     }
@@ -249,7 +249,7 @@ public extension CanvasViewModel {
 
     func initializeCanvas(configuration: CanvasConfiguration) async throws {
         // Initialize the texture repository
-        let resultConfiguration = try await dependencies.textureLayerRepository.initializeStorage(
+        let resultConfiguration = try await dependencies.textureRepository.initializeStorage(
             configuration: configuration
         )
         setupCanvas(resultConfiguration)
@@ -261,15 +261,18 @@ public extension CanvasViewModel {
             let commandBuffer = displayView?.commandBuffer
         else { return }
 
-        let textureLayerRepository = dependencies.textureLayerRepository
+        let textureRepository = dependencies.textureRepository
 
-        canvasState.setData(configuration)
+        canvasState.initialize(
+            configuration: configuration,
+            textureRepository: textureRepository
+        )
 
         renderer.initTextures(textureSize: textureSize)
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureLayerRepository: textureLayerRepository,
+            textureRepository: textureRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.completeCanvasSetup(textureSize: textureSize, configuration: configuration)
@@ -425,7 +428,7 @@ extension CanvasViewModel {
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                try await dependencies.textureLayerRepository.restoreStorage(
+                try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
                     with: configuration
                 )
@@ -435,10 +438,20 @@ extension CanvasViewModel {
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
 
-                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
             }
             catch {
-                alertSubject.send(error)
+                alertSubject.send(
+                    ErrorModel.create(
+                        error as NSError,
+                        title: String(localized: "Loading Error", bundle: .module)
+                    )
+                )
             }
         }
     }
@@ -468,7 +481,7 @@ extension CanvasViewModel {
             do {
                 try dependencies.localFileRepository.createWorkingDirectory()
 
-                let result = try await dependencies.textureLayerRepository.copyTextures(
+                let result = try await dependencies.textureRepository.copyTextures(
                     uuids: canvasState.layers.map { $0.id }
                 )
 
@@ -497,9 +510,19 @@ extension CanvasViewModel {
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
 
-                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
             } catch {
-                alertSubject.send(error)
+                alertSubject.send(
+                    ErrorModel.create(
+                        error as NSError,
+                        title: String(localized: "Saving Error", bundle: .module)
+                    )
+                )
             }
         }
     }
@@ -551,7 +574,6 @@ extension CanvasViewModel {
 
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
-
 }
 
 extension CanvasViewModel {
@@ -576,12 +598,11 @@ extension CanvasViewModel {
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
         Task {
             do {
-                let resultTexture = try await dependencies.textureLayerRepository.updateTexture(
+                let resultTexture = try await dependencies.textureRepository.updateTexture(
                     texture: texture,
                     for: selectedTextureId
                 )
                 await undoStack?.pushUndoDrawingObject(
-                    canvasState: canvasState,
                     texture: resultTexture.texture
                 )
             } catch {
@@ -589,6 +610,10 @@ extension CanvasViewModel {
                 Logger.error(error)
             }
         }
+
+        canvasState.updateThumbnail(
+            .init(uuid: selectedTextureId, texture: texture)
+        )
     }
 
     private func resetAllInputParameters() {
@@ -609,14 +634,13 @@ extension CanvasViewModel {
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureLayerRepository: dependencies.textureLayerRepository,
+            textureRepository: dependencies.textureRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()
         }
     }
 
-    @MainActor
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,
@@ -630,8 +654,4 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
-}
-
-enum CanvasViewModelError: Error {
-    case invalidValue(String)
 }

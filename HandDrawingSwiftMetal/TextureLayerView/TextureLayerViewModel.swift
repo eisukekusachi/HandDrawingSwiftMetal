@@ -20,10 +20,6 @@ final class TextureLayerViewModel: ObservableObject {
         canvasState?.selectedLayer
     }
 
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        textureLayerRepository?.thumbnail(uuid)
-    }
-
     private(set) var canvasState: CanvasState?
 
     @Published private var selectedLayerId: UUID? {
@@ -35,7 +31,7 @@ final class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    private var textureLayerRepository: TextureLayerRepository!
+    private var textureRepository: TextureRepository!
 
     private var undoStack: UndoStack?
 
@@ -45,21 +41,13 @@ final class TextureLayerViewModel: ObservableObject {
         configuration: TextureLayerConfiguration
     ) {
         self.canvasState = configuration.canvasState
-        self.textureLayerRepository = configuration.textureLayerRepository
+        self.textureRepository = configuration.textureRepository
         self.undoStack = configuration.undoStack
 
         subscribe()
     }
 
     private func subscribe() {
-        // Update the SwiftUI layout
-        textureLayerRepository.objectWillChangeSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
         // Bind the drag gesture of the alpha slider
         alphaSliderValue.$isHandleDragging
             .sink { [weak self] startDragging in
@@ -102,12 +90,16 @@ extension TextureLayerViewModel {
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
         Task {
-            let result = try await textureLayerRepository
+            let result = try await textureRepository
                 .addTexture(
                     MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     newTextureUUID: layer.id
                 )
             insertLayer(layer: layer, at: index, undoTexture: result.texture)
+
+            canvasState?.updateThumbnail(
+                .init(uuid: layer.id, texture: result.texture)
+            )
         }
     }
 
@@ -120,14 +112,21 @@ extension TextureLayerViewModel {
         else { return }
 
         Task {
-            let result = try await textureLayerRepository.copyTexture(
+            let result = try await textureRepository.copyTexture(
                 uuid: textureLayerId
             )
 
-            try textureLayerRepository
+            try textureRepository
                 .removeTexture(selectedLayer.id)
 
             removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
+
+            if let layerId = canvasState?.selectedLayerId {
+                let result = try await textureRepository.copyTexture(uuid: layerId)
+                canvasState?.updateThumbnail(
+                    .init(uuid: layerId, texture: result.texture)
+                )
+            }
         }
     }
 
@@ -146,7 +145,6 @@ extension TextureLayerViewModel {
     func onMoveLayer(source: IndexSet, destination: Int) {
         moveLayer(indices: .init(sourceIndexSet: source, destinationIndex: destination))
     }
-
 }
 
 // MARK: CRUD
@@ -156,7 +154,13 @@ extension TextureLayerViewModel {
         let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
 
         // Perform a layer operation
-        canvasState?.layers.insert(.init(item: layer), at: index)
+        canvasState?.layers.insert(
+            .init(
+                item: layer,
+                thumbnail: nil
+            ),
+            at: index
+        )
         canvasState?.selectedLayerId = layer.id
         canvasState?.fullCanvasUpdateSubject.send(())
 
@@ -238,6 +242,7 @@ extension TextureLayerViewModel {
         if let title {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
+                thumbnail: layer.thumbnail,
                 title: title,
                 alpha: layer.alpha,
                 isVisible: layer.isVisible
@@ -246,6 +251,7 @@ extension TextureLayerViewModel {
         if let isVisible {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
+                thumbnail: layer.thumbnail,
                 title: layer.title,
                 alpha: layer.alpha,
                 isVisible: isVisible
@@ -257,6 +263,7 @@ extension TextureLayerViewModel {
         if let alpha {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
+                thumbnail: layer.thumbnail,
                 title: layer.title,
                 alpha: alpha,
                 isVisible: layer.isVisible
@@ -320,7 +327,7 @@ extension TextureLayerViewModel {
 
         // Create a addition undo object to cancel the deletion
         let undoObject = UndoAdditionObject(
-            redoObject,
+            layerToBeAdded: redoObject.textureLayer,
             insertIndex: previousLayerIndex
         )
 
@@ -365,14 +372,17 @@ extension TextureLayerViewModel {
                let selectedLayer = canvasState.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(
-                    alpha: oldAlpha,
-                    textureLayer: selectedLayer
+                    layer: .init(model: selectedLayer),
+                    withNewAlpha: oldAlpha
                 )
 
                 undoStack?.pushUndoObject(
                     .init(
                         undoObject: undoObject,
-                        redoObject: UndoAlphaChangedObject(undoObject, withNewAlpha: newAlpha)
+                        redoObject: UndoAlphaChangedObject(
+                            layer: undoObject.textureLayer,
+                            withNewAlpha: newAlpha
+                        )
                     )
                 )
             }
@@ -380,10 +390,4 @@ extension TextureLayerViewModel {
             self.alphaSliderValue.temporaryStoredValue = nil
         }
     }
-}
-
-enum TextureLayerError: Error {
-    case indexOutOfBounds
-    case minimumLayerRequired
-    case failedToUnwrap
 }

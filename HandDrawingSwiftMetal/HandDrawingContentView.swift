@@ -49,6 +49,8 @@ final class HandDrawingContentView: UIView {
     }
 
     private func commonInit() {
+        canvasView.alpha = 0.0
+
         addEvents()
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
@@ -139,6 +141,10 @@ extension HandDrawingContentView {
         canvasView.setDrawingTool(configuration.drawingTool)
 
         showSlider(configuration.drawingTool)
+
+        UIView.animate(withDuration: 0.1) { [weak self] in
+            self?.canvasView.alpha = 1.0
+        }
 
         backgroundColor = .white
     }

@@ -129,7 +129,7 @@ public enum MTLTextureCreator {
             Int(size.width) >= MTLRenderer.threadGroupLength &&
             Int(size.height) >= MTLRenderer.threadGroupLength
         else {
-            Logger.standard.error("Texture size is below the minimum: \(size.width) \(size.height)")
+            Logger.error("\(String(localized: "Texture size is below the minimum", bundle: .module)):\(size.width) \(size.height)")
             return nil
         }
 

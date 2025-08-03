@@ -51,9 +51,7 @@ class Toast: UIView {
 
     func setupView(_ model: ToastModel) {
         label.text = model.title
-
-        imageView.image = UIImage(systemName: model.systemName)
-
+        imageView.image = model.icon
         duration = model.duration
 
         commonInit()

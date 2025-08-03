@@ -14,7 +14,7 @@ final class CanvasStateStorage {
 
     private(set) var coreDataConfiguration: CanvasConfiguration?
 
-    let errorDialogSubject = PassthroughSubject<Error, Never>()
+    let alertSubject = PassthroughSubject<NSError, Never>()
 
     private var coreDataRepository: CoreDataRepository
 
@@ -47,7 +47,8 @@ final class CanvasStateStorage {
             )
 
         } catch {
-            errorDialogSubject.send(error)
+            Logger.error(error)
+            alertSubject.send(error as NSError)
         }
     }
 
@@ -55,10 +56,9 @@ final class CanvasStateStorage {
         do {
             try coreDataRepository.saveContext()
         } catch {
-            Logger.standard.error("Failed to save canvas state: \(error)")
+            Logger.error(error)
         }
     }
-
 }
 
 extension CanvasStateStorage {
@@ -102,7 +102,8 @@ extension CanvasStateStorage {
             try coreDataRepository.saveContext()
         }
         catch {
-            errorDialogSubject.send(error)
+            Logger.error(error)
+            alertSubject.send(error as NSError)
         }
     }
 
