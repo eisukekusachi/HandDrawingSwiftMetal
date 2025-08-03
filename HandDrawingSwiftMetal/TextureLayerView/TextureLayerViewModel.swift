@@ -391,9 +391,3 @@ extension TextureLayerViewModel {
         }
     }
 }
-
-enum TextureLayerError: Error {
-    case indexOutOfBounds
-    case minimumLayerRequired
-    case failedToUnwrap
-}
