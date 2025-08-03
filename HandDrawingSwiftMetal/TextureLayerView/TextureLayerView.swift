@@ -145,7 +145,7 @@ private struct PreviewView: View {
 
         configuration = .init(
             canvasState: canvasState,
-            textureLayerRepository: MockTextureLayerRepository(),
+            textureRepository: MockTextureRepository(),
             undoStack: nil
         )
     }

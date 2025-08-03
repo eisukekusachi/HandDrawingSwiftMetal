@@ -20,7 +20,7 @@ public protocol UndoObject {
 
     /// A method called when the undo operation is performed
     func performTextureOperation(
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws
 }

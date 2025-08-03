@@ -35,15 +35,15 @@ public final class UndoAdditionObject: UndoObject {
         self.insertIndex = insertIndex
     }
 
-    /// Copies a texture from the `undoTextureRepository` to the `textureLayerRepository` to restore a layer during an undo operation
+    /// Copies a texture from the `undoTextureRepository` to the `textureRepository` to restore a layer during an undo operation
     public func performTextureOperation(
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws {
         let result = try await undoTextureRepository
             .copyTexture(uuid: undoTextureUUID)
 
-        try await textureLayerRepository.addTexture(
+        try await textureRepository.addTexture(
             result.texture,
             newTextureUUID: textureLayer.id
         )

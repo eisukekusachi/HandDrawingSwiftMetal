@@ -21,7 +21,7 @@ public final class UndoStack {
 
     private let canvasState: CanvasState
 
-    private let textureLayerRepository: TextureLayerRepository!
+    private let textureRepository: TextureRepository!
 
     private let undoTextureRepository: TextureRepository
 
@@ -33,7 +33,7 @@ public final class UndoStack {
     init(
         undoCount: Int = 64,
         canvasState: CanvasState,
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) {
         self.canvasState = canvasState
@@ -41,7 +41,7 @@ public final class UndoStack {
         self.undoManager.levelsOfUndo = undoCount
         self.undoManager.groupsByEvent = false
 
-        self.textureLayerRepository = textureLayerRepository
+        self.textureRepository = textureRepository
         self.undoTextureRepository = undoTextureRepository
 
         didUndoSubject.send(.init(undoManager))
@@ -80,7 +80,7 @@ public extension UndoStack {
         )
 
         do {
-            let result = try await textureLayerRepository
+            let result = try await textureRepository
                 .copyTexture(uuid: textureLayerId)
 
             try await undoTextureRepository.addTexture(
@@ -264,13 +264,13 @@ extension UndoStack {
         Task {
             do {
                 try await undoObject.performTextureOperation(
-                    textureLayerRepository: textureLayerRepository,
+                    textureRepository: textureRepository,
                     undoTextureRepository: undoTextureRepository
                 )
 
                 try await didPerformUndo(
                     undoObject: undoObject,
-                    textureRepository: textureLayerRepository
+                    textureRepository: textureRepository
                 )
             } catch {
                 Logger.error(error)

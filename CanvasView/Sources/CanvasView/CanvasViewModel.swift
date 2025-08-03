@@ -52,7 +52,7 @@ public final class CanvasViewModel {
     var textureLayerConfiguration: TextureLayerConfiguration {
         .init(
             canvasState: canvasState,
-            textureLayerRepository: self.dependencies.textureLayerRepository,
+            textureRepository: self.dependencies.textureRepository,
             undoStack: undoStack
         )
     }
@@ -62,7 +62,7 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies!
 
-    /// It persists the canvas state to disk using `CoreData` when `textureLayerRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
+    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
     private var canvasStateStorage: CanvasStateStorage?
 
     /// Handles input from finger touches
@@ -123,17 +123,17 @@ public final class CanvasViewModel {
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if self.dependencies.textureLayerRepository is TextureLayerDocumentsDirectoryRepository {
+        if self.dependencies.textureRepository is TextureDocumentsDirectoryRepository {
             canvasStateStorage = CanvasStateStorage()
             canvasStateStorage?.setupStorage(canvasState)
         }
 
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            let textureLayerRepository = self.dependencies.textureLayerRepository
+            let textureRepository = self.dependencies.textureRepository
             undoStack = .init(
                 canvasState: canvasState,
-                textureLayerRepository: textureLayerRepository,
+                textureRepository: textureRepository,
                 undoTextureRepository: undoTextureRepository
             )
         }
@@ -247,7 +247,7 @@ public extension CanvasViewModel {
 
     func initializeCanvas(configuration: CanvasConfiguration) async throws {
         // Initialize the texture repository
-        let resultConfiguration = try await dependencies.textureLayerRepository.initializeStorage(
+        let resultConfiguration = try await dependencies.textureRepository.initializeStorage(
             configuration: configuration
         )
         setupCanvas(resultConfiguration)
@@ -259,18 +259,18 @@ public extension CanvasViewModel {
             let commandBuffer = displayView?.commandBuffer
         else { return }
 
-        let textureLayerRepository = dependencies.textureLayerRepository
+        let textureRepository = dependencies.textureRepository
 
         canvasState.initialize(
             configuration: configuration,
-            textureRepository: textureLayerRepository
+            textureRepository: textureRepository
         )
 
         renderer.initTextures(textureSize: textureSize)
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureLayerRepository: textureLayerRepository,
+            textureRepository: textureRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.completeCanvasSetup(textureSize: textureSize, configuration: configuration)
@@ -426,7 +426,7 @@ extension CanvasViewModel {
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                try await dependencies.textureLayerRepository.restoreStorage(
+                try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
                     with: configuration
                 )
@@ -469,7 +469,7 @@ extension CanvasViewModel {
             do {
                 try dependencies.localFileRepository.createWorkingDirectory()
 
-                let result = try await dependencies.textureLayerRepository.copyTextures(
+                let result = try await dependencies.textureRepository.copyTextures(
                     uuids: canvasState.layers.map { $0.id }
                 )
 
@@ -577,7 +577,7 @@ extension CanvasViewModel {
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
         Task {
             do {
-                let resultTexture = try await dependencies.textureLayerRepository.updateTexture(
+                let resultTexture = try await dependencies.textureRepository.updateTexture(
                     texture: texture,
                     for: selectedTextureId
                 )
@@ -613,7 +613,7 @@ extension CanvasViewModel {
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureLayerRepository: dependencies.textureLayerRepository,
+            textureRepository: dependencies.textureRepository,
             with: commandBuffer
         ) { [weak self] in
             self?.updateCanvasView()

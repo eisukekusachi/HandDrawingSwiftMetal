@@ -31,7 +31,7 @@ final class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    private var textureLayerRepository: TextureLayerRepository!
+    private var textureRepository: TextureRepository!
 
     private var undoStack: UndoStack?
 
@@ -41,7 +41,7 @@ final class TextureLayerViewModel: ObservableObject {
         configuration: TextureLayerConfiguration
     ) {
         self.canvasState = configuration.canvasState
-        self.textureLayerRepository = configuration.textureLayerRepository
+        self.textureRepository = configuration.textureRepository
         self.undoStack = configuration.undoStack
 
         subscribe()
@@ -90,7 +90,7 @@ extension TextureLayerViewModel {
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
         Task {
-            let result = try await textureLayerRepository
+            let result = try await textureRepository
                 .addTexture(
                     MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
                     newTextureUUID: layer.id
@@ -112,17 +112,17 @@ extension TextureLayerViewModel {
         else { return }
 
         Task {
-            let result = try await textureLayerRepository.copyTexture(
+            let result = try await textureRepository.copyTexture(
                 uuid: textureLayerId
             )
 
-            try textureLayerRepository
+            try textureRepository
                 .removeTexture(selectedLayer.id)
 
             removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
 
             if let layerId = canvasState?.selectedLayerId {
-                let result = try await textureLayerRepository.copyTexture(uuid: layerId)
+                let result = try await textureRepository.copyTexture(uuid: layerId)
                 canvasState?.updateThumbnail(
                     .init(uuid: layerId, texture: result.texture)
                 )

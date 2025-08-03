@@ -169,7 +169,7 @@ private struct PreviewView: View {
         viewModel.initialize(
             configuration: .init(
                 canvasState: canvasState,
-                textureLayerRepository: MockTextureLayerRepository(),
+                textureRepository: MockTextureRepository(),
                 undoStack: nil
             )
         )

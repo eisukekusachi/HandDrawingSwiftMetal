@@ -34,10 +34,10 @@ public final class UndoDeletionObject: UndoObject {
     }
 
     public func performTextureOperation(
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws {
-        try textureLayerRepository
+        try textureRepository
             .removeTexture(textureLayer.id)
     }
 }

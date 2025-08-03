@@ -36,7 +36,7 @@ public final class UndoAlphaChangedObject: UndoObject {
     }
 
     public func performTextureOperation(
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws {
         // Do nothing

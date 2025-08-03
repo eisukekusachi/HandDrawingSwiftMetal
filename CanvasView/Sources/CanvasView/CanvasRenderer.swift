@@ -105,7 +105,7 @@ extension CanvasRenderer {
     @MainActor
     func updateDrawingTextures(
         canvasState: CanvasState,
-        textureLayerRepository: TextureLayerRepository,
+        textureRepository: TextureRepository,
         with commandBuffer: MTLCommandBuffer,
         onCompleted: (() -> Void)?
     ) {
@@ -125,7 +125,7 @@ extension CanvasRenderer {
         )
 
         Task {
-            let textures = try await textureLayerRepository.copyTextures(
+            let textures = try await textureRepository.copyTextures(
                 uuids: canvasState.layers.map { $0.id }
             )
             let bottomLayers = bottomLayers(
