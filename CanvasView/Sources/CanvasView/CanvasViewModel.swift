@@ -436,7 +436,12 @@ extension CanvasViewModel {
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
 
-                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
             }
             catch {
                 alertSubject.send(error)
@@ -498,7 +503,12 @@ extension CanvasViewModel {
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
 
-                toastSubject.send(.init(title: "Success", systemName: "hand.thumbsup.fill"))
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
             } catch {
                 alertSubject.send(error)
             }

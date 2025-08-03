@@ -5,20 +5,23 @@
 //  Created by Eisuke Kusachi on 2024/05/04.
 //
 
-import Foundation
+import UIKit
 
-public struct ToastModel {
+public struct ToastModel: Identifiable {
+    public let id: UUID
     public let title: String
-    public let systemName: String
+    public let icon: UIImage?
     public let duration: Double
 
     public init(
+        id: UUID = UUID(),
         title: String,
-        systemName: String,
+        icon: UIImage?,
         duration: Double = 2.0
     ) {
+        self.id = id
         self.title = title
-        self.systemName = systemName
+        self.icon = icon
         self.duration = duration
     }
 }
