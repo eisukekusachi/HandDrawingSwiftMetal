@@ -41,7 +41,7 @@ public final class CanvasViewModel {
     }
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        undoRedoButtonStateSubject.eraseToAnyPublisher()
+        didUndoSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
@@ -101,7 +101,7 @@ public final class CanvasViewModel {
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     private var undoStack: UndoStack? = nil
 
@@ -233,7 +233,7 @@ public final class CanvasViewModel {
         undoStack?.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.undoRedoButtonStateSubject.send(state)
+                self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
     }

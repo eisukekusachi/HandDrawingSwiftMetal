@@ -31,7 +31,7 @@ import UIKit
     }
 
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        undoRedoButtonStateSubject.eraseToAnyPublisher()
+        didUndoSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
@@ -64,7 +64,7 @@ import UIKit
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
 
-    private var undoRedoButtonStateSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     private let canvasViewModel = CanvasViewModel()
 
@@ -197,7 +197,7 @@ extension CanvasView {
 
         canvasViewModel.didUndo
             .sink { [weak self] value in
-                self?.undoRedoButtonStateSubject.send(value)
+                self?.didUndoSubject.send(value)
             }
             .store(in: &cancellables)
     }
