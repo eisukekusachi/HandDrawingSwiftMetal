@@ -13,12 +13,16 @@ public struct ErrorModel: Identifiable {
     public let title: String
     public let message: String
 
-    static func from(_ error: NSError) -> ErrorModel {
+    static func create(
+        _ error: NSError?,
+        title: String? = nil,
+        message: String? = nil
+    ) -> Self {
         ErrorModel(
             id: UUID(),
-            domain: error.domain,
-            title: error.localizedDescription,
-            message: error.localizedFailureReason ?? ""
+            domain: error?.domain ?? "",
+            title: title ?? (error?.localizedDescription ?? ""),
+            message: message ?? (error?.localizedFailureReason ?? "")
         )
     }
 }

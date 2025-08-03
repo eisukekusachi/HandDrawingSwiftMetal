@@ -52,10 +52,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
             Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .main),
                 message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
             )
+            Logger.error(error)
+            throw error
         }
 
         removeAll()
@@ -83,29 +85,35 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Invalid value", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         guard
             let device = MTLCreateSystemDefaultDevice()
         else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [UUID: MTLTexture] = [:]
 
         guard let textureSize = configuration.textureSize else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Invalid value", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         try configuration.layers.forEach { layer in
@@ -114,10 +122,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             )
 
             guard let hexadecimalData = textureData.encodedHexadecimals else {
-                throw NSError(
+                let error = NSError(
                     title: String(localized: "Error", bundle: .module),
                     message: String(localized: "Unable to load required data", bundle: .module)
                 )
+                Logger.error(error)
+                throw error
             }
 
             guard let newTexture = MTLTextureCreator.makeTexture(
@@ -125,10 +135,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 colorArray: hexadecimalData,
                 with: device
             ) else {
-                throw NSError(
+                let error = NSError(
                     title: String(localized: "Error", bundle: .module),
                     message: String(localized: "Unable to load required data", bundle: .module)
                 )
+                Logger.error(error)
+                throw error
             }
 
             newTextures[layer.id] = newTexture
@@ -148,10 +160,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         guard
             let device = MTLCreateSystemDefaultDevice()
         else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
@@ -178,10 +192,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 with: device
             )
         else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         return .init(uuid: uuid, texture: newTexture)
@@ -205,17 +221,21 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard let texture else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         guard textures[uuid] == nil else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "File already exists", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         textures[uuid] = texture
@@ -232,17 +252,21 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 with: device
             )
         else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         guard self.textures[uuid] != nil else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: "\(String(localized: "File not found", bundle: .module)):\(uuid.uuidString)"
             )
+            Logger.error(error)
+            throw error
         }
 
         textures[uuid] = newTexture

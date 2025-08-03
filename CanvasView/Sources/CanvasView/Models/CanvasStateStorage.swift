@@ -47,6 +47,7 @@ final class CanvasStateStorage {
             )
 
         } catch {
+            Logger.error(error)
             alertSubject.send(error as NSError)
         }
     }
@@ -101,6 +102,7 @@ extension CanvasStateStorage {
             try coreDataRepository.saveContext()
         }
         catch {
+            Logger.error(error)
             alertSubject.send(error as NSError)
         }
     }

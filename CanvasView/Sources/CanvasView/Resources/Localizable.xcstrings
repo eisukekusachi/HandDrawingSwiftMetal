@@ -19,6 +19,12 @@
     "Invalid value" : {
       "extractionState" : "manual"
     },
+    "Loading Error" : {
+      "extractionState" : "manual"
+    },
+    "Saving Error" : {
+      "extractionState" : "manual"
+    },
     "Texture size is below the minimum" : {
       "extractionState" : "manual"
     },

@@ -45,6 +45,7 @@ final class DefaultCoreDataRepository: CoreDataRepository {
 
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
+                Logger.error(error)
                 fatalError("CoreData Load Error: \(error), \(error.userInfo)")
             }
         }

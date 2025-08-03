@@ -228,10 +228,12 @@ extension CanvasRenderer {
         on destination: MTLTexture
     ) async throws {
         guard let tempCommandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else {
-            throw NSError(
+            let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to load required data", bundle: .module)
             )
+            Logger.error(error)
+            throw error
         }
 
         renderer.clearTexture(texture: destination, with: tempCommandBuffer)

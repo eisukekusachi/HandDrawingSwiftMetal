@@ -17,13 +17,12 @@ public extension NSError {
         title: String,
         message: String
     ) {
-        let fileName = (file as NSString).lastPathComponent
         self.init(
             domain: domain,
             code: code,
             userInfo: [
                 NSLocalizedDescriptionKey: title,
-                NSLocalizedFailureReasonErrorKey: message + "[\(fileName):\(line)] \(function)"
+                NSLocalizedFailureReasonErrorKey: message
             ]
         )
     }

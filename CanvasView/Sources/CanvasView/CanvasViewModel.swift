@@ -223,7 +223,7 @@ public final class CanvasViewModel {
         canvasStateStorage?.alertSubject
             .sink { [weak self] error in
                 self?.alertSubject.send(
-                    ErrorModel.from(error)
+                    ErrorModel.create(error)
                 )
             }
             .store(in: &cancellables)
@@ -447,7 +447,10 @@ extension CanvasViewModel {
             }
             catch {
                 alertSubject.send(
-                    ErrorModel.from(error as NSError)
+                    ErrorModel.create(
+                        error as NSError,
+                        title: String(localized: "Loading Error", bundle: .module)
+                    )
                 )
             }
         }
@@ -515,7 +518,10 @@ extension CanvasViewModel {
                 )
             } catch {
                 alertSubject.send(
-                    ErrorModel.from(error as NSError)
+                    ErrorModel.create(
+                        error as NSError,
+                        title: String(localized: "Saving Error", bundle: .module)
+                    )
                 )
             }
         }
