@@ -552,7 +552,6 @@ extension CanvasViewModel {
 
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
-
 }
 
 extension CanvasViewModel {
@@ -620,7 +619,6 @@ extension CanvasViewModel {
         }
     }
 
-    @MainActor
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = canvasState.selectedLayer,
@@ -634,8 +632,4 @@ extension CanvasViewModel {
             with: commandBuffer
         )
     }
-}
-
-enum CanvasViewModelError: Error {
-    case invalidValue(String)
 }

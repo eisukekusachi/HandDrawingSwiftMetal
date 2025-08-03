@@ -215,7 +215,6 @@ extension CanvasView {
     }
 }
 
-
 extension CanvasView: FingerInputGestureRecognizerSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
