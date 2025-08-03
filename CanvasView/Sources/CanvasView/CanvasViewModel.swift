@@ -31,7 +31,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show the alert
-    var alert: AnyPublisher<Error, Never> {
+    var alert: AnyPublisher<ErrorModel, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -95,7 +95,7 @@ public final class CanvasViewModel {
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<Error, Never>()
+    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
@@ -220,9 +220,11 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        canvasStateStorage?.errorDialogSubject
+        canvasStateStorage?.alertSubject
             .sink { [weak self] error in
-                self?.alertSubject.send(error)
+                self?.alertSubject.send(
+                    ErrorModel.from(error)
+                )
             }
             .store(in: &cancellables)
 
@@ -444,7 +446,9 @@ extension CanvasViewModel {
                 )
             }
             catch {
-                alertSubject.send(error)
+                alertSubject.send(
+                    ErrorModel.from(error as NSError)
+                )
             }
         }
     }
@@ -510,7 +514,9 @@ extension CanvasViewModel {
                     )
                 )
             } catch {
-                alertSubject.send(error)
+                alertSubject.send(
+                    ErrorModel.from(error as NSError)
+                )
             }
         }
     }

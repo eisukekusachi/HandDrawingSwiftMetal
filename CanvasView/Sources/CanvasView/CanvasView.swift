@@ -21,7 +21,7 @@ import UIKit
     }
 
     /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<Error, Never> {
+    public var alert: AnyPublisher<ErrorModel, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -58,7 +58,7 @@ import UIKit
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<Error, Never>()
+    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
@@ -183,8 +183,8 @@ extension CanvasView {
 
         canvasViewModel.alert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.alertSubject.send(value)
+            .sink { [weak self] error in
+                self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
 

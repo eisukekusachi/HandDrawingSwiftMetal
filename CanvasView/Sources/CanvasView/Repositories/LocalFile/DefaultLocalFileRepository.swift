@@ -101,9 +101,3 @@ extension DefaultLocalFileRepository {
         try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
     }
 }
-
-enum DocumentsDirectoryRepositoryError: Error {
-    case error(Error)
-    case operationError(String)
-    case invalidValue(String)
-}

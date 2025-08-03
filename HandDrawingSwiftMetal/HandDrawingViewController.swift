@@ -60,10 +60,7 @@ extension HandDrawingViewController {
         contentView.canvasView.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
-                self?.showAlert(
-                    title: "Alert",
-                    message: error.localizedDescription
-                )
+                self?.showAlert(error)
             }
             .store(in: &cancellables)
 
@@ -145,10 +142,10 @@ extension HandDrawingViewController {
         )
     }
 
-    private func showAlert(title: String, message: String) {
+    private func showAlert(_ error: ErrorModel) {
         dialogPresenter.configuration = .init(
-            title: title,
-            message: message
+            title: error.title,
+            message: error.message
         )
         dialogPresenter.presentAlert(on: self)
     }

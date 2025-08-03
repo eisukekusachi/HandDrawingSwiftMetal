@@ -24,6 +24,16 @@ public enum Logger {
         standard.error("[\(fileName):\(line)] \(function) - \(error)")
     }
 
+    public static func error(
+        file: String = #file,
+        function: String = #function,
+        line: Int = #line,
+        _ error: String
+    ) {
+        let fileName = (file as NSString).lastPathComponent
+        standard.error("[\(fileName):\(line)] \(function) - \(error)")
+    }
+
     public static func info(
         file: String = #file,
         function: String = #function,

@@ -52,8 +52,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
             Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
-            Logger.standard.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            throw TextureRepositoryError.invalidTextureSize
+            throw NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
+            )
         }
 
         removeAll()
@@ -81,20 +83,29 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
-            throw TextureRepositoryError.invalidValue("restoreStorage(from:, with:)")
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
         }
 
         guard
             let device = MTLCreateSystemDefaultDevice()
         else {
-            throw TextureRepositoryError.failedToUnwrap
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
         }
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [UUID: MTLTexture] = [:]
 
         guard let textureSize = configuration.textureSize else {
-            throw TextureRepositoryError.invalidTextureSize
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
         }
 
         try configuration.layers.forEach { layer in
@@ -103,7 +114,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             )
 
             guard let hexadecimalData = textureData.encodedHexadecimals else {
-                throw TextureRepositoryError.failedToUnwrap
+                throw NSError(
+                    title: String(localized: "Error", bundle: .module),
+                    message: String(localized: "Unable to load required data", bundle: .module)
+                )
             }
 
             guard let newTexture = MTLTextureCreator.makeTexture(
@@ -111,7 +125,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 colorArray: hexadecimalData,
                 with: device
             ) else {
-                throw TextureRepositoryError.failedToLoadTexture
+                throw NSError(
+                    title: String(localized: "Error", bundle: .module),
+                    message: String(localized: "Unable to load required data", bundle: .module)
+                )
             }
 
             newTextures[layer.id] = newTexture
@@ -131,7 +148,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         guard
             let device = MTLCreateSystemDefaultDevice()
         else {
-            throw TextureRepositoryError.failedToUnwrap
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
         }
 
         textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
@@ -143,7 +163,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
     }
 
     /// Removes a texture with UUID
-    func removeTexture(_ uuid: UUID) throws -> UUID {
+    func removeTexture(_ uuid: UUID) -> UUID {
         textures.removeValue(forKey: uuid)
         return uuid
     }
@@ -158,7 +178,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 with: device
             )
         else {
-            throw TextureRepositoryError.failedToLoadTexture
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
         }
 
         return .init(uuid: uuid, texture: newTexture)
@@ -182,11 +205,17 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard let texture else {
-            throw TextureRepositoryError.failedToUnwrap
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
         }
 
         guard textures[uuid] == nil else {
-            throw TextureRepositoryError.fileAlreadyExists
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "File already exists", bundle: .module)
+            )
         }
 
         textures[uuid] = texture
@@ -203,11 +232,17 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
                 with: device
             )
         else {
-            throw TextureRepositoryError.failedToUnwrap
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
         }
 
         guard self.textures[uuid] != nil else {
-            throw TextureRepositoryError.fileNotFound(uuid.uuidString)
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: "\(String(localized: "File not found", bundle: .module)):\(uuid.uuidString)"
+            )
         }
 
         textures[uuid] = newTexture
