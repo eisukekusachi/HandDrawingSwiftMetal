@@ -15,7 +15,7 @@ struct TextureLayerView: View {
 
     private let buttonThrottle = ButtonThrottle()
 
-    private let range = 0 ... 255
+    private let range: ClosedRange<Float> = 0 ... 255
 
     private let buttonSize: CGFloat = 20
 
@@ -46,7 +46,7 @@ struct TextureLayerView: View {
                             )
 
                             TwoRowsSliderView(
-                                sliderValue: viewModel.alphaSliderValue,
+                                value: $viewModel.alphaSliderValue,
                                 title: "Alpha",
                                 range: range
                             )

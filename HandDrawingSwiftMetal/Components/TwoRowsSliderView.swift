@@ -7,23 +7,31 @@
 
 import SwiftUI
 
-struct TwoRowsSliderView: View {
+public struct TwoRowsSliderView: View {
 
-    @ObservedObject var sliderValue: SliderValue
+    @Binding var value : Float
 
     let title: String
-    let range: ClosedRange<Int>
+    let range: ClosedRange<Float>
 
-    var buttonSize: CGFloat = 20
+    var buttonSize: CGFloat
 
-    var body: some View {
+    public init(
+        value: Binding<Float>,
+        title: String,
+        range: ClosedRange<Float>,
+        buttonSize: CGFloat = 20
+    ) {
+        self._value = value
+        self.title = title
+        self.range = range
+        self.buttonSize = buttonSize
+    }
+
+    public var body: some View {
         VStack(spacing: 4) {
             buttons
-            IntSlider(
-                value: $sliderValue.value,
-                isHandleDragging: $sliderValue.isHandleDragging,
-                in: range
-            )
+            Slider(value: $value, in: range)
         }
     }
 
@@ -40,7 +48,7 @@ struct TwoRowsSliderView: View {
     private var minusButton: some View {
         Button(
             action: {
-                sliderValue.value = (max(sliderValue.value - 1, range.lowerBound))
+                value = (max(value - 1, range.lowerBound))
             },
             label: {
                 Image(systemName: "minus")
@@ -61,7 +69,7 @@ struct TwoRowsSliderView: View {
             Spacer()
                 .frame(width: 8)
 
-            Text("\(sliderValue.value)")
+            Text("\(value)")
                 .font(.footnote)
                 .foregroundColor(Color(uiColor: .gray))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -72,7 +80,7 @@ struct TwoRowsSliderView: View {
     private var plusButton: some View {
         Button(
             action: {
-                sliderValue.value = (min(sliderValue.value + 1, range.upperBound))
+                value = (min(value + 1, range.upperBound))
             },
             label: {
                 Image(systemName: "plus")
@@ -88,21 +96,15 @@ struct TwoRowsSliderView: View {
 }
 
 private struct PreviewView: View {
-    var sliderValues: [SliderValue] = [
-        .init(value: 25),
-        .init(value: 125),
-        .init(value: 225)
-    ]
-    var body: some View {
-        ForEach(sliderValues.indices, id: \.self) { index in
-            TwoRowsSliderView(
-                sliderValue: sliderValues[index],
-                title: "Alpha",
-                range: 0 ... 255
-            )
-            .padding()
-        }
 
+    @State var value: Float = 0
+
+    var body: some View {
+        TwoRowsSliderView(
+            value: $value,
+            title: "Alpha",
+            range: 0 ... 255
+        )
+        .padding()
     }
 }
-

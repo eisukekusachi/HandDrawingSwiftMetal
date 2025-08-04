@@ -14,7 +14,11 @@ final class TextureLayerViewModel: ObservableObject {
 
     @Published var arrowX: CGFloat = 0
 
-    let alphaSliderValue = SliderValue()
+    @Published var alphaSliderValue: Float = 0
+
+    private var oldValue: Float?
+
+    @Published var isHandleDragging: Bool = false
 
     var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
@@ -26,7 +30,7 @@ final class TextureLayerViewModel: ObservableObject {
         didSet {
             // Update the slider value when selectedLayerId changes
             if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
-                alphaSliderValue.value = layer.alpha
+                alphaSliderValue = Float(layer.alpha)
             }
         }
     }
@@ -49,19 +53,19 @@ final class TextureLayerViewModel: ObservableObject {
 
     private func subscribe() {
         // Bind the drag gesture of the alpha slider
-        alphaSliderValue.$isHandleDragging
+        $isHandleDragging
             .sink { [weak self] startDragging in
                 self?.addUndoAlphaObject(dragging: startDragging)
             }
             .store(in: &cancellables)
 
         // Bind the value of the alpha slider
-        alphaSliderValue.$value
+        $alphaSliderValue
             .sink { [weak self] value in
                 guard let selectedLayerId = self?.selectedLayerId else { return }
                 self?.updateLayer(
                     id: selectedLayerId,
-                    alpha: value
+                    alpha: Int(value)
                 )
             }
             .store(in: &cancellables)
@@ -116,7 +120,7 @@ extension TextureLayerViewModel {
                 uuid: textureLayerId
             )
 
-            try textureRepository
+            textureRepository
                 .removeTexture(selectedLayer.id)
 
             removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
@@ -364,16 +368,16 @@ extension TextureLayerViewModel {
     private func addUndoAlphaObject(dragging: Bool) {
         guard let canvasState else { return }
 
-        if dragging {
-            self.alphaSliderValue.temporaryStoredValue = canvasState.selectedLayer?.alpha
+        if dragging, let alpha = canvasState.selectedLayer?.alpha {
+            self.oldValue = Float(alpha)
         } else {
-            if let oldAlpha = self.alphaSliderValue.temporaryStoredValue,
+            if let oldAlpha = self.oldValue,
                let newAlpha = canvasState.selectedLayer?.alpha,
                let selectedLayer = canvasState.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(
                     layer: .init(model: selectedLayer),
-                    withNewAlpha: oldAlpha
+                    withNewAlpha: Int(oldAlpha)
                 )
 
                 undoStack?.pushUndoObject(
@@ -387,7 +391,7 @@ extension TextureLayerViewModel {
                 )
             }
 
-            self.alphaSliderValue.temporaryStoredValue = nil
+            self.oldValue = nil
         }
     }
 }

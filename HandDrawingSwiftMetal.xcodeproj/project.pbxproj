@@ -13,8 +13,6 @@
 		D40CDF0D2B4137080059527E /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40CDF0C2B4137080059527E /* ImageExtensions.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
 		D42F409B2B44030000B32707 /* TwoRowsSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */; };
-		D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409C2B44033300B32707 /* SliderStyle.swift */; };
-		D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42F409E2B44035A00B32707 /* IntSlider.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
@@ -24,7 +22,6 @@
 		D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
-		D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F8132E17FACA00B8DE41 /* SliderValue.swift */; };
 		D488B59D2DD0803400089B3D /* ButtonThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D488B59C2DD0803400089B3D /* ButtonThrottle.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
@@ -66,8 +63,6 @@
 		D40CDF0C2B4137080059527E /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoRowsSliderView.swift; sourceTree = "<group>"; };
-		D42F409C2B44033300B32707 /* SliderStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderStyle.swift; sourceTree = "<group>"; };
-		D42F409E2B44035A00B32707 /* IntSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntSlider.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
@@ -76,7 +71,6 @@
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrowConfiguration.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
-		D481F8132E17FACA00B8DE41 /* SliderValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderValue.swift; sourceTree = "<group>"; };
 		D488B59C2DD0803400089B3D /* ButtonThrottle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonThrottle.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
@@ -129,11 +123,9 @@
 			isa = PBXGroup;
 			children = (
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
-				D42F409E2B44035A00B32707 /* IntSlider.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */,
-				D42F409C2B44033300B32707 /* SliderStyle.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 				D42F409A2B44030000B32707 /* TwoRowsSliderView.swift */,
@@ -149,21 +141,12 @@
 			path = FileView;
 			sourceTree = "<group>";
 		};
-		D463A5F02C6E346500D102AD /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				D481F8132E17FACA00B8DE41 /* SliderValue.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		D46A30492BF858AD0057DB69 /* TextureLayerView */ = {
 			isa = PBXGroup;
 			children = (
 				D40CDF0C2B4137080059527E /* ImageExtensions.swift */,
 				D488B59C2DD0803400089B3D /* ButtonThrottle.swift */,
 				D4E0EC292E3B680800AFE6C5 /* Mocks */,
-				D463A5F02C6E346500D102AD /* Models */,
 				D40CDF022B411F660059527E /* TextureLayerListView.swift */,
 				D40CDEFE2B411F450059527E /* TextureLayerView.swift */,
 				D4F1BB3D2B2D436F006EA102 /* TextureLayerViewModel.swift */,
@@ -426,7 +409,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D481F8142E17FACA00B8DE41 /* SliderValue.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */,
 				D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */,
@@ -443,12 +425,10 @@
 				D40CDEFF2B411F450059527E /* TextureLayerView.swift in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
-				D42F409D2B44033300B32707 /* SliderStyle.swift in Sources */,
 				D44B52DC2DB6752E00EE213C /* MockTextureRepository.swift in Sources */,
 				D40CDF032B411F660059527E /* TextureLayerListView.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
-				D42F409F2B44035A00B32707 /* IntSlider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
