@@ -15,8 +15,8 @@
 		D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */; };
+		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
-		D46FED0E2E4232DA009CCC51 /* LayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46FED0D2E4232DA009CCC51 /* LayerView */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
@@ -59,8 +59,8 @@
 		D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingViewController.xib; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrowConfiguration.swift; sourceTree = "<group>"; };
+		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
-		D46FED0C2E4232BD009CCC51 /* LayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LayerView; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
@@ -85,8 +85,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D46FED0E2E4232DA009CCC51 /* LayerView in Frameworks */,
 				D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */,
+				D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */,
 				D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -158,7 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				D4F0BF042E38F78900C3E441 /* CanvasView */,
-				D46FED0C2E4232BD009CCC51 /* LayerView */,
+				D46A2CE32E424E7000D638AE /* TextureLayerView */,
 				D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */,
 				D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */,
 				D4E1ECFC2752388E00D4A23D /* HandDrawingSwiftMetalUITests */,
@@ -233,7 +233,7 @@
 			packageProductDependencies = (
 				D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */,
 				D4F0BF052E38F79600C3E441 /* CanvasView */,
-				D46FED0D2E4232DA009CCC51 /* LayerView */,
+				D46A2CE42E424E8900D638AE /* TextureLayerView */,
 			);
 			productName = HandDrawingSwiftMetal;
 			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
@@ -764,9 +764,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D46FED0D2E4232DA009CCC51 /* LayerView */ = {
+		D46A2CE42E424E8900D638AE /* TextureLayerView */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = LayerView;
+			productName = TextureLayerView;
 		};
 		D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
