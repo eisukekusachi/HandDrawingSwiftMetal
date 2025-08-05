@@ -16,5 +16,4 @@ extension Image {
             .frame(width: diameter, height: diameter)
             .foregroundColor(Color(uiColor: uiColor))
     }
-
 }

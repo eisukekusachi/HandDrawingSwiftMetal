@@ -8,7 +8,7 @@
 import CanvasView
 import SwiftUI
 
-struct TextureLayerView: View {
+public struct TextureLayerView: View {
 
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
@@ -21,13 +21,13 @@ struct TextureLayerView: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
-    init(
+    public init(
         viewModel: TextureLayerViewModel
     ) {
         self.viewModel = viewModel
     }
 
-    var body: some View {
+    public var body: some View {
         if let canvasState = viewModel.canvasState {
             ZStack {
                 PopupWithArrowView(
@@ -62,7 +62,7 @@ struct TextureLayerView: View {
     }
 }
 
-extension TextureLayerView {
+public extension TextureLayerView {
 
     private func toolbar(
         _ viewModel: TextureLayerViewModel

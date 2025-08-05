@@ -10,15 +10,15 @@ import Combine
 import MetalKit
 
 @MainActor
-final class TextureLayerViewModel: ObservableObject {
+public final class TextureLayerViewModel: ObservableObject {
 
-    @Published var arrowX: CGFloat = 0
+    @Published public var arrowX: CGFloat = 0
 
-    @Published var alphaSliderValue: Float = 0
+    @Published public var alphaSliderValue: Float = 0
 
     private var oldValue: Float?
 
-    @Published var isHandleDragging: Bool = false
+    @Published public var isHandleDragging: Bool = false
 
     var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
@@ -41,7 +41,9 @@ final class TextureLayerViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    func initialize(
+    public init() {}
+
+    public func initialize(
         configuration: TextureLayerConfiguration
     ) {
         self.canvasState = configuration.canvasState
@@ -76,7 +78,7 @@ final class TextureLayerViewModel: ObservableObject {
     }
 }
 
-extension TextureLayerViewModel {
+public extension TextureLayerViewModel {
 
     func onTapInsertButton() {
         guard
@@ -152,7 +154,7 @@ extension TextureLayerViewModel {
 }
 
 // MARK: CRUD
-extension TextureLayerViewModel {
+public extension TextureLayerViewModel {
 
     private func insertLayer(layer: TextureLayerItem, at index: Int, undoTexture: MTLTexture?) {
         let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
@@ -285,9 +287,9 @@ extension TextureLayerViewModel {
 
 }
 
-extension TextureLayerViewModel {
+private extension TextureLayerViewModel {
 
-    private func addUndoAdditionObject(
+    func addUndoAdditionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
         layer: TextureLayerItem,
@@ -315,7 +317,7 @@ extension TextureLayerViewModel {
         )
     }
 
-    private func addUndoDeletionObject(
+    func addUndoDeletionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
         layer: TextureLayerItem,
@@ -344,7 +346,7 @@ extension TextureLayerViewModel {
         )
     }
 
-    private func addUndoMoveObject(
+    func addUndoMoveObject(
         indices: MoveLayerIndices,
         selectedLayerId: UUID,
         textureLayer: TextureLayerItem
@@ -365,7 +367,7 @@ extension TextureLayerViewModel {
         )
     }
 
-    private func addUndoAlphaObject(dragging: Bool) {
+    func addUndoAlphaObject(dragging: Bool) {
         guard let canvasState else { return }
 
         if dragging, let alpha = canvasState.selectedLayer?.alpha {

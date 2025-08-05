@@ -6,6 +6,7 @@
 //
 
 import CanvasView
+import LayerView
 import UIKit
 import SwiftUI
 
