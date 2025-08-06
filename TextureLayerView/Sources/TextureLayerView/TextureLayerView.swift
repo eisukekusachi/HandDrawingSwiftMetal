@@ -29,32 +29,21 @@ public struct TextureLayerView: View {
 
     public var body: some View {
         if let canvasState = viewModel.canvasState {
-            ZStack {
-                PopupWithArrowView(
-                    arrowPointX: $viewModel.arrowX,
-                    arrowSize: CGSize(width: 18, height: 14),
-                    roundedCorner: 12,
-                    lineWidth: 0.5,
-                    backgroundColor: .white.withAlphaComponent(0.9),
-                    content: {
-                        VStack {
-                            toolbar(viewModel)
+            VStack {
+                toolbar(viewModel)
 
-                            TextureLayerListView(
-                                viewModel: viewModel,
-                                canvasState: canvasState
-                            )
-
-                            TwoRowsSliderView(
-                                value: $viewModel.alphaSliderValue,
-                                title: "Alpha",
-                                range: range
-                            )
-                            .padding(.top, 4)
-                            .padding([.leading, .trailing, .bottom], 8)
-                        }
-                    }
+                TextureLayerListView(
+                    viewModel: viewModel,
+                    canvasState: canvasState
                 )
+
+                TwoRowsSliderView(
+                    value: $viewModel.alphaSliderValue,
+                    title: "Alpha",
+                    range: range
+                )
+                .padding(.top, 4)
+                .padding([.leading, .trailing, .bottom], 8)
             }
         } else {
             EmptyView()

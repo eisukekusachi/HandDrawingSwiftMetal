@@ -15,8 +15,23 @@ struct PopupWithArrowView<Content: View>: View {
     let roundedCorner: CGFloat
     let lineWidth: CGFloat
     let backgroundColor: UIColor
-
     let content: () -> Content
+
+    init(
+        arrowPointX: Binding<CGFloat>,
+        arrowSize: CGSize = CGSize(width: 20, height: 10),
+        roundedCorner: CGFloat = 8,
+        lineWidth: CGFloat = 0.5,
+        backgroundColor: UIColor = UIColor.white.withAlphaComponent(0.95),
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self._arrowPointX = arrowPointX
+        self.arrowSize = arrowSize
+        self.roundedCorner = roundedCorner
+        self.lineWidth = lineWidth
+        self.backgroundColor = backgroundColor
+        self.content = content
+    }
 
     var body: some View {
         ZStack {
@@ -97,11 +112,7 @@ private struct PreviewView: View {
 
     var body: some View {
         PopupWithArrowView(
-            arrowPointX: $arrowX,
-            arrowSize: CGSize(width: 20, height: 10),
-            roundedCorner: 8,
-            lineWidth: 0.5,
-            backgroundColor: UIColor.white.withAlphaComponent(0.95)
+            arrowPointX: $arrowX
         ) {
             VStack(spacing: 8) {
                 Text("Popup View")

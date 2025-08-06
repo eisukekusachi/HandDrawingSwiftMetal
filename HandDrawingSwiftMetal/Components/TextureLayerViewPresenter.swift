@@ -15,8 +15,9 @@ final class TextureLayerViewPresenter {
 
     private let viewModel = TextureLayerViewModel()
 
-    private var layerViewController: UIHostingController<TextureLayerView>!
-    private var layerView: TextureLayerView!
+    private var layerViewController: UIHostingController<PopupWithArrowView<TextureLayerView>>!
+
+    private var popupWithArrowView: PopupWithArrowView<TextureLayerView>!
 
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
@@ -29,18 +30,26 @@ final class TextureLayerViewPresenter {
     ) {
         viewModel.initialize(configuration: configuration)
 
-        layerView = TextureLayerView(
+        let layerView = TextureLayerView(
             viewModel: viewModel
         )
 
-        layerViewController = UIHostingController(rootView: layerView)
+        popupWithArrowView = PopupWithArrowView(
+            arrowPointX: Binding(
+                get: { self.viewModel.arrowX },
+                set: { self.viewModel.arrowX = $0 }
+            )
+        ) {
+            layerView
+        }
+
+        layerViewController = UIHostingController(rootView: popupWithArrowView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
 
         popupConfiguration.initialize(
             sourceView: layerViewController.view
         )
-
         viewModel.arrowX = popupConfiguration.arrowX
     }
 }
