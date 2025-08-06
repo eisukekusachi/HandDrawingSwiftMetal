@@ -128,6 +128,7 @@ public final class CanvasViewModel {
             canvasStateStorage?.setupStorage(canvasState)
         }
 
+        /*
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
             let textureRepository = self.dependencies.textureRepository
@@ -137,6 +138,7 @@ public final class CanvasViewModel {
                 undoTextureRepository: undoTextureRepository
             )
         }
+        */
 
         self.displayView = displayView
 
