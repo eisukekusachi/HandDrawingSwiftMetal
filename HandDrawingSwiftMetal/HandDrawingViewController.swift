@@ -105,9 +105,13 @@ extension HandDrawingViewController {
     private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
+
+            let scale = UIScreen.main.scale
+            let size = UIScreen.main.bounds.size
+
             self.contentView.canvasView.newCanvas(
                 configuration: CanvasConfiguration(
-                    textureSize: self.contentView.canvasView.currentTextureSize
+                    textureSize: .init(width: size.width * scale, height: size.height * scale)
                 )
             )
         }
