@@ -397,9 +397,7 @@ extension CanvasViewModel {
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
-        try await initializeCanvas(
-            configuration: CanvasConfiguration(textureSize: canvasState.textureSize)
-        )
+        try await initializeCanvas(configuration: configuration)
         transformer.setMatrix(.identity)
     }
 
