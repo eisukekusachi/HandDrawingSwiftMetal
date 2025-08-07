@@ -9,12 +9,12 @@ import SwiftUI
 
 public struct TwoRowsSliderView: View {
 
-    @Binding var value : Int
+    @Binding private var value : Int
 
-    let title: String
-    let range: ClosedRange<Int>
+    private let title: String
+    private let range: ClosedRange<Int>
 
-    var buttonSize: CGFloat
+    private var buttonSize: CGFloat
 
     public init(
         value: Binding<Int>,
@@ -30,18 +30,14 @@ public struct TwoRowsSliderView: View {
 
     public var body: some View {
         VStack(spacing: 4) {
-            buttons
+            HStack {
+                minusButton
+                Spacer()
+                valueLabel
+                Spacer()
+                plusButton
+            }
             IntSliderView($value, range: range)
-        }
-    }
-
-    private var buttons: some View {
-        HStack {
-            minusButton
-            Spacer()
-            valueLabel
-            Spacer()
-            plusButton
         }
     }
 
@@ -91,10 +87,6 @@ public struct TwoRowsSliderView: View {
     }
 }
 
-#Preview {
-    PreviewView()
-}
-
 private struct PreviewView: View {
 
     @State var value: Int = 0
@@ -107,4 +99,8 @@ private struct PreviewView: View {
         )
         .padding()
     }
+}
+
+#Preview {
+    PreviewView()
 }
