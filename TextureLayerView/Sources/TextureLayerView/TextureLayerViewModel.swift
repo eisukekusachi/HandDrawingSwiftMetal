@@ -154,9 +154,9 @@ public extension TextureLayerViewModel {
 }
 
 // MARK: CRUD
-public extension TextureLayerViewModel {
+private extension TextureLayerViewModel {
 
-    private func insertLayer(layer: TextureLayerItem, at index: Int, undoTexture: MTLTexture?) {
+    func insertLayer(layer: TextureLayerItem, at index: Int, undoTexture: MTLTexture?) {
         let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
 
         // Perform a layer operation
@@ -182,7 +182,7 @@ public extension TextureLayerViewModel {
         }
     }
 
-    private func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
+    func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
         guard let canvasState else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
@@ -232,7 +232,7 @@ public extension TextureLayerViewModel {
         )
     }
 
-    private func updateLayer(
+    func updateLayer(
         id: UUID,
         title: String? = nil,
         isVisible: Bool? = nil,
@@ -280,11 +280,10 @@ public extension TextureLayerViewModel {
         }
     }
 
-    private func selectLayer(layerId: UUID) {
+    func selectLayer(layerId: UUID) {
         canvasState?.selectedLayerId = layerId
         canvasState?.fullCanvasUpdateSubject.send(())
     }
-
 }
 
 private extension TextureLayerViewModel {
