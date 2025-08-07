@@ -9,17 +9,17 @@ import SwiftUI
 
 public struct TwoRowsSliderView: View {
 
-    @Binding var value : Float
+    @Binding var value : Int
 
     let title: String
-    let range: ClosedRange<Float>
+    let range: ClosedRange<Int>
 
     var buttonSize: CGFloat
 
     public init(
-        value: Binding<Float>,
+        value: Binding<Int>,
         title: String,
-        range: ClosedRange<Float>,
+        range: ClosedRange<Int>,
         buttonSize: CGFloat = 20
     ) {
         self._value = value
@@ -31,7 +31,7 @@ public struct TwoRowsSliderView: View {
     public var body: some View {
         VStack(spacing: 4) {
             buttons
-            Slider(value: $value, in: range)
+            IntSliderView($value, range: range)
         }
     }
 
@@ -97,13 +97,13 @@ public struct TwoRowsSliderView: View {
 
 private struct PreviewView: View {
 
-    @State var value: Float = 0
+    @State var value: Int = 0
 
     var body: some View {
         TwoRowsSliderView(
             value: $value,
             title: "Alpha",
-            range: 0 ... 255
+            range: 0...255
         )
         .padding()
     }

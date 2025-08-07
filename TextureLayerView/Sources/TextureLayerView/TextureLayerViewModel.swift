@@ -14,7 +14,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var arrowX: CGFloat = 0
 
-    @Published public var alphaSliderValue: Float = 0
+    @Published public var alphaSliderValue: Int = 0
 
     private var oldValue: Float?
 
@@ -30,7 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
         didSet {
             // Update the slider value when selectedLayerId changes
             if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
-                alphaSliderValue = Float(layer.alpha)
+                alphaSliderValue = layer.alpha
             }
         }
     }

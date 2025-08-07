@@ -15,7 +15,7 @@ public struct TextureLayerView: View {
 
     private let buttonThrottle = ButtonThrottle()
 
-    private let range: ClosedRange<Float> = 0 ... 255
+    private let range: ClosedRange<Int> = 0 ... 255
 
     private let buttonSize: CGFloat = 20
 
