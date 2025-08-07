@@ -60,7 +60,9 @@ public extension TextureLayerView {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
-                        viewModel.onTapInsertButton()
+                        Task { @MainActor in
+                            viewModel.onTapInsertButton()
+                        }
                     }
                 },
                 label: {
@@ -74,7 +76,9 @@ public extension TextureLayerView {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
-                        viewModel.onTapDeleteButton()
+                        Task { @MainActor in
+                            viewModel.onTapDeleteButton()
+                        }
                     }
                 },
                 label: {
