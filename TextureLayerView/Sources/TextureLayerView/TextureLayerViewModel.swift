@@ -286,6 +286,7 @@ private extension TextureLayerViewModel {
     }
 }
 
+// MARK: Undo
 private extension TextureLayerViewModel {
 
     func addUndoAdditionObject(
