@@ -14,9 +14,9 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var arrowX: CGFloat = 0
 
-    @Published public var alphaSliderValue: Int = 0
+    @Published public var currentAlpha: Int = 0
 
-    private var oldValue: Float?
+    private var oldAlpha: Int?
 
     @Published public var isHandleDragging: Bool = false
 
@@ -30,7 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
         didSet {
             // Update the slider value when selectedLayerId changes
             if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
-                alphaSliderValue = layer.alpha
+                currentAlpha = layer.alpha
             }
         }
     }
@@ -62,7 +62,7 @@ public final class TextureLayerViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Bind the value of the alpha slider
-        $alphaSliderValue
+        $currentAlpha
             .sink { [weak self] value in
                 guard let selectedLayerId = self?.selectedLayerId else { return }
                 self?.updateLayer(
@@ -371,9 +371,9 @@ private extension TextureLayerViewModel {
         guard let canvasState else { return }
 
         if dragging, let alpha = canvasState.selectedLayer?.alpha {
-            self.oldValue = Float(alpha)
+            self.oldAlpha = alpha
         } else {
-            if let oldAlpha = self.oldValue,
+            if let oldAlpha = self.oldAlpha,
                let newAlpha = canvasState.selectedLayer?.alpha,
                let selectedLayer = canvasState.selectedLayer {
 
@@ -393,7 +393,7 @@ private extension TextureLayerViewModel {
                 )
             }
 
-            self.oldValue = nil
+            self.oldAlpha = nil
         }
     }
 }

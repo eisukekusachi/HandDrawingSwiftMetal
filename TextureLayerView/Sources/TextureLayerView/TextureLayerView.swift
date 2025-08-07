@@ -38,7 +38,7 @@ public struct TextureLayerView: View {
                 )
 
                 TwoRowsSliderView(
-                    value: $viewModel.alphaSliderValue,
+                    value: $viewModel.currentAlpha,
                     title: "Alpha",
                     range: range
                 )
