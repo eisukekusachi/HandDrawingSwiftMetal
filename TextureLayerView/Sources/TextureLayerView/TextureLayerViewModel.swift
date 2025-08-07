@@ -16,9 +16,9 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
-    private var oldAlpha: Int?
+    @Published private var isHandleDragging: Bool = false
 
-    @Published public var isHandleDragging: Bool = false
+    private var oldAlpha: Int?
 
     var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
