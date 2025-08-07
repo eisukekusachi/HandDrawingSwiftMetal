@@ -113,6 +113,17 @@ public extension TextureLayerView {
     }
 }
 
+private extension Image {
+
+    func buttonModifier(diameter: CGFloat, _ uiColor: UIColor = .systemBlue) -> some View {
+        self
+            .resizable()
+            .scaledToFit()
+            .frame(width: diameter, height: diameter)
+            .foregroundColor(Color(uiColor: uiColor))
+    }
+}
+
 #Preview {
     PreviewView()
 }
