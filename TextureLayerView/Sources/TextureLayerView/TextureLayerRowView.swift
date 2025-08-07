@@ -109,36 +109,7 @@ public struct TextureLayerRowView: View {
 }
 
 #Preview {
-    PreviewView()
-}
-
-private struct PreviewView: View {
-    let canvasState = CanvasState()
-
-    let viewModel = TextureLayerViewModel()
-
-    init() {
-        canvasState.initialize(
-            configuration: CanvasConfiguration(
-                layers: [
-                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
-                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50)
-                ]
-            )
-        )
-
-        viewModel.initialize(
-            configuration: .init(
-                canvasState: canvasState,
-                textureRepository: MockTextureRepository(),
-                undoStack: nil
-            )
-        )
-    }
-    var body: some View {
+    VStack(spacing: 24) {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
@@ -156,10 +127,23 @@ private struct PreviewView: View {
             }
         )
         .frame(width: 256, height: 44)
-        .background(.black)
-    }
-}
 
-#Preview {
-    PreviewView()
+        TextureLayerRowView(
+            layer: .init(
+                id: UUID(),
+                thumbnail: .init(systemName: "hand.thumbsup.fill"),
+                title: "Title",
+                alpha: 255,
+                isVisible: true
+            ),
+            isSelected: false,
+            didTapRow: { _ in
+                print("Did tap the row")
+            },
+            didTapVisibleButton: { _ in
+                print("Did tap the visible button")
+            }
+        )
+        .frame(width: 256, height: 44)
+    }
 }

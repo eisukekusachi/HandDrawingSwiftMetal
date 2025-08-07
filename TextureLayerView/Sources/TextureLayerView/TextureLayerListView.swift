@@ -45,10 +45,6 @@ struct TextureLayerListView: View {
     }
 }
 
-#Preview {
-    PreviewView()
-}
-
 private struct PreviewView: View {
     let canvasState = CanvasState()
 
@@ -82,4 +78,8 @@ private struct PreviewView: View {
         )
         .frame(width: 256, height: 300)
     }
+}
+
+#Preview {
+    PreviewView()
 }

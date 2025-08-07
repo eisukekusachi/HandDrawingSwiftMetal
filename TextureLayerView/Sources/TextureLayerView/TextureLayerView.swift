@@ -124,13 +124,10 @@ private extension Image {
     }
 }
 
-#Preview {
-    PreviewView()
-}
-
 private struct PreviewView: View {
     let canvasState = CanvasState()
     let configuration: TextureLayerConfiguration
+    let viewModel = TextureLayerViewModel()
 
     init() {
         canvasState.initialize(
@@ -152,11 +149,17 @@ private struct PreviewView: View {
             textureRepository: MockTextureRepository(),
             undoStack: nil
         )
+
+        viewModel.initialize(configuration: configuration)
     }
     var body: some View {
         TextureLayerView(
-            viewModel: TextureLayerViewModel()
+            viewModel: viewModel
         )
         .frame(width: 320, height: 300)
     }
+}
+
+#Preview {
+    PreviewView()
 }
