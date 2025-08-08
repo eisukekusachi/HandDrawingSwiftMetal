@@ -11,6 +11,8 @@ public struct TwoRowsSliderView: View {
 
     @Binding private var value : Int
 
+    @Binding private var isDragging : Bool
+
     private let title: String
     private let range: ClosedRange<Int>
 
@@ -18,11 +20,13 @@ public struct TwoRowsSliderView: View {
 
     public init(
         value: Binding<Int>,
+        isDragging: Binding<Bool>,
         title: String,
         range: ClosedRange<Int>,
         buttonSize: CGFloat = 20
     ) {
         self._value = value
+        self._isDragging = isDragging
         self.title = title
         self.range = range
         self.buttonSize = buttonSize
@@ -37,7 +41,12 @@ public struct TwoRowsSliderView: View {
                 Spacer()
                 plusButton
             }
-            IntSliderView($value, range: range)
+            IntSliderView(
+                $value,
+                range: range
+            ) { isEditing in
+                self.isDragging = isEditing
+            }
         }
     }
 
@@ -90,10 +99,12 @@ public struct TwoRowsSliderView: View {
 private struct PreviewView: View {
 
     @State var value: Int = 0
+    @State var isDragging: Bool = false
 
     var body: some View {
         TwoRowsSliderView(
             value: $value,
+            isDragging: $isDragging,
             title: "Alpha",
             range: 0...255
         )

@@ -16,7 +16,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
-    @Published private var isHandleDragging: Bool = false
+    @Published var isDragging: Bool = false
 
     private var oldAlpha: Int?
 
@@ -55,7 +55,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private func subscribe() {
         // Bind the drag gesture of the alpha slider
-        $isHandleDragging
+        $isDragging
             .sink { [weak self] startDragging in
                 self?.addUndoAlphaObject(dragging: startDragging)
             }

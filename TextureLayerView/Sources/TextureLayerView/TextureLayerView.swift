@@ -39,6 +39,7 @@ public struct TextureLayerView: View {
 
                 TwoRowsSliderView(
                     value: $viewModel.currentAlpha,
+                    isDragging: $viewModel.isDragging,
                     title: "Alpha",
                     range: range
                 )
