@@ -32,10 +32,10 @@ final class TextureLayerViewPresenter {
 
     @MainActor
     func initialize(
-        configuration: TextureLayerConfiguration,
+        textureLayerConfiguration: TextureLayerConfiguration,
         popupConfiguration: PopupWithArrowConfiguration
     ) {
-        viewModel.initialize(configuration: configuration)
+        viewModel.initialize(configuration: textureLayerConfiguration)
 
         let layerView = TextureLayerView(
             viewModel: viewModel
