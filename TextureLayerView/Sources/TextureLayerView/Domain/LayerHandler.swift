@@ -1,5 +1,5 @@
 //
-//  Layers.swift
+//  LayerHandler.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/08/08.
@@ -8,10 +8,16 @@
 import CanvasView
 import MetalKit
 
-enum Layers {
+@MainActor
+final class LayerHandler {
 
-    static func insertLayer(
-        canvasState: CanvasState?,
+    private var canvasState: CanvasState?
+
+    init(canvasState: CanvasState? = nil) {
+        self.canvasState = canvasState
+    }
+
+    func insertLayer(
         layer: TextureLayerItem,
         texture: MTLTexture?,
         at index: Int
@@ -29,8 +35,7 @@ enum Layers {
         canvasState.fullCanvasUpdateSubject.send(())
     }
 
-    static func removeLayer(
-        canvasState: CanvasState?,
+    func removeLayer(
         selectedLayerIndex: Int,
         selectedLayer: TextureLayerModel
     ) {
@@ -43,8 +48,7 @@ enum Layers {
         canvasState.fullCanvasUpdateSubject.send(())
     }
 
-    static func moveLayer(
-        canvasState: CanvasState?,
+    func moveLayer(
         indices: MoveLayerIndices
     ) {
         guard let canvasState else { return }
@@ -61,8 +65,7 @@ enum Layers {
         canvasState.fullCanvasUpdateSubject.send(())
     }
 
-    static func updateLayer(
-        canvasState: CanvasState?,
+    func updateLayer(
         id: UUID,
         title: String? = nil,
         isVisible: Bool? = nil,
@@ -111,10 +114,10 @@ enum Layers {
         }
     }
 
-    static func selectLayer(canvasState: CanvasState?, layerId: UUID) {
+    func selectLayer(id: UUID) {
         guard let canvasState else { return }
 
-        canvasState.selectedLayerId = layerId
+        canvasState.selectedLayerId = id
         canvasState.fullCanvasUpdateSubject.send(())
     }
 }

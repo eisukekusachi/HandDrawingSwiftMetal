@@ -16,118 +16,113 @@ public struct TextureLayerRowView: View {
     private let didTapRow: (TextureLayerModel) -> Void
     private let didTapVisibleButton: (TextureLayerModel) -> Void
 
+    /// The background color when the item is not selected
+    private let defaultBackgroundColor: UIColor
+    /// The background color when the item is selected
+    private let selectedBackgroundColor: UIColor
+
+    private let iconSize: CGSize
+    private let cornerRadius: CGFloat
+
     public init(
         layer: TextureLayerModel,
         isSelected: Bool,
+        defaultBackgroundColor: UIColor = .white,
+        selectedBackgroundColor: UIColor = .black,
+        iconSize: CGSize = .init(width: 32, height: 32),
+        cornerRadius: CGFloat = 4,
         didTapRow: @escaping (TextureLayerModel) -> Void,
         didTapVisibleButton: @escaping (TextureLayerModel) -> Void
     ) {
         self.layer = layer
         self.isSelected = isSelected
+
+        self.iconSize = iconSize
+        self.cornerRadius = cornerRadius
+
+        self.defaultBackgroundColor = defaultBackgroundColor
+        self.selectedBackgroundColor = selectedBackgroundColor
+
         self.didTapRow = didTapRow
         self.didTapVisibleButton = didTapVisibleButton
     }
 
     public var body: some View {
-        ZStack {
-            Color(
-                backgroundColor(isSelected)
-            )
+        HStack {
+            if let thumbnail = layer.thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .frame(width: iconSize.width, height: iconSize.height)
+                    .scaledToFit()
+                    .background(Color.white)
+                    .padding(4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1.0)
+                    )
+                    .cornerRadius(4)
+            } else {
+                Rectangle()
+                    .foregroundColor(Color.white)
+                    .frame(width: iconSize.width, height: iconSize.height)
+                    .padding(4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(.gray.opacity(0.5), lineWidth: 1.0)
+                    )
+                    .cornerRadius(4)
+            }
 
-            HStack {
-                Spacer()
-                    .frame(width: 8)
+            Text(layer.title)
+                .font(.subheadline)
+                .foregroundColor(
+                    Color(
+                        textColor(isSelected)
+                    )
+                )
 
-                if let thumbnail = layer.thumbnail {
-                    Image(uiImage: thumbnail)
-                        .resizable()
-                        .frame(width: 32, height: 32)
-                        .scaledToFit()
-                        .background(Color.white)
-                        .cornerRadius(4)
-                        .overlay(
-                            Rectangle()
-                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
-                        )
+            Spacer()
+
+            Text("A: \(layer.alpha)")
+                .font(.caption2)
+                .foregroundColor(Color(uiColor: .gray))
+
+            Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
+                .frame(width: 32, height: 32)
+                .foregroundColor(
+                    Color(
+                        iconColor(isVisible: layer.isVisible, isSelected)
+                    )
+                )
+                .onTapGesture {
+                    didTapVisibleButton(layer)
                 }
 
-                Text(layer.title)
-                    .font(.subheadline)
-                    .foregroundColor(
-                        Color(
-                            textColor(isSelected)
-                        )
-                    )
-
-                Spacer()
-
-                Text("A: \(layer.alpha)")
-                    .font(.caption2)
-                    .foregroundColor(Color(uiColor: .gray))
-
-                Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
-                    .frame(width: 32, height: 32)
-                    .foregroundColor(
-                        Color(
-                            iconColor(layer: layer, isSelected)
-                        )
-                    )
-                    .onTapGesture {
-                        didTapVisibleButton(layer)
-                    }
-
-                Spacer()
-                    .frame(width: 8)
-            }
+            Spacer()
+                .frame(width: 8)
         }
+        .background(
+            Color(backgroundColor(isSelected))
+        )
+        .cornerRadius(cornerRadius)
         .onTapGesture {
             didTapRow(layer)
         }
     }
 
     private func backgroundColor(_ selected: Bool) -> UIColor {
-        if selected {
-            return UIColor(named: "component") ?? .clear
-        } else {
-            return UIColor(named: "reversalComponent") ?? .clear
-        }
+        !selected ? defaultBackgroundColor : selectedBackgroundColor
     }
     private func textColor(_ selected: Bool) -> UIColor {
-        if selected {
-            return UIColor(named: "reversalComponent") ?? .clear
-        } else {
-            return UIColor(named: "component") ?? .clear
-        }
+        !selected ? selectedBackgroundColor : defaultBackgroundColor
     }
-    private func iconColor(layer: TextureLayerModel, _ selected: Bool) -> UIColor {
-        if selected {
-            return layer.isVisible ? .white : .lightGray
-        } else {
-            return layer.isVisible ? .black : .darkGray
-        }
+    private func iconColor(isVisible: Bool, _ selected: Bool) -> UIColor {
+        !selected ? selectedBackgroundColor : defaultBackgroundColor
     }
 }
 
 #Preview {
     VStack(spacing: 24) {
-        TextureLayerRowView(
-            layer: .init(
-                id: UUID(),
-                thumbnail: .init(systemName: "hand.thumbsup.fill"),
-                title: "Title",
-                alpha: 255,
-                isVisible: true
-            ),
-            isSelected: true,
-            didTapRow: { _ in
-                print("Did tap the row")
-            },
-            didTapVisibleButton: { _ in
-                print("Did tap the visible button")
-            }
-        )
-        .frame(width: 256, height: 44)
-
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
@@ -145,5 +140,77 @@ public struct TextureLayerRowView: View {
             }
         )
         .frame(width: 256, height: 44)
+
+        TextureLayerRowView(
+            layer: .init(
+                id: UUID(),
+                thumbnail: .init(systemName: "hand.thumbsup.fill"),
+                title: "Title",
+                alpha: 255,
+                isVisible: false
+            ),
+            isSelected: false,
+            didTapRow: { _ in
+                print("Did tap the row")
+            },
+            didTapVisibleButton: { _ in
+                print("Did tap the visible button")
+            }
+        )
+        .frame(width: 256, height: 44)
+
+        TextureLayerRowView(
+            layer: .init(
+                id: UUID(),
+                thumbnail: nil,
+                title: "Title",
+                alpha: 255,
+                isVisible: true
+            ),
+            isSelected: false,
+            didTapRow: { _ in
+                print("Did tap the row")
+            },
+            didTapVisibleButton: { _ in
+                print("Did tap the visible button")
+            }
+        )
+        .frame(width: 256, height: 44)
+
+        TextureLayerRowView(
+            layer: .init(
+                id: UUID(),
+                thumbnail: .init(systemName: "hand.thumbsup.fill"),
+                title: "Title",
+                alpha: 255,
+                isVisible: true
+            ),
+            isSelected: true,
+            didTapRow: { _ in
+                print("Did tap the row")
+            },
+            didTapVisibleButton: { _ in
+                print("Did tap the visible button")
+            }
+        )
+        .frame(width: 256, height: 64)
+
+        TextureLayerRowView(
+            layer: .init(
+                id: UUID(),
+                thumbnail: .init(systemName: "hand.thumbsup.fill"),
+                title: "Title",
+                alpha: 255,
+                isVisible: false
+            ),
+            isSelected: true,
+            didTapRow: { _ in
+                print("Did tap the row")
+            },
+            didTapVisibleButton: { _ in
+                print("Did tap the visible button")
+            }
+        )
+        .frame(width: 256, height: 64)
     }
 }

@@ -53,7 +53,9 @@ public final class CanvasViewModel {
         .init(
             canvasState: canvasState,
             textureRepository: self.dependencies.textureRepository,
-            undoStack: undoStack
+            undoStack: undoStack,
+            defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
+            selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
         )
     }
 

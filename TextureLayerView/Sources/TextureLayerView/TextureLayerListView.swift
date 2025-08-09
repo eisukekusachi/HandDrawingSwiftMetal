@@ -20,7 +20,9 @@ struct TextureLayerListView: View {
             ) { layer in
                 TextureLayerRowView(
                     layer: layer,
-                    isSelected: viewModel.selectedLayer?.id == layer.id,
+                    isSelected: viewModel.isSelected(layer.id),
+                    defaultBackgroundColor: viewModel.defaultBackgroundColor,
+                    selectedBackgroundColor: viewModel.selectedBackgroundColor,
                     didTapRow: { targetLayer in
                         viewModel.onTapCell(id: targetLayer.id)
                     },
@@ -44,19 +46,39 @@ struct TextureLayerListView: View {
 }
 
 private struct PreviewView: View {
-    let canvasState = CanvasState()
-
     let viewModel = TextureLayerViewModel()
 
     init() {
+        let canvasState = CanvasState()
+
         canvasState.initialize(
             configuration: CanvasConfiguration(
                 layers: [
-                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
-                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50)
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer0",
+                        alpha: 255
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer1",
+                        alpha: 200
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer2",
+                        alpha: 150
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer3",
+                        alpha: 100
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer4",
+                        alpha: 50
+                    )
                 ]
             )
         )

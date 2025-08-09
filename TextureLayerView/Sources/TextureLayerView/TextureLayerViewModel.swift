@@ -17,13 +17,16 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
-    @Published var isDragging: Bool = false
+    @Published public var isDragging: Bool = false
 
-    var selectedLayer: TextureLayerModel? {
+    public var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
     }
 
     private(set) var canvasState: CanvasState?
+
+    private(set) var defaultBackgroundColor: UIColor = .white
+    private(set) var selectedBackgroundColor: UIColor = .black
 
     @Published private var selectedLayerId: UUID? {
         didSet {
@@ -36,7 +39,9 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var textureRepository: TextureRepository!
 
-    private var undo: Undo?
+    private var layerHandler: LayerHandler?
+
+    private var undoHandler: UndoHandler?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -45,10 +50,15 @@ public final class TextureLayerViewModel: ObservableObject {
     public func initialize(
         configuration: TextureLayerConfiguration
     ) {
-        self.canvasState = configuration.canvasState
-        self.textureRepository = configuration.textureRepository
+        canvasState = configuration.canvasState
+        textureRepository = configuration.textureRepository
 
-        self.undo = .init(undoStack: configuration.undoStack)
+        defaultBackgroundColor = configuration.defaultBackgroundColor
+        selectedBackgroundColor = configuration.selectedBackgroundColor
+
+        layerHandler = .init(canvasState: canvasState)
+
+        undoHandler = .init(canvasState: canvasState, undoStack: configuration.undoStack)
 
         subscribe()
     }
@@ -58,8 +68,7 @@ public final class TextureLayerViewModel: ObservableObject {
         $isDragging
             .sink { [weak self] startDragging in
                 guard let `self` else { return }
-                self.undo?.addUndoAlphaObject(
-                    canvasState: self.canvasState,
+                self.undoHandler?.addUndoAlphaObject(
                     dragging: startDragging
                 )
             }
@@ -69,11 +78,9 @@ public final class TextureLayerViewModel: ObservableObject {
         $currentAlpha
             .sink { [weak self] value in
                 guard
-                    let canvasState = self?.canvasState,
                     let selectedLayerId = self?.selectedLayerId
                 else { return }
-                Layers.updateLayer(
-                    canvasState: canvasState,
+                self?.layerHandler?.updateLayer(
                     id: selectedLayerId,
                     alpha: Int(value)
                 )
@@ -91,6 +98,10 @@ public final class TextureLayerViewModel: ObservableObject {
 }
 
 public extension TextureLayerViewModel {
+
+    func isSelected(_ uuid: UUID) -> Bool {
+        canvasState?.selectedLayer?.id == uuid
+    }
 
     func onTapInsertButton() {
         guard
@@ -120,8 +131,7 @@ public extension TextureLayerViewModel {
                     newTextureUUID: layer.id
                 )
 
-            Layers.insertLayer(
-                canvasState: canvasState,
+            layerHandler?.insertLayer(
                 layer: layer,
                 texture: texture,
                 at: index
@@ -130,8 +140,7 @@ public extension TextureLayerViewModel {
             // Push an UndoObject onto the stack
             Task {
                 let currentLayerIndex = canvasState.selectedIndex ?? 0
-                await undo?.addUndoAdditionObject(
-                    canvasState: canvasState,
+                await undoHandler?.addUndoAdditionObject(
                     previousLayerIndex: previousLayerIndex,
                     currentLayerIndex: currentLayerIndex,
                     layer: layer,
@@ -159,15 +168,13 @@ public extension TextureLayerViewModel {
 
             let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
 
-            Layers.removeLayer(
-                canvasState: canvasState,
+            layerHandler?.removeLayer(
                 selectedLayerIndex: selectedIndex,
                 selectedLayer: selectedLayer
             )
 
             Task {
-                await undo?.addUndoDeletionObject(
-                    canvasState: canvasState,
+                await undoHandler?.addUndoDeletionObject(
                     previousLayerIndex: selectedIndex,
                     currentLayerIndex: newLayerIndex,
                     layer: .init(model: selectedLayer),
@@ -178,15 +185,15 @@ public extension TextureLayerViewModel {
     }
 
     func onTapTitleButton(id: UUID, title: String) {
-        Layers.updateLayer(canvasState: canvasState, id: id, title: title)
+        layerHandler?.updateLayer(id: id, title: title)
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        Layers.updateLayer(canvasState: canvasState, id: id, isVisible: isVisible)
+        layerHandler?.updateLayer(id: id, isVisible: isVisible)
     }
 
     func onTapCell(id: UUID) {
-        Layers.selectLayer(canvasState: canvasState, layerId: id)
+        layerHandler?.selectLayer(id: id)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
@@ -198,14 +205,14 @@ public extension TextureLayerViewModel {
             layerCount: canvasState.layers.count
         )
 
-        Layers.moveLayer(canvasState: canvasState, indices: indices)
+        layerHandler?.moveLayer(indices: indices)
 
         guard
             let selectedLayerId = canvasState.selectedLayer?.id,
             let textureLayer = canvasState.layers.first(where: { $0.id == selectedLayerId })
         else { return }
 
-        undo?.addUndoMoveObject(
+        undoHandler?.addUndoMoveObject(
             indices: reversedIndices,
             selectedLayerId: selectedLayerId,
             textureLayer: .init(model: textureLayer)

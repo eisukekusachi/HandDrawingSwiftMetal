@@ -39,7 +39,6 @@ public struct TextureLayerView: View {
 }
 
 private struct PreviewView: View {
-
     let viewModel = TextureLayerViewModel()
 
     init() {
@@ -48,13 +47,33 @@ private struct PreviewView: View {
         canvasState.initialize(
             configuration: .init(
                 textureSize: .init(width: 44, height: 44),
-                layerIndex: 1,
+                layerIndex: 3,
                 layers: [
-                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
-                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer0",
+                        alpha: 255
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer1",
+                        alpha: 200
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer2",
+                        alpha: 150
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer3",
+                        alpha: 100
+                    ),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer4",
+                        alpha: 50
+                    ),
                 ]
             )
         )

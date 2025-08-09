@@ -82,7 +82,6 @@ struct TextureLayerToolbar: View {
 }
 
 private extension Image {
-
     func buttonModifier(diameter: CGFloat, _ uiColor: UIColor = .systemBlue) -> some View {
         self
             .resizable()
@@ -103,7 +102,11 @@ private struct PreviewView: View {
                 textureSize: .init(width: 44, height: 44),
                 layerIndex: 1,
                 layers: [
-                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer0",
+                        alpha: 255
+                    ),
                     .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
                     .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
                     .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),

@@ -1,5 +1,5 @@
 //
-//  Undo.swift
+//  UndoHandler.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/08/09.
@@ -10,18 +10,22 @@ import MetalKit
 import SwiftUI
 
 @MainActor
-final class Undo {
+final class UndoHandler {
 
+    private var canvasState: CanvasState?
     private var undoStack: UndoStack?
 
     private var oldAlpha: Int?
 
-    init(undoStack: UndoStack?) {
+    init(
+        canvasState: CanvasState?,
+        undoStack: UndoStack?
+    ) {
+        self.canvasState = canvasState
         self.undoStack = undoStack
     }
 
     func addUndoAdditionObject(
-        canvasState: CanvasState?,
         previousLayerIndex: Int,
         currentLayerIndex: Int,
         layer: TextureLayerItem,
@@ -50,7 +54,6 @@ final class Undo {
     }
 
     func addUndoDeletionObject(
-        canvasState: CanvasState?,
         previousLayerIndex: Int,
         currentLayerIndex: Int,
         layer: TextureLayerItem,
@@ -101,7 +104,6 @@ final class Undo {
     }
 
     func addUndoAlphaObject(
-        canvasState: CanvasState?,
         dragging: Bool
     ) {
         guard let canvasState else { return }
@@ -128,7 +130,6 @@ final class Undo {
                     )
                 )
             }
-
             self.oldAlpha = nil
         }
     }
