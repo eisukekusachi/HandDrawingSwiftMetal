@@ -61,25 +61,25 @@ public struct TextureLayerRowView: View {
                 if let thumbnail = layer.thumbnail {
                     Image(uiImage: thumbnail)
                         .resizable()
-                        .frame(width: iconSize.width, height: iconSize.height)
                         .scaledToFit()
+                        .frame(width: iconSize.width, height: iconSize.height)
                         .background(Color.white)
-                        .padding(padding)
+                        .cornerRadius(cornerRadius)
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius)
                                 .stroke(.gray.opacity(0.5), lineWidth: 1.0)
                         )
-                        .cornerRadius(padding)
+                        .padding(padding)
                 } else {
                     Rectangle()
                         .foregroundColor(Color.white)
                         .frame(width: iconSize.width, height: iconSize.height)
-                        .padding(padding)
+                        .cornerRadius(cornerRadius)
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius)
                                 .stroke(.gray.opacity(0.5), lineWidth: 1.0)
                         )
-                        .cornerRadius(cornerRadius)
+                        .padding(padding)
                 }
 
                 Text(layer.title)
@@ -111,6 +111,7 @@ public struct TextureLayerRowView: View {
                     .frame(width: padding)
             }
         }
+        .frame(height: iconSize.height + padding * 2)
         .background(.clear)
         .onTapGesture {
             didTapRow(layer)
