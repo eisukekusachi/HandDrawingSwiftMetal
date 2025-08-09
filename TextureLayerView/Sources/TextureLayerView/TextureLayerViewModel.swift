@@ -118,68 +118,71 @@ public extension TextureLayerViewModel {
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
         let previousLayerIndex = canvasState.selectedIndex ?? 0
 
-        Task {
-            let texture = MTLTextureCreator.makeBlankTexture(
-                size: canvasState.currentTextureSize,
-                with: device
-            )
+        let texture = MTLTextureCreator.makeBlankTexture(
+            size: canvasState.currentTextureSize,
+            with: device
+        )
 
+        let thumbnail = texture?.makeThumbnail()
+
+        layerHandler?.insertLayer(
+            layer: layer,
+            thumbnail: thumbnail,
+            at: index
+        )
+        // Add Task to prevent flickering
+        Task {
+            layerHandler?.selectLayer(id: layer.id)
+        }
+
+        Task {
             let result = try await textureRepository
                 .addTexture(
                     texture,
                     newTextureUUID: layer.id
                 )
 
-            layerHandler?.insertLayer(
+            let currentLayerIndex = canvasState.selectedIndex ?? 0
+            await undoHandler?.addUndoAdditionObject(
+                previousLayerIndex: previousLayerIndex,
+                currentLayerIndex: currentLayerIndex,
                 layer: layer,
-                texture: texture,
-                at: index
+                texture: result.texture
             )
-
-            // Push an UndoObject onto the stack
-            Task {
-                let currentLayerIndex = canvasState.selectedIndex ?? 0
-                await undoHandler?.addUndoAdditionObject(
-                    previousLayerIndex: previousLayerIndex,
-                    currentLayerIndex: currentLayerIndex,
-                    layer: layer,
-                    texture: result.texture
-                )
-            }
         }
     }
 
     func onTapDeleteButton() {
         guard
             let canvasState,
-            canvasState.layers.count > 1,
             let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex
+            let selectedIndex = canvasState.selectedIndex,
+            canvasState.layers.count > 1
         else { return }
+
+        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
+
+        layerHandler?.removeLayer(
+            selectedLayerIndex: selectedIndex
+        )
+        Task {
+            layerHandler?.selectLayer(id: canvasState.layers[newLayerIndex].id)
+        }
 
         Task {
             let result = try await textureRepository.copyTexture(
-                uuid: canvasState.layers[selectedIndex].id
+                uuid: selectedLayer.id
+            )
+
+            await undoHandler?.addUndoDeletionObject(
+                previousLayerIndex: selectedIndex,
+                currentLayerIndex: newLayerIndex,
+                layer: .init(model: selectedLayer),
+                texture: result.texture
             )
 
             textureRepository
                 .removeTexture(selectedLayer.id)
-
-            let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
-
-            layerHandler?.removeLayer(
-                selectedLayerIndex: selectedIndex,
-                selectedLayer: selectedLayer
-            )
-
-            Task {
-                await undoHandler?.addUndoDeletionObject(
-                    previousLayerIndex: selectedIndex,
-                    currentLayerIndex: newLayerIndex,
-                    layer: .init(model: selectedLayer),
-                    texture: result.texture
-                )
-            }
         }
     }
 
@@ -198,13 +201,14 @@ public extension TextureLayerViewModel {
     func onMoveLayer(source: IndexSet, destination: Int) {
         guard let canvasState else { return }
 
-        let indices: MoveLayerIndices = .init(sourceIndexSet: source, destinationIndex: destination)
-        let reversedIndices = MoveLayerIndices.reversedIndices(
-            indices: indices,
-            layerCount: canvasState.layers.count
+        let indices: MoveLayerIndices = .init(
+            sourceIndexSet: source,
+            destinationIndex: destination
         )
 
         layerHandler?.moveLayer(indices: indices)
+
+        canvasState.fullCanvasUpdateSubject.send(())
 
         guard
             let selectedLayerId = canvasState.selectedLayer?.id,
@@ -212,7 +216,10 @@ public extension TextureLayerViewModel {
         else { return }
 
         undoHandler?.addUndoMoveObject(
-            indices: reversedIndices,
+            indices: MoveLayerIndices.reversedIndices(
+                indices: indices,
+                layerCount: canvasState.layers.count
+            ),
             selectedLayerId: selectedLayerId,
             textureLayer: .init(model: textureLayer)
         )

@@ -8,6 +8,7 @@
 import CanvasView
 import MetalKit
 
+/// /// A class responsible for managing layer operations and updating the CanvasState accordingly.
 @MainActor
 final class LayerHandler {
 
@@ -19,7 +20,7 @@ final class LayerHandler {
 
     func insertLayer(
         layer: TextureLayerItem,
-        texture: MTLTexture?,
+        thumbnail: UIImage?,
         at index: Int
     ) {
         guard let canvasState else { return }
@@ -27,25 +28,18 @@ final class LayerHandler {
         canvasState.layers.insert(
             .init(
                 item: layer,
-                thumbnail: texture?.makeThumbnail()
+                thumbnail: thumbnail
             ),
             at: index
         )
-        canvasState.selectedLayerId = layer.id
-        canvasState.fullCanvasUpdateSubject.send(())
     }
 
     func removeLayer(
-        selectedLayerIndex: Int,
-        selectedLayer: TextureLayerModel
+        selectedLayerIndex: Int
     ) {
         guard let canvasState else { return }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
-
         canvasState.layers.remove(at: selectedLayerIndex)
-        canvasState.selectedLayerId = canvasState.layers[newLayerIndex].id
-        canvasState.fullCanvasUpdateSubject.send(())
     }
 
     func moveLayer(
@@ -62,7 +56,6 @@ final class LayerHandler {
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
-        canvasState.fullCanvasUpdateSubject.send(())
     }
 
     func updateLayer(
