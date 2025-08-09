@@ -301,7 +301,8 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard inputDevice.update(.finger) != .pencil else { return }
+        inputDevice.update(.finger)
+        guard inputDevice.isNotPencil else { return }
 
         fingerStroke.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {

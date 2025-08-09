@@ -29,6 +29,9 @@ public extension InputDeviceState {
     var isPencil: Bool {
         state == .pencil
     }
+    var isNotPencil: Bool {
+        state != .pencil
+    }
 
     /// Update the state if it is not `.pencil`
     /// `.pencil` takes precedence over `.finger`

@@ -17,6 +17,24 @@ struct InputDeviceStateTests {
         #expect(subject.state == .undetermined)
     }
 
+    @Test("state is .pencil.")
+    func stateIsPencil() {
+        let subject = InputDeviceState(.pencil)
+        #expect(subject.isPencil == true)
+    }
+
+    @Test(
+        "state is not .pencil.",
+        arguments: [
+            InputDeviceType.undetermined,
+            InputDeviceType.finger
+        ]
+    )
+    func stateIsNotPencil(type: InputDeviceType) {
+        let subject = InputDeviceState(type)
+        #expect(subject.isNotPencil == true)
+    }
+
     @Test("Update to .finger sets state to .finger.")
     func updateToFinger() {
         let subject = InputDeviceState()
