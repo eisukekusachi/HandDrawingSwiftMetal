@@ -28,26 +28,21 @@ public struct TextureLayerView: View {
     }
 
     public var body: some View {
-        if let canvasState = viewModel.canvasState {
-            VStack {
-                toolbar(viewModel)
+        VStack {
+            toolbar(viewModel)
 
-                TextureLayerListView(
-                    viewModel: viewModel,
-                    canvasState: canvasState
-                )
+            TextureLayerListView(
+                viewModel: viewModel
+            )
 
-                TwoRowsSliderView(
-                    value: $viewModel.currentAlpha,
-                    isDragging: $viewModel.isDragging,
-                    title: "Alpha",
-                    range: range
-                )
-                .padding(.top, 4)
-                .padding([.leading, .trailing, .bottom], 8)
-            }
-        } else {
-            EmptyView()
+            TwoRowsSliderView(
+                value: $viewModel.currentAlpha,
+                isDragging: $viewModel.isDragging,
+                title: "Alpha",
+                range: range
+            )
+            .padding(.top, 4)
+            .padding([.leading, .trailing, .bottom], 8)
         }
     }
 }

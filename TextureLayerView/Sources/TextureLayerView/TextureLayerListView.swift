@@ -12,12 +12,10 @@ struct TextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
-    @ObservedObject var canvasState: CanvasState
-
     var body: some View {
         List {
             ForEach(
-                Array(canvasState.layers.reversed()),
+                Array(viewModel.layers.reversed()),
                 id: \.id
             ) { layer in
                 TextureLayerRowView(
@@ -73,8 +71,7 @@ private struct PreviewView: View {
     }
     var body: some View {
         TextureLayerListView(
-            viewModel: viewModel,
-            canvasState: viewModel.canvasState!
+            viewModel: viewModel
         )
         .frame(width: 256, height: 300)
     }

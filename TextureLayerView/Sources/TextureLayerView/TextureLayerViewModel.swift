@@ -11,6 +11,7 @@ import MetalKit
 
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
+    @Published private(set) var layers: [TextureLayerModel] = []
 
     @Published public var arrowX: CGFloat = 0
 
@@ -82,6 +83,10 @@ public final class TextureLayerViewModel: ObservableObject {
         // Bind `canvasState.selectedLayerId` to `selectedLayerId`
         canvasState?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
+
+        canvasState?.$layers
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$layers)
     }
 }
 
