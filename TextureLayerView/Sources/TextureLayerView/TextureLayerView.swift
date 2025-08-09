@@ -10,14 +10,7 @@ import SwiftUI
 
 public struct TextureLayerView: View {
 
-    @State private var isTextFieldPresented: Bool = false
-    @State private var textFieldTitle: String = ""
-
-    private let buttonThrottle = ButtonThrottle()
-
     private let range: ClosedRange<Int> = 0 ... 255
-
-    private let buttonSize: CGFloat = 20
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
@@ -29,11 +22,9 @@ public struct TextureLayerView: View {
 
     public var body: some View {
         VStack {
-            toolbar(viewModel)
+            TextureLayerToolbar(viewModel: viewModel)
 
-            TextureLayerListView(
-                viewModel: viewModel
-            )
+            TextureLayerListView(viewModel: viewModel)
 
             TwoRowsSliderView(
                 value: $viewModel.currentAlpha,
@@ -47,85 +38,13 @@ public struct TextureLayerView: View {
     }
 }
 
-public extension TextureLayerView {
-
-    private func toolbar(
-        _ viewModel: TextureLayerViewModel
-    ) -> some View {
-        HStack {
-            Button(
-                action: {
-                    buttonThrottle.throttle(id: "insertLayer") {
-                        Task { @MainActor in
-                            viewModel.onTapInsertButton()
-                        }
-                    }
-                },
-                label: {
-                    Image(systemName: "plus.circle")
-                        .buttonModifier(diameter: buttonSize)
-                }
-            )
-
-            Spacer().frame(width: 16)
-
-            Button(
-                action: {
-                    buttonThrottle.throttle(id: "removeLayer") {
-                        Task { @MainActor in
-                            viewModel.onTapDeleteButton()
-                        }
-                    }
-                },
-                label: {
-                    Image(systemName: "minus.circle")
-                        .buttonModifier(diameter: buttonSize)
-                }
-            )
-
-            Spacer().frame(width: 16)
-
-            Button(
-                action: {
-                    textFieldTitle = viewModel.selectedLayer?.title ?? ""
-                    isTextFieldPresented = true
-                },
-                label: {
-                    Image(systemName: "pencil")
-                        .buttonModifier(diameter: buttonSize)
-                }
-            )
-            .alert("Enter a title", isPresented: $isTextFieldPresented) {
-                TextField("Enter a title", text: $textFieldTitle)
-                Button("OK", action: {
-                    guard let selectedLayer = viewModel.selectedLayer else { return }
-                    viewModel.onTapTitleButton(id: selectedLayer.id, title: textFieldTitle)
-                })
-                Button("Cancel", action: {})
-            }
-            Spacer()
-        }
-        .padding(8)
-    }
-}
-
-private extension Image {
-
-    func buttonModifier(diameter: CGFloat, _ uiColor: UIColor = .systemBlue) -> some View {
-        self
-            .resizable()
-            .scaledToFit()
-            .frame(width: diameter, height: diameter)
-            .foregroundColor(Color(uiColor: uiColor))
-    }
-}
-
 private struct PreviewView: View {
-    let canvasState = CanvasState()
-    let configuration: TextureLayerConfiguration
+
     let viewModel = TextureLayerViewModel()
 
     init() {
+        let canvasState = CanvasState()
+
         canvasState.initialize(
             configuration: .init(
                 textureSize: .init(width: 44, height: 44),
@@ -140,13 +59,13 @@ private struct PreviewView: View {
             )
         )
 
-        configuration = .init(
-            canvasState: canvasState,
-            textureRepository: MockTextureRepository(),
-            undoStack: nil
+        viewModel.initialize(
+            configuration: .init(
+                canvasState: canvasState,
+                textureRepository: MockTextureRepository(),
+                undoStack: nil
+            )
         )
-
-        viewModel.initialize(configuration: configuration)
     }
     var body: some View {
         TextureLayerView(
