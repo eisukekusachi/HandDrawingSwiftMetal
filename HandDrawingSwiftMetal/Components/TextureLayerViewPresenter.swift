@@ -13,11 +13,18 @@ import SwiftUI
 @MainActor
 final class TextureLayerViewPresenter {
 
+    private class TextureLayerViewPresenterController: ObservableObject {
+
+        @Published public var arrowX: CGFloat = 0
+    }
+
     private let viewModel = TextureLayerViewModel()
 
     private var layerViewController: UIHostingController<PopupWithArrowView<TextureLayerView>>!
 
     private var popupWithArrowView: PopupWithArrowView<TextureLayerView>!
+
+    private let controller = TextureLayerViewPresenterController()
 
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
@@ -36,8 +43,8 @@ final class TextureLayerViewPresenter {
 
         popupWithArrowView = PopupWithArrowView(
             arrowPointX: Binding(
-                get: { self.viewModel.arrowX },
-                set: { self.viewModel.arrowX = $0 }
+                get: { self.controller.arrowX },
+                set: { self.controller.arrowX = $0 }
             )
         ) {
             layerView
@@ -50,6 +57,6 @@ final class TextureLayerViewPresenter {
         popupConfiguration.initialize(
             sourceView: layerViewController.view
         )
-        viewModel.arrowX = popupConfiguration.arrowX
+        controller.arrowX = popupConfiguration.arrowX
     }
 }

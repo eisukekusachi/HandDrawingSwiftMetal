@@ -13,8 +13,6 @@ import MetalKit
 public final class TextureLayerViewModel: ObservableObject {
     @Published private(set) var layers: [TextureLayerModel] = []
 
-    @Published public var arrowX: CGFloat = 0
-
     @Published public var currentAlpha: Int = 0
 
     @Published public var isDragging: Bool = false
