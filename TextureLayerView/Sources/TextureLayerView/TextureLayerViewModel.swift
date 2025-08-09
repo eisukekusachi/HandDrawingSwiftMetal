@@ -18,8 +18,6 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published var isDragging: Bool = false
 
-    private var oldAlpha: Int?
-
     var selectedLayer: TextureLayerModel? {
         canvasState?.selectedLayer
     }
@@ -37,7 +35,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var textureRepository: TextureRepository!
 
-    private var undoStack: UndoStack?
+    private var undo: Undo?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -48,7 +46,8 @@ public final class TextureLayerViewModel: ObservableObject {
     ) {
         self.canvasState = configuration.canvasState
         self.textureRepository = configuration.textureRepository
-        self.undoStack = configuration.undoStack
+
+        self.undo = .init(undoStack: configuration.undoStack)
 
         subscribe()
     }
@@ -57,7 +56,11 @@ public final class TextureLayerViewModel: ObservableObject {
         // Bind the drag gesture of the alpha slider
         $isDragging
             .sink { [weak self] startDragging in
-                self?.addUndoAlphaObject(dragging: startDragging)
+                guard let `self` else { return }
+                self.undo?.addUndoAlphaObject(
+                    canvasState: self.canvasState,
+                    dragging: startDragging
+                )
             }
             .store(in: &cancellables)
 
@@ -122,7 +125,8 @@ public extension TextureLayerViewModel {
             // Push an UndoObject onto the stack
             Task {
                 let currentLayerIndex = canvasState.selectedIndex ?? 0
-                await addUndoAdditionObject(
+                await undo?.addUndoAdditionObject(
+                    canvasState: canvasState,
                     previousLayerIndex: previousLayerIndex,
                     currentLayerIndex: currentLayerIndex,
                     layer: layer,
@@ -157,7 +161,8 @@ public extension TextureLayerViewModel {
             )
 
             Task {
-                await addUndoDeletionObject(
+                await undo?.addUndoDeletionObject(
+                    canvasState: canvasState,
                     previousLayerIndex: selectedIndex,
                     currentLayerIndex: newLayerIndex,
                     layer: .init(model: selectedLayer),
@@ -190,127 +195,15 @@ public extension TextureLayerViewModel {
 
         Layers.moveLayer(canvasState: canvasState, indices: indices)
 
-        // MARK: Push an UndoObject onto the stack
         guard
             let selectedLayerId = canvasState.selectedLayer?.id,
             let textureLayer = canvasState.layers.first(where: { $0.id == selectedLayerId })
         else { return }
-        addUndoMoveObject(
+
+        undo?.addUndoMoveObject(
             indices: reversedIndices,
             selectedLayerId: selectedLayerId,
             textureLayer: .init(model: textureLayer)
         )
-    }
-}
-
-// MARK: Undo
-private extension TextureLayerViewModel {
-
-    func addUndoAdditionObject(
-        previousLayerIndex: Int,
-        currentLayerIndex: Int,
-        layer: TextureLayerItem,
-        texture: MTLTexture?
-    ) async {
-        guard let canvasState else { return }
-
-        let redoObject = UndoAdditionObject(
-            layerToBeAdded: layer,
-            insertIndex: currentLayerIndex
-        )
-
-        // Create a deletion undo object to cancel the addition
-        let undoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: canvasState.layers[previousLayerIndex].id
-        )
-
-        await undoStack?.pushUndoAdditionObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject,
-                texture: texture
-            )
-        )
-    }
-
-    func addUndoDeletionObject(
-        previousLayerIndex: Int,
-        currentLayerIndex: Int,
-        layer: TextureLayerItem,
-        texture: MTLTexture?
-    ) async {
-        guard let canvasState else { return }
-
-        // Add an undo object to the undo stack
-        let redoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: canvasState.layers[currentLayerIndex].id
-        )
-
-        // Create a addition undo object to cancel the deletion
-        let undoObject = UndoAdditionObject(
-            layerToBeAdded: redoObject.textureLayer,
-            insertIndex: previousLayerIndex
-        )
-
-        await undoStack?.pushUndoDeletionObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject,
-                texture: texture
-            )
-        )
-    }
-
-    func addUndoMoveObject(
-        indices: MoveLayerIndices,
-        selectedLayerId: UUID,
-        textureLayer: TextureLayerItem
-    ) {
-        let redoObject = UndoMoveObject(
-            indices: indices,
-            selectedLayerId: selectedLayerId,
-            layer: textureLayer
-        )
-
-        let undoObject = redoObject.reversedObject
-
-        undoStack?.pushUndoObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-
-    func addUndoAlphaObject(dragging: Bool) {
-        guard let canvasState else { return }
-
-        if dragging, let alpha = canvasState.selectedLayer?.alpha {
-            self.oldAlpha = alpha
-        } else {
-            if let oldAlpha = self.oldAlpha,
-               let newAlpha = canvasState.selectedLayer?.alpha,
-               let selectedLayer = canvasState.selectedLayer {
-
-                let undoObject = UndoAlphaChangedObject(
-                    layer: .init(model: selectedLayer),
-                    withNewAlpha: Int(oldAlpha)
-                )
-
-                undoStack?.pushUndoObject(
-                    .init(
-                        undoObject: undoObject,
-                        redoObject: UndoAlphaChangedObject(
-                            layer: undoObject.textureLayer,
-                            withNewAlpha: newAlpha
-                        )
-                    )
-                )
-            }
-
-            self.oldAlpha = nil
-        }
     }
 }
