@@ -67,8 +67,7 @@ public final class TextureLayerViewModel: ObservableObject {
         // Bind the drag gesture of the alpha slider
         $isDragging
             .sink { [weak self] startDragging in
-                guard let `self` else { return }
-                self.undoHandler?.addUndoAlphaObject(
+                self?.undoHandler?.addUndoAlphaObject(
                     dragging: startDragging
                 )
             }
