@@ -24,12 +24,15 @@ public struct TextureLayerRowView: View {
     private let iconSize: CGSize
     private let cornerRadius: CGFloat
 
+    private let padding: CGFloat
+
     public init(
         layer: TextureLayerModel,
         isSelected: Bool,
         defaultBackgroundColor: UIColor = .white,
         selectedBackgroundColor: UIColor = .black,
         iconSize: CGSize = .init(width: 32, height: 32),
+        padding: CGFloat = 4,
         cornerRadius: CGFloat = 4,
         didTapRow: @escaping (TextureLayerModel) -> Void,
         didTapVisibleButton: @escaping (TextureLayerModel) -> Void
@@ -38,6 +41,7 @@ public struct TextureLayerRowView: View {
         self.isSelected = isSelected
 
         self.iconSize = iconSize
+        self.padding = padding
         self.cornerRadius = cornerRadius
 
         self.defaultBackgroundColor = defaultBackgroundColor
@@ -48,63 +52,66 @@ public struct TextureLayerRowView: View {
     }
 
     public var body: some View {
-        HStack {
-            if let thumbnail = layer.thumbnail {
-                Image(uiImage: thumbnail)
-                    .resizable()
-                    .frame(width: iconSize.width, height: iconSize.height)
-                    .scaledToFit()
-                    .background(Color.white)
-                    .padding(4)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(.gray.opacity(0.5), lineWidth: 1.0)
-                    )
-                    .cornerRadius(4)
-            } else {
-                Rectangle()
-                    .foregroundColor(Color.white)
-                    .frame(width: iconSize.width, height: iconSize.height)
-                    .padding(4)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(.gray.opacity(0.5), lineWidth: 1.0)
-                    )
-                    .cornerRadius(4)
-            }
+        ZStack {
+            Color(
+                backgroundColor(isSelected)
+            )
 
-            Text(layer.title)
-                .font(.subheadline)
-                .foregroundColor(
-                    Color(
-                        textColor(isSelected)
-                    )
-                )
-
-            Spacer()
-
-            Text("A: \(layer.alpha)")
-                .font(.caption2)
-                .foregroundColor(Color(uiColor: .gray))
-
-            Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
-                .frame(width: 32, height: 32)
-                .foregroundColor(
-                    Color(
-                        iconColor(isVisible: layer.isVisible, isSelected)
-                    )
-                )
-                .onTapGesture {
-                    didTapVisibleButton(layer)
+            HStack {
+                if let thumbnail = layer.thumbnail {
+                    Image(uiImage: thumbnail)
+                        .resizable()
+                        .frame(width: iconSize.width, height: iconSize.height)
+                        .scaledToFit()
+                        .background(Color.white)
+                        .padding(padding)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius)
+                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
+                        )
+                        .cornerRadius(padding)
+                } else {
+                    Rectangle()
+                        .foregroundColor(Color.white)
+                        .frame(width: iconSize.width, height: iconSize.height)
+                        .padding(padding)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius)
+                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
+                        )
+                        .cornerRadius(cornerRadius)
                 }
 
-            Spacer()
-                .frame(width: 8)
+                Text(layer.title)
+                    .font(.subheadline)
+                    .foregroundColor(
+                        Color(
+                            textColor(isSelected)
+                        )
+                    )
+
+                Spacer()
+
+                Text("A: \(layer.alpha)")
+                    .font(.caption2)
+                    .foregroundColor(Color(uiColor: .gray))
+
+                Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
+                    .frame(width: iconSize.width, height: iconSize.height)
+                    .foregroundColor(
+                        Color(
+                            iconColor(isVisible: layer.isVisible, isSelected)
+                        )
+                    )
+                    .onTapGesture {
+                        didTapVisibleButton(layer)
+                    }
+
+                Spacer()
+                    .frame(width: padding)
+            }
         }
-        .background(
-            Color(backgroundColor(isSelected))
-        )
-        .cornerRadius(cornerRadius)
+        .background(.clear)
         .onTapGesture {
             didTapRow(layer)
         }
