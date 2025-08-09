@@ -79,7 +79,7 @@ struct PopupWithArrowView<Content: View>: View {
         let maxX0maxY1 = CGPoint(x: maxX0, y: maxY1)
         let maxX1maxY0 = CGPoint(x: maxX1, y: maxY0)
         let minX1maxY0 = CGPoint(x: minX1, y: maxY0)
-        let minX0maxY1 = CGPoint(x: minX0, y: maxY0)
+        let minX0maxY1 = CGPoint(x: minX0, y: maxY1)
 
         var path = Path()
         path.move(to: minX0minY1)
