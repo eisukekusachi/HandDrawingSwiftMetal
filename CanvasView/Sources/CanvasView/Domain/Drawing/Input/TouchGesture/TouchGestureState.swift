@@ -35,20 +35,18 @@ public extension TouchGestureState {
         transformingGestureRecognitionSecond = second
     }
 
+    func touchGestureType(from touchHistories: TouchHistoriesOnScreen) -> TouchGestureType {
+        isDrawingGesture(touchHistories) ??
+        isTransformingGesture(touchHistories) ??
+        .undetermined
+    }
+
+    /// Update the status if the status is not yet determined
     func update(
         _ touchHistories: TouchHistoriesOnScreen
     ) -> TouchGestureType {
-        update(
-            touchGestureType(from: touchHistories)
-        )
-    }
-
-    /// Update the status if the status is not yet determined.
-    func update(
-        _ type: TouchGestureType
-    ) -> TouchGestureType {
         if status == .undetermined {
-            status = type
+            status = touchGestureType(from: touchHistories)
         }
         return status
     }
@@ -60,13 +58,7 @@ public extension TouchGestureState {
 
 public extension TouchGestureState {
 
-    func touchGestureType(from touchHistories: TouchHistoriesOnScreen) -> TouchGestureType {
-        isDrawingGesture(touchHistories) ??
-        isTransformingGesture(touchHistories) ??
-        .undetermined
-    }
-
-    func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
+    private func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
         guard
             touchHistories.count == 1,
             let history = touchHistories.first?.value,
@@ -81,7 +73,7 @@ public extension TouchGestureState {
         return nil
     }
 
-    func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
+    private func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
         guard
             touchHistories.count == 2,
             let firstHistory = touchHistories.first,
