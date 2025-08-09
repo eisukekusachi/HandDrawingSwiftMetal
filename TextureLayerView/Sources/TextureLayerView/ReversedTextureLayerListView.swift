@@ -1,5 +1,5 @@
 //
-//  TextureLayerListView.swift
+//  ReversedTextureLayerListView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/31.
@@ -8,13 +8,15 @@
 import CanvasView
 import SwiftUI
 
-struct TextureLayerListView: View {
+struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
     var body: some View {
         List {
             ForEach(
+                // In drawing apps, textures stack from bottom to top,
+                // so the layer order is reversed compared to the default.
                 Array(viewModel.layers.reversed()),
                 id: \.id
             ) { layer in
@@ -92,7 +94,7 @@ private struct PreviewView: View {
         )
     }
     var body: some View {
-        TextureLayerListView(
+        ReversedTextureLayerListView(
             viewModel: viewModel
         )
         .frame(width: 256, height: 300)

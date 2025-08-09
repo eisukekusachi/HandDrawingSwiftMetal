@@ -47,6 +47,7 @@ final class LayerHandler {
     ) {
         guard let canvasState else { return }
 
+        // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
             layerCount: canvasState.layers.count

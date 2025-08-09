@@ -24,7 +24,7 @@ public struct TextureLayerView: View {
         VStack {
             TextureLayerToolbar(viewModel: viewModel)
 
-            TextureLayerListView(viewModel: viewModel)
+            ReversedTextureLayerListView(viewModel: viewModel)
 
             TwoRowsSliderView(
                 value: $viewModel.currentAlpha,
