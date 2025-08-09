@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum InputDeviceType {
+public enum InputDeviceType: Sendable {
     /// The status is still undetermined
     case undetermined
 
