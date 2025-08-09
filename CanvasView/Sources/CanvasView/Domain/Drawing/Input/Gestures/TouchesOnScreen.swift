@@ -7,8 +7,8 @@
 
 import Foundation
 
-typealias TouchesOnScreen = [TouchID: TouchPoint]
+public typealias TouchesOnScreen = [TouchID: TouchPoint]
 
-typealias TouchHistoriesOnScreen = [TouchID: [TouchPoint]]
+public typealias TouchHistoriesOnScreen = [TouchID: [TouchPoint]]
 
-typealias TouchID = Int
+public typealias TouchID = Int
