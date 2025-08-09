@@ -1,5 +1,5 @@
 //
-//  TouchGestureStatus.swift
+//  TouchGestureState.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TouchGestureStatus {
+final class TouchGestureState {
 
     private(set) var status: TouchGestureType = .undetermined
 
@@ -19,10 +19,10 @@ final class TouchGestureStatus {
 
     /// Update the status if the status is not yet determined.
     func update(
-        _ newStatus: TouchGestureType
+        _ type: TouchGestureType
     ) -> TouchGestureType {
         if status == .undetermined {
-            status = newStatus
+            status = type
         }
         return status
     }
