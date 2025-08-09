@@ -6,16 +6,25 @@
 //
 
 import CanvasView
+import TextureLayerView
 import UIKit
 import SwiftUI
 
 @MainActor
 final class TextureLayerViewPresenter {
 
+    private class TextureLayerViewPresenterController: ObservableObject {
+
+        @Published public var arrowX: CGFloat = 0
+    }
+
     private let viewModel = TextureLayerViewModel()
 
-    private var layerViewController: UIHostingController<TextureLayerView>!
-    private var layerView: TextureLayerView!
+    private var layerViewController: UIHostingController<PopupWithArrowView<TextureLayerView>>!
+
+    private var popupWithArrowView: PopupWithArrowView<TextureLayerView>!
+
+    private let controller = TextureLayerViewPresenterController()
 
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
@@ -23,23 +32,31 @@ final class TextureLayerViewPresenter {
 
     @MainActor
     func initialize(
-        configuration: TextureLayerConfiguration,
+        textureLayerConfiguration: TextureLayerConfiguration,
         popupConfiguration: PopupWithArrowConfiguration
     ) {
-        viewModel.initialize(configuration: configuration)
+        viewModel.initialize(configuration: textureLayerConfiguration)
 
-        layerView = TextureLayerView(
+        let layerView = TextureLayerView(
             viewModel: viewModel
         )
 
-        layerViewController = UIHostingController(rootView: layerView)
+        popupWithArrowView = PopupWithArrowView(
+            arrowPointX: Binding(
+                get: { self.controller.arrowX },
+                set: { self.controller.arrowX = $0 }
+            )
+        ) {
+            layerView
+        }
+
+        layerViewController = UIHostingController(rootView: popupWithArrowView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
 
         popupConfiguration.initialize(
             sourceView: layerViewController.view
         )
-
-        viewModel.arrowX = popupConfiguration.arrowX
+        controller.arrowX = popupConfiguration.arrowX
     }
 }

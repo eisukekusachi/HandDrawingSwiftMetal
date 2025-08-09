@@ -44,7 +44,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
             throw NSError(domain: "AddTextureError", code: -1, userInfo: nil)
         }
         return .init(
-            uuid: UUID(),
+            uuid: uuid,
             texture: texture
         )
     }

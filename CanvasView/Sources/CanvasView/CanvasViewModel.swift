@@ -53,7 +53,9 @@ public final class CanvasViewModel {
         .init(
             canvasState: canvasState,
             textureRepository: self.dependencies.textureRepository,
-            undoStack: undoStack
+            undoStack: undoStack,
+            defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
+            selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
         )
     }
 
@@ -106,8 +108,6 @@ public final class CanvasViewModel {
     private var undoStack: UndoStack? = nil
 
     private var cancellables = Set<AnyCancellable>()
-
-    private let device = MTLCreateSystemDefaultDevice()!
 
     func initialize(
         dependencies: CanvasViewDependencies,
@@ -579,9 +579,12 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
-        guard let commandBuffer = displayView?.commandBuffer else { return }
+        guard
+            let commandBuffer = displayView?.commandBuffer,
+            let device = MTLCreateSystemDefaultDevice(),
+            let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()
+        else { return }
 
-        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 

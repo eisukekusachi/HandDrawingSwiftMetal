@@ -1,77 +1,36 @@
 //
-//  TextureLayerView.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerToolbar.swift
+//  TextureLayerView
 //
-//  Created by Eisuke Kusachi on 2023/12/31.
+//  Created by Eisuke Kusachi on 2025/08/09.
 //
 
 import CanvasView
 import SwiftUI
 
-struct TextureLayerView: View {
-
-    @State private var isTextFieldPresented: Bool = false
-    @State private var textFieldTitle: String = ""
+public struct TextureLayerToolbar: View {
 
     private let buttonThrottle = ButtonThrottle()
-
-    private let range = 0 ... 255
 
     private let buttonSize: CGFloat = 20
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
-    init(
-        viewModel: TextureLayerViewModel
-    ) {
+    @State private var isTextFieldPresented: Bool = false
+    @State private var textFieldTitle: String = ""
+
+    init(viewModel: TextureLayerViewModel) {
         self.viewModel = viewModel
     }
 
-    var body: some View {
-        if let canvasState = viewModel.canvasState {
-            ZStack {
-                PopupWithArrowView(
-                    arrowPointX: $viewModel.arrowX,
-                    arrowSize: CGSize(width: 18, height: 14),
-                    roundedCorner: 12,
-                    lineWidth: 0.5,
-                    backgroundColor: .white.withAlphaComponent(0.9),
-                    content: {
-                        VStack {
-                            toolbar(viewModel)
-
-                            TextureLayerListView(
-                                viewModel: viewModel,
-                                canvasState: canvasState
-                            )
-
-                            TwoRowsSliderView(
-                                sliderValue: viewModel.alphaSliderValue,
-                                title: "Alpha",
-                                range: range
-                            )
-                            .padding(.top, 4)
-                            .padding([.leading, .trailing, .bottom], 8)
-                        }
-                    }
-                )
-            }
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-extension TextureLayerView {
-
-    private func toolbar(
-        _ viewModel: TextureLayerViewModel
-    ) -> some View {
+    public var body: some View {
         HStack {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
-                        viewModel.onTapInsertButton()
+                        Task { @MainActor in
+                            viewModel.onTapInsertButton()
+                        }
                     }
                 },
                 label: {
@@ -85,7 +44,9 @@ extension TextureLayerView {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
-                        viewModel.onTapDeleteButton()
+                        Task { @MainActor in
+                            viewModel.onTapDeleteButton()
+                        }
                     }
                 },
                 label: {
@@ -120,13 +81,20 @@ extension TextureLayerView {
     }
 }
 
-#Preview {
-    PreviewView()
+private extension Image {
+    func buttonModifier(diameter: CGFloat, _ uiColor: UIColor = .systemBlue) -> some View {
+        self
+            .resizable()
+            .scaledToFit()
+            .frame(width: diameter, height: diameter)
+            .foregroundColor(Color(uiColor: uiColor))
+    }
 }
 
 private struct PreviewView: View {
     let canvasState = CanvasState()
     let configuration: TextureLayerConfiguration
+    let viewModel = TextureLayerViewModel()
 
     init() {
         canvasState.initialize(
@@ -134,7 +102,11 @@ private struct PreviewView: View {
                 textureSize: .init(width: 44, height: 44),
                 layerIndex: 1,
                 layers: [
-                    .init(textureName: UUID().uuidString, title: "Layer0", alpha: 255),
+                    .init(
+                        textureName: UUID().uuidString,
+                        title: "Layer0",
+                        alpha: 255
+                    ),
                     .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
                     .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
                     .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
@@ -148,11 +120,17 @@ private struct PreviewView: View {
             textureRepository: MockTextureRepository(),
             undoStack: nil
         )
+
+        viewModel.initialize(configuration: configuration)
     }
     var body: some View {
-        TextureLayerView(
-            viewModel: TextureLayerViewModel()
+        TextureLayerToolbar(
+            viewModel: viewModel
         )
         .frame(width: 320, height: 300)
     }
+}
+
+#Preview {
+    PreviewView()
 }
