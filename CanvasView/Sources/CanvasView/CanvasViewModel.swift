@@ -122,6 +122,14 @@ public final class CanvasViewModel {
             environmentConfiguration: environmentConfiguration
         )
 
+        // Set the gesture recognition durations in seconds
+        self.touchGesture.setDrawingGestureRecognitionSecond(
+            environmentConfiguration.drawingGestureRecognitionSecond
+        )
+        self.touchGesture.setTransformingGestureRecognitionSecond(
+            environmentConfiguration.transformingGestureRecognitionSecond
+        )
+
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
         if self.dependencies.textureRepository is TextureDocumentsDirectoryRepository {
             canvasStateStorage = CanvasStateStorage()
