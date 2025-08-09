@@ -10,7 +10,7 @@ import MetalKit
 
 /// /// A class responsible for managing layer operations and updating the CanvasState accordingly.
 @MainActor
-final class LayerHandler {
+public final class LayerHandler {
 
     private var canvasState: CanvasState?
 

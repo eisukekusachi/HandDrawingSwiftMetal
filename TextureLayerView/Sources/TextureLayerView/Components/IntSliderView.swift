@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct IntSliderView: View {
+public struct IntSliderView: View {
     @Binding private var value: Int
     private var range: ClosedRange<Float>
     private var onEditingChanged: ((Bool) -> Void)?

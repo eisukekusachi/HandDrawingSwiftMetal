@@ -8,7 +8,7 @@
 import CanvasView
 import SwiftUI
 
-struct TextureLayerToolbar: View {
+public struct TextureLayerToolbar: View {
 
     private let buttonThrottle = ButtonThrottle()
 
@@ -23,7 +23,7 @@ struct TextureLayerToolbar: View {
         self.viewModel = viewModel
     }
 
-    var body: some View {
+    public var body: some View {
         HStack {
             Button(
                 action: {

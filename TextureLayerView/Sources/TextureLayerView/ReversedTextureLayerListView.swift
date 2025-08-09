@@ -8,11 +8,11 @@
 import CanvasView
 import SwiftUI
 
-struct ReversedTextureLayerListView: View {
+public struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
-    var body: some View {
+    public var body: some View {
         List {
             ForEach(
                 // In drawing apps, textures stack from bottom to top,

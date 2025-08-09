@@ -10,7 +10,7 @@ import MetalKit
 import SwiftUI
 
 @MainActor
-final class UndoHandler {
+public final class UndoHandler {
 
     private var canvasState: CanvasState?
     private var undoStack: UndoStack?
