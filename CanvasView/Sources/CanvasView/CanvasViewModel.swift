@@ -180,7 +180,11 @@ public final class CanvasViewModel {
                     onDrawing: { [weak self] resultTexture in
                         self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
                     },
-                    onDrawingCompleted: { resultTexture in
+                    onDrawingCompleted: { [weak self] resultTexture in
+
+                        // Reset parameters on drawing completion
+                        self?.resetAllInputParameters()
+
                         commandBuffer.addCompletedHandler { [weak self] _ in
                             Task { @MainActor in
                                 self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
