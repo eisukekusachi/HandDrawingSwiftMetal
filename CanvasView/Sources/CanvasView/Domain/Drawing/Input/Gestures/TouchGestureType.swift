@@ -30,23 +30,35 @@ enum TouchGestureType: Int {
 }
 
 extension TouchGestureType {
-
-    static let activatingDrawingCount: Int = 6
-    static let activatingTransformingCount: Int = 2
+    static let activatingDrawingDuration: TimeInterval = 0.1
+    static let activatingTransformingDuration: TimeInterval = 0.05
 
     static func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> Self? {
-        if touchHistories.count != 1 { return nil }
+        guard touchHistories.count == 1,
+              let history = touchHistories.first?.value,
+              let first = history.first,
+              let last = history.last else { return nil }
 
-        if let count = touchHistories.first?.count, count > activatingDrawingCount {
+        let duration = last.timestamp - first.timestamp
+        if duration > activatingDrawingDuration {
             return .drawing
         }
         return nil
     }
-    static func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> Self? {
-        if touchHistories.count != 2 { return nil }
 
-        if let countA = touchHistories.first?.count, countA > activatingTransformingCount,
-           let countB = touchHistories.last?.count, countB > activatingTransformingCount {
+    static func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> Self? {
+        guard touchHistories.count == 2 else { return nil }
+        guard let firstHistory = touchHistories.first,
+              let lastHistory = touchHistories.last,
+              let firstA = firstHistory.first,
+              let lastA = firstHistory.last,
+              let firstB = lastHistory.first,
+              let lastB = lastHistory.last else { return nil }
+
+        let durationA = lastA.timestamp - firstA.timestamp
+        let durationB = lastB.timestamp - firstB.timestamp
+
+        if durationA > activatingTransformingDuration && durationB > activatingTransformingDuration {
             return .transforming
         }
         return nil

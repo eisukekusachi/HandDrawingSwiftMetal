@@ -90,7 +90,7 @@ public final class CanvasViewModel {
     private let transformer = Transformer()
 
     /// Manages input from pen and finger
-    private let inputDevice = InputDeviceStatus()
+    private let inputDevice = InputDeviceState()
 
     /// Manages on-screen gestures such as drag and pinch
     private let touchGestureStatus = TouchGestureStatus()
@@ -340,7 +340,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         // Cancel finger drawing and switch to pen drawing if present
-        if inputDevice.status == .finger {
+        if inputDevice.isFinger {
             cancelFingerDrawing()
         }
         inputDevice.update(.pencil)
