@@ -64,8 +64,12 @@ public final class TextureLayerViewModel: ObservableObject {
         // Bind the value of the alpha slider
         $currentAlpha
             .sink { [weak self] value in
-                guard let selectedLayerId = self?.selectedLayerId else { return }
-                self?.updateLayer(
+                guard
+                    let canvasState = self?.canvasState,
+                    let selectedLayerId = self?.selectedLayerId
+                else { return }
+                Layers.updateLayer(
+                    canvasState: canvasState,
                     id: selectedLayerId,
                     alpha: Int(value)
                 )
@@ -82,8 +86,8 @@ public extension TextureLayerViewModel {
 
     func onTapInsertButton() {
         guard
-            let selectedIndex = canvasState?.selectedIndex,
-            let textureSize = canvasState?.getTextureSize(),
+            let canvasState,
+            let selectedIndex = canvasState.selectedIndex,
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
@@ -94,131 +98,97 @@ public extension TextureLayerViewModel {
             isVisible: true
         )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+        let previousLayerIndex = canvasState.selectedIndex ?? 0
 
         Task {
+            let texture = MTLTextureCreator.makeBlankTexture(
+                size: canvasState.currentTextureSize,
+                with: device
+            )
+
             let result = try await textureRepository
                 .addTexture(
-                    MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
+                    texture,
                     newTextureUUID: layer.id
                 )
-            insertLayer(layer: layer, at: index, undoTexture: result.texture)
 
-            canvasState?.updateThumbnail(
-                .init(uuid: layer.id, texture: result.texture)
+            Layers.insertLayer(
+                canvasState: canvasState,
+                layer: layer,
+                texture: texture,
+                at: index
             )
+
+            // Push an UndoObject onto the stack
+            Task {
+                let currentLayerIndex = canvasState.selectedIndex ?? 0
+                await addUndoAdditionObject(
+                    previousLayerIndex: previousLayerIndex,
+                    currentLayerIndex: currentLayerIndex,
+                    layer: layer,
+                    texture: result.texture
+                )
+            }
         }
     }
 
     func onTapDeleteButton() {
         guard
-            canvasState?.layers.count ?? 0 > 1,
-            let selectedLayer = canvasState?.selectedLayer,
-            let selectedIndex = canvasState?.selectedIndex,
-            let textureLayerId = canvasState?.layers[selectedIndex].id
+            let canvasState,
+            canvasState.layers.count > 1,
+            let selectedLayer = canvasState.selectedLayer,
+            let selectedIndex = canvasState.selectedIndex
         else { return }
 
         Task {
             let result = try await textureRepository.copyTexture(
-                uuid: textureLayerId
+                uuid: canvasState.layers[selectedIndex].id
             )
 
             textureRepository
                 .removeTexture(selectedLayer.id)
 
-            removeLayer(selectedLayerIndex: selectedIndex, selectedLayer: selectedLayer, undoTexture: result.texture)
+            let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
 
-            if let layerId = canvasState?.selectedLayerId {
-                let result = try await textureRepository.copyTexture(uuid: layerId)
-                canvasState?.updateThumbnail(
-                    .init(uuid: layerId, texture: result.texture)
+            Layers.removeLayer(
+                canvasState: canvasState,
+                selectedLayerIndex: selectedIndex,
+                selectedLayer: selectedLayer
+            )
+
+            Task {
+                await addUndoDeletionObject(
+                    previousLayerIndex: selectedIndex,
+                    currentLayerIndex: newLayerIndex,
+                    layer: .init(model: selectedLayer),
+                    texture: result.texture
                 )
             }
         }
     }
 
     func onTapTitleButton(id: UUID, title: String) {
-        updateLayer(id: id, title: title)
+        Layers.updateLayer(canvasState: canvasState, id: id, title: title)
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        updateLayer(id: id, isVisible: isVisible)
+        Layers.updateLayer(canvasState: canvasState, id: id, isVisible: isVisible)
     }
 
     func onTapCell(id: UUID) {
-        selectLayer(layerId: id)
+        Layers.selectLayer(canvasState: canvasState, layerId: id)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
-        moveLayer(indices: .init(sourceIndexSet: source, destinationIndex: destination))
-    }
-}
-
-// MARK: CRUD
-private extension TextureLayerViewModel {
-
-    func insertLayer(layer: TextureLayerItem, at index: Int, undoTexture: MTLTexture?) {
-        let previousLayerIndex = self.canvasState?.selectedIndex ?? 0
-
-        // Perform a layer operation
-        canvasState?.layers.insert(
-            .init(
-                item: layer,
-                thumbnail: nil
-            ),
-            at: index
-        )
-        canvasState?.selectedLayerId = layer.id
-        canvasState?.fullCanvasUpdateSubject.send(())
-
-        // Push an UndoObject onto the stack
-        Task {
-            let currentLayerIndex = canvasState?.selectedIndex ?? 0
-            await addUndoAdditionObject(
-                previousLayerIndex: previousLayerIndex,
-                currentLayerIndex: currentLayerIndex,
-                layer: layer,
-                texture: undoTexture
-            )
-        }
-    }
-
-    func removeLayer(selectedLayerIndex: Int, selectedLayer: TextureLayerModel, undoTexture: MTLTexture?) {
         guard let canvasState else { return }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedLayerIndex)
-
-        // Perform a layer operation
-        canvasState.layers.remove(at: selectedLayerIndex)
-        canvasState.selectedLayerId = canvasState.layers[newLayerIndex].id
-        canvasState.fullCanvasUpdateSubject.send(())
-
-        // Push an UndoObject onto the stack
-        Task {
-            await addUndoDeletionObject(
-                previousLayerIndex: selectedLayerIndex,
-                currentLayerIndex: newLayerIndex,
-                layer: .init(model: selectedLayer),
-                texture: undoTexture
-            )
-        }
-    }
-
-    private func moveLayer(
-        indices: MoveLayerIndices
-    ) {
-        guard let canvasState else { return }
-
+        let indices: MoveLayerIndices = .init(sourceIndexSet: source, destinationIndex: destination)
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
             layerCount: canvasState.layers.count
         )
 
-        // MARK: Perform a layer operation
-        canvasState.layers.move(
-            fromOffsets: reversedIndices.sourceIndexSet,
-            toOffset: reversedIndices.destinationIndex
-        )
-        canvasState.fullCanvasUpdateSubject.send(())
+        Layers.moveLayer(canvasState: canvasState, indices: indices)
 
         // MARK: Push an UndoObject onto the stack
         guard
@@ -230,59 +200,6 @@ private extension TextureLayerViewModel {
             selectedLayerId: selectedLayerId,
             textureLayer: .init(model: textureLayer)
         )
-    }
-
-    func updateLayer(
-        id: UUID,
-        title: String? = nil,
-        isVisible: Bool? = nil,
-        alpha: Int? = nil
-    ) {
-        guard
-            let canvasState,
-            let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
-
-        let layer = canvasState.layers[selectedIndex]
-
-        if let title {
-            canvasState.layers[selectedIndex] = .init(
-                id: layer.id,
-                thumbnail: layer.thumbnail,
-                title: title,
-                alpha: layer.alpha,
-                isVisible: layer.isVisible
-            )
-        }
-        if let isVisible {
-            canvasState.layers[selectedIndex] = .init(
-                id: layer.id,
-                thumbnail: layer.thumbnail,
-                title: layer.title,
-                alpha: layer.alpha,
-                isVisible: isVisible
-            )
-
-            // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-            canvasState.fullCanvasUpdateSubject.send(())
-        }
-        if let alpha {
-            canvasState.layers[selectedIndex] = .init(
-                id: layer.id,
-                thumbnail: layer.thumbnail,
-                title: layer.title,
-                alpha: alpha,
-                isVisible: layer.isVisible
-            )
-
-            // Only the alpha of the selected layer can be changed, so other layers will not be updated
-            canvasState.canvasUpdateSubject.send(())
-        }
-    }
-
-    func selectLayer(layerId: UUID) {
-        canvasState?.selectedLayerId = layerId
-        canvasState?.fullCanvasUpdateSubject.send(())
     }
 }
 

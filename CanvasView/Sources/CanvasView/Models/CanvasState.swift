@@ -72,6 +72,10 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
 public extension CanvasState {
 
+    var currentTextureSize: CGSize {
+        textureSize
+    }
+
     var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
         return layers.first(where: { $0.id == selectedLayerId })
@@ -91,10 +95,6 @@ public extension CanvasState {
 
     func layer(_ layerId: UUID) -> TextureLayerModel? {
         layers.first(where: { $0.id == layerId })
-    }
-
-    func getTextureSize() -> CGSize {
-        textureSize
     }
 
     func setDrawingTool(_ drawingToolType: DrawingToolType) {
