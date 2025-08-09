@@ -11,21 +11,29 @@ public final class TouchGestureState {
 
     private(set) var status: TouchGestureType
 
-    let activatingDrawingDuration: TimeInterval
-    let activatingTransformingDuration: TimeInterval
+    private var drawingGestureRecognitionSecond: TimeInterval
+    private var transformingGestureRecognitionSecond: TimeInterval
 
     init(
         _ status: TouchGestureType = .undetermined,
-        activatingDrawingDuration: TimeInterval = 0.1,
-        activatingTransformingDuration: TimeInterval = 0.05
+        drawingGestureRecognitionSecond: TimeInterval = 0.1,
+        transformingGestureRecognitionSecond: TimeInterval = 0.05
     ) {
         self.status = status
-        self.activatingDrawingDuration = activatingDrawingDuration
-        self.activatingTransformingDuration = activatingTransformingDuration
+        self.drawingGestureRecognitionSecond = drawingGestureRecognitionSecond
+        self.transformingGestureRecognitionSecond = transformingGestureRecognitionSecond
     }
 }
 
 public extension TouchGestureState {
+
+    func setDrawingGestureRecognitionSecond(_ second: TimeInterval) {
+        drawingGestureRecognitionSecond = second
+    }
+
+    func setTransformingGestureRecognitionSecond(_ second: TimeInterval) {
+        transformingGestureRecognitionSecond = second
+    }
 
     func update(
         _ touchHistories: TouchHistoriesOnScreen
@@ -67,7 +75,7 @@ public extension TouchGestureState {
         else { return nil }
 
         let duration = last.timestamp - first.timestamp
-        if duration > activatingDrawingDuration {
+        if duration > drawingGestureRecognitionSecond {
             return .drawing
         }
         return nil
@@ -84,11 +92,11 @@ public extension TouchGestureState {
             let lastB = lastHistory.last
         else { return nil }
 
-        let durationA = lastA.timestamp - firstA.timestamp
-        let durationB = lastB.timestamp - firstB.timestamp
+        let secondA = lastA.timestamp - firstA.timestamp
+        let secondB = lastB.timestamp - firstB.timestamp
 
-        if  durationA > activatingTransformingDuration &&
-            durationB > activatingTransformingDuration {
+        if  secondA > transformingGestureRecognitionSecond &&
+            secondB > transformingGestureRecognitionSecond {
             return .transforming
         }
         return nil
