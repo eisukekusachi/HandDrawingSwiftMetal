@@ -22,7 +22,7 @@ public struct IntSliderView: View {
         self.onEditingChanged = onEditingChanged
     }
 
-    var body: some View {
+    public var body: some View {
         Slider(
             value: Binding(
                 get: { Float(value) },
