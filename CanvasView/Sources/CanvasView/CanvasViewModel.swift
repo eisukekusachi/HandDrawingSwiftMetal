@@ -87,7 +87,7 @@ public final class CanvasViewModel {
 
     private var renderer = CanvasRenderer()
 
-    private let transformer = Transformer()
+    private let transforming = Transforming()
 
     /// Manages input from pen and finger
     private let inputDevice = InputDeviceState()
@@ -242,7 +242,7 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        transformer.matrixPublisher
+        transforming.matrixPublisher
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
 
@@ -392,7 +392,7 @@ extension CanvasViewModel {
 
     func resetTransforming() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
-        transformer.setMatrix(.identity)
+        transforming.setMatrix(.identity)
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
@@ -411,7 +411,7 @@ extension CanvasViewModel {
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
         try await initializeCanvas(configuration: configuration)
-        transformer.setMatrix(.identity)
+        transforming.setMatrix(.identity)
     }
 
     func undo() {
@@ -552,7 +552,7 @@ extension CanvasViewModel {
         drawingCurve?.append(
             points: screenTouchPoints.map {
                 .init(
-                    matrix: transformer.matrix.inverted(flipY: true),
+                    matrix: transforming.matrix.inverted(flipY: true),
                     touchPoint: $0,
                     textureSize: canvasState.textureSize,
                     drawableSize: drawableSize,
@@ -569,12 +569,14 @@ extension CanvasViewModel {
     private func transformCanvas() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
-        transformer.initTransformingIfNeeded(
-            fingerStroke.touchHistories
-        )
+        if transforming.isNotKeysInitialized {
+            transforming.initialize(
+                fingerStroke.touchHistories
+            )
+        }
 
         if fingerStroke.isAllFingersOnScreen {
-            transformer.transformCanvas(
+            transforming.transformCanvas(
                 screenCenter: .init(
                     x: renderer.frameSize.width * 0.5,
                     y: renderer.frameSize.height * 0.5
@@ -582,7 +584,7 @@ extension CanvasViewModel {
                 touchHistories: fingerStroke.touchHistories
             )
         } else {
-            transformer.finishTransforming()
+            transforming.endTransformation()
         }
 
         renderer.updateCanvasView(displayView, with: commandBuffer)
@@ -604,7 +606,7 @@ extension CanvasViewModel {
         fingerStroke.reset()
 
         drawingCurve = nil
-        transformer.resetMatrix()
+        transforming.resetMatrix()
 
         displayView?.resetCommandBuffer()
 
@@ -640,7 +642,7 @@ extension CanvasViewModel {
         pencilStroke.reset()
 
         drawingCurve = nil
-        transformer.resetMatrix()
+        transforming.resetMatrix()
     }
 
     func updateCanvasByMergingAllLayers() {
