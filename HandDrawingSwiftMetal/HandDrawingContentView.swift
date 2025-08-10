@@ -24,11 +24,20 @@ final class HandDrawingContentView: UIView {
     @IBOutlet private(set) weak var exportImageButton: UIButton!
     @IBOutlet private(set) weak var layerButton: UIButton!
 
+    @IBOutlet weak var drawingToolButton: UIButton!
+    @IBOutlet weak var brushPaletteView: UIStackView!
+    @IBOutlet weak var eraserPaletteView: UIStackView!
+
+    @IBOutlet weak var undoButton: UIButton!
+    @IBOutlet weak var redoButton: UIButton!
+
     var tapSaveButton: (() -> Void)?
     var tapLayerButton: (() -> Void)?
     var tapLoadButton: (() -> Void)?
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
+
+    private let viewModel = HandDrawingContentViewModel()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -47,15 +56,92 @@ final class HandDrawingContentView: UIView {
         canvasView.alpha = 0.0
 
         addEvents()
+        addPalettes()
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
+
+        undoButton.isHidden = true
+        redoButton.isHidden = true
+
+        updateDrawingComponents(
+            viewModel.drawingTool
+        )
+    }
+
+    func setup(_ configuration: CanvasConfiguration) {
+
+        brushDiameterSlider.setValue(
+            DrawingBrushToolState.diameterFloatValue(configuration.brushDiameter),
+            animated: false
+        )
+        eraserDiameterSlider.setValue(
+            DrawingEraserToolState.diameterFloatValue(configuration.eraserDiameter),
+            animated: false
+        )
+
+        updateDrawingComponents(configuration.drawingTool)
+
+        UIView.animate(withDuration: 0.1) { [weak self] in
+            self?.canvasView.alpha = 1.0
+        }
+
+        backgroundColor = .white
     }
 }
 
-extension HandDrawingContentView {
+private extension HandDrawingContentView {
 
-    private func addEvents() {
+    func changeDrawingTool() {
+        viewModel.changeDrawingTool()
+        updateDrawingComponents(viewModel.drawingTool)
+    }
+
+    func addPalettes() {
+        let size: CGFloat = 28
+
+        for (index, color) in viewModel.brushColors.enumerated() {
+            let colorView = UIButton()
+            colorView.translatesAutoresizingMaskIntoConstraints = false
+            colorView.backgroundColor = color
+            colorView.layer.cornerRadius = size * 0.5
+            colorView.clipsToBounds = true
+            brushPaletteView.addArrangedSubview(colorView)
+
+            colorView.addAction(.init { [weak self] _ in
+                guard let `self` else { return }
+                self.viewModel.selectedBrushColorIndex = index
+                self.canvasView.setBrushColor(self.viewModel.brushColor)
+            }, for: .touchUpInside)
+
+            NSLayoutConstraint.activate([
+                colorView.widthAnchor.constraint(equalToConstant: size),
+                colorView.heightAnchor.constraint(equalToConstant: size)
+            ])
+        }
+
+        for (index, alpha) in viewModel.eraserAlphas.enumerated() {
+            let colorView = UIButton()
+            colorView.translatesAutoresizingMaskIntoConstraints = false
+            colorView.backgroundColor = .black.withAlphaComponent(CGFloat(alpha) / 255.0)
+            colorView.layer.cornerRadius = size * 0.5
+            colorView.clipsToBounds = true
+            eraserPaletteView.addArrangedSubview(colorView)
+
+            colorView.addAction(.init { [weak self] _ in
+                guard let `self` else { return }
+                self.viewModel.selectedEraserAlphaIndex = index
+                self.canvasView.setEraserAlpha(self.viewModel.eraserAlpha)
+            }, for: .touchUpInside)
+
+            NSLayoutConstraint.activate([
+                colorView.widthAnchor.constraint(equalToConstant: size),
+                colorView.heightAnchor.constraint(equalToConstant: size)
+            ])
+        }
+    }
+
+    func addEvents() {
 
         resetTransformButton.addAction(.init { [weak self] _ in
             self?.canvasView.resetTransforming()
@@ -81,20 +167,11 @@ extension HandDrawingContentView {
             self?.tapNewButton?()
         }, for: .touchUpInside)
 
+        drawingToolButton.addAction(.init { [weak self] _ in
+            self?.changeDrawingTool()
+        }, for: .touchUpInside)
+
 /*
-        blackColorButton.addAction(.init { [weak self] _ in
-            self?.setBlackBrushColor()
-        }, for: .touchUpInside)
-
-        redColorButton.addAction(.init { [weak self] _ in
-            self?.setRedBrushColor()
-        }, for: .touchUpInside)
-
-        eraserButton.addAction(.init { [weak self] _ in
-            self?.setEraser()
-
-        }, for: .touchUpInside)
-
         undoButton.addAction(.init { [weak self] _ in
             self?.canvasView.undo()
         }, for: .touchUpInside)
@@ -115,50 +192,25 @@ extension HandDrawingContentView {
         }, for: .valueChanged)
     }
 
-    private func showSlider(_ tool: DrawingToolType) {
-        brushDiameterSlider.isHidden = tool != .brush
-        eraserDiameterSlider.isHidden = tool != .eraser
-    }
-}
+    func updateDrawingComponents(_ tool: DrawingToolType) {
+        if tool == .brush {
+            drawingToolButton.setImage(.init(systemName: "pencil.line"), for: .normal)
 
-extension HandDrawingContentView {
+            canvasView.setDrawingTool(.brush)
+            canvasView.setBrushColor(viewModel.brushColor)
 
-    func setup(_ configuration: CanvasConfiguration) {
+        } else {
+            drawingToolButton.setImage(.init(named: "DrawingEraser"), for: .normal)
 
-        brushDiameterSlider.setValue(
-            DrawingBrushToolState.diameterFloatValue(configuration.brushDiameter),
-            animated: false
-        )
-        eraserDiameterSlider.setValue(
-            DrawingEraserToolState.diameterFloatValue(configuration.eraserDiameter),
-            animated: false
-        )
-
-        canvasView.setBrushColor(configuration.brushColor)
-        canvasView.setDrawingTool(configuration.drawingTool)
-
-        showSlider(configuration.drawingTool)
-
-        UIView.animate(withDuration: 0.1) { [weak self] in
-            self?.canvasView.alpha = 1.0
+            canvasView.setDrawingTool(.eraser)
+            canvasView.setEraserAlpha(viewModel.eraserAlpha)
         }
 
-        backgroundColor = .white
-    }
+        brushDiameterSlider.isHidden = tool != .brush
+        brushPaletteView.isHidden = tool != .brush
 
-    func setBlackBrushColor() {
-        showSlider(.brush)
-        canvasView.setDrawingTool(.brush)
-        canvasView.setBrushColor(UIColor.black.withAlphaComponent(0.75))
-    }
-    func setRedBrushColor() {
-        showSlider(.brush)
-        canvasView.setDrawingTool(.brush)
-        canvasView.setBrushColor(UIColor.red.withAlphaComponent(0.75))
-    }
-    func setEraser() {
-        showSlider(.eraser)
-        canvasView.setDrawingTool(.eraser)
+        eraserDiameterSlider.isHidden = tool != .eraser
+        eraserPaletteView.isHidden = tool != .eraser
     }
 
     /*

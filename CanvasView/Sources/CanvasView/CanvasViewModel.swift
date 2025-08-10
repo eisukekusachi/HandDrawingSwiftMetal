@@ -405,6 +405,9 @@ extension CanvasViewModel {
     func setBrushDiameter(_ value: Float) {
         canvasState.brush.setDiameter(value)
     }
+    func setEraserAlpha(_ alpha: Int) {
+        canvasState.eraser.alpha = alpha
+    }
     func setEraserDiameter(_ value: Float) {
         canvasState.eraser.setDiameter(value)
     }

@@ -124,9 +124,12 @@ import UIKit
     public func setBrushColor(_ color: UIColor) {
         canvasViewModel.setBrushColor(color)
     }
-
     public func setBrushDiameter(_ diameter: Float) {
         canvasViewModel.setBrushDiameter(diameter)
+    }
+
+    public func setEraserAlpha(_ alpha: Int) {
+        canvasViewModel.setEraserAlpha(alpha)
     }
     public func setEraserDiameter(_ diameter: Float) {
         canvasViewModel.setEraserDiameter(diameter)
