@@ -143,28 +143,25 @@ extension CanvasConfiguration {
         self.drawingTool = .brush
     }
 
-    /// Returns an instance with the provided texture size if it was previously nil
-    func resolvedTextureSize(_ textureSize: CGSize) -> Self {
-        if self.textureSize == nil {
-            return .init(
-                projectName: projectName,
+    public init(
+        _ configuration: Self,
+        newTextureSize: CGSize
+    ) {
+        self.textureSize = newTextureSize
 
-                textureSize: textureSize,
+        self.projectName = configuration.projectName
 
-                layerIndex: layerIndex,
-                layers: layers,
+        self.layerIndex = configuration.layerIndex
+        self.layers = configuration.layers
 
-                drawingTool: drawingTool,
+        self.drawingTool = configuration.drawingTool
 
-                brushColors: brushColors,
-                brushIndex: brushIndex,
-                brushDiameter: brushDiameter,
+        self.brushColors = configuration.brushColors
+        self.brushIndex = configuration.brushIndex
+        self.brushDiameter = configuration.brushDiameter
 
-                eraserAlphas: eraserAlphas,
-                eraserIndex: eraserIndex,
-                eraserDiameter: eraserDiameter
-            )
-        }
-        return self
+        self.eraserAlphas = configuration.eraserAlphas
+        self.eraserIndex = configuration.eraserIndex
+        self.eraserDiameter = configuration.eraserDiameter
     }
 }

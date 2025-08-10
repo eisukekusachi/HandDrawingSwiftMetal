@@ -155,7 +155,7 @@ public final class CanvasViewModel {
         // otherwise, fall back to the default value
         Task {
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
+                configuration: canvasStateStorage?.coreDataConfiguration ?? .init(configuration, newTextureSize: defaultTextureSize)
             )
 
             bindData()
