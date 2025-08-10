@@ -6,7 +6,7 @@
 //
 
 import CanvasView
-import MetalKit
+import Foundation
 
 public extension TextureLayerItem {
 
