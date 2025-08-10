@@ -1,25 +1,23 @@
 //
-//  TextureLayerModelDummy.swift
-//  HandDrawingSwiftMetalTests
+//  File.swift
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/04/06.
+//  Created by Eisuke Kusachi on 2025/08/10.
 //
 
 import CanvasView
 import MetalKit
 
-public extension TextureLayerModel {
+public extension TextureLayerItem {
 
     static func generate(
         id: UUID = UUID(),
-        thumbnail: UIImage? = nil,
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true
     ) -> Self {
         .init(
             id: id,
-            thumbnail: thumbnail,
             title: title,
             alpha: alpha,
             isVisible: isVisible
