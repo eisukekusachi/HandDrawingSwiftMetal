@@ -110,8 +110,8 @@ final class CanvasRendererTests: XCTestCase {
             subject.updateCanvasView(
                 canvasView,
                 realtimeDrawingTexture: condition.hasRealtimeDrawingTexture ? realtimeDrawingTexture : nil,
-                selectedLayer: .init(
-                    textureName: UUID().uuidString,
+                selectedLayer: .generate(
+                    id: UUID(),
                     title: "TestLayer",
                     isVisible: condition.isLayerVisible
                 ),
@@ -126,12 +126,12 @@ final class CanvasRendererTests: XCTestCase {
     @MainActor
     func testUnselectedLayersAreSeparatedIntoTopAndBottomArrays() {
         struct Condition {
-            let layers: [TextureLayerModel]
+            let layers: [TextureLayerItem]
             let selectedLayerIndex: Int
         }
         struct Expectation {
-            let expectationBottomLayers: [TextureLayerModel]
-            let expectationTopLayers: [TextureLayerModel]
+            let expectationBottomLayers: [TextureLayerItem]
+            let expectationTopLayers: [TextureLayerItem]
         }
 
         let testCases: [(Condition, Expectation)] = [
