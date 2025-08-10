@@ -21,11 +21,6 @@ final class HandDrawingContentView: UIView {
     @IBOutlet private weak var brushDiameterSlider: UISlider!
     @IBOutlet private weak var eraserDiameterSlider: UISlider!
 
-    @IBOutlet private weak var blackColorButton: UIButton!
-    @IBOutlet private weak var redColorButton: UIButton!
-    @IBOutlet private weak var eraserButton: UIButton!
-    @IBOutlet private(set) weak var undoButton: UIButton!
-    @IBOutlet private(set) weak var redoButton: UIButton!
     @IBOutlet private(set) weak var exportImageButton: UIButton!
     @IBOutlet private(set) weak var layerButton: UIButton!
 
@@ -55,9 +50,6 @@ final class HandDrawingContentView: UIView {
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        undoButton.isHidden = true
-        redoButton.isHidden = true
     }
 }
 
@@ -89,6 +81,7 @@ extension HandDrawingContentView {
             self?.tapNewButton?()
         }, for: .touchUpInside)
 
+/*
         blackColorButton.addAction(.init { [weak self] _ in
             self?.setBlackBrushColor()
         }, for: .touchUpInside)
@@ -109,6 +102,7 @@ extension HandDrawingContentView {
         redoButton.addAction(.init { [weak self] _ in
             self?.canvasView.redo()
         }, for: .touchUpInside)
+*/
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
@@ -167,8 +161,10 @@ extension HandDrawingContentView {
         canvasView.setDrawingTool(.eraser)
     }
 
+    /*
     func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
         undoButton.isEnabled = state.isUndoEnabled
         redoButton.isEnabled = state.isRedoEnabled
     }
+    */
 }

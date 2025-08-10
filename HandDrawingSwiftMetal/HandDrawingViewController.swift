@@ -71,11 +71,13 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        /*
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
+        */
     }
 
     private func addEvents() {

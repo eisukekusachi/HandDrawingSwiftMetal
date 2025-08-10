@@ -12,20 +12,15 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HandDrawingContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
-                <outlet property="blackColorButton" destination="dMS-qm-Xjc" id="I8s-nR-HYr"/>
                 <outlet property="brushDiameterSlider" destination="UxJ-dV-AbQ" id="bsG-sU-Tdc"/>
                 <outlet property="canvasView" destination="Rri-Cz-Fww" id="y6k-tJ-gCc"/>
-                <outlet property="eraserButton" destination="Ydn-J6-zrX" id="6fj-Bu-pwF"/>
                 <outlet property="eraserDiameterSlider" destination="s4f-db-5LA" id="moF-b6-DPQ"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
                 <outlet property="newButton" destination="ML0-1y-T1Z" id="LCz-ss-GSK"/>
-                <outlet property="redColorButton" destination="zOD-md-2qy" id="iop-zf-s6b"/>
-                <outlet property="redoButton" destination="UCl-eJ-tD6" id="vT8-3m-JfV"/>
                 <outlet property="resetTransformButton" destination="IVg-Dj-hIn" id="dWm-1g-ASc"/>
                 <outlet property="saveButton" destination="Ugs-EZ-K7D" id="HVF-Y2-eRP"/>
-                <outlet property="undoButton" destination="7Ib-t7-xwq" id="gzC-M5-8He"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
