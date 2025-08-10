@@ -8,7 +8,7 @@
 import Foundation
 
 public enum TouchGestureType: Int, Sendable {
-    /// The status is still undetermined
+
     case undetermined
 
     case drawing
