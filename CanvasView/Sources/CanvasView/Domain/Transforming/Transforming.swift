@@ -1,5 +1,5 @@
 //
-//  Transformer.swift
+//  Transforming.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/10/15.
@@ -8,8 +8,8 @@
 import UIKit
 import Combine
 
-/// A class for canvas rotation
-final class Transformer {
+/// A class that manages canvas transformations
+final class Transforming {
 
     var matrix: CGAffineTransform {
         matrixSubject.value
@@ -28,15 +28,18 @@ final class Transformer {
     private var firstTouchPointB: CGPoint?
 }
 
-extension Transformer {
+extension Transforming {
 
     var isKeysInitialized: Bool {
         keyA != nil && keyB != nil
     }
 
-    func initTransformingIfNeeded(_ touchHistories: TouchHistoriesOnScreen) {
+    var isNotKeysInitialized: Bool {
+        !isKeysInitialized
+    }
+
+    func initialize(_ touchHistories: TouchHistoriesOnScreen) {
         guard
-            !isKeysInitialized,
             touchHistories.count == 2,
             let keyA = touchHistories.keys.sorted().first,
             let keyB = touchHistories.keys.sorted().last,
@@ -84,13 +87,13 @@ extension Transformer {
         resetParameters()
     }
 
-    func finishTransforming() {
+    func endTransformation() {
         storedMatrix = matrixSubject.value
         resetParameters()
     }
 }
 
-extension Transformer {
+extension Transforming {
 
     private func resetParameters() {
         keyA = nil

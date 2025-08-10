@@ -7,8 +7,7 @@
 
 import UIKit
 
-@MainActor
-public struct TouchPoint: Equatable {
+public struct TouchPoint: Equatable, Sendable {
 
     let location: CGPoint
     let phase: UITouch.Phase

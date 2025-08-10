@@ -25,15 +25,25 @@ public struct CanvasEnvironmentConfiguration: Sendable {
     /// For the repository type used to store undo textures. even if `.disk` is selected, it only uses disk storage temporarily and textures are not persisted.
     let undoTextureRepositoryType: StorageType?
 
+    /// The duration in seconds that must pass to recognize a drawing gesture
+    let drawingGestureRecognitionSecond: TimeInterval
+
+    /// The duration in seconds that must pass to recognize a transforming gesture
+    let transformingGestureRecognitionSecond: TimeInterval
+
     public init(
         backgroundColor: UIColor = .white,
         baseBackgroundColor: UIColor = UIColor(230, 230, 230),
         textureRepositoryType: StorageType = .disk,
-        undoTextureRepositoryType: StorageType? = .disk
+        undoTextureRepositoryType: StorageType? = .disk,
+        drawingGestureRecognitionSecond: TimeInterval = 0.1,
+        transformingGestureRecognitionSecond: TimeInterval = 0.05
     ) {
         self.backgroundColor = backgroundColor
         self.baseBackgroundColor = baseBackgroundColor
         self.textureRepositoryType = textureRepositoryType
         self.undoTextureRepositoryType = undoTextureRepositoryType
+        self.drawingGestureRecognitionSecond = drawingGestureRecognitionSecond
+        self.transformingGestureRecognitionSecond = transformingGestureRecognitionSecond
     }
 }

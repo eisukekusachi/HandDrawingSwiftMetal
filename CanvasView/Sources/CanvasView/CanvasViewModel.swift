@@ -87,13 +87,13 @@ public final class CanvasViewModel {
 
     private var renderer = CanvasRenderer()
 
-    private let transformer = Transformer()
+    private let transforming = Transforming()
 
     /// Manages input from pen and finger
     private let inputDevice = InputDeviceState()
 
     /// Manages on-screen gestures such as drag and pinch
-    private let touchGestureStatus = TouchGestureStatus()
+    private let touchGesture = TouchGestureState()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
@@ -120,6 +120,14 @@ public final class CanvasViewModel {
 
         self.renderer.initialize(
             environmentConfiguration: environmentConfiguration
+        )
+
+        // Set the gesture recognition durations in seconds
+        self.touchGesture.setDrawingGestureRecognitionSecond(
+            environmentConfiguration.drawingGestureRecognitionSecond
+        )
+        self.touchGesture.setTransformingGestureRecognitionSecond(
+            environmentConfiguration.transformingGestureRecognitionSecond
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
@@ -234,7 +242,7 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        transformer.matrixPublisher
+        transforming.matrixPublisher
             .assign(to: \.matrix, on: renderer)
             .store(in: &cancellables)
 
@@ -315,7 +323,7 @@ extension CanvasViewModel {
         )
 
         // determine the gesture from the dictionary
-        switch touchGestureStatus.update(fingerStroke.touchHistories) {
+        switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
@@ -384,7 +392,7 @@ extension CanvasViewModel {
 
     func resetTransforming() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
-        transformer.setMatrix(.identity)
+        transforming.setMatrix(.identity)
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
@@ -403,7 +411,7 @@ extension CanvasViewModel {
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
         try await initializeCanvas(configuration: configuration)
-        transformer.setMatrix(.identity)
+        transforming.setMatrix(.identity)
     }
 
     func undo() {
@@ -544,7 +552,7 @@ extension CanvasViewModel {
         drawingCurve?.append(
             points: screenTouchPoints.map {
                 .init(
-                    matrix: transformer.matrix.inverted(flipY: true),
+                    matrix: transforming.matrix.inverted(flipY: true),
                     touchPoint: $0,
                     textureSize: canvasState.textureSize,
                     drawableSize: drawableSize,
@@ -561,12 +569,14 @@ extension CanvasViewModel {
     private func transformCanvas() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
-        transformer.initTransformingIfNeeded(
-            fingerStroke.touchHistories
-        )
+        if transforming.isNotKeysInitialized {
+            transforming.initialize(
+                fingerStroke.touchHistories
+            )
+        }
 
         if fingerStroke.isAllFingersOnScreen {
-            transformer.transformCanvas(
+            transforming.transformCanvas(
                 screenCenter: .init(
                     x: renderer.frameSize.width * 0.5,
                     y: renderer.frameSize.height * 0.5
@@ -574,7 +584,7 @@ extension CanvasViewModel {
                 touchHistories: fingerStroke.touchHistories
             )
         } else {
-            transformer.finishTransforming()
+            transforming.endTransformation()
         }
 
         renderer.updateCanvasView(displayView, with: commandBuffer)
@@ -596,7 +606,7 @@ extension CanvasViewModel {
         fingerStroke.reset()
 
         drawingCurve = nil
-        transformer.resetMatrix()
+        transforming.resetMatrix()
 
         displayView?.resetCommandBuffer()
 
@@ -626,13 +636,13 @@ extension CanvasViewModel {
 
     private func resetAllInputParameters() {
         inputDevice.reset()
-        touchGestureStatus.reset()
+        touchGesture.reset()
 
         fingerStroke.reset()
         pencilStroke.reset()
 
         drawingCurve = nil
-        transformer.resetMatrix()
+        transforming.resetMatrix()
     }
 
     func updateCanvasByMergingAllLayers() {
