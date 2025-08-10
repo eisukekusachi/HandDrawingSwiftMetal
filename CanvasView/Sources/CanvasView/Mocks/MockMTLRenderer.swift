@@ -81,7 +81,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     func drawTexture(
         grayscaleTexture: MTLTexture,
-        color rgb: (Int, Int, Int),
+        color rgb: IntRGB,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -123,7 +123,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     func fillTexture(
         texture: MTLTexture,
-        withRGB rgb: (Int, Int, Int),
+        withRGB rgb: IntRGB,
         with commandBuffer: any MTLCommandBuffer
     ) {
         let textureLabel = texture.label ?? ""
@@ -141,7 +141,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     func fillTexture(
         texture: MTLTexture,
-        withRGBA rgba: (Int, Int, Int, Int),
+        withRGBA rgba: IntRGBA,
         with commandBuffer: any MTLCommandBuffer
     ) {
         let textureLabel = texture.label ?? ""

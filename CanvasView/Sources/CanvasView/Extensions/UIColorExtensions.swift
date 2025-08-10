@@ -16,7 +16,7 @@ public extension UIColor {
         return Int(alpha * 255)
     }
 
-    var rgb: (Int, Int, Int) {
+    var rgb: IntRGB {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
@@ -25,7 +25,7 @@ public extension UIColor {
         return (Int(red * 255), Int(green * 255), Int(blue * 255))
     }
 
-    var rgba: (Int, Int, Int, Int) {
+    var rgba: IntRGBA {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
@@ -59,7 +59,7 @@ public extension UIColor {
         )
     }
 
-    convenience init(rgb: (Int, Int, Int)) {
+    convenience init(rgb: IntRGB) {
         let red: Int = max(0, min(rgb.0, 255))
         let green: Int = max(0, min(rgb.1, 255))
         let blue: Int = max(0, min(rgb.2, 255))
@@ -72,7 +72,7 @@ public extension UIColor {
         )
     }
 
-    convenience init(rgba: (Int, Int, Int, Int)) {
+    convenience init(rgba: IntRGBA) {
         let red: Int = max(0, min(rgba.0, 255))
         let green: Int = max(0, min(rgba.1, 255))
         let blue: Int = max(0, min(rgba.2, 255))

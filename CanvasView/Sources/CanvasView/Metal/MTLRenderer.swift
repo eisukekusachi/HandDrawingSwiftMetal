@@ -35,7 +35,7 @@ public protocol MTLRendering: Sendable {
 
     func drawTexture(
         grayscaleTexture: MTLTexture,
-        color rgb: (Int, Int, Int),
+        color rgb: IntRGB,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
@@ -62,13 +62,13 @@ public protocol MTLRendering: Sendable {
 
     func fillTexture(
         texture: MTLTexture,
-        withRGB rgb: (Int, Int, Int),
+        withRGB rgb: IntRGB,
         with commandBuffer: MTLCommandBuffer
     )
 
     func fillTexture(
         texture: MTLTexture,
-        withRGBA rgba: (Int, Int, Int, Int),
+        withRGBA rgba: IntRGBA,
         with commandBuffer: MTLCommandBuffer
     )
 
@@ -192,7 +192,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func drawTexture(
         grayscaleTexture: MTLTexture,
-        color rgb: (Int, Int, Int),
+        color rgb: IntRGB,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -299,7 +299,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func fillTexture(
         texture: MTLTexture,
-        withRGB rgb: (Int, Int, Int),
+        withRGB rgb: IntRGB,
         with commandBuffer: MTLCommandBuffer
     ) {
         fillTexture(
@@ -311,7 +311,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func fillTexture(
         texture: MTLTexture,
-        withRGBA rgba: (Int, Int, Int, Int),
+        withRGBA rgba: IntRGBA,
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
