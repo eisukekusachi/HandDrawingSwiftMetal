@@ -18,11 +18,21 @@ public struct CanvasConfiguration: Sendable {
 
     public let drawingTool: DrawingToolType
 
-    public let brushColor: UIColor
+    public let brushColors: [IntRGBA]
+    public let brushIndex: Int
     public let brushDiameter: Int
 
-    public let eraserAlpha: Int
+    public let eraserAlphas: [Int]
+    public let eraserIndex: Int
     public let eraserDiameter: Int
+
+    public var brushColor: UIColor {
+        UIColor.init(rgba: brushColors[brushIndex])
+    }
+
+    public var eraserAlpha: Int {
+        eraserAlphas[eraserIndex]
+    }
 
     public init(
         projectName: String = Calendar.currentDate,
@@ -30,19 +40,26 @@ public struct CanvasConfiguration: Sendable {
         layerIndex: Int = 0,
         layers: [TextureLayerItem] = [],
         drawingTool: DrawingToolType = .brush,
-        brushColor: UIColor = UIColor.black.withAlphaComponent(0.75),
+        brushColors: [IntRGBA] = [(0, 0, 0, 255)],
+        brushIndex: Int = 0,
         brushDiameter: Int = 8,
-        eraserAlpha: Int = 155,
+        eraserAlphas: [Int] = [255],
+        eraserIndex: Int = 0,
         eraserDiameter: Int = 44
     ) {
         self.projectName = projectName
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
+
         self.drawingTool = drawingTool
-        self.brushColor = brushColor
+
+        self.brushColors = brushColors
+        self.brushIndex = brushIndex
         self.brushDiameter = brushDiameter
-        self.eraserAlpha = eraserAlpha
+
+        self.eraserAlphas = eraserAlphas
+        self.eraserIndex = eraserIndex
         self.eraserDiameter = eraserDiameter
     }
 }
@@ -56,20 +73,22 @@ extension CanvasConfiguration {
         // Since the project name is the same as the folder name, it will not be managed in `CanvasEntity`
         self.projectName = projectName
 
+        self.textureSize = entity.textureSize
+
         self.layerIndex = entity.layerIndex
         self.layers = entity.layers.map {
             .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
         }
 
-        self.textureSize = entity.textureSize
-
         self.drawingTool = .init(rawValue: entity.drawingTool)
 
+        self.brushColors = [UIColor.black.withAlphaComponent(0.75).rgba]
+        self.brushIndex = 0
         self.brushDiameter = entity.brushDiameter
-        self.eraserDiameter = entity.eraserDiameter
 
-        self.brushColor = UIColor.black.withAlphaComponent(0.75)
-        self.eraserAlpha = 155
+        self.eraserAlphas = [155]
+        self.eraserIndex = 0
+        self.eraserDiameter = entity.eraserDiameter
     }
 
     public init(
@@ -84,18 +103,22 @@ extension CanvasConfiguration {
 
         if let brush = entity.drawingTool?.brush,
            let colorHexString = brush.colorHex {
-            self.brushColor = UIColor(hex: colorHexString)
+            self.brushColors = [UIColor(hex: colorHexString).rgba]
+            self.brushIndex = 0
             self.brushDiameter = Int(brush.diameter)
         } else {
-            self.brushColor = UIColor.black.withAlphaComponent(0.75)
+            self.brushColors = [UIColor.black.withAlphaComponent(0.75).rgba]
+            self.brushIndex = 0
             self.brushDiameter = 8
         }
 
         if let eraser = entity.drawingTool?.eraser {
-            self.eraserAlpha = Int(eraser.alpha)
+            self.eraserAlphas = [Int(eraser.alpha)]
+            self.eraserIndex = 0
             self.eraserDiameter = Int(eraser.diameter)
         } else {
-            self.eraserAlpha = 155
+            self.eraserAlphas = [155]
+            self.eraserIndex = 0
             self.eraserDiameter = 44
         }
 
@@ -125,13 +148,20 @@ extension CanvasConfiguration {
         if self.textureSize == nil {
             return .init(
                 projectName: projectName,
+
                 textureSize: textureSize,
+
                 layerIndex: layerIndex,
                 layers: layers,
+
                 drawingTool: drawingTool,
-                brushColor: brushColor,
+
+                brushColors: brushColors,
+                brushIndex: brushIndex,
                 brushDiameter: brushDiameter,
-                eraserAlpha: eraserAlpha,
+
+                eraserAlphas: eraserAlphas,
+                eraserIndex: eraserIndex,
                 eraserDiameter: eraserDiameter
             )
         }
