@@ -67,7 +67,7 @@ public extension TouchGestureState {
             let last = history.last
         else { return nil }
 
-        if (last.timestamp - first.timestamp) > drawingGestureRecognitionSecond {
+        if (last.timestamp - first.timestamp) >= drawingGestureRecognitionSecond {
             return .drawing
         }
         return nil
@@ -84,8 +84,8 @@ public extension TouchGestureState {
             let lastB = lastHistory.last
         else { return nil }
 
-        if  (lastA.timestamp - firstA.timestamp) > transformingGestureRecognitionSecond &&
-            (lastB.timestamp - firstB.timestamp) > transformingGestureRecognitionSecond {
+        if  (lastA.timestamp - firstA.timestamp) >= transformingGestureRecognitionSecond &&
+            (lastB.timestamp - firstB.timestamp) >= transformingGestureRecognitionSecond {
             return .transforming
         }
         return nil
