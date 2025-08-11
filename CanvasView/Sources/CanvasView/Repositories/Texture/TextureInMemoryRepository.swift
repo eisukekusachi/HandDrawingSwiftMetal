@@ -45,8 +45,11 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         self.renderer = renderer
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
-        let textureSize = configuration.textureSize ?? .zero
+    func initializeStorage(
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
+        let textureSize = configuration.textureSize ?? defaultTextureSize
 
         guard
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
@@ -77,7 +80,12 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        return .init(textureSize: textureSize, layers: [layer])
+        let configuration: CanvasConfiguration = .init(textureSize: textureSize, layers: [layer])
+
+        return try await .init(
+            configuration: configuration,
+            defaultTextureSize: textureSize
+        )
     }
 
     func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {

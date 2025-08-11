@@ -93,35 +93,47 @@ private extension Image {
 
 private struct PreviewView: View {
     let canvasState = CanvasState()
-    let configuration: TextureLayerConfiguration
+    let textureLayerConfiguration: TextureLayerConfiguration
     let viewModel = TextureLayerViewModel()
 
     init() {
-        canvasState.initialize(
-            configuration: .init(
-                textureSize: .init(width: 44, height: 44),
-                layerIndex: 1,
-                layers: [
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer0",
-                        alpha: 255
-                    ),
-                    .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-                    .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-                    .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-                    .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
-                ]
-            )
+        let layers: [TextureLayerItem] = [
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer0",
+                alpha: 255
+            ),
+            .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
+            .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
+            .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
+            .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
+        ]
+
+        let configuration: CanvasResolvedConfiguration = .init(
+            projectName: "",
+            textureSize: .zero,
+            layerIndex: 0,
+            layers: layers.map { .init(item: $0, thumbnail: nil) },
+            drawingTool: .brush,
+            brushColors: [],
+            brushIndex: 0,
+            brushDiameter: 0,
+            eraserAlphas: [],
+            eraserIndex: 0,
+            eraserDiameter: 0
         )
 
-        configuration = .init(
+        canvasState.initialize(
+            configuration: configuration
+        )
+
+        textureLayerConfiguration = .init(
             canvasState: canvasState,
             textureRepository: MockTextureRepository(),
             undoStack: nil
         )
 
-        viewModel.initialize(configuration: configuration)
+        viewModel.initialize(configuration: textureLayerConfiguration)
     }
     var body: some View {
         TextureLayerToolbar(

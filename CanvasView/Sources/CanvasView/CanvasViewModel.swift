@@ -45,7 +45,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -101,7 +101,7 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -151,13 +151,12 @@ public final class CanvasViewModel {
         self.displayView = displayView
 
         // Use the size from CoreData if available,
-        // if not, use the size from the configuration,
-        // otherwise, fall back to the default value
+        // if not, use the size from the configuration
         Task {
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? .init(configuration, newTextureSize: defaultTextureSize)
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration,
+                defaultTextureSize: defaultTextureSize
             )
-
             bindData()
         }
     }
@@ -261,19 +260,20 @@ public extension CanvasViewModel {
         canvasState.textureSize
     }
 
-    func initializeCanvas(configuration: CanvasConfiguration) async throws {
+    func initializeCanvas(
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws {
         // Initialize the texture repository
-        let resultConfiguration = try await dependencies.textureRepository.initializeStorage(
-            configuration: configuration
+        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+            configuration: configuration,
+            defaultTextureSize: defaultTextureSize
         )
-        setupCanvas(resultConfiguration)
+        setupCanvas(resolvedConfiguration)
     }
 
-    private func setupCanvas(_ configuration: CanvasConfiguration) {
-        guard
-            let textureSize = configuration.textureSize,
-            let commandBuffer = displayView?.commandBuffer
-        else { return }
+    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
 
         let textureRepository = dependencies.textureRepository
 
@@ -282,18 +282,18 @@ public extension CanvasViewModel {
             textureRepository: textureRepository
         )
 
-        renderer.initTextures(textureSize: textureSize)
+        renderer.initTextures(textureSize: configuration.textureSize)
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
             textureRepository: textureRepository,
             with: commandBuffer
         ) { [weak self] in
-            self?.completeCanvasSetup(textureSize: textureSize, configuration: configuration)
+            self?.completeCanvasSetup(textureSize: configuration.textureSize, configuration: configuration)
         }
     }
 
-    private func completeCanvasSetup(textureSize: CGSize, configuration: CanvasConfiguration) {
+    private func completeCanvasSetup(textureSize: CGSize, configuration: CanvasResolvedConfiguration) {
 
         drawingBrushTextureSet.initTextures(textureSize)
         drawingEraserTextureSet.initTextures(textureSize)
@@ -388,7 +388,17 @@ extension CanvasViewModel {
     }
 }
 
-extension CanvasViewModel {
+public extension CanvasViewModel {
+
+    func defaultTextureSize() -> CGSize {
+        let scale = UIScreen.main.scale
+        let size = UIScreen.main.bounds.size
+
+        return .init(
+            width: size.width * scale,
+            height: size.height * scale
+        )
+    }
 
     func resetTransforming() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
@@ -413,7 +423,7 @@ extension CanvasViewModel {
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
-        try await initializeCanvas(configuration: configuration)
+        try await initializeCanvas(configuration: configuration, defaultTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
 
@@ -449,7 +459,11 @@ extension CanvasViewModel {
                     with: configuration
                 )
 
-                setupCanvas(configuration)
+                let resolvedConfiguration: CanvasResolvedConfiguration = try await .init(
+                    configuration: configuration,
+                    defaultTextureSize: defaultTextureSize()
+                )
+                setupCanvas(resolvedConfiguration)
 
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()

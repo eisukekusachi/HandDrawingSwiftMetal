@@ -26,14 +26,6 @@ public struct CanvasConfiguration: Sendable {
     public let eraserIndex: Int
     public let eraserDiameter: Int
 
-    public var brushColor: UIColor {
-        UIColor.init(rgba: brushColors[brushIndex])
-    }
-
-    public var eraserAlpha: Int {
-        eraserAlphas[eraserIndex]
-    }
-
     public init(
         projectName: String = Calendar.currentDate,
         textureSize: CGSize? = nil,

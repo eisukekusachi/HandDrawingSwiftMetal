@@ -39,21 +39,16 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
     public init() {}
 
     public func initialize(
-        configuration: CanvasConfiguration,
+        configuration: CanvasResolvedConfiguration,
         textureRepository: TextureRepository? = nil
     ) {
-
         self.projectName = configuration.projectName
-        self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
 
-        self.layers.removeAll()
-        self.layers = configuration.layers.map {
-            .init(
-                item: $0,
-                thumbnail: nil
-            )
-        }
-        self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
+        self.textureSize = configuration.textureSize
+
+        self.layers = configuration.layers
+
+        self.selectedLayerId = configuration.selectedLayerId
 
         self.brush.color = configuration.brushColor
         self.brush.setDiameter(configuration.brushDiameter)

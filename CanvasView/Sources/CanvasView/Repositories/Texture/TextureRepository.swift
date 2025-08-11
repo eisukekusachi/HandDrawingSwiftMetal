@@ -25,7 +25,10 @@ public protocol TextureRepository: Sendable {
     var isInitialized: Bool { get }
 
     /// Initializes the storage from the given configuration, falling back to a new texture if that fails
-    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration
+    func initializeStorage(
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
     func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws
