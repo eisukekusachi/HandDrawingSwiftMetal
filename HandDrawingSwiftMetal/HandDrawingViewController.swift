@@ -188,7 +188,6 @@ extension HandDrawingViewController {
             )
         }
     }
-
 }
 
 extension HandDrawingViewController {
@@ -200,5 +199,4 @@ extension HandDrawingViewController {
         viewController.configuration = configuration
         return viewController
     }
-
 }

@@ -198,15 +198,11 @@ private extension HandDrawingContentView {
     func updateDrawingComponents(_ tool: DrawingToolType) {
         if tool == .brush {
             drawingToolButton.setImage(.init(systemName: "pencil.line"), for: .normal)
-
             canvasView.setDrawingTool(.brush)
-            canvasView.setBrushColor(viewModel.brushColor)
 
         } else {
             drawingToolButton.setImage(.init(named: "DrawingEraser"), for: .normal)
-
             canvasView.setDrawingTool(.eraser)
-            canvasView.setEraserAlpha(viewModel.eraserAlpha)
         }
 
         brushDiameterSlider.isHidden = tool != .brush
