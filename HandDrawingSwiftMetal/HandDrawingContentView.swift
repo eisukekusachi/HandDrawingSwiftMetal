@@ -102,6 +102,8 @@ private extension HandDrawingContentView {
     func updateBrushPalettes(_ brushColors: [IntRGBA]) {
         let size: CGFloat = 28
 
+        brushPaletteView.removeAllArrangedSubviews()
+
         brushColors.forEach { color in
             let colorView = UIButton()
             colorView.translatesAutoresizingMaskIntoConstraints = false
@@ -124,6 +126,9 @@ private extension HandDrawingContentView {
 
     func updateEraserPalettes(_ eraserAlphas: [Int]) {
         let size: CGFloat = 28
+
+        eraserPaletteView.removeAllArrangedSubviews()
+
         eraserAlphas.forEach { alpha in
             let colorView = UIButton()
             colorView.translatesAutoresizingMaskIntoConstraints = false
