@@ -194,7 +194,7 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        configuration: CanvasConfiguration = .init()
+        configuration: CanvasConfiguration
     ) -> Self {
         let viewController = Self()
         viewController.configuration = configuration

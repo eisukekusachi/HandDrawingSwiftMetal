@@ -73,6 +73,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
+
+        let textureSize = configuration.textureSize ?? defaultTextureSize
+
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
@@ -83,14 +86,23 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
 
-            return try await .init(configuration: configuration, defaultTextureSize: defaultTextureSize)
+            return try await .init(
+                configuration: configuration,
+                resolvedTextureSize: textureSize
+            )
         } else {
-            let configuration = try await initializeStorageWithNewTexture(configuration.textureSize ?? .zero)
-            return try await .init(configuration: configuration, defaultTextureSize: defaultTextureSize)
+            return try await initializeStorageWithNewTexture(
+                configuration: configuration,
+                textureSize: textureSize
+            )
         }
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {
+    func restoreStorage(
+        from sourceFolderURL: URL,
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -114,6 +126,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
+        let textureSize = configuration.textureSize ?? defaultTextureSize
+
         var tmpTextureIds: Set<UUID> = []
 
         try configuration.layers.forEach { layer in
@@ -121,7 +135,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
             guard
-                let textureSize = configuration.textureSize,
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = MTLTextureCreator.makeTexture(
                     size: textureSize,
@@ -155,12 +168,19 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
+
+        return try await .init(
+            configuration: configuration,
+            resolvedTextureSize: defaultTextureSize
+        )
     }
 
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) async throws -> CanvasConfiguration {
+    private func initializeStorageWithNewTexture(
+        configuration: CanvasConfiguration,
+        textureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
         guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-                Int(textureSize.height) > MTLRenderer.threadGroupLength
+            Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -188,7 +208,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        return .init(textureSize: textureSize, layers: [layer])
+        return try await .init(
+            configuration: .init(configuration, newLayers: [layer]),
+            resolvedTextureSize: textureSize
+        )
     }
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {

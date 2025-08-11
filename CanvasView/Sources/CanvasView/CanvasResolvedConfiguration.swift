@@ -59,26 +59,27 @@ public extension CanvasResolvedConfiguration {
 
     init(
         configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
+        resolvedTextureSize: CGSize
     ) async throws {
-        projectName = configuration.projectName
 
-        textureSize = configuration.textureSize ?? defaultTextureSize
+        self.textureSize = resolvedTextureSize
 
-        layerIndex = configuration.layerIndex
-        layers = configuration.layers.map {
+        self.projectName = configuration.projectName
+
+        self.layerIndex = configuration.layerIndex
+        self.layers = configuration.layers.map {
             .init(item: $0, thumbnail: nil)
         }
 
-        drawingTool = configuration.drawingTool
+        self.drawingTool = configuration.drawingTool
 
-        brushColors = configuration.brushColors
-        brushIndex = configuration.brushIndex
-        brushDiameter = configuration.brushDiameter
+        self.brushColors = configuration.brushColors
+        self.brushIndex = configuration.brushIndex
+        self.brushDiameter = configuration.brushDiameter
 
-        eraserAlphas = configuration.eraserAlphas
-        eraserIndex = configuration.eraserIndex
-        eraserDiameter = configuration.eraserDiameter
+        self.eraserAlphas = configuration.eraserAlphas
+        self.eraserIndex = configuration.eraserIndex
+        self.eraserDiameter = configuration.eraserDiameter
     }
 
     var selectedLayerId: UUID {

@@ -56,7 +56,6 @@ final class HandDrawingContentView: UIView {
         canvasView.alpha = 0.0
 
         addEvents()
-        addPalettes()
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
@@ -69,7 +68,7 @@ final class HandDrawingContentView: UIView {
         )
     }
 
-    func setup(_ configuration: CanvasConfiguration) {
+    func setup(_ configuration: CanvasResolvedConfiguration) {
 
         brushDiameterSlider.setValue(
             DrawingBrushToolState.diameterFloatValue(configuration.brushDiameter),
@@ -79,6 +78,9 @@ final class HandDrawingContentView: UIView {
             DrawingEraserToolState.diameterFloatValue(configuration.eraserDiameter),
             animated: false
         )
+
+        updateBrushPalettes(configuration.brushColors)
+        updateEraserPalettes(configuration.eraserAlphas)
 
         updateDrawingComponents(configuration.drawingTool)
 
@@ -97,21 +99,20 @@ private extension HandDrawingContentView {
         updateDrawingComponents(viewModel.drawingTool)
     }
 
-    func addPalettes() {
+    func updateBrushPalettes(_ brushColors: [IntRGBA]) {
         let size: CGFloat = 28
 
-        for (index, color) in viewModel.brushColors.enumerated() {
+        brushColors.forEach { color in
             let colorView = UIButton()
             colorView.translatesAutoresizingMaskIntoConstraints = false
-            colorView.backgroundColor = color
+            colorView.backgroundColor = UIColor(rgba: color)
             colorView.layer.cornerRadius = size * 0.5
             colorView.clipsToBounds = true
             brushPaletteView.addArrangedSubview(colorView)
 
             colorView.addAction(.init { [weak self] _ in
                 guard let `self` else { return }
-                self.viewModel.selectedBrushColorIndex = index
-                self.canvasView.setBrushColor(self.viewModel.brushColor)
+                self.canvasView.setBrushColor(UIColor(rgba: color))
             }, for: .touchUpInside)
 
             NSLayoutConstraint.activate([
@@ -119,8 +120,11 @@ private extension HandDrawingContentView {
                 colorView.heightAnchor.constraint(equalToConstant: size)
             ])
         }
+    }
 
-        for (index, alpha) in viewModel.eraserAlphas.enumerated() {
+    func updateEraserPalettes(_ eraserAlphas: [Int]) {
+        let size: CGFloat = 28
+        eraserAlphas.forEach { alpha in
             let colorView = UIButton()
             colorView.translatesAutoresizingMaskIntoConstraints = false
             colorView.backgroundColor = .black.withAlphaComponent(CGFloat(alpha) / 255.0)
@@ -130,8 +134,7 @@ private extension HandDrawingContentView {
 
             colorView.addAction(.init { [weak self] _ in
                 guard let `self` else { return }
-                self.viewModel.selectedEraserAlphaIndex = index
-                self.canvasView.setEraserAlpha(self.viewModel.eraserAlpha)
+                self.canvasView.setEraserAlpha(alpha)
             }, for: .touchUpInside)
 
             NSLayoutConstraint.activate([

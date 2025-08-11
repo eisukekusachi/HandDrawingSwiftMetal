@@ -41,22 +41,12 @@ final class HandDrawingContentViewModel: ObservableObject {
 
         if brushColors.isEmpty {
             self.brushColors = [
-                .black,
-                .black.withAlphaComponent(0.75),
-                .black.withAlphaComponent(0.5),
-                .red,
-                .blue
+                .black
             ]
         }
         if eraserAlphas.isEmpty {
             self.eraserAlphas = [
-                255,
-                200,
-                150,
-                100,
-                75,
-                50,
-                25
+                255
             ]
         }
     }

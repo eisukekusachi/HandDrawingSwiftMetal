@@ -269,40 +269,39 @@ public extension CanvasViewModel {
             configuration: configuration,
             defaultTextureSize: defaultTextureSize
         )
+
         setupCanvas(resolvedConfiguration)
     }
 
     private func setupCanvas(_ configuration: CanvasResolvedConfiguration) {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
-        let textureRepository = dependencies.textureRepository
-
         canvasState.initialize(
             configuration: configuration,
-            textureRepository: textureRepository
+            textureRepository: dependencies.textureRepository
         )
 
         renderer.initTextures(textureSize: configuration.textureSize)
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureRepository: textureRepository,
+            textureRepository: dependencies.textureRepository,
             with: commandBuffer
         ) { [weak self] in
-            self?.completeCanvasSetup(textureSize: configuration.textureSize, configuration: configuration)
+            self?.completeCanvasSetup(configuration: configuration)
         }
     }
 
-    private func completeCanvasSetup(textureSize: CGSize, configuration: CanvasResolvedConfiguration) {
+    private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
 
-        drawingBrushTextureSet.initTextures(textureSize)
-        drawingEraserTextureSet.initTextures(textureSize)
+        drawingBrushTextureSet.initTextures(configuration.textureSize)
+        drawingEraserTextureSet.initTextures(configuration.textureSize)
 
-        undoStack?.initialize(textureSize)
-
-        updateCanvasView()
+        undoStack?.initialize(configuration.textureSize)
 
         canvasViewSetupCompletedSubject.send(configuration)
+
+        updateCanvasView()
     }
 }
 
@@ -454,15 +453,12 @@ public extension CanvasViewModel {
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                try await dependencies.textureRepository.restoreStorage(
+                let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
-                    with: configuration
-                )
-
-                let resolvedConfiguration: CanvasResolvedConfiguration = try await .init(
                     configuration: configuration,
                     defaultTextureSize: defaultTextureSize()
                 )
+
                 setupCanvas(resolvedConfiguration)
 
                 /// Remove the working space

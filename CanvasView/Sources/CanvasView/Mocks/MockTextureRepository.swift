@@ -46,15 +46,21 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
-        try await .init(configuration: configuration, defaultTextureSize: defaultTextureSize)
+        try await .init(
+            configuration: configuration,
+            resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
+        )
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {}
-
-    func initializeStorageWithNewTexture(_ textureSize: CGSize) -> AnyPublisher<CanvasConfiguration, Error> {
-        Just(.init())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+    func restoreStorage(
+        from sourceFolderURL: URL,
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
+        try await .init(
+            configuration: configuration,
+            resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
+        )
     }
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {}

@@ -156,4 +156,26 @@ extension CanvasConfiguration {
         self.eraserIndex = configuration.eraserIndex
         self.eraserDiameter = configuration.eraserDiameter
     }
+
+    public init(
+        _ configuration: Self,
+        newLayers: [TextureLayerItem]
+    ) {
+        self.projectName = configuration.projectName
+
+        self.textureSize = configuration.textureSize
+
+        self.layerIndex = configuration.layerIndex
+        self.layers = newLayers
+
+        self.drawingTool = configuration.drawingTool
+
+        self.brushColors = configuration.brushColors
+        self.brushIndex = configuration.brushIndex
+        self.brushDiameter = configuration.brushDiameter
+
+        self.eraserAlphas = configuration.eraserAlphas
+        self.eraserIndex = configuration.eraserIndex
+        self.eraserDiameter = configuration.eraserDiameter
+    }
 }
