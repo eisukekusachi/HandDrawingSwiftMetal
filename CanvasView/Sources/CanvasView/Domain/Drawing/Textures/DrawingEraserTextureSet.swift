@@ -111,7 +111,7 @@ extension DrawingEraserTextureSet {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: (0, 0, 0),
+            color: .init(0, 0, 0),
             on: lineDrawnTexture,
             with: commandBuffer
         )

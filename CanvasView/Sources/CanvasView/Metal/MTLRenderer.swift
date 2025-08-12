@@ -168,10 +168,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
         if let rgba = color?.rgba {
             descriptor.colorAttachments[0].loadAction = .clear
             descriptor.colorAttachments[0].clearColor = MTLClearColorMake(
-                min(CGFloat(rgba.0) / 255.0, 1.0),
-                min(CGFloat(rgba.1) / 255.0, 1.0),
-                min(CGFloat(rgba.2) / 255.0, 1.0),
-                min(CGFloat(rgba.3) / 255.0, 1.0)
+                min(CGFloat(rgba.r) / 255.0, 1.0),
+                min(CGFloat(rgba.g) / 255.0, 1.0),
+                min(CGFloat(rgba.b) / 255.0, 1.0),
+                min(CGFloat(rgba.a) / 255.0, 1.0)
             )
         }
 
@@ -208,9 +208,9 @@ public final class MTLRenderer: Sendable, MTLRendering {
         )
 
         var rgba: [Float] = [
-            Float(rgb.0) / 255.0,
-            Float(rgb.1) / 255.0,
-            Float(rgb.2) / 255.0,
+            Float(rgb.r) / 255.0,
+            Float(rgb.g) / 255.0,
+            Float(rgb.b) / 255.0,
             1.0
         ]
 
@@ -304,7 +304,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         fillTexture(
             texture: texture,
-            withRGBA: (rgb.0, rgb.1, rgb.2, 255),
+            withRGBA: .init(rgb.r, rgb.g, rgb.b, 255),
             with: commandBuffer
         )
     }
@@ -326,10 +326,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
         )
 
         var nRgba: [Float] = [
-            Float(rgba.0) / 255.0,
-            Float(rgba.1) / 255.0,
-            Float(rgba.2) / 255.0,
-            Float(rgba.3) / 255.0
+            Float(rgba.r) / 255.0,
+            Float(rgba.g) / 255.0,
+            Float(rgba.b) / 255.0,
+            Float(rgba.a) / 255.0
         ]
 
         let encoder = commandBuffer.makeComputeCommandEncoder()

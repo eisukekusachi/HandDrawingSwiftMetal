@@ -21,10 +21,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = HandDrawingViewController.create(
             configuration: .init(
                 brushColors: [
-                    (0, 0, 0, 255),
-                    (0, 0, 0, 200),
-                    (255, 0, 0, 200),
-                    (0, 0, 255, 200)
+                    .init(0, 0, 0, 255),
+                    .init(0, 0, 0, 200),
+                    .init(255, 0, 0, 200),
+                    .init(0, 0, 255, 200)
                 ],
                 eraserAlphas: [
                     255,

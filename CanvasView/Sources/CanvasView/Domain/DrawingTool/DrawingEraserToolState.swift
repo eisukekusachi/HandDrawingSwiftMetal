@@ -9,9 +9,9 @@ import UIKit
 
 public final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol {
 
-    @Published var diameter: Int = 0
+    @Published public var diameter: Int = 0
 
-    @Published var alpha: Int = 0 {
+    @Published public var alpha: Int = 0 {
         didSet {
             let clamped = max(0, min(alpha, 255))
             if alpha != clamped {
@@ -19,7 +19,6 @@ public final class DrawingEraserToolState: ObservableObject, DrawingToolProtocol
             }
         }
     }
-
 }
 
 extension DrawingEraserToolState {
@@ -34,7 +33,6 @@ extension DrawingEraserToolState {
     func setDiameter(_ value: Int) {
         diameter = value
     }
-
 }
 
 public extension DrawingEraserToolState {

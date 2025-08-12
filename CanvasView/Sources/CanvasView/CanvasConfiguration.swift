@@ -32,7 +32,7 @@ public struct CanvasConfiguration: Sendable {
         layerIndex: Int = 0,
         layers: [TextureLayerItem] = [],
         drawingTool: DrawingToolType = .brush,
-        brushColors: [IntRGBA] = [(0, 0, 0, 255)],
+        brushColors: [IntRGBA] = [.init(0, 0, 0, 255)],
         brushIndex: Int = 0,
         brushDiameter: Int = 8,
         eraserAlphas: [Int] = [255],

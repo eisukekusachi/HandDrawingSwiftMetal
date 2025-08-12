@@ -71,7 +71,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
                 "drawTexture(",
                 "texture: \(textureLabel), ",
                 "buffers: buffers, ",
-                "withBackgroundColor: \(color?.rgba ?? (0, 0, 0, 0)), ",
+                "withBackgroundColor: \(color?.rgba.tuple ?? (0, 0, 0, 0)), ",
                 "on: \(destinationTextureLabel), ",
                 "with: \(commandBufferLabel)",
                 ")"

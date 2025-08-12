@@ -9,9 +9,9 @@ import UIKit
 
 public final class DrawingBrushToolState: ObservableObject, DrawingToolProtocol {
 
-    @Published var diameter: Int = 0
+    @Published public var diameter: Int = 0
 
-    @Published var color: UIColor = .clear
+    @Published public var color: UIColor = .clear
 
 }
 
