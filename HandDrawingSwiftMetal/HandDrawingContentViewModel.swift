@@ -10,7 +10,27 @@ import UIKit
 
 final class HandDrawingContentViewModel: ObservableObject {
 
+    private let drawingToolController: PersistenceController
+
+    @Published var brushPalette: BrushPalette
+    @Published var eraserPalette: EraserPalette
+
     var drawingTool: DrawingToolType = .brush
+
+    public init() {
+        drawingToolController = PersistenceController(modelName: "Drawingtool")
+
+        brushPalette = BrushPalette(
+            storage: BrushPalette.CoreDataStorage(
+                context: drawingToolController.context
+            )
+        )
+        eraserPalette = EraserPalette(
+            storage: EraserPalette.CoreDataStorage(
+                context: drawingToolController.context
+            )
+        )
+    }
 
     func changeDrawingTool() {
         if drawingTool == .brush {

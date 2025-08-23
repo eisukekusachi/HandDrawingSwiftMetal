@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
+		D4168DA92E594E4D007F7904 /* Drawingtool.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */; };
+		D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAA2E594E84007F7904 /* BrushPalette.swift */; };
+		D4168DAD2E594E9A007F7904 /* EraserPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAC2E594E9A007F7904 /* EraserPalette.swift */; };
+		D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
@@ -54,6 +58,10 @@
 
 /* Begin PBXFileReference section */
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
+		D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Drawingtool.xcdatamodel; sourceTree = "<group>"; };
+		D4168DAA2E594E84007F7904 /* BrushPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPalette.swift; sourceTree = "<group>"; };
+		D4168DAC2E594E9A007F7904 /* EraserPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPalette.swift; sourceTree = "<group>"; };
+		D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
@@ -112,9 +120,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D4168DAE2E594EA9007F7904 /* Drawingtool */ = {
+			isa = PBXGroup;
+			children = (
+				D4168DAA2E594E84007F7904 /* BrushPalette.swift */,
+				D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */,
+				D4168DAC2E594E9A007F7904 /* EraserPalette.swift */,
+			);
+			path = Drawingtool;
+			sourceTree = "<group>";
+		};
 		D42F40992B4402EC00B32707 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D4168DAE2E594EA9007F7904 /* Drawingtool */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
@@ -139,6 +158,7 @@
 				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
 				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
 				D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */,
+				D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -389,15 +409,19 @@
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
+				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
+				D4168DA92E594E4D007F7904 /* Drawingtool.xcdatamodeld in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
+				D4168DAD2E594E9A007F7904 /* EraserPalette.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingContentViewModel.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
+				D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -786,6 +810,19 @@
 			productName = CanvasView;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */,
+			);
+			currentVersion = D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */;
+			path = Drawingtool.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = D4E1ECD12752388C00D4A23D /* Project object */;
 }

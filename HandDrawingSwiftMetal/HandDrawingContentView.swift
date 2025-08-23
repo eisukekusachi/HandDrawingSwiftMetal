@@ -25,7 +25,6 @@ final class HandDrawingContentView: UIView {
     @IBOutlet private(set) weak var layerButton: UIButton!
 
     @IBOutlet weak var drawingToolButton: UIButton!
-    @IBOutlet weak var brushPaletteView: UIStackView!
     @IBOutlet weak var eraserPaletteView: UIStackView!
 
     @IBOutlet weak var undoButton: UIButton!
@@ -79,7 +78,7 @@ final class HandDrawingContentView: UIView {
             animated: false
         )
 
-        updateBrushPalettes(configuration.brushColors)
+        // updateBrushPalettes(configuration.brushColors)
         updateEraserPalettes(configuration.eraserAlphas)
 
         updateDrawingComponents(configuration.drawingTool)
@@ -98,7 +97,7 @@ private extension HandDrawingContentView {
         viewModel.changeDrawingTool()
         updateDrawingComponents(viewModel.drawingTool)
     }
-
+/*
     func updateBrushPalettes(_ brushColors: [IntRGBA]) {
         let size: CGFloat = 28
 
@@ -123,7 +122,7 @@ private extension HandDrawingContentView {
             ])
         }
     }
-
+*/
     func updateEraserPalettes(_ eraserAlphas: [Int]) {
         let size: CGFloat = 28
 
@@ -211,7 +210,7 @@ private extension HandDrawingContentView {
         }
 
         brushDiameterSlider.isHidden = tool != .brush
-        brushPaletteView.isHidden = tool != .brush
+        //brushPaletteView.isHidden = tool != .brush
 
         eraserDiameterSlider.isHidden = tool != .eraser
         eraserPaletteView.isHidden = tool != .eraser
