@@ -112,47 +112,50 @@ public final class EraserPalette: ObservableObject {
 
     public func select(_ index: Int) {
         currentIndex = index
+        saveData()
     }
 
-    public func append(_ alpha: Int) async throws {
+    public func append(_ alpha: Int) {
         alphas.append(alpha)
-        try await saveData()
+        saveData()
     }
 
-    public func insert(_ alpha: Int, at index: Int) async throws {
+    public func insert(_ alpha: Int, at index: Int) {
         guard (0 ... alphas.count).contains(index) else { return }
         alphas.insert(alpha, at: index)
-        try await saveData()
+        saveData()
     }
 
-    public func update(_ alpha: Int, at index: Int) async throws {
+    public func update(_ alpha: Int, at index: Int) {
         guard alphas.indices.contains(index) else { return }
         alphas[index] = alpha
-        try await saveData()
+        saveData()
     }
 
-    public func remove(at index: Int) async throws {
+    public func remove(at index: Int) {
         guard alphas.indices.contains(index) && alphas.count > 1 else { return }
         alphas.remove(at: index)
-        try await saveData()
+        saveData()
     }
 
-    public func removeAll() async throws {
+    public func removeAll() {
         alphas = initialAlphas
         currentIndex = 0
-        try await saveData()
+        saveData()
     }
 
-    public func replaceAll(with newAlphas: [Int]) async throws {
+    public func replaceAll(with newAlphas: [Int]) {
         alphas = newAlphas.isEmpty ? initialAlphas : newAlphas
         currentIndex = 0
-        try await saveData()
+        saveData()
     }
 
-    private func saveData() async throws {
-        try await storage.save(
-            index: currentIndex,
-            alphas: alphas
-        )
+    private func saveData() {
+        Task {
+            try? await storage.save(
+                index: currentIndex,
+                alphas: alphas
+            )
+        }
     }
 }

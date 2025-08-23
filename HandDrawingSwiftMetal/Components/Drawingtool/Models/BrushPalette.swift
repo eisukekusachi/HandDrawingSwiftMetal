@@ -114,49 +114,52 @@ extension BrushPalette {
 
     public func select(_ index: Int) {
         currentIndex = index
+        saveData()
     }
 
-    public func append(_ color: UIColor) async throws {
+    public func append(_ color: UIColor) {
         colors.append(color)
-        try await saveData()
+        saveData()
     }
 
-    public func insert(_ color: UIColor, at index: Int) async throws {
+    public func insert(_ color: UIColor, at index: Int) {
         guard (0 ... colors.count).contains(index) else { return }
         colors.insert(color, at: index)
-        try await saveData()
+        saveData()
     }
 
-    public func update(_ color: UIColor, at index: Int) async throws {
+    public func update(_ color: UIColor, at index: Int) {
         guard colors.indices.contains(index) else { return }
         colors[index] = color
-        try await saveData()
+        saveData()
     }
 
-    public func remove(at index: Int) async throws {
+    public func remove(at index: Int) {
         guard colors.indices.contains(index) && colors.count > 1 else { return }
         colors.remove(at: index)
-        try await saveData()
+        saveData()
     }
 
-    public func removeAll() async throws {
+    public func removeAll() {
         colors = initialColors
         currentIndex = 0
-        try await saveData()
+        saveData()
     }
 
-    public func replaceAll(with newColors: [UIColor]) async throws {
+    public func replaceAll(with newColors: [UIColor]) {
         colors = newColors.isEmpty ? initialColors : newColors
         currentIndex = 0
-        try await saveData()
+        saveData()
     }
 }
 
 extension BrushPalette {
-    private func saveData() async throws {
-        try await storage.save(
-            index: currentIndex,
-            hexColors: colors.map { $0.hex() }
-        )
+    private func saveData() {
+        Task {
+            try? await storage.save(
+                index: currentIndex,
+                hexColors: colors.map { $0.hex() }
+            )
+        }
     }
 }
