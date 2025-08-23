@@ -14,6 +14,7 @@ public protocol EraserPaletteStorage {
     func save(index: Int, alphas: [Int]) async throws
 }
 
+@MainActor
 public final class EraserPalette: ObservableObject {
 
     @Published private(set) var alphas: [Int] = []
@@ -25,6 +26,7 @@ public final class EraserPalette: ObservableObject {
 
     public init(
         initialAlphas: [Int] = [255],
+        initialIndex: Int = 0,
         storage: EraserPaletteStorage
     ) {
         self.initialAlphas = initialAlphas
@@ -36,7 +38,8 @@ public final class EraserPalette: ObservableObject {
                 self.currentIndex = max(0, min(entity.index, self.alphas.count - 1))
             } else {
                 self.alphas = self.initialAlphas
-                self.currentIndex = 0
+                self.currentIndex = max(0, min(initialIndex, self.alphas.count - 1))
+
                 try await storage.save(
                     index: currentIndex,
                     alphas: alphas.map { $0 }
@@ -98,12 +101,17 @@ public final class EraserPalette: ObservableObject {
         }
     }
 
-    public var currentAlpha: Int {
-        alphas[currentIndex]
+    public var currentAlpha: Int? {
+        guard alphas.count < currentIndex else { return nil }
+        return alphas[currentIndex]
     }
 
     public func alpha(at index: Int) -> Int? {
         alphas[index]
+    }
+
+    public func select(_ index: Int) {
+        currentIndex = index
     }
 
     public func append(_ alpha: Int) async throws {

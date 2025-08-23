@@ -14,6 +14,7 @@ public protocol BrushPaletteStorage {
     func save(index: Int, hexColors: [String]) async throws
 }
 
+@MainActor
 public final class BrushPalette: ObservableObject {
 
     @Published private(set) var colors: [UIColor] = []
@@ -24,7 +25,8 @@ public final class BrushPalette: ObservableObject {
     private let storage: BrushPaletteStorage
 
     public init(
-        initialColors: [UIColor] = [UIColor.red.withAlphaComponent(0.5), .purple, .blue],
+        initialColors: [UIColor] = [.black],
+        initialIndex: Int = 0,
         storage: BrushPaletteStorage
     ) {
         self.initialColors = initialColors
@@ -36,7 +38,8 @@ public final class BrushPalette: ObservableObject {
                 self.currentIndex = max(0, min(entity.index, self.colors.count - 1))
             } else {
                 self.colors = self.initialColors
-                self.currentIndex = 0
+                self.currentIndex = max(0, min(initialIndex, self.colors.count - 1))
+
                 try await storage.save(
                     index: currentIndex,
                     hexColors: colors.map { $0.hex() }
@@ -100,12 +103,17 @@ public final class BrushPalette: ObservableObject {
 }
 
 extension BrushPalette {
-    public var currentColor: UIColor {
-        colors[currentIndex]
+    public var currentColor: UIColor? {
+        guard currentIndex < colors.count else { return nil }
+        return colors[currentIndex]
     }
 
     public func color(at index: Int) -> UIColor? {
         colors.indices.contains(index) ? colors[index] : nil
+    }
+
+    public func select(_ index: Int) {
+        currentIndex = index
     }
 
     public func append(_ color: UIColor) async throws {

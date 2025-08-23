@@ -12,10 +12,11 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HandDrawingContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
                 <outlet property="brushDiameterSlider" destination="UxJ-dV-AbQ" id="bsG-sU-Tdc"/>
+                <outlet property="brushPaletteView" destination="450-qS-bWU" id="Uhd-6C-8eF"/>
                 <outlet property="canvasView" destination="Rri-Cz-Fww" id="y6k-tJ-gCc"/>
                 <outlet property="drawingToolButton" destination="5LT-Wg-ht9" id="dK3-Ho-3Nb"/>
                 <outlet property="eraserDiameterSlider" destination="s4f-db-5LA" id="moF-b6-DPQ"/>
-                <outlet property="eraserPaletteView" destination="b96-p8-gyB" id="8ET-hC-R1M"/>
+                <outlet property="eraserPaletteView" destination="gZx-i3-2bH" id="DeH-vJ-8z5"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
@@ -90,48 +91,48 @@
                     </constraints>
                 </slider>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
-                    <rect key="frame" x="287" y="745" width="98" height="34.333333333333371"/>
+                    <rect key="frame" x="289" y="745" width="96" height="34.333333333333371"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
+                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="999" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
                             <rect key="frame" x="0.0" y="0.0" width="49" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.backward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward.square" catalog="system"/>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UCl-eJ-tD6">
-                            <rect key="frame" x="49" y="0.0" width="49" height="34.333333333333336"/>
+                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UCl-eJ-tD6">
+                            <rect key="frame" x="49" y="0.0" width="47" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.forward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
                         </button>
                     </subviews>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="96" id="7q1-tn-YPt"/>
+                    </constraints>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59x-cS-eat" userLabel="ContentView">
-                    <rect key="frame" x="60" y="746" width="219" height="32"/>
+                    <rect key="frame" x="60" y="746" width="221" height="32"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="450-qS-bWU">
-                            <rect key="frame" x="0.0" y="2" width="219" height="28"/>
-                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="28" id="KD2-vA-C25"/>
-                            </constraints>
+                            <rect key="frame" x="0.0" y="0.0" width="221" height="32"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
-                        <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="b96-p8-gyB">
-                            <rect key="frame" x="0.0" y="2" width="219" height="28"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="28" id="YBW-EL-8fX"/>
-                            </constraints>
-                        </stackView>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gZx-i3-2bH">
+                            <rect key="frame" x="0.0" y="0.0" width="221" height="32"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstItem="450-qS-bWU" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="0Ys-Pt-IeP"/>
-                        <constraint firstItem="b96-p8-gyB" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="Ebq-t0-Fm3"/>
+                        <constraint firstItem="450-qS-bWU" firstAttribute="top" secondItem="59x-cS-eat" secondAttribute="top" id="8Ns-uX-V1L"/>
+                        <constraint firstAttribute="trailing" secondItem="gZx-i3-2bH" secondAttribute="trailing" id="BdR-Be-Jco"/>
+                        <constraint firstAttribute="bottom" secondItem="gZx-i3-2bH" secondAttribute="bottom" id="C5p-XF-iZP"/>
                         <constraint firstAttribute="height" priority="750" constant="32" id="IFB-nU-GUb"/>
                         <constraint firstAttribute="trailing" secondItem="450-qS-bWU" secondAttribute="trailing" id="Pk1-ts-ojd"/>
-                        <constraint firstAttribute="trailing" secondItem="b96-p8-gyB" secondAttribute="trailing" priority="999" id="RaX-w4-Pxi"/>
-                        <constraint firstItem="b96-p8-gyB" firstAttribute="centerY" secondItem="59x-cS-eat" secondAttribute="centerY" id="vfi-Ek-4gD"/>
-                        <constraint firstItem="450-qS-bWU" firstAttribute="centerY" secondItem="59x-cS-eat" secondAttribute="centerY" id="xkV-Ow-Mzx"/>
+                        <constraint firstItem="gZx-i3-2bH" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="PxN-fy-CC8"/>
+                        <constraint firstAttribute="bottom" secondItem="450-qS-bWU" secondAttribute="bottom" id="gnn-TM-lsC"/>
+                        <constraint firstItem="gZx-i3-2bH" firstAttribute="top" secondItem="59x-cS-eat" secondAttribute="top" id="lWH-jR-1vZ"/>
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5LT-Wg-ht9" userLabel="DrawingToolButton">
@@ -168,6 +169,13 @@
                 <constraint firstItem="s4f-db-5LA" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="uNl-Qs-2Na"/>
             </constraints>
             <point key="canvasLocation" x="90.839694656488547" y="20.422535211267608"/>
+        </view>
+        <view contentMode="scaleToFill" id="3oh-Ng-uPp">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <viewLayoutGuide key="safeArea" id="g0S-Hb-pMn"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <point key="canvasLocation" x="-95" y="670"/>
         </view>
     </objects>
     <resources>

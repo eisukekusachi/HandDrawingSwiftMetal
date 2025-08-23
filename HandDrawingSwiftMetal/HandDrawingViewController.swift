@@ -25,6 +25,8 @@ class HandDrawingViewController: UIViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let colorSize: CGFloat = 32
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -131,6 +133,51 @@ extension HandDrawingViewController {
                 )
             )
         )
+
+        addBrushPalette()
+        addEraserPalette()
+    }
+
+    private func addBrushPalette() {
+        let targetView: UIView = contentView.brushPaletteView
+
+        let brushPaletteHostingView = UIHostingController(
+            rootView: BrushPaletteView(
+                palette: contentView.viewModel.brushPalette,
+                size: colorSize
+            )
+        )
+        brushPaletteHostingView.view.backgroundColor = .clear
+        targetView.addSubview(brushPaletteHostingView.view)
+
+        brushPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            brushPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            brushPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            brushPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            brushPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+        ])
+    }
+
+    private func addEraserPalette() {
+        let targetView: UIView = contentView.eraserPaletteView
+
+        let eraserPaletteHostingView = UIHostingController(
+            rootView: EraserPaletteView(
+                palette: contentView.viewModel.eraserPalette,
+                size: colorSize
+            )
+        )
+        eraserPaletteHostingView.view.backgroundColor = .clear
+        targetView.addSubview(eraserPaletteHostingView.view)
+
+        eraserPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            eraserPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            eraserPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            eraserPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            eraserPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+        ])
     }
 
     private func showFileView() {
