@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
-		D4168DA92E594E4D007F7904 /* Drawingtool.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */; };
+		D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */; };
 		D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAA2E594E84007F7904 /* BrushPalette.swift */; };
 		D4168DAD2E594E9A007F7904 /* EraserPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAC2E594E9A007F7904 /* EraserPalette.swift */; };
 		D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */; };
@@ -64,7 +64,7 @@
 
 /* Begin PBXFileReference section */
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
-		D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Drawingtool.xcdatamodel; sourceTree = "<group>"; };
+		D4168DA82E594E4D007F7904 /* DrawingToolStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DrawingToolStorage.xcdatamodel; sourceTree = "<group>"; };
 		D4168DAA2E594E84007F7904 /* BrushPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPalette.swift; sourceTree = "<group>"; };
 		D4168DAC2E594E9A007F7904 /* EraserPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPalette.swift; sourceTree = "<group>"; };
 		D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
@@ -145,7 +145,7 @@
 			isa = PBXGroup;
 			children = (
 				D4168DAA2E594E84007F7904 /* BrushPalette.swift */,
-				D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */,
+				D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */,
 				D4168DAC2E594E9A007F7904 /* EraserPalette.swift */,
 				D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */,
 			);
@@ -453,7 +453,7 @@
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
 				D4168F242E59F7B4007F7904 /* EraserPaletteView.swift in Sources */,
-				D4168DA92E594E4D007F7904 /* Drawingtool.xcdatamodeld in Sources */,
+				D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
 				D4168F1E2E59F0E1007F7904 /* ColorCircle.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
@@ -852,13 +852,13 @@
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
-		D4168DA72E594E4D007F7904 /* Drawingtool.xcdatamodeld */ = {
+		D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */,
+				D4168DA82E594E4D007F7904 /* DrawingToolStorage.xcdatamodel */,
 			);
-			currentVersion = D4168DA82E594E4D007F7904 /* Drawingtool.xcdatamodel */;
-			path = Drawingtool.xcdatamodeld;
+			currentVersion = D4168DA82E594E4D007F7904 /* DrawingToolStorage.xcdatamodel */;
+			path = DrawingToolStorage.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

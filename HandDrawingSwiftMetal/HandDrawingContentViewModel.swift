@@ -19,7 +19,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     var drawingTool: DrawingToolType = .brush
 
     public init() {
-        drawingToolController = PersistenceController(modelName: "Drawingtool")
+        drawingToolController = PersistenceController(modelName: "DrawingToolStorage")
 
         brushPalette = BrushPalette(
             initialColors: [
