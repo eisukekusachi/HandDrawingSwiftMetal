@@ -195,7 +195,13 @@ extension HandDrawingViewController {
             suffix: CanvasViewModel.fileSuffix,
             onTapItem: { [weak self] url in
                 self?.presentedViewController?.dismiss(animated: true)
-                self?.contentView.canvasView.loadFile(zipFileURL: url)
+                self?.contentView.canvasView.loadFile(
+                    zipFileURL: url,
+                    candidates: [
+                        CanvasEntity.self,
+                        OldCanvasEntity.self
+                    ]
+                )
             }
         )
         present(

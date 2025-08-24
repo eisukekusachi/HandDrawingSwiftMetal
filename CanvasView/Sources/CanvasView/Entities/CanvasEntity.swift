@@ -14,6 +14,13 @@ public struct CanvasEntity: Codable, Equatable {
     let layers: [TextureLayerEntity]
 
     let thumbnailName: String
+
+    public init(textureSize: CGSize, layerIndex: Int, layers: [TextureLayerEntity], thumbnailName: String) {
+        self.textureSize = textureSize
+        self.layerIndex = layerIndex
+        self.layers = layers
+        self.thumbnailName = thumbnailName
+    }
 }
 
 extension CanvasEntity {

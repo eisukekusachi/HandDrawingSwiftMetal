@@ -129,10 +129,10 @@ import UIKit
             eraserDiameter: eraserDiameter
         )
     }
-    public func loadFile(zipFileURL: URL) {
+    public func loadFile(zipFileURL: URL, candidates: [CanvasEntityConvertible.Type]) {
         canvasViewModel.loadFile(
             zipFileURL: zipFileURL,
-            candidates: [CanvasEntity.self, OldCanvasEntity.self]
+            candidates: candidates
         )
     }
 
