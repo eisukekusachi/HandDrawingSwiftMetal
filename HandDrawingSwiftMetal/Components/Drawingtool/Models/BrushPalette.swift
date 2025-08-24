@@ -40,10 +40,7 @@ public final class BrushPalette: ObservableObject {
                 self.colors = self.initialColors
                 self.currentIndex = max(0, min(initialIndex, self.colors.count - 1))
 
-                try await storage.save(
-                    index: currentIndex,
-                    hexColors: colors.map { $0.hex() }
-                )
+                saveData()
             }
         }
     }

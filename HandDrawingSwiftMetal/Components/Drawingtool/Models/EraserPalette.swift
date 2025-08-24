@@ -40,10 +40,7 @@ public final class EraserPalette: ObservableObject {
                 self.alphas = self.initialAlphas
                 self.currentIndex = max(0, min(initialIndex, self.alphas.count - 1))
 
-                try await storage.save(
-                    index: currentIndex,
-                    alphas: alphas.map { $0 }
-                )
+                saveData()
             }
         }
     }
