@@ -130,7 +130,10 @@ import UIKit
         )
     }
     public func loadFile(zipFileURL: URL) {
-        canvasViewModel.loadFile(zipFileURL: zipFileURL)
+        canvasViewModel.loadFile(
+            zipFileURL: zipFileURL,
+            candidates: [CanvasEntity.self, OldCanvasEntity.self]
+        )
     }
 
     public func undo() {

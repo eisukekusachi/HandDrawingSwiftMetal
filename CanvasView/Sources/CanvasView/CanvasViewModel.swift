@@ -398,7 +398,7 @@ public extension CanvasViewModel {
         undoStack?.redo()
     }
 
-    func loadFile(zipFileURL: URL) {
+    func loadFile(zipFileURL: URL, candidates: [CanvasEntityConvertible.Type]) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -411,7 +411,8 @@ public extension CanvasViewModel {
                 )
 
                 let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName),
+                    candidates: candidates
                 )
                 let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,

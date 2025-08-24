@@ -35,34 +35,33 @@ extension CanvasEntity {
         self.layers = canvasState.layers.map { .init(from: $0) }
     }
 
-    init(fileURL: URL) throws {
-        if let entity: CanvasEntity = try FileInput.loadJson(fileURL) {
-            self = entity
+    init(fileURL: URL, candidates: [CanvasEntityConvertible.Type]) throws {
+        let decoder = JSONDecoder()
+        let jsonString: String = try String(contentsOf: fileURL, encoding: .utf8)
+        let dataJson = jsonString.data(using: .utf8) ?? Data()
 
-        } else if let entity: OldCanvasEntity = try FileInput.loadJson(fileURL) {
-            self.thumbnailName = entity.thumbnailName ?? ""
-
-            self.textureSize = entity.textureSize ?? .zero
-
-            self.layerIndex = 0
-            self.layers = [.init(
-                textureName: entity.textureName ?? "",
-                title: "NewLayer",
-                alpha: 255,
-                isVisible: true)
-            ]
-
-        } else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
+        for type in candidates {
+            if let decoded = try? decoder.decode(type, from: dataJson) {
+                self = decoded.entity()
+                return
+            }
         }
+
+        let error = NSError(
+            domain: "CanvasEntity",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Unable to decode CanvasEntity"]
+        )
+        Logger.error(error)
+        throw error
     }
 }
 
+extension CanvasEntity: CanvasEntityConvertible {
+    public func entity() -> CanvasEntity {
+        self
+    }
+}
 extension CanvasEntity: LocalFileConvertible {
     public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
