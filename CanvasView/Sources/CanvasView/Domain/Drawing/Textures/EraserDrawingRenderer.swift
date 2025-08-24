@@ -55,8 +55,8 @@ public extension EraserDrawingRenderer {
     func getDiameter() -> Int {
         diameter
     }
-    func setDiameter(_ diameter: Float) {
-        self.diameter = EraserDrawingRenderer.diameterIntValue(diameter)
+    func setDiameter(_ diameter: Int) {
+        self.diameter = diameter
     }
 
     func setAlpha(_ alpha: Int) {

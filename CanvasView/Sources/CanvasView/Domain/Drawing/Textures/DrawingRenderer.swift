@@ -15,7 +15,7 @@ public protocol DrawingRenderer {
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)
 
-    func setDiameter(_ diameter: Float)
+    func setDiameter(_ diameter: Int)
 
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],

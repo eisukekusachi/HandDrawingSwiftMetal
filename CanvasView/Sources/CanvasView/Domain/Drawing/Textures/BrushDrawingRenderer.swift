@@ -53,8 +53,8 @@ public extension BrushDrawingRenderer {
     func getDiameter() -> Int {
         diameter
     }
-    func setDiameter(_ diameter: Float) {
-        self.diameter = BrushDrawingRenderer.diameterIntValue(diameter)
+    func setDiameter(_ diameter: Int) {
+        self.diameter = diameter
     }
 
     func setColor(_ color: UIColor) {

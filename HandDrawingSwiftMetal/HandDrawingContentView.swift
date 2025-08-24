@@ -69,19 +69,24 @@ final class HandDrawingContentView: UIView {
         redoButton.isHidden = true
 
         updateDrawingComponents(
-            viewModel.drawingTool
+            viewModel.drawingTool.type
         )
     }
 
-    func setup(_ configuration: CanvasResolvedConfiguration) {
-        let brushDiameter = BrushDrawingRenderer.diameterFloatValue(brushDrawingRenderer.getDiameter())
-        let eraserDiameter = EraserDrawingRenderer.diameterFloatValue(eraserDrawingRenderer.getDiameter())
+    func setup() {
+        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        brushDiameterSlider.setValue(
+            BrushDrawingRenderer.diameterFloatValue(viewModel.drawingTool.brushDiameter),
+            animated: false
+        )
 
-        brushDrawingRenderer.setDiameter(brushDiameter)
-        brushDiameterSlider.setValue(brushDiameter, animated: false)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        eraserDiameterSlider.setValue(
+            EraserDrawingRenderer.diameterFloatValue(viewModel.drawingTool.eraserDiameter),
+            animated: false
+        )
 
-        eraserDrawingRenderer.setDiameter(eraserDiameter)
-        eraserDiameterSlider.setValue(eraserDiameter, animated: false)
+        updateDrawingComponents(viewModel.drawingTool.type)
 
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.canvasView.alpha = 1.0
@@ -109,11 +114,23 @@ private extension HandDrawingContentView {
                 self.eraserDrawingRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
+
+        viewModel.drawingTool.$brushDiameter
+            .sink { [weak self] diameter in
+                self?.brushDrawingRenderer.setDiameter(diameter)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingTool.$eraserDiameter
+            .sink { [weak self] diameter in
+                self?.eraserDrawingRenderer.setDiameter(diameter)
+            }
+            .store(in: &cancellables)
     }
 
     func changeDrawingTool() {
         viewModel.changeDrawingTool()
-        updateDrawingComponents(viewModel.drawingTool)
+        updateDrawingComponents(viewModel.drawingTool.type)
     }
 
     func addEvents() {
@@ -158,12 +175,12 @@ private extension HandDrawingContentView {
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.brushDrawingRenderer.setDiameter(slider.value)
+            self?.viewModel.drawingTool.setBrushDiameter(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.eraserDrawingRenderer.setDiameter(slider.value)
+            self?.viewModel.drawingTool.setEraserDiameter(slider.value)
         }, for: .valueChanged)
     }
 
@@ -182,6 +199,8 @@ private extension HandDrawingContentView {
 
         eraserDiameterSlider.isHidden = tool != .eraser
         eraserPaletteView.isHidden = tool != .eraser
+
+        canvasView.setDrawingTool(tool.rawValue)
     }
 
     /*

@@ -18,6 +18,7 @@
 		D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168F212E59F14A007F7904 /* UIImageExtensions.swift */; };
 		D4168F242E59F7B4007F7904 /* EraserPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168F232E59F7B4007F7904 /* EraserPaletteView.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
+		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
@@ -74,6 +75,7 @@
 		D4168F212E59F14A007F7904 /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4168F232E59F7B4007F7904 /* EraserPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteView.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
+		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				D4168DAA2E594E84007F7904 /* BrushPalette.swift */,
+				D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */,
 				D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */,
 				D4168DAC2E594E9A007F7904 /* EraserPalette.swift */,
 				D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */,
@@ -458,6 +461,7 @@
 				D4168F1E2E59F0E1007F7904 /* ColorCircle.swift in Sources */,
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D4168DAD2E594E9A007F7904 /* EraserPalette.swift in Sources */,
+				D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingContentViewModel.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,

@@ -52,8 +52,8 @@ extension HandDrawingViewController {
 
         contentView.canvasView.canvasViewSetupCompleted
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.contentView.setup(configuration)
+            .sink { [weak self] _ in
+                self?.contentView.setup()
             }
             .store(in: &cancellables)
 

@@ -13,13 +13,18 @@ final class HandDrawingContentViewModel: ObservableObject {
 
     private let drawingToolController: PersistenceController
 
+    @Published var drawingTool: DrawingTool
     @Published var brushPalette: BrushPalette
     @Published var eraserPalette: EraserPalette
 
-    var drawingTool: DrawingToolType = .brush
-
     public init() {
         drawingToolController = PersistenceController(modelName: "DrawingToolStorage")
+
+        drawingTool = DrawingTool(
+            storage: DrawingTool.CoreDataStorage(
+                context: drawingToolController.context
+            )
+        )
 
         brushPalette = BrushPalette(
             initialColors: [
@@ -49,10 +54,6 @@ final class HandDrawingContentViewModel: ObservableObject {
     }
 
     func changeDrawingTool() {
-        if drawingTool == .brush {
-            drawingTool = .eraser
-        } else {
-            drawingTool = .brush
-        }
+        drawingTool.setDrawingTool(drawingTool.type == .brush ? .eraser: .brush)
     }
 }
