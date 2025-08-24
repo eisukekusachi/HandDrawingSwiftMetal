@@ -25,9 +25,9 @@ public protocol DrawingTextureSet {
     ) -> [GrayscaleDotPoint]
 
     /// Updates the realtime drawing texture by curve points from the given iterator
-    func drawCurveOnRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
-        drawingCurve: DrawingCurve,
+    func drawCurve(
+        _ drawingCurve: DrawingCurve,
+        using baseTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?

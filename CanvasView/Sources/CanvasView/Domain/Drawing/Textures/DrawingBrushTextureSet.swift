@@ -79,9 +79,9 @@ public extension DrawingBrushTextureSet {
         }
     }
 
-    func drawCurveOnRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
-        drawingCurve: DrawingCurve,
+    func drawCurve(
+        _ drawingCurve: DrawingCurve,
+        using baseTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?

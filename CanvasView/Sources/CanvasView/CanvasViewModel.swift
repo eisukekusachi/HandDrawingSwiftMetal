@@ -173,9 +173,9 @@ public final class CanvasViewModel {
                     let commandBuffer = self?.displayView?.commandBuffer
                 else { return }
 
-                self?.drawingTextureSet?.drawCurveOnRealTimeDrawingTexture(
-                    baseTexture: texture,
-                    drawingCurve: drawingCurve,
+                self?.drawingTextureSet?.drawCurve(
+                    drawingCurve,
+                    using: texture,
                     with: commandBuffer,
                     onDrawing: { [weak self] resultTexture in
                         self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
