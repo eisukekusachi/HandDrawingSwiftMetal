@@ -34,9 +34,9 @@ class HandDrawingViewController: UIViewController {
         bindData()
 
         contentView.canvasView.initialize(
-            drawingTools: [
-                contentView.brush,
-                contentView.eraser
+            drawingRenderers: [
+                contentView.brushDrawingRenderer,
+                contentView.eraserDrawingRenderer
             ],
             configuration: configuration
         )
@@ -94,8 +94,8 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.contentView.canvasView.saveFile(
                 drawingTool: 0,
-                brushDiameter: self.contentView.brush.getDiameter(),
-                eraserDiameter: self.contentView.eraser.getDiameter()
+                brushDiameter: self.contentView.brushDrawingRenderer.getDiameter(),
+                eraserDiameter: self.contentView.eraserDrawingRenderer.getDiameter()
             )
         }
         contentView.tapLoadButton = { [weak self] in

@@ -8,9 +8,9 @@
 import Combine
 import MetalKit
 
-/// A protocol for a set of textures for realtime drawing
+/// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
-public protocol DrawingTextureSet {
+public protocol DrawingRenderer {
 
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)

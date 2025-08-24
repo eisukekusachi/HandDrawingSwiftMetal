@@ -76,8 +76,8 @@ public final class CanvasViewModel {
     private var drawingCurve: DrawingCurve?
 
     /// A texture set for realtime drawing
-    private var drawingTextureSet: DrawingTextureSet?
-    private var drawingTools: [DrawingTextureSet] = []
+    private var drawingRenderer: DrawingRenderer?
+    private var drawingRenderers: [DrawingRenderer] = []
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -107,15 +107,15 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     func initialize(
-        drawingTools: [DrawingTextureSet],
+        drawingRenderers: [DrawingRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration,
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
-        self.drawingTools = drawingTools
-        self.drawingTextureSet = self.drawingTools[0]
+        self.drawingRenderers = drawingRenderers
+        self.drawingRenderer = self.drawingRenderers[0]
 
         self.dependencies = dependencies
 
@@ -173,7 +173,7 @@ public final class CanvasViewModel {
                     let commandBuffer = self?.displayView?.commandBuffer
                 else { return }
 
-                self?.drawingTextureSet?.drawCurve(
+                self?.drawingRenderer?.drawCurve(
                     drawingCurve,
                     using: texture,
                     with: commandBuffer,
@@ -194,32 +194,7 @@ public final class CanvasViewModel {
                 )
             }
             .store(in: &cancellables)
-/*
-        // Update drawingTextureSet when the tool is switched
-        canvasState.$drawingTool
-            .sink { [weak self] tool in
-                guard let `self` else { return }
-                switch tool {
-                case .brush: self.drawingTextureSet = self.drawingBrushTextureSet
-                case .eraser: self.drawingTextureSet = self.drawingEraserTextureSet
-                }
-            }
-            .store(in: &cancellables)
 
-        // Update the color of drawingBrushTextureSet when the brush color changes
-        canvasState.brush.$color
-            .sink { [weak self] color in
-                self?.drawingBrushTextureSet.setBrushColor(color)
-            }
-            .store(in: &cancellables)
-
-        // Update the alpha of drawingEraserTextureSet when the eraser alpha changes
-        canvasState.eraser.$alpha
-            .sink { [weak self] alpha in
-                self?.drawingEraserTextureSet.setEraserAlpha(alpha)
-            }
-            .store(in: &cancellables)
-*/
         // Update the canvas
         canvasState.canvasUpdateSubject
             .sink { [weak self] in
@@ -294,8 +269,8 @@ public extension CanvasViewModel {
     }
 
     private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
-        for i in 0 ..< drawingTools.count {
-            drawingTools[i].initTextures(configuration.textureSize)
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initTextures(configuration.textureSize)
         }
 
         undoStack?.initialize(configuration.textureSize)
@@ -407,8 +382,8 @@ public extension CanvasViewModel {
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
-        guard drawingToolIndex < drawingTools.count else { return }
-        drawingTextureSet = drawingTools[drawingToolIndex]
+        guard drawingToolIndex < drawingRenderers.count else { return }
+        drawingRenderer = drawingRenderers[drawingToolIndex]
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
@@ -552,12 +527,12 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let drawingTextureSet,
+            let drawingRenderer,
             let drawableSize = displayView?.displayTexture?.size
         else { return }
 
         drawingCurve?.append(
-            points: drawingTextureSet.curvePoints(
+            points: drawingRenderer.curvePoints(
                 screenTouchPoints,
                 matrix: transforming.matrix.inverted(flipY: true),
                 drawableSize: drawableSize,
@@ -603,7 +578,7 @@ extension CanvasViewModel {
             let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()
         else { return }
 
-        drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
+        drawingRenderer?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 
         fingerStroke.reset()
