@@ -86,7 +86,6 @@ private struct PreviewView: View {
             textureSize: .zero,
             layerIndex: 0,
             layers: layers.map { .init(item: $0, thumbnail: nil) },
-            drawingTool: .brush,
             brushColors: [],
             brushIndex: 0,
             brushDiameter: 0,

@@ -34,6 +34,10 @@ class HandDrawingViewController: UIViewController {
         bindData()
 
         contentView.canvasView.initialize(
+            drawingTools: [
+                contentView.brush,
+                contentView.eraser
+            ],
             configuration: configuration
         )
 
@@ -87,7 +91,12 @@ extension HandDrawingViewController {
             self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.contentView.canvasView.saveFile()
+            guard let `self` else { return }
+            self.contentView.canvasView.saveFile(
+                drawingTool: 0,
+                brushDiameter: self.contentView.brush.getDiameter(),
+                eraserDiameter: self.contentView.eraser.getDiameter()
+            )
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()

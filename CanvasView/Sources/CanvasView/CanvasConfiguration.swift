@@ -16,8 +16,6 @@ public struct CanvasConfiguration: Sendable {
     public let layerIndex: Int
     public let layers: [TextureLayerItem]
 
-    public let drawingTool: DrawingToolType
-
     public let brushColors: [IntRGBA]
     public let brushIndex: Int
     public let brushDiameter: Int
@@ -31,7 +29,6 @@ public struct CanvasConfiguration: Sendable {
         textureSize: CGSize? = nil,
         layerIndex: Int = 0,
         layers: [TextureLayerItem] = [],
-        drawingTool: DrawingToolType = .brush,
         brushColors: [IntRGBA] = [.init(0, 0, 0, 255)],
         brushIndex: Int = 0,
         brushDiameter: Int = 8,
@@ -43,8 +40,6 @@ public struct CanvasConfiguration: Sendable {
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
-
-        self.drawingTool = drawingTool
 
         self.brushColors = brushColors
         self.brushIndex = brushIndex
@@ -71,8 +66,6 @@ extension CanvasConfiguration {
         self.layers = entity.layers.map {
             .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
         }
-
-        self.drawingTool = .init(rawValue: entity.drawingTool)
 
         self.brushColors = [UIColor.black.withAlphaComponent(0.75).rgba]
         self.brushIndex = 0
@@ -131,8 +124,6 @@ extension CanvasConfiguration {
         }
 
         self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-
-        self.drawingTool = .brush
     }
 
     public init(
@@ -145,8 +136,6 @@ extension CanvasConfiguration {
 
         self.layerIndex = configuration.layerIndex
         self.layers = configuration.layers
-
-        self.drawingTool = configuration.drawingTool
 
         self.brushColors = configuration.brushColors
         self.brushIndex = configuration.brushIndex
@@ -167,8 +156,6 @@ extension CanvasConfiguration {
 
         self.layerIndex = configuration.layerIndex
         self.layers = newLayers
-
-        self.drawingTool = configuration.drawingTool
 
         self.brushColors = configuration.brushColors
         self.brushIndex = configuration.brushIndex

@@ -16,8 +16,6 @@ public struct CanvasResolvedConfiguration {
     public let layerIndex: Int
     public let layers: [TextureLayerModel]
 
-    public let drawingTool: DrawingToolType
-
     // TODO: Remove brush-related code
     public let brushColors: [IntRGBA]
     public let brushIndex: Int
@@ -33,7 +31,6 @@ public struct CanvasResolvedConfiguration {
         textureSize: CGSize,
         layerIndex: Int,
         layers: [TextureLayerModel],
-        drawingTool: DrawingToolType,
         brushColors: [IntRGBA],
         brushIndex: Int,
         brushDiameter: Int,
@@ -45,7 +42,6 @@ public struct CanvasResolvedConfiguration {
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
-        self.drawingTool = drawingTool
         self.brushColors = brushColors
         self.brushIndex = brushIndex
         self.brushDiameter = brushDiameter
@@ -70,8 +66,6 @@ public extension CanvasResolvedConfiguration {
         self.layers = configuration.layers.map {
             .init(item: $0, thumbnail: nil)
         }
-
-        self.drawingTool = configuration.drawingTool
 
         self.brushColors = configuration.brushColors
         self.brushIndex = configuration.brushIndex

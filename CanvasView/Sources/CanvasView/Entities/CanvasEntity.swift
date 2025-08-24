@@ -31,7 +31,10 @@ extension CanvasEntity {
 
     init(
         thumbnailName: String,
-        canvasState: CanvasState
+        canvasState: CanvasState,
+        drawingTool: Int,
+        brushDiameter: Int,
+        eraserDiameter: Int
     ) {
         self.thumbnailName = thumbnailName
 
@@ -39,10 +42,9 @@ extension CanvasEntity {
         self.layerIndex = canvasState.selectedIndex ?? 0
         self.layers = canvasState.layers.map { .init(from: $0) }
 
-        self.drawingTool = canvasState.drawingTool.rawValue
-
-        self.brushDiameter = canvasState.brush.diameter
-        self.eraserDiameter = canvasState.eraser.diameter
+        self.drawingTool = drawingTool
+        self.brushDiameter = brushDiameter
+        self.eraserDiameter = eraserDiameter
     }
 
     init(fileURL: URL) throws {

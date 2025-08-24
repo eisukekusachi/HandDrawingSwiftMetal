@@ -38,6 +38,9 @@ final class HandDrawingContentView: UIView {
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
 
+    let brush = DrawingBrushTextureSet()
+    let eraser = DrawingEraserTextureSet()
+
     let viewModel = HandDrawingContentViewModel()
 
     private var cancellables = Set<AnyCancellable>()
@@ -71,17 +74,14 @@ final class HandDrawingContentView: UIView {
     }
 
     func setup(_ configuration: CanvasResolvedConfiguration) {
+        let brushDiameter = DrawingBrushTextureSet.diameterFloatValue(configuration.brushDiameter)
+        let eraserDiameter = DrawingEraserTextureSet.diameterFloatValue(configuration.eraserDiameter)
 
-        brushDiameterSlider.setValue(
-            DrawingBrushToolState.diameterFloatValue(configuration.brushDiameter),
-            animated: false
-        )
-        eraserDiameterSlider.setValue(
-            DrawingEraserToolState.diameterFloatValue(configuration.eraserDiameter),
-            animated: false
-        )
+        brush.setDiameter(brushDiameter)
+        brushDiameterSlider.setValue(brushDiameter, animated: false)
 
-        updateDrawingComponents(configuration.drawingTool)
+        eraser.setDiameter(eraserDiameter)
+        eraserDiameterSlider.setValue(eraserDiameter, animated: false)
 
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.canvasView.alpha = 1.0
@@ -98,7 +98,7 @@ private extension HandDrawingContentView {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
-                self.canvasView.setBrushColor(newColor)
+                self.brush.setColor(newColor)
             }
             .store(in: &cancellables)
 
@@ -106,7 +106,7 @@ private extension HandDrawingContentView {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
-                self.canvasView.setEraserAlpha(newAlpha)
+                self.eraser.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
     }
@@ -123,7 +123,7 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         saveButton.addAction(.init { [weak self] _ in
-            self?.canvasView.saveFile()
+            self?.tapSaveButton?()
         }, for: .touchUpInside)
 
         layerButton.addAction(.init { [weak self] _ in
@@ -158,23 +158,23 @@ private extension HandDrawingContentView {
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.canvasView.setBrushDiameter(slider.value)
+            self?.brush.setDiameter(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.canvasView.setEraserDiameter(slider.value)
+            self?.eraser.setDiameter(slider.value)
         }, for: .valueChanged)
     }
 
     func updateDrawingComponents(_ tool: DrawingToolType) {
         if tool == .brush {
             drawingToolButton.setImage(.init(systemName: "pencil.line"), for: .normal)
-            canvasView.setDrawingTool(.brush)
+            canvasView.setDrawingTool(DrawingToolType.brush.rawValue)
 
         } else {
             drawingToolButton.setImage(.init(named: "DrawingEraser"), for: .normal)
-            canvasView.setDrawingTool(.eraser)
+            canvasView.setDrawingTool(DrawingToolType.eraser.rawValue)
         }
 
         brushDiameterSlider.isHidden = tool != .brush

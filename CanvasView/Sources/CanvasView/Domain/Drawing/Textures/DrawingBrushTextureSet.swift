@@ -12,6 +12,11 @@ import MetalKit
 @MainActor
 public final class DrawingBrushTextureSet: DrawingTextureSet {
 
+    private var color: UIColor = .black
+
+    private var diameter: Int = 8
+
+    private var textureSize: CGSize!
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
@@ -20,11 +25,9 @@ public final class DrawingBrushTextureSet: DrawingTextureSet {
 
     private let renderer: MTLRendering
 
-    private var brushColor: UIColor = .black
-
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required public init(renderer: MTLRendering = MTLRenderer.shared) {
+    public required init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -37,6 +40,7 @@ public final class DrawingBrushTextureSet: DrawingTextureSet {
 public extension DrawingBrushTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
+        self.textureSize = textureSize
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
@@ -46,11 +50,36 @@ public extension DrawingBrushTextureSet {
         temporaryRenderCommandBuffer.commit()
     }
 
-    func setBrushColor(_ color: UIColor) {
-        brushColor = color
+    func getDiameter() -> Int {
+        diameter
+    }
+    func setDiameter(_ diameter: Float) {
+        self.diameter = DrawingBrushTextureSet.diameterIntValue(diameter)
     }
 
-    func updateRealTimeDrawingTexture(
+    func setColor(_ color: UIColor) {
+        self.color = color
+    }
+
+    func curvePoints(
+        _ screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        frameSize: CGSize
+    ) -> [GrayscaleDotPoint] {
+        screenTouchPoints.map {
+            .init(
+                matrix: matrix,
+                touchPoint: $0,
+                textureSize: textureSize,
+                drawableSize: drawableSize,
+                frameSize: frameSize,
+                diameter: CGFloat(diameter)
+            )
+        }
+    }
+
+    func drawCurveOnRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
@@ -98,7 +127,7 @@ extension DrawingBrushTextureSet {
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
-                alpha: brushColor.alpha,
+                alpha: color.alpha,
                 textureSize: drawingTexture.size,
                 with: device
             ),
@@ -108,7 +137,7 @@ extension DrawingBrushTextureSet {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: brushColor.rgb,
+            color: color.rgb,
             on: drawingTexture,
             with: commandBuffer
         )
@@ -142,5 +171,19 @@ extension DrawingBrushTextureSet {
         )
 
         clearTextures(with: commandBuffer)
+    }
+}
+
+extension DrawingBrushTextureSet {
+    static private let minDiameter: Int = 1
+    static private let maxDiameter: Int = 64
+
+    static private let initBrushSize: Int = 8
+
+    public static func diameterIntValue(_ value: Float) -> Int {
+        Int(value * Float(maxDiameter - minDiameter)) + minDiameter
+    }
+    public static func diameterFloatValue(_ value: Int) -> Float {
+        Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

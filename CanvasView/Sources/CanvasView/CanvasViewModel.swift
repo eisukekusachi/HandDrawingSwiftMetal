@@ -77,10 +77,7 @@ public final class CanvasViewModel {
 
     /// A texture set for realtime drawing
     private var drawingTextureSet: DrawingTextureSet?
-    /// A brush texture set for realtime drawing
-    private let drawingBrushTextureSet = DrawingBrushTextureSet()
-    /// An eraser texture set for realtime drawing
-    private let drawingEraserTextureSet = DrawingEraserTextureSet()
+    private var drawingTools: [DrawingTextureSet] = []
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -110,12 +107,16 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     func initialize(
+        drawingTools: [DrawingTextureSet],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration,
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
+        self.drawingTools = drawingTools
+        self.drawingTextureSet = self.drawingTools[0]
+
         self.dependencies = dependencies
 
         self.renderer.initialize(
@@ -172,7 +173,7 @@ public final class CanvasViewModel {
                     let commandBuffer = self?.displayView?.commandBuffer
                 else { return }
 
-                self?.drawingTextureSet?.updateRealTimeDrawingTexture(
+                self?.drawingTextureSet?.drawCurveOnRealTimeDrawingTexture(
                     baseTexture: texture,
                     drawingCurve: drawingCurve,
                     with: commandBuffer,
@@ -193,7 +194,7 @@ public final class CanvasViewModel {
                 )
             }
             .store(in: &cancellables)
-
+/*
         // Update drawingTextureSet when the tool is switched
         canvasState.$drawingTool
             .sink { [weak self] tool in
@@ -218,7 +219,7 @@ public final class CanvasViewModel {
                 self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
-
+*/
         // Update the canvas
         canvasState.canvasUpdateSubject
             .sink { [weak self] in
@@ -293,9 +294,9 @@ public extension CanvasViewModel {
     }
 
     private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
-
-        drawingBrushTextureSet.initTextures(configuration.textureSize)
-        drawingEraserTextureSet.initTextures(configuration.textureSize)
+        for i in 0 ..< drawingTools.count {
+            drawingTools[i].initTextures(configuration.textureSize)
+        }
 
         undoStack?.initialize(configuration.textureSize)
 
@@ -405,20 +406,9 @@ public extension CanvasViewModel {
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
-    func setDrawingTool(_ drawingTool: DrawingToolType) {
-        canvasState.setDrawingTool(drawingTool)
-    }
-    func setBrushColor(_ color: UIColor) {
-        canvasState.brush.color = color
-    }
-    func setBrushDiameter(_ value: Float) {
-        canvasState.brush.setDiameter(value)
-    }
-    func setEraserAlpha(_ alpha: Int) {
-        canvasState.eraser.alpha = alpha
-    }
-    func setEraserDiameter(_ value: Float) {
-        canvasState.eraser.setDiameter(value)
+    func setDrawingTool(_ drawingToolIndex: Int) {
+        guard drawingToolIndex < drawingTools.count else { return }
+        drawingTextureSet = drawingTools[drawingToolIndex]
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
@@ -482,7 +472,11 @@ public extension CanvasViewModel {
         }
     }
 
-    func saveFile() {
+    func saveFile(
+        drawingTool: Int,
+        brushDiameter: Int,
+        eraserDiameter: Int
+    ) {
         guard
             let canvasTexture = renderer.canvasTexture,
             let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
@@ -497,7 +491,10 @@ public extension CanvasViewModel {
         )
         let entity = CanvasEntity(
             thumbnailName: CanvasEntity.thumbnailName,
-            canvasState: canvasState
+            canvasState: canvasState,
+            drawingTool: drawingTool,
+            brushDiameter: brushDiameter,
+            eraserDiameter: eraserDiameter
         )
 
         Task {
@@ -558,21 +555,17 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let drawableSize = displayView?.displayTexture?.size,
-            let diameter = canvasState.drawingToolDiameter
+            let drawingTextureSet,
+            let drawableSize = displayView?.displayTexture?.size
         else { return }
 
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    matrix: transforming.matrix.inverted(flipY: true),
-                    touchPoint: $0,
-                    textureSize: canvasState.textureSize,
-                    drawableSize: drawableSize,
-                    frameSize: renderer.frameSize,
-                    diameter: CGFloat(diameter)
-                )
-            },
+            points: drawingTextureSet.curvePoints(
+                screenTouchPoints,
+                matrix: transforming.matrix.inverted(flipY: true),
+                drawableSize: drawableSize,
+                frameSize: renderer.frameSize
+            ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )
 

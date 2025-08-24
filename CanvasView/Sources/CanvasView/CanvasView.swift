@@ -11,6 +11,8 @@ import UIKit
 @MainActor
 @objc public class CanvasView: UIView {
 
+    private var drawingTools: [DrawingTextureSet] = []
+
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
@@ -41,13 +43,6 @@ import UIKit
 
     public var currentTextureSize: CGSize {
         canvasViewModel.currentTextureSize
-    }
-
-    public var brushDiameter: Int {
-        canvasViewModel.canvasState.brush.diameter
-    }
-    public var eraserDiameter: Int {
-        canvasViewModel.canvasState.eraser.diameter
     }
 
     public var textureLayerConfiguration: TextureLayerConfiguration {
@@ -84,6 +79,7 @@ import UIKit
     }
 
     public func initialize(
+        drawingTools: [DrawingTextureSet],
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
@@ -91,6 +87,7 @@ import UIKit
         let size = UIScreen.main.bounds.size
 
         canvasViewModel.initialize(
+            drawingTools: drawingTools,
             dependencies: .init(
                 environmentConfiguration: environmentConfiguration
             ),
@@ -117,26 +114,20 @@ import UIKit
         canvasViewModel.resetTransforming()
     }
 
-    public func setDrawingTool(_ drawingTool: DrawingToolType) {
-        canvasViewModel.setDrawingTool(drawingTool)
+    public func setDrawingTool(_ drawingToolType: Int) {
+        canvasViewModel.setDrawingTool(drawingToolType)
     }
 
-    public func setBrushColor(_ color: UIColor) {
-        canvasViewModel.setBrushColor(color)
-    }
-    public func setBrushDiameter(_ diameter: Float) {
-        canvasViewModel.setBrushDiameter(diameter)
-    }
-
-    public func setEraserAlpha(_ alpha: Int) {
-        canvasViewModel.setEraserAlpha(alpha)
-    }
-    public func setEraserDiameter(_ diameter: Float) {
-        canvasViewModel.setEraserDiameter(diameter)
-    }
-
-    public func saveFile() {
-        canvasViewModel.saveFile()
+    public func saveFile(
+        drawingTool: Int,
+        brushDiameter: Int,
+        eraserDiameter: Int
+    ) {
+        canvasViewModel.saveFile(
+            drawingTool: drawingTool,
+            brushDiameter: brushDiameter,
+            eraserDiameter: eraserDiameter
+        )
     }
     public func loadFile(zipFileURL: URL) {
         canvasViewModel.loadFile(zipFileURL: zipFileURL)

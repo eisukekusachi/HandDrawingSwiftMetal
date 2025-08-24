@@ -10,10 +10,13 @@ import MetalKit
 
 /// A set of textures for realtime eraser drawing
 @MainActor
-final class DrawingEraserTextureSet: DrawingTextureSet {
+public final class DrawingEraserTextureSet: DrawingTextureSet {
 
-    private var eraserAlpha: Int = 255
+    private var alpha: Int = 255
 
+    private var diameter: Int = 8
+
+    private var textureSize: CGSize!
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
@@ -25,7 +28,7 @@ final class DrawingEraserTextureSet: DrawingTextureSet {
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    required init(renderer: MTLRendering = MTLRenderer.shared) {
+    public required init(renderer: MTLRendering = MTLRenderer.shared) {
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
@@ -35,9 +38,10 @@ final class DrawingEraserTextureSet: DrawingTextureSet {
     }
 }
 
-extension DrawingEraserTextureSet {
+public extension DrawingEraserTextureSet {
 
     func initTextures(_ textureSize: CGSize) {
+        self.textureSize = textureSize
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
         self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
         self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
@@ -48,11 +52,36 @@ extension DrawingEraserTextureSet {
         temporaryRenderCommandBuffer.commit()
     }
 
-    func setEraserAlpha(_ alpha: Int) {
-        eraserAlpha = alpha
+    func getDiameter() -> Int {
+        diameter
+    }
+    func setDiameter(_ diameter: Float) {
+        self.diameter = DrawingEraserTextureSet.diameterIntValue(diameter)
     }
 
-    func updateRealTimeDrawingTexture(
+    func setAlpha(_ alpha: Int) {
+        self.alpha = alpha
+    }
+
+    func curvePoints(
+        _ screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        frameSize: CGSize
+    ) -> [GrayscaleDotPoint] {
+        screenTouchPoints.map {
+            .init(
+                matrix: matrix,
+                touchPoint: $0,
+                textureSize: textureSize,
+                drawableSize: drawableSize,
+                frameSize: frameSize,
+                diameter: CGFloat(diameter)
+            )
+        }
+    }
+
+    func drawCurveOnRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer,
@@ -101,7 +130,7 @@ extension DrawingEraserTextureSet {
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
-                alpha: eraserAlpha,
+                alpha: alpha,
                 textureSize: lineDrawnTexture.size,
                 with: device
             ),
@@ -154,5 +183,19 @@ extension DrawingEraserTextureSet {
         )
 
         clearTextures(with: commandBuffer)
+    }
+}
+
+public extension DrawingEraserTextureSet {
+    static private let minDiameter: Int = 1
+    static private let maxDiameter: Int = 64
+
+    static private let initEraserSize: Int = 8
+
+    static func diameterIntValue(_ value: Float) -> Int {
+        Int(value * Float(maxDiameter - minDiameter)) + minDiameter
+    }
+    static func diameterFloatValue(_ value: Int) -> Float {
+        Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }
