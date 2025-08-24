@@ -37,12 +37,7 @@ extension CanvasEntity {
 
     init(fileURL: URL) throws {
         if let entity: CanvasEntity = try FileInput.loadJson(fileURL) {
-            self.thumbnailName = entity.thumbnailName
-
-            self.textureSize = entity.textureSize
-
-            self.layerIndex = entity.layerIndex
-            self.layers = entity.layers
+            self = entity
 
         } else if let entity: OldCanvasEntity = try FileInput.loadJson(fileURL) {
             self.thumbnailName = entity.thumbnailName ?? ""
