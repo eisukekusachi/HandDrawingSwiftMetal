@@ -14,11 +14,6 @@ public struct CanvasEntity: Codable, Equatable {
     let layers: [TextureLayerEntity]
 
     let thumbnailName: String
-
-    let drawingTool: Int
-
-    let brushDiameter: Int
-    let eraserDiameter: Int
 }
 
 extension CanvasEntity {
@@ -31,20 +26,13 @@ extension CanvasEntity {
 
     init(
         thumbnailName: String,
-        canvasState: CanvasState,
-        drawingTool: Int,
-        brushDiameter: Int,
-        eraserDiameter: Int
+        canvasState: CanvasState
     ) {
         self.thumbnailName = thumbnailName
 
         self.textureSize = canvasState.textureSize
         self.layerIndex = canvasState.selectedIndex ?? 0
         self.layers = canvasState.layers.map { .init(from: $0) }
-
-        self.drawingTool = drawingTool
-        self.brushDiameter = brushDiameter
-        self.eraserDiameter = eraserDiameter
     }
 
     init(fileURL: URL) throws {
@@ -55,10 +43,6 @@ extension CanvasEntity {
 
             self.layerIndex = entity.layerIndex
             self.layers = entity.layers
-
-            self.drawingTool = entity.drawingTool
-            self.brushDiameter = entity.brushDiameter
-            self.eraserDiameter = entity.eraserDiameter
 
         } else if let entity: OldCanvasEntity = try FileInput.loadJson(fileURL) {
             self.thumbnailName = entity.thumbnailName ?? ""
@@ -72,10 +56,6 @@ extension CanvasEntity {
                 alpha: 255,
                 isVisible: true)
             ]
-
-            self.drawingTool = entity.drawingTool ?? 0
-            self.brushDiameter = entity.brushDiameter ?? 8
-            self.eraserDiameter = entity.eraserDiameter ?? 8
 
         } else {
             let error = NSError(

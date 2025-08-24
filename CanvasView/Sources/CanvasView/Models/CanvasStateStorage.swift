@@ -91,10 +91,7 @@ extension CanvasStateStorage {
 
     private func bindCanvasStateToCoreDataEntities(canvasState: CanvasState?, coreDataRepository: CoreDataRepository) {
         guard
-            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
-            let drawingToolStorage = canvasStorageEntity.drawingTool,
-            let brushStorage = drawingToolStorage.brush,
-            let eraserStorage = drawingToolStorage.eraser
+            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
 
         cancellables.removeAll()

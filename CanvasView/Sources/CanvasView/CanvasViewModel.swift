@@ -491,10 +491,7 @@ public extension CanvasViewModel {
         )
         let entity = CanvasEntity(
             thumbnailName: CanvasEntity.thumbnailName,
-            canvasState: canvasState,
-            drawingTool: drawingTool,
-            brushDiameter: brushDiameter,
-            eraserDiameter: eraserDiameter
+            canvasState: canvasState
         )
 
         Task {

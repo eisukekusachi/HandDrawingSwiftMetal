@@ -16,38 +16,16 @@ public struct CanvasConfiguration: Sendable {
     public let layerIndex: Int
     public let layers: [TextureLayerItem]
 
-    public let brushColors: [IntRGBA]
-    public let brushIndex: Int
-    public let brushDiameter: Int
-
-    public let eraserAlphas: [Int]
-    public let eraserIndex: Int
-    public let eraserDiameter: Int
-
     public init(
         projectName: String = Calendar.currentDate,
         textureSize: CGSize? = nil,
         layerIndex: Int = 0,
-        layers: [TextureLayerItem] = [],
-        brushColors: [IntRGBA] = [.init(0, 0, 0, 255)],
-        brushIndex: Int = 0,
-        brushDiameter: Int = 8,
-        eraserAlphas: [Int] = [255],
-        eraserIndex: Int = 0,
-        eraserDiameter: Int = 44
+        layers: [TextureLayerItem] = []
     ) {
         self.projectName = projectName
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
-
-        self.brushColors = brushColors
-        self.brushIndex = brushIndex
-        self.brushDiameter = brushDiameter
-
-        self.eraserAlphas = eraserAlphas
-        self.eraserIndex = eraserIndex
-        self.eraserDiameter = eraserDiameter
     }
 }
 
@@ -66,14 +44,6 @@ extension CanvasConfiguration {
         self.layers = entity.layers.map {
             .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
         }
-
-        self.brushColors = [UIColor.black.withAlphaComponent(0.75).rgba]
-        self.brushIndex = 0
-        self.brushDiameter = entity.brushDiameter
-
-        self.eraserAlphas = [155]
-        self.eraserIndex = 0
-        self.eraserDiameter = entity.eraserDiameter
     }
 
     public init(
@@ -85,27 +55,6 @@ extension CanvasConfiguration {
             width: CGFloat(entity.textureWidth),
             height: CGFloat(entity.textureHeight)
         )
-
-        if let brush = entity.drawingTool?.brush,
-           let colorHexString = brush.colorHex {
-            self.brushColors = [UIColor(hex: colorHexString).rgba]
-            self.brushIndex = 0
-            self.brushDiameter = Int(brush.diameter)
-        } else {
-            self.brushColors = [UIColor.black.withAlphaComponent(0.75).rgba]
-            self.brushIndex = 0
-            self.brushDiameter = 8
-        }
-
-        if let eraser = entity.drawingTool?.eraser {
-            self.eraserAlphas = [Int(eraser.alpha)]
-            self.eraserIndex = 0
-            self.eraserDiameter = Int(eraser.diameter)
-        } else {
-            self.eraserAlphas = [155]
-            self.eraserIndex = 0
-            self.eraserDiameter = 44
-        }
 
         if let layers = entity.textureLayers as? Set<TextureLayerStorageEntity> {
             self.layers = layers
@@ -136,14 +85,6 @@ extension CanvasConfiguration {
 
         self.layerIndex = configuration.layerIndex
         self.layers = configuration.layers
-
-        self.brushColors = configuration.brushColors
-        self.brushIndex = configuration.brushIndex
-        self.brushDiameter = configuration.brushDiameter
-
-        self.eraserAlphas = configuration.eraserAlphas
-        self.eraserIndex = configuration.eraserIndex
-        self.eraserDiameter = configuration.eraserDiameter
     }
 
     public init(
@@ -156,13 +97,5 @@ extension CanvasConfiguration {
 
         self.layerIndex = configuration.layerIndex
         self.layers = newLayers
-
-        self.brushColors = configuration.brushColors
-        self.brushIndex = configuration.brushIndex
-        self.brushDiameter = configuration.brushDiameter
-
-        self.eraserAlphas = configuration.eraserAlphas
-        self.eraserIndex = configuration.eraserIndex
-        self.eraserDiameter = configuration.eraserDiameter
     }
 }

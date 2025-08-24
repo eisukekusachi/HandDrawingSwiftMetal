@@ -113,13 +113,7 @@ private struct PreviewView: View {
             projectName: "",
             textureSize: .zero,
             layerIndex: 0,
-            layers: layers.map { .init(item: $0, thumbnail: nil) },
-            brushColors: [],
-            brushIndex: 0,
-            brushDiameter: 0,
-            eraserAlphas: [],
-            eraserIndex: 0,
-            eraserDiameter: 0
+            layers: layers.map { .init(item: $0, thumbnail: nil) }
         )
 
         canvasState.initialize(

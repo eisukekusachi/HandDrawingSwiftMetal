@@ -74,8 +74,8 @@ final class HandDrawingContentView: UIView {
     }
 
     func setup(_ configuration: CanvasResolvedConfiguration) {
-        let brushDiameter = DrawingBrushTextureSet.diameterFloatValue(configuration.brushDiameter)
-        let eraserDiameter = DrawingEraserTextureSet.diameterFloatValue(configuration.eraserDiameter)
+        let brushDiameter = DrawingBrushTextureSet.diameterFloatValue(brush.getDiameter())
+        let eraserDiameter = DrawingEraserTextureSet.diameterFloatValue(eraser.getDiameter())
 
         brush.setDiameter(brushDiameter)
         brushDiameterSlider.setValue(brushDiameter, animated: false)

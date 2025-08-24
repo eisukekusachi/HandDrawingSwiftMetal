@@ -16,38 +16,16 @@ public struct CanvasResolvedConfiguration {
     public let layerIndex: Int
     public let layers: [TextureLayerModel]
 
-    // TODO: Remove brush-related code
-    public let brushColors: [IntRGBA]
-    public let brushIndex: Int
-    public let brushDiameter: Int
-
-    // TODO: Remove eraser-related code
-    public let eraserAlphas: [Int]
-    public let eraserIndex: Int
-    public let eraserDiameter: Int
-
     public init(
         projectName: String,
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [TextureLayerModel],
-        brushColors: [IntRGBA],
-        brushIndex: Int,
-        brushDiameter: Int,
-        eraserAlphas: [Int],
-        eraserIndex: Int,
-        eraserDiameter: Int
+        layers: [TextureLayerModel]
     ) {
         self.projectName = projectName
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
-        self.brushColors = brushColors
-        self.brushIndex = brushIndex
-        self.brushDiameter = brushDiameter
-        self.eraserAlphas = eraserAlphas
-        self.eraserIndex = eraserIndex
-        self.eraserDiameter = eraserDiameter
     }
 }
 
@@ -66,25 +44,9 @@ public extension CanvasResolvedConfiguration {
         self.layers = configuration.layers.map {
             .init(item: $0, thumbnail: nil)
         }
-
-        self.brushColors = configuration.brushColors
-        self.brushIndex = configuration.brushIndex
-        self.brushDiameter = configuration.brushDiameter
-
-        self.eraserAlphas = configuration.eraserAlphas
-        self.eraserIndex = configuration.eraserIndex
-        self.eraserDiameter = configuration.eraserDiameter
     }
 
     var selectedLayerId: UUID {
         layers[layerIndex].id
-    }
-
-    var brushColor: UIColor {
-        UIColor.init(rgba: brushColors[brushIndex])
-    }
-
-    var eraserAlpha: Int {
-        eraserAlphas[eraserIndex]
     }
 }
