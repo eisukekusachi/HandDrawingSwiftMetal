@@ -238,11 +238,11 @@ private extension HandDrawingContentView {
 
     func updateDrawingComponents(_ tool: DrawingToolType) {
         if tool == .brush {
-            drawingToolButton.setImage(.init(systemName: "pencil.line"), for: .normal)
+            drawingToolButton.setImage(.init(systemName: "pencil"), for: .normal)
             canvasView.setDrawingTool(DrawingToolType.brush.rawValue)
 
         } else {
-            drawingToolButton.setImage(.init(named: "DrawingEraser"), for: .normal)
+            drawingToolButton.setImage(.init(systemName: "eraser"), for: .normal)
             canvasView.setDrawingTool(DrawingToolType.eraser.rawValue)
         }
 
