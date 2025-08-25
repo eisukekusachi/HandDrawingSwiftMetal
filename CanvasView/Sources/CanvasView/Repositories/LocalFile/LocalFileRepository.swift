@@ -24,4 +24,8 @@ public protocol LocalFileRepository: Sendable {
 
     /// Saves multiple file items to the working directory
     func saveAllItemsToWorkingDirectory<T: LocalFileConvertible & Sendable>(namedItems: [LocalFileNamedItem<T>]) async throws -> [URL]
+
+    func saveItemToWorkingDirectory(namedItem: AnyLocalFileNamedItem) async throws -> URL
+
+    func saveAllItemsToWorkingDirectory(namedItems: [AnyLocalFileNamedItem]) async throws -> [URL]
 }

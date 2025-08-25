@@ -66,7 +66,7 @@ public extension DefaultLocalFileRepository {
     func saveItemToWorkingDirectory<T: LocalFileConvertible>(
         namedItem: LocalFileNamedItem<T>
     ) async throws -> URL {
-        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.name)
+        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.fileName)
         try namedItem.item.write(to: fileURL)
         return fileURL
     }
@@ -74,6 +74,34 @@ public extension DefaultLocalFileRepository {
     /// Saves multiple file items to the working directory
     func saveAllItemsToWorkingDirectory<T: LocalFileConvertible & Sendable>(
         namedItems: [LocalFileNamedItem<T>]
+    ) async throws -> [URL] {
+        try await withThrowingTaskGroup(of: URL.self) { group in
+            for namedItem in namedItems {
+                let item = namedItem
+                group.addTask {
+                    try await self.saveItemToWorkingDirectory(namedItem: item)
+                }
+            }
+
+            var urls: [URL] = []
+            for try await url in group {
+                urls.append(url)
+            }
+            return urls
+        }
+    }
+
+    /// Saves a single file item to the working directory
+    func saveItemToWorkingDirectory(
+        namedItem: AnyLocalFileNamedItem
+    ) async throws -> URL {
+        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.fileName)
+        try namedItem.write(to: fileURL)
+        return fileURL
+    }
+
+    func saveAllItemsToWorkingDirectory(
+        namedItems: [AnyLocalFileNamedItem]
     ) async throws -> [URL] {
         try await withThrowingTaskGroup(of: URL.self) { group in
             for namedItem in namedItems {

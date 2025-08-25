@@ -92,7 +92,13 @@ extension HandDrawingViewController {
         }
         contentView.tapSaveButton = { [weak self] in
             guard let `self` else { return }
-            self.contentView.canvasView.saveFile()
+            self.contentView.canvasView.saveFile(
+                additionalItems: [
+                    DrawingToolFile.anyNamedItem(from: contentView.viewModel.drawingTool),
+                    BrushPaletteFile.anyNamedItem(from: contentView.viewModel.brushPalette),
+                    EraserPaletteFile.anyNamedItem(from: contentView.viewModel.eraserPalette)
+                ]
+            )
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -194,8 +200,7 @@ extension HandDrawingViewController {
                 self?.contentView.canvasView.loadFile(
                     zipFileURL: url,
                     candidates: [
-                        CanvasEntity.self,
-                        OldCanvasEntity.self
+                        CanvasEntity.self
                     ]
                 )
             }

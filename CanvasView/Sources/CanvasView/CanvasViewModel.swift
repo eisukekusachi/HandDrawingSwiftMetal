@@ -448,7 +448,9 @@ public extension CanvasViewModel {
         }
     }
 
-    func saveFile() {
+    func saveFile(
+        additionalItems: [AnyLocalFileNamedItem] = []
+    ) {
         // Create a thumbnail image from the current canvas texture
         guard
             let canvasTexture = renderer.canvasTexture,
@@ -473,13 +475,13 @@ public extension CanvasViewModel {
 
                 // Save the thumbnail image into the working directory
                 async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnailImage)
+                    namedItem: .init(fileName: CanvasEntity.thumbnailName, item: thumbnailImage)
                 )
 
                 // Save the textures into the working directory
                 async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
                     namedItems: textures.map {
-                        .init(name: $0.uuid.uuidString, item: $0)
+                        .init(fileName: $0.uuid.uuidString, item: $0)
                     }
                 )
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
@@ -488,7 +490,12 @@ public extension CanvasViewModel {
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
                     namedItem: CanvasEntity.namedItem(canvasState)
                 )
-                _ = try await (resultCanvasEntity)
+
+                async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
+                    namedItems: additionalItems
+                )
+
+                _ = try await (resultCanvasEntity, resultAdditional)
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(

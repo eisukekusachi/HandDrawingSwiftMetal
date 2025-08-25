@@ -118,8 +118,10 @@ import UIKit
         canvasViewModel.setDrawingTool(drawingToolType)
     }
 
-    public func saveFile() {
-        canvasViewModel.saveFile()
+    public func saveFile(additionalItems: [AnyLocalFileNamedItem] = []) {
+        canvasViewModel.saveFile(
+            additionalItems: additionalItems
+        )
     }
     public func loadFile(zipFileURL: URL, candidates: [CanvasEntityConvertible.Type]) {
         canvasViewModel.loadFile(
