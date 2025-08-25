@@ -8,17 +8,26 @@
 import Combine
 import MetalKit
 
-/// A protocol for a set of textures for realtime drawing
+/// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
-protocol DrawingTextureSet {
+public protocol DrawingRenderer {
 
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initTextures(_ textureSize: CGSize)
 
+    func setDiameter(_ diameter: Int)
+
+    func curvePoints(
+        _ screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform,
+        drawableSize: CGSize,
+        frameSize: CGSize
+    ) -> [GrayscaleDotPoint]
+
     /// Updates the realtime drawing texture by curve points from the given iterator
-    func updateRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
-        drawingCurve: DrawingCurve,
+    func drawCurve(
+        _ drawingCurve: DrawingCurve,
+        using baseTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?

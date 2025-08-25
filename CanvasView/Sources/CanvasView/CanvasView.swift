@@ -11,6 +11,8 @@ import UIKit
 @MainActor
 @objc public class CanvasView: UIView {
 
+    private var drawingRenderers: [DrawingRenderer] = []
+
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
@@ -35,19 +37,12 @@ import UIKit
     }
 
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
+    public var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
     public var currentTextureSize: CGSize {
         canvasViewModel.currentTextureSize
-    }
-
-    public var brushDiameter: Int {
-        canvasViewModel.canvasState.brush.diameter
-    }
-    public var eraserDiameter: Int {
-        canvasViewModel.canvasState.eraser.diameter
     }
 
     public var textureLayerConfiguration: TextureLayerConfiguration {
@@ -62,7 +57,7 @@ import UIKit
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -84,6 +79,7 @@ import UIKit
     }
 
     public func initialize(
+        drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
@@ -91,6 +87,7 @@ import UIKit
         let size = UIScreen.main.bounds.size
 
         canvasViewModel.initialize(
+            drawingRenderers: drawingRenderers,
             dependencies: .init(
                 environmentConfiguration: environmentConfiguration
             ),
@@ -117,26 +114,25 @@ import UIKit
         canvasViewModel.resetTransforming()
     }
 
-    public func setDrawingTool(_ drawingTool: DrawingToolType) {
-        canvasViewModel.setDrawingTool(drawingTool)
+    public func setDrawingTool(_ drawingToolType: Int) {
+        canvasViewModel.setDrawingTool(drawingToolType)
     }
 
-    public func setBrushColor(_ color: UIColor) {
-        canvasViewModel.setBrushColor(color)
+    public func saveFile(additionalItems: [AnyLocalFileNamedItem] = []) {
+        canvasViewModel.saveFile(
+            additionalItems: additionalItems
+        )
     }
-
-    public func setBrushDiameter(_ diameter: Float) {
-        canvasViewModel.setBrushDiameter(diameter)
-    }
-    public func setEraserDiameter(_ diameter: Float) {
-        canvasViewModel.setEraserDiameter(diameter)
-    }
-
-    public func saveFile() {
-        canvasViewModel.saveFile()
-    }
-    public func loadFile(zipFileURL: URL) {
-        canvasViewModel.loadFile(zipFileURL: zipFileURL)
+    public func loadFile(
+        zipFileURL: URL,
+        requiredEntityType: [CanvasEntityConvertible.Type],
+        optionalEntities: [AnyLocalFileLoader] = []
+    ) {
+        canvasViewModel.loadFile(
+            zipFileURL: zipFileURL,
+            requiredEntityType: requiredEntityType,
+            optionalEntities: optionalEntities
+        )
     }
 
     public func undo() {

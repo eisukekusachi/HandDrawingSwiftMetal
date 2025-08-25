@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TextureLayerEntity: Codable, Equatable {
+public struct TextureLayerEntity: Codable, Equatable, Sendable {
     /// The filename of the texture
     /// MTLTexture cannot be encoded into JSON,
     /// the texture is saved as a file, and this struct holds the `textureName` of the texture.
@@ -19,6 +19,12 @@ struct TextureLayerEntity: Codable, Equatable {
     /// Whether the layer is visible or not
     let isVisible: Bool
 
+    public init(textureName: String, title: String, alpha: Int, isVisible: Bool) {
+        self.textureName = textureName
+        self.title = title
+        self.alpha = alpha
+        self.isVisible = isVisible
+    }
 }
 
 extension TextureLayerEntity {
@@ -34,5 +40,4 @@ extension TextureLayerEntity {
     static func id(from entity: TextureLayerEntity) -> UUID {
         UUID.init(uuidString: entity.textureName) ?? UUID()
     }
-
 }

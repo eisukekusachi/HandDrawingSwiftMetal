@@ -44,38 +44,43 @@ private struct PreviewView: View {
     init() {
         let canvasState = CanvasState()
 
-        canvasState.initialize(
-            configuration: .init(
-                textureSize: .init(width: 44, height: 44),
-                layerIndex: 3,
-                layers: [
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer0",
-                        alpha: 255
-                    ),
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer1",
-                        alpha: 200
-                    ),
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer2",
-                        alpha: 150
-                    ),
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer3",
-                        alpha: 100
-                    ),
-                    .init(
-                        textureName: UUID().uuidString,
-                        title: "Layer4",
-                        alpha: 50
-                    ),
-                ]
+        let layers: [TextureLayerItem] = [
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer0",
+                alpha: 255
+            ),
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer1",
+                alpha: 200
+            ),
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer2",
+                alpha: 150
+            ),
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer3",
+                alpha: 100
+            ),
+            .init(
+                textureName: UUID().uuidString,
+                title: "Layer4",
+                alpha: 50
             )
+        ]
+
+        let canvasResolvedConfiguration: CanvasResolvedConfiguration = .init(
+            projectName: "",
+            textureSize: .zero,
+            layerIndex: 0,
+            layers: layers.map { .init(item: $0, thumbnail: nil) }
+        )
+
+        canvasState.initialize(
+            configuration: canvasResolvedConfiguration
         )
 
         viewModel.initialize(

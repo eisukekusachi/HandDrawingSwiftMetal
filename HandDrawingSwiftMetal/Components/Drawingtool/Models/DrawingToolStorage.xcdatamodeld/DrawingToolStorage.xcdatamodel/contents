@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24270" systemVersion="24G90" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="BrushPaletteEntity" representedClassName="BrushPaletteEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="index" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="paletteColorGroup" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PaletteColorEntity" inverseName="brushPaletteEntity" inverseEntity="PaletteColorEntity"/>
+    </entity>
+    <entity name="DrawingToolEntity" representedClassName="DrawingToolEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="brushDiameter" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="eraserDiameter" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="EraserPaletteEntity" representedClassName="EraserPaletteEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="index" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="paletteAlphaGroup" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="PaletteAlphaEntity" inverseName="eraserPaletteEntity" inverseEntity="PaletteAlphaEntity"/>
+    </entity>
+    <entity name="PaletteAlphaEntity" representedClassName="PaletteAlphaEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="alpha" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="eraserPaletteEntity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EraserPaletteEntity" inverseName="paletteAlphaGroup" inverseEntity="EraserPaletteEntity"/>
+    </entity>
+    <entity name="PaletteColorEntity" representedClassName="PaletteColorEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="hex" optional="YES" attributeType="String"/>
+        <relationship name="brushPaletteEntity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BrushPaletteEntity" inverseName="paletteColorGroup" inverseEntity="BrushPaletteEntity"/>
+    </entity>
+</model>

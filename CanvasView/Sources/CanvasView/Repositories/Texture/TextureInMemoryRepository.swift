@@ -45,8 +45,11 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         self.renderer = renderer
     }
 
-    func initializeStorage(configuration: CanvasConfiguration) async throws -> CanvasConfiguration {
-        let textureSize = configuration.textureSize ?? .zero
+    func initializeStorage(
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
+        let textureSize = configuration.textureSize ?? defaultTextureSize
 
         guard
             Int(textureSize.width) > MTLRenderer.threadGroupLength &&
@@ -77,10 +80,19 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        return .init(textureSize: textureSize, layers: [layer])
+        let configuration: CanvasConfiguration = .init(textureSize: textureSize, layers: [layer])
+
+        return try await .init(
+            configuration: configuration,
+            resolvedTextureSize: textureSize
+        )
     }
 
-    func restoreStorage(from sourceFolderURL: URL, with configuration: CanvasConfiguration) async throws {
+    func restoreStorage(
+        from sourceFolderURL: URL,
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws -> CanvasResolvedConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -104,17 +116,10 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             throw error
         }
 
+        let textureSize = configuration.textureSize ?? defaultTextureSize
+
         // Temporary dictionary to hold new textures before applying
         var newTextures: [UUID: MTLTexture] = [:]
-
-        guard let textureSize = configuration.textureSize else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Invalid value", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
 
         try configuration.layers.forEach { layer in
             let textureData = try Data(
@@ -150,6 +155,11 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
         textures = newTextures
         setTextureSize(textureSize)
+
+        return try await .init(
+            configuration: configuration,
+            resolvedTextureSize: textureSize
+        )
     }
 
     func setTextureSize(_ size: CGSize) {

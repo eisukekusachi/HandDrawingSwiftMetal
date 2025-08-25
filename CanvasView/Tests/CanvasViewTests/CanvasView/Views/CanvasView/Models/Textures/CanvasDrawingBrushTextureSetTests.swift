@@ -99,9 +99,9 @@ final class DrawingBrushTextureSetTests: XCTestCase {
             var didCallDrawingTexture: MTLTexture?
             var didCallDrawingCompletedTexture: MTLTexture?
 
-            subject.updateRealTimeDrawingTexture(
-                baseTexture: baseTexture,
-                drawingCurve: iterator,
+            subject.drawCurveOnRealTimeDrawingTexture(
+                iterator,
+                using: baseTexture,
                 with: commandBuffer,
                 onDrawing: { resultTexture in
                     didCallDrawingTexture = resultTexture
