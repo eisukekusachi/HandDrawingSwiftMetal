@@ -40,3 +40,5 @@ extension EraserPaletteFile {
         AnyLocalFileNamedItem(Self.namedItem(from: palette))
     }
 }
+
+extension EraserPaletteFile: LocalFileLoadable {}

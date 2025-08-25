@@ -41,12 +41,13 @@ extension CanvasEntity {
         self.layers = canvasState.layers.map { .init(from: $0) }
     }
 
-    init(fileURL: URL, candidates: [CanvasEntityConvertible.Type]) throws {
+    /// Initializes `CanvasEntity` by trying to decode with the given compatible types and restoring from the first that succeeds
+    init(fileURL: URL, compatibleTypes: [CanvasEntityConvertible.Type]) throws {
         let decoder = JSONDecoder()
         let jsonString: String = try String(contentsOf: fileURL, encoding: .utf8)
         let dataJson = jsonString.data(using: .utf8) ?? Data()
 
-        for type in candidates {
+        for type in compatibleTypes {
             if let decoded = try? decoder.decode(type, from: dataJson) {
                 self = decoded.entity()
                 return

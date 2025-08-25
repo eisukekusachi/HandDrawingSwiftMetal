@@ -43,6 +43,58 @@ final class HandDrawingContentView: UIView {
 
     let viewModel = HandDrawingContentViewModel()
 
+    lazy var drawingToolLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileNamedLoader<DrawingToolFile>(
+                fileName: DrawingToolFile.fileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.drawingTool.update(
+                        type: .init(rawValue: file.type),
+                        brushDiameter: file.brushDiameter,
+                        eraserDiameter: file.eraserDiameter
+                    )
+                }
+            },
+            // Since this file is optional, if it is not found or an error occurs, simply do nothing
+            ignoreError: true
+         )
+    }()
+
+    lazy var brushPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileNamedLoader<BrushPaletteFile>(
+                fileName: BrushPaletteFile.fileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.brushPalette.update(
+                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
+                        currentIndex: file.index
+                    )
+                }
+            },
+            // Since this file is optional, if it is not found or an error occurs, simply do nothing
+            ignoreError: true
+         )
+    }()
+
+    lazy var eraserPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileNamedLoader<EraserPaletteFile>(
+                fileName: EraserPaletteFile.fileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.eraserPalette.update(
+                        alphas: file.alphas,
+                        currentIndex: file.index
+                    )
+                }
+            },
+            // Since this file is optional, if it is not found or an error occurs, simply do nothing
+            ignoreError: true
+         )
+    }()
+
     private var cancellables = Set<AnyCancellable>()
 
     override init(frame: CGRect) {

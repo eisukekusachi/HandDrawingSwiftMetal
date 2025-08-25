@@ -32,8 +32,7 @@ final class HandDrawingContentViewModel: ObservableObject {
                 .gray.withAlphaComponent(0.8),
                 .red.withAlphaComponent(0.8),
                 .blue.withAlphaComponent(0.8),
-                .green.withAlphaComponent(0.8),
-                .yellow.withAlphaComponent(0.8)
+                .green.withAlphaComponent(0.8)
             ],
             storage: BrushPalette.CoreDataStorage(
                 context: drawingToolController.context

@@ -42,3 +42,5 @@ extension DrawingToolFile {
         AnyLocalFileNamedItem(Self.namedItem(from: drawingTool))
     }
 }
+
+extension DrawingToolFile: LocalFileLoadable {}

@@ -40,3 +40,5 @@ extension BrushPaletteFile {
         AnyLocalFileNamedItem(Self.namedItem(from: palette))
     }
 }
+
+extension BrushPaletteFile: LocalFileLoadable {}

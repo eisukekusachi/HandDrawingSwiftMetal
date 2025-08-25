@@ -398,7 +398,11 @@ public extension CanvasViewModel {
         undoStack?.redo()
     }
 
-    func loadFile(zipFileURL: URL, candidates: [CanvasEntityConvertible.Type]) {
+    func loadFile(
+        zipFileURL: URL,
+        requiredEntityType: [CanvasEntityConvertible.Type],
+        optionalEntities: [AnyLocalFileLoader] = []
+    ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -412,7 +416,7 @@ public extension CanvasViewModel {
 
                 let entity: CanvasEntity = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName),
-                    candidates: candidates
+                    compatibleTypes: requiredEntityType
                 )
                 let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,
@@ -426,6 +430,10 @@ public extension CanvasViewModel {
                 )
 
                 setupCanvas(resolvedConfiguration)
+
+                for entity in optionalEntities {
+                    try entity.load(in: workingDirectoryURL)
+                }
 
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()

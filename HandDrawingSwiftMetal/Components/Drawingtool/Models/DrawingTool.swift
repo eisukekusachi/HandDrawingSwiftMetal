@@ -93,6 +93,20 @@ public final class DrawingTool: ObservableObject {
             return try context.fetch(request).first
         }
     }
+}
+
+extension DrawingTool {
+
+    func update(
+        type: DrawingToolType,
+        brushDiameter: Int,
+        eraserDiameter: Int
+    ) {
+        self.type = type
+        self.brushDiameter = brushDiameter
+        self.eraserDiameter = eraserDiameter
+        saveData()
+    }
 
     func setDrawingTool(_ type: DrawingToolType) {
         self.type = type

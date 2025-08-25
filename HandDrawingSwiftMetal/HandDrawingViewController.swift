@@ -196,11 +196,18 @@ extension HandDrawingViewController {
             targetURL: URL.documents,
             suffix: CanvasViewModel.fileSuffix,
             onTapItem: { [weak self] url in
-                self?.presentedViewController?.dismiss(animated: true)
-                self?.contentView.canvasView.loadFile(
+                guard let `self` else { return }
+
+                self.presentedViewController?.dismiss(animated: true)
+                self.contentView.canvasView.loadFile(
                     zipFileURL: url,
-                    candidates: [
+                    requiredEntityType: [
                         CanvasEntity.self
+                    ],
+                    optionalEntities: [
+                        self.contentView.drawingToolLoader,
+                        self.contentView.brushPaletteLoader,
+                        self.contentView.eraserPaletteLoader
                     ]
                 )
             }

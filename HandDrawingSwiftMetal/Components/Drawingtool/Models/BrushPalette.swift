@@ -100,6 +100,16 @@ public final class BrushPalette: ObservableObject {
 }
 
 extension BrushPalette {
+
+    public func update(
+        colors: [UIColor] = [],
+        currentIndex: Int = 0
+    ) {
+        self.colors = colors
+        self.currentIndex = max(0, min(currentIndex, colors.count - 1))
+        saveData()
+    }
+
     public var currentColor: UIColor? {
         guard currentIndex < colors.count else { return nil }
         return colors[currentIndex]

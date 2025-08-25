@@ -97,6 +97,18 @@ public final class EraserPalette: ObservableObject {
             return try context.fetch(request).first
         }
     }
+}
+
+extension EraserPalette {
+
+    public func update(
+        alphas: [Int] = [],
+        currentIndex: Int = 0
+    ) {
+        self.alphas = alphas
+        self.currentIndex = max(0, min(currentIndex, alphas.count - 1))
+        saveData()
+    }
 
     public var currentAlpha: Int? {
         guard alphas.count < currentIndex else { return nil }
