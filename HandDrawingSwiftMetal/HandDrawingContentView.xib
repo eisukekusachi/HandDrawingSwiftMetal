@@ -142,7 +142,7 @@
                         <constraint firstAttribute="height" constant="44" id="sUD-Pe-cqd"/>
                     </constraints>
                     <state key="normal" title="Button"/>
-                    <buttonConfiguration key="configuration" style="plain" image="pencil.line" catalog="system"/>
+                    <buttonConfiguration key="configuration" style="plain"/>
                 </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
@@ -170,18 +170,10 @@
             </constraints>
             <point key="canvasLocation" x="90.839694656488547" y="20.422535211267608"/>
         </view>
-        <view contentMode="scaleToFill" id="3oh-Ng-uPp">
-            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-            <viewLayoutGuide key="safeArea" id="g0S-Hb-pMn"/>
-            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-            <point key="canvasLocation" x="-95" y="670"/>
-        </view>
     </objects>
     <resources>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
-        <image name="pencil.line" catalog="system" width="128" height="117"/>
         <image name="photo" catalog="system" width="128" height="93"/>
         <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
         <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
