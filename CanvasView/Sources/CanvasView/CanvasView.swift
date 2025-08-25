@@ -118,16 +118,8 @@ import UIKit
         canvasViewModel.setDrawingTool(drawingToolType)
     }
 
-    public func saveFile(
-        drawingTool: Int,
-        brushDiameter: Int,
-        eraserDiameter: Int
-    ) {
-        canvasViewModel.saveFile(
-            drawingTool: drawingTool,
-            brushDiameter: brushDiameter,
-            eraserDiameter: eraserDiameter
-        )
+    public func saveFile() {
+        canvasViewModel.saveFile()
     }
     public func loadFile(zipFileURL: URL, candidates: [CanvasEntityConvertible.Type]) {
         canvasViewModel.loadFile(

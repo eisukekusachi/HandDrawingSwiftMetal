@@ -32,10 +32,9 @@ extension CanvasEntity {
     static let thumbnailLength: CGFloat = 500
 
     init(
-        thumbnailName: String,
         canvasState: CanvasState
     ) {
-        self.thumbnailName = thumbnailName
+        self.thumbnailName = CanvasEntity.thumbnailName
 
         self.textureSize = canvasState.textureSize
         self.layerIndex = canvasState.selectedIndex ?? 0
@@ -69,7 +68,18 @@ extension CanvasEntity: CanvasEntityConvertible {
         self
     }
 }
+
 extension CanvasEntity: LocalFileConvertible {
+
+    public static func namedItem(_ canvasState: CanvasState) -> LocalFileNamedItem<CanvasEntity> {
+        .init(
+            name: CanvasEntity.jsonFileName,
+            item: .init(
+                canvasState: canvasState
+            )
+        )
+    }
+
     public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
     }

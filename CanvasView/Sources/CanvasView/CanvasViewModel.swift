@@ -448,59 +448,51 @@ public extension CanvasViewModel {
         }
     }
 
-    func saveFile(
-        drawingTool: Int,
-        brushDiameter: Int,
-        eraserDiameter: Int
-    ) {
+    func saveFile() {
+        // Create a thumbnail image from the current canvas texture
         guard
             let canvasTexture = renderer.canvasTexture,
-            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+            let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
                 height: CanvasEntity.thumbnailLength,
                 scale: 1.0
             )
         else { return }
-
-        let zipFileURL = FileManager.documentsFileURL(
-            projectName: canvasState.projectName,
-            suffix: CanvasViewModel.fileSuffix
-        )
-        let entity = CanvasEntity(
-            thumbnailName: CanvasEntity.thumbnailName,
-            canvasState: canvasState
-        )
 
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
 
             do {
+                // Create a temporary working directory for saving project files
                 try dependencies.localFileRepository.createWorkingDirectory()
 
-                let result = try await dependencies.textureRepository.copyTextures(
+                // Copy all textures from the textureRepository
+                let textures = try await dependencies.textureRepository.copyTextures(
                     uuids: canvasState.layers.map { $0.id }
                 )
 
-                async let resultThumbnail = try await dependencies.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
+                // Save the thumbnail image into the working directory
+                async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnailImage)
                 )
-                async let resultURLs: [URL] = try await dependencies.localFileRepository.saveAllToWorkingDirectory(
-                    namedItems: result.map {
+
+                // Save the textures into the working directory
+                async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
+                    namedItems: textures.map {
                         .init(name: $0.uuid.uuidString, item: $0)
                     }
                 )
-                _ = try await (resultThumbnail, resultURLs)
+                _ = try await (resultCanvasThumbnail, resultCanvasTextures)
 
-                async let resultEntity = try await dependencies.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(
-                        name: CanvasEntity.jsonFileName,
-                        item: entity
-                    )
+                // Save the canvas entity (JSON metadata)
+                async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: CanvasEntity.namedItem(canvasState)
                 )
-                _ = try await (resultEntity)
+                _ = try await (resultCanvasEntity)
 
+                // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL
+                    to: zipFileURL(fileName: canvasState.projectName)
                 )
 
                 /// Remove the working space
@@ -649,6 +641,16 @@ extension CanvasViewModel {
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
+        )
+    }
+}
+
+extension CanvasViewModel {
+
+    func zipFileURL(fileName: String) -> URL {
+        FileManager.documentsFileURL(
+            projectName: fileName,
+            suffix: CanvasViewModel.fileSuffix
         )
     }
 }

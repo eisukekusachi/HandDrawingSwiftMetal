@@ -92,11 +92,7 @@ extension HandDrawingViewController {
         }
         contentView.tapSaveButton = { [weak self] in
             guard let `self` else { return }
-            self.contentView.canvasView.saveFile(
-                drawingTool: 0,
-                brushDiameter: self.contentView.brushDrawingRenderer.getDiameter(),
-                eraserDiameter: self.contentView.eraserDrawingRenderer.getDiameter()
-            )
+            self.contentView.canvasView.saveFile()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
