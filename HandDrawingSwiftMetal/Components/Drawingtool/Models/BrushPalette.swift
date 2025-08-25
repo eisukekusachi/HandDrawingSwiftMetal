@@ -110,6 +110,12 @@ extension BrushPalette {
         saveData()
     }
 
+    public func reset() {
+        self.colors = initialColors
+        self.currentIndex = 0
+        saveData()
+    }
+
     public var currentColor: UIColor? {
         guard currentIndex < colors.count else { return nil }
         return colors[currentIndex]

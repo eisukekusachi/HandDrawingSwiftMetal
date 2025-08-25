@@ -121,9 +121,12 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
+            self.contentView.viewModel.drawingTool.reset()
+            self.contentView.viewModel.brushPalette.reset()
+            self.contentView.viewModel.eraserPalette.reset()
+
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
-
             self.contentView.canvasView.newCanvas(
                 configuration: CanvasConfiguration(
                     textureSize: .init(width: size.width * scale, height: size.height * scale)
@@ -231,7 +234,6 @@ extension HandDrawingViewController {
         toast.setupView(model)
         view.addSubview(toast)
     }
-
 }
 
 extension HandDrawingViewController {

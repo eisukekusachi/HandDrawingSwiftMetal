@@ -108,6 +108,13 @@ extension DrawingTool {
         saveData()
     }
 
+    func reset() {
+        self.type = .brush
+        self.brushDiameter = 8
+        self.eraserDiameter = 8
+        saveData()
+    }
+
     func setDrawingTool(_ type: DrawingToolType) {
         self.type = type
         saveData()

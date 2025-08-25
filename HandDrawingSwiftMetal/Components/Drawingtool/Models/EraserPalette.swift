@@ -110,6 +110,12 @@ extension EraserPalette {
         saveData()
     }
 
+    public func reset() {
+        self.alphas = initialAlphas
+        self.currentIndex = 0
+        saveData()
+    }
+
     public var currentAlpha: Int? {
         guard alphas.count < currentIndex else { return nil }
         return alphas[currentIndex]
