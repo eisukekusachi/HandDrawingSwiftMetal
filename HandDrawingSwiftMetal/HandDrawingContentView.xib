@@ -111,14 +111,14 @@
                     </constraints>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59x-cS-eat" userLabel="ContentView">
-                    <rect key="frame" x="60" y="746" width="221" height="32"/>
+                    <rect key="frame" x="68" y="746" width="213" height="32"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="450-qS-bWU">
-                            <rect key="frame" x="0.0" y="0.0" width="221" height="32"/>
+                            <rect key="frame" x="0.0" y="0.0" width="213" height="32"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gZx-i3-2bH">
-                            <rect key="frame" x="0.0" y="0.0" width="221" height="32"/>
+                            <rect key="frame" x="0.0" y="0.0" width="213" height="32"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                     </subviews>
@@ -136,7 +136,7 @@
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5LT-Wg-ht9" userLabel="DrawingToolButton">
-                    <rect key="frame" x="8" y="740" width="44" height="44"/>
+                    <rect key="frame" x="16" y="740" width="44" height="44"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="44" id="EnK-FW-Nkg"/>
                         <constraint firstAttribute="height" constant="44" id="sUD-Pe-cqd"/>
@@ -159,7 +159,7 @@
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="centerY" secondItem="P50-DK-emi" secondAttribute="centerY" id="IJP-iX-eIY"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="5LT-Wg-ht9" secondAttribute="bottom" id="JUX-Jd-dHq"/>
                 <constraint firstItem="P50-DK-emi" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="ZLC-p5-E1x"/>
-                <constraint firstItem="5LT-Wg-ht9" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="8" id="aM2-7s-yDd"/>
+                <constraint firstItem="5LT-Wg-ht9" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="16" id="aM2-7s-yDd"/>
                 <constraint firstItem="59x-cS-eat" firstAttribute="centerY" secondItem="5LT-Wg-ht9" secondAttribute="centerY" id="f73-fO-sl7"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="16" id="fM0-qC-Agx"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="P50-DK-emi" secondAttribute="trailing" constant="16" id="gUB-QZ-nmC"/>
