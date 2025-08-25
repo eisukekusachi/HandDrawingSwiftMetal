@@ -21,6 +21,9 @@ public final class DrawingTool: ObservableObject {
     @Published private(set) var brushDiameter: Int = 8
     @Published private(set) var eraserDiameter: Int = 8
 
+    private let initialBrushDiameter: Int
+    private let initialEraserDiameter: Int
+
     private let storage: DrawingToolStorageProtocol
 
     public init(
@@ -29,6 +32,9 @@ public final class DrawingTool: ObservableObject {
         initialEraserDiameter: Int = 8,
         storage: DrawingToolStorageProtocol
     ) {
+        self.initialBrushDiameter = initialBrushDiameter
+        self.initialEraserDiameter = initialEraserDiameter
+
         self.storage = storage
 
         Task {
@@ -110,8 +116,8 @@ extension DrawingTool {
 
     func reset() {
         self.type = .brush
-        self.brushDiameter = 8
-        self.eraserDiameter = 8
+        self.brushDiameter = initialBrushDiameter
+        self.eraserDiameter = initialEraserDiameter
         saveData()
     }
 

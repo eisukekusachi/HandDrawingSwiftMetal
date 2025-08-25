@@ -21,6 +21,9 @@
 		D426FC5C2E5C003400CC116D /* BrushPaletteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5B2E5C003400CC116D /* BrushPaletteFile.swift */; };
 		D426FC5E2E5C08AA00CC116D /* EraserPaletteFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5D2E5C08AA00CC116D /* EraserPaletteFile.swift */; };
 		D426FC602E5C0A8B00CC116D /* DrawingToolFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5F2E5C0A8B00CC116D /* DrawingToolFile.swift */; };
+		D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */; };
+		D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */; };
+		D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */; };
 		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
@@ -81,6 +84,9 @@
 		D426FC5B2E5C003400CC116D /* BrushPaletteFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPaletteFile.swift; sourceTree = "<group>"; };
 		D426FC5D2E5C08AA00CC116D /* EraserPaletteFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteFile.swift; sourceTree = "<group>"; };
 		D426FC5F2E5C0A8B00CC116D /* DrawingToolFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolFile.swift; sourceTree = "<group>"; };
+		D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPaletteTests.swift; sourceTree = "<group>"; };
+		D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteTests.swift; sourceTree = "<group>"; };
+		D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolTests.swift; sourceTree = "<group>"; };
 		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
@@ -173,6 +179,32 @@
 				D4168F232E59F7B4007F7904 /* EraserPaletteView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		D426FC612E5C4B2700CC116D /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				D426FC622E5C4B3000CC116D /* Drawingtool */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D426FC622E5C4B3000CC116D /* Drawingtool */ = {
+			isa = PBXGroup;
+			children = (
+				D426FC632E5C4B4200CC116D /* Models */,
+			);
+			path = Drawingtool;
+			sourceTree = "<group>";
+		};
+		D426FC632E5C4B4200CC116D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */,
+				D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */,
+				D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		D42F40992B4402EC00B32707 /* Components */ = {
@@ -271,6 +303,7 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
+				D426FC612E5C4B2700CC116D /* Components */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 			);
 			path = HandDrawingSwiftMetalTests;
@@ -485,7 +518,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
+				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
+				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

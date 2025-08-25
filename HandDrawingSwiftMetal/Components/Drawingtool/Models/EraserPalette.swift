@@ -110,14 +110,8 @@ extension EraserPalette {
         saveData()
     }
 
-    public func reset() {
-        self.alphas = initialAlphas
-        self.currentIndex = 0
-        saveData()
-    }
-
     public var currentAlpha: Int? {
-        guard alphas.count < currentIndex else { return nil }
+        guard currentIndex < alphas.count else { return nil }
         return alphas[currentIndex]
     }
 
@@ -127,11 +121,6 @@ extension EraserPalette {
 
     public func select(_ index: Int) {
         currentIndex = index
-        saveData()
-    }
-
-    public func append(_ alpha: Int) {
-        alphas.append(alpha)
         saveData()
     }
 
@@ -153,17 +142,14 @@ extension EraserPalette {
         saveData()
     }
 
-    public func removeAll() {
+    public func reset() {
         alphas = initialAlphas
         currentIndex = 0
         saveData()
     }
+}
 
-    public func replaceAll(with newAlphas: [Int]) {
-        alphas = newAlphas.isEmpty ? initialAlphas : newAlphas
-        currentIndex = 0
-        saveData()
-    }
+extension EraserPalette {
 
     private func saveData() {
         Task {
