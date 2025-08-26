@@ -32,7 +32,9 @@ final class HandDrawingContentViewModel: ObservableObject {
                 .gray.withAlphaComponent(0.8),
                 .red.withAlphaComponent(0.8),
                 .blue.withAlphaComponent(0.8),
-                .green.withAlphaComponent(0.8)
+                .green.withAlphaComponent(0.8),
+                .yellow.withAlphaComponent(0.8),
+                .purple.withAlphaComponent(0.8)
             ],
             storage: BrushPalette.CoreDataStorage(
                 context: drawingToolController.context
@@ -41,8 +43,11 @@ final class HandDrawingContentViewModel: ObservableObject {
         eraserPalette = EraserPalette(
             initialAlphas: [
                 255,
+                225,
                 200,
+                175,
                 150,
+                125,
                 100,
                 50
             ],
