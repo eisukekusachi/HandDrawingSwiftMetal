@@ -30,7 +30,7 @@ struct BrushPaletteView: View {
         spacing: CGFloat = 2,
         paddingVertical: CGFloat = 2,
         paddingHorizontal: CGFloat = 2,
-        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.25)
+        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15)
     ) {
         self.palette = palette
         self.paletteHeight = paletteHeight
