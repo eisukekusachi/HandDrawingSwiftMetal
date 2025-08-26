@@ -12,7 +12,6 @@ struct BrushPaletteView: View {
     private let paletteHeight: CGFloat
 
     private let paddingVertical: CGFloat
-    private let paddingHorizontal: CGFloat
 
     private let colorSize: CGFloat
 
@@ -29,13 +28,11 @@ struct BrushPaletteView: View {
         paletteHeight: CGFloat,
         spacing: CGFloat = 2,
         paddingVertical: CGFloat = 2,
-        paddingHorizontal: CGFloat = 2,
         backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15)
     ) {
         self.palette = palette
         self.paletteHeight = paletteHeight
         self.paddingVertical = paddingVertical
-        self.paddingHorizontal = paddingHorizontal
         self.colorSize = paletteHeight - paddingVertical * 2
         self.spacing = spacing
         self.backgroundColor = Color(backgroundColor)
@@ -59,7 +56,6 @@ struct BrushPaletteView: View {
         }
         .frame(height: paletteHeight)
         .padding(.vertical, paddingVertical)
-        .padding(.horizontal, paddingHorizontal)
         .background(backgroundColor)
         .cornerRadius(paletteHeight)
         .onAppear() {

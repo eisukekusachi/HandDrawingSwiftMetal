@@ -133,6 +133,7 @@
                         <constraint firstItem="gZx-i3-2bH" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="PxN-fy-CC8"/>
                         <constraint firstAttribute="bottom" secondItem="450-qS-bWU" secondAttribute="bottom" id="gnn-TM-lsC"/>
                         <constraint firstItem="gZx-i3-2bH" firstAttribute="top" secondItem="59x-cS-eat" secondAttribute="top" id="lWH-jR-1vZ"/>
+                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="250" id="xuK-IF-5BV"/>
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5LT-Wg-ht9" userLabel="DrawingToolButton">
@@ -151,7 +152,7 @@
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="1ki-Ki-Gw5"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3hA-PR-FpI"/>
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="4lu-2J-etw"/>
-                <constraint firstItem="w1G-k3-kW5" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="trailing" constant="8" id="BfW-B7-6aH"/>
+                <constraint firstItem="w1G-k3-kW5" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="trailing" priority="750" constant="8" id="BfW-B7-6aH"/>
                 <constraint firstItem="w1G-k3-kW5" firstAttribute="centerY" secondItem="5LT-Wg-ht9" secondAttribute="centerY" id="E8G-aa-3GT"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="Epa-wm-YYq"/>
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>

@@ -25,7 +25,7 @@ class HandDrawingViewController: UIViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let paletteHeight: CGFloat = 32
+    private let paletteHeight: CGFloat = 44
 
     override func viewDidLoad() {
         super.viewDidLoad()
