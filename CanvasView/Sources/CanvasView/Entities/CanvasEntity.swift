@@ -15,10 +15,12 @@ public struct CanvasEntity: Codable, Equatable {
 
     let thumbnailName: String
 
-    let drawingTool: Int
-
-    let brushDiameter: Int
-    let eraserDiameter: Int
+    public init(textureSize: CGSize, layerIndex: Int, layers: [TextureLayerEntity], thumbnailName: String) {
+        self.textureSize = textureSize
+        self.layerIndex = layerIndex
+        self.layers = layers
+        self.thumbnailName = thumbnailName
+    }
 }
 
 extension CanvasEntity {
@@ -30,63 +32,55 @@ extension CanvasEntity {
     static let thumbnailLength: CGFloat = 500
 
     init(
-        thumbnailName: String,
         canvasState: CanvasState
     ) {
-        self.thumbnailName = thumbnailName
+        self.thumbnailName = CanvasEntity.thumbnailName
 
         self.textureSize = canvasState.textureSize
         self.layerIndex = canvasState.selectedIndex ?? 0
         self.layers = canvasState.layers.map { .init(from: $0) }
-
-        self.drawingTool = canvasState.drawingTool.rawValue
-
-        self.brushDiameter = canvasState.brush.diameter
-        self.eraserDiameter = canvasState.eraser.diameter
     }
 
-    init(fileURL: URL) throws {
-        if let entity: CanvasEntity = try FileInput.loadJson(fileURL) {
-            self.thumbnailName = entity.thumbnailName
+    /// Initializes `CanvasEntity` by trying to decode with the given compatible types and restoring from the first that succeeds
+    init(fileURL: URL, compatibleTypes: [CanvasEntityConvertible.Type]) throws {
+        let decoder = JSONDecoder()
+        let jsonString: String = try String(contentsOf: fileURL, encoding: .utf8)
+        let dataJson = jsonString.data(using: .utf8) ?? Data()
 
-            self.textureSize = entity.textureSize
-
-            self.layerIndex = entity.layerIndex
-            self.layers = entity.layers
-
-            self.drawingTool = entity.drawingTool
-            self.brushDiameter = entity.brushDiameter
-            self.eraserDiameter = entity.eraserDiameter
-
-        } else if let entity: OldCanvasEntity = try FileInput.loadJson(fileURL) {
-            self.thumbnailName = entity.thumbnailName ?? ""
-
-            self.textureSize = entity.textureSize ?? .zero
-
-            self.layerIndex = 0
-            self.layers = [.init(
-                textureName: entity.textureName ?? "",
-                title: "NewLayer",
-                alpha: 255,
-                isVisible: true)
-            ]
-
-            self.drawingTool = entity.drawingTool ?? 0
-            self.brushDiameter = entity.brushDiameter ?? 8
-            self.eraserDiameter = entity.eraserDiameter ?? 8
-
-        } else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
+        for type in compatibleTypes {
+            if let decoded = try? decoder.decode(type, from: dataJson) {
+                self = decoded.entity()
+                return
+            }
         }
+
+        let error = NSError(
+            domain: "CanvasEntity",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Unable to decode CanvasEntity"]
+        )
+        Logger.error(error)
+        throw error
+    }
+}
+
+extension CanvasEntity: CanvasEntityConvertible {
+    public func entity() -> CanvasEntity {
+        self
     }
 }
 
 extension CanvasEntity: LocalFileConvertible {
+
+    public static func namedItem(_ canvasState: CanvasState) -> LocalFileNamedItem<CanvasEntity> {
+        .init(
+            fileName: CanvasEntity.jsonFileName,
+            item: .init(
+                canvasState: canvasState
+            )
+        )
+    }
+
     public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
     }

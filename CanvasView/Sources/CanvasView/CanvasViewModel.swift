@@ -45,7 +45,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<CanvasConfiguration, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -76,11 +76,8 @@ public final class CanvasViewModel {
     private var drawingCurve: DrawingCurve?
 
     /// A texture set for realtime drawing
-    private var drawingTextureSet: DrawingTextureSet?
-    /// A brush texture set for realtime drawing
-    private let drawingBrushTextureSet = DrawingBrushTextureSet()
-    /// An eraser texture set for realtime drawing
-    private let drawingEraserTextureSet = DrawingEraserTextureSet()
+    private var drawingRenderer: DrawingRenderer?
+    private var drawingRenderers: [DrawingRenderer] = []
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -101,7 +98,7 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -110,12 +107,16 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     func initialize(
+        drawingRenderers: [DrawingRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration,
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
+        self.drawingRenderers = drawingRenderers
+        self.drawingRenderer = self.drawingRenderers[0]
+
         self.dependencies = dependencies
 
         self.renderer.initialize(
@@ -151,13 +152,12 @@ public final class CanvasViewModel {
         self.displayView = displayView
 
         // Use the size from CoreData if available,
-        // if not, use the size from the configuration,
-        // otherwise, fall back to the default value
+        // if not, use the size from the configuration
         Task {
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.resolvedTextureSize(defaultTextureSize)
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration,
+                defaultTextureSize: defaultTextureSize
             )
-
             bindData()
         }
     }
@@ -173,9 +173,9 @@ public final class CanvasViewModel {
                     let commandBuffer = self?.displayView?.commandBuffer
                 else { return }
 
-                self?.drawingTextureSet?.updateRealTimeDrawingTexture(
-                    baseTexture: texture,
-                    drawingCurve: drawingCurve,
+                self?.drawingRenderer?.drawCurve(
+                    drawingCurve,
+                    using: texture,
                     with: commandBuffer,
                     onDrawing: { [weak self] resultTexture in
                         self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
@@ -192,31 +192,6 @@ public final class CanvasViewModel {
                         }
                     }
                 )
-            }
-            .store(in: &cancellables)
-
-        // Update drawingTextureSet when the tool is switched
-        canvasState.$drawingTool
-            .sink { [weak self] tool in
-                guard let `self` else { return }
-                switch tool {
-                case .brush: self.drawingTextureSet = self.drawingBrushTextureSet
-                case .eraser: self.drawingTextureSet = self.drawingEraserTextureSet
-                }
-            }
-            .store(in: &cancellables)
-
-        // Update the color of drawingBrushTextureSet when the brush color changes
-        canvasState.brush.$color
-            .sink { [weak self] color in
-                self?.drawingBrushTextureSet.setBrushColor(color)
-            }
-            .store(in: &cancellables)
-
-        // Update the alpha of drawingEraserTextureSet when the eraser alpha changes
-        canvasState.eraser.$alpha
-            .sink { [weak self] alpha in
-                self?.drawingEraserTextureSet.setEraserAlpha(alpha)
             }
             .store(in: &cancellables)
 
@@ -261,48 +236,48 @@ public extension CanvasViewModel {
         canvasState.textureSize
     }
 
-    func initializeCanvas(configuration: CanvasConfiguration) async throws {
+    func initializeCanvas(
+        configuration: CanvasConfiguration,
+        defaultTextureSize: CGSize
+    ) async throws {
         // Initialize the texture repository
-        let resultConfiguration = try await dependencies.textureRepository.initializeStorage(
-            configuration: configuration
+        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+            configuration: configuration,
+            defaultTextureSize: defaultTextureSize
         )
-        setupCanvas(resultConfiguration)
+
+        setupCanvas(resolvedConfiguration)
     }
 
-    private func setupCanvas(_ configuration: CanvasConfiguration) {
-        guard
-            let textureSize = configuration.textureSize,
-            let commandBuffer = displayView?.commandBuffer
-        else { return }
-
-        let textureRepository = dependencies.textureRepository
+    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
 
         canvasState.initialize(
             configuration: configuration,
-            textureRepository: textureRepository
+            textureRepository: dependencies.textureRepository
         )
 
-        renderer.initTextures(textureSize: textureSize)
+        renderer.initTextures(textureSize: configuration.textureSize)
 
         renderer.updateDrawingTextures(
             canvasState: canvasState,
-            textureRepository: textureRepository,
+            textureRepository: dependencies.textureRepository,
             with: commandBuffer
         ) { [weak self] in
-            self?.completeCanvasSetup(textureSize: textureSize, configuration: configuration)
+            self?.completeCanvasSetup(configuration: configuration)
         }
     }
 
-    private func completeCanvasSetup(textureSize: CGSize, configuration: CanvasConfiguration) {
+    private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initTextures(configuration.textureSize)
+        }
 
-        drawingBrushTextureSet.initTextures(textureSize)
-        drawingEraserTextureSet.initTextures(textureSize)
-
-        undoStack?.initialize(textureSize)
-
-        updateCanvasView()
+        undoStack?.initialize(configuration.textureSize)
 
         canvasViewSetupCompletedSubject.send(configuration)
+
+        updateCanvasView()
     }
 }
 
@@ -388,7 +363,17 @@ extension CanvasViewModel {
     }
 }
 
-extension CanvasViewModel {
+public extension CanvasViewModel {
+
+    func defaultTextureSize() -> CGSize {
+        let scale = UIScreen.main.scale
+        let size = UIScreen.main.bounds.size
+
+        return .init(
+            width: size.width * scale,
+            height: size.height * scale
+        )
+    }
 
     func resetTransforming() {
         guard let commandBuffer = displayView?.commandBuffer else { return }
@@ -396,21 +381,13 @@ extension CanvasViewModel {
         renderer.updateCanvasView(displayView, with: commandBuffer)
     }
 
-    func setDrawingTool(_ drawingTool: DrawingToolType) {
-        canvasState.setDrawingTool(drawingTool)
-    }
-    func setBrushColor(_ color: UIColor) {
-        canvasState.brush.color = color
-    }
-    func setBrushDiameter(_ value: Float) {
-        canvasState.brush.setDiameter(value)
-    }
-    func setEraserDiameter(_ value: Float) {
-        canvasState.eraser.setDiameter(value)
+    func setDrawingTool(_ drawingToolIndex: Int) {
+        guard drawingToolIndex < drawingRenderers.count else { return }
+        drawingRenderer = drawingRenderers[drawingToolIndex]
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
-        try await initializeCanvas(configuration: configuration)
+        try await initializeCanvas(configuration: configuration, defaultTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
 
@@ -421,7 +398,11 @@ extension CanvasViewModel {
         undoStack?.redo()
     }
 
-    func loadFile(zipFileURL: URL) {
+    func loadFile(
+        zipFileURL: URL,
+        requiredEntityType: [CanvasEntityConvertible.Type],
+        optionalEntities: [AnyLocalFileLoader] = []
+    ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -434,19 +415,25 @@ extension CanvasViewModel {
                 )
 
                 let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName),
+                    compatibleTypes: requiredEntityType
                 )
                 let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,
                     entity: entity
                 )
                 /// Restore the repository from the extracted textures
-                try await dependencies.textureRepository.restoreStorage(
+                let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
-                    with: configuration
+                    configuration: configuration,
+                    defaultTextureSize: defaultTextureSize()
                 )
 
-                setupCanvas(configuration)
+                setupCanvas(resolvedConfiguration)
+
+                for entity in optionalEntities {
+                    try entity.load(in: workingDirectoryURL)
+                }
 
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
@@ -469,55 +456,58 @@ extension CanvasViewModel {
         }
     }
 
-    func saveFile() {
+    func saveFile(
+        additionalItems: [AnyLocalFileNamedItem] = []
+    ) {
+        // Create a thumbnail image from the current canvas texture
         guard
             let canvasTexture = renderer.canvasTexture,
-            let thumbnail = canvasTexture.uiImage?.resizeWithAspectRatio(
+            let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
                 height: CanvasEntity.thumbnailLength,
                 scale: 1.0
             )
         else { return }
-
-        let zipFileURL = FileManager.documentsFileURL(
-            projectName: canvasState.projectName,
-            suffix: CanvasViewModel.fileSuffix
-        )
-        let entity = CanvasEntity(
-            thumbnailName: CanvasEntity.thumbnailName,
-            canvasState: canvasState
-        )
 
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
 
             do {
+                // Create a temporary working directory for saving project files
                 try dependencies.localFileRepository.createWorkingDirectory()
 
-                let result = try await dependencies.textureRepository.copyTextures(
+                // Copy all textures from the textureRepository
+                let textures = try await dependencies.textureRepository.copyTextures(
                     uuids: canvasState.layers.map { $0.id }
                 )
 
-                async let resultThumbnail = try await dependencies.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(name: CanvasEntity.thumbnailName, item: thumbnail)
+                // Save the thumbnail image into the working directory
+                async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: .init(fileName: CanvasEntity.thumbnailName, item: thumbnailImage)
                 )
-                async let resultURLs: [URL] = try await dependencies.localFileRepository.saveAllToWorkingDirectory(
-                    namedItems: result.map {
-                        .init(name: $0.uuid.uuidString, item: $0)
+
+                // Save the textures into the working directory
+                async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
+                    namedItems: textures.map {
+                        .init(fileName: $0.uuid.uuidString, item: $0)
                     }
                 )
-                _ = try await (resultThumbnail, resultURLs)
+                _ = try await (resultCanvasThumbnail, resultCanvasTextures)
 
-                async let resultEntity = try await dependencies.localFileRepository.saveToWorkingDirectory(
-                    namedItem: .init(
-                        name: CanvasEntity.jsonFileName,
-                        item: entity
-                    )
+                // Save the canvas entity (JSON metadata)
+                async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: CanvasEntity.namedItem(canvasState)
                 )
-                _ = try await (resultEntity)
 
+                async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
+                    namedItems: additionalItems
+                )
+
+                _ = try await (resultCanvasEntity, resultAdditional)
+
+                // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL
+                    to: zipFileURL(fileName: canvasState.projectName)
                 )
 
                 /// Remove the working space
@@ -545,21 +535,17 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let drawableSize = displayView?.displayTexture?.size,
-            let diameter = canvasState.drawingToolDiameter
+            let drawingRenderer,
+            let drawableSize = displayView?.displayTexture?.size
         else { return }
 
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    matrix: transforming.matrix.inverted(flipY: true),
-                    touchPoint: $0,
-                    textureSize: canvasState.textureSize,
-                    drawableSize: drawableSize,
-                    frameSize: renderer.frameSize,
-                    diameter: CGFloat(diameter)
-                )
-            },
+            points: drawingRenderer.curvePoints(
+                screenTouchPoints,
+                matrix: transforming.matrix.inverted(flipY: true),
+                drawableSize: drawableSize,
+                frameSize: renderer.frameSize
+            ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )
 
@@ -600,7 +586,7 @@ extension CanvasViewModel {
             let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()
         else { return }
 
-        drawingTextureSet?.clearTextures(with: temporaryRenderCommandBuffer)
+        drawingRenderer?.clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
 
         fingerStroke.reset()
@@ -670,6 +656,16 @@ extension CanvasViewModel {
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer,
             with: commandBuffer
+        )
+    }
+}
+
+extension CanvasViewModel {
+
+    func zipFileURL(fileName: String) -> URL {
+        FileManager.documentsFileURL(
+            projectName: fileName,
+            suffix: CanvasViewModel.fileSuffix
         )
     }
 }

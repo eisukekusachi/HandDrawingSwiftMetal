@@ -18,7 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = HandDrawingViewController.create()
+        window.rootViewController = HandDrawingViewController.create(
+            configuration: .init()
+        )
         self.window = window
         self.window?.makeKeyAndVisible()
     }

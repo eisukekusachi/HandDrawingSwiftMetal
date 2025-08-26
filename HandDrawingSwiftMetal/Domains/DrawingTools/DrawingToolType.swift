@@ -2,7 +2,7 @@
 //  DrawingToolType.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/04/17.
+//  Created by Eisuke Kusachi on 2025/08/24.
 //
 
 import Foundation

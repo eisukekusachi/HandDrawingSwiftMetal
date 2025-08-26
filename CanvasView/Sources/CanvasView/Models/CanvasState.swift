@@ -11,10 +11,6 @@ import UIKit
 /// Manage the state of the canvas
 public final class CanvasState: ObservableObject, @unchecked Sendable {
 
-    let brush = DrawingBrushToolState()
-
-    let eraser = DrawingEraserToolState()
-
     /// Subject to publish updates for the canvas
     public let canvasUpdateSubject = PassthroughSubject<Void, Never>()
 
@@ -32,36 +28,21 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
     @Published private(set) var backgroundColor: UIColor = .white
 
-    @Published private(set) var drawingTool: DrawingToolType = .brush
-
     private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
     public init() {}
 
     public func initialize(
-        configuration: CanvasConfiguration,
+        configuration: CanvasResolvedConfiguration,
         textureRepository: TextureRepository? = nil
     ) {
-
         self.projectName = configuration.projectName
-        self.textureSize = configuration.textureSize ?? CanvasState.defaultTextureSize
 
-        self.layers.removeAll()
-        self.layers = configuration.layers.map {
-            .init(
-                item: $0,
-                thumbnail: nil
-            )
-        }
-        self.selectedLayerId = layers.isEmpty ? nil : layers[configuration.layerIndex].id
+        self.textureSize = configuration.textureSize
 
-        self.brush.color = configuration.brushColor
-        self.brush.setDiameter(configuration.brushDiameter)
+        self.layers = configuration.layers
 
-        self.eraser.alpha = configuration.eraserAlpha
-        self.eraser.setDiameter(configuration.eraserDiameter)
-
-        self.setDrawingTool(configuration.drawingTool)
+        self.selectedLayerId = configuration.selectedLayerId
 
         Task {
             let results = try await textureRepository?.copyTextures(uuids: layers.map { $0.id })
@@ -86,19 +67,8 @@ public extension CanvasState {
         return layers.firstIndex(where: { $0.id == selectedLayerId })
     }
 
-    var drawingToolDiameter: Int? {
-        switch drawingTool {
-        case .brush: brush.diameter
-        case .eraser: eraser.diameter
-        }
-    }
-
     func layer(_ layerId: UUID) -> TextureLayerModel? {
         layers.first(where: { $0.id == layerId })
-    }
-
-    func setDrawingTool(_ drawingToolType: DrawingToolType) {
-        self.drawingTool = drawingToolType
     }
 }
 

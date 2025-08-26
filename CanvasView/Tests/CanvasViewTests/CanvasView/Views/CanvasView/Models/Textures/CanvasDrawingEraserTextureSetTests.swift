@@ -102,9 +102,9 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
             var didCallDrawingTexture: MTLTexture?
             var didCallDrawingCompletedTexture: MTLTexture?
 
-            subject.updateRealTimeDrawingTexture(
-                baseTexture: baseTexture,
-                drawingCurve: drawingCurve,
+            subject.drawCurveOnRealTimeDrawingTexture(
+                drawingCurve,
+                using: baseTexture,
                 with: commandBuffer,
                 onDrawing: { resultTexture in
                     didCallDrawingTexture = resultTexture

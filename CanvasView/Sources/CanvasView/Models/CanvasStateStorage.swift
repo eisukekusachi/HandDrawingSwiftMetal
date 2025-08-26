@@ -65,29 +65,11 @@ extension CanvasStateStorage {
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
         do {
-            let brush = BrushStorageEntity(context: coreDataRepository.context)
-            brush.colorHex = canvasState.brush.color.hexString()
-            brush.diameter = Int16(canvasState.brush.diameter)
-
-            let eraser = EraserStorageEntity(context: coreDataRepository.context)
-            eraser.alpha = Int16(canvasState.eraser.alpha)
-            eraser.diameter = Int16(canvasState.eraser.diameter)
-
-            let drawingTool = DrawingToolStorageEntity(context: coreDataRepository.context)
-            drawingTool.brush = brush
-            drawingTool.eraser = eraser
-
-            brush.drawingTool = drawingTool
-            eraser.drawingTool = drawingTool
-
             newStorage.projectName = canvasState.projectName
 
             newStorage.textureWidth = Int16(canvasState.textureSize.width)
             newStorage.textureHeight = Int16(canvasState.textureSize.height)
 
-            newStorage.drawingTool?.brush = brush
-            newStorage.drawingTool?.eraser = eraser
-            newStorage.drawingTool = drawingTool
             newStorage.selectedLayerId = canvasState.selectedLayerId
 
             for (index, layer) in canvasState.layers.enumerated() {
@@ -109,10 +91,7 @@ extension CanvasStateStorage {
 
     private func bindCanvasStateToCoreDataEntities(canvasState: CanvasState?, coreDataRepository: CoreDataRepository) {
         guard
-            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity,
-            let drawingToolStorage = canvasStorageEntity.drawingTool,
-            let brushStorage = drawingToolStorage.brush,
-            let eraserStorage = drawingToolStorage.eraser
+            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
 
         cancellables.removeAll()
@@ -134,46 +113,6 @@ extension CanvasStateStorage {
             .sink { [weak self] result in
                 canvasStorageEntity.textureWidth = Int16(result.width)
                 canvasStorageEntity.textureHeight = Int16(result.height)
-                try? self?.coreDataRepository.saveContext()
-            }
-            .store(in: &cancellables)
-
-        canvasState?.brush.$color
-            .dropFirst()
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .map { $0.hexString() }
-            .sink { [weak self] result in
-                brushStorage.colorHex = result
-                try? self?.coreDataRepository.saveContext()
-            }
-            .store(in: &cancellables)
-
-        canvasState?.brush.$diameter
-            .dropFirst()
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .map { Int16($0) }
-            .sink { [weak self] result in
-                brushStorage.diameter = result
-                try? self?.coreDataRepository.saveContext()
-            }
-            .store(in: &cancellables)
-
-        canvasState?.eraser.$alpha
-            .dropFirst()
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .map { Int16($0) }
-            .sink { [weak self] result in
-                eraserStorage.alpha = result
-                try? self?.coreDataRepository.saveContext()
-            }
-            .store(in: &cancellables)
-
-        canvasState?.eraser.$diameter
-            .dropFirst()
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .map { Int16($0) }
-            .sink { [weak self] result in
-                eraserStorage.diameter = result
                 try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)

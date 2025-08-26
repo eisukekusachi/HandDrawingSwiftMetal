@@ -25,6 +25,8 @@ class HandDrawingViewController: UIViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let paletteHeight: CGFloat = 44
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,6 +34,10 @@ class HandDrawingViewController: UIViewController {
         bindData()
 
         contentView.canvasView.initialize(
+            drawingRenderers: [
+                contentView.brushDrawingRenderer,
+                contentView.eraserDrawingRenderer
+            ],
             configuration: configuration
         )
 
@@ -46,8 +52,8 @@ extension HandDrawingViewController {
 
         contentView.canvasView.canvasViewSetupCompleted
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] configuration in
-                self?.contentView.setup(configuration)
+            .sink { [weak self] _ in
+                self?.contentView.setup()
             }
             .store(in: &cancellables)
 
@@ -71,11 +77,13 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        /*
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
+        */
     }
 
     private func addEvents() {
@@ -83,7 +91,14 @@ extension HandDrawingViewController {
             self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.contentView.canvasView.saveFile()
+            guard let `self` else { return }
+            self.contentView.canvasView.saveFile(
+                additionalItems: [
+                    CoreDataDrawingToolEntity.anyNamedItem(from: contentView.viewModel.drawingTool),
+                    CoreDataBrushPaletteEntity.anyNamedItem(from: contentView.viewModel.brushPalette),
+                    CoreDataEraserPaletteEntity.anyNamedItem(from: contentView.viewModel.eraserPalette)
+                ]
+            )
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -106,9 +121,12 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
+            self.contentView.viewModel.drawingTool.reset()
+            self.contentView.viewModel.brushPalette.reset()
+            self.contentView.viewModel.eraserPalette.reset()
+
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
-
             self.contentView.canvasView.newCanvas(
                 configuration: CanvasConfiguration(
                     textureSize: .init(width: size.width * scale, height: size.height * scale)
@@ -129,6 +147,51 @@ extension HandDrawingViewController {
                 )
             )
         )
+
+        addBrushPalette()
+        addEraserPalette()
+    }
+
+    private func addBrushPalette() {
+        let targetView: UIView = contentView.brushPaletteView
+
+        let brushPaletteHostingView = UIHostingController(
+            rootView: BrushPaletteView(
+                palette: contentView.viewModel.brushPalette,
+                paletteHeight: paletteHeight
+            )
+        )
+        brushPaletteHostingView.view.backgroundColor = .clear
+        targetView.addSubview(brushPaletteHostingView.view)
+
+        brushPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            brushPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            brushPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            brushPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            brushPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+        ])
+    }
+
+    private func addEraserPalette() {
+        let targetView: UIView = contentView.eraserPaletteView
+
+        let eraserPaletteHostingView = UIHostingController(
+            rootView: EraserPaletteView(
+                palette: contentView.viewModel.eraserPalette,
+                paletteHeight: paletteHeight
+            )
+        )
+        eraserPaletteHostingView.view.backgroundColor = .clear
+        targetView.addSubview(eraserPaletteHostingView.view)
+
+        eraserPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            eraserPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            eraserPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            eraserPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            eraserPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+        ])
     }
 
     private func showFileView() {
@@ -136,8 +199,20 @@ extension HandDrawingViewController {
             targetURL: URL.documents,
             suffix: CanvasViewModel.fileSuffix,
             onTapItem: { [weak self] url in
-                self?.presentedViewController?.dismiss(animated: true)
-                self?.contentView.canvasView.loadFile(zipFileURL: url)
+                guard let `self` else { return }
+
+                self.presentedViewController?.dismiss(animated: true)
+                self.contentView.canvasView.loadFile(
+                    zipFileURL: url,
+                    requiredEntityType: [
+                        CanvasEntity.self
+                    ],
+                    optionalEntities: [
+                        self.contentView.drawingToolLoader,
+                        self.contentView.brushPaletteLoader,
+                        self.contentView.eraserPaletteLoader
+                    ]
+                )
             }
         )
         present(
@@ -159,7 +234,6 @@ extension HandDrawingViewController {
         toast.setupView(model)
         view.addSubview(toast)
     }
-
 }
 
 extension HandDrawingViewController {
@@ -186,17 +260,15 @@ extension HandDrawingViewController {
             )
         }
     }
-
 }
 
 extension HandDrawingViewController {
 
     static func create(
-        configuration: CanvasConfiguration = .init()
+        configuration: CanvasConfiguration
     ) -> Self {
         let viewController = Self()
         viewController.configuration = configuration
         return viewController
     }
-
 }

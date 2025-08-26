@@ -4,7 +4,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24057"/>
-        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -12,20 +11,20 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HandDrawingContentView" customModule="HandDrawingSwiftMetal" customModuleProvider="target">
             <connections>
-                <outlet property="blackColorButton" destination="dMS-qm-Xjc" id="I8s-nR-HYr"/>
                 <outlet property="brushDiameterSlider" destination="UxJ-dV-AbQ" id="bsG-sU-Tdc"/>
+                <outlet property="brushPaletteView" destination="450-qS-bWU" id="Uhd-6C-8eF"/>
                 <outlet property="canvasView" destination="Rri-Cz-Fww" id="y6k-tJ-gCc"/>
-                <outlet property="eraserButton" destination="Ydn-J6-zrX" id="6fj-Bu-pwF"/>
+                <outlet property="drawingToolButton" destination="5LT-Wg-ht9" id="dK3-Ho-3Nb"/>
                 <outlet property="eraserDiameterSlider" destination="s4f-db-5LA" id="moF-b6-DPQ"/>
+                <outlet property="eraserPaletteView" destination="gZx-i3-2bH" id="DeH-vJ-8z5"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
                 <outlet property="newButton" destination="ML0-1y-T1Z" id="LCz-ss-GSK"/>
-                <outlet property="redColorButton" destination="zOD-md-2qy" id="iop-zf-s6b"/>
-                <outlet property="redoButton" destination="UCl-eJ-tD6" id="vT8-3m-JfV"/>
+                <outlet property="redoButton" destination="UCl-eJ-tD6" id="kxf-0N-cn7"/>
                 <outlet property="resetTransformButton" destination="IVg-Dj-hIn" id="dWm-1g-ASc"/>
                 <outlet property="saveButton" destination="Ugs-EZ-K7D" id="HVF-Y2-eRP"/>
-                <outlet property="undoButton" destination="7Ib-t7-xwq" id="gzC-M5-8He"/>
+                <outlet property="undoButton" destination="7Ib-t7-xwq" id="yhi-6f-YLD"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -38,36 +37,36 @@
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVg-Dj-hIn">
-                    <rect key="frame" x="16.000000000000007" y="118.33333333333333" width="113.66666666666669" height="34.333333333333329"/>
+                    <rect key="frame" x="16.000000000000007" y="117.99999999999999" width="113.66666666666669" height="34.333333333333329"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="Reset zoom"/>
                 </button>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P50-DK-emi">
-                    <rect key="frame" x="159.66666666666663" y="118.00000000000001" width="217.33333333333337" height="34.666666666666671"/>
+                    <rect key="frame" x="152.66666666666663" y="117.99999999999999" width="224.33333333333337" height="34.333333333333329"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ugs-EZ-K7D">
-                            <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.666666666666664"/>
+                            <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.up" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RSE-Ca-Pvz">
-                            <rect key="frame" x="48.333333333333343" y="0.0" width="44" height="34.666666666666664"/>
+                            <rect key="frame" x="48.333333333333343" y="0.0" width="51" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <buttonConfiguration key="configuration" style="plain" image="Layer"/>
+                            <buttonConfiguration key="configuration" style="plain" image="square.3.layers.3d" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ve-sD-YOE">
-                            <rect key="frame" x="92.333333333333343" y="0.0" width="48.333333333333343" height="34.666666666666664"/>
+                            <rect key="frame" x="99.333333333333343" y="0.0" width="48.333333333333343" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
-                            <rect key="frame" x="140.66666666666666" y="0.0" width="54.666666666666657" height="34.666666666666664"/>
+                            <rect key="frame" x="147.66666666666666" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="photo" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="photo" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ML0-1y-T1Z">
-                            <rect key="frame" x="195.33333333333334" y="0.0" width="22" height="34.666666666666664"/>
+                            <rect key="frame" x="202.33333333333334" y="0.0" width="22" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="plus.square.fill.on.square.fill" catalog="system"/>
                         </button>
@@ -91,85 +90,98 @@
                         <constraint firstAttribute="width" constant="256" id="eVt-lc-xIh"/>
                     </constraints>
                 </slider>
-                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qtN-lB-os6">
-                    <rect key="frame" x="76" y="750.33333333333337" width="241" height="33.666666666666629"/>
+                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
+                    <rect key="frame" x="289" y="745" width="96" height="34.333333333333371"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dMS-qm-Xjc">
-                            <rect key="frame" x="0.0" y="0.0" width="49.666666666666664" height="33.666666666666664"/>
-                            <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal" image="circle.fill" catalog="system"/>
-                            <buttonConfiguration key="configuration" style="plain" image="circle.fill" catalog="system"/>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zOD-md-2qy">
-                            <rect key="frame" x="49.666666666666671" y="0.0" width="49.666666666666671" height="33.666666666666664"/>
-                            <color key="tintColor" systemColor="systemRedColor"/>
-                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal" image="circle.fill" catalog="system"/>
-                            <buttonConfiguration key="configuration" style="plain" image="circle.fill" catalog="system"/>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ydn-J6-zrX">
-                            <rect key="frame" x="99.333333333333343" y="0.0" width="43.666666666666657" height="33.666666666666664"/>
-                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal">
-                                <imageReference key="image" image="eraser" catalog="system" symbolScale="default"/>
-                            </state>
-                            <buttonConfiguration key="configuration" style="plain">
-                                <imageReference key="image" image="DrawingEraser" symbolScale="default"/>
-                            </buttonConfiguration>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
-                            <rect key="frame" x="143" y="0.0" width="49" height="33.666666666666664"/>
+                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="999" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
+                            <rect key="frame" x="0.0" y="0.0" width="49" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.backward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward.square" catalog="system"/>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UCl-eJ-tD6">
-                            <rect key="frame" x="192" y="0.0" width="49" height="33.666666666666664"/>
+                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UCl-eJ-tD6">
+                            <rect key="frame" x="49" y="0.0" width="47" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="arrow.uturn.forward.square" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
                         </button>
                     </subviews>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="96" id="7q1-tn-YPt"/>
+                    </constraints>
                 </stackView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59x-cS-eat" userLabel="ContentView">
+                    <rect key="frame" x="68" y="746" width="213" height="32"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="450-qS-bWU">
+                            <rect key="frame" x="0.0" y="0.0" width="213" height="32"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gZx-i3-2bH">
+                            <rect key="frame" x="0.0" y="0.0" width="213" height="32"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="450-qS-bWU" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="0Ys-Pt-IeP"/>
+                        <constraint firstItem="450-qS-bWU" firstAttribute="top" secondItem="59x-cS-eat" secondAttribute="top" id="8Ns-uX-V1L"/>
+                        <constraint firstAttribute="trailing" secondItem="gZx-i3-2bH" secondAttribute="trailing" id="BdR-Be-Jco"/>
+                        <constraint firstAttribute="bottom" secondItem="gZx-i3-2bH" secondAttribute="bottom" id="C5p-XF-iZP"/>
+                        <constraint firstAttribute="height" priority="750" constant="32" id="IFB-nU-GUb"/>
+                        <constraint firstAttribute="trailing" secondItem="450-qS-bWU" secondAttribute="trailing" id="Pk1-ts-ojd"/>
+                        <constraint firstItem="gZx-i3-2bH" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="leading" id="PxN-fy-CC8"/>
+                        <constraint firstAttribute="bottom" secondItem="450-qS-bWU" secondAttribute="bottom" id="gnn-TM-lsC"/>
+                        <constraint firstItem="gZx-i3-2bH" firstAttribute="top" secondItem="59x-cS-eat" secondAttribute="top" id="lWH-jR-1vZ"/>
+                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="250" id="xuK-IF-5BV"/>
+                    </constraints>
+                </view>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5LT-Wg-ht9" userLabel="DrawingToolButton">
+                    <rect key="frame" x="16" y="740" width="44" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="44" id="EnK-FW-Nkg"/>
+                        <constraint firstAttribute="height" constant="44" id="sUD-Pe-cqd"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain"/>
+                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="1ki-Ki-Gw5"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="qtN-lB-os6" secondAttribute="bottom" id="2wt-Bs-phB"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3hA-PR-FpI"/>
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="4lu-2J-etw"/>
+                <constraint firstItem="w1G-k3-kW5" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="trailing" priority="750" constant="8" id="BfW-B7-6aH"/>
+                <constraint firstItem="w1G-k3-kW5" firstAttribute="centerY" secondItem="5LT-Wg-ht9" secondAttribute="centerY" id="E8G-aa-3GT"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="Epa-wm-YYq"/>
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GzD-nN-Z2I"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="centerY" secondItem="P50-DK-emi" secondAttribute="centerY" id="IJP-iX-eIY"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="5LT-Wg-ht9" secondAttribute="bottom" id="JUX-Jd-dHq"/>
                 <constraint firstItem="P50-DK-emi" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="ZLC-p5-E1x"/>
+                <constraint firstItem="5LT-Wg-ht9" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="16" id="aM2-7s-yDd"/>
+                <constraint firstItem="59x-cS-eat" firstAttribute="centerY" secondItem="5LT-Wg-ht9" secondAttribute="centerY" id="f73-fO-sl7"/>
                 <constraint firstItem="IVg-Dj-hIn" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="16" id="fM0-qC-Agx"/>
-                <constraint firstItem="qtN-lB-os6" firstAttribute="centerX" secondItem="vUN-kp-3ea" secondAttribute="centerX" id="fO0-py-vJO"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="P50-DK-emi" secondAttribute="trailing" constant="16" id="gUB-QZ-nmC"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="w1G-k3-kW5" secondAttribute="trailing" constant="8" id="jZ6-yZ-QRD"/>
+                <constraint firstItem="59x-cS-eat" firstAttribute="leading" secondItem="5LT-Wg-ht9" secondAttribute="trailing" constant="8" id="kxp-6s-qsY"/>
                 <constraint firstAttribute="bottom" secondItem="Rri-Cz-Fww" secondAttribute="bottom" id="npb-fh-cuo"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="uNl-Qs-2Na"/>
             </constraints>
-            <point key="canvasLocation" x="91" y="21"/>
+            <point key="canvasLocation" x="90.839694656488547" y="20.422535211267608"/>
         </view>
     </objects>
     <resources>
-        <image name="DrawingEraser" width="19.845800399780273" height="19.648799896240234"/>
-        <image name="Layer" width="20.322299957275391" height="20.830099105834961"/>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
-        <image name="circle.fill" catalog="system" width="128" height="123"/>
-        <image name="eraser" catalog="system" width="128" height="119"/>
         <image name="photo" catalog="system" width="128" height="93"/>
         <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
+        <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
         <image name="square.and.arrow.down" catalog="system" width="114" height="128"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

@@ -20,8 +20,12 @@ public protocol LocalFileRepository: Sendable {
     func unzipToWorkingDirectoryAsync(from zipFileURL: URL) async throws -> URL
 
     /// Saves a single file item to the working directory
-    func saveToWorkingDirectory<T: LocalFileConvertible>(namedItem: LocalFileNamedItem<T>) async throws -> URL
+    func saveItemToWorkingDirectory<T: LocalFileConvertible>(namedItem: LocalFileNamedItem<T>) async throws -> URL
 
     /// Saves multiple file items to the working directory
-    func saveAllToWorkingDirectory<T: LocalFileConvertible & Sendable>(namedItems: [LocalFileNamedItem<T>]) async throws -> [URL]
+    func saveAllItemsToWorkingDirectory<T: LocalFileConvertible & Sendable>(namedItems: [LocalFileNamedItem<T>]) async throws -> [URL]
+
+    func saveItemToWorkingDirectory(namedItem: AnyLocalFileNamedItem) async throws -> URL
+
+    func saveAllItemsToWorkingDirectory(namedItems: [AnyLocalFileNamedItem]) async throws -> [URL]
 }
