@@ -1,5 +1,5 @@
 //
-//  EraserPaletteView.swift
+//  BrushPaletteView.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/23.
@@ -7,20 +7,20 @@
 
 import SwiftUI
 
-public struct EraserPaletteView: View {
+struct BrushPaletteView: View {
 
     private let size: CGFloat
 
     private let spacing: CGFloat
 
-    @ObservedObject private var palette: EraserPalette
+    @ObservedObject private var palette: BrushPalette
 
     @Environment(\.displayScale) private var scale
 
     @State private var checkeredImage: UIImage? = nil
 
     public init(
-        palette: EraserPalette,
+        palette: BrushPalette,
         size: CGFloat,
         spacing: CGFloat = 2
     ) {
@@ -29,16 +29,12 @@ public struct EraserPaletteView: View {
         self.spacing = spacing
     }
 
-    private func alpha(_ alpha: Int) -> CGFloat {
-        CGFloat(alpha) / 255.0
-    }
-
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
-                ForEach(palette.alphas.indices, id: \.self) { i in
+                ForEach(palette.colors.indices, id: \.self) { i in
                     ColorCircle(
-                        color: UIColor.black.withAlphaComponent(alpha(palette.alphas[i])),
+                        color: palette.colors[i],
                         checkeredImage: checkeredImage,
                         size: size,
                         selected: palette.currentIndex == i
@@ -66,22 +62,30 @@ public struct EraserPaletteView: View {
 private struct Preview: View {
     let paletteSize: CGFloat = 32
 
-    class EraserPaletteStorageStub: EraserPaletteStorage {
-        init(index: Int = 0, alphas: [Int] = []) {}
-        func load() async throws -> (index: Int, alphas: [Int])? { nil }
-        func save(index: Int, alphas: [Int]) async throws {}
+    class BrushPaletteStorageStub: BrushPaletteStorage {
+        init(index: Int = 0, hexColors: [String] = []) {}
+        func load() async throws -> (index: Int, hexColors: [String])? { nil }
+        func save(index: Int, hexColors: [String]) async throws {}
     }
 
     var body: some View {
         VStack {
             Spacer()
-            EraserPaletteView(
+            BrushPaletteView(
                 palette: .init(
-                    initialAlphas: [
-                        255, 225, 200, 150, 100, 50, 25
+                    initialColors: [
+                        .red,
+                        .blue,
+                        .green,
+                        UIColor.red.withAlphaComponent(0.5),
+                        UIColor.blue.withAlphaComponent(0.5),
+                        UIColor.green.withAlphaComponent(0.5),
+                        UIColor.red.withAlphaComponent(0.25),
+                        UIColor.blue.withAlphaComponent(0.25),
+                        UIColor.green.withAlphaComponent(0.25)
                     ],
-                    initialIndex: 3,
-                    storage: EraserPaletteStorageStub()
+                    initialIndex: 5,
+                    storage: BrushPaletteStorageStub()
                 ),
                 size: paletteSize
             )

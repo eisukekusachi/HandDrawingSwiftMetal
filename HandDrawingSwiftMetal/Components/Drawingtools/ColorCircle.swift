@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct ColorCircle: View {
+struct ColorCircle: View {
 
     let color: UIColor
     let checkeredImage: UIImage?
