@@ -1,5 +1,5 @@
 //
-//  DrawingToolFile.swift
+//  CoreDataDrawingToolEntity.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,7 +8,7 @@
 import CanvasView
 import Foundation
 
-struct DrawingToolFile: Codable, Sendable {
+struct CoreDataDrawingToolEntity: Codable, Sendable {
     public let type: Int
     public let brushDiameter: Int
     public let eraserDiameter: Int
@@ -16,7 +16,7 @@ struct DrawingToolFile: Codable, Sendable {
     public static let fileName = "drawing-tool"
 }
 
-extension DrawingToolFile: LocalFileConvertible {
+extension CoreDataDrawingToolEntity: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -26,8 +26,8 @@ extension DrawingToolFile: LocalFileConvertible {
 }
 
 @MainActor
-extension DrawingToolFile {
-    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolFile> {
+extension CoreDataDrawingToolEntity {
+    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<CoreDataDrawingToolEntity> {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(
@@ -43,4 +43,4 @@ extension DrawingToolFile {
     }
 }
 
-extension DrawingToolFile: LocalFileLoadable {}
+extension CoreDataDrawingToolEntity: LocalFileLoadable {}

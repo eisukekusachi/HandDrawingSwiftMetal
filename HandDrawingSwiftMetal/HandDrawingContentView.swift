@@ -45,8 +45,8 @@ final class HandDrawingContentView: UIView {
 
     lazy var drawingToolLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<DrawingToolFile>(
-                fileName: DrawingToolFile.fileName
+            LocalFileNamedLoader<CoreDataDrawingToolEntity>(
+                fileName: CoreDataDrawingToolEntity.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.viewModel.drawingTool.update(
@@ -63,8 +63,8 @@ final class HandDrawingContentView: UIView {
 
     lazy var brushPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<BrushPaletteFile>(
-                fileName: BrushPaletteFile.fileName
+            LocalFileNamedLoader<CoreDataBrushPaletteEntity>(
+                fileName: CoreDataBrushPaletteEntity.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.viewModel.brushPalette.update(
@@ -80,8 +80,8 @@ final class HandDrawingContentView: UIView {
 
     lazy var eraserPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<EraserPaletteFile>(
-                fileName: EraserPaletteFile.fileName
+            LocalFileNamedLoader<CoreDataEraserPaletteEntity>(
+                fileName: CoreDataEraserPaletteEntity.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.viewModel.eraserPalette.update(
