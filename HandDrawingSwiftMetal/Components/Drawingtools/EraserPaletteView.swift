@@ -9,24 +9,36 @@ import SwiftUI
 
 struct EraserPaletteView: View {
 
-    private let size: CGFloat
+    private let paletteHeight: CGFloat
+
+    private let paddingVertical: CGFloat
+    private let paddingHorizontal: CGFloat
+
+    private let colorSize: CGFloat
 
     private let spacing: CGFloat
 
-    @ObservedObject private var palette: EraserPalette
+    private let backgroundColor: Color
 
-    @Environment(\.displayScale) private var scale
+    @ObservedObject private var palette: EraserPalette
 
     @State private var checkeredImage: UIImage? = nil
 
     public init(
         palette: EraserPalette,
-        size: CGFloat,
-        spacing: CGFloat = 2
+        paletteHeight: CGFloat,
+        spacing: CGFloat = 2,
+        paddingVertical: CGFloat = 2,
+        paddingHorizontal: CGFloat = 2,
+        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.25)
     ) {
         self.palette = palette
-        self.size = size
+        self.paletteHeight = paletteHeight
+        self.paddingVertical = paddingVertical
+        self.paddingHorizontal = paddingHorizontal
+        self.colorSize = paletteHeight - paddingVertical * 2
         self.spacing = spacing
+        self.backgroundColor = Color(backgroundColor)
     }
 
     private func alpha(_ alpha: Int) -> CGFloat {
@@ -40,7 +52,7 @@ struct EraserPaletteView: View {
                     ColorCircle(
                         color: UIColor.black.withAlphaComponent(alpha(palette.alphas[i])),
                         checkeredImage: checkeredImage,
-                        size: size,
+                        size: colorSize,
                         selected: palette.currentIndex == i
                     ) {
                         palette.select(i)
@@ -49,12 +61,15 @@ struct EraserPaletteView: View {
             }
             .padding(.horizontal, spacing)
         }
-        .frame(height: size)
-        .background(.clear)
+        .frame(height: paletteHeight)
+        .padding(.vertical, paddingVertical)
+        .padding(.horizontal, paddingHorizontal)
+        .background(backgroundColor)
+        .cornerRadius(paletteHeight)
         .onAppear() {
             if checkeredImage == nil {
                 checkeredImage = UIImage.checkerboardImage(
-                    size: .init(width: size, height: size),
+                    size: .init(width: colorSize, height: colorSize),
                     checkSize: 4,
                     dark: .init(white: 0.8, alpha: 1.0)
                 )
@@ -64,7 +79,7 @@ struct EraserPaletteView: View {
 }
 
 private struct Preview: View {
-    let paletteSize: CGFloat = 32
+    let paletteHeight: CGFloat = 32
 
     class EraserPaletteStorageStub: EraserPaletteStorage {
         init(index: Int = 0, alphas: [Int] = []) {}
@@ -78,12 +93,12 @@ private struct Preview: View {
             EraserPaletteView(
                 palette: .init(
                     initialAlphas: [
-                        255, 225, 200, 150, 100, 50, 25
+                        255, 225, 200, 175, 150, 125, 100, 50, 25
                     ],
                     initialIndex: 3,
                     storage: EraserPaletteStorageStub()
                 ),
-                size: paletteSize
+                paletteHeight: paletteHeight
             )
             .frame(width: 256)
             Spacer()

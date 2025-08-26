@@ -9,24 +9,36 @@ import SwiftUI
 
 struct BrushPaletteView: View {
 
-    private let size: CGFloat
+    private let paletteHeight: CGFloat
+
+    private let paddingVertical: CGFloat
+    private let paddingHorizontal: CGFloat
+
+    private let colorSize: CGFloat
 
     private let spacing: CGFloat
 
-    @ObservedObject private var palette: BrushPalette
+    private let backgroundColor: Color
 
-    @Environment(\.displayScale) private var scale
+    @ObservedObject private var palette: BrushPalette
 
     @State private var checkeredImage: UIImage? = nil
 
-    public init(
+    init(
         palette: BrushPalette,
-        size: CGFloat,
-        spacing: CGFloat = 2
+        paletteHeight: CGFloat,
+        spacing: CGFloat = 2,
+        paddingVertical: CGFloat = 2,
+        paddingHorizontal: CGFloat = 2,
+        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.25)
     ) {
         self.palette = palette
-        self.size = size
+        self.paletteHeight = paletteHeight
+        self.paddingVertical = paddingVertical
+        self.paddingHorizontal = paddingHorizontal
+        self.colorSize = paletteHeight - paddingVertical * 2
         self.spacing = spacing
+        self.backgroundColor = Color(backgroundColor)
     }
 
     public var body: some View {
@@ -36,7 +48,7 @@ struct BrushPaletteView: View {
                     ColorCircle(
                         color: palette.colors[i],
                         checkeredImage: checkeredImage,
-                        size: size,
+                        size: colorSize,
                         selected: palette.currentIndex == i
                     ) {
                         palette.select(i)
@@ -45,12 +57,15 @@ struct BrushPaletteView: View {
             }
             .padding(.horizontal, spacing)
         }
-        .frame(height: size)
-        .background(.clear)
+        .frame(height: paletteHeight)
+        .padding(.vertical, paddingVertical)
+        .padding(.horizontal, paddingHorizontal)
+        .background(backgroundColor)
+        .cornerRadius(paletteHeight)
         .onAppear() {
             if checkeredImage == nil {
                 checkeredImage = UIImage.checkerboardImage(
-                    size: .init(width: size, height: size),
+                    size: .init(width: colorSize, height: colorSize),
                     checkSize: 4,
                     dark: .init(white: 0.8, alpha: 1.0)
                 )
@@ -60,7 +75,7 @@ struct BrushPaletteView: View {
 }
 
 private struct Preview: View {
-    let paletteSize: CGFloat = 32
+    let paletteHeight: CGFloat = 32
 
     class BrushPaletteStorageStub: BrushPaletteStorage {
         init(index: Int = 0, hexColors: [String] = []) {}
@@ -87,7 +102,7 @@ private struct Preview: View {
                     initialIndex: 5,
                     storage: BrushPaletteStorageStub()
                 ),
-                size: paletteSize
+                paletteHeight: paletteHeight
             )
             .frame(width: 256)
             Spacer()

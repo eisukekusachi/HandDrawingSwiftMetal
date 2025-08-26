@@ -25,7 +25,7 @@ class HandDrawingViewController: UIViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let colorSize: CGFloat = 32
+    private let paletteHeight: CGFloat = 32
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -158,7 +158,7 @@ extension HandDrawingViewController {
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
                 palette: contentView.viewModel.brushPalette,
-                size: colorSize
+                paletteHeight: paletteHeight
             )
         )
         brushPaletteHostingView.view.backgroundColor = .clear
@@ -179,7 +179,7 @@ extension HandDrawingViewController {
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
                 palette: contentView.viewModel.eraserPalette,
-                size: colorSize
+                paletteHeight: paletteHeight
             )
         )
         eraserPaletteHostingView.view.backgroundColor = .clear
