@@ -4,7 +4,7 @@ This is a drawing app using [jSignature](https://willowsystems.github.io/jSignat
 
 It is used in [Rollcanvas](https://rollcanvas.org) app.
 
-If the `Missing package product ZipArchive` error occurs, please select `Product`-> `Clean Build Folder...` then restart Xcode.
+Make sure to choose the run scheme `HandDrawingSwiftMetal` before running or building the project.
 
 The repository from which only the drawing functionality has been extracted is [here](https://github.com/eisukekusachi/SimpleApplePencilDrawing) .
 
