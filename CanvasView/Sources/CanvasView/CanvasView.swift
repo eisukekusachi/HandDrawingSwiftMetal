@@ -8,7 +8,6 @@
 import Combine
 import UIKit
 
-@MainActor
 @objc public class CanvasView: UIView {
 
     private var drawingRenderers: [DrawingRenderer] = []
