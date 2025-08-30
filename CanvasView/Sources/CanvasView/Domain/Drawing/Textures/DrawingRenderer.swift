@@ -17,6 +17,9 @@ public protocol DrawingRenderer {
 
     func setDiameter(_ diameter: Int)
 
+    /// Defines a private property `displayView` of type `CanvasDisplayable? and retains its value
+    func setDisplayView(_ displayView: CanvasDisplayable)
+
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform,
@@ -28,11 +31,9 @@ public protocol DrawingRenderer {
     func drawCurve(
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?
     )
 
-    /// Resets the realtime drawing textures
-    func clearTextures(with commandBuffer: MTLCommandBuffer)
+    func clearTextures()
 }

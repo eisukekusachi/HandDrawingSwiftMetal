@@ -8,7 +8,7 @@
 import MetalKit
 
 @MainActor
-protocol CanvasDisplayable {
+public protocol CanvasDisplayable {
     var commandBuffer: MTLCommandBuffer? { get }
 
     var displayTexture: MTLTexture? { get }

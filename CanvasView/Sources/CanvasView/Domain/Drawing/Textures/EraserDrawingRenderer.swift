@@ -24,6 +24,8 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
+    private var displayView: CanvasDisplayable?
+
     private let renderer: MTLRendering
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -39,6 +41,10 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 }
 
 public extension EraserDrawingRenderer {
+
+    func setDisplayView(_ displayView: CanvasDisplayable) {
+        self.displayView = displayView
+    }
 
     func initTextures(_ textureSize: CGSize) {
         self.textureSize = textureSize
@@ -84,15 +90,13 @@ public extension EraserDrawingRenderer {
     func drawCurve(
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?
     ) {
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
-            on: realtimeDrawingTexture,
-            with: commandBuffer
+            on: realtimeDrawingTexture
         )
 
         onDrawing?(realtimeDrawingTexture)
@@ -100,33 +104,28 @@ public extension EraserDrawingRenderer {
         if drawingCurve.isDrawingFinished {
             drawCurrentTexture(
                 texture: realtimeDrawingTexture,
-                on: baseTexture,
-                with: commandBuffer
+                on: baseTexture
             )
             onDrawingCompleted?(realtimeDrawingTexture)
         }
     }
 
-    func clearTextures(with commandBuffer: MTLCommandBuffer) {
-        renderer.clearTextures(
-            textures: [
-                drawingTexture,
-                grayscaleTexture,
-                lineDrawnTexture
-            ],
-            with: commandBuffer
-        )
+    func clearTextures() {
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTextures(with: temporaryRenderCommandBuffer)
+        temporaryRenderCommandBuffer.commit()
     }
 }
 
-extension EraserDrawingRenderer {
+private extension EraserDrawingRenderer {
 
-    private func updateRealTimeDrawingTexture(
+    func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
-        on texture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
+        on texture: MTLTexture
     ) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
@@ -169,11 +168,12 @@ extension EraserDrawingRenderer {
         )
     }
 
-    private func drawCurrentTexture(
+    func drawCurrentTexture(
         texture sourceTexture: MTLTexture,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
+        on destinationTexture: MTLTexture
     ) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
+
         renderer.drawTexture(
             texture: sourceTexture,
             buffers: flippedTextureBuffers,
@@ -183,6 +183,17 @@ extension EraserDrawingRenderer {
         )
 
         clearTextures(with: commandBuffer)
+    }
+
+    func clearTextures(with commandBuffer: MTLCommandBuffer) {
+        renderer.clearTextures(
+            textures: [
+                drawingTexture,
+                grayscaleTexture,
+                lineDrawnTexture
+            ],
+            with: commandBuffer
+        )
     }
 }
 

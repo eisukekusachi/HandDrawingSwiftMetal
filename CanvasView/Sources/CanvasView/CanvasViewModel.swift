@@ -115,6 +115,10 @@ public final class CanvasViewModel {
         displayView: CanvasDisplayable
     ) {
         self.drawingRenderers = drawingRenderers
+        self.drawingRenderers.forEach {
+            $0.setDisplayView(displayView)
+        }
+
         self.drawingRenderer = self.drawingRenderers[0]
 
         self.dependencies = dependencies
@@ -178,7 +182,6 @@ public final class CanvasViewModel {
                 self?.drawingRenderer?.drawCurve(
                     drawingCurve,
                     using: texture,
-                    with: commandBuffer,
                     onDrawing: { [weak self] resultTexture in
                         self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
                     },
@@ -581,13 +584,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
-        guard
-            let device = MTLCreateSystemDefaultDevice(),
-            let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()
-        else { return }
-
-        drawingRenderer?.clearTextures(with: temporaryRenderCommandBuffer)
-        temporaryRenderCommandBuffer.commit()
+        drawingRenderer?.clearTextures()
 
         fingerStroke.reset()
 

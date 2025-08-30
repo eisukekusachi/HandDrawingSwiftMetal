@@ -23,6 +23,8 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
+    private var displayView: CanvasDisplayable?
+
     private let renderer: MTLRendering
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
@@ -38,6 +40,10 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 }
 
 public extension BrushDrawingRenderer {
+
+    func setDisplayView(_ displayView: CanvasDisplayable) {
+        self.displayView = displayView
+    }
 
     func initTextures(_ textureSize: CGSize) {
         self.textureSize = textureSize
@@ -82,10 +88,11 @@ public extension BrushDrawingRenderer {
     func drawCurve(
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
         onDrawingCompleted: ((MTLTexture) -> Void)?
     ) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
+
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
@@ -105,14 +112,10 @@ public extension BrushDrawingRenderer {
         }
     }
 
-    func clearTextures(with commandBuffer: MTLCommandBuffer) {
-        renderer.clearTextures(
-            textures: [
-                drawingTexture,
-                grayscaleTexture
-            ],
-            with: commandBuffer
-        )
+    func clearTextures() {
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTextures(with: temporaryRenderCommandBuffer)
+        temporaryRenderCommandBuffer.commit()
     }
 }
 
@@ -171,6 +174,16 @@ extension BrushDrawingRenderer {
         )
 
         clearTextures(with: commandBuffer)
+    }
+
+    func clearTextures(with commandBuffer: MTLCommandBuffer) {
+        renderer.clearTextures(
+            textures: [
+                drawingTexture,
+                grayscaleTexture
+            ],
+            with: commandBuffer
+        )
     }
 }
 
