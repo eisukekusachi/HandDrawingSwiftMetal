@@ -97,6 +97,13 @@ final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
+    var drawableSize: CGSize? {
+        displayView.displayTexture?.size
+    }
+
+    func resetCommandBuffer() {
+        displayView.resetCommandBuffer()
+    }
     func bottomLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
@@ -168,7 +175,6 @@ extension CanvasRenderer {
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     func updateCanvasView(
-        _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel
     ) {
@@ -204,17 +210,13 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView(
-            canvasView
-        )
+        updateCanvasView()
     }
 
-    func updateCanvasView(
-        _ canvasView: CanvasDisplayable?
-    ) {
+    func updateCanvasView() {
         guard
             let commandBuffer = displayView.commandBuffer,
-            let displayTexture = canvasView?.displayTexture
+            let displayTexture = displayView.displayTexture
         else { return }
 
         renderer.drawTexture(
@@ -226,7 +228,7 @@ extension CanvasRenderer {
             device: device,
             with: commandBuffer
         )
-        canvasView?.setNeedsDisplay()
+        displayView.setNeedsDisplay()
     }
 
     func drawLayerTextures(

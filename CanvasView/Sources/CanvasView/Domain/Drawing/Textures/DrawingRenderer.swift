@@ -32,7 +32,8 @@ public protocol DrawingRenderer {
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
-        onDrawingCompleted: ((MTLTexture) -> Void)?
+        onDrawingCompleted: ((MTLTexture) -> Void)?,
+        onCommandBufferCompleted: (@Sendable @MainActor (MTLTexture) -> Void)?
     )
 
     func clearTextures()

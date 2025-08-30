@@ -6,8 +6,7 @@
 //
 
 import Combine
-
-@preconcurrency import MetalKit
+import UIKit
 
 @MainActor
 public final class CanvasViewModel {
@@ -58,9 +57,6 @@ public final class CanvasViewModel {
             selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
         )
     }
-
-    /// A rendering target
-    private var displayView: CanvasDisplayable?
 
     private var dependencies: CanvasViewDependencies!
 
@@ -114,10 +110,10 @@ public final class CanvasViewModel {
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
-        self.drawingRenderers = drawingRenderers
-        self.drawingRenderers.forEach {
+        drawingRenderers.forEach {
             $0.setDisplayView(displayView)
         }
+        self.drawingRenderers = drawingRenderers
 
         self.drawingRenderer = self.drawingRenderers[0]
 
@@ -155,8 +151,6 @@ public final class CanvasViewModel {
         }
         */
 
-        self.displayView = displayView
-
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
@@ -175,8 +169,7 @@ public final class CanvasViewModel {
                 guard
                     let drawingCurve = self?.drawingCurve,
                     let texture = self?.renderer?.selectedTexture,
-                    let selectedLayerId = self?.canvasState.selectedLayer?.id,
-                    let commandBuffer = self?.displayView?.commandBuffer
+                    let selectedLayerId = self?.canvasState.selectedLayer?.id
                 else { return }
 
                 self?.drawingRenderer?.drawCurve(
@@ -186,15 +179,11 @@ public final class CanvasViewModel {
                         self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
                     },
                     onDrawingCompleted: { [weak self] resultTexture in
-
                         // Reset parameters on drawing completion
                         self?.resetAllInputParameters()
-
-                        commandBuffer.addCompletedHandler { [weak self] _ in
-                            Task { @MainActor in
-                                self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
-                            }
-                        }
+                    },
+                    onCommandBufferCompleted: { [weak self] resultTexture in
+                        self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
                     }
                 )
             }
@@ -381,7 +370,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        renderer?.updateCanvasView(displayView)
+        renderer?.updateCanvasView()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
@@ -540,7 +529,7 @@ extension CanvasViewModel {
         guard
             let renderer,
             let drawingRenderer,
-            let drawableSize = displayView?.displayTexture?.size
+            let drawableSize = renderer.drawableSize
         else { return }
 
         drawingCurve?.append(
@@ -577,13 +566,14 @@ extension CanvasViewModel {
             transforming.endTransformation()
         }
 
-        renderer.updateCanvasView(displayView)
+        renderer.updateCanvasView()
     }
 }
 
 extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
+
         drawingRenderer?.clearTextures()
 
         fingerStroke.reset()
@@ -591,9 +581,9 @@ extension CanvasViewModel {
         drawingCurve = nil
         transforming.resetMatrix()
 
-        displayView?.resetCommandBuffer()
+        renderer?.resetCommandBuffer()
 
-        renderer?.updateCanvasView(displayView)
+        renderer?.updateCanvasView()
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
@@ -643,7 +633,6 @@ extension CanvasViewModel {
         else { return }
 
         renderer?.updateCanvasView(
-            displayView,
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer
         )

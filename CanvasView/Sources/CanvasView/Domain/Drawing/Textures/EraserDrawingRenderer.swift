@@ -91,12 +91,16 @@ public extension EraserDrawingRenderer {
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
-        onDrawingCompleted: ((MTLTexture) -> Void)?
+        onDrawingCompleted: ((MTLTexture) -> Void)?,
+        onCommandBufferCompleted: (@Sendable @MainActor (MTLTexture) -> Void)?
     ) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
+
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
-            on: realtimeDrawingTexture
+            on: realtimeDrawingTexture,
+            with: commandBuffer
         )
 
         onDrawing?(realtimeDrawingTexture)
@@ -104,9 +108,17 @@ public extension EraserDrawingRenderer {
         if drawingCurve.isDrawingFinished {
             drawCurrentTexture(
                 texture: realtimeDrawingTexture,
-                on: baseTexture
+                on: baseTexture,
+                with: commandBuffer
             )
             onDrawingCompleted?(realtimeDrawingTexture)
+
+            commandBuffer.addCompletedHandler { _ in
+                Task { @MainActor [weak self] in
+                    guard let `self` else { return }
+                    onCommandBufferCompleted?(self.realtimeDrawingTexture)
+                }
+            }
         }
     }
 
@@ -122,10 +134,9 @@ private extension EraserDrawingRenderer {
     func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
-        on texture: MTLTexture
+        on texture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard let commandBuffer = displayView?.commandBuffer else { return }
-
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
@@ -170,10 +181,9 @@ private extension EraserDrawingRenderer {
 
     func drawCurrentTexture(
         texture sourceTexture: MTLTexture,
-        on destinationTexture: MTLTexture
+        on destinationTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard let commandBuffer = displayView?.commandBuffer else { return }
-
         renderer.drawTexture(
             texture: sourceTexture,
             buffers: flippedTextureBuffers,
