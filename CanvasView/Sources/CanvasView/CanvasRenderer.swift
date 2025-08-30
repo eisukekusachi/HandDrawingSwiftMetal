@@ -33,6 +33,8 @@ final class CanvasRenderer: ObservableObject {
     /// The texture of the selected layer.
     private(set) var selectedTexture: MTLTexture!
 
+    private let displayView: CanvasDisplayable
+
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture!
 
@@ -43,12 +45,15 @@ final class CanvasRenderer: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(
+        displayView: CanvasDisplayable,
         renderer: MTLRendering = MTLRenderer.shared
     ) {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )
+
+        self.displayView = displayView
 
         self.renderer = renderer
     }
@@ -105,7 +110,6 @@ extension CanvasRenderer {
     func updateDrawingTextures(
         canvasState: CanvasState,
         textureRepository: TextureRepository,
-        with commandBuffer: MTLCommandBuffer,
         onCompleted: (() -> Void)?
     ) {
         guard
@@ -166,10 +170,12 @@ extension CanvasRenderer {
     func updateCanvasView(
         _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel,
-        with commandBuffer: MTLCommandBuffer
+        selectedLayer: TextureLayerModel
     ) {
-        guard let canvasTexture else { return }
+        guard
+            let commandBuffer = displayView.commandBuffer,
+            let canvasTexture
+        else { return }
 
         renderer.fillTexture(
             texture: canvasTexture,
@@ -199,16 +205,17 @@ extension CanvasRenderer {
         )
 
         updateCanvasView(
-            canvasView,
-            with: commandBuffer
+            canvasView
         )
     }
 
     func updateCanvasView(
-        _ canvasView: CanvasDisplayable?,
-        with commandBuffer: MTLCommandBuffer
+        _ canvasView: CanvasDisplayable?
     ) {
-        guard let displayTexture = canvasView?.displayTexture else { return }
+        guard
+            let commandBuffer = displayView.commandBuffer,
+            let displayTexture = canvasView?.displayTexture
+        else { return }
 
         renderer.drawTexture(
             texture: canvasTexture,
