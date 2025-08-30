@@ -7,20 +7,20 @@
 
 import UIKit
 
-public struct CanvasResolvedConfiguration {
+public struct CanvasResolvedConfiguration: Sendable {
 
     public let projectName: String
 
     public let textureSize: CGSize
 
     public let layerIndex: Int
-    public let layers: [TextureLayerModel]
+    public let layers: [TextureLayerItem]
 
     public init(
         projectName: String,
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [TextureLayerModel]
+        layers: [TextureLayerItem]
     ) {
         self.projectName = projectName
         self.textureSize = textureSize
@@ -41,9 +41,7 @@ public extension CanvasResolvedConfiguration {
         self.projectName = configuration.projectName
 
         self.layerIndex = configuration.layerIndex
-        self.layers = configuration.layers.map {
-            .init(item: $0, thumbnail: nil)
-        }
+        self.layers = configuration.layers
     }
 
     var selectedLayerId: UUID {

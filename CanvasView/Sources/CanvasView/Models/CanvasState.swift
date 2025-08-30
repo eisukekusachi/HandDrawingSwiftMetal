@@ -40,7 +40,9 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
         self.textureSize = configuration.textureSize
 
-        self.layers = configuration.layers
+        self.layers = configuration.layers.map {
+            .init(item: $0, thumbnail: nil)
+        }
 
         self.selectedLayerId = configuration.selectedLayerId
 
