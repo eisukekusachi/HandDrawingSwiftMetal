@@ -82,7 +82,10 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         let device = MTLCreateSystemDefaultDevice()!
         return  .init(
             uuid: UUID(),
-            texture: MTLTextureCreator.makeBlankTexture(with: device)!
+            texture: MTLTextureCreator.makeBlankTexture(
+                size: .init(width: canvasMinimumTextureLength, height: canvasMinimumTextureLength),
+                with: device
+            )!
         )
     }
 
@@ -103,7 +106,10 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
         return  .init(
             uuid: UUID(),
-            texture: MTLTextureCreator.makeBlankTexture(with: device)!
+            texture: MTLTextureCreator.makeBlankTexture(
+                size: .init(width: canvasMinimumTextureLength, height: canvasMinimumTextureLength),
+                with: device
+            )!
         )
     }
 }

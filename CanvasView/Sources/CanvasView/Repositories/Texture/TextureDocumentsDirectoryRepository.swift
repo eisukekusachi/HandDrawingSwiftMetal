@@ -180,7 +180,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         textureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
+            Int(textureSize.width) > canvasMinimumTextureLength &&
+            Int(textureSize.height) > canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),

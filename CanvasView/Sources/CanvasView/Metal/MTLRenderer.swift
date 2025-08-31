@@ -7,6 +7,8 @@
 
 import MetalKit
 
+let canvasMinimumTextureLength: Int = 16
+
 public protocol MTLRendering: Sendable {
 
     func drawGrayPointBuffersWithMaxBlendMode(
@@ -86,13 +88,6 @@ public protocol MTLRendering: Sendable {
 public final class MTLRenderer: Sendable, MTLRendering {
 
     public static let shared = MTLRenderer()
-
-    public static let threadGroupLength: Int = 16
-
-    public static let minimumTextureSize: CGSize = .init(
-        width: threadGroupLength,
-        height: threadGroupLength
-    )
 
     private let pipelines = MTLPipelines()
 
@@ -197,8 +192,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / MTLRenderer.threadGroupLength),
-            height: Int(grayscaleTexture.height / MTLRenderer.threadGroupLength),
+            width: Int(grayscaleTexture.width / canvasMinimumTextureLength),
+            height: Int(grayscaleTexture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -275,8 +270,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         }
 
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / MTLRenderer.threadGroupLength),
-            height: Int(destinationTexture.height / MTLRenderer.threadGroupLength),
+            width: Int(destinationTexture.width / canvasMinimumTextureLength),
+            height: Int(destinationTexture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -315,8 +310,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
-            width: Int(texture.width / MTLRenderer.threadGroupLength),
-            height: Int(texture.height / MTLRenderer.threadGroupLength),
+            width: Int(texture.width / canvasMinimumTextureLength),
+            height: Int(texture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -358,13 +353,13 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         precondition(
-            texture.width >= MTLRenderer.threadGroupLength &&
-            texture.height >= MTLRenderer.threadGroupLength
+            texture.width >= canvasMinimumTextureLength &&
+            texture.height >= canvasMinimumTextureLength
         )
 
         let threadGroupSize = MTLSize(
-            width: Int(texture.width / MTLRenderer.threadGroupLength),
-            height: Int(texture.height / MTLRenderer.threadGroupLength),
+            width: Int(texture.width / canvasMinimumTextureLength),
+            height: Int(texture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(

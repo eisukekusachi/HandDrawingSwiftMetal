@@ -67,8 +67,8 @@ final class CanvasRenderer: ObservableObject {
 
     func initTextures(textureSize: CGSize) {
         guard
-            Int(textureSize.width) >= MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) >= MTLRenderer.threadGroupLength
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             assert(false, "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return

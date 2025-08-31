@@ -52,8 +52,8 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         let textureSize = configuration.textureSize ?? defaultTextureSize
 
         guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
+            Int(textureSize.width) > canvasMinimumTextureLength &&
+            Int(textureSize.height) > canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),

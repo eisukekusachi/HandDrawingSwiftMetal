@@ -11,6 +11,8 @@ import Metal
 
 @preconcurrency import Combine
 
+let canvasMinimumTextureLength: Int = 16
+
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     let objectWillChangeSubject: PassthroughSubject<Void, Never> = .init()
@@ -51,7 +53,10 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let texture = MTLTextureCreator.makeBlankTexture(with: device)
+            let texture = MTLTextureCreator.makeBlankTexture(
+                size: .init(width: canvasMinimumTextureLength, height: canvasMinimumTextureLength),
+                with: device
+            )
         else {
             throw NSError(domain: "AddTextureError", code: -1, userInfo: nil)
         }
@@ -74,7 +79,10 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let texture = MTLTextureCreator.makeBlankTexture(with: device)
+            let texture = MTLTextureCreator.makeBlankTexture(
+                size: .init(width: canvasMinimumTextureLength, height: canvasMinimumTextureLength),
+                with: device
+            )
         else {
             throw NSError(domain: "AddTextureError", code: -1, userInfo: nil)
         }
@@ -87,7 +95,10 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let texture = MTLTextureCreator.makeBlankTexture(with: device)
+            let texture = MTLTextureCreator.makeBlankTexture(
+                size: .init(width: canvasMinimumTextureLength, height: canvasMinimumTextureLength),
+                with: device
+            )
         else {
             throw NSError(domain: "MockTextureRepository", code: -1, userInfo: nil)
         }
