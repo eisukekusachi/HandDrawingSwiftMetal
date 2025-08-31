@@ -17,11 +17,14 @@ public final class MTLRenderer: Sendable, MTLRendering {
     }
     private var _device: MTLDevice?
 
+    private let commandQueue: MTLCommandQueue?
+
     private let pipelines: MTLPipelines
 
     init(device: MTLDevice?) {
         self._device = device
         self.pipelines = MTLPipelines(device: device)
+        self.commandQueue = device?.makeCommandQueue()
     }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
@@ -313,7 +316,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
         texture: MTLTexture?
     ) -> MTLTexture? {
         guard
-            let commandBuffer = device?.makeCommandQueue()?.makeCommandBuffer(),
+            let commandBuffer = commandQueue?.makeCommandBuffer(),
             let duplicatedTexture = duplicateTexture(
                 texture: texture,
                 with: commandBuffer
