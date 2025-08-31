@@ -47,9 +47,24 @@ public extension BrushDrawingToolRenderer {
 
     func initTextures(_ textureSize: CGSize) {
         self.textureSize = textureSize
-        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
-        self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
+        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
+            label: "realtimeDrawingTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        self.drawingTexture = MTLTextureCreator.makeTexture(
+            label: "drawingTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        self.grayscaleTexture = MTLTextureCreator.makeTexture(
+            label: "grayscaleTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearTextures(with: temporaryRenderCommandBuffer)

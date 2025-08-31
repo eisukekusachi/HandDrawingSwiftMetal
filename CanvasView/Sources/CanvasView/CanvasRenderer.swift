@@ -75,10 +75,26 @@ final class CanvasRenderer: ObservableObject {
         }
 
         guard
-            let unselectedBottomTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let selectedTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let unselectedTopTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let canvasTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+            let unselectedBottomTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let selectedTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let unselectedTopTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let canvasTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         else {
             assert(false, "Failed to generate texture")
             return

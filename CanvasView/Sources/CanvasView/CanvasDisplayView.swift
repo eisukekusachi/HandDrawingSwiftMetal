@@ -66,7 +66,11 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         self.backgroundColor = .white
 
         if let device, let textureSize: CGSize = currentDrawable?.texture.size {
-            _displayTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+            _displayTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         }
     }
 
@@ -98,7 +102,11 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         guard let device else { return }
 
         // Align the size of `_displayTexture` with `drawableSize`
-        _displayTexture = MTLTextureCreator.makeBlankTexture(size: size, with: device)
+        _displayTexture = MTLTextureCreator.makeTexture(
+            width: Int(size.width),
+            height: Int(size.height),
+            with: device
+        )
     }
 
     func resetCommandBuffer() {

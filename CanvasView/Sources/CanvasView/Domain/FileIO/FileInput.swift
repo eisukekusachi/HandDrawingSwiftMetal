@@ -15,8 +15,9 @@ enum FileInput {
             let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals
         else { return nil }
         return MTLTextureCreator.makeTexture(
-            size: textureSize,
-            colorArray: hexadecimalData,
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            from: hexadecimalData,
             with: device
         )
     }

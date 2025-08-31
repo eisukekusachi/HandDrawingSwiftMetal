@@ -228,4 +228,36 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
             ].joined()
         )
     }
+
+    func duplicateTexture(
+        texture: MTLTexture?
+    ) -> MTLTexture? {
+        let textureLabel = texture?.label ?? ""
+
+        callHistory.append(
+            [
+                "duplicateTexture(",
+                "texture: \(textureLabel)",
+                ")"
+            ].joined()
+        )
+        return texture
+    }
+
+    func duplicateTexture(
+        texture: MTLTexture?,
+        withCommandBuffer commandBuffer: any MTLCommandBuffer
+    ) -> MTLTexture? {
+        let textureLabel = texture?.label ?? ""
+        let commandBufferLabel = commandBuffer.label ?? ""
+        callHistory.append(
+            [
+                "clearTexture(",
+                "texture: \(textureLabel), ",
+                "with: \(commandBufferLabel)",
+                ")"
+            ].joined()
+        )
+        return texture
+    }
 }

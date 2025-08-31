@@ -116,8 +116,9 @@ public extension TextureLayerViewModel {
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
         let previousLayerIndex = canvasState.selectedIndex ?? 0
 
-        let texture = MTLTextureCreator.makeBlankTexture(
-            size: canvasState.currentTextureSize,
+        let texture = MTLTextureCreator.makeTexture(
+            width: Int(canvasState.currentTextureSize.width),
+            height: Int(canvasState.currentTextureSize.height),
             with: device
         )
 

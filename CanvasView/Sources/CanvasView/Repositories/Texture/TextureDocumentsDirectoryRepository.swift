@@ -137,8 +137,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             guard
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = MTLTextureCreator.makeTexture(
-                    size: textureSize,
-                    colorArray: hexadecimalData,
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
+                    from: hexadecimalData,
                     with: device
                 )
             else {
@@ -220,7 +221,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             let device = MTLCreateSystemDefaultDevice()
         else { return }
 
-        if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+        if let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        ) {
             try FileOutput.saveTextureAsData(
                 bytes: texture.bytes,
                 to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
@@ -359,9 +364,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        guard let newTexture = MTLTextureCreator.duplicateTexture(
-            texture: texture,
-            with: device
+        guard let newTexture = renderer.duplicateTexture(
+            texture: texture
         ) else {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),

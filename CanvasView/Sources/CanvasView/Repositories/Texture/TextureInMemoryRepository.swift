@@ -136,8 +136,9 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             }
 
             guard let newTexture = MTLTextureCreator.makeTexture(
-                size: textureSize,
-                colorArray: hexadecimalData,
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                from: hexadecimalData,
                 with: device
             ) else {
                 let error = NSError(
@@ -178,7 +179,11 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             throw error
         }
 
-        textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        textures[uuid] = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
     }
 
     /// Removes all textures
@@ -196,10 +201,8 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[uuid],
-            let device = MTLCreateSystemDefaultDevice(),
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
+            let newTexture = renderer.duplicateTexture(
+                texture: texture
             )
         else {
             let error = NSError(
@@ -256,11 +259,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
     @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture,
-            let device = MTLCreateSystemDefaultDevice(),
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
-            )
+            let newTexture = renderer.duplicateTexture(texture: texture)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

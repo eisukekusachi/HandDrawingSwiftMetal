@@ -74,6 +74,15 @@ public protocol MTLRendering: Sendable {
         with commandBuffer: MTLCommandBuffer
     )
 
+    func duplicateTexture(
+        texture: MTLTexture?
+    ) -> MTLTexture?
+
+    func duplicateTexture(
+        texture: MTLTexture?,
+        withCommandBuffer commandBuffer: MTLCommandBuffer
+    ) -> MTLTexture?
+
     func clearTextures(
         textures: [MTLTexture?],
         with commandBuffer: MTLCommandBuffer
@@ -90,6 +99,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
     public static let shared = MTLRenderer()
 
     private let pipelines = MTLPipelines()
+
+    private let device: MTLDevice? = MTLCreateSystemDefaultDevice()
 
     private init() {}
 
@@ -376,5 +387,51 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.setTexture(texture, index: 0)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
+    }
+
+    public func duplicateTexture(
+        texture: MTLTexture?
+    ) -> MTLTexture? {
+        guard
+            let commandBuffer = device?.makeCommandQueue()?.makeCommandBuffer(),
+            let duplicatedTexture = duplicateTexture(
+                texture: texture,
+                withCommandBuffer: commandBuffer
+            )
+        else { return nil }
+
+        commandBuffer.commit()
+
+        return duplicatedTexture
+    }
+
+    public func duplicateTexture(
+        texture: MTLTexture?,
+        withCommandBuffer commandBuffer: MTLCommandBuffer
+    ) -> MTLTexture? {
+        guard
+            let device,
+            let texture,
+            let newTexture = MTLTextureCreator.makeTexture(
+                label: texture.label,
+                width: Int(texture.size.width),
+                height: Int(texture.size.height),
+                with: device
+            ),
+            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+                nodes: .flippedTextureNodes,
+                with: device
+            )
+        else { return nil }
+
+        drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: newTexture,
+            with: commandBuffer
+        )
+
+        return newTexture
     }
 }
