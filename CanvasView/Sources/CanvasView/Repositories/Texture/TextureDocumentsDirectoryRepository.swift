@@ -41,7 +41,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         storageDirectoryURL: URL,
         directoryName: String,
         textures: Set<UUID> = [],
-        renderer: MTLRendering = MTLRenderer.shared
+        renderer: MTLRendering
     ) {
         self.textureIds = textures
         self.renderer = renderer

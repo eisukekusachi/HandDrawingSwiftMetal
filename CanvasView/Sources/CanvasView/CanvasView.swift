@@ -48,6 +48,10 @@ import UIKit
         canvasViewModel.textureLayerConfiguration
     }
 
+    private var renderer: MTLRendering = MTLRenderer(
+        pipelines: MTLPipelines()
+    )
+
     private let displayView = CanvasDisplayView()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
@@ -77,6 +81,18 @@ import UIKit
         canvasViewModel.frameSize = frame.size
     }
 
+    private func setup() {
+        layoutView()
+        bindData()
+
+        addGestureRecognizer(
+            FingerInputGestureRecognizer(delegate: self)
+        )
+        addGestureRecognizer(
+            PencilInputGestureRecognizer(delegate: self)
+        )
+    }
+
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration,
@@ -85,10 +101,13 @@ import UIKit
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
 
+        displayView.configure(renderer: renderer)
+
         canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
-                environmentConfiguration: environmentConfiguration
+                environmentConfiguration: environmentConfiguration,
+                renderer: renderer
             ),
             configuration: configuration,
             environmentConfiguration: environmentConfiguration,
@@ -96,6 +115,7 @@ import UIKit
                 width: size.width * scale,
                 height: size.height * scale
             ),
+            renderer: renderer,
             displayView: displayView
         )
     }
@@ -143,18 +163,6 @@ import UIKit
 }
 
 extension CanvasView {
-
-    private func setup() {
-        layoutView()
-        bindData()
-
-        addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
-    }
 
     private func bindData() {
         displayView.displayTextureSizeChanged

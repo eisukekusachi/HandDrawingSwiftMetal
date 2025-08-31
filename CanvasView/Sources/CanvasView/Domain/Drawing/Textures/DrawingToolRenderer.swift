@@ -17,8 +17,8 @@ public protocol DrawingToolRenderer {
 
     func setDiameter(_ diameter: Int)
 
-    /// Defines a private property `displayView` of type `CanvasDisplayable? and retains its value
-    func setDisplayView(_ displayView: CanvasDisplayable)
+    /// Injects external dependencies `CanvasDisplayable` and `MTLRendering`
+    func configure(displayView: CanvasDisplayable, renderer: MTLRendering)
 
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],

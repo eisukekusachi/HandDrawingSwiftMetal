@@ -25,13 +25,11 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 
     private var displayView: CanvasDisplayable?
 
-    private let renderer: MTLRendering
+    private var renderer: MTLRendering?
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    public required init(renderer: MTLRendering = MTLRenderer.shared) {
-        self.renderer = renderer
-
+    public required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -40,6 +38,11 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 }
 
 public extension BrushDrawingToolRenderer {
+
+    func configure(displayView: CanvasDisplayable, renderer: MTLRendering) {
+        self.displayView = displayView
+        self.renderer = renderer
+    }
 
     func setDisplayView(_ displayView: CanvasDisplayable) {
         self.displayView = displayView
@@ -150,6 +153,8 @@ extension BrushDrawingToolRenderer {
         on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let renderer else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
@@ -188,6 +193,8 @@ extension BrushDrawingToolRenderer {
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let renderer else { return }
+
         renderer.drawTexture(
             texture: sourceTexture,
             buffers: flippedTextureBuffers,
@@ -200,6 +207,8 @@ extension BrushDrawingToolRenderer {
     }
 
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
+        guard let renderer else { return }
+
         renderer.clearTextures(
             textures: [
                 drawingTexture,

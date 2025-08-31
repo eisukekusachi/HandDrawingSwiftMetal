@@ -39,7 +39,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     init(
         textures: [UUID: MTLTexture?] = [:],
-        renderer: MTLRendering = MTLRenderer.shared
+        renderer: MTLRendering
     ) {
         self.textures = textures
         self.renderer = renderer

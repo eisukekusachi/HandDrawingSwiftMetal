@@ -21,6 +21,8 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
     private(set) var commandBuffer: MTLCommandBuffer?
 
+    private var renderer: MTLRendering?
+
     /// A texture that is rendered on the screen.
     /// Its size changes when the device is rotated.
     private var _displayTexture: MTLTexture? {
@@ -44,6 +46,10 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     required init(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
+    }
+
+    func configure(renderer: MTLRendering) {
+        self.renderer = renderer
     }
 
     private func commonInit() {
@@ -84,9 +90,10 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         else { return }
 
         // Draw `renderTexture` directly onto `drawable.texture`
-        MTLRenderer.shared.drawTexture(
+        renderer?.drawTexture(
             texture: displayTexture,
             buffers: flippedTextureBuffers,
+            withBackgroundColor: nil,
             on: drawable.texture,
             with: commandBuffer
         )

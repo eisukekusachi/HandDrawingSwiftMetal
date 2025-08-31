@@ -46,16 +46,16 @@ final class CanvasRenderer: ObservableObject {
 
     init(
         displayView: CanvasDisplayable,
-        renderer: MTLRendering = MTLRenderer.shared
+        renderer: MTLRendering
     ) {
+        self.renderer = renderer
+
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )
 
         self.displayView = displayView
-
-        self.renderer = renderer
     }
 
     func initialize(

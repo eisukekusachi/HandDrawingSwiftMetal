@@ -26,13 +26,11 @@ public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 
     private var displayView: CanvasDisplayable?
 
-    private let renderer: MTLRendering
+    private var renderer: MTLRendering?
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    public required init(renderer: MTLRendering = MTLRenderer.shared) {
-        self.renderer = renderer
-
+    public required init() {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -42,8 +40,9 @@ public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 
 public extension EraserDrawingToolRenderer {
 
-    func setDisplayView(_ displayView: CanvasDisplayable) {
+    func configure(displayView: CanvasDisplayable, renderer: MTLRendering) {
         self.displayView = displayView
+        self.renderer = renderer
     }
 
     func initTextures(_ textureSize: CGSize) {
@@ -157,6 +156,8 @@ private extension EraserDrawingToolRenderer {
         on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let renderer else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
@@ -204,6 +205,8 @@ private extension EraserDrawingToolRenderer {
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let renderer else { return }
+
         renderer.drawTexture(
             texture: sourceTexture,
             buffers: flippedTextureBuffers,
@@ -216,6 +219,8 @@ private extension EraserDrawingToolRenderer {
     }
 
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
+        guard let renderer else { return }
+
         renderer.clearTextures(
             textures: [
                 drawingTexture,

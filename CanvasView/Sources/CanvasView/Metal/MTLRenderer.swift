@@ -11,13 +11,13 @@ let canvasMinimumTextureLength: Int = 16
 
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public static let shared = MTLRenderer()
-
-    private let pipelines = MTLPipelines()
+    private let pipelines: MTLPipelines
 
     private let device: MTLDevice? = MTLCreateSystemDefaultDevice()
 
-    private init() {}
+    init(pipelines: MTLPipelines) {
+        self.pipelines = pipelines
+    }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
@@ -66,7 +66,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
             return
         }
 
-        MTLRenderer.shared.drawTexture(
+        drawTexture(
             texture: texture,
             buffers: textureBuffers,
             withBackgroundColor: backgroundColor,
