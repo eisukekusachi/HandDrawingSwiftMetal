@@ -246,7 +246,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     func duplicateTexture(
         texture: MTLTexture?,
-        withCommandBuffer commandBuffer: any MTLCommandBuffer
+        with commandBuffer: any MTLCommandBuffer
     ) -> MTLTexture? {
         let textureLabel = texture?.label ?? ""
         let commandBufferLabel = commandBuffer.label ?? ""

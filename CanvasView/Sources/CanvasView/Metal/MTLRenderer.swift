@@ -9,91 +9,6 @@ import MetalKit
 
 let canvasMinimumTextureLength: Int = 16
 
-public protocol MTLRendering: Sendable {
-
-    func drawGrayPointBuffersWithMaxBlendMode(
-        buffers: MTLGrayscalePointBuffers?,
-        onGrayscaleTexture texture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        texture: MTLTexture?,
-        matrix: CGAffineTransform,
-        frameSize: CGSize,
-        backgroundColor: UIColor,
-        on destinationTexture: MTLTexture,
-        device: MTLDevice,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        texture: MTLTexture,
-        buffers: MTLTextureBuffers,
-        withBackgroundColor color: UIColor?,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        grayscaleTexture: MTLTexture,
-        color rgb: IntRGB,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func subtractTextureWithEraseBlendMode(
-        texture: MTLTexture,
-        buffers: MTLTextureBuffers,
-        from destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func mergeTexture(
-        texture: MTLTexture,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func mergeTexture(
-        texture: MTLTexture,
-        alpha: Int,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func fillTexture(
-        texture: MTLTexture,
-        withRGB rgb: IntRGB,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func fillTexture(
-        texture: MTLTexture,
-        withRGBA rgba: IntRGBA,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func duplicateTexture(
-        texture: MTLTexture?
-    ) -> MTLTexture?
-
-    func duplicateTexture(
-        texture: MTLTexture?,
-        withCommandBuffer commandBuffer: MTLCommandBuffer
-    ) -> MTLTexture?
-
-    func clearTextures(
-        textures: [MTLTexture?],
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func clearTexture(
-        texture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-}
-
 public final class MTLRenderer: Sendable, MTLRendering {
 
     public static let shared = MTLRenderer()
@@ -396,7 +311,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
             let commandBuffer = device?.makeCommandQueue()?.makeCommandBuffer(),
             let duplicatedTexture = duplicateTexture(
                 texture: texture,
-                withCommandBuffer: commandBuffer
+                with: commandBuffer
             )
         else { return nil }
 
@@ -407,7 +322,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func duplicateTexture(
         texture: MTLTexture?,
-        withCommandBuffer commandBuffer: MTLCommandBuffer
+        with commandBuffer: MTLCommandBuffer
     ) -> MTLTexture? {
         guard
             let device,
