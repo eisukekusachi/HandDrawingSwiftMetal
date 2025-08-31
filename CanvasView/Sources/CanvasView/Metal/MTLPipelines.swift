@@ -7,6 +7,7 @@
 
 import MetalKit
 
+@MainActor
 final class MTLPipelines: Sendable {
 
     let drawGrayPointsWithMaxBlendMode: MTLRenderPipelineState
