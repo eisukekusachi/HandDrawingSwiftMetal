@@ -363,7 +363,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        guard let newTexture = renderer.duplicateTexture(
+        guard let newTexture = await renderer.duplicateTexture(
             texture: texture
         ) else {
             let error = NSError(

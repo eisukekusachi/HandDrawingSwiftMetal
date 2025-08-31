@@ -77,7 +77,7 @@ public protocol MTLRendering {
 
     func duplicateTexture(
         texture: MTLTexture?
-    ) -> MTLTexture?
+    ) async -> MTLTexture?
 
     func duplicateTexture(
         texture: MTLTexture?,

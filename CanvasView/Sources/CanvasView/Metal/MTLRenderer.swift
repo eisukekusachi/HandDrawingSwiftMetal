@@ -314,7 +314,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func duplicateTexture(
         texture: MTLTexture?
-    ) -> MTLTexture? {
+    ) async -> MTLTexture? {
         guard
             let commandBuffer = commandQueue?.makeCommandBuffer(),
             let duplicatedTexture = duplicateTexture(
@@ -323,7 +323,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
             )
         else { return nil }
 
-        commandBuffer.commit()
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            commandBuffer.addCompletedHandler { _ in continuation.resume() }
+            commandBuffer.commit()
+        }
 
         return duplicatedTexture
     }
