@@ -12,6 +12,8 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     var callHistory: [String] = []
 
+    let device: MTLDevice? = MTLCreateSystemDefaultDevice()
+
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture,

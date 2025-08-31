@@ -10,6 +10,7 @@ import Foundation
 import MetalKit
 
 /// A protocol that defines a repository for managing textures
+@MainActor
 public protocol TextureRepository: Sendable {
 
     /// The number of textures currently managed

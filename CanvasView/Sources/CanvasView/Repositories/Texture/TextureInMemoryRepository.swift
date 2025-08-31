@@ -10,7 +10,8 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages in-memory textures
-class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
+@MainActor
+class TextureInMemoryRepository: TextureRepository {
 
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
@@ -106,7 +107,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         }
 
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -169,7 +170,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

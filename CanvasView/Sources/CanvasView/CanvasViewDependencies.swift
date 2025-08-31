@@ -19,6 +19,7 @@ struct CanvasViewDependencies {
 }
 
 extension CanvasViewDependencies {
+    @MainActor
     init(
         environmentConfiguration: CanvasEnvironmentConfiguration,
         renderer: MTLRendering

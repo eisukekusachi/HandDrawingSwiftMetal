@@ -48,9 +48,7 @@ import UIKit
         canvasViewModel.textureLayerConfiguration
     }
 
-    private var renderer: MTLRendering = MTLRenderer(
-        pipelines: MTLPipelines()
-    )
+    private var renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
 
@@ -69,11 +67,19 @@ import UIKit
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
+
+        renderer = MTLRenderer(device: displayView.device)
+
         super.init(frame: .zero)
+
         setup()
     }
     public required init?(coder: NSCoder) {
+
+        renderer = MTLRenderer(device: displayView.device)
+
         super.init(coder: coder)
+
         setup()
     }
 

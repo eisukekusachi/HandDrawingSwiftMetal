@@ -9,14 +9,19 @@ import MetalKit
 
 let canvasMinimumTextureLength: Int = 16
 
+@MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
+
+    public var device: MTLDevice? {
+        _device
+    }
+    private var _device: MTLDevice?
 
     private let pipelines: MTLPipelines
 
-    private let device: MTLDevice? = MTLCreateSystemDefaultDevice()
-
-    init(pipelines: MTLPipelines) {
-        self.pipelines = pipelines
+    init(device: MTLDevice?) {
+        self._device = device
+        self.pipelines = MTLPipelines(device: device)
     }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
