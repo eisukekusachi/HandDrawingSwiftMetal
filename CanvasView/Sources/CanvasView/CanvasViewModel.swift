@@ -20,7 +20,7 @@ public final class CanvasViewModel {
 
     var frameSize: CGSize = .zero {
         didSet {
-            renderer?.frameSize = frameSize
+            canvasRenderer?.frameSize = frameSize
         }
     }
 
@@ -71,14 +71,15 @@ public final class CanvasViewModel {
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
-    /// A texture set for realtime drawing
-    private var drawingRenderer: DrawingRenderer?
-    private var drawingRenderers: [DrawingRenderer] = []
+    /// A class that manages rendering to the canvas
+    private var canvasRenderer: CanvasRenderer?
+
+    /// A class that manages drawing lines onto textures
+    private var drawingToolRenderer: DrawingToolRenderer?
+    private var drawingToolRenderers: [DrawingToolRenderer] = []
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
-
-    private var renderer: CanvasRenderer?
 
     private let transforming = Transforming()
 
@@ -103,25 +104,25 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     func initialize(
-        drawingRenderers: [DrawingRenderer],
+        drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration,
         defaultTextureSize: CGSize,
         displayView: CanvasDisplayable
     ) {
-        drawingRenderers.forEach {
+        drawingToolRenderers.forEach {
             $0.setDisplayView(displayView)
         }
-        self.drawingRenderers = drawingRenderers
+        self.drawingToolRenderers = drawingToolRenderers
 
-        self.drawingRenderer = self.drawingRenderers[0]
+        self.drawingToolRenderer = self.drawingToolRenderers[0]
 
         self.dependencies = dependencies
 
-        self.renderer = CanvasRenderer(displayView: displayView)
+        self.canvasRenderer = CanvasRenderer(displayView: displayView)
 
-        self.renderer?.initialize(
+        self.canvasRenderer?.initialize(
             environmentConfiguration: environmentConfiguration
         )
 
@@ -168,11 +169,11 @@ public final class CanvasViewModel {
             .sink { [weak self] in
                 guard
                     let drawingCurve = self?.drawingCurve,
-                    let texture = self?.renderer?.selectedTexture,
+                    let texture = self?.canvasRenderer?.selectedTexture,
                     let selectedLayerId = self?.canvasState.selectedLayer?.id
                 else { return }
 
-                self?.drawingRenderer?.drawCurve(
+                self?.drawingToolRenderer?.drawCurve(
                     drawingCurve,
                     using: texture,
                     onDrawing: { [weak self] resultTexture in
@@ -213,7 +214,7 @@ public final class CanvasViewModel {
 
         transforming.matrixPublisher
             .sink { [weak self] matrix in
-                self?.renderer?.matrix = matrix
+                self?.canvasRenderer?.matrix = matrix
             }
             .store(in: &cancellables)
 
@@ -251,9 +252,9 @@ public extension CanvasViewModel {
             textureRepository: dependencies.textureRepository
         )
 
-        renderer?.initTextures(textureSize: configuration.textureSize)
+        canvasRenderer?.initTextures(textureSize: configuration.textureSize)
 
-        renderer?.updateDrawingTextures(
+        canvasRenderer?.updateDrawingTextures(
             canvasState: canvasState,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
@@ -262,8 +263,8 @@ public extension CanvasViewModel {
     }
 
     private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
-        for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initTextures(configuration.textureSize)
+        for i in 0 ..< drawingToolRenderers.count {
+            drawingToolRenderers[i].initTextures(configuration.textureSize)
         }
 
         undoStack?.initialize(configuration.textureSize)
@@ -370,12 +371,12 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        renderer?.updateCanvasView()
+        canvasRenderer?.updateCanvasView()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
-        guard drawingToolIndex < drawingRenderers.count else { return }
-        drawingRenderer = drawingRenderers[drawingToolIndex]
+        guard drawingToolIndex < drawingToolRenderers.count else { return }
+        drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
     func newCanvas(configuration: CanvasConfiguration) async throws {
@@ -453,7 +454,7 @@ public extension CanvasViewModel {
     ) {
         // Create a thumbnail image from the current canvas texture
         guard
-            let canvasTexture = renderer?.canvasTexture,
+            let canvasTexture = canvasRenderer?.canvasTexture,
             let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
                 height: CanvasEntity.thumbnailLength,
                 scale: 1.0
@@ -527,17 +528,17 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let renderer,
-            let drawingRenderer,
-            let drawableSize = renderer.drawableSize
+            let canvasRenderer,
+            let drawingToolRenderer,
+            let drawableSize = canvasRenderer.drawableSize
         else { return }
 
         drawingCurve?.append(
-            points: drawingRenderer.curvePoints(
+            points: drawingToolRenderer.curvePoints(
                 screenTouchPoints,
                 matrix: transforming.matrix.inverted(flipY: true),
                 drawableSize: drawableSize,
-                frameSize: renderer.frameSize
+                frameSize: canvasRenderer.frameSize
             ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )
@@ -546,7 +547,7 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas() {
-        guard let renderer else { return }
+        guard let canvasRenderer else { return }
 
         if transforming.isNotKeysInitialized {
             transforming.initialize(
@@ -557,8 +558,8 @@ extension CanvasViewModel {
         if fingerStroke.isAllFingersOnScreen {
             transforming.transformCanvas(
                 screenCenter: .init(
-                    x: renderer.frameSize.width * 0.5,
-                    y: renderer.frameSize.height * 0.5
+                    x: canvasRenderer.frameSize.width * 0.5,
+                    y: canvasRenderer.frameSize.height * 0.5
                 ),
                 touchHistories: fingerStroke.touchHistories
             )
@@ -566,7 +567,7 @@ extension CanvasViewModel {
             transforming.endTransformation()
         }
 
-        renderer.updateCanvasView()
+        canvasRenderer.updateCanvasView()
     }
 }
 
@@ -574,16 +575,16 @@ extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
 
-        drawingRenderer?.clearTextures()
+        drawingToolRenderer?.clearTextures()
 
         fingerStroke.reset()
 
         drawingCurve = nil
         transforming.resetMatrix()
 
-        renderer?.resetCommandBuffer()
+        canvasRenderer?.resetCommandBuffer()
 
-        renderer?.updateCanvasView()
+        canvasRenderer?.updateCanvasView()
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
@@ -619,7 +620,7 @@ extension CanvasViewModel {
     }
 
     func updateCanvasByMergingAllLayers() {
-        renderer?.updateDrawingTextures(
+        canvasRenderer?.updateDrawingTextures(
             canvasState: canvasState,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
@@ -632,7 +633,7 @@ extension CanvasViewModel {
             let selectedLayer = canvasState.selectedLayer
         else { return }
 
-        renderer?.updateCanvasView(
+        canvasRenderer?.updateCanvasView(
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer
         )

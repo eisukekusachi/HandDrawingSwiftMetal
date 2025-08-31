@@ -10,7 +10,7 @@ import UIKit
 
 @objc public class CanvasView: UIView {
 
-    private var drawingRenderers: [DrawingRenderer] = []
+    private var drawingRenderers: [DrawingToolRenderer] = []
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
@@ -78,7 +78,7 @@ import UIKit
     }
 
     public func initialize(
-        drawingRenderers: [DrawingRenderer],
+        drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
@@ -86,7 +86,7 @@ import UIKit
         let size = UIScreen.main.bounds.size
 
         canvasViewModel.initialize(
-            drawingRenderers: drawingRenderers,
+            drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
                 environmentConfiguration: environmentConfiguration
             ),

@@ -1,5 +1,5 @@
 //
-//  EraserDrawingRenderer.swift
+//  EraserDrawingToolRenderer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -10,7 +10,7 @@ import MetalKit
 
 /// A set of textures for realtime eraser drawing
 @MainActor
-public final class EraserDrawingRenderer: DrawingRenderer {
+public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 
     private var alpha: Int = 255
 
@@ -40,7 +40,7 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     }
 }
 
-public extension EraserDrawingRenderer {
+public extension EraserDrawingToolRenderer {
 
     func setDisplayView(_ displayView: CanvasDisplayable) {
         self.displayView = displayView
@@ -129,7 +129,7 @@ public extension EraserDrawingRenderer {
     }
 }
 
-private extension EraserDrawingRenderer {
+private extension EraserDrawingToolRenderer {
 
     func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
@@ -207,7 +207,7 @@ private extension EraserDrawingRenderer {
     }
 }
 
-public extension EraserDrawingRenderer {
+public extension EraserDrawingToolRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 

@@ -137,12 +137,12 @@ extension DrawingTool {
     }
 
     func setBrushDiameter(_ diameter: Float) {
-        self.brushDiameter = BrushDrawingRenderer.diameterIntValue(diameter)
+        self.brushDiameter = BrushDrawingToolRenderer.diameterIntValue(diameter)
         saveData()
     }
 
     func setEraserDiameter(_ diameter: Float) {
-        self.eraserDiameter = EraserDrawingRenderer.diameterIntValue(diameter)
+        self.eraserDiameter = EraserDrawingToolRenderer.diameterIntValue(diameter)
         saveData()
     }
 }
