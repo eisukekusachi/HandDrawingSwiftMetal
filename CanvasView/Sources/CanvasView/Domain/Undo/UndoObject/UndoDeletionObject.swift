@@ -37,7 +37,7 @@ public final class UndoDeletionObject: UndoObject {
         textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) async throws {
-        try textureRepository
+        await textureRepository
             .removeTexture(textureLayer.id)
     }
 }

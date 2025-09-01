@@ -41,7 +41,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         storageDirectoryURL: URL,
         directoryName: String,
         textures: Set<UUID> = [],
-        renderer: MTLRendering = MTLRenderer.shared
+        renderer: MTLRendering
     ) {
         self.textureIds = textures
         self.renderer = renderer
@@ -116,7 +116,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
 
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -137,8 +137,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             guard
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = MTLTextureCreator.makeTexture(
-                    size: textureSize,
-                    colorArray: hexadecimalData,
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
+                    from: hexadecimalData,
                     with: device
                 )
             else {
@@ -180,7 +181,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         textureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength && Int(textureSize.height) > MTLRenderer.threadGroupLength
+            Int(textureSize.width) > canvasMinimumTextureLength &&
+            Int(textureSize.height) > canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -216,10 +218,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else { return }
 
-        if let texture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device) {
+        if let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        ) {
             try FileOutput.saveTextureAsData(
                 bytes: texture.bytes,
                 to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
@@ -245,7 +251,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
         guard
-            let device = MTLCreateSystemDefaultDevice(),
+            let device = renderer.device,
             let newTexture: MTLTexture = try FileInput.loadTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
@@ -336,8 +342,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     @discardableResult
     func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
-            let texture,
-            let device = MTLCreateSystemDefaultDevice()
+            let texture
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -358,9 +363,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        guard let newTexture = MTLTextureCreator.duplicateTexture(
-            texture: texture,
-            with: device
+        guard let newTexture = await renderer.duplicateTexture(
+            texture: texture
         ) else {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),

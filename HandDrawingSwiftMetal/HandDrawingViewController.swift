@@ -34,9 +34,9 @@ class HandDrawingViewController: UIViewController {
         bindData()
 
         contentView.canvasView.initialize(
-            drawingRenderers: [
-                contentView.brushDrawingRenderer,
-                contentView.eraserDrawingRenderer
+            drawingToolRenderers: [
+                contentView.brushDrawingToolRenderer,
+                contentView.eraserDrawingToolRenderer
             ],
             configuration: configuration
         )

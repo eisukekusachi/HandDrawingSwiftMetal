@@ -7,96 +7,25 @@
 
 import MetalKit
 
-public protocol MTLRendering: Sendable {
+let canvasMinimumTextureLength: Int = 16
 
-    func drawGrayPointBuffersWithMaxBlendMode(
-        buffers: MTLGrayscalePointBuffers?,
-        onGrayscaleTexture texture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        texture: MTLTexture?,
-        matrix: CGAffineTransform,
-        frameSize: CGSize,
-        backgroundColor: UIColor,
-        on destinationTexture: MTLTexture,
-        device: MTLDevice,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        texture: MTLTexture,
-        buffers: MTLTextureBuffers,
-        withBackgroundColor color: UIColor?,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func drawTexture(
-        grayscaleTexture: MTLTexture,
-        color rgb: IntRGB,
-        on destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func subtractTextureWithEraseBlendMode(
-        texture: MTLTexture,
-        buffers: MTLTextureBuffers,
-        from destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func mergeTexture(
-        texture: MTLTexture,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func mergeTexture(
-        texture: MTLTexture,
-        alpha: Int,
-        into destinationTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func fillTexture(
-        texture: MTLTexture,
-        withRGB rgb: IntRGB,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func fillTexture(
-        texture: MTLTexture,
-        withRGBA rgba: IntRGBA,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func clearTextures(
-        textures: [MTLTexture?],
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func clearTexture(
-        texture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-}
-
+@MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public static let shared = MTLRenderer()
+    public var device: MTLDevice? {
+        _device
+    }
+    private var _device: MTLDevice?
 
-    public static let threadGroupLength: Int = 16
+    private let commandQueue: MTLCommandQueue?
 
-    public static let minimumTextureSize: CGSize = .init(
-        width: threadGroupLength,
-        height: threadGroupLength
-    )
+    private let pipelines: MTLPipelines
 
-    private let pipelines = MTLPipelines()
-
-    private init() {}
+    init(device: MTLDevice?) {
+        self._device = device
+        self.pipelines = MTLPipelines(device: device)
+        self.commandQueue = device?.makeCommandQueue()
+    }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
@@ -145,7 +74,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
             return
         }
 
-        MTLRenderer.shared.drawTexture(
+        drawTexture(
             texture: texture,
             buffers: textureBuffers,
             withBackgroundColor: backgroundColor,
@@ -197,8 +126,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / MTLRenderer.threadGroupLength),
-            height: Int(grayscaleTexture.height / MTLRenderer.threadGroupLength),
+            width: Int(grayscaleTexture.width / canvasMinimumTextureLength),
+            height: Int(grayscaleTexture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -275,8 +204,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         }
 
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / MTLRenderer.threadGroupLength),
-            height: Int(destinationTexture.height / MTLRenderer.threadGroupLength),
+            width: Int(destinationTexture.width / canvasMinimumTextureLength),
+            height: Int(destinationTexture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -315,8 +244,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         let threadGroupSize = MTLSize(
-            width: Int(texture.width / MTLRenderer.threadGroupLength),
-            height: Int(texture.height / MTLRenderer.threadGroupLength),
+            width: Int(texture.width / canvasMinimumTextureLength),
+            height: Int(texture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -358,13 +287,13 @@ public final class MTLRenderer: Sendable, MTLRendering {
         with commandBuffer: MTLCommandBuffer
     ) {
         precondition(
-            texture.width >= MTLRenderer.threadGroupLength &&
-            texture.height >= MTLRenderer.threadGroupLength
+            texture.width >= canvasMinimumTextureLength &&
+            texture.height >= canvasMinimumTextureLength
         )
 
         let threadGroupSize = MTLSize(
-            width: Int(texture.width / MTLRenderer.threadGroupLength),
-            height: Int(texture.height / MTLRenderer.threadGroupLength),
+            width: Int(texture.width / canvasMinimumTextureLength),
+            height: Int(texture.height / canvasMinimumTextureLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -381,5 +310,54 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.setTexture(texture, index: 0)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
+    }
+
+    public func duplicateTexture(
+        texture: MTLTexture?
+    ) async -> MTLTexture? {
+        guard
+            let commandBuffer = commandQueue?.makeCommandBuffer(),
+            let duplicatedTexture = duplicateTexture(
+                texture: texture,
+                with: commandBuffer
+            )
+        else { return nil }
+
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            commandBuffer.addCompletedHandler { @Sendable _ in continuation.resume() }
+            commandBuffer.commit()
+        }
+
+        return duplicatedTexture
+    }
+
+    public func duplicateTexture(
+        texture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) -> MTLTexture? {
+        guard
+            let device,
+            let texture,
+            let newTexture = MTLTextureCreator.makeTexture(
+                label: texture.label,
+                width: Int(texture.size.width),
+                height: Int(texture.size.height),
+                with: device
+            ),
+            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
+                nodes: .flippedTextureNodes,
+                with: device
+            )
+        else { return nil }
+
+        drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: newTexture,
+            with: commandBuffer
+        )
+
+        return newTexture
     }
 }

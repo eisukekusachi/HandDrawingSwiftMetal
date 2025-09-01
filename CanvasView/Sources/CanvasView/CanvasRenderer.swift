@@ -33,6 +33,8 @@ final class CanvasRenderer: ObservableObject {
     /// The texture of the selected layer.
     private(set) var selectedTexture: MTLTexture!
 
+    private let displayView: CanvasDisplayable
+
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture!
 
@@ -43,14 +45,17 @@ final class CanvasRenderer: ObservableObject {
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
     init(
-        renderer: MTLRendering = MTLRenderer.shared
+        displayView: CanvasDisplayable,
+        renderer: MTLRendering
     ) {
+        self.renderer = renderer
+
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
         )
 
-        self.renderer = renderer
+        self.displayView = displayView
     }
 
     func initialize(
@@ -62,18 +67,34 @@ final class CanvasRenderer: ObservableObject {
 
     func initTextures(textureSize: CGSize) {
         guard
-            Int(textureSize.width) >= MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) >= MTLRenderer.threadGroupLength
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             assert(false, "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return
         }
 
         guard
-            let unselectedBottomTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let selectedTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let unselectedTopTexture = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device),
-            let canvasTexture = MTLTextureCreator.makeTexture(size: textureSize, with: device)
+            let unselectedBottomTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let selectedTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let unselectedTopTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            ),
+            let canvasTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         else {
             assert(false, "Failed to generate texture")
             return
@@ -92,6 +113,13 @@ final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
+    var drawableSize: CGSize? {
+        displayView.displayTexture?.size
+    }
+
+    func resetCommandBuffer() {
+        displayView.resetCommandBuffer()
+    }
     func bottomLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
@@ -105,12 +133,12 @@ extension CanvasRenderer {
     func updateDrawingTextures(
         canvasState: CanvasState,
         textureRepository: TextureRepository,
-        with commandBuffer: MTLCommandBuffer,
         onCompleted: (() -> Void)?
     ) {
         guard
             let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex
+            let selectedIndex = canvasState.selectedIndex,
+            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else {
             return
         }
@@ -137,25 +165,33 @@ extension CanvasRenderer {
             )
 
             Task { @MainActor in
-                async let bottomTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: bottomLayers,
-                    on: unselectedBottomTexture
+                    on: unselectedBottomTexture,
+                    with: commandBuffer
                 )
 
-                async let selectedTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: [opaqueLayer],
-                    on: selectedTexture
+                    on: selectedTexture,
+                    with: commandBuffer
                 )
 
-                async let topTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: topLayers,
-                    on: unselectedTopTexture
+                    on: unselectedTopTexture,
+                    with: commandBuffer
                 )
 
-                _ = try await (bottomTexture, selectedTexture, topTexture)
+                try await withCheckedThrowingContinuation { continuation in
+                    commandBuffer.addCompletedHandler { @Sendable _ in
+                        continuation.resume()
+                    }
+                    commandBuffer.commit()
+                }
 
                 onCompleted?()
             }
@@ -164,12 +200,13 @@ extension CanvasRenderer {
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     func updateCanvasView(
-        _ canvasView: CanvasDisplayable?,
         realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel,
-        with commandBuffer: MTLCommandBuffer
+        selectedLayer: TextureLayerModel
     ) {
-        guard let canvasTexture else { return }
+        guard
+            let commandBuffer = displayView.commandBuffer,
+            let canvasTexture
+        else { return }
 
         renderer.fillTexture(
             texture: canvasTexture,
@@ -198,17 +235,14 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView(
-            canvasView,
-            with: commandBuffer
-        )
+        updateCanvasView()
     }
 
-    func updateCanvasView(
-        _ canvasView: CanvasDisplayable?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let displayTexture = canvasView?.displayTexture else { return }
+    func updateCanvasView() {
+        guard
+            let commandBuffer = displayView.commandBuffer,
+            let displayTexture = displayView.displayTexture
+        else { return }
 
         renderer.drawTexture(
             texture: canvasTexture,
@@ -219,24 +253,17 @@ extension CanvasRenderer {
             device: device,
             with: commandBuffer
         )
-        canvasView?.setNeedsDisplay()
+        displayView.setNeedsDisplay()
     }
 
     func drawLayerTextures(
         textures: [IdentifiedTexture],
         layers: [TextureLayerItem],
-        on destination: MTLTexture
+        on destination: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let tempCommandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
 
-        renderer.clearTexture(texture: destination, with: tempCommandBuffer)
+        renderer.clearTexture(texture: destination, with: commandBuffer)
 
         let textureDictionary = IdentifiedTexture.dictionary(from: Set(textures))
 
@@ -246,16 +273,9 @@ extension CanvasRenderer {
                     texture: resultTexture,
                     alpha: layer.alpha,
                     into: destination,
-                    with: tempCommandBuffer
+                    with: commandBuffer
                 )
             }
-        }
-
-        try await withCheckedThrowingContinuation { continuation in
-            tempCommandBuffer.addCompletedHandler { _ in
-                continuation.resume()
-            }
-            tempCommandBuffer.commit()
         }
     }
 }

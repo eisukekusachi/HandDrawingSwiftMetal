@@ -7,7 +7,8 @@
 
 import MetalKit
 
-final class MTLPipelines: Sendable {
+@MainActor
+final public class MTLPipelines: Sendable {
 
     let drawGrayPointsWithMaxBlendMode: MTLRenderPipelineState
     let drawTexture: MTLRenderPipelineState
@@ -16,10 +17,9 @@ final class MTLPipelines: Sendable {
     let mergeTextures: MTLComputePipelineState
     let fillColor: MTLComputePipelineState
 
-    init() {
-        guard
-            let device = MTLCreateSystemDefaultDevice() else {
-            fatalError("device is nil.")
+    public init(device: MTLDevice?) {
+        guard let device else {
+            fatalError("this device is nil.")
         }
 
         /*

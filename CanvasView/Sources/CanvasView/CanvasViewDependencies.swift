@@ -19,15 +19,18 @@ struct CanvasViewDependencies {
 }
 
 extension CanvasViewDependencies {
+    @MainActor
     init(
-        environmentConfiguration: CanvasEnvironmentConfiguration
+        environmentConfiguration: CanvasEnvironmentConfiguration,
+        renderer: MTLRendering
     ) {
         switch environmentConfiguration.textureRepositoryType {
         case .disk: textureRepository = TextureDocumentsDirectoryRepository(
             storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage"
+            directoryName: "TextureStorage",
+            renderer: renderer
         )
-        case .memory: textureRepository = TextureInMemoryRepository()
+        case .memory: textureRepository = TextureInMemoryRepository(renderer: renderer)
         }
 
         /*

@@ -38,8 +38,8 @@ final class HandDrawingContentView: UIView {
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
 
-    let brushDrawingRenderer = BrushDrawingRenderer()
-    let eraserDrawingRenderer = EraserDrawingRenderer()
+    let brushDrawingToolRenderer = BrushDrawingToolRenderer()
+    let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
 
     let viewModel = HandDrawingContentViewModel()
 
@@ -126,15 +126,15 @@ final class HandDrawingContentView: UIView {
     }
 
     func setup() {
-        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        brushDrawingToolRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
         brushDiameterSlider.setValue(
-            BrushDrawingRenderer.diameterFloatValue(viewModel.drawingTool.brushDiameter),
+            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.brushDiameter),
             animated: false
         )
 
-        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        eraserDrawingToolRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
         eraserDiameterSlider.setValue(
-            EraserDrawingRenderer.diameterFloatValue(viewModel.drawingTool.eraserDiameter),
+            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.eraserDiameter),
             animated: false
         )
 
@@ -155,7 +155,7 @@ private extension HandDrawingContentView {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
-                self.brushDrawingRenderer.setColor(newColor)
+                self.brushDrawingToolRenderer.setColor(newColor)
             }
             .store(in: &cancellables)
 
@@ -163,19 +163,19 @@ private extension HandDrawingContentView {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
-                self.eraserDrawingRenderer.setAlpha(newAlpha)
+                self.eraserDrawingToolRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
-                self?.brushDrawingRenderer.setDiameter(diameter)
+                self?.brushDrawingToolRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
-                self?.eraserDrawingRenderer.setDiameter(diameter)
+                self?.eraserDrawingToolRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
     }

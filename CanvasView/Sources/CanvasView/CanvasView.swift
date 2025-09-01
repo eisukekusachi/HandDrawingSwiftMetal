@@ -8,10 +8,9 @@
 import Combine
 import UIKit
 
-@MainActor
 @objc public class CanvasView: UIView {
 
-    private var drawingRenderers: [DrawingRenderer] = []
+    private var drawingRenderers: [DrawingToolRenderer] = []
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
@@ -49,6 +48,8 @@ import UIKit
         canvasViewModel.textureLayerConfiguration
     }
 
+    private var renderer: MTLRendering
+
     private let displayView = CanvasDisplayView()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
@@ -66,11 +67,19 @@ import UIKit
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
+
+        renderer = MTLRenderer(device: displayView.device)
+
         super.init(frame: .zero)
+
         setup()
     }
     public required init?(coder: NSCoder) {
+
+        renderer = MTLRenderer(device: displayView.device)
+
         super.init(coder: coder)
+
         setup()
     }
 
@@ -78,18 +87,33 @@ import UIKit
         canvasViewModel.frameSize = frame.size
     }
 
+    private func setup() {
+        layoutView()
+        bindData()
+
+        addGestureRecognizer(
+            FingerInputGestureRecognizer(delegate: self)
+        )
+        addGestureRecognizer(
+            PencilInputGestureRecognizer(delegate: self)
+        )
+    }
+
     public func initialize(
-        drawingRenderers: [DrawingRenderer],
+        drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
 
+        displayView.configure(renderer: renderer)
+
         canvasViewModel.initialize(
-            drawingRenderers: drawingRenderers,
+            drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
-                environmentConfiguration: environmentConfiguration
+                environmentConfiguration: environmentConfiguration,
+                renderer: renderer
             ),
             configuration: configuration,
             environmentConfiguration: environmentConfiguration,
@@ -97,6 +121,7 @@ import UIKit
                 width: size.width * scale,
                 height: size.height * scale
             ),
+            renderer: renderer,
             displayView: displayView
         )
     }
@@ -144,18 +169,6 @@ import UIKit
 }
 
 extension CanvasView {
-
-    private func setup() {
-        layoutView()
-        bindData()
-
-        addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
-    }
 
     private func bindData() {
         displayView.displayTextureSizeChanged

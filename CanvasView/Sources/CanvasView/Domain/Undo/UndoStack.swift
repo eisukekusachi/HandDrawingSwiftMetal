@@ -248,11 +248,13 @@ extension UndoStack {
         _ undoStack: UndoStackModel<UndoObject>
     ) {
         undoManager.beginUndoGrouping()
-        undoManager.registerUndo(withTarget: self) { [weak self] _ in
-            self?.performUndo(undoStack.undoObject)
+        undoManager.registerUndo(withTarget: self) { _ in
+            Task { @MainActor [weak self] in
+                self?.performUndo(undoStack.undoObject)
 
-            // Redo Registration
-            self?.pushUndoObject(undoStack.reversedObject)
+                // Redo Registration
+                self?.pushUndoObject(undoStack.reversedObject)
+            }
         }
         undoManager.endUndoGrouping()
         didUndoSubject.send(.init(undoManager))

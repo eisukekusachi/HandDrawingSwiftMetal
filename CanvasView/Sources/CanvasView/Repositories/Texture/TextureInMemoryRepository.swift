@@ -10,7 +10,8 @@ import MetalKit
 import SwiftUI
 
 /// A repository that manages in-memory textures
-class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
+@MainActor
+class TextureInMemoryRepository: TextureRepository {
 
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
@@ -39,7 +40,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     init(
         textures: [UUID: MTLTexture?] = [:],
-        renderer: MTLRendering = MTLRenderer.shared
+        renderer: MTLRendering
     ) {
         self.textures = textures
         self.renderer = renderer
@@ -52,8 +53,8 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         let textureSize = configuration.textureSize ?? defaultTextureSize
 
         guard
-            Int(textureSize.width) > MTLRenderer.threadGroupLength &&
-            Int(textureSize.height) > MTLRenderer.threadGroupLength
+            Int(textureSize.width) > canvasMinimumTextureLength &&
+            Int(textureSize.height) > canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -106,7 +107,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
         }
 
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -136,8 +137,9 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             }
 
             guard let newTexture = MTLTextureCreator.makeTexture(
-                size: textureSize,
-                colorArray: hexadecimalData,
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                from: hexadecimalData,
                 with: device
             ) else {
                 let error = NSError(
@@ -168,7 +170,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
 
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {
         guard
-            let device = MTLCreateSystemDefaultDevice()
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -178,7 +180,11 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
             throw error
         }
 
-        textures[uuid] = MTLTextureCreator.makeBlankTexture(size: textureSize, with: device)
+        textures[uuid] = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
     }
 
     /// Removes all textures
@@ -196,10 +202,8 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[uuid],
-            let device = MTLCreateSystemDefaultDevice(),
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
+            let newTexture = await renderer.duplicateTexture(
+                texture: texture
             )
         else {
             let error = NSError(
@@ -256,11 +260,7 @@ class TextureInMemoryRepository: TextureRepository, @unchecked Sendable {
     @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture,
-            let device = MTLCreateSystemDefaultDevice(),
-            let newTexture = MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                with: device
-            )
+            let newTexture = await renderer.duplicateTexture(texture: texture)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

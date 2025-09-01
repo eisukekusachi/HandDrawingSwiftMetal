@@ -1,5 +1,5 @@
 //
-//  BrushDrawingRenderer.swift
+//  BrushDrawingToolRenderer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -10,7 +10,7 @@ import MetalKit
 
 /// A set of textures for realtime brush drawing
 @MainActor
-public final class BrushDrawingRenderer: DrawingRenderer {
+public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 
     private var color: UIColor = .black
 
@@ -23,27 +23,47 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
-    private let renderer: MTLRendering
+    private var displayView: CanvasDisplayable?
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+    private var renderer: MTLRendering?
 
-    public required init(renderer: MTLRendering = MTLRenderer.shared) {
+    public init() {}
+}
+
+public extension BrushDrawingToolRenderer {
+
+    func configure(displayView: CanvasDisplayable, renderer: MTLRendering) {
+        self.displayView = displayView
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
     }
-}
-
-public extension BrushDrawingRenderer {
 
     func initTextures(_ textureSize: CGSize) {
+        guard let device = renderer?.device else { return }
+
         self.textureSize = textureSize
-        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(label: "realtimeDrawingTexture", size: textureSize, with: device)
-        self.drawingTexture = MTLTextureCreator.makeTexture(label: "drawingTexture", size: textureSize, with: device)
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(label: "grayscaleTexture", size: textureSize, with: device)
+        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
+            label: "realtimeDrawingTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        self.drawingTexture = MTLTextureCreator.makeTexture(
+            label: "drawingTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        self.grayscaleTexture = MTLTextureCreator.makeTexture(
+            label: "grayscaleTexture",
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearTextures(with: temporaryRenderCommandBuffer)
@@ -82,10 +102,12 @@ public extension BrushDrawingRenderer {
     func drawCurve(
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer,
         onDrawing: ((MTLTexture) -> Void)?,
-        onDrawingCompleted: ((MTLTexture) -> Void)?
+        onDrawingCompleted: ((MTLTexture) -> Void)?,
+        onCommandBufferCompleted: (@Sendable @MainActor (MTLTexture) -> Void)?
     ) {
+        guard let commandBuffer = displayView?.commandBuffer else { return }
+
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
@@ -102,21 +124,26 @@ public extension BrushDrawingRenderer {
                 with: commandBuffer
             )
             onDrawingCompleted?(realtimeDrawingTexture)
+
+            commandBuffer.addCompletedHandler { @Sendable _ in
+                Task { @MainActor [weak self] in
+                    guard let `self` else { return }
+                    onCommandBufferCompleted?(self.realtimeDrawingTexture)
+                }
+            }
         }
     }
 
-    func clearTextures(with commandBuffer: MTLCommandBuffer) {
-        renderer.clearTextures(
-            textures: [
-                drawingTexture,
-                grayscaleTexture
-            ],
-            with: commandBuffer
-        )
+    func clearTextures() {
+        guard let device = renderer?.device else { return }
+
+        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
+        clearTextures(with: temporaryRenderCommandBuffer)
+        temporaryRenderCommandBuffer.commit()
     }
 }
 
-extension BrushDrawingRenderer {
+extension BrushDrawingToolRenderer {
 
     private func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
@@ -124,6 +151,11 @@ extension BrushDrawingRenderer {
         on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard
+            let renderer,
+            let device = renderer.device
+        else { return }
+
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
@@ -162,6 +194,8 @@ extension BrushDrawingRenderer {
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let renderer else { return }
+
         renderer.drawTexture(
             texture: sourceTexture,
             buffers: flippedTextureBuffers,
@@ -172,9 +206,21 @@ extension BrushDrawingRenderer {
 
         clearTextures(with: commandBuffer)
     }
+
+    func clearTextures(with commandBuffer: MTLCommandBuffer) {
+        guard let renderer else { return }
+
+        renderer.clearTextures(
+            textures: [
+                drawingTexture,
+                grayscaleTexture
+            ],
+            with: commandBuffer
+        )
+    }
 }
 
-extension BrushDrawingRenderer {
+extension BrushDrawingToolRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 
