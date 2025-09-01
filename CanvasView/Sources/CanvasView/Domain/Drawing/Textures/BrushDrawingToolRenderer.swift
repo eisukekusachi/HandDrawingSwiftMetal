@@ -125,7 +125,7 @@ public extension BrushDrawingToolRenderer {
             )
             onDrawingCompleted?(realtimeDrawingTexture)
 
-            commandBuffer.addCompletedHandler { _ in
+            commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
                     guard let `self` else { return }
                     onCommandBufferCompleted?(self.realtimeDrawingTexture)

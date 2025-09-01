@@ -324,7 +324,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
         else { return nil }
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            commandBuffer.addCompletedHandler { _ in continuation.resume() }
+            commandBuffer.addCompletedHandler { @Sendable _ in continuation.resume() }
             commandBuffer.commit()
         }
 

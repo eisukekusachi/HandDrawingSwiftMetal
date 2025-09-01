@@ -137,7 +137,8 @@ extension CanvasRenderer {
     ) {
         guard
             let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex
+            let selectedIndex = canvasState.selectedIndex,
+            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else {
             return
         }
@@ -164,25 +165,33 @@ extension CanvasRenderer {
             )
 
             Task { @MainActor in
-                async let bottomTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: bottomLayers,
-                    on: unselectedBottomTexture
+                    on: unselectedBottomTexture,
+                    with: commandBuffer
                 )
 
-                async let selectedTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: [opaqueLayer],
-                    on: selectedTexture
+                    on: selectedTexture,
+                    with: commandBuffer
                 )
 
-                async let topTexture: Void = try await drawLayerTextures(
+                try await drawLayerTextures(
                     textures: textures,
                     layers: topLayers,
-                    on: unselectedTopTexture
+                    on: unselectedTopTexture,
+                    with: commandBuffer
                 )
 
-                _ = try await (bottomTexture, selectedTexture, topTexture)
+                try await withCheckedThrowingContinuation { continuation in
+                    commandBuffer.addCompletedHandler { @Sendable _ in
+                        continuation.resume()
+                    }
+                    commandBuffer.commit()
+                }
 
                 onCompleted?()
             }
@@ -250,18 +259,11 @@ extension CanvasRenderer {
     func drawLayerTextures(
         textures: [IdentifiedTexture],
         layers: [TextureLayerItem],
-        on destination: MTLTexture
+        on destination: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let tempCommandBuffer = device.makeCommandQueue()?.makeCommandBuffer() else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
 
-        renderer.clearTexture(texture: destination, with: tempCommandBuffer)
+        renderer.clearTexture(texture: destination, with: commandBuffer)
 
         let textureDictionary = IdentifiedTexture.dictionary(from: Set(textures))
 
@@ -271,16 +273,9 @@ extension CanvasRenderer {
                     texture: resultTexture,
                     alpha: layer.alpha,
                     into: destination,
-                    with: tempCommandBuffer
+                    with: commandBuffer
                 )
             }
-        }
-
-        try await withCheckedThrowingContinuation { continuation in
-            tempCommandBuffer.addCompletedHandler { _ in
-                continuation.resume()
-            }
-            tempCommandBuffer.commit()
         }
     }
 }
