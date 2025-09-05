@@ -13,7 +13,7 @@ struct DrawingToolModel: Codable, Sendable {
     public let brushDiameter: Int
     public let eraserDiameter: Int
 
-    public static let fileName = "drawing-tool"
+    public static let fileName = "drawing_tool"
 }
 
 extension DrawingToolModel: LocalFileConvertible {
