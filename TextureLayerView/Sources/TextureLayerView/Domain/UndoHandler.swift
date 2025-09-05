@@ -28,7 +28,7 @@ public final class UndoHandler {
     func addUndoAdditionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
-        layer: TextureLayerItem,
+        layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
         guard let canvasState else { return }
@@ -56,7 +56,7 @@ public final class UndoHandler {
     func addUndoDeletionObject(
         previousLayerIndex: Int,
         currentLayerIndex: Int,
-        layer: TextureLayerItem,
+        layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
         guard let canvasState else { return }
@@ -85,7 +85,7 @@ public final class UndoHandler {
     func addUndoMoveObject(
         indices: MoveLayerIndices,
         selectedLayerId: UUID,
-        textureLayer: TextureLayerItem
+        textureLayer: TextureLayerModel
     ) {
         let redoObject = UndoMoveObject(
             indices: indices,
@@ -116,7 +116,7 @@ public final class UndoHandler {
                let selectedLayer = canvasState.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(
-                    layer: .init(model: selectedLayer),
+                    layer: .init(item: selectedLayer),
                     withNewAlpha: Int(oldAlpha)
                 )
 

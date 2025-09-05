@@ -15,7 +15,7 @@ public final class UndoAlphaChangedObject: UndoObject {
     /// Not used
     public let undoTextureUUID: UUID = UUID()
 
-    public let textureLayer: TextureLayerItem
+    public let textureLayer: TextureLayerModel
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
@@ -24,7 +24,7 @@ public final class UndoAlphaChangedObject: UndoObject {
     }
 
     public init(
-        layer: TextureLayerItem,
+        layer: TextureLayerModel,
         withNewAlpha alpha: Int
     ) {
         self.textureLayer = .init(

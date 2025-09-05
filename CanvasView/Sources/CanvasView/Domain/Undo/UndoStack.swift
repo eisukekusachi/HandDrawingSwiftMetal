@@ -76,7 +76,7 @@ public extension UndoStack {
         else { return }
 
         let undoObject = UndoDrawingObject(
-            layer: .init(model: undoLayer)
+            from: .init(item: undoLayer)
         )
 
         do {
@@ -105,7 +105,7 @@ public extension UndoStack {
         else { return }
 
         let redoObject = UndoDrawingObject(
-            layer: .init(model: redoLayer)
+            from: .init(item: redoLayer)
         )
 
         do {
@@ -139,7 +139,7 @@ public extension UndoStack {
         else { return }
 
         let redoObject = UndoDrawingObject(
-            layer: .init(model: redoLayer)
+            from: .init(item: redoLayer)
         )
 
         do {
@@ -211,25 +211,17 @@ public extension UndoStack {
 
         undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                do {
-                    try self?.undoTextureRepository.removeTexture(
-                        result.undoTextureUUID
-                    )
-                } catch {
-                    Logger.error(error)
-                }
+                self?.undoTextureRepository.removeTexture(
+                    result.undoTextureUUID
+                )
             })
             .store(in: &cancellables)
 
         redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                do {
-                    try self?.undoTextureRepository.removeTexture(
-                        result.undoTextureUUID
-                    )
-                } catch {
-                    Logger.error(error)
-                }
+                self?.undoTextureRepository.removeTexture(
+                    result.undoTextureUUID
+                )
             })
             .store(in: &cancellables)
 
@@ -295,10 +287,7 @@ extension UndoStack {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
             canvasState.addLayer(
-                newTextureLayer: .init(
-                    item: undoObject.textureLayer,
-                    thumbnail: result.texture.makeThumbnail()
-                ),
+                newTextureLayer: .init(model: undoObject.textureLayer, thumbnail: nil),
                 at: undoObject.insertIndex
             )
             canvasState.fullCanvasUpdateSubject.send()
@@ -321,10 +310,7 @@ extension UndoStack {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
             canvasState.updateLayer(
-                newTextureLayer: .init(
-                    item: undoObject.textureLayer,
-                    thumbnail: result.texture.makeThumbnail()
-                )
+                newTextureLayer: .init(model: undoObject.textureLayer, thumbnail: nil)
             )
             canvasState.canvasUpdateSubject.send()
         }

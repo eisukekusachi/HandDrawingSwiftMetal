@@ -11,14 +11,14 @@ public struct CanvasModel: Codable, Equatable {
 
     let textureSize: CGSize
     let layerIndex: Int
-    let layers: [TextureLayerEntity]
+    let layers: [TextureLayerModel]
 
     let thumbnailName: String
 
     public init(
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [TextureLayerEntity],
+        layers: [TextureLayerModel],
         thumbnailName: String
     ) {
         self.textureSize = textureSize
@@ -41,7 +41,7 @@ extension CanvasModel {
     ) {
         self.textureSize = canvasState.textureSize
         self.layerIndex = canvasState.selectedIndex ?? 0
-        self.layers = canvasState.layers.map { .init(from: $0) }
+        self.layers = canvasState.layers.map { .init(item: $0) }
         self.thumbnailName = CanvasModel.thumbnailName
     }
 
@@ -91,42 +91,3 @@ extension CanvasModel: LocalFileConvertible {
 public protocol CanvasEntityConvertible: Decodable {
     func model() -> CanvasModel
 }
-
-/*
-
- struct BrushPaletteModel: Codable, Sendable {
-     public let index: Int
-     public let hexColors: [String]
-
-     public static let fileName = "brush_palette"
- }
-
- extension BrushPaletteModel: LocalFileConvertible {
-     public func write(to url: URL) throws {
-         let encoder = JSONEncoder()
-         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-         let data = try encoder.encode(self)
-         try data.write(to: url, options: .atomic)
-     }
- }
-
- @MainActor
- extension BrushPaletteModel {
-     static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteModel> {
-         .init(
-             fileName: "\(Self.fileName)",
-             item: .init(
-                 index: palette.currentIndex,
-                 hexColors: palette.colors.map { $0.hex() }
-             )
-         )
-     }
-
-     static func anyNamedItem(from palette: BrushPalette) -> AnyLocalFileNamedItem {
-         AnyLocalFileNamedItem(Self.namedItem(from: palette))
-     }
- }
-
- extension BrushPaletteModel: LocalFileLoadable {}
-
- */

@@ -14,13 +14,13 @@ public struct CanvasResolvedConfiguration: Sendable {
     public let textureSize: CGSize
 
     public let layerIndex: Int
-    public let layers: [TextureLayerItem]
+    public let layers: [TextureLayerModel]
 
     public init(
         projectName: String,
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [TextureLayerItem]
+        layers: [TextureLayerModel]
     ) {
         self.projectName = projectName
         self.textureSize = textureSize

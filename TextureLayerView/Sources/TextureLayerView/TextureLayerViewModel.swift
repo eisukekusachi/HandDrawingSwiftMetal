@@ -11,13 +11,14 @@ import MetalKit
 
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
-    @Published private(set) var layers: [TextureLayerModel] = []
+
+    @Published private(set) var layers: [TextureLayerItem] = []
 
     @Published public var currentAlpha: Int = 0
 
     @Published public var isDragging: Bool = false
 
-    public var selectedLayer: TextureLayerModel? {
+    public var selectedLayer: TextureLayerItem? {
         canvasState?.selectedLayer
     }
 
@@ -107,15 +108,6 @@ public extension TextureLayerViewModel {
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
-        let layer: TextureLayerItem = .init(
-            id: UUID(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true
-        )
-        let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        let previousLayerIndex = canvasState.selectedIndex ?? 0
-
         let texture = MTLTextureCreator.makeTexture(
             width: Int(canvasState.currentTextureSize.width),
             height: Int(canvasState.currentTextureSize.height),
@@ -124,11 +116,18 @@ public extension TextureLayerViewModel {
 
         let thumbnail = texture?.makeThumbnail()
 
-        layerHandler?.insertLayer(
-            layer: layer,
-            thumbnail: thumbnail,
-            at: index
+        let layer: TextureLayerItem = .init(
+            id: UUID(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true,
+            thumbnail: thumbnail
         )
+        let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+        let previousLayerIndex = canvasState.selectedIndex ?? 0
+
+        layerHandler?.insertLayer(layer: layer, at: index)
+
         // Add Task to prevent flickering
         Task {
             layerHandler?.selectLayer(id: layer.id)
@@ -145,7 +144,12 @@ public extension TextureLayerViewModel {
             await undoHandler?.addUndoAdditionObject(
                 previousLayerIndex: previousLayerIndex,
                 currentLayerIndex: currentLayerIndex,
-                layer: layer,
+                layer: .init(
+                    id: layer.id,
+                    title: layer.title,
+                    alpha: layer.alpha,
+                    isVisible: layer.isVisible
+                ),
                 texture: result.texture
             )
         }
@@ -176,7 +180,12 @@ public extension TextureLayerViewModel {
             await undoHandler?.addUndoDeletionObject(
                 previousLayerIndex: selectedIndex,
                 currentLayerIndex: newLayerIndex,
-                layer: .init(model: selectedLayer),
+                layer: .init(
+                    id: selectedLayer.id,
+                    title: selectedLayer.title,
+                    alpha: selectedLayer.alpha,
+                    isVisible: selectedLayer.isVisible
+                ),
                 texture: result.texture
             )
 
@@ -220,7 +229,12 @@ public extension TextureLayerViewModel {
                 layerCount: canvasState.layers.count
             ),
             selectedLayerId: selectedLayerId,
-            textureLayer: .init(model: textureLayer)
+            textureLayer: .init(
+                id: textureLayer.id,
+                title: textureLayer.title,
+                alpha: textureLayer.alpha,
+                isVisible: textureLayer.isVisible
+            )
         )
     }
 }

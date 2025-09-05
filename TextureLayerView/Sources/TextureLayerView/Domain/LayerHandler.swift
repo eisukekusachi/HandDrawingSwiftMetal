@@ -20,18 +20,11 @@ public final class LayerHandler {
 
     func insertLayer(
         layer: TextureLayerItem,
-        thumbnail: UIImage?,
         at index: Int
     ) {
         guard let canvasState else { return }
 
-        canvasState.layers.insert(
-            .init(
-                item: layer,
-                thumbnail: thumbnail
-            ),
-            at: index
-        )
+        canvasState.layers.insert(layer, at: index)
     }
 
     func removeLayer(
@@ -76,19 +69,19 @@ public final class LayerHandler {
         if let title {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
-                thumbnail: layer.thumbnail,
                 title: title,
                 alpha: layer.alpha,
-                isVisible: layer.isVisible
+                isVisible: layer.isVisible,
+                thumbnail: layer.thumbnail
             )
         }
         if let isVisible {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
-                thumbnail: layer.thumbnail,
                 title: layer.title,
                 alpha: layer.alpha,
-                isVisible: isVisible
+                isVisible: isVisible,
+                thumbnail: layer.thumbnail
             )
 
             // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
@@ -97,10 +90,10 @@ public final class LayerHandler {
         if let alpha {
             canvasState.layers[selectedIndex] = .init(
                 id: layer.id,
-                thumbnail: layer.thumbnail,
                 title: layer.title,
                 alpha: alpha,
-                isVisible: layer.isVisible
+                isVisible: layer.isVisible,
+                thumbnail: layer.thumbnail
             )
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated

@@ -10,11 +10,11 @@ import SwiftUI
 
 public struct TextureLayerRowView: View {
 
-    @ObservedObject var layer: TextureLayerModel
+    @ObservedObject var layer: TextureLayerItem
 
     private let isSelected: Bool
-    private let didTapRow: (TextureLayerModel) -> Void
-    private let didTapVisibleButton: (TextureLayerModel) -> Void
+    private let didTapRow: (TextureLayerItem) -> Void
+    private let didTapVisibleButton: (TextureLayerItem) -> Void
 
     /// The background color when the item is not selected
     private let defaultBackgroundColor: UIColor
@@ -27,15 +27,15 @@ public struct TextureLayerRowView: View {
     private let padding: CGFloat
 
     public init(
-        layer: TextureLayerModel,
+        layer: TextureLayerItem,
         isSelected: Bool,
         defaultBackgroundColor: UIColor = .white,
         selectedBackgroundColor: UIColor = .black,
         iconSize: CGSize = .init(width: 32, height: 32),
         padding: CGFloat = 4,
         cornerRadius: CGFloat = 4,
-        didTapRow: @escaping (TextureLayerModel) -> Void,
-        didTapVisibleButton: @escaping (TextureLayerModel) -> Void
+        didTapRow: @escaping (TextureLayerItem) -> Void,
+        didTapVisibleButton: @escaping (TextureLayerItem) -> Void
     ) {
         self.layer = layer
         self.isSelected = isSelected
@@ -134,10 +134,10 @@ public struct TextureLayerRowView: View {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
-                thumbnail: .init(systemName: "hand.thumbsup.fill"),
                 title: "Title",
                 alpha: 255,
-                isVisible: true
+                isVisible: true,
+                thumbnail: nil
             ),
             isSelected: false,
             didTapRow: { _ in
@@ -152,10 +152,10 @@ public struct TextureLayerRowView: View {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
-                thumbnail: .init(systemName: "hand.thumbsup.fill"),
                 title: "Title",
                 alpha: 255,
-                isVisible: false
+                isVisible: false,
+                thumbnail: nil
             ),
             isSelected: false,
             didTapRow: { _ in
@@ -170,10 +170,10 @@ public struct TextureLayerRowView: View {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
-                thumbnail: nil,
                 title: "Title",
                 alpha: 255,
-                isVisible: true
+                isVisible: true,
+                thumbnail: nil
             ),
             isSelected: false,
             didTapRow: { _ in
@@ -188,10 +188,10 @@ public struct TextureLayerRowView: View {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
-                thumbnail: .init(systemName: "hand.thumbsup.fill"),
                 title: "Title",
                 alpha: 255,
-                isVisible: true
+                isVisible: true,
+                thumbnail: nil
             ),
             isSelected: true,
             didTapRow: { _ in
@@ -206,10 +206,10 @@ public struct TextureLayerRowView: View {
         TextureLayerRowView(
             layer: .init(
                 id: UUID(),
-                thumbnail: .init(systemName: "hand.thumbsup.fill"),
                 title: "Title",
                 alpha: 255,
-                isVisible: false
+                isVisible: false,
+                thumbnail: nil
             ),
             isSelected: true,
             didTapRow: { _ in

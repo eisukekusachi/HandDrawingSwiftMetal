@@ -637,7 +637,7 @@ extension CanvasViewModel {
 
         canvasRenderer?.updateCanvasView(
             realtimeDrawingTexture: realtimeDrawingTexture,
-            selectedLayer: selectedLayer
+            selectedLayer: .init(item: selectedLayer)
         )
     }
 }

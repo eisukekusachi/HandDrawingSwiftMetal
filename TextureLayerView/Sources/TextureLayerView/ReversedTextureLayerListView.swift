@@ -53,31 +53,36 @@ private struct PreviewView: View {
     init() {
         let canvasState = CanvasState()
 
-        let layers: [TextureLayerItem] = [
+        let layers: [TextureLayerModel] = [
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer0",
-                alpha: 255
+                alpha: 255,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer1",
-                alpha: 200
+                alpha: 200,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer2",
-                alpha: 150
+                alpha: 150,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer3",
-                alpha: 100
+                alpha: 100,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer4",
-                alpha: 50
+                alpha: 50,
+                isVisible: true
             )
         ]
 

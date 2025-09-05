@@ -14,13 +14,13 @@ public struct CanvasConfiguration: Sendable {
     public let textureSize: CGSize?
 
     public let layerIndex: Int
-    public let layers: [TextureLayerItem]
+    public let layers: [TextureLayerModel]
 
     public init(
         projectName: String = Calendar.currentDate,
         textureSize: CGSize? = nil,
         layerIndex: Int = 0,
-        layers: [TextureLayerItem] = []
+        layers: [TextureLayerModel] = []
     ) {
         self.projectName = projectName
         self.textureSize = textureSize
@@ -41,9 +41,7 @@ extension CanvasConfiguration {
         self.textureSize = model.textureSize
 
         self.layerIndex = model.layerIndex
-        self.layers = model.layers.map {
-            .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
-        }
+        self.layers = model.layers
     }
 
     public init(
@@ -61,8 +59,8 @@ extension CanvasConfiguration {
                 .sorted { $0.orderIndex < $1.orderIndex }
                 .enumerated()
                 .map { index, layer in
-                    TextureLayerItem(
-                        id: TextureLayerItem.id(from: layer.fileName),
+                    TextureLayerModel(
+                        id: layer.id ?? UUID(),
                         title: layer.title ?? "",
                         alpha: Int(layer.alpha),
                         isVisible: layer.isVisible
@@ -89,7 +87,7 @@ extension CanvasConfiguration {
 
     public init(
         _ configuration: Self,
-        newLayers: [TextureLayerItem]
+        newLayers: [TextureLayerModel]
     ) {
         self.projectName = configuration.projectName
 

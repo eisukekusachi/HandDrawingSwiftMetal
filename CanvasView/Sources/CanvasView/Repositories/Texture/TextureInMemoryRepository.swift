@@ -66,7 +66,7 @@ class TextureInMemoryRepository: TextureRepository {
 
         removeAll()
 
-        let layer = TextureLayerItem(
+        let layer = TextureLayerModel(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,

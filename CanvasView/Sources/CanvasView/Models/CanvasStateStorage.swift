@@ -75,7 +75,7 @@ extension CanvasStateStorage {
             for (index, layer) in canvasState.layers.enumerated() {
                 let texture = TextureLayerStorageEntity(context: coreDataRepository.context)
                 texture.title = layer.title
-                texture.fileName = TextureLayerModel.fileName(id: layer.id)
+                texture.fileName = layer.fileName
                 texture.alpha = Int16(layer.alpha)
                 texture.orderIndex = Int16(index)
                 texture.canvas = newStorage
@@ -130,7 +130,7 @@ extension CanvasStateStorage {
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
-                self?.updateAllTextureLayerEntities(result)
+                self?.updateAllTextureLayerEntities(result.map { .init(item: $0) })
                 try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
@@ -152,7 +152,7 @@ extension CanvasStateStorage {
         layers.enumerated().forEach { index, model in
             let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
-            newLayer.fileName = TextureLayerModel.fileName(id: model.id)
+            newLayer.fileName = model.fileName
             newLayer.isVisible = model.isVisible
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)

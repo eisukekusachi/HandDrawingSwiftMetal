@@ -97,23 +97,17 @@ private struct PreviewView: View {
     let viewModel = TextureLayerViewModel()
 
     init() {
-        let layers: [TextureLayerItem] = [
-            .init(
-                textureName: UUID().uuidString,
-                title: "Layer0",
-                alpha: 255
-            ),
-            .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-            .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-            .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-            .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
-        ]
-
         let configuration: CanvasResolvedConfiguration = .init(
             projectName: "",
             textureSize: .zero,
             layerIndex: 0,
-            layers: layers
+            layers: [
+                .init(id: UUID(), title: "Layer0", alpha: 255, isVisible: true),
+                .init(id: UUID(), title: "Layer1", alpha: 200, isVisible: true),
+                .init(id: UUID(), title: "Layer2", alpha: 150, isVisible: true),
+                .init(id: UUID(), title: "Layer3", alpha: 100, isVisible: true),
+                .init(id: UUID(), title: "Layer4", alpha: 50, isVisible: true),
+            ]
         )
 
         canvasState.initialize(

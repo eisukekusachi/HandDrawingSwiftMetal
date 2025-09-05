@@ -195,7 +195,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         // Delete all textures in the repository
         removeAll()
 
-        let layer = TextureLayerItem(
+        let layer = TextureLayerModel(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,

@@ -7,41 +7,30 @@
 
 import UIKit
 
-public final class TextureLayerModel: Identifiable, Equatable, ObservableObject {
+public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
 
     /// Uses the ID as the filename
-    static func fileName(id: UUID) -> String {
+    var fileName: String {
         id.uuidString
     }
 
     /// The unique identifier for the layer
-    public var id: UUID
-
-    @Published public var thumbnail: UIImage?
+    public let id: UUID
 
     /// The name of the layer
-    @Published public var title: String
+    public let title: String
 
     /// The opacity of the layer
-    @Published public var alpha: Int
+    public let alpha: Int
 
     /// Whether the layer is visible or not
-    @Published public var isVisible: Bool
+    public let isVisible: Bool
 
-    public init(id: UUID, thumbnail: UIImage?, title: String, alpha: Int, isVisible: Bool) {
+    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
         self.id = id
-        self.thumbnail = thumbnail
         self.title = title
         self.alpha = alpha
         self.isVisible = isVisible
-    }
-
-    public init(item: TextureLayerItem, thumbnail: UIImage?) {
-        self.id = item.id
-        self.thumbnail = thumbnail
-        self.title = item.title
-        self.alpha = item.alpha
-        self.isVisible = item.isVisible
     }
 
     public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
@@ -52,7 +41,18 @@ public final class TextureLayerModel: Identifiable, Equatable, ObservableObject 
     }
 
     /// Retrieve the UUID from the file name since it uses a UUID
-    static func id(from string: String?) -> UUID {
+    static func id(fromFileName string: String?) -> UUID {
         UUID.init(uuidString: string ?? "") ?? UUID()
+    }
+}
+
+extension TextureLayerModel {
+    public convenience init(item: TextureLayerItem) {
+        self.init(
+            id: item.id,
+            title: item.title,
+            alpha: item.alpha,
+            isVisible: item.isVisible
+        )
     }
 }
