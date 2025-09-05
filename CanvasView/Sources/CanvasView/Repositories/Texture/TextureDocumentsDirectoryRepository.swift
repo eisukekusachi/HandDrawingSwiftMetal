@@ -252,10 +252,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         guard
             let device = renderer.device,
-            let newTexture: MTLTexture = try FileInput.loadTexture(
+            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
-                device: device
+                with: device
             )
         else {
             let error = NSError(
