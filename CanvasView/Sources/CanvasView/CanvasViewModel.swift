@@ -397,7 +397,6 @@ public extension CanvasViewModel {
 
     func loadFile(
         zipFileURL: URL,
-        requiredEntityType: [CanvasEntityConvertible.Type],
         optionalEntities: [AnyLocalFileLoader] = []
     ) {
         Task {
@@ -411,13 +410,12 @@ public extension CanvasViewModel {
                     from: zipFileURL
                 )
 
-                let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName),
-                    compatibleTypes: requiredEntityType
+                let model: CanvasModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasModel.jsonFileName)
                 )
                 let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,
-                    entity: entity
+                    model: model
                 )
                 /// Restore the repository from the extracted textures
                 let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
@@ -460,7 +458,7 @@ public extension CanvasViewModel {
         guard
             let canvasTexture = canvasRenderer?.canvasTexture,
             let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: CanvasEntity.thumbnailLength,
+                height: CanvasModel.thumbnailLength,
                 scale: 1.0
             )
         else { return }
@@ -480,7 +478,7 @@ public extension CanvasViewModel {
 
                 // Save the thumbnail image into the working directory
                 async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(fileName: CanvasEntity.thumbnailName, item: thumbnailImage)
+                    namedItem: .init(fileName: CanvasModel.thumbnailName, item: thumbnailImage)
                 )
 
                 // Save the textures into the working directory
@@ -493,7 +491,7 @@ public extension CanvasViewModel {
 
                 // Save the canvas entity (JSON metadata)
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: CanvasEntity.namedItem(canvasState)
+                    namedItem: CanvasModel.namedItem(canvasState)
                 )
 
                 async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(

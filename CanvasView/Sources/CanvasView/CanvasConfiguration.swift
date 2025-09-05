@@ -33,15 +33,15 @@ extension CanvasConfiguration {
 
     public init(
         projectName: String,
-        entity: CanvasEntity
+        model: CanvasModel
     ) {
         // Since the project name is the same as the folder name, it will not be managed in `CanvasEntity`
         self.projectName = projectName
 
-        self.textureSize = entity.textureSize
+        self.textureSize = model.textureSize
 
-        self.layerIndex = entity.layerIndex
-        self.layers = entity.layers.map {
+        self.layerIndex = model.layerIndex
+        self.layers = model.layers.map {
             .init(textureName: $0.textureName, title: $0.title, alpha: $0.alpha, isVisible: $0.isVisible)
         }
     }

@@ -204,9 +204,6 @@ extension HandDrawingViewController {
                 self.presentedViewController?.dismiss(animated: true)
                 self.contentView.canvasView.loadFile(
                     zipFileURL: url,
-                    requiredEntityType: [
-                        CanvasEntity.self
-                    ],
                     optionalEntities: [
                         self.contentView.drawingToolLoader,
                         self.contentView.brushPaletteLoader,

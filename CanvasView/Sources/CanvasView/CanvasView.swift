@@ -150,12 +150,10 @@ import UIKit
     }
     public func loadFile(
         zipFileURL: URL,
-        requiredEntityType: [CanvasEntityConvertible.Type],
         optionalEntities: [AnyLocalFileLoader] = []
     ) {
         canvasViewModel.loadFile(
             zipFileURL: zipFileURL,
-            requiredEntityType: requiredEntityType,
             optionalEntities: optionalEntities
         )
     }
