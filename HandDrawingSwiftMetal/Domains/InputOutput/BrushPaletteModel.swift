@@ -1,5 +1,5 @@
 //
-//  CoreDataBrushPaletteEntity.swift
+//  BrushPaletteModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,14 +8,14 @@
 import CanvasView
 import Foundation
 
-struct CoreDataBrushPaletteEntity: Codable, Sendable {
+struct BrushPaletteModel: Codable, Sendable {
     public let index: Int
     public let hexColors: [String]
 
     public static let fileName = "brush_palette"
 }
 
-extension CoreDataBrushPaletteEntity: LocalFileConvertible {
+extension BrushPaletteModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -25,8 +25,8 @@ extension CoreDataBrushPaletteEntity: LocalFileConvertible {
 }
 
 @MainActor
-extension CoreDataBrushPaletteEntity {
-    static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<CoreDataBrushPaletteEntity> {
+extension BrushPaletteModel {
+    static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteModel> {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(
@@ -41,4 +41,4 @@ extension CoreDataBrushPaletteEntity {
     }
 }
 
-extension CoreDataBrushPaletteEntity: LocalFileLoadable {}
+extension BrushPaletteModel: LocalFileLoadable {}

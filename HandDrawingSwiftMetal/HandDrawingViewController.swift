@@ -94,9 +94,9 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.contentView.canvasView.saveFile(
                 additionalItems: [
-                    CoreDataDrawingToolEntity.anyNamedItem(from: contentView.viewModel.drawingTool),
-                    CoreDataBrushPaletteEntity.anyNamedItem(from: contentView.viewModel.brushPalette),
-                    CoreDataEraserPaletteEntity.anyNamedItem(from: contentView.viewModel.eraserPalette)
+                    DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingTool),
+                    BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPalette),
+                    EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPalette)
                 ]
             )
         }
