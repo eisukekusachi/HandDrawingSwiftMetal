@@ -8,12 +8,16 @@
 import UIKit
 
 public struct CanvasConfiguration: Sendable {
-
+    /// The file name saved in the Documents folder
     public let projectName: String
 
+    /// The size of the texture used for the canvas
     public let textureSize: CGSize?
 
+    /// The index of the layer
     public let layerIndex: Int
+
+    /// An array of layer models
     public let layers: [TextureLayerModel]
 
     public init(
@@ -32,10 +36,24 @@ public struct CanvasConfiguration: Sendable {
 extension CanvasConfiguration {
 
     public init(
+        _ configuration: Self,
+        textureSize: CGSize? = nil,
+        layerIndex: Int? = nil,
+        layers: [TextureLayerModel]? = nil
+    ) {
+        self.projectName = configuration.projectName
+
+        self.textureSize = textureSize ?? configuration.textureSize
+
+        self.layerIndex = layerIndex ?? configuration.layerIndex
+        self.layers = layers ?? configuration.layers
+    }
+
+    public init(
         projectName: String,
         model: CanvasModel
     ) {
-        // Since the project name is the same as the folder name, it will not be managed in `CanvasEntity`
+        // `projectName` is the file name in the Documents folder and is not managed in `CanvasModel`
         self.projectName = projectName
 
         self.textureSize = model.textureSize
@@ -71,29 +89,5 @@ extension CanvasConfiguration {
         }
 
         self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-    }
-
-    public init(
-        _ configuration: Self,
-        newTextureSize: CGSize
-    ) {
-        self.textureSize = newTextureSize
-
-        self.projectName = configuration.projectName
-
-        self.layerIndex = configuration.layerIndex
-        self.layers = configuration.layers
-    }
-
-    public init(
-        _ configuration: Self,
-        newLayers: [TextureLayerModel]
-    ) {
-        self.projectName = configuration.projectName
-
-        self.textureSize = configuration.textureSize
-
-        self.layerIndex = configuration.layerIndex
-        self.layers = newLayers
     }
 }

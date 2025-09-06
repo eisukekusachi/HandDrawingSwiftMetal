@@ -211,7 +211,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         setTextureSize(textureSize)
 
         return try await .init(
-            configuration: .init(configuration, newLayers: [layer]),
+            configuration: .init(configuration, layers: [layer]),
             resolvedTextureSize: textureSize
         )
     }
