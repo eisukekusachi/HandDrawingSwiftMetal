@@ -106,8 +106,7 @@ public final class CanvasViewModel {
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
-        configuration: CanvasConfiguration,
-        environmentConfiguration: CanvasEnvironmentConfiguration,
+        configuration: Configuration,
         defaultTextureSize: CGSize
     ) {
         drawingToolRenderers.forEach {
@@ -125,15 +124,15 @@ public final class CanvasViewModel {
         )
 
         self.canvasRenderer?.initialize(
-            environmentConfiguration: environmentConfiguration
+            environmentConfiguration: configuration.canvasEnvironmentConfiguration
         )
 
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            environmentConfiguration.drawingGestureRecognitionSecond
+            configuration.canvasEnvironmentConfiguration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            environmentConfiguration.transformingGestureRecognitionSecond
+            configuration.canvasEnvironmentConfiguration.transformingGestureRecognitionSecond
         )
 
         // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
@@ -158,7 +157,7 @@ public final class CanvasViewModel {
         // if not, use the size from the configuration
         Task {
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration,
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
                 defaultTextureSize: defaultTextureSize
             )
             bindData()

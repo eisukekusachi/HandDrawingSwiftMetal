@@ -101,7 +101,7 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        configuration: CanvasConfiguration,
+        canvasConfiguration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
     ) {
         let scale = UIScreen.main.scale
@@ -116,8 +116,10 @@ import UIKit
                 renderer: renderer,
                 displayView: displayView
             ),
-            configuration: configuration,
-            environmentConfiguration: environmentConfiguration,
+            configuration: .init(
+                canvasConfiguration: canvasConfiguration,
+                canvasEnvironmentConfiguration: environmentConfiguration
+            ),
             defaultTextureSize: .init(
                 width: size.width * scale,
                 height: size.height * scale
