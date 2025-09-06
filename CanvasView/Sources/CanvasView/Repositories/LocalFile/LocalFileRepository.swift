@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 public protocol LocalFileRepository: Sendable {
 
     func createWorkingDirectory() throws

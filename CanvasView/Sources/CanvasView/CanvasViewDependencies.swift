@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 struct CanvasViewDependencies {
     /// Repository that manages textures for canvas layers
     let textureRepository: TextureRepository
@@ -16,13 +17,17 @@ struct CanvasViewDependencies {
 
     /// Repository that manages files in the Documents directory
     let localFileRepository: LocalFileRepository
+
+    let renderer: MTLRendering
+
+    let displayView: CanvasDisplayable
 }
 
 extension CanvasViewDependencies {
-    @MainActor
     init(
         environmentConfiguration: CanvasEnvironmentConfiguration,
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable
     ) {
         switch environmentConfiguration.textureRepositoryType {
         case .disk: textureRepository = TextureDocumentsDirectoryRepository(
@@ -50,5 +55,9 @@ extension CanvasViewDependencies {
         localFileRepository = DefaultLocalFileRepository(
             workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
         )
+
+        self.renderer = renderer
+
+        self.displayView = displayView
     }
 }

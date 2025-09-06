@@ -113,16 +113,15 @@ import UIKit
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
                 environmentConfiguration: environmentConfiguration,
-                renderer: renderer
+                renderer: renderer,
+                displayView: displayView
             ),
             configuration: configuration,
             environmentConfiguration: environmentConfiguration,
             defaultTextureSize: .init(
                 width: size.width * scale,
                 height: size.height * scale
-            ),
-            renderer: renderer,
-            displayView: displayView
+            )
         )
     }
 

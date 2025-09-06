@@ -108,12 +108,10 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration,
         environmentConfiguration: CanvasEnvironmentConfiguration,
-        defaultTextureSize: CGSize,
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable
+        defaultTextureSize: CGSize
     ) {
         drawingToolRenderers.forEach {
-            $0.configure(displayView: displayView, renderer: renderer)
+            $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
         self.drawingToolRenderers = drawingToolRenderers
 
@@ -122,8 +120,8 @@ public final class CanvasViewModel {
         self.dependencies = dependencies
 
         self.canvasRenderer = CanvasRenderer(
-            displayView: displayView,
-            renderer: renderer
+            displayView: dependencies.displayView,
+            renderer: dependencies.renderer
         )
 
         self.canvasRenderer?.initialize(
