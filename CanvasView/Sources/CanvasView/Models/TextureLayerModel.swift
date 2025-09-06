@@ -27,8 +27,8 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         UUID.init(uuidString: textureName) ?? UUID()
     }
 
-    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
-        self.textureName = id.uuidString
+    public init(fileName: String, title: String, alpha: Int, isVisible: Bool) {
+        self.textureName = fileName
         self.title = title
         self.alpha = alpha
         self.isVisible = isVisible
@@ -50,7 +50,7 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
 extension TextureLayerModel {
     public convenience init(item: TextureLayerItem) {
         self.init(
-            id: item.id,
+            fileName: item.fileName,
             title: item.title,
             alpha: item.alpha,
             isVisible: item.isVisible

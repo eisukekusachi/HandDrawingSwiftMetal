@@ -145,7 +145,7 @@ public extension TextureLayerViewModel {
                 previousLayerIndex: previousLayerIndex,
                 currentLayerIndex: currentLayerIndex,
                 layer: .init(
-                    id: layer.id,
+                    fileName: layer.fileName,
                     title: layer.title,
                     alpha: layer.alpha,
                     isVisible: layer.isVisible
@@ -181,7 +181,7 @@ public extension TextureLayerViewModel {
                 previousLayerIndex: selectedIndex,
                 currentLayerIndex: newLayerIndex,
                 layer: .init(
-                    id: selectedLayer.id,
+                    fileName: selectedLayer.fileName,
                     title: selectedLayer.title,
                     alpha: selectedLayer.alpha,
                     isVisible: selectedLayer.isVisible
@@ -230,7 +230,7 @@ public extension TextureLayerViewModel {
             ),
             selectedLayerId: selectedLayerId,
             textureLayer: .init(
-                id: textureLayer.id,
+                fileName: textureLayer.fileName,
                 title: textureLayer.title,
                 alpha: textureLayer.alpha,
                 isVisible: textureLayer.isVisible

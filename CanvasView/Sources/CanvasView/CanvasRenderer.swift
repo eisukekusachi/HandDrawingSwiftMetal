@@ -142,7 +142,7 @@ extension CanvasRenderer {
 
         // The selected texture is kept opaque here because transparency is applied when used
         let opaqueLayer: TextureLayerModel = .init(
-            id: selectedLayer.id,
+            fileName: selectedLayer.fileName,
             title: selectedLayer.title,
             alpha: 255,
             isVisible: selectedLayer.isVisible

@@ -51,20 +51,7 @@ extension ProjectConfiguration {
     }
 
     public init(
-        projectName: String,
-        model: CanvasModel
-    ) {
-        // `projectName` is the file name in the Documents folder and is not managed in `CanvasModel`
-        self.projectName = projectName
-
-        self.textureSize = model.textureSize
-
-        self.layerIndex = model.layerIndex
-        self.layers = model.layers
-    }
-
-    public init(
-        entity: CanvasStorageEntity
+        coreDataEntity entity: CanvasStorageEntity
     ) {
         self.projectName = entity.projectName ?? Calendar.currentDate
 
@@ -79,7 +66,7 @@ extension ProjectConfiguration {
                 .enumerated()
                 .map { index, layer in
                     TextureLayerModel(
-                        id: layer.id ?? UUID(),
+                        fileName: layer.fileName ?? UUID().uuidString,
                         title: layer.title ?? "",
                         alpha: Int(layer.alpha),
                         isVisible: layer.isVisible

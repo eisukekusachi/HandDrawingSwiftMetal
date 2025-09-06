@@ -403,7 +403,9 @@ public extension CanvasViewModel {
                 )
                 let configuration: ProjectConfiguration = .init(
                     projectName: zipFileURL.fileName,
-                    model: model
+                    textureSize: model.textureSize,
+                    layerIndex: model.layerIndex,
+                    layers: model.layers
                 )
                 /// Restore the repository from the extracted textures
                 let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(

@@ -102,7 +102,12 @@ private struct PreviewView: View {
         textureSize: .zero,
         layerIndex: 0,
         layers: [
-            .init(id: UUID(), title: "Layer0", alpha: 255, isVisible: true)
+            .init(
+                fileName: UUID().uuidString,
+                title: "Layer0",
+                alpha: 255,
+                isVisible: true
+            )
         ]
     )
 

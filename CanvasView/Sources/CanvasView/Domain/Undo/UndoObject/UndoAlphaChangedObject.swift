@@ -28,7 +28,7 @@ public final class UndoAlphaChangedObject: UndoObject {
         withNewAlpha alpha: Int
     ) {
         self.textureLayer = .init(
-            id: layer.id,
+            fileName: layer.id.uuidString,
             title: layer.title,
             alpha: alpha,
             isVisible: layer.isVisible

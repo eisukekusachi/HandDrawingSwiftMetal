@@ -19,7 +19,7 @@ public class TextureLayerItem: ObservableObject {
 
     @Published public var thumbnail: UIImage?
 
-    var fileName: String {
+    public var fileName: String {
         id.uuidString
     }
 
