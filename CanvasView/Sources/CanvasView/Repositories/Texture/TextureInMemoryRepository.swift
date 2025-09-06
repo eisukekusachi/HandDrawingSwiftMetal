@@ -174,7 +174,7 @@ class TextureInMemoryRepository: TextureRepository {
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
+                message: String(localized: "Missing required parameter", bundle: .module)
             )
             Logger.error(error)
             throw error

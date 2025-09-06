@@ -22,6 +22,9 @@
     "Loading Error" : {
       "extractionState" : "manual"
     },
+    "Missing required parameter" : {
+      "extractionState" : "manual"
+    },
     "Saving Error" : {
       "extractionState" : "manual"
     },

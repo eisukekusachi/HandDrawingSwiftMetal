@@ -219,7 +219,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {
         guard
             let device = renderer.device
-        else { return }
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Missing required parameter", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
 
         if let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
