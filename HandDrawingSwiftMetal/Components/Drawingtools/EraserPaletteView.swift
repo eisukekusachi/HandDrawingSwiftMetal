@@ -50,7 +50,7 @@ struct EraserPaletteView: View {
                         color: UIColor.black.withAlphaComponent(alpha(palette.alphas[i])),
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.currentIndex == i
+                        selected: palette.index == i
                     ) {
                         palette.select(i)
                     }
@@ -77,22 +77,15 @@ struct EraserPaletteView: View {
 private struct Preview: View {
     let paletteHeight: CGFloat = 32
 
-    class EraserPaletteStorageStub: EraserPaletteStorage {
-        init(index: Int = 0, alphas: [Int] = []) {}
-        func load() async throws -> (index: Int, alphas: [Int])? { nil }
-        func save(index: Int, alphas: [Int]) async throws {}
-    }
-
     var body: some View {
         VStack {
             Spacer()
             EraserPaletteView(
                 palette: .init(
-                    initialAlphas: [
+                    alphas: [
                         255, 225, 200, 175, 150, 125, 100, 50, 25
                     ],
-                    initialIndex: 3,
-                    storage: EraserPaletteStorageStub()
+                    index: 3
                 ),
                 paletteHeight: paletteHeight
             )

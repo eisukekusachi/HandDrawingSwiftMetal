@@ -1,5 +1,5 @@
 //
-//  CoreDataBrushPaletteStorage.swift
+//  CoreDataEraserPaletteStorage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/09/06.
@@ -10,16 +10,17 @@ import Combine
 import CoreData
 import UIKit
 
-/// Color palette managed by Core Data
+/// Alpha palette managed by Core Data
 @MainActor
-public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, ObservableObject {
+public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, ObservableObject {
 
-    @Published var palette: BrushPalette
+    @Published var palette: EraserPalette
+
     private let storage: CoreDataStorage
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(palette: BrushPalette, context: NSManagedObjectContext) {
+    init(palette: EraserPalette, context: NSManagedObjectContext) {
         self.palette = palette
         self.storage = .init(context: context)
 
@@ -35,18 +36,18 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         }
         .store(in: &cancellables)
 
-        // Save to Core Data when colors are updated
-        palette.$colors.sink { [weak self] _ in
+        // Save to Core Data when alphas are updated
+        palette.$alphas.sink { [weak self] _ in
             Task { await self?.storage.save(palette) }
         }
         .store(in: &cancellables)
 
         Task {
-            // Load colors from Core Data
+            // Load alphas from Core Data
             if let entity = try await storage.load() {
-                let colors = entity.hexColors.compactMap { UIColor(hex: $0) }
-                let index = max(0, min(entity.index, colors.count - 1))
-                self.palette.update(colors: colors, index: index)
+                let alphas = entity.alphas
+                let index = max(0, min(entity.index, alphas.count - 1))
+                self.palette.update(alphas: alphas, index: index)
             } else {
                 // Save the palette to Core Data
                 Task { await storage.save(palette) }
@@ -54,12 +55,12 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         }
     }
 
-    var color: UIColor? {
-        palette.color
+    var alpha: Int? {
+        palette.alpha
     }
 
-    func color(at index: Int) -> UIColor? {
-        palette.color(at: index)
+    func alpha(at index: Int) -> Int? {
+        palette.alpha(at: index)
     }
 
     func select(_ index: Int) {
@@ -67,18 +68,18 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         Task { await storage.save(palette) }
     }
 
-    func insert(_ color: UIColor, at index: Int) {
-        palette.insert(color, at: index)
+    func insert(_ alpha: Int, at index: Int) {
+        palette.insert(alpha, at: index)
         Task { await storage.save(palette) }
     }
 
-    func update(colors: [UIColor], index: Int) {
-        palette.update(colors: colors, index: index)
+    func update(alphas: [Int], index: Int) {
+        palette.update(alphas: alphas, index: index)
         Task { await storage.save(palette) }
     }
 
-    func update(color: UIColor, at index: Int) {
-        palette.update(color: color, at: index)
+    func update(alpha: Int, at index: Int) {
+        palette.update(alpha: alpha, at: index)
         Task { await storage.save(palette) }
     }
 
@@ -95,8 +96,8 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
     private final class CoreDataStorage {
 
         private let uniqueName: String
-        private let entityName: String = "BrushPaletteEntity"
-        private let relationshipKey: String = "paletteColorGroup"
+        private let entityName: String = "EraserPaletteEntity"
+        private let relationshipKey: String = "paletteAlphaGroup"
         private let context: NSManagedObjectContext
 
         public init(
@@ -107,21 +108,21 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
             self.context = context
         }
 
-        public func load() async throws -> (index: Int, hexColors: [String])? {
+        public func load() async throws -> (index: Int, alphas: [Int])? {
             try await context.perform {
                 guard let palette = try self.fetch() else { return nil }
                 return (
                     index: Int(palette.index),
-                    hexColors: (palette.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap { $0.hex } ?? []
+                    alphas: (palette.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
                 )
             }
         }
 
-        func save(_ brushPalette: BrushPalette) async {
+        func save(_ eraserPalette: EraserPalette) async {
             do {
                 try await save(
-                    index: brushPalette.index,
-                    hexColors: brushPalette.colors.map { $0.hex() }
+                    index: eraserPalette.index,
+                    alphas: eraserPalette.alphas
                 )
             } catch {
                 // Do nothing because nothing can be done
@@ -129,15 +130,17 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
             }
         }
 
-        private func save(index: Int, hexColors: [String]) async throws {
+        private func save(index: Int, alphas: [Int]) async throws {
             try await context.perform {
-                let coreDataPalette = try self.fetch() ?? BrushPaletteEntity(context: self.context)
+                let coreDataPalette = try self.fetch() ?? EraserPaletteEntity(context: self.context)
 
                 let currentIndex = Int(coreDataPalette.index)
-                let currentHex: [String] = (coreDataPalette.paletteColorGroup?.array as? [PaletteColorEntity])?
-                    .compactMap { $0.hex } ?? []
+                let currentAlphas16: [Int16] = (coreDataPalette.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
+                    .compactMap { $0.alpha } ?? []
 
-                if currentIndex == index, currentHex == hexColors {
+                let currentAlphas = currentAlphas16.map { Int($0) }
+
+                if currentIndex == index, currentAlphas == alphas {
                     return
                 }
 
@@ -147,22 +150,22 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
                     coreDataPalette.index = Int16(index)
                 }
 
-                if currentHex != hexColors {
-                    let children = (coreDataPalette.paletteColorGroup?.array as? [PaletteColorEntity]) ?? []
+                if currentAlphas != alphas {
+                    let children = (coreDataPalette.paletteAlphaGroup?.array as? [PaletteAlphaEntity]) ?? []
 
-                    if children.count == hexColors.count {
-                        for (i, hex) in hexColors.enumerated() where children[i].hex != hex {
-                            children[i].hex = hex
+                    if children.count == alphas.count {
+                        for (i, alpha) in alphas.enumerated() where children[i].alpha != alpha {
+                            children[i].alpha = Int16(alpha)
                         }
-                        coreDataPalette.paletteColorGroup = NSOrderedSet(array: children)
+                        coreDataPalette.paletteAlphaGroup = NSOrderedSet(array: children)
                     } else {
                         children.forEach { self.context.delete($0) }
-                        let newChildren = hexColors.map { hex -> PaletteColorEntity in
-                            let entity = PaletteColorEntity(context: self.context)
-                            entity.hex = hex
+                        let newChildren = currentAlphas.map { alpha -> PaletteAlphaEntity in
+                            let entity = PaletteAlphaEntity(context: self.context)
+                            entity.alpha = Int16(alpha)
                             return entity
                         }
-                        coreDataPalette.paletteColorGroup = NSOrderedSet(array: newChildren)
+                        coreDataPalette.paletteAlphaGroup = NSOrderedSet(array: newChildren)
                     }
                 }
 
@@ -172,8 +175,8 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
             }
         }
 
-        private func fetch() throws -> BrushPaletteEntity? {
-            let request: NSFetchRequest<BrushPaletteEntity> = BrushPaletteEntity.fetchRequest()
+        private func fetch() throws -> EraserPaletteEntity? {
+            let request: NSFetchRequest<EraserPaletteEntity> = EraserPaletteEntity.fetchRequest()
             request.predicate = NSPredicate(format: "name == %@", uniqueName)
             request.fetchLimit = 1
             request.returnsObjectsAsFaults = false

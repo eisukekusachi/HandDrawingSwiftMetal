@@ -41,9 +41,10 @@ public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
         index: Int = 0,
         initialColors: [UIColor]? = nil
     ) {
-        self.colors = colors.isEmpty ? [.black] : colors
-        self.index = max(0, min(index, colors.count - 1))
-        self.initialColors = initialColors ?? colors
+        let newColors = colors.isEmpty ? [.black] : colors
+        self.colors = newColors
+        self.index = max(0, min(index, newColors.count - 1))
+        self.initialColors = initialColors ?? newColors
     }
 }
 
@@ -71,8 +72,8 @@ extension BrushPalette {
         colors: [UIColor] = [],
         index: Int = 0
     ) {
-        self.colors = colors
-        self.index = max(0, min(index, colors.count - 1))
+        self.colors = colors.isEmpty ? [.black] : colors
+        self.index = max(0, min(index, self.colors.count - 1))
     }
 
     public func update(

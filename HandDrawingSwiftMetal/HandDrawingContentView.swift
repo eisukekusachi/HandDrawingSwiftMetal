@@ -84,9 +84,9 @@ final class HandDrawingContentView: UIView {
                 fileName: EraserPaletteModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.eraserPalette.update(
+                    self?.viewModel.eraserPaletteStorage.update(
                         alphas: file.alphas,
-                        currentIndex: file.index
+                        index: file.index
                     )
                 }
             },
@@ -159,10 +159,10 @@ private extension HandDrawingContentView {
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPalette.$currentIndex
+        viewModel.eraserPaletteStorage.palette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPalette.alphas[index]
+                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
                 self.eraserDrawingToolRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)

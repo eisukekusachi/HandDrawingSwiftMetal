@@ -30,7 +30,7 @@ extension EraserPaletteModel {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(
-                index: palette.currentIndex,
+                index: palette.index,
                 alphas: palette.alphas
             )
         )

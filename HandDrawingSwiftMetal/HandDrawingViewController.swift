@@ -99,7 +99,7 @@ extension HandDrawingViewController {
                 additionalItems: [
                     DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingTool),
                     BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
-                    EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPalette)
+                    EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPaletteStorage.palette)
                 ]
             )
         }
@@ -126,7 +126,7 @@ extension HandDrawingViewController {
 
             self.contentView.viewModel.drawingTool.reset()
             self.contentView.viewModel.brushPaletteStorage.reset()
-            self.contentView.viewModel.eraserPalette.reset()
+            self.contentView.viewModel.eraserPaletteStorage.reset()
 
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
@@ -181,7 +181,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: contentView.viewModel.eraserPalette,
+                palette: contentView.viewModel.eraserPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
