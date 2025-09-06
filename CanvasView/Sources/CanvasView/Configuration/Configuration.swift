@@ -8,6 +8,6 @@
 import Foundation
 
 public struct Configuration {
-    public let canvasConfiguration: CanvasConfiguration
-    public let canvasEnvironmentConfiguration: CanvasEnvironmentConfiguration
+    public let projectConfiguration: ProjectConfiguration
+    public let environmentConfiguration: EnvironmentConfiguration
 }

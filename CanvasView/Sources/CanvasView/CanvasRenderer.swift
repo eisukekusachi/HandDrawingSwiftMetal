@@ -59,7 +59,7 @@ final class CanvasRenderer: ObservableObject {
     }
 
     func initialize(
-        environmentConfiguration: CanvasEnvironmentConfiguration
+        environmentConfiguration: EnvironmentConfiguration
     ) {
         self.backgroundColor = environmentConfiguration.backgroundColor
         self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor

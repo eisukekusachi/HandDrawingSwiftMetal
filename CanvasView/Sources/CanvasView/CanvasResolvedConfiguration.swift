@@ -32,7 +32,7 @@ public struct CanvasResolvedConfiguration: Sendable {
 public extension CanvasResolvedConfiguration {
 
     init(
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         resolvedTextureSize: CGSize
     ) async throws {
 

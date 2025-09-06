@@ -47,7 +47,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     func initializeStorage(
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         let textureSize = configuration.textureSize ?? defaultTextureSize
@@ -81,7 +81,7 @@ class TextureInMemoryRepository: TextureRepository {
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        let configuration: CanvasConfiguration = .init(textureSize: textureSize, layers: [layer])
+        let configuration: ProjectConfiguration = .init(textureSize: textureSize, layers: [layer])
 
         return try await .init(
             configuration: configuration,
@@ -91,7 +91,7 @@ class TextureInMemoryRepository: TextureRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         guard FileManager.containsAll(

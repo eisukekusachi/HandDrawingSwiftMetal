@@ -12,7 +12,7 @@ import UIKit
 /// A class that binds `CanvasState` and `CoreDataRepository`
 final class CanvasStateStorage {
 
-    private(set) var coreDataConfiguration: CanvasConfiguration?
+    private(set) var coreDataConfiguration: ProjectConfiguration?
 
     let alertSubject = PassthroughSubject<NSError, Never>()
 

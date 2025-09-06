@@ -1,5 +1,5 @@
 //
-//  CanvasConfiguration.swift
+//  ProjectConfiguration.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct CanvasConfiguration: Sendable {
+public struct ProjectConfiguration: Sendable {
     /// The file name saved in the Documents folder
     public let projectName: String
 
@@ -33,7 +33,7 @@ public struct CanvasConfiguration: Sendable {
     }
 }
 
-extension CanvasConfiguration {
+extension ProjectConfiguration {
 
     public init(
         _ configuration: Self,

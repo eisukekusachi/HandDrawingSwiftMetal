@@ -101,8 +101,8 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        canvasConfiguration: CanvasConfiguration,
-        environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
+        canvasConfiguration: ProjectConfiguration,
+        environmentConfiguration: EnvironmentConfiguration = EnvironmentConfiguration()
     ) {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
@@ -116,8 +116,8 @@ import UIKit
                 displayView: displayView
             ),
             configuration: .init(
-                canvasConfiguration: canvasConfiguration,
-                canvasEnvironmentConfiguration: environmentConfiguration
+                projectConfiguration: canvasConfiguration,
+                environmentConfiguration: environmentConfiguration
             ),
             defaultTextureSize: .init(
                 width: size.width * scale,
@@ -126,7 +126,7 @@ import UIKit
         )
     }
 
-    public func newCanvas(configuration: CanvasConfiguration) {
+    public func newCanvas(configuration: ProjectConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)

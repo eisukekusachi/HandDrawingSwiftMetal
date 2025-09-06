@@ -124,15 +124,15 @@ public final class CanvasViewModel {
         )
 
         self.canvasRenderer?.initialize(
-            environmentConfiguration: configuration.canvasEnvironmentConfiguration
+            environmentConfiguration: configuration.environmentConfiguration
         )
 
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            configuration.canvasEnvironmentConfiguration.drawingGestureRecognitionSecond
+            configuration.environmentConfiguration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            configuration.canvasEnvironmentConfiguration.transformingGestureRecognitionSecond
+            configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
         canvasStateStorage = CanvasStateStorage()
@@ -155,7 +155,7 @@ public final class CanvasViewModel {
         // if not, use the size from the configuration
         Task {
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.projectConfiguration,
                 defaultTextureSize: defaultTextureSize
             )
             bindData()
@@ -233,7 +233,7 @@ public extension CanvasViewModel {
     }
 
     func initializeCanvas(
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
     ) async throws {
         // Initialize the texture repository
@@ -378,7 +378,7 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func newCanvas(configuration: CanvasConfiguration) async throws {
+    func newCanvas(configuration: ProjectConfiguration) async throws {
         try await initializeCanvas(configuration: configuration, defaultTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
@@ -408,7 +408,7 @@ public extension CanvasViewModel {
                 let model: CanvasModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasModel.jsonFileName)
                 )
-                let configuration: CanvasConfiguration = .init(
+                let configuration: ProjectConfiguration = .init(
                     projectName: zipFileURL.fileName,
                     model: model
                 )

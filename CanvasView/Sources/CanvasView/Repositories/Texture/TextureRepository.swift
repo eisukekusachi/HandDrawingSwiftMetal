@@ -27,14 +27,14 @@ public protocol TextureRepository: Sendable {
 
     /// Initializes the storage from the given configuration, falling back to a new texture if that fails
     func initializeStorage(
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration
 
