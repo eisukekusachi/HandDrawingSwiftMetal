@@ -67,9 +67,9 @@ final class HandDrawingContentView: UIView {
                 fileName: BrushPaletteModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.brushPalette.update(
+                    self?.viewModel.brushPaletteStorage.update(
                         colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                        currentIndex: file.index
+                        index: file.index
                     )
                 }
             },
@@ -151,10 +151,10 @@ final class HandDrawingContentView: UIView {
 private extension HandDrawingContentView {
 
     func subscribe() {
-        viewModel.brushPalette.$currentIndex
+        viewModel.brushPaletteStorage.palette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
-                let newColor = viewModel.brushPalette.colors[index]
+                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
+                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
                 self.brushDrawingToolRenderer.setColor(newColor)
             }
             .store(in: &cancellables)

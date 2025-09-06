@@ -14,8 +14,9 @@ final class HandDrawingContentViewModel: ObservableObject {
     private let drawingToolController: PersistenceController
 
     @Published var drawingTool: DrawingTool
-    @Published var brushPalette: BrushPalette
     @Published var eraserPalette: EraserPalette
+
+    @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
 
     public init() {
         drawingToolController = PersistenceController(modelName: "DrawingToolStorage")
@@ -26,20 +27,21 @@ final class HandDrawingContentViewModel: ObservableObject {
             )
         )
 
-        brushPalette = BrushPalette(
-            initialColors: [
-                .black.withAlphaComponent(0.8),
-                .gray.withAlphaComponent(0.8),
-                .red.withAlphaComponent(0.8),
-                .blue.withAlphaComponent(0.8),
-                .green.withAlphaComponent(0.8),
-                .yellow.withAlphaComponent(0.8),
-                .purple.withAlphaComponent(0.8)
-            ],
-            storage: BrushPalette.CoreDataStorage(
-                context: drawingToolController.context
-            )
+        brushPaletteStorage = CoreDataBrushPaletteStorage(
+            palette: BrushPalette(
+                colors: [
+                    .black.withAlphaComponent(0.8),
+                    .gray.withAlphaComponent(0.8),
+                    .red.withAlphaComponent(0.8),
+                    .blue.withAlphaComponent(0.8),
+                    .green.withAlphaComponent(0.8),
+                    .yellow.withAlphaComponent(0.8),
+                    .purple.withAlphaComponent(0.8)
+                ]
+            ),
+            context: drawingToolController.context
         )
+
         eraserPalette = EraserPalette(
             initialAlphas: [
                 255,

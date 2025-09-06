@@ -98,7 +98,7 @@ extension HandDrawingViewController {
             self.contentView.canvasView.saveFile(
                 additionalItems: [
                     DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingTool),
-                    BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPalette),
+                    BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
                     EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPalette)
                 ]
             )
@@ -125,7 +125,7 @@ extension HandDrawingViewController {
             guard let `self` else { return }
 
             self.contentView.viewModel.drawingTool.reset()
-            self.contentView.viewModel.brushPalette.reset()
+            self.contentView.viewModel.brushPaletteStorage.reset()
             self.contentView.viewModel.eraserPalette.reset()
 
             let scale = UIScreen.main.scale
@@ -160,7 +160,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: contentView.viewModel.brushPalette,
+                palette: contentView.viewModel.brushPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )

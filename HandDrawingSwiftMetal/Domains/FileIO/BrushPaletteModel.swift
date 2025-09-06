@@ -30,7 +30,7 @@ extension BrushPaletteModel {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(
-                index: palette.currentIndex,
+                index: palette.index,
                 hexColors: palette.colors.map { $0.hex() }
             )
         )
