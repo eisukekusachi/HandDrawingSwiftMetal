@@ -29,11 +29,10 @@ final class CanvasStateStorage {
         self.coreDataRepository = coreDataRepository
     }
 
-    func setupStorage(_ canvasState: CanvasState) {
+    func setupStorage(from canvasState: CanvasState) {
         do {
             if let storageEntity = try self.coreDataRepository.fetchEntity() as? CanvasStorageEntity {
                 self.coreDataConfiguration = .init(entity: storageEntity)
-
             } else {
                 initializeStorageWithCanvasState(
                     canvasState,

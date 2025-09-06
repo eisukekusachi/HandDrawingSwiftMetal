@@ -60,7 +60,7 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies!
 
-    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
+    /// Stores the canvas state in CoreData
     private var canvasStateStorage: CanvasStateStorage?
 
     /// Handles input from finger touches
@@ -135,11 +135,9 @@ public final class CanvasViewModel {
             configuration.canvasEnvironmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if self.dependencies.textureRepository is TextureDocumentsDirectoryRepository {
-            canvasStateStorage = CanvasStateStorage()
-            canvasStateStorage?.setupStorage(canvasState)
-        }
+        canvasStateStorage = CanvasStateStorage()
+        canvasStateStorage?.setupStorage(from: canvasState)
+
 
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled

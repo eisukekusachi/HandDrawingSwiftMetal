@@ -112,7 +112,6 @@ import UIKit
         canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
-                environmentConfiguration: environmentConfiguration,
                 renderer: renderer,
                 displayView: displayView
             ),
