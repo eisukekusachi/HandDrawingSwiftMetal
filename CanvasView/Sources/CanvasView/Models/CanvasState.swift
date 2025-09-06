@@ -62,7 +62,7 @@ public final class CanvasState: ObservableObject {
 
 public extension CanvasState {
 
-    var currentTextureSize: CGSize {
+    var currentTextureSize: CGSize? {
         textureSize
     }
 

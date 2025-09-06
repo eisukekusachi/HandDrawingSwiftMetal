@@ -104,13 +104,14 @@ public extension TextureLayerViewModel {
     func onTapInsertButton() {
         guard
             let canvasState,
+            let canvasSize = canvasState.currentTextureSize,
             let selectedIndex = canvasState.selectedIndex,
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
         let texture = MTLTextureCreator.makeTexture(
-            width: Int(canvasState.currentTextureSize.width),
-            height: Int(canvasState.currentTextureSize.height),
+            width: Int(canvasSize.width),
+            height: Int(canvasSize.height),
             with: device
         )
 
