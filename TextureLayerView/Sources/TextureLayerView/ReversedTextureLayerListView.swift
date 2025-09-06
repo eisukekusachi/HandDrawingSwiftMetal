@@ -48,68 +48,45 @@ public struct ReversedTextureLayerListView: View {
 }
 
 private struct PreviewView: View {
-    let viewModel = TextureLayerViewModel()
+    private let viewModel = TextureLayerViewModel()
 
-    init() {
-        let canvasState = CanvasState()
+    private let canvasState = CanvasState()
+    private let repository = MockTextureRepository()
 
-        let layers: [TextureLayerModel] = [
-            .init(
-                id: UUID(),
-                title: "Layer0",
-                alpha: 255,
-                isVisible: true
-            ),
-            .init(
-                id: UUID(),
-                title: "Layer1",
-                alpha: 200,
-                isVisible: true
-            ),
-            .init(
-                id: UUID(),
-                title: "Layer2",
-                alpha: 150,
-                isVisible: true
-            ),
-            .init(
-                id: UUID(),
-                title: "Layer3",
-                alpha: 100,
-                isVisible: true
-            ),
-            .init(
-                id: UUID(),
-                title: "Layer4",
-                alpha: 50,
-                isVisible: true
-            )
+    private let previewConfig: CanvasResolvedConfiguration = .init(
+        projectName: "",
+        textureSize: .zero,
+        layerIndex: 0,
+        layers: [
+            .init(id: UUID(), title: "Layer0", alpha: 255, isVisible: true),
+            .init(id: UUID(), title: "Layer1", alpha: 200, isVisible: true),
+            .init(id: UUID(), title: "Layer2", alpha: 150, isVisible: true),
+            .init(id: UUID(), title: "Layer3", alpha: 100, isVisible: true),
+            .init(id: UUID(), title: "Layer4", alpha: 50,  isVisible: true)
         ]
+    )
 
-        let canvasResolvedConfiguration: CanvasResolvedConfiguration = .init(
-            projectName: "",
-            textureSize: .zero,
-            layerIndex: 0,
-            layers: layers
-        )
-
-        canvasState.initialize(
-            configuration: canvasResolvedConfiguration
-        )
-
-        viewModel.initialize(
-            configuration: .init(
-                canvasState: canvasState,
-                textureRepository: MockTextureRepository(),
-                undoStack: nil
-            )
-        )
-    }
     var body: some View {
         ReversedTextureLayerListView(
             viewModel: viewModel
         )
         .frame(width: 256, height: 300)
+        .onAppear {
+            Task {
+                await canvasState.initialize(
+                    configuration: previewConfig,
+                    textureRepository: repository
+                )
+                
+                viewModel.initialize(
+                    configuration: .init(
+                        canvasState: canvasState,
+                        textureRepository: repository,
+                        undoStack: nil
+                    )
+                )
+            }
+        }
     }
 }
 

@@ -247,11 +247,11 @@ public extension CanvasViewModel {
             defaultTextureSize: defaultTextureSize
         )
 
-        setupCanvas(resolvedConfiguration)
+        await setupCanvas(resolvedConfiguration)
     }
 
-    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) {
-        canvasState.initialize(
+    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) async {
+        await canvasState.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
         )
@@ -424,7 +424,7 @@ public extension CanvasViewModel {
                     defaultTextureSize: defaultTextureSize()
                 )
 
-                setupCanvas(resolvedConfiguration)
+                await setupCanvas(resolvedConfiguration)
 
                 for entity in optionalEntities {
                     try entity.load(in: workingDirectoryURL)
@@ -463,6 +463,8 @@ public extension CanvasViewModel {
             )
         else { return }
 
+        let canvasModel: CanvasModel = .init(canvasState: canvasState)
+
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -491,7 +493,7 @@ public extension CanvasViewModel {
 
                 // Save the canvas entity (JSON metadata)
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: CanvasModel.namedItem(canvasState)
+                    namedItem: CanvasModel.namedItem(canvasModel)
                 )
 
                 async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(

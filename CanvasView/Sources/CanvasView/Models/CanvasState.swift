@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 /// Manage the state of the canvas
-public final class CanvasState: ObservableObject, @unchecked Sendable {
+public final class CanvasState: ObservableObject {
 
     /// Subject to publish updates for the canvas
     public let canvasUpdateSubject = PassthroughSubject<Void, Never>()
@@ -32,10 +32,11 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
     public init() {}
 
+    @MainActor
     public func initialize(
         configuration: CanvasResolvedConfiguration,
         textureRepository: TextureRepository? = nil
-    ) {
+    ) async {
         self.projectName = configuration.projectName
 
         self.textureSize = configuration.textureSize
@@ -54,7 +55,7 @@ public final class CanvasState: ObservableObject, @unchecked Sendable {
 
         Task {
             let results = try await textureRepository?.copyTextures(uuids: layers.map { $0.id })
-            await updateAllThumbnails(results ?? [])
+            self.updateAllThumbnails(results ?? [])
         }
     }
 }

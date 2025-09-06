@@ -74,12 +74,10 @@ extension CanvasModel: CanvasEntityConvertible {
 
 extension CanvasModel: LocalFileConvertible {
 
-    public static func namedItem(_ canvasState: CanvasState) -> LocalFileNamedItem<CanvasModel> {
+    public static func namedItem(_ canvasModel: CanvasModel) -> LocalFileNamedItem<CanvasModel> {
         .init(
             fileName: CanvasModel.jsonFileName,
-            item: .init(
-                canvasState: canvasState
-            )
+            item: canvasModel
         )
     }
 
