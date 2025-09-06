@@ -21,15 +21,14 @@ final class CanvasStateStorage {
     private var cancellables = Set<AnyCancellable>()
 
     init(
+        canvasState: CanvasState,
         coreDataRepository: CoreDataRepository = DefaultCoreDataRepository(
             entityName: "CanvasStorageEntity",
             persistentContainerName: "CanvasStorage"
         )
     ) {
         self.coreDataRepository = coreDataRepository
-    }
 
-    func setupStorage(from canvasState: CanvasState) {
         do {
             if let storageEntity = try self.coreDataRepository.fetchEntity() as? CanvasStorageEntity {
                 self.coreDataConfiguration = .init(entity: storageEntity)

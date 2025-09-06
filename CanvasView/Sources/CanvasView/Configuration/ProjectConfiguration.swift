@@ -11,7 +11,8 @@ public struct ProjectConfiguration: Sendable {
     /// The file name saved in the Documents folder
     public let projectName: String
 
-    /// The size of the texture used for the canvas
+    /// The size of the texture used for the canvas.
+    /// If nothing is set, the screen size is applied.
     public let textureSize: CGSize?
 
     /// The index of the layer

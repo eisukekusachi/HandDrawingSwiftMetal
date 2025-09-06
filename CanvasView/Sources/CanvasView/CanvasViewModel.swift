@@ -131,8 +131,7 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        canvasStateStorage = CanvasStateStorage()
-        canvasStateStorage?.setupStorage(from: canvasState)
+        canvasStateStorage = CanvasStateStorage(canvasState: canvasState)
 
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
@@ -151,9 +150,11 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
+            let textureSize = configuration.projectConfiguration.textureSize ?? defaultTextureSize()
+
             try await initializeCanvas(
                 configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.projectConfiguration,
-                fallbackTextureSize: defaultTextureSize()
+                fallbackTextureSize: textureSize
             )
         }
     }
