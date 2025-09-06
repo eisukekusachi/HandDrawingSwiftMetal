@@ -24,11 +24,9 @@ public final class CanvasState: ObservableObject {
     /// A name of the file to be saved
     @Published private(set) var projectName: String = Calendar.currentDate
 
-    @Published private(set) var textureSize: CGSize = CanvasState.defaultTextureSize
+    @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
     @Published private(set) var backgroundColor: UIColor = .white
-
-    private static let defaultTextureSize: CGSize = .init(width: 768, height: 1024)
 
     public init() {}
 
@@ -62,7 +60,8 @@ public final class CanvasState: ObservableObject {
 
 public extension CanvasState {
 
-    var currentTextureSize: CGSize? {
+    // Add a computed property for cross-package access
+    var currentTextureSize: CGSize {
         textureSize
     }
 
