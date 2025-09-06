@@ -72,7 +72,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     func initializeStorage(
         configuration: ProjectConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedProjectConfiguration {
 
         let textureSize = configuration.textureSize ?? fallbackTextureSize
 
@@ -102,7 +102,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         from sourceFolderURL: URL,
         configuration: ProjectConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedProjectConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -179,7 +179,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     private func initializeStorageWithNewTexture(
         configuration: ProjectConfiguration,
         textureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedProjectConfiguration {
         guard
             Int(textureSize.width) > canvasMinimumTextureLength &&
             Int(textureSize.height) > canvasMinimumTextureLength

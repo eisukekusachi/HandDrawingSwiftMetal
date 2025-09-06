@@ -1,5 +1,5 @@
 //
-//  CanvasResolvedConfiguration.swift
+//  ResolvedProjectConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,7 +7,8 @@
 
 import UIKit
 
-public struct CanvasResolvedConfiguration: Sendable {
+/// `ProjectConfiguration` with a determined texture size
+public struct ResolvedProjectConfiguration: Sendable {
 
     public let projectName: String
 
@@ -29,7 +30,7 @@ public struct CanvasResolvedConfiguration: Sendable {
     }
 }
 
-public extension CanvasResolvedConfiguration {
+public extension ResolvedProjectConfiguration {
 
     init(
         configuration: ProjectConfiguration,

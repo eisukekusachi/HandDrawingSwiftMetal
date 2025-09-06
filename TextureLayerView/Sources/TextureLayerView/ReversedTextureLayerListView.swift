@@ -53,7 +53,7 @@ private struct PreviewView: View {
     private let canvasState = CanvasState()
     private let repository = MockTextureRepository()
 
-    private let previewConfig: CanvasResolvedConfiguration = .init(
+    private let previewConfig: ResolvedProjectConfiguration = .init(
         projectName: "",
         textureSize: .zero,
         layerIndex: 0,

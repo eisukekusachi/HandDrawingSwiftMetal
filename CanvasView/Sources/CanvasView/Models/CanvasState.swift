@@ -32,7 +32,7 @@ public final class CanvasState: ObservableObject {
 
     @MainActor
     public func initialize(
-        configuration: CanvasResolvedConfiguration,
+        configuration: ResolvedProjectConfiguration,
         textureRepository: TextureRepository? = nil
     ) async {
         self.projectName = configuration.projectName

@@ -44,7 +44,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<ResolvedProjectConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -95,7 +95,7 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedProjectConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -238,7 +238,7 @@ public extension CanvasViewModel {
         await setupCanvas(resolvedConfiguration)
     }
 
-    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) async {
+    private func setupCanvas(_ configuration: ResolvedProjectConfiguration) async {
         await canvasState.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
@@ -254,7 +254,7 @@ public extension CanvasViewModel {
         }
     }
 
-    private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
+    private func completeCanvasSetup(configuration: ResolvedProjectConfiguration) {
         for i in 0 ..< drawingToolRenderers.count {
             drawingToolRenderers[i].initTextures(configuration.textureSize)
         }
