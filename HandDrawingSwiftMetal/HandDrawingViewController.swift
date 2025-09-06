@@ -38,7 +38,10 @@ class HandDrawingViewController: UIViewController {
                 contentView.brushDrawingToolRenderer,
                 contentView.eraserDrawingToolRenderer
             ],
-            canvasConfiguration: configuration
+            canvasConfiguration: .init(
+                projectConfiguration: ProjectConfiguration(),
+                environmentConfiguration: EnvironmentConfiguration()
+            )
         )
 
         setupNewCanvasDialogPresenter()

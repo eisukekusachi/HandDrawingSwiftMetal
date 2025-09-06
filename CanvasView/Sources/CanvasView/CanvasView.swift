@@ -40,10 +40,6 @@ import UIKit
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    public var currentTextureSize: CGSize {
-        canvasViewModel.currentTextureSize
-    }
-
     public var textureLayerConfiguration: TextureLayerConfiguration {
         canvasViewModel.textureLayerConfiguration
     }
@@ -101,8 +97,7 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        canvasConfiguration: ProjectConfiguration,
-        environmentConfiguration: EnvironmentConfiguration = EnvironmentConfiguration()
+        canvasConfiguration: CanvasConfiguration
     ) {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
@@ -115,14 +110,7 @@ import UIKit
                 renderer: renderer,
                 displayView: displayView
             ),
-            configuration: .init(
-                projectConfiguration: canvasConfiguration,
-                environmentConfiguration: environmentConfiguration
-            ),
-            defaultTextureSize: .init(
-                width: size.width * scale,
-                height: size.height * scale
-            )
+            configuration: canvasConfiguration
         )
     }
 

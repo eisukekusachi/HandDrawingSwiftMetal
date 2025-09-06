@@ -106,8 +106,7 @@ public final class CanvasViewModel {
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
-        configuration: Configuration,
-        defaultTextureSize: CGSize
+        configuration: CanvasConfiguration
     ) {
         drawingToolRenderers.forEach {
             $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
@@ -120,10 +119,7 @@ public final class CanvasViewModel {
 
         self.canvasRenderer = CanvasRenderer(
             displayView: dependencies.displayView,
-            renderer: dependencies.renderer
-        )
-
-        self.canvasRenderer?.initialize(
+            renderer: dependencies.renderer,
             environmentConfiguration: configuration.environmentConfiguration
         )
 
@@ -138,7 +134,6 @@ public final class CanvasViewModel {
         canvasStateStorage = CanvasStateStorage()
         canvasStateStorage?.setupStorage(from: canvasState)
 
-
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
@@ -151,14 +146,15 @@ public final class CanvasViewModel {
         }
         */
 
+        bindData()
+
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
             try await initializeCanvas(
                 configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.projectConfiguration,
-                defaultTextureSize: defaultTextureSize
+                fallbackTextureSize: defaultTextureSize()
             )
-            bindData()
         }
     }
 
@@ -228,18 +224,14 @@ public final class CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    var currentTextureSize: CGSize {
-        canvasState.textureSize
-    }
-
-    func initializeCanvas(
+    private func initializeCanvas(
         configuration: ProjectConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws {
         // Initialize the texture repository
         let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
             configuration: configuration,
-            defaultTextureSize: defaultTextureSize
+            fallbackTextureSize: fallbackTextureSize
         )
 
         await setupCanvas(resolvedConfiguration)
@@ -379,7 +371,7 @@ public extension CanvasViewModel {
     }
 
     func newCanvas(configuration: ProjectConfiguration) async throws {
-        try await initializeCanvas(configuration: configuration, defaultTextureSize: defaultTextureSize())
+        try await initializeCanvas(configuration: configuration, fallbackTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
 

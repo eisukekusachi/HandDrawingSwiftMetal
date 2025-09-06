@@ -48,9 +48,9 @@ class TextureInMemoryRepository: TextureRepository {
 
     func initializeStorage(
         configuration: ProjectConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
-        let textureSize = configuration.textureSize ?? defaultTextureSize
+        let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
             Int(textureSize.width) > canvasMinimumTextureLength &&

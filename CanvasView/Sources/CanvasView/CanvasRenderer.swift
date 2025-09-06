@@ -17,10 +17,10 @@ final class CanvasRenderer: ObservableObject {
     var matrix: CGAffineTransform = .identity
 
     /// The background color of the canvas
-    var backgroundColor: UIColor = .white
+    private var backgroundColor: UIColor = .white
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
-    var baseBackgroundColor: UIColor = .lightGray
+    private var baseBackgroundColor: UIColor = .lightGray
 
     private let renderer: MTLRendering
 
@@ -46,7 +46,8 @@ final class CanvasRenderer: ObservableObject {
 
     init(
         displayView: CanvasDisplayable,
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        environmentConfiguration: EnvironmentConfiguration
     ) {
         self.renderer = renderer
 
@@ -56,11 +57,7 @@ final class CanvasRenderer: ObservableObject {
         )
 
         self.displayView = displayView
-    }
 
-    func initialize(
-        environmentConfiguration: EnvironmentConfiguration
-    ) {
         self.backgroundColor = environmentConfiguration.backgroundColor
         self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor
     }

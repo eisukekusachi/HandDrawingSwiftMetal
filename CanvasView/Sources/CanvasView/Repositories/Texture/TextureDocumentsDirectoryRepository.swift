@@ -67,14 +67,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    /// Attempts to restore the repository from a given `CanvasConfiguration`
+    /// Attempts to restore the repository from a given `ProjectConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
         configuration: ProjectConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
 
-        let textureSize = configuration.textureSize ?? defaultTextureSize
+        let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.textureName },
