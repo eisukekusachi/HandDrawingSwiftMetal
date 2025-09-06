@@ -186,7 +186,7 @@
 		D426FC9C2E5DD88600CC116D /* Domains */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC9E2E5DD90500CC116D /* InputOutput */,
+				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
 			);
 			path = Domains;
@@ -203,14 +203,14 @@
 			path = DrawingTools;
 			sourceTree = "<group>";
 		};
-		D426FC9E2E5DD90500CC116D /* InputOutput */ = {
+		D426FC9E2E5DD90500CC116D /* FileIO */ = {
 			isa = PBXGroup;
 			children = (
 				D426FC5B2E5C003400CC116D /* BrushPaletteModel.swift */,
 				D426FC5F2E5C0A8B00CC116D /* DrawingToolModel.swift */,
 				D426FC5D2E5C08AA00CC116D /* EraserPaletteModel.swift */,
 			);
-			path = InputOutput;
+			path = FileIO;
 			sourceTree = "<group>";
 		};
 		D42F40992B4402EC00B32707 /* Components */ = {
