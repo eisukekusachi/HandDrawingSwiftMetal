@@ -152,7 +152,7 @@ extension CanvasStateStorage {
         layers.enumerated().forEach { index, model in
             let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
             newLayer.title = model.title
-            newLayer.fileName = model.fileName
+            newLayer.fileName = model.textureName
             newLayer.isVisible = model.isVisible
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)

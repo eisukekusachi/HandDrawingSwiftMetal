@@ -9,13 +9,8 @@ import UIKit
 
 public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
 
-    /// Uses the ID as the filename
-    var fileName: String {
-        id.uuidString
-    }
-
     /// The unique identifier for the layer
-    public let id: UUID
+    public let textureName: String
 
     /// The name of the layer
     public let title: String
@@ -26,15 +21,21 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
     /// Whether the layer is visible or not
     public let isVisible: Bool
 
+
+    /// Retrieve the UUID from the file name since it uses a UUID
+    public var id: UUID {
+        UUID.init(uuidString: textureName) ?? UUID()
+    }
+
     public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
-        self.id = id
+        self.textureName = id.uuidString
         self.title = title
         self.alpha = alpha
         self.isVisible = isVisible
     }
 
     public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
-        lhs.id == rhs.id &&
+        lhs.textureName == rhs.textureName &&
         lhs.title == rhs.title &&
         lhs.alpha == rhs.alpha &&
         lhs.isVisible == rhs.isVisible

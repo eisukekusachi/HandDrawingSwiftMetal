@@ -77,7 +77,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let textureSize = configuration.textureSize ?? defaultTextureSize
 
         if FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
             // Retain IDs
@@ -104,7 +104,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         guard FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(

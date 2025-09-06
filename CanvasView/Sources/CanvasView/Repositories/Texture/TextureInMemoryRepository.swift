@@ -95,7 +95,7 @@ class TextureInMemoryRepository: TextureRepository {
         defaultTextureSize: CGSize
     ) async throws -> CanvasResolvedConfiguration {
         guard FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
