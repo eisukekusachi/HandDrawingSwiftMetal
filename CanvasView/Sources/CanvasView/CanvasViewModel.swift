@@ -11,9 +11,6 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
-    /// A name of the file to be saved
-    @Published private(set) var projectName: String = Calendar.currentDate
-
     public static var fileSuffix: String {
         "zip"
     }
@@ -388,7 +385,8 @@ public extension CanvasViewModel {
 
     func loadFile(
         zipFileURL: URL,
-        optionalEntities: [AnyLocalFileLoader] = []
+        optionalEntities: [AnyLocalFileLoader] = [],
+        completion: ((ResolvedProjectConfiguration) -> Void)?
     ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -432,6 +430,8 @@ public extension CanvasViewModel {
                         icon: UIImage(systemName: "hand.thumbsup.fill")
                     )
                 )
+
+                completion?(resolvedConfiguration)
             }
             catch {
                 alertSubject.send(
@@ -445,6 +445,7 @@ public extension CanvasViewModel {
     }
 
     func saveFile(
+        projectName: String,
         additionalItems: [AnyLocalFileNamedItem] = []
     ) {
         // Create a thumbnail image from the current canvas texture
