@@ -49,7 +49,7 @@ class TextureInMemoryRepository: TextureRepository {
     func initializeStorage(
         configuration: CanvasConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedProjectConfiguration {
+    ) async throws -> ResolvedCanvasConfiguration {
         let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
@@ -93,7 +93,7 @@ class TextureInMemoryRepository: TextureRepository {
         from sourceFolderURL: URL,
         configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> ResolvedProjectConfiguration {
+    ) async throws -> ResolvedCanvasConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)

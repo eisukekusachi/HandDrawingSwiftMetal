@@ -30,7 +30,7 @@ public final class TextureLayers: ObservableObject {
 
     @MainActor
     public func initialize(
-        configuration: ResolvedProjectConfiguration,
+        configuration: ResolvedCanvasConfiguration,
         textureRepository: TextureRepository? = nil
     ) async {
         self.textureSize = configuration.textureSize

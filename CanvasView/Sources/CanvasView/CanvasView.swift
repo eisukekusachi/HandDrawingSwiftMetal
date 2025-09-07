@@ -39,7 +39,7 @@ import UIKit
     }
 
     /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<ResolvedProjectConfiguration, Never> {
+    public var canvasViewSetupCompleted: AnyPublisher<ResolvedCanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -57,7 +57,7 @@ import UIKit
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedProjectConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedCanvasConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 

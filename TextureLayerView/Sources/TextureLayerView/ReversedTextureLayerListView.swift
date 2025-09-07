@@ -53,7 +53,7 @@ private struct PreviewView: View {
     private let canvasState = TextureLayers()
     private let repository = MockTextureRepository()
 
-    private let previewConfig: ResolvedProjectConfiguration = .init(
+    private let configuration: ResolvedCanvasConfiguration = .init(
         projectName: "",
         textureSize: .zero,
         layerIndex: 0,
@@ -99,7 +99,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 await canvasState.initialize(
-                    configuration: previewConfig,
+                    configuration: configuration,
                     textureRepository: repository
                 )
                 

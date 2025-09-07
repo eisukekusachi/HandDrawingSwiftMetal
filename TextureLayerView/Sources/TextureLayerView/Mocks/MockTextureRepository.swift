@@ -24,7 +24,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func initializeStorage(
         configuration: CanvasConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedProjectConfiguration {
+    ) async throws -> ResolvedCanvasConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? fallbackTextureSize
@@ -35,7 +35,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         from sourceFolderURL: URL,
         configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> ResolvedProjectConfiguration {
+    ) async throws -> ResolvedCanvasConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
