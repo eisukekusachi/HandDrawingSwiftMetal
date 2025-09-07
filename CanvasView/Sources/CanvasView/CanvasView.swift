@@ -102,9 +102,6 @@ import UIKit
         drawingToolRenderers: [DrawingToolRenderer],
         canvasConfiguration: CanvasConfiguration
     ) {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-
         displayView.configure(renderer: renderer)
 
         canvasViewModel.initialize(
