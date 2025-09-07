@@ -17,6 +17,8 @@ public final class TextureLayers: ObservableObject {
     /// Subject to publish updates for the entire canvas, including all textures
     public let fullCanvasUpdateSubject = PassthroughSubject<Void, Never>()
 
+    private var textureRepository: TextureRepository?
+
     @Published public var layers: [TextureLayerItem] = []
 
     @Published public var selectedLayerId: UUID?
@@ -44,6 +46,8 @@ public final class TextureLayers: ObservableObject {
         }
 
         self.selectedLayerId = configuration.selectedLayerId
+
+        self.textureRepository = textureRepository
 
         Task {
             let results = try await textureRepository?.copyTextures(uuids: layers.map { $0.id })
