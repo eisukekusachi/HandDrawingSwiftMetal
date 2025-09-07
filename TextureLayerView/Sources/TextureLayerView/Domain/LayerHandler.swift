@@ -12,41 +12,41 @@ import MetalKit
 @MainActor
 public final class LayerHandler {
 
-    private var canvasState: CanvasState?
+    private var textureLayers: TextureLayers?
 
-    init(canvasState: CanvasState? = nil) {
-        self.canvasState = canvasState
+    init(textureLayers: TextureLayers? = nil) {
+        self.textureLayers = textureLayers
     }
 
     func insertLayer(
         layer: TextureLayerItem,
         at index: Int
     ) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
-        canvasState.layers.insert(layer, at: index)
+        textureLayers.layers.insert(layer, at: index)
     }
 
     func removeLayer(
         selectedLayerIndex: Int
     ) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
-        canvasState.layers.remove(at: selectedLayerIndex)
+        textureLayers.layers.remove(at: selectedLayerIndex)
     }
 
     func moveLayer(
         indices: MoveLayerIndices
     ) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
-            layerCount: canvasState.layers.count
+            layerCount: textureLayers.layers.count
         )
 
-        canvasState.layers.move(
+        textureLayers.layers.move(
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
@@ -58,16 +58,16 @@ public final class LayerHandler {
         isVisible: Bool? = nil,
         alpha: Int? = nil
     ) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
         guard
-            let selectedIndex = canvasState.layers.map({ $0.id }).firstIndex(of: id)
+            let selectedIndex = textureLayers.layers.map({ $0.id }).firstIndex(of: id)
         else { return }
 
-        let layer = canvasState.layers[selectedIndex]
+        let layer = textureLayers.layers[selectedIndex]
 
         if let title {
-            canvasState.layers[selectedIndex] = .init(
+            textureLayers.layers[selectedIndex] = .init(
                 id: layer.id,
                 title: title,
                 alpha: layer.alpha,
@@ -76,7 +76,7 @@ public final class LayerHandler {
             )
         }
         if let isVisible {
-            canvasState.layers[selectedIndex] = .init(
+            textureLayers.layers[selectedIndex] = .init(
                 id: layer.id,
                 title: layer.title,
                 alpha: layer.alpha,
@@ -85,10 +85,10 @@ public final class LayerHandler {
             )
 
             // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-            canvasState.fullCanvasUpdateSubject.send(())
+            textureLayers.fullCanvasUpdateSubject.send(())
         }
         if let alpha {
-            canvasState.layers[selectedIndex] = .init(
+            textureLayers.layers[selectedIndex] = .init(
                 id: layer.id,
                 title: layer.title,
                 alpha: alpha,
@@ -97,14 +97,14 @@ public final class LayerHandler {
             )
 
             // Only the alpha of the selected layer can be changed, so other layers will not be updated
-            canvasState.canvasUpdateSubject.send(())
+            textureLayers.canvasUpdateSubject.send(())
         }
     }
 
     func selectLayer(id: UUID) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
-        canvasState.selectedLayerId = id
-        canvasState.fullCanvasUpdateSubject.send(())
+        textureLayers.selectedLayerId = id
+        textureLayers.fullCanvasUpdateSubject.send(())
     }
 }

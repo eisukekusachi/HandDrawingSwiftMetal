@@ -1,5 +1,5 @@
 //
-//  CanvasState.swift
+//  TextureLayers.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/13.
@@ -8,8 +8,8 @@
 import Combine
 import UIKit
 
-/// Manage the state of the canvas
-public final class CanvasState: ObservableObject {
+/// A store that manages the layer stack of a canvas
+public final class TextureLayers: ObservableObject {
 
     /// Subject to publish updates for the canvas
     public let canvasUpdateSubject = PassthroughSubject<Void, Never>()
@@ -21,6 +21,7 @@ public final class CanvasState: ObservableObject {
 
     @Published public var selectedLayerId: UUID?
 
+    // Set a default value to avoid nil
     @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
     public init() {}
@@ -51,7 +52,7 @@ public final class CanvasState: ObservableObject {
     }
 }
 
-public extension CanvasState {
+public extension TextureLayers {
 
     // Add a computed property for cross-package access
     var currentTextureSize: CGSize {
@@ -73,7 +74,7 @@ public extension CanvasState {
     }
 }
 
-public extension CanvasState {
+public extension TextureLayers {
 
     func addLayer(newTextureLayer textureLayer: TextureLayerItem, at index: Int) {
         self.layers.insert(textureLayer, at: index)

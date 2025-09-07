@@ -50,7 +50,7 @@ public struct ReversedTextureLayerListView: View {
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
-    private let canvasState = CanvasState()
+    private let canvasState = TextureLayers()
     private let repository = MockTextureRepository()
 
     private let previewConfig: ResolvedProjectConfiguration = .init(
@@ -105,7 +105,7 @@ private struct PreviewView: View {
                 
                 viewModel.initialize(
                     configuration: .init(
-                        canvasState: canvasState,
+                        textureLayers: canvasState,
                         textureRepository: repository,
                         undoStack: nil
                     )

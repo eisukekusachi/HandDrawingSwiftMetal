@@ -94,7 +94,7 @@ private extension Image {
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
-    private let canvasState = CanvasState()
+    private let textureLayers = TextureLayers()
     private let repository = MockTextureRepository()
 
     private let previewConfig: ResolvedProjectConfiguration = .init(
@@ -118,14 +118,14 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                await canvasState.initialize(
+                await textureLayers.initialize(
                     configuration: previewConfig,
                     textureRepository: repository
                 )
 
                 viewModel.initialize(
                     configuration: .init(
-                        canvasState: canvasState,
+                        textureLayers: textureLayers,
                         textureRepository: repository,
                         undoStack: nil
                     )

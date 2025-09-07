@@ -37,11 +37,11 @@ extension CanvasModel {
     static let thumbnailLength: CGFloat = 500
 
     init(
-        canvasState: CanvasState
+        textureLayers: TextureLayers
     ) {
-        self.textureSize = canvasState.textureSize
-        self.layerIndex = canvasState.selectedIndex ?? 0
-        self.layers = canvasState.layers.map { .init(item: $0) }
+        self.textureSize = textureLayers.textureSize
+        self.layerIndex = textureLayers.selectedIndex ?? 0
+        self.layers = textureLayers.layers.map { .init(item: $0) }
         self.thumbnailName = CanvasModel.thumbnailName
     }
 

@@ -12,16 +12,16 @@ import SwiftUI
 @MainActor
 public final class UndoHandler {
 
-    private var canvasState: CanvasState?
+    private var textureLayers: TextureLayers?
     private var undoStack: UndoStack?
 
     private var oldAlpha: Int?
 
     init(
-        canvasState: CanvasState?,
+        textureLayers: TextureLayers?,
         undoStack: UndoStack?
     ) {
-        self.canvasState = canvasState
+        self.textureLayers = textureLayers
         self.undoStack = undoStack
     }
 
@@ -31,7 +31,7 @@ public final class UndoHandler {
         layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
         let redoObject = UndoAdditionObject(
             layerToBeAdded: layer,
@@ -41,7 +41,7 @@ public final class UndoHandler {
         // Create a deletion undo object to cancel the addition
         let undoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: canvasState.layers[previousLayerIndex].id
+            selectedLayerIdAfterDeletion: textureLayers.layers[previousLayerIndex].id
         )
 
         await undoStack?.pushUndoAdditionObject(
@@ -59,12 +59,12 @@ public final class UndoHandler {
         layer: TextureLayerModel,
         texture: MTLTexture?
     ) async {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
         // Add an undo object to the undo stack
         let redoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: canvasState.layers[currentLayerIndex].id
+            selectedLayerIdAfterDeletion: textureLayers.layers[currentLayerIndex].id
         )
 
         // Create a addition undo object to cancel the deletion
@@ -106,14 +106,14 @@ public final class UndoHandler {
     func addUndoAlphaObject(
         dragging: Bool
     ) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
-        if dragging, let alpha = canvasState.selectedLayer?.alpha {
+        if dragging, let alpha = textureLayers.selectedLayer?.alpha {
             self.oldAlpha = alpha
         } else {
             if let oldAlpha = self.oldAlpha,
-               let newAlpha = canvasState.selectedLayer?.alpha,
-               let selectedLayer = canvasState.selectedLayer {
+               let newAlpha = textureLayers.selectedLayer?.alpha,
+               let selectedLayer = textureLayers.selectedLayer {
 
                 let undoObject = UndoAlphaChangedObject(
                     layer: .init(item: selectedLayer),

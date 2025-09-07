@@ -19,10 +19,10 @@ public final class TextureLayerViewModel: ObservableObject {
     @Published public var isDragging: Bool = false
 
     public var selectedLayer: TextureLayerItem? {
-        canvasState?.selectedLayer
+        textureLayers?.selectedLayer
     }
 
-    private(set) var canvasState: CanvasState?
+    private(set) var textureLayers: TextureLayers?
 
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
@@ -30,7 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
     @Published private var selectedLayerId: UUID? {
         didSet {
             // Update the slider value when selectedLayerId changes
-            if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
+            if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
                 currentAlpha = layer.alpha
             }
         }
@@ -49,15 +49,15 @@ public final class TextureLayerViewModel: ObservableObject {
     public func initialize(
         configuration: TextureLayerConfiguration
     ) {
-        canvasState = configuration.canvasState
+        textureLayers = configuration.textureLayers
         textureRepository = configuration.textureRepository
 
         defaultBackgroundColor = configuration.defaultBackgroundColor
         selectedBackgroundColor = configuration.selectedBackgroundColor
 
-        layerHandler = .init(canvasState: canvasState)
+        layerHandler = .init(textureLayers: textureLayers)
 
-        undoHandler = .init(canvasState: canvasState, undoStack: configuration.undoStack)
+        undoHandler = .init(textureLayers: textureLayers, undoStack: configuration.undoStack)
 
         subscribe()
     }
@@ -86,10 +86,10 @@ public final class TextureLayerViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Bind `canvasState.selectedLayerId` to `selectedLayerId`
-        canvasState?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
+        textureLayers?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
             .store(in: &cancellables)
 
-        canvasState?.$layers
+        textureLayers?.$layers
             .receive(on: DispatchQueue.main)
             .assign(to: &$layers)
     }
@@ -98,19 +98,19 @@ public final class TextureLayerViewModel: ObservableObject {
 public extension TextureLayerViewModel {
 
     func isSelected(_ uuid: UUID) -> Bool {
-        canvasState?.selectedLayer?.id == uuid
+        textureLayers?.selectedLayer?.id == uuid
     }
 
     func onTapInsertButton() {
         guard
-            let canvasState,
-            let selectedIndex = canvasState.selectedIndex,
+            let textureLayers,
+            let selectedIndex = textureLayers.selectedIndex,
             let device: MTLDevice = MTLCreateSystemDefaultDevice()
         else { return }
 
         let texture = MTLTextureCreator.makeTexture(
-            width: Int(canvasState.currentTextureSize.width),
-            height: Int(canvasState.currentTextureSize.height),
+            width: Int(textureLayers.currentTextureSize.width),
+            height: Int(textureLayers.currentTextureSize.height),
             with: device
         )
 
@@ -124,7 +124,7 @@ public extension TextureLayerViewModel {
             thumbnail: thumbnail
         )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        let previousLayerIndex = canvasState.selectedIndex ?? 0
+        let previousLayerIndex = textureLayers.selectedIndex ?? 0
 
         layerHandler?.insertLayer(layer: layer, at: index)
 
@@ -140,7 +140,7 @@ public extension TextureLayerViewModel {
                     newTextureUUID: layer.id
                 )
 
-            let currentLayerIndex = canvasState.selectedIndex ?? 0
+            let currentLayerIndex = textureLayers.selectedIndex ?? 0
             await undoHandler?.addUndoAdditionObject(
                 previousLayerIndex: previousLayerIndex,
                 currentLayerIndex: currentLayerIndex,
@@ -157,10 +157,10 @@ public extension TextureLayerViewModel {
 
     func onTapDeleteButton() {
         guard
-            let canvasState,
-            let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex,
-            canvasState.layers.count > 1
+            let textureLayers,
+            let selectedLayer = textureLayers.selectedLayer,
+            let selectedIndex = textureLayers.selectedIndex,
+            textureLayers.layers.count > 1
         else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
@@ -169,7 +169,7 @@ public extension TextureLayerViewModel {
             selectedLayerIndex: selectedIndex
         )
         Task {
-            layerHandler?.selectLayer(id: canvasState.layers[newLayerIndex].id)
+            layerHandler?.selectLayer(id: textureLayers.layers[newLayerIndex].id)
         }
 
         Task {
@@ -207,7 +207,7 @@ public extension TextureLayerViewModel {
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
-        guard let canvasState else { return }
+        guard let textureLayers else { return }
 
         let indices: MoveLayerIndices = .init(
             sourceIndexSet: source,
@@ -216,17 +216,17 @@ public extension TextureLayerViewModel {
 
         layerHandler?.moveLayer(indices: indices)
 
-        canvasState.fullCanvasUpdateSubject.send(())
+        textureLayers.fullCanvasUpdateSubject.send(())
 
         guard
-            let selectedLayerId = canvasState.selectedLayer?.id,
-            let textureLayer = canvasState.layers.first(where: { $0.id == selectedLayerId })
+            let selectedLayerId = textureLayers.selectedLayer?.id,
+            let textureLayer = textureLayers.layers.first(where: { $0.id == selectedLayerId })
         else { return }
 
         undoHandler?.addUndoMoveObject(
             indices: MoveLayerIndices.reversedIndices(
                 indices: indices,
-                layerCount: canvasState.layers.count
+                layerCount: textureLayers.layers.count
             ),
             selectedLayerId: selectedLayerId,
             textureLayer: .init(

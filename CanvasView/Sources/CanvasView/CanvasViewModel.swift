@@ -11,9 +11,6 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
-    /// Maintains the state of the canvas
-    let canvasState = CanvasState()
-
     /// A name of the file to be saved
     @Published private(set) var projectName: String = Calendar.currentDate
 
@@ -53,8 +50,8 @@ public final class CanvasViewModel {
 
     var textureLayerConfiguration: TextureLayerConfiguration {
         .init(
-            canvasState: canvasState,
-            textureRepository: self.dependencies.textureRepository,
+            textureLayers: textureLayers,
+            textureRepository: dependencies.textureRepository,
             undoStack: undoStack,
             defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
             selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
@@ -62,6 +59,9 @@ public final class CanvasViewModel {
     }
 
     private var dependencies: CanvasViewDependencies!
+
+    /// Maintains the state of the canvas
+    let textureLayers = TextureLayers()
 
     /// Stores the canvas state in CoreData
     private var canvasStateStorage: CanvasStateStorage?
@@ -134,7 +134,7 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        canvasStateStorage = CanvasStateStorage(canvasState: canvasState)
+        canvasStateStorage = CanvasStateStorage(textureLayers: textureLayers)
 
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
@@ -169,7 +169,7 @@ public final class CanvasViewModel {
                 guard
                     let drawingCurve = self?.drawingCurve,
                     let texture = self?.canvasRenderer?.selectedTexture,
-                    let selectedLayerId = self?.canvasState.selectedLayer?.id
+                    let selectedLayerId = self?.textureLayers.selectedLayer?.id
                 else { return }
 
                 self?.drawingToolRenderer?.drawCurve(
@@ -190,14 +190,14 @@ public final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas
-        canvasState.canvasUpdateSubject
+        textureLayers.canvasUpdateSubject
             .sink { [weak self] in
                 self?.updateCanvasView()
             }
             .store(in: &cancellables)
 
         // Update the entire canvas, including all drawing textures
-        canvasState.fullCanvasUpdateSubject
+        textureLayers.fullCanvasUpdateSubject
             .sink { [weak self] in
                 self?.updateCanvasByMergingAllLayers()
             }
@@ -242,7 +242,7 @@ public extension CanvasViewModel {
     }
 
     private func setupCanvas(_ configuration: ResolvedProjectConfiguration) async {
-        await canvasState.initialize(
+        await textureLayers.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
         )
@@ -250,7 +250,7 @@ public extension CanvasViewModel {
         canvasRenderer?.initTextures(textureSize: configuration.textureSize)
 
         canvasRenderer?.updateDrawingTextures(
-            canvasState: canvasState,
+            textureLayers: textureLayers,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
             self?.completeCanvasSetup(configuration: configuration)
@@ -456,7 +456,7 @@ public extension CanvasViewModel {
             )
         else { return }
 
-        let canvasModel: CanvasModel = .init(canvasState: canvasState)
+        let canvasModel: CanvasModel = .init(textureLayers: textureLayers)
 
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -468,7 +468,7 @@ public extension CanvasViewModel {
 
                 // Copy all textures from the textureRepository
                 let textures = try await dependencies.textureRepository.copyTextures(
-                    uuids: canvasState.layers.map { $0.id }
+                    uuids: textureLayers.layers.map { $0.id }
                 )
 
                 // Save the thumbnail image into the working directory
@@ -600,7 +600,7 @@ extension CanvasViewModel {
             }
         }
 
-        canvasState.updateThumbnail(
+        textureLayers.updateThumbnail(
             .init(uuid: selectedTextureId, texture: texture)
         )
     }
@@ -618,7 +618,7 @@ extension CanvasViewModel {
 
     func updateCanvasByMergingAllLayers() {
         canvasRenderer?.updateDrawingTextures(
-            canvasState: canvasState,
+            textureLayers: textureLayers,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
             self?.updateCanvasView()
@@ -627,7 +627,7 @@ extension CanvasViewModel {
 
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
-            let selectedLayer = canvasState.selectedLayer
+            let selectedLayer = textureLayers.selectedLayer
         else { return }
 
         canvasRenderer?.updateCanvasView(

@@ -8,7 +8,7 @@
 import UIKit
 
 public struct TextureLayerConfiguration {
-    public let canvasState: CanvasState
+    public let textureLayers: TextureLayers
     public let textureRepository: TextureRepository
     public let undoStack: UndoStack?
 
@@ -16,13 +16,13 @@ public struct TextureLayerConfiguration {
     public let selectedBackgroundColor: UIColor
 
     public init(
-        canvasState: CanvasState,
+        textureLayers: TextureLayers,
         textureRepository: TextureRepository,
         undoStack: UndoStack?,
         defaultBackgroundColor: UIColor = .white,
         selectedBackgroundColor: UIColor = .black
     ) {
-        self.canvasState = canvasState
+        self.textureLayers = textureLayers
         self.textureRepository = textureRepository
         self.undoStack = undoStack
         self.defaultBackgroundColor = defaultBackgroundColor

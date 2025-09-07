@@ -21,7 +21,7 @@ final class CanvasStateStorage {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        canvasState: CanvasState,
+        textureLayers: TextureLayers,
         coreDataRepository: CoreDataRepository = DefaultCoreDataRepository(
             entityName: "CanvasStorageEntity",
             persistentContainerName: "CanvasStorage"
@@ -34,13 +34,13 @@ final class CanvasStateStorage {
                 self.coreDataConfiguration = .init(coreDataEntity: storageEntity)
             } else {
                 initializeStorageWithCanvasState(
-                    canvasState,
+                    textureLayers,
                     to: CanvasStorageEntity(context: self.coreDataRepository.context)
                 )
             }
 
             bindCanvasStateToCoreDataEntities(
-                canvasState: canvasState,
+                canvasState: textureLayers,
                 coreDataRepository: self.coreDataRepository
             )
 
@@ -61,7 +61,7 @@ final class CanvasStateStorage {
 
 extension CanvasStateStorage {
 
-    private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
+    private func initializeStorageWithCanvasState(_ canvasState: TextureLayers, to newStorage: CanvasStorageEntity) {
         do {
             // newStorage.projectName = canvasState.projectName
 
@@ -87,7 +87,7 @@ extension CanvasStateStorage {
         }
     }
 
-    private func bindCanvasStateToCoreDataEntities(canvasState: CanvasState?, coreDataRepository: CoreDataRepository) {
+    private func bindCanvasStateToCoreDataEntities(canvasState: TextureLayers?, coreDataRepository: CoreDataRepository) {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
