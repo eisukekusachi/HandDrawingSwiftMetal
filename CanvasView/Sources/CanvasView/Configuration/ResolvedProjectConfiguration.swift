@@ -33,7 +33,7 @@ public struct ResolvedProjectConfiguration: Sendable {
 public extension ResolvedProjectConfiguration {
 
     init(
-        configuration: ProjectConfiguration,
+        configuration: CanvasConfiguration,
         resolvedTextureSize: CGSize
     ) async throws {
 

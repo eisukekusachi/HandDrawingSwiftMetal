@@ -100,7 +100,7 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        canvasConfiguration: CanvasConfiguration
+        configuration: ProjectConfiguration
     ) {
         displayView.configure(renderer: renderer)
 
@@ -110,11 +110,11 @@ import UIKit
                 renderer: renderer,
                 displayView: displayView
             ),
-            configuration: canvasConfiguration
+            configuration: configuration
         )
     }
 
-    public func newCanvas(configuration: ProjectConfiguration) {
+    public func newCanvas(configuration: CanvasConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)

@@ -16,7 +16,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var configuration = ProjectConfiguration()
+    private var projectConfiguration: ProjectConfiguration?
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -38,10 +38,7 @@ class HandDrawingViewController: UIViewController {
                 contentView.brushDrawingToolRenderer,
                 contentView.eraserDrawingToolRenderer
             ],
-            canvasConfiguration: .init(
-                projectConfiguration: ProjectConfiguration(),
-                environmentConfiguration: EnvironmentConfiguration()
-            )
+            configuration: projectConfiguration ?? .init()
         )
 
         setupNewCanvasDialogPresenter()
@@ -131,7 +128,7 @@ extension HandDrawingViewController {
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
             self.contentView.canvasView.newCanvas(
-                configuration: ProjectConfiguration(
+                configuration: CanvasConfiguration(
                     textureSize: .init(width: size.width * scale, height: size.height * scale)
                 )
             )
@@ -265,10 +262,10 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        configuration: ProjectConfiguration
+        projectConfiguration: ProjectConfiguration? = nil
     ) -> Self {
         let viewController = Self()
-        viewController.configuration = configuration
+        viewController.projectConfiguration = projectConfiguration
         return viewController
     }
 }

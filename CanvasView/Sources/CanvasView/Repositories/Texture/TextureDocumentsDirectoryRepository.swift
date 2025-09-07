@@ -70,7 +70,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// Attempts to restore the repository from a given `ProjectConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
-        configuration: ProjectConfiguration,
+        configuration: CanvasConfiguration,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedProjectConfiguration {
 
@@ -100,7 +100,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: ProjectConfiguration,
+        configuration: CanvasConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> ResolvedProjectConfiguration {
         guard FileManager.containsAll(
@@ -177,7 +177,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     private func initializeStorageWithNewTexture(
-        configuration: ProjectConfiguration,
+        configuration: CanvasConfiguration,
         textureSize: CGSize
     ) async throws -> ResolvedProjectConfiguration {
         guard

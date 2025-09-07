@@ -106,7 +106,7 @@ public final class CanvasViewModel {
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
-        configuration: CanvasConfiguration
+        configuration: ProjectConfiguration
     ) {
         drawingToolRenderers.forEach {
             $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
@@ -150,10 +150,10 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            let textureSize = configuration.projectConfiguration.textureSize ?? defaultTextureSize()
+            let textureSize = configuration.canvasConfiguration.textureSize ?? defaultTextureSize()
 
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.projectConfiguration,
+                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
                 fallbackTextureSize: textureSize
             )
         }
@@ -226,7 +226,7 @@ public final class CanvasViewModel {
 public extension CanvasViewModel {
 
     private func initializeCanvas(
-        configuration: ProjectConfiguration,
+        configuration: CanvasConfiguration,
         fallbackTextureSize: CGSize
     ) async throws {
         // Initialize the texture repository
@@ -371,7 +371,7 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func newCanvas(configuration: ProjectConfiguration) async throws {
+    func newCanvas(configuration: CanvasConfiguration) async throws {
         try await initializeCanvas(configuration: configuration, fallbackTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
@@ -402,7 +402,7 @@ public extension CanvasViewModel {
                 let model: CanvasModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(CanvasModel.jsonFileName)
                 )
-                let configuration: ProjectConfiguration = .init(
+                let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,
                     textureSize: model.textureSize,
                     layerIndex: model.layerIndex,

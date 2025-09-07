@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: scene)
         window.rootViewController = HandDrawingViewController.create(
-            configuration: .init()
+            projectConfiguration: .init()
         )
         self.window = window
         self.window?.makeKeyAndVisible()
