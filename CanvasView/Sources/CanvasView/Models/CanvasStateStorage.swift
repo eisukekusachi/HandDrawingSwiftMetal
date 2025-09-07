@@ -63,7 +63,7 @@ extension CanvasStateStorage {
 
     private func initializeStorageWithCanvasState(_ canvasState: CanvasState, to newStorage: CanvasStorageEntity) {
         do {
-            newStorage.projectName = canvasState.projectName
+            // newStorage.projectName = canvasState.projectName
 
             newStorage.textureWidth = Int16(canvasState.textureSize.width)
             newStorage.textureHeight = Int16(canvasState.textureSize.height)
@@ -94,6 +94,7 @@ extension CanvasStateStorage {
 
         cancellables.removeAll()
 
+        /*
         canvasState?.$projectName
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
@@ -103,6 +104,7 @@ extension CanvasStateStorage {
                 try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
+        */
 
         canvasState?.$textureSize
             .dropFirst()

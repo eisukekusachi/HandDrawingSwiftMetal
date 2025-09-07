@@ -14,6 +14,9 @@ public final class CanvasViewModel {
     /// Maintains the state of the canvas
     let canvasState = CanvasState()
 
+    /// A name of the file to be saved
+    @Published private(set) var projectName: String = Calendar.currentDate
+
     public static var fileSuffix: String {
         "zip"
     }
@@ -494,7 +497,7 @@ public extension CanvasViewModel {
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL(fileName: canvasState.projectName)
+                    to: zipFileURL(fileName: projectName)
                 )
 
                 /// Remove the working space

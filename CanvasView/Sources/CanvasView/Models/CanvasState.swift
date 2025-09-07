@@ -21,12 +21,7 @@ public final class CanvasState: ObservableObject {
 
     @Published public var selectedLayerId: UUID?
 
-    /// A name of the file to be saved
-    @Published private(set) var projectName: String = Calendar.currentDate
-
     @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
-
-    @Published private(set) var backgroundColor: UIColor = .white
 
     public init() {}
 
@@ -35,8 +30,6 @@ public final class CanvasState: ObservableObject {
         configuration: ResolvedProjectConfiguration,
         textureRepository: TextureRepository? = nil
     ) async {
-        self.projectName = configuration.projectName
-
         self.textureSize = configuration.textureSize
 
         self.layers = configuration.layers.map {
