@@ -276,6 +276,7 @@ extension UndoStack {
         undoObject: UndoObject,
         textureRepository: TextureRepository
     ) async throws {
+        /*
         if let undoObject = undoObject as? UndoDrawingObject {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
@@ -314,5 +315,6 @@ extension UndoStack {
             )
             textureLayers.canvasUpdateSubject.send()
         }
+        */
     }
 }

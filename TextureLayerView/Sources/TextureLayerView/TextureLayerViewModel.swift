@@ -38,10 +38,6 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var textureRepository: TextureRepository!
 
-    private var layerHandler: LayerHandler?
-
-    private var undoHandler: UndoHandler?
-
     private var cancellables = Set<AnyCancellable>()
 
     public init() {}
@@ -50,14 +46,8 @@ public final class TextureLayerViewModel: ObservableObject {
         configuration: TextureLayerConfiguration
     ) {
         textureLayers = configuration.textureLayers
-        textureRepository = configuration.textureRepository
-
         defaultBackgroundColor = configuration.defaultBackgroundColor
         selectedBackgroundColor = configuration.selectedBackgroundColor
-
-        layerHandler = .init(textureLayers: textureLayers)
-
-        undoHandler = .init(textureLayers: textureLayers, undoStack: configuration.undoStack)
 
         subscribe()
     }
@@ -66,7 +56,7 @@ public final class TextureLayerViewModel: ObservableObject {
         // Bind the drag gesture of the alpha slider
         $isDragging
             .sink { [weak self] startDragging in
-                self?.undoHandler?.addUndoAlphaObject(
+                self?.textureLayers?.addUndoAlphaObject(
                     dragging: startDragging
                 )
             }
@@ -78,7 +68,7 @@ public final class TextureLayerViewModel: ObservableObject {
                 guard
                     let selectedLayerId = self?.selectedLayerId
                 else { return }
-                self?.layerHandler?.updateLayer(
+                self?.textureLayers?.updateLayer(
                     id: selectedLayerId,
                     alpha: Int(value)
                 )
@@ -114,127 +104,60 @@ public extension TextureLayerViewModel {
             with: device
         )
 
-        let thumbnail = texture?.makeThumbnail()
-
         let layer: TextureLayerItem = .init(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true,
-            thumbnail: thumbnail
+            thumbnail: texture?.makeThumbnail()
         )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        let previousLayerIndex = textureLayers.selectedIndex ?? 0
-
-        layerHandler?.insertLayer(layer: layer, at: index)
-
-        // Add Task to prevent flickering
-        Task {
-            layerHandler?.selectLayer(id: layer.id)
-        }
 
         Task {
-            let result = try await textureRepository
-                .addTexture(
-                    texture,
-                    newTextureUUID: layer.id
+            do {
+                try await textureLayers.addLayer(
+                    newTextureLayer: layer,
+                    texture: texture,
+                    at: index
                 )
+            } catch {
 
-            let currentLayerIndex = textureLayers.selectedIndex ?? 0
-            await undoHandler?.addUndoAdditionObject(
-                previousLayerIndex: previousLayerIndex,
-                currentLayerIndex: currentLayerIndex,
-                layer: .init(
-                    fileName: layer.fileName,
-                    title: layer.title,
-                    alpha: layer.alpha,
-                    isVisible: layer.isVisible
-                ),
-                texture: result.texture
-            )
+            }
         }
     }
 
     func onTapDeleteButton() {
         guard
             let textureLayers,
-            let selectedLayer = textureLayers.selectedLayer,
             let selectedIndex = textureLayers.selectedIndex,
             textureLayers.layers.count > 1
         else { return }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
-
-        layerHandler?.removeLayer(
-            selectedLayerIndex: selectedIndex
-        )
         Task {
-            layerHandler?.selectLayer(id: textureLayers.layers[newLayerIndex].id)
-        }
-
-        Task {
-            let result = try await textureRepository.copyTexture(
-                uuid: selectedLayer.id
-            )
-
-            await undoHandler?.addUndoDeletionObject(
-                previousLayerIndex: selectedIndex,
-                currentLayerIndex: newLayerIndex,
-                layer: .init(
-                    fileName: selectedLayer.fileName,
-                    title: selectedLayer.title,
-                    alpha: selectedLayer.alpha,
-                    isVisible: selectedLayer.isVisible
-                ),
-                texture: result.texture
-            )
-
-            textureRepository
-                .removeTexture(selectedLayer.id)
+            try await textureLayers.removeLayer(layerIdToDelete: selectedIndex)
         }
     }
 
     func onTapTitleButton(id: UUID, title: String) {
-        layerHandler?.updateLayer(id: id, title: title)
+        textureLayers?.updateLayer(id: id, title: title)
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        layerHandler?.updateLayer(id: id, isVisible: isVisible)
+        textureLayers?.updateLayer(id: id, isVisible: isVisible)
     }
 
     func onTapCell(id: UUID) {
-        layerHandler?.selectLayer(id: id)
+        textureLayers?.selectLayer(id: id)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
-        guard let textureLayers else { return }
-
-        let indices: MoveLayerIndices = .init(
-            sourceIndexSet: source,
-            destinationIndex: destination
-        )
-
-        layerHandler?.moveLayer(indices: indices)
-
-        textureLayers.fullCanvasUpdateSubject.send(())
-
-        guard
-            let selectedLayerId = textureLayers.selectedLayer?.id,
-            let textureLayer = textureLayers.layers.first(where: { $0.id == selectedLayerId })
-        else { return }
-
-        undoHandler?.addUndoMoveObject(
-            indices: MoveLayerIndices.reversedIndices(
-                indices: indices,
-                layerCount: textureLayers.layers.count
-            ),
-            selectedLayerId: selectedLayerId,
-            textureLayer: .init(
-                fileName: textureLayer.fileName,
-                title: textureLayer.title,
-                alpha: textureLayer.alpha,
-                isVisible: textureLayer.isVisible
+        Task {
+            await textureLayers?.moveLayer(
+                indices: .init(
+                    sourceIndexSet: source,
+                    destinationIndex: destination
+                )
             )
-        )
+        }
     }
 }

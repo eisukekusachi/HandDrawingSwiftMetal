@@ -105,9 +105,7 @@ private struct PreviewView: View {
                 
                 viewModel.initialize(
                     configuration: .init(
-                        textureLayers: canvasState,
-                        textureRepository: repository,
-                        undoStack: nil
+                        textureLayers: canvasState
                     )
                 )
             }

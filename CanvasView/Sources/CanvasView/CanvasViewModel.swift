@@ -48,8 +48,6 @@ public final class CanvasViewModel {
     var textureLayerConfiguration: TextureLayerConfiguration {
         .init(
             textureLayers: textureLayers,
-            textureRepository: dependencies.textureRepository,
-            undoStack: undoStack,
             defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
             selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
         )

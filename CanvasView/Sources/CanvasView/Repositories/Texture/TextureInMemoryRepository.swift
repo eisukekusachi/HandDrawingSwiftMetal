@@ -232,7 +232,7 @@ class TextureInMemoryRepository: TextureRepository {
         }
     }
 
-
+    @discardableResult
     func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard let texture else {
             let error = NSError(
