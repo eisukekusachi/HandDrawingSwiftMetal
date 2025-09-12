@@ -38,13 +38,14 @@ import UIKit
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
+    /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
     public var canvasViewSetupCompleted: AnyPublisher<ResolvedCanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    public var textureLayerConfiguration: TextureLayerConfiguration {
-        canvasViewModel.textureLayerConfiguration
+    /// A publisher that emits `TextureLayers` when `TextureLayers` setup is prepared
+    public var textureLayersPrepared: AnyPublisher<TextureLayers, Never> {
+        textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
     private var renderer: MTLRendering
@@ -58,6 +59,8 @@ import UIKit
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedCanvasConfiguration, Never>()
+
+    private let textureLayersPreparedSubject = PassthroughSubject<TextureLayers, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -169,6 +172,12 @@ extension CanvasView {
         canvasViewModel.canvasViewSetupCompleted
             .sink { [weak self] value in
                 self?.canvasViewSetupCompletedSubject.send(value)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.textureLayersPrepared
+            .sink { [weak self] value in
+                self?.textureLayersPreparedSubject.send(value)
             }
             .store(in: &cancellables)
 

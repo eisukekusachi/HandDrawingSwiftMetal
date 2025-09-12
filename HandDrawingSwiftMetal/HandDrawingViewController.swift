@@ -33,6 +33,9 @@ class HandDrawingViewController: UIViewController {
         addEvents()
         bindData()
 
+        addBrushPalette()
+        addEraserPalette()
+
         contentView.canvasView.initialize(
             drawingToolRenderers: [
                 contentView.brushDrawingToolRenderer,
@@ -42,7 +45,6 @@ class HandDrawingViewController: UIViewController {
         )
 
         setupNewCanvasDialogPresenter()
-        setupLayerView()
     }
 }
 
@@ -54,6 +56,14 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.contentView.setup()
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.textureLayersPrepared
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] textureLayers in
+                self?.setupLayerView(textureLayers)
+                print(textureLayers)
             }
             .store(in: &cancellables)
 
@@ -135,9 +145,9 @@ extension HandDrawingViewController {
         }
     }
 
-    private func setupLayerView() {
+    private func setupLayerView(_ textureLayers: TextureLayers) {
         textureLayerViewPresenter.initialize(
-            textureLayerConfiguration: contentView.canvasView.textureLayerConfiguration,
+            textureLayers: textureLayers,
             popupConfiguration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
@@ -147,9 +157,6 @@ extension HandDrawingViewController {
                 )
             )
         )
-
-        addBrushPalette()
-        addEraserPalette()
     }
 
     private func addBrushPalette() {

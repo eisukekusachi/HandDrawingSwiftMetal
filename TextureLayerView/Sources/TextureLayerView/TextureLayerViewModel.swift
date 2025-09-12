@@ -43,12 +43,9 @@ public final class TextureLayerViewModel: ObservableObject {
     public init() {}
 
     public func initialize(
-        configuration: TextureLayerConfiguration
+        textureLayers: TextureLayers
     ) {
-        textureLayers = configuration.textureLayers
-        defaultBackgroundColor = configuration.defaultBackgroundColor
-        selectedBackgroundColor = configuration.selectedBackgroundColor
-
+        self.textureLayers = textureLayers
         subscribe()
     }
 

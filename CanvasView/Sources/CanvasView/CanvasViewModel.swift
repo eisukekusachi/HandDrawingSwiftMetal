@@ -40,17 +40,14 @@ public final class CanvasViewModel {
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `Void` when the canvas view setup is completed
+    /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
     var canvasViewSetupCompleted: AnyPublisher<ResolvedCanvasConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    var textureLayerConfiguration: TextureLayerConfiguration {
-        .init(
-            textureLayers: textureLayers,
-            defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
-            selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
-        )
+    /// A publisher that emits `TextureLayers` when `TextureLayers` setup is prepared
+    var textureLayersPrepared: AnyPublisher<TextureLayers, Never> {
+        textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
     private var dependencies: CanvasViewDependencies!
@@ -94,6 +91,8 @@ public final class CanvasViewModel {
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedCanvasConfiguration, Never>()
+
+    private let textureLayersPreparedSubject = PassthroughSubject<TextureLayers, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -258,6 +257,8 @@ public extension CanvasViewModel {
         }
 
         undoStack?.initialize(configuration.textureSize)
+
+        textureLayersPreparedSubject.send(textureLayers)
 
         canvasViewSetupCompletedSubject.send(configuration)
 

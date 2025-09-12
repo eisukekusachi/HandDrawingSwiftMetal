@@ -50,7 +50,7 @@ public struct ReversedTextureLayerListView: View {
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
-    private let canvasState = TextureLayers()
+    private let textureLayers = TextureLayers()
     private let repository = MockTextureRepository()
 
     private let configuration: ResolvedCanvasConfiguration = .init(
@@ -98,15 +98,8 @@ private struct PreviewView: View {
         .frame(width: 256, height: 300)
         .onAppear {
             Task {
-                await canvasState.initialize(
-                    configuration: configuration,
-                    textureRepository: repository
-                )
-                
                 viewModel.initialize(
-                    configuration: .init(
-                        textureLayers: canvasState
-                    )
+                    textureLayers: textureLayers
                 )
             }
         }
