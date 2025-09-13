@@ -36,6 +36,7 @@ extension CanvasModel {
 
     static let thumbnailLength: CGFloat = 500
 
+    @MainActor
     init(
         textureLayers: TextureLayers
     ) {

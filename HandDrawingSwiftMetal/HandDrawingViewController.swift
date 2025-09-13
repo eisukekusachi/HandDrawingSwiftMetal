@@ -63,7 +63,6 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureLayers in
                 self?.setupLayerView(textureLayers)
-                print(textureLayers)
             }
             .store(in: &cancellables)
 

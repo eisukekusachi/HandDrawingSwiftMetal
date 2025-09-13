@@ -184,14 +184,14 @@ public final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas
-        textureLayers.canvasUpdateSubject
+        textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
                 self?.updateCanvasView()
             }
             .store(in: &cancellables)
 
         // Update the entire canvas, including all drawing textures
-        textureLayers.fullCanvasUpdateSubject
+        textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
                 self?.updateCanvasByMergingAllLayers()
             }

@@ -46,6 +46,7 @@ public extension ResolvedCanvasConfiguration {
     }
 
     var selectedLayerId: UUID {
-        layers[layerIndex].id
+        let index = layerIndex < layers.count ? layerIndex : 0
+        return layers[index].id
     }
 }

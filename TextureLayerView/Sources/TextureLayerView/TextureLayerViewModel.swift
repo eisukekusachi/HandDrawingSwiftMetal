@@ -22,7 +22,7 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers?.selectedLayer
     }
 
-    private(set) var textureLayers: TextureLayers?
+    private(set) var textureLayers: (any TextureLayersProtocol)?
 
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
@@ -43,42 +43,41 @@ public final class TextureLayerViewModel: ObservableObject {
     public init() {}
 
     public func initialize(
-        textureLayers: TextureLayers
+        textureLayers: any TextureLayersProtocol
     ) {
         self.textureLayers = textureLayers
         subscribe()
     }
 
     private func subscribe() {
-        // Bind the drag gesture of the alpha slider
-        $isDragging
-            .sink { [weak self] startDragging in
-                self?.textureLayers?.addUndoAlphaObject(
-                    dragging: startDragging
-                )
-            }
-            .store(in: &cancellables)
+        // Bind the alpha slider
+        Publishers.CombineLatest(
+            $currentAlpha.removeDuplicates(),
+            $isDragging.removeDuplicates()
+        )
+        .sink { [weak self] alpha, isDragging in
+            guard
+                let selectedLayerId = self?.selectedLayerId
+            else { return }
+            self?.textureLayers?.updateAlpha(
+                id: selectedLayerId,
+                alpha: Int(alpha),
+                isStartHandleDragging: isDragging
+            )
+        }
+        .store(in: &cancellables)
 
-        // Bind the value of the alpha slider
-        $currentAlpha
+        textureLayers?.selectedLayerIdPublisher
             .sink { [weak self] value in
-                guard
-                    let selectedLayerId = self?.selectedLayerId
-                else { return }
-                self?.textureLayers?.updateLayer(
-                    id: selectedLayerId,
-                    alpha: Int(value)
-                )
+                self?.selectedLayerId = value
             }
             .store(in: &cancellables)
 
-        // Bind `canvasState.selectedLayerId` to `selectedLayerId`
-        textureLayers?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
+        textureLayers?.layersPublisher
+            .sink { [weak self] value in
+                self?.layers = value
+            }
             .store(in: &cancellables)
-
-        textureLayers?.$layers
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$layers)
     }
 }
 
@@ -96,8 +95,8 @@ public extension TextureLayerViewModel {
         else { return }
 
         let texture = MTLTextureCreator.makeTexture(
-            width: Int(textureLayers.currentTextureSize.width),
-            height: Int(textureLayers.currentTextureSize.height),
+            width: Int(textureLayers.textureSize.width),
+            height: Int(textureLayers.textureSize.height),
             with: device
         )
 
@@ -113,7 +112,7 @@ public extension TextureLayerViewModel {
         Task {
             do {
                 try await textureLayers.addLayer(
-                    newTextureLayer: layer,
+                    layer: layer,
                     texture: texture,
                     at: index
                 )
@@ -127,20 +126,20 @@ public extension TextureLayerViewModel {
         guard
             let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
-            textureLayers.layers.count > 1
+            textureLayers.layerCount > 1
         else { return }
 
         Task {
-            try await textureLayers.removeLayer(layerIdToDelete: selectedIndex)
+            try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
         }
     }
 
     func onTapTitleButton(id: UUID, title: String) {
-        textureLayers?.updateLayer(id: id, title: title)
+        textureLayers?.updateTitle(id: id, title: title)
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        textureLayers?.updateLayer(id: id, isVisible: isVisible)
+        textureLayers?.updateVisibility(id: id, isVisible: isVisible)
     }
 
     func onTapCell(id: UUID) {
@@ -149,7 +148,7 @@ public extension TextureLayerViewModel {
 
     func onMoveLayer(source: IndexSet, destination: Int) {
         Task {
-            await textureLayers?.moveLayer(
+            textureLayers?.moveLayer(
                 indices: .init(
                     sourceIndexSet: source,
                     destinationIndex: destination

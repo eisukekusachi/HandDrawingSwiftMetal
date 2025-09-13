@@ -20,6 +20,7 @@ final class CanvasStateStorage {
 
     private var cancellables = Set<AnyCancellable>()
 
+    @MainActor
     init(
         textureLayers: TextureLayers,
         coreDataRepository: CoreDataRepository = DefaultCoreDataRepository(
@@ -40,7 +41,7 @@ final class CanvasStateStorage {
             }
 
             bindCanvasStateToCoreDataEntities(
-                canvasState: textureLayers,
+                textureLayers: textureLayers,
                 coreDataRepository: self.coreDataRepository
             )
 
@@ -61,6 +62,7 @@ final class CanvasStateStorage {
 
 extension CanvasStateStorage {
 
+    @MainActor
     private func initializeStorageWithCanvasState(_ canvasState: TextureLayers, to newStorage: CanvasStorageEntity) {
         do {
             // newStorage.projectName = canvasState.projectName
@@ -87,7 +89,8 @@ extension CanvasStateStorage {
         }
     }
 
-    private func bindCanvasStateToCoreDataEntities(canvasState: TextureLayers?, coreDataRepository: CoreDataRepository) {
+    @MainActor
+    private func bindCanvasStateToCoreDataEntities(textureLayers: TextureLayers?, coreDataRepository: CoreDataRepository) {
         guard
             let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
         else { return }
@@ -106,7 +109,8 @@ extension CanvasStateStorage {
             .store(in: &cancellables)
         */
 
-        canvasState?.$textureSize
+        /*
+        textureLayers?.$textureSize
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .compactMap { $0 }
@@ -116,8 +120,9 @@ extension CanvasStateStorage {
                 try? self?.coreDataRepository.saveContext()
             }
             .store(in: &cancellables)
+        */
 
-        canvasState?.$selectedLayerId
+        textureLayers?.selectedLayerIdPublisher
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
@@ -126,7 +131,7 @@ extension CanvasStateStorage {
             }
             .store(in: &cancellables)
 
-        canvasState?.$layers
+        textureLayers?.layersPublisher
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
