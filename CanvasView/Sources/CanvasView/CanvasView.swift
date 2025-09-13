@@ -48,7 +48,7 @@ import UIKit
         textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
-    private var renderer: MTLRendering
+    private let renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
 

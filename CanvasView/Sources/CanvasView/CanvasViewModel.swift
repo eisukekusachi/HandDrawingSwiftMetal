@@ -56,7 +56,7 @@ public final class CanvasViewModel {
     let textureLayers = TextureLayers()
 
     /// Stores the canvas state in CoreData
-    private var canvasStateStorage: CanvasStateStorage?
+    private var canvasStorage: CoreDataCanvasStorage?
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
@@ -128,7 +128,7 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        canvasStateStorage = CanvasStateStorage(textureLayers: textureLayers)
+        canvasStorage = CoreDataCanvasStorage(textureLayers: textureLayers)
 
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
@@ -150,7 +150,7 @@ public final class CanvasViewModel {
             let textureSize = configuration.canvasConfiguration.textureSize ?? defaultTextureSize()
 
             try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
+                configuration: canvasStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
                 fallbackTextureSize: textureSize
             )
         }
@@ -197,7 +197,7 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        canvasStateStorage?.alertSubject
+        canvasStorage?.alertSubject
             .sink { [weak self] error in
                 self?.alertSubject.send(
                     ErrorModel.create(error)

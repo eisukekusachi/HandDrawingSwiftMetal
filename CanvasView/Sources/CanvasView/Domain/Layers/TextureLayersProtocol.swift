@@ -28,9 +28,9 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var selectedIndex: Int? { get }
 
-    var textureSize: CGSize { get }
-
     var layerCount: Int { get }
+
+    var size: CGSize { get }
 
     func layer(_ layerId: UUID) -> TextureLayerItem?
 

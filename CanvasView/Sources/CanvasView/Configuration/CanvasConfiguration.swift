@@ -49,33 +49,4 @@ extension CanvasConfiguration {
         self.layerIndex = layerIndex ?? configuration.layerIndex
         self.layers = layers ?? configuration.layers
     }
-
-    public init(
-        coreDataEntity entity: CanvasStorageEntity
-    ) {
-        self.projectName = entity.projectName ?? Calendar.currentDate
-
-        self.textureSize = .init(
-            width: CGFloat(entity.textureWidth),
-            height: CGFloat(entity.textureHeight)
-        )
-
-        if let layers = entity.textureLayers as? Set<TextureLayerStorageEntity> {
-            self.layers = layers
-                .sorted { $0.orderIndex < $1.orderIndex }
-                .enumerated()
-                .map { index, layer in
-                    TextureLayerModel(
-                        fileName: layer.fileName ?? UUID().uuidString,
-                        title: layer.title ?? "",
-                        alpha: Int(layer.alpha),
-                        isVisible: layer.isVisible
-                    )
-                }
-        } else {
-            self.layers = []
-        }
-
-        self.layerIndex = self.layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-    }
 }

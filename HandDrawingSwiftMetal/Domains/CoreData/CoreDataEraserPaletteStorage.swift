@@ -132,10 +132,10 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
 
         private func save(index: Int, alphas: [Int]) async throws {
             try await context.perform {
-                let coreDataPalette = try self.fetch() ?? EraserPaletteEntity(context: self.context)
+                let coreData = try self.fetch() ?? EraserPaletteEntity(context: self.context)
 
-                let currentIndex = Int(coreDataPalette.index)
-                let currentAlphas16: [Int16] = (coreDataPalette.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
+                let currentIndex = Int(coreData.index)
+                let currentAlphas16: [Int16] = (coreData.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
                     .compactMap { $0.alpha } ?? []
 
                 let currentAlphas = currentAlphas16.map { Int($0) }
@@ -144,20 +144,20 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
                     return
                 }
 
-                coreDataPalette.name = self.uniqueName
+                coreData.name = self.uniqueName
 
                 if currentIndex != index {
-                    coreDataPalette.index = Int16(index)
+                    coreData.index = Int16(index)
                 }
 
                 if currentAlphas != alphas {
-                    let children = (coreDataPalette.paletteAlphaGroup?.array as? [PaletteAlphaEntity]) ?? []
+                    let children = (coreData.paletteAlphaGroup?.array as? [PaletteAlphaEntity]) ?? []
 
                     if children.count == alphas.count {
                         for (i, alpha) in alphas.enumerated() where children[i].alpha != alpha {
                             children[i].alpha = Int16(alpha)
                         }
-                        coreDataPalette.paletteAlphaGroup = NSOrderedSet(array: children)
+                        coreData.paletteAlphaGroup = NSOrderedSet(array: children)
                     } else {
                         children.forEach { self.context.delete($0) }
                         let newChildren = currentAlphas.map { alpha -> PaletteAlphaEntity in
@@ -165,7 +165,7 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
                             entity.alpha = Int16(alpha)
                             return entity
                         }
-                        coreDataPalette.paletteAlphaGroup = NSOrderedSet(array: newChildren)
+                        coreData.paletteAlphaGroup = NSOrderedSet(array: newChildren)
                     }
                 }
 

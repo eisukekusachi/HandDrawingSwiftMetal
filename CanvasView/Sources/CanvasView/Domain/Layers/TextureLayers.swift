@@ -41,7 +41,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
     @Published private(set) var selectedLayerId: UUID?
 
     // Set a default value to avoid nil
-    @Published private(set) var _textureSize: CGSize = .init(width: 768, height: 1024)
+    @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
     private var oldAlpha: Int?
 
@@ -50,9 +50,8 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
 public extension TextureLayers {
 
-    // Add a computed property for cross-package access
-    var textureSize: CGSize {
-        _textureSize
+    var size: CGSize {
+        textureSize
     }
 
     var layerCount: Int {
@@ -82,7 +81,7 @@ public extension TextureLayers {
         textureRepository: TextureRepository? = nil,
         undoStack: UndoStack? = nil
     ) async {
-        self._textureSize = configuration.textureSize
+        self.textureSize = configuration.textureSize
 
         self.layers = configuration.layers.map {
             .init(

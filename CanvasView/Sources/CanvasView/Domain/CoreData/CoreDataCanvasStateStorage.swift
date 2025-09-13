@@ -1,5 +1,5 @@
 //
-//  CanvasStateStorage.swift
+//  CoreDataCanvasStorage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/03.
@@ -9,40 +9,48 @@ import Combine
 import CoreData
 import UIKit
 
-/// A class that binds `CanvasState` and `CoreDataRepository`
-final class CanvasStateStorage {
+/// A class that binds a model and `CoreDataStorage`
+final class CoreDataCanvasStorage {
 
     private(set) var coreDataConfiguration: CanvasConfiguration?
 
     let alertSubject = PassthroughSubject<NSError, Never>()
 
-    private var coreDataRepository: CoreDataRepository
+    private var coreDataStorage: CoreDataStorage
 
     private var cancellables = Set<AnyCancellable>()
+
+    private var canvasStorageRequest: NSFetchRequest<CanvasStorageEntity> {
+        let request = CanvasStorageEntity.fetchRequest()
+        request.fetchLimit = 1
+        request.returnsObjectsAsFaults = false
+        return request
+    }
 
     @MainActor
     init(
         textureLayers: TextureLayers,
-        coreDataRepository: CoreDataRepository = DefaultCoreDataRepository(
+        coreDataStorage: CoreDataStorage = DefaultCoreDataStorage(
+            name: "CanvasStorage",
             entityName: "CanvasStorageEntity",
-            persistentContainerName: "CanvasStorage"
+            type: .swiftPackageManager
         )
     ) {
-        self.coreDataRepository = coreDataRepository
+        self.coreDataStorage = coreDataStorage
 
         do {
-            if let storageEntity = try self.coreDataRepository.fetchEntity() as? CanvasStorageEntity {
-                self.coreDataConfiguration = .init(coreDataEntity: storageEntity)
+            if let storageEntity = try self.coreDataStorage.context.fetch(canvasStorageRequest).first {
+                self.coreDataConfiguration = configuration(from: storageEntity)
             } else {
                 initializeStorageWithCanvasState(
                     textureLayers,
-                    to: CanvasStorageEntity(context: self.coreDataRepository.context)
+                    to: CanvasStorageEntity(context: self.coreDataStorage.context)
                 )
             }
 
             bindCanvasStateToCoreDataEntities(
                 textureLayers: textureLayers,
-                coreDataRepository: self.coreDataRepository
+                coreDataRepository: coreDataStorage
             )
 
         } catch {
@@ -53,27 +61,27 @@ final class CanvasStateStorage {
 
     func saveContext() {
         do {
-            try coreDataRepository.saveContext()
+            try coreDataStorage.saveContext()
         } catch {
             Logger.error(error)
         }
     }
 }
 
-extension CanvasStateStorage {
+extension CoreDataCanvasStorage {
 
     @MainActor
-    private func initializeStorageWithCanvasState(_ canvasState: TextureLayers, to newStorage: CanvasStorageEntity) {
+    private func initializeStorageWithCanvasState(_ textureLayers: TextureLayers, to newStorage: CanvasStorageEntity) {
         do {
-            // newStorage.projectName = canvasState.projectName
+            //newStorage.projectName = canvasState.projectName
 
-            newStorage.textureWidth = Int16(canvasState.textureSize.width)
-            newStorage.textureHeight = Int16(canvasState.textureSize.height)
+            newStorage.textureWidth = Int16(textureLayers.textureSize.width)
+            newStorage.textureHeight = Int16(textureLayers.textureSize.height)
 
-            newStorage.selectedLayerId = canvasState.selectedLayerId
+            newStorage.selectedLayerId = textureLayers.selectedLayerId
 
-            for (index, layer) in canvasState.layers.enumerated() {
-                let texture = TextureLayerStorageEntity(context: coreDataRepository.context)
+            for (index, layer) in textureLayers.layers.enumerated() {
+                let texture = TextureLayerStorageEntity(context: coreDataStorage.context)
                 texture.title = layer.title
                 texture.fileName = layer.fileName
                 texture.alpha = Int16(layer.alpha)
@@ -81,7 +89,7 @@ extension CanvasStateStorage {
                 texture.canvas = newStorage
             }
 
-            try coreDataRepository.saveContext()
+            try coreDataStorage.saveContext()
         }
         catch {
             Logger.error(error)
@@ -90,9 +98,9 @@ extension CanvasStateStorage {
     }
 
     @MainActor
-    private func bindCanvasStateToCoreDataEntities(textureLayers: TextureLayers?, coreDataRepository: CoreDataRepository) {
+    private func bindCanvasStateToCoreDataEntities(textureLayers: TextureLayers?, coreDataRepository: CoreDataStorage) {
         guard
-            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
+            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(canvasStorageRequest).first
         else { return }
 
         cancellables.removeAll()
@@ -109,7 +117,6 @@ extension CanvasStateStorage {
             .store(in: &cancellables)
         */
 
-        /*
         textureLayers?.$textureSize
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
@@ -117,17 +124,16 @@ extension CanvasStateStorage {
             .sink { [weak self] result in
                 canvasStorageEntity.textureWidth = Int16(result.width)
                 canvasStorageEntity.textureHeight = Int16(result.height)
-                try? self?.coreDataRepository.saveContext()
+                try? self?.coreDataStorage.saveContext()
             }
             .store(in: &cancellables)
-        */
 
         textureLayers?.selectedLayerIdPublisher
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
                 canvasStorageEntity.selectedLayerId = result
-                try? self?.coreDataRepository.saveContext()
+                try? self?.coreDataStorage.saveContext()
             }
             .store(in: &cancellables)
 
@@ -136,7 +142,7 @@ extension CanvasStateStorage {
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] result in
                 self?.updateAllTextureLayerEntities(result.map { .init(item: $0) })
-                try? self?.coreDataRepository.saveContext()
+                try? self?.coreDataStorage.saveContext()
             }
             .store(in: &cancellables)
     }
@@ -145,17 +151,17 @@ extension CanvasStateStorage {
     /// assuming the number of layers stays below 100.
     private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
         guard
-            let canvasStorageEntity = try? coreDataRepository.fetchEntity() as? CanvasStorageEntity
+            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(canvasStorageRequest).first
         else { return }
 
         // Deletes all existing data first
         if let existing = canvasStorageEntity.textureLayers as? Set<TextureLayerStorageEntity> {
-            existing.forEach(coreDataRepository.context.delete)
+            existing.forEach(coreDataStorage.context.delete)
         }
 
         // Saves all data
         layers.enumerated().forEach { index, model in
-            let newLayer = TextureLayerStorageEntity(context: coreDataRepository.context)
+            let newLayer = TextureLayerStorageEntity(context: coreDataStorage.context)
             newLayer.title = model.title
             newLayer.fileName = model.textureName
             newLayer.isVisible = model.isVisible
@@ -163,5 +169,41 @@ extension CanvasStateStorage {
             newLayer.orderIndex = Int16(index)
             newLayer.canvas = canvasStorageEntity
         }
+    }
+
+    public func configuration(
+        from entity: CanvasStorageEntity
+    ) -> CanvasConfiguration {
+
+        let projectName = entity.projectName ?? Calendar.currentDate
+
+        let width  = max(0, Int(entity.textureWidth))
+        let height = max(0, Int(entity.textureHeight))
+        let textureSize = CGSize(width: CGFloat(width), height: CGFloat(height))
+
+        let layerSet = (entity.textureLayers as? Set<TextureLayerStorageEntity>) ?? []
+
+        let models: [TextureLayerModel] = layerSet
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map { layer in
+                TextureLayerModel(
+                    fileName: layer.fileName ?? UUID().uuidString,
+                    title: layer.title ?? "",
+                    alpha: Int(layer.alpha),
+                    isVisible: layer.isVisible
+                )
+            }
+
+        let selectedIndex: Int = {
+            guard let selectedId = entity.selectedLayerId else { return 0 }
+            return models.firstIndex(where: { $0.id == selectedId }) ?? 0
+        }()
+
+        return .init(
+            projectName: projectName,
+            textureSize: textureSize,
+            layerIndex: selectedIndex,
+            layers: models
+        )
     }
 }
