@@ -398,8 +398,8 @@ public extension CanvasViewModel {
                     from: zipFileURL
                 )
 
-                let model: CanvasModel = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasModel.jsonFileName)
+                let model: ArchiveModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(ArchiveModel.jsonFileName)
                 )
                 let configuration: CanvasConfiguration = .init(
                     projectName: zipFileURL.fileName,
@@ -451,12 +451,12 @@ public extension CanvasViewModel {
         guard
             let canvasTexture = canvasRenderer?.canvasTexture,
             let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: CanvasModel.thumbnailLength,
+                height: ArchiveModel.thumbnailLength,
                 scale: 1.0
             )
         else { return }
 
-        let canvasModel: CanvasModel = .init(textureLayers: textureLayers)
+        let archiveModel: ArchiveModel = .init(textureLayers: textureLayers)
 
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -473,7 +473,7 @@ public extension CanvasViewModel {
 
                 // Save the thumbnail image into the working directory
                 async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(fileName: CanvasModel.thumbnailName, item: thumbnailImage)
+                    namedItem: .init(fileName: ArchiveModel.thumbnailName, item: thumbnailImage)
                 )
 
                 // Save the textures into the working directory
@@ -486,7 +486,7 @@ public extension CanvasViewModel {
 
                 // Save the canvas entity (JSON metadata)
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: CanvasModel.namedItem(canvasModel)
+                    namedItem: archiveModel.namedItem()
                 )
 
                 async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(

@@ -1,0 +1,88 @@
+//
+//  ArchiveModel.swift
+//  HandDrawingSwiftMetal
+//
+//  Created by Eisuke Kusachi on 2024/05/04.
+//
+
+import Foundation
+
+public struct ArchiveModel: Codable, Equatable {
+
+    let textureSize: CGSize
+    let layerIndex: Int
+    let layers: [TextureLayerModel]
+
+    public init(
+        textureSize: CGSize,
+        layerIndex: Int,
+        layers: [TextureLayerModel]
+    ) {
+        self.textureSize = textureSize
+        self.layerIndex = layerIndex
+        self.layers = layers
+    }
+}
+
+extension ArchiveModel {
+
+    static let thumbnailName: String = "thumbnail.png"
+
+    static let jsonFileName: String = "data"
+
+    static let thumbnailLength: CGFloat = 500
+
+    @MainActor
+    init(
+        textureLayers: TextureLayers
+    ) {
+        self.textureSize = textureLayers.textureSize
+        self.layerIndex = textureLayers.selectedIndex ?? 0
+        self.layers = textureLayers.layers.map { .init(item: $0) }
+    }
+
+    /// Initializes by decoding a JSON file at the given URL
+    init(fileURL: URL) throws {
+        let data = try Data(contentsOf: fileURL)
+        do {
+            self = try JSONDecoder().decode(ArchiveModel.self, from: data).model()
+        } catch {
+            let className = String(describing: ArchiveModel.self)
+            let nsError = NSError(
+                domain: className,
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to decode \(className) from JSON.",
+                    NSUnderlyingErrorKey: error,
+                    "fileURL": fileURL.path
+                ]
+            )
+            Logger.error(nsError)
+            throw nsError
+        }
+    }
+}
+
+extension ArchiveModel: CanvasEntityConvertible {
+    public func model() -> Self {
+        self
+    }
+}
+
+extension ArchiveModel: LocalFileConvertible {
+
+    public func namedItem() -> LocalFileNamedItem<ArchiveModel> {
+        .init(
+            fileName: ArchiveModel.jsonFileName,
+            item: self
+        )
+    }
+
+    public func write(to url: URL) throws {
+        try FileOutput.saveJson(self, to: url)
+    }
+}
+
+public protocol CanvasEntityConvertible: Decodable {
+    func model() -> ArchiveModel
+}
