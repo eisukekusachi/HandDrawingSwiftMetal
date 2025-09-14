@@ -44,7 +44,7 @@ import UIKit
     }
 
     /// A publisher that emits `TextureLayers` when `TextureLayers` setup is prepared
-    public var textureLayersPrepared: AnyPublisher<TextureLayers, Never> {
+    public var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
         textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
@@ -60,7 +60,7 @@ import UIKit
 
     private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayserArrayConfiguration, Never>()
 
-    private let textureLayersPreparedSubject = PassthroughSubject<TextureLayers, Never>()
+    private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
