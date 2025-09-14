@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24270" systemVersion="24G90" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="CanvasStorageEntity" representedClassName="CanvasStorageEntity" syncable="YES" codeGenerationType="class">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24295.2" systemVersion="24G90" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="TextureLayerArrayStorageEntity" representedClassName="TextureLayerArrayStorageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="projectName" optional="YES" attributeType="String"/>
         <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="textureHeight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -14,6 +14,6 @@
         <attribute name="isVisible" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="orderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <relationship name="canvas" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CanvasStorageEntity" inverseName="textureLayers" inverseEntity="CanvasStorageEntity"/>
+        <relationship name="canvas" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerArrayStorageEntity" inverseName="textureLayers" inverseEntity="TextureLayerArrayStorageEntity"/>
     </entity>
 </model>

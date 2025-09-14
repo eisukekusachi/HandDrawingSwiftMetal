@@ -20,8 +20,8 @@ final class CoreDataCanvasStorage {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var canvasStorageRequest: NSFetchRequest<CanvasStorageEntity> {
-        let request = CanvasStorageEntity.fetchRequest()
+    private var canvasStorageRequest: NSFetchRequest<TextureLayerArrayStorageEntity> {
+        let request = TextureLayerArrayStorageEntity.fetchRequest()
         request.fetchLimit = 1
         request.returnsObjectsAsFaults = false
         return request
@@ -32,7 +32,7 @@ final class CoreDataCanvasStorage {
         textureLayers: TextureLayers,
         coreDataStorage: CoreDataStorage = DefaultCoreDataStorage(
             name: "CanvasStorage",
-            entityName: "CanvasStorageEntity",
+            entityName: "TextureLayerArrayStorageEntity",
             type: .swiftPackageManager
         )
     ) {
@@ -44,7 +44,7 @@ final class CoreDataCanvasStorage {
             } else {
                 initializeStorageWithCanvasState(
                     textureLayers,
-                    to: CanvasStorageEntity(context: self.coreDataStorage.context)
+                    to: TextureLayerArrayStorageEntity(context: self.coreDataStorage.context)
                 )
             }
 
@@ -71,7 +71,7 @@ final class CoreDataCanvasStorage {
 extension CoreDataCanvasStorage {
 
     @MainActor
-    private func initializeStorageWithCanvasState(_ textureLayers: TextureLayers, to newStorage: CanvasStorageEntity) {
+    private func initializeStorageWithCanvasState(_ textureLayers: TextureLayers, to newStorage: TextureLayerArrayStorageEntity) {
         do {
             //newStorage.projectName = canvasState.projectName
 
@@ -172,7 +172,7 @@ extension CoreDataCanvasStorage {
     }
 
     public func configuration(
-        from entity: CanvasStorageEntity
+        from entity: TextureLayerArrayStorageEntity
     ) -> CanvasConfiguration {
 
         let projectName = entity.projectName ?? Calendar.currentDate
