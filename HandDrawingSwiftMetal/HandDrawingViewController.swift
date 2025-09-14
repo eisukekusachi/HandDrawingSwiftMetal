@@ -16,7 +16,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var projectConfiguration: ProjectConfiguration?
+    private var canvasConfiguration: CanvasConfiguration?
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -41,7 +41,7 @@ class HandDrawingViewController: UIViewController {
                 contentView.brushDrawingToolRenderer,
                 contentView.eraserDrawingToolRenderer
             ],
-            configuration: projectConfiguration ?? .init()
+            configuration: canvasConfiguration ?? .init()
         )
 
         setupNewCanvasDialogPresenter()
@@ -269,10 +269,10 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        projectConfiguration: ProjectConfiguration? = nil
+        canvasConfiguration: CanvasConfiguration? = nil
     ) -> Self {
         let viewController = Self()
-        viewController.projectConfiguration = projectConfiguration
+        viewController.canvasConfiguration = canvasConfiguration
         return viewController
     }
 }

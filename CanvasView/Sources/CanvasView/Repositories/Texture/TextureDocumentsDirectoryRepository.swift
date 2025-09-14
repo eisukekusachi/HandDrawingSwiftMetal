@@ -67,7 +67,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    /// Attempts to restore the repository from a given `ProjectConfiguration`
+    /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
         configuration: TextureLayserArrayConfiguration,

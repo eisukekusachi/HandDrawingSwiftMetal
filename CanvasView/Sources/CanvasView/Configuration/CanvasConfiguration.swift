@@ -1,5 +1,5 @@
 //
-//  ProjectConfiguration.swift
+//  CanvasConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/09/06.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ProjectConfiguration {
+public struct CanvasConfiguration {
     let textureLayserArrayConfiguration: TextureLayserArrayConfiguration
     let environmentConfiguration: EnvironmentConfiguration
 

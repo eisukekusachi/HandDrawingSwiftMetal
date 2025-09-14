@@ -103,7 +103,7 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        configuration: ProjectConfiguration
+        configuration: CanvasConfiguration
     ) {
         displayView.configure(renderer: renderer)
 

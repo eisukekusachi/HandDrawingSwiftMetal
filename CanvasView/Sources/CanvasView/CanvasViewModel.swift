@@ -103,7 +103,7 @@ public final class CanvasViewModel {
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
-        configuration: ProjectConfiguration
+        configuration: CanvasConfiguration
     ) {
         drawingToolRenderers.forEach {
             $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
