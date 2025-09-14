@@ -8,14 +8,14 @@
 import Foundation
 
 public struct ProjectConfiguration {
-    let canvasConfiguration: CanvasConfiguration
+    let textureLayserArrayConfiguration: TextureLayserArrayConfiguration
     let environmentConfiguration: EnvironmentConfiguration
 
     public init(
-        canvasConfiguration: CanvasConfiguration = .init(),
+        textureLayserArrayConfiguration: TextureLayserArrayConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
-        self.canvasConfiguration = canvasConfiguration
+        self.textureLayserArrayConfiguration = textureLayserArrayConfiguration
         self.environmentConfiguration = environmentConfiguration
     }
 }

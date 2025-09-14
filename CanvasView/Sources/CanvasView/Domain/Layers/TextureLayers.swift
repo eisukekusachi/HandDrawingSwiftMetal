@@ -77,7 +77,7 @@ public extension TextureLayers {
 public extension TextureLayers {
 
     func initialize(
-        configuration: ResolvedCanvasConfiguration,
+        configuration: ResolvedTextureLayserArrayConfiguration,
         textureRepository: TextureRepository? = nil,
         undoStack: UndoStack? = nil
     ) async {

@@ -137,7 +137,7 @@ extension HandDrawingViewController {
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
             self.contentView.canvasView.newCanvas(
-                configuration: CanvasConfiguration(
+                configuration: TextureLayserArrayConfiguration(
                     textureSize: .init(width: size.width * scale, height: size.height * scale)
                 )
             )
@@ -209,6 +209,7 @@ extension HandDrawingViewController {
 
                 self.presentedViewController?.dismiss(animated: true)
                 self.contentView.canvasView.loadFile(
+                    projectName: "test",
                     zipFileURL: url,
                     optionalEntities: [
                         self.contentView.drawingToolLoader,

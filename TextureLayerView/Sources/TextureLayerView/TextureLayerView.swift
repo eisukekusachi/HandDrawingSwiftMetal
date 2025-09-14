@@ -45,7 +45,7 @@ private struct PreviewView: View {
     private let textureLayers = TextureLayers()
     private let repository = MockTextureRepository()
 
-    private let configuration: ResolvedCanvasConfiguration = .init(
+    private let configuration: ResolvedTextureLayserArrayConfiguration = .init(
         projectName: "",
         textureSize: .zero,
         layerIndex: 3,

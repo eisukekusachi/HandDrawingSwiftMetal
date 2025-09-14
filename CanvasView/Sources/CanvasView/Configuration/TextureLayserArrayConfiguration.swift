@@ -1,5 +1,5 @@
 //
-//  CanvasConfiguration.swift
+//  TextureLayserArrayConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,10 +7,7 @@
 
 import UIKit
 
-public struct CanvasConfiguration: Sendable {
-    /// The file name saved in the Documents folder
-    public let projectName: String
-
+public struct TextureLayserArrayConfiguration: Sendable {
     /// The size of the texture used for the canvas.
     /// If nothing is set, the screen size is applied.
     public let textureSize: CGSize?
@@ -22,19 +19,17 @@ public struct CanvasConfiguration: Sendable {
     public let layers: [TextureLayerModel]
 
     public init(
-        projectName: String = Calendar.currentDate,
         textureSize: CGSize? = nil,
         layerIndex: Int = 0,
         layers: [TextureLayerModel] = []
     ) {
-        self.projectName = projectName
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
     }
 }
 
-extension CanvasConfiguration {
+extension TextureLayserArrayConfiguration {
 
     public init(
         _ configuration: Self,
@@ -42,8 +37,6 @@ extension CanvasConfiguration {
         layerIndex: Int? = nil,
         layers: [TextureLayerModel]? = nil
     ) {
-        self.projectName = configuration.projectName
-
         self.textureSize = textureSize ?? configuration.textureSize
 
         self.layerIndex = layerIndex ?? configuration.layerIndex

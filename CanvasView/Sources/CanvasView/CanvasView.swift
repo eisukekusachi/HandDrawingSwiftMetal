@@ -39,7 +39,7 @@ import UIKit
     }
 
     /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<ResolvedCanvasConfiguration, Never> {
+    public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayserArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -58,7 +58,7 @@ import UIKit
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedCanvasConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayserArrayConfiguration, Never>()
 
     private let textureLayersPreparedSubject = PassthroughSubject<TextureLayers, Never>()
 
@@ -117,7 +117,7 @@ import UIKit
         )
     }
 
-    public func newCanvas(configuration: CanvasConfiguration) {
+    public func newCanvas(configuration: TextureLayserArrayConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -141,6 +141,7 @@ import UIKit
         )
     }
     public func loadFile(
+        projectName: String,
         zipFileURL: URL,
         optionalEntities: [AnyLocalFileLoader] = []
     ) {
@@ -148,7 +149,7 @@ import UIKit
             zipFileURL: zipFileURL,
             optionalEntities: optionalEntities
         ) { [weak self] configuration in
-            self?.projectName = configuration.projectName
+            self?.projectName = projectName
         }
     }
 

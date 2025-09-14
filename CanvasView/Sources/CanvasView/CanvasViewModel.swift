@@ -41,7 +41,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<ResolvedCanvasConfiguration, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayserArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -90,7 +90,7 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedCanvasConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayserArrayConfiguration, Never>()
 
     private let textureLayersPreparedSubject = PassthroughSubject<TextureLayers, Never>()
 
@@ -147,10 +147,10 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            let textureSize = configuration.canvasConfiguration.textureSize ?? defaultTextureSize()
+            let textureSize = configuration.textureLayserArrayConfiguration.textureSize ?? defaultTextureSize()
 
             try await initializeCanvas(
-                configuration: canvasStorage?.coreDataConfiguration ?? configuration.canvasConfiguration,
+                configuration: canvasStorage?.coreDataConfiguration ?? configuration.textureLayserArrayConfiguration,
                 fallbackTextureSize: textureSize
             )
         }
@@ -223,7 +223,7 @@ public final class CanvasViewModel {
 public extension CanvasViewModel {
 
     private func initializeCanvas(
-        configuration: CanvasConfiguration,
+        configuration: TextureLayserArrayConfiguration,
         fallbackTextureSize: CGSize
     ) async throws {
         // Initialize the texture repository
@@ -235,7 +235,7 @@ public extension CanvasViewModel {
         await setupCanvas(resolvedConfiguration)
     }
 
-    private func setupCanvas(_ configuration: ResolvedCanvasConfiguration) async {
+    private func setupCanvas(_ configuration: ResolvedTextureLayserArrayConfiguration) async {
         await textureLayers.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
@@ -251,7 +251,7 @@ public extension CanvasViewModel {
         }
     }
 
-    private func completeCanvasSetup(configuration: ResolvedCanvasConfiguration) {
+    private func completeCanvasSetup(configuration: ResolvedTextureLayserArrayConfiguration) {
         for i in 0 ..< drawingToolRenderers.count {
             drawingToolRenderers[i].initTextures(configuration.textureSize)
         }
@@ -370,7 +370,7 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func newCanvas(configuration: CanvasConfiguration) async throws {
+    func newCanvas(configuration: TextureLayserArrayConfiguration) async throws {
         try await initializeCanvas(configuration: configuration, fallbackTextureSize: defaultTextureSize())
         transforming.setMatrix(.identity)
     }
@@ -385,7 +385,7 @@ public extension CanvasViewModel {
     func loadFile(
         zipFileURL: URL,
         optionalEntities: [AnyLocalFileLoader] = [],
-        completion: ((ResolvedCanvasConfiguration) -> Void)?
+        completion: ((ResolvedTextureLayserArrayConfiguration) -> Void)?
     ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -401,8 +401,7 @@ public extension CanvasViewModel {
                 let model: ArchiveModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ArchiveModel.jsonFileName)
                 )
-                let configuration: CanvasConfiguration = .init(
-                    projectName: zipFileURL.fileName,
+                let configuration: TextureLayserArrayConfiguration = .init(
                     textureSize: model.textureSize,
                     layerIndex: model.layerIndex,
                     layers: model.layers

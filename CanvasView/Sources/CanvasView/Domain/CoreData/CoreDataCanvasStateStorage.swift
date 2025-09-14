@@ -12,7 +12,7 @@ import UIKit
 /// A class that binds a model and `CoreDataStorage`
 final class CoreDataCanvasStorage {
 
-    private(set) var coreDataConfiguration: CanvasConfiguration?
+    private(set) var coreDataConfiguration: TextureLayserArrayConfiguration?
 
     let alertSubject = PassthroughSubject<NSError, Never>()
 
@@ -20,7 +20,7 @@ final class CoreDataCanvasStorage {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var canvasStorageRequest: NSFetchRequest<TextureLayerArrayStorageEntity> {
+    private var textureLayerArrayRequest: NSFetchRequest<TextureLayerArrayStorageEntity> {
         let request = TextureLayerArrayStorageEntity.fetchRequest()
         request.fetchLimit = 1
         request.returnsObjectsAsFaults = false
@@ -39,7 +39,7 @@ final class CoreDataCanvasStorage {
         self.coreDataStorage = coreDataStorage
 
         do {
-            if let storageEntity = try self.coreDataStorage.context.fetch(canvasStorageRequest).first {
+            if let storageEntity = try self.coreDataStorage.context.fetch(textureLayerArrayRequest).first {
                 self.coreDataConfiguration = configuration(from: storageEntity)
             } else {
                 initializeStorageWithCanvasState(
@@ -86,7 +86,7 @@ extension CoreDataCanvasStorage {
                 texture.fileName = layer.fileName
                 texture.alpha = Int16(layer.alpha)
                 texture.orderIndex = Int16(index)
-                texture.canvas = newStorage
+                texture.textureLayerArray = newStorage
             }
 
             try coreDataStorage.saveContext()
@@ -100,7 +100,7 @@ extension CoreDataCanvasStorage {
     @MainActor
     private func bindCanvasStateToCoreDataEntities(textureLayers: TextureLayers?, coreDataRepository: CoreDataStorage) {
         guard
-            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(canvasStorageRequest).first
+            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(textureLayerArrayRequest).first
         else { return }
 
         cancellables.removeAll()
@@ -151,11 +151,11 @@ extension CoreDataCanvasStorage {
     /// assuming the number of layers stays below 100.
     private func updateAllTextureLayerEntities(_ layers: [TextureLayerModel]) {
         guard
-            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(canvasStorageRequest).first
+            let canvasStorageEntity = try? self.coreDataStorage.context.fetch(textureLayerArrayRequest).first
         else { return }
 
         // Deletes all existing data first
-        if let existing = canvasStorageEntity.textureLayers as? Set<TextureLayerStorageEntity> {
+        if let existing = canvasStorageEntity.textureLayerArray as? Set<TextureLayerStorageEntity> {
             existing.forEach(coreDataStorage.context.delete)
         }
 
@@ -167,21 +167,19 @@ extension CoreDataCanvasStorage {
             newLayer.isVisible = model.isVisible
             newLayer.alpha = Int16(model.alpha)
             newLayer.orderIndex = Int16(index)
-            newLayer.canvas = canvasStorageEntity
+            newLayer.textureLayerArray = canvasStorageEntity
         }
     }
 
     public func configuration(
         from entity: TextureLayerArrayStorageEntity
-    ) -> CanvasConfiguration {
-
-        let projectName = entity.projectName ?? Calendar.currentDate
+    ) -> TextureLayserArrayConfiguration {
 
         let width  = max(0, Int(entity.textureWidth))
         let height = max(0, Int(entity.textureHeight))
         let textureSize = CGSize(width: CGFloat(width), height: CGFloat(height))
 
-        let layerSet = (entity.textureLayers as? Set<TextureLayerStorageEntity>) ?? []
+        let layerSet = (entity.textureLayerArray as? Set<TextureLayerStorageEntity>) ?? []
 
         let models: [TextureLayerModel] = layerSet
             .sorted { $0.orderIndex < $1.orderIndex }
@@ -200,7 +198,6 @@ extension CoreDataCanvasStorage {
         }()
 
         return .init(
-            projectName: projectName,
             textureSize: textureSize,
             layerIndex: selectedIndex,
             layers: models
