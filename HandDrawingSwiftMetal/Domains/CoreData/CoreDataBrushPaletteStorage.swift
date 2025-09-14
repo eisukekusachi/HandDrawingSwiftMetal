@@ -93,8 +93,10 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         palette.reset()
         Task { await storage.save(palette) }
     }
+}
 
-    private final class CoreDataStorage {
+private extension CoreDataBrushPaletteStorage {
+    final class CoreDataStorage {
 
         private let entityName: String = "BrushPaletteEntity"
         private let relationshipKey: String = "paletteColorGroup"
@@ -163,7 +165,6 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
                     if context.hasChanges {
                         try context.save()
                     }
-
                 } catch {
                     // Do nothing because nothing can be done
                     Logger.error(error)

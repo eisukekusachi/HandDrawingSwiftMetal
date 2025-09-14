@@ -103,7 +103,7 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.contentView.canvasView.saveFile(
                 additionalItems: [
-                    DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingTool),
+                    DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingToolStorage.drawingTool),
                     BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
                     EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPaletteStorage.palette)
                 ]
@@ -130,7 +130,7 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.contentView.viewModel.drawingTool.reset()
+            self.contentView.viewModel.drawingToolStorage.reset()
             self.contentView.viewModel.brushPaletteStorage.reset()
             self.contentView.viewModel.eraserPaletteStorage.reset()
 

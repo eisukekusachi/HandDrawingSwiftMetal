@@ -49,11 +49,9 @@ final class HandDrawingContentView: UIView {
                 fileName: DrawingToolModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.drawingTool.update(
-                        type: .init(rawValue: file.type),
-                        brushDiameter: file.brushDiameter,
-                        eraserDiameter: file.eraserDiameter
-                    )
+                    self?.viewModel.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
+                    self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
+                    self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
                 }
             },
             // Since this file is optional, if it is not found or an error occurs, simply do nothing
@@ -121,24 +119,24 @@ final class HandDrawingContentView: UIView {
         redoButton.isHidden = true
 
         updateDrawingComponents(
-            viewModel.drawingTool.type
+            viewModel.drawingToolStorage.type
         )
     }
 
     func setup() {
-        brushDrawingToolRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
         brushDiameterSlider.setValue(
-            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.brushDiameter),
+            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.brushDiameter),
             animated: false
         )
 
-        eraserDrawingToolRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
         eraserDiameterSlider.setValue(
-            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.eraserDiameter),
+            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.eraserDiameter),
             animated: false
         )
 
-        updateDrawingComponents(viewModel.drawingTool.type)
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
 
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.canvasView.alpha = 1.0
@@ -167,13 +165,13 @@ private extension HandDrawingContentView {
             }
             .store(in: &cancellables)
 
-        viewModel.drawingTool.$brushDiameter
+        viewModel.drawingToolStorage.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
                 self?.brushDrawingToolRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingTool.$eraserDiameter
+        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
                 self?.eraserDrawingToolRenderer.setDiameter(diameter)
             }
@@ -182,7 +180,7 @@ private extension HandDrawingContentView {
 
     func changeDrawingTool() {
         viewModel.changeDrawingTool()
-        updateDrawingComponents(viewModel.drawingTool.type)
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
     }
 
     func addEvents() {
@@ -227,12 +225,16 @@ private extension HandDrawingContentView {
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingTool.setBrushDiameter(slider.value)
+            self?.viewModel.drawingToolStorage.setBrushDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(slider.value)
+            )
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingTool.setEraserDiameter(slider.value)
+            self?.viewModel.drawingToolStorage.setEraserDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(slider.value)
+            )
         }, for: .valueChanged)
     }
 

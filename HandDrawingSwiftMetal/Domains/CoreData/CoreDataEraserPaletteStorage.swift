@@ -93,8 +93,10 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
         palette.reset()
         Task { await storage.save(palette) }
     }
+}
 
-    private final class CoreDataStorage {
+private extension CoreDataEraserPaletteStorage {
+    final class CoreDataStorage {
 
         private let entityName: String = "EraserPaletteEntity"
         private let relationshipKey: String = "paletteAlphaGroup"
@@ -130,14 +132,8 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
                     let entity = try context.fetch(CoreDataStorage.fetchRequest()).first ?? EraserPaletteEntity(context: context)
 
                     let currentIndex = Int(entity.index)
-                    let currentAlphas16: [Int16] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
-                        .compactMap { $0.alpha } ?? []
-
+                    let currentAlphas16: [Int16] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { $0.alpha } ?? []
                     let currentAlphas = currentAlphas16.map { Int($0) }
-
-                    if currentIndex == index, currentAlphas == alphas {
-                        return
-                    }
 
                     // Return if no changes
                     guard currentIndex != index || currentAlphas != alphas else { return }
