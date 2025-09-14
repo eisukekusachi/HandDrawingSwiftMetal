@@ -7,8 +7,9 @@
 
 import CanvasView
 import Combine
-import CoreData
 import UIKit
+
+@preconcurrency import CoreData
 
 /// Alpha palette managed by Core Data
 @MainActor
@@ -31,14 +32,14 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
             .store(in: &cancellables)
 
         // Save to Core Data when the index is updated
-        palette.$index.sink { [weak self] _ in
-            Task { await self?.storage.save(palette) }
-        }
-        .store(in: &cancellables)
-
-        // Save to Core Data when alphas are updated
-        palette.$alphas.sink { [weak self] _ in
-            Task { await self?.storage.save(palette) }
+        Publishers.Merge(
+            palette.$index.map { _ in () }.eraseToAnyPublisher(),
+            palette.$alphas.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.storage.save(self.palette) }
         }
         .store(in: &cancellables)
 
@@ -95,92 +96,83 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
 
     private final class CoreDataStorage {
 
-        private let uniqueName: String
         private let entityName: String = "EraserPaletteEntity"
         private let relationshipKey: String = "paletteAlphaGroup"
         private let context: NSManagedObjectContext
 
+        private static func fetchRequest() -> NSFetchRequest<EraserPaletteEntity> {
+            let request = EraserPaletteEntity.fetchRequest()
+            request.fetchLimit = 1
+            request.returnsObjectsAsFaults = false
+            return request
+        }
+
         public init(
-            uniqueName: String = "default",
             context: NSManagedObjectContext
         ) {
-            self.uniqueName = uniqueName
             self.context = context
         }
 
         public func load() async throws -> (index: Int, alphas: [Int])? {
-            try await context.perform {
-                guard let palette = try self.fetch() else { return nil }
-                return (
-                    index: Int(palette.index),
-                    alphas: (palette.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
-                )
-            }
+            guard let entity = try context.fetch(CoreDataStorage.fetchRequest()).first else { return nil }
+            return (
+                index: Int(entity.index),
+                alphas: (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
+            )
         }
 
         func save(_ eraserPalette: EraserPalette) async {
-            do {
-                try await save(
-                    index: eraserPalette.index,
-                    alphas: eraserPalette.alphas
-                )
-            } catch {
-                // Do nothing because nothing can be done
-                Logger.error(error)
-            }
-        }
+            let index = await eraserPalette.index
+            let alphas = await eraserPalette.alphas
 
-        private func save(index: Int, alphas: [Int]) async throws {
-            try await context.perform {
-                let coreData = try self.fetch() ?? EraserPaletteEntity(context: self.context)
+            await self.context.perform { [context] in
+                do {
+                    let entity = try context.fetch(CoreDataStorage.fetchRequest()).first ?? EraserPaletteEntity(context: context)
 
-                let currentIndex = Int(coreData.index)
-                let currentAlphas16: [Int16] = (coreData.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
-                    .compactMap { $0.alpha } ?? []
+                    let currentIndex = Int(entity.index)
+                    let currentAlphas16: [Int16] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?
+                        .compactMap { $0.alpha } ?? []
 
-                let currentAlphas = currentAlphas16.map { Int($0) }
+                    let currentAlphas = currentAlphas16.map { Int($0) }
 
-                if currentIndex == index, currentAlphas == alphas {
-                    return
-                }
-
-                coreData.name = self.uniqueName
-
-                if currentIndex != index {
-                    coreData.index = Int16(index)
-                }
-
-                if currentAlphas != alphas {
-                    let children = (coreData.paletteAlphaGroup?.array as? [PaletteAlphaEntity]) ?? []
-
-                    if children.count == alphas.count {
-                        for (i, alpha) in alphas.enumerated() where children[i].alpha != alpha {
-                            children[i].alpha = Int16(alpha)
-                        }
-                        coreData.paletteAlphaGroup = NSOrderedSet(array: children)
-                    } else {
-                        children.forEach { self.context.delete($0) }
-                        let newChildren = currentAlphas.map { alpha -> PaletteAlphaEntity in
-                            let entity = PaletteAlphaEntity(context: self.context)
-                            entity.alpha = Int16(alpha)
-                            return entity
-                        }
-                        coreData.paletteAlphaGroup = NSOrderedSet(array: newChildren)
+                    if currentIndex == index, currentAlphas == alphas {
+                        return
                     }
-                }
 
-                if self.context.hasChanges {
-                    try self.context.save()
+                    // Return if no changes
+                    guard currentIndex != index || currentAlphas != alphas else { return }
+
+                    if currentIndex != index {
+                        entity.index = Int16(index)
+                    }
+
+                    if currentAlphas != alphas {
+                        let children = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity]) ?? []
+
+                        if children.count == alphas.count {
+                            for (i, alpha) in alphas.enumerated() where children[i].alpha != alpha {
+                                children[i].alpha = Int16(alpha)
+                            }
+                            entity.paletteAlphaGroup = NSOrderedSet(array: children)
+                        } else {
+                            children.forEach { context.delete($0) }
+                            let newChildren = alphas.map { alpha -> PaletteAlphaEntity in
+                                let entity = PaletteAlphaEntity(context: context)
+                                entity.alpha = Int16(alpha)
+                                return entity
+                            }
+                            entity.paletteAlphaGroup = NSOrderedSet(array: newChildren)
+                        }
+                    }
+
+                    if context.hasChanges {
+                        try context.save()
+                    }
+                } catch {
+                    // Do nothing because nothing can be done
+                    Logger.error(error)
                 }
             }
-        }
-
-        private func fetch() throws -> EraserPaletteEntity? {
-            let request: NSFetchRequest<EraserPaletteEntity> = EraserPaletteEntity.fetchRequest()
-            request.predicate = NSPredicate(format: "name == %@", uniqueName)
-            request.fetchLimit = 1
-            request.returnsObjectsAsFaults = false
-            return try context.fetch(request).first
         }
     }
 }
