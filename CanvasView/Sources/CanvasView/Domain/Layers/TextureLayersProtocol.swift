@@ -28,9 +28,17 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var selectedIndex: Int? { get }
 
+    var layers: [TextureLayerItem] { get }
+
     var layerCount: Int { get }
 
-    var size: CGSize { get }
+    var textureSize: CGSize { get }
+
+    func initialize(
+        configuration: ResolvedTextureLayserArrayConfiguration,
+        textureRepository: TextureRepository?,
+        undoStack: UndoStack?
+    ) async
 
     func layer(_ layerId: UUID) -> TextureLayerItem?
 
@@ -40,11 +48,13 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func removeLayer(layerIndexToDelete index: Int) async throws
 
-    func moveLayer( indices: MoveLayerIndices)
+    func moveLayer(indices: MoveLayerIndices)
 
     func updateTitle(id: UUID, title: String)
 
     func updateVisibility(id: UUID, isVisible: Bool)
 
     func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool)
+
+    func updateThumbnail(_ identifiedTexture: IdentifiedTexture)
 }

@@ -34,7 +34,7 @@ extension ArchiveModel {
 
     @MainActor
     init(
-        textureLayers: TextureLayers
+        textureLayers: any TextureLayersProtocol
     ) {
         self.textureSize = textureLayers.textureSize
         self.layerIndex = textureLayers.selectedIndex ?? 0

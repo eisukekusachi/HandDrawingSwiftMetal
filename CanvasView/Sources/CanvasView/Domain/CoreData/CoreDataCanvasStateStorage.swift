@@ -117,7 +117,7 @@ extension CoreDataCanvasStorage {
             .store(in: &cancellables)
         */
 
-        textureLayers?.$textureSize
+        textureLayers?.textureSizePublisher
             .dropFirst()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .compactMap { $0 }

@@ -24,24 +24,29 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Emits whenever `layers` change
     public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
-        $layers.eraseToAnyPublisher()
+        $_layers.eraseToAnyPublisher()
     }
 
     /// Emits whenever `selectedLayerId` change
     public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
-        $selectedLayerId.eraseToAnyPublisher()
+        $_selectedLayerId.eraseToAnyPublisher()
+    }
+
+    /// Emits whenever `textureSize` change
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        $_textureSize.eraseToAnyPublisher()
     }
 
     private var textureRepository: TextureRepository?
 
     private var undoStack: UndoStack?
 
-    @Published private(set) var layers: [TextureLayerItem] = []
+    @Published private var _layers: [TextureLayerItem] = []
 
-    @Published private(set) var selectedLayerId: UUID?
+    @Published private var _selectedLayerId: UUID?
 
     // Set a default value to avoid nil
-    @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
+    @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
 
     private var oldAlpha: Int?
 
@@ -50,26 +55,34 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
 public extension TextureLayers {
 
-    var size: CGSize {
-        textureSize
+    var textureSize: CGSize {
+        _textureSize
+    }
+
+    var layers: [TextureLayerItem] {
+        _layers
     }
 
     var layerCount: Int {
-        layers.count
+        _layers.count
+    }
+
+    var selectedLayerId: UUID? {
+        _selectedLayerId
     }
 
     var selectedLayer: TextureLayerItem? {
-        guard let selectedLayerId else { return nil }
-        return layers.first(where: { $0.id == selectedLayerId })
+        guard let _selectedLayerId else { return nil }
+        return _layers.first(where: { $0.id == _selectedLayerId })
     }
 
     var selectedIndex: Int? {
-        guard let selectedLayerId else { return nil }
-        return layers.firstIndex(where: { $0.id == selectedLayerId })
+        guard let _selectedLayerId else { return nil }
+        return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
 
     func layer(_ layerId: UUID) -> TextureLayerItem? {
-        layers.first(where: { $0.id == layerId })
+        _layers.first(where: { $0.id == layerId })
     }
 }
 
@@ -81,9 +94,9 @@ public extension TextureLayers {
         textureRepository: TextureRepository? = nil,
         undoStack: UndoStack? = nil
     ) async {
-        self.textureSize = configuration.textureSize
+        self._textureSize = configuration.textureSize
 
-        self.layers = configuration.layers.map {
+        self._layers = configuration.layers.map {
             .init(
                 id: $0.id,
                 title: $0.title,
@@ -93,34 +106,34 @@ public extension TextureLayers {
             )
         }
 
-        self.selectedLayerId = configuration.selectedLayerId
+        self._selectedLayerId = configuration.selectedLayerId
 
         self.textureRepository = textureRepository
 
         Task {
-            let textures = try await textureRepository?.copyTextures(uuids: layers.map { $0.id })
+            let textures = try await textureRepository?.copyTextures(uuids: _layers.map { $0.id })
             textures?.forEach { [weak self] texture in
                 self?.updateThumbnail(texture)
             }
         }
     }
 
-    func addLayer(layer textureLayer: TextureLayerItem, texture: MTLTexture?, at index: Int) async throws {
+    func addLayer(layer: TextureLayerItem, texture: MTLTexture?, at index: Int) async throws {
         guard
             let textureRepository,
             let previousLayerIndex = selectedIndex
         else { return }
 
-        self.layers.insert(textureLayer, at: index)
+        self._layers.insert(layer, at: index)
 
         try? await Task.sleep(nanoseconds: 1_000_000)
 
-        selectLayer(id: textureLayer.id)
+        selectLayer(id: layer.id)
 
         try await textureRepository
             .addTexture(
                 texture,
-                newTextureUUID: textureLayer.id
+                newTextureUUID: layer.id
             )
 
         guard
@@ -128,7 +141,7 @@ public extension TextureLayers {
             let object = undoAdditionObject(
                 previousLayerIndex: previousLayerIndex,
                 currentLayerIndex: currentLayerIndex,
-                layer: .init(item: textureLayer),
+                layer: .init(item: layer),
                 texture: texture
             )
         else { return }
@@ -139,21 +152,21 @@ public extension TextureLayers {
     func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
             let textureRepository,
-            let selectedLayerId,
+            let _selectedLayerId,
             let selectedLayer,
             let selectedIndex
         else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
 
-        layers.remove(at: index)
+        _layers.remove(at: index)
 
         try? await Task.sleep(nanoseconds: 1_000_000)
 
-        selectLayer(id: layers[newLayerIndex].id)
+        selectLayer(id: _layers[newLayerIndex].id)
 
         let result = try await textureRepository.copyTexture(
-            uuid: selectedLayerId
+            uuid: _selectedLayerId
         )
 
         textureRepository
@@ -179,10 +192,10 @@ public extension TextureLayers {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
-            layerCount: self.layers.count
+            layerCount: self._layers.count
         )
 
-        self.layers.move(
+        self._layers.move(
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
@@ -191,11 +204,11 @@ public extension TextureLayers {
 
         guard
             let selectedLayerId = selectedLayer?.id,
-            let textureLayer = layers.first(where: { $0.id == selectedLayerId }),
+            let textureLayer = _layers.first(where: { $0.id == selectedLayerId }),
             let object = undoMoveObject(
                 indices: MoveLayerIndices.reversedIndices(
                     indices: indices,
-                    layerCount: layers.count
+                    layerCount: _layers.count
                 ),
                 selectedLayerId: selectedLayerId,
                 textureLayer: .init(
@@ -211,23 +224,23 @@ public extension TextureLayers {
     }
 
     func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        guard let index = layers.firstIndex(where: { $0.id == identifiedTexture.uuid }) else { return }
-        self.layers[index].thumbnail = identifiedTexture.texture.makeThumbnail()
+        guard let index = _layers.firstIndex(where: { $0.id == identifiedTexture.uuid }) else { return }
+        self._layers[index].thumbnail = identifiedTexture.texture.makeThumbnail()
     }
 
     func selectLayer(id: UUID) {
-        selectedLayerId = id
+        _selectedLayerId = id
         fullCanvasUpdateRequestedSubject.send(())
     }
 
     func updateTitle(id: UUID, title: String) {
         guard
-            let selectedIndex = layers.map({ $0.id }).firstIndex(of: id)
+            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
         else { return }
 
-        let layer = layers[selectedIndex]
+        let layer = _layers[selectedIndex]
 
-        layers[selectedIndex] = .init(
+        _layers[selectedIndex] = .init(
             id: layer.id,
             title: title,
             alpha: layer.alpha,
@@ -238,12 +251,12 @@ public extension TextureLayers {
 
     func updateVisibility(id: UUID, isVisible: Bool) {
         guard
-            let selectedIndex = layers.map({ $0.id }).firstIndex(of: id)
+            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
         else { return }
 
-        let layer = layers[selectedIndex]
+        let layer = _layers[selectedIndex]
 
-        layers[selectedIndex] = .init(
+        _layers[selectedIndex] = .init(
             id: layer.id,
             title: layer.title,
             alpha: layer.alpha,
@@ -257,12 +270,12 @@ public extension TextureLayers {
 
     func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
         guard
-            let selectedIndex = layers.map({ $0.id }).firstIndex(of: id)
+            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
         else { return }
 
-        let layer = layers[selectedIndex]
+        let layer = _layers[selectedIndex]
 
-        layers[selectedIndex] = .init(
+        _layers[selectedIndex] = .init(
             id: layer.id,
             title: layer.title,
             alpha: alpha,
@@ -329,7 +342,7 @@ public extension TextureLayers {
         // Create a deletion undo object to cancel the addition
         let undoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: layers[previousLayerIndex].id
+            selectedLayerIdAfterDeletion: _layers[previousLayerIndex].id
         )
 
         return .init(
@@ -348,7 +361,7 @@ public extension TextureLayers {
         // Add an undo object to the undo stack
         let redoObject = UndoDeletionObject(
             layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: layers[currentLayerIndex].id
+            selectedLayerIdAfterDeletion: _layers[currentLayerIndex].id
         )
 
         // Create a addition undo object to cancel the deletion

@@ -128,7 +128,7 @@ extension CanvasRenderer {
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
-        textureLayers: TextureLayers,
+        textureLayers: any TextureLayersProtocol,
         textureRepository: TextureRepository,
         onCompleted: (() -> Void)?
     ) {

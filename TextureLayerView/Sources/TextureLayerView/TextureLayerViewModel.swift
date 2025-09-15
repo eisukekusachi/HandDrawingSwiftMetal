@@ -95,8 +95,8 @@ public extension TextureLayerViewModel {
         else { return }
 
         let texture = MTLTextureCreator.makeTexture(
-            width: Int(textureLayers.size.width),
-            height: Int(textureLayers.size.height),
+            width: Int(textureLayers.textureSize.width),
+            height: Int(textureLayers.textureSize.height),
             with: device
         )
 
