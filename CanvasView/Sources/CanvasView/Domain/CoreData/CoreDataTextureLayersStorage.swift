@@ -14,7 +14,9 @@ import UIKit
 @MainActor
 public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
 
-    private var textureLayers: TextureLayers
+    @Published private var textureLayers: TextureLayers
+
+    private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
 
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -59,15 +61,33 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayers
+        textureLayers: TextureLayers,
+        context: NSManagedObjectContext
     ) {
         self.textureLayers = textureLayers
 
+        self.storage = .init(context: context)
+
         // Propagate changes from children to the parent
-        textureLayers.objectWillChange
+        self.textureLayers.objectWillChange
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+
+        // Save to Core Data when the index is updated
+        Publishers.Merge3(
+            self.textureLayers.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task {
+                await self.save(textureLayers)
+            }
+        }
+        .store(in: &cancellables)
     }
 
     public func initialize(
@@ -85,36 +105,127 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     public func layer(_ layerId: UUID) -> TextureLayerItem? {
         textureLayers.layer(layerId)
     }
-    
+
     public func selectLayer(id: UUID) {
         textureLayers.selectLayer(id: id)
     }
-    
+
     public func addLayer(layer: TextureLayerItem, texture: (any MTLTexture)?, at index: Int) async throws {
         try await textureLayers.addLayer(layer: layer, texture: texture, at: index)
     }
-    
+
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         try await textureLayers.removeLayer(layerIndexToDelete: index)
     }
-    
+
     public func moveLayer(indices: MoveLayerIndices) {
         textureLayers.moveLayer(indices: indices)
     }
-    
+
     public func updateTitle(id: UUID, title: String) {
         textureLayers.updateTitle(id: id, title: title)
     }
-    
+
     public func updateVisibility(id: UUID, isVisible: Bool) {
         textureLayers.updateVisibility(id: id, isVisible: isVisible)
     }
-    
+
     public func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
         textureLayers.updateAlpha(id: id, alpha: alpha, isStartHandleDragging: isStartHandleDragging)
     }
 
     public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
         textureLayers.updateThumbnail(identifiedTexture)
+    }
+}
+
+extension CoreDataTextureLayersStorage {
+    public func fetch() throws -> TextureLayerArrayStorageEntity? {
+        try storage.fetch()
+    }
+}
+
+private extension CoreDataTextureLayersStorage {
+    func save(_ target: TextureLayers) async {
+
+        // Convert it to Sendable
+        let layers = target.layers.map { TextureLayerModel(item: $0) }
+
+        let textureSize = target.textureSize
+        let selectedLayerId = target.selectedLayerId
+
+        let context = self.storage.context
+        let request = self.storage.fetchRequest()
+
+        await context.perform { [context] in
+            do {
+                // Fetch or create root
+                let rootEntity = try context.fetch(request).first ?? TextureLayerArrayStorageEntity(context: context)
+
+                var newTextureLayerEntityArray: [TextureLayerStorageEntity] = []
+
+                let currentTextureLayerEntitySet = (rootEntity.textureLayerArray as? Set<TextureLayerStorageEntity>) ?? []
+
+                let currentTextureLayerEntityDictionary = Dictionary<UUID, TextureLayerStorageEntity>(
+                    uniqueKeysWithValues: currentTextureLayerEntitySet.compactMap {
+                        guard let id = $0.id else { return nil }
+                        return (id, $0)
+                    }
+                )
+
+                // Create new Core Data layer entities based on the layers
+                for (index, layer) in layers.enumerated() {
+                    if let entity = currentTextureLayerEntityDictionary[layer.id] {
+                        if entity.title != layer.title { entity.title = layer.title }
+                        if entity.fileName != layer.fileName { entity.fileName = layer.fileName }
+                        if entity.alpha != Int16(layer.alpha) { entity.alpha = Int16(layer.alpha) }
+                        if entity.isVisible != layer.isVisible { entity.isVisible = layer.isVisible }
+                        if entity.orderIndex != Int16(index) { entity.orderIndex = Int16(index) }
+                        newTextureLayerEntityArray.append(entity)
+                    } else {
+                        let newEntity = TextureLayerStorageEntity(context: context)
+                        newEntity.id = layer.id
+                        newEntity.title = layer.title
+                        newEntity.fileName = layer.fileName
+                        newEntity.alpha = Int16(layer.alpha)
+                        newEntity.isVisible = layer.isVisible
+                        newEntity.orderIndex = Int16(index)
+                        newTextureLayerEntityArray.append(newEntity)
+                    }
+                }
+
+                let currentLayerIdArray = currentTextureLayerEntitySet.compactMap { $0.id }
+                let newLayerIdArray = newTextureLayerEntityArray.compactMap { $0.id }
+                let newIdSet = Set(newLayerIdArray)
+
+                // Remove any entities that existed before but are no longer present
+                for currentEntity in currentTextureLayerEntitySet {
+                    if let currentEntityId = currentEntity.id, !newIdSet.contains(currentEntityId) {
+                        context.delete(currentEntity)
+                    }
+                }
+
+                // Update entities only if values have actually changed
+                if rootEntity.textureWidth != Int16(textureSize.width) {
+                    rootEntity.textureWidth = Int16(textureSize.width)
+                }
+                if rootEntity.textureHeight != Int16(textureSize.height) {
+                    rootEntity.textureHeight = Int16(textureSize.height)
+                }
+                if rootEntity.selectedLayerId != selectedLayerId {
+                    rootEntity.selectedLayerId = selectedLayerId
+                }
+
+                if currentLayerIdArray != newLayerIdArray {
+                    rootEntity.textureLayerArray = NSSet(array: newTextureLayerEntityArray)
+                }
+
+                if context.hasChanges {
+                    try context.save()
+                }
+            } catch {
+                Logger.error(error)
+            }
+        }
     }
 }

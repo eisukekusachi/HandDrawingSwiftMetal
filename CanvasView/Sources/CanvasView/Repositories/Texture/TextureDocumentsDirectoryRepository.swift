@@ -74,9 +74,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayserArrayConfiguration {
 
-        let textureSize = configuration.textureSize ?? fallbackTextureSize
-
-        if FileManager.containsAll(
+        if let textureSize = configuration.textureSize,
+           FileManager.containsAll(
             fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
@@ -93,7 +92,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         } else {
             return try await initializeStorageWithNewTexture(
                 configuration: configuration,
-                textureSize: textureSize
+                textureSize: fallbackTextureSize
             )
         }
     }

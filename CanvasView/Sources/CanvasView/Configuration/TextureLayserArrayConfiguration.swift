@@ -42,4 +42,29 @@ extension TextureLayserArrayConfiguration {
         self.layerIndex = layerIndex ?? configuration.layerIndex
         self.layers = layers ?? configuration.layers
     }
+
+    public init?(entity: TextureLayerArrayStorageEntity?) {
+        guard let entity else { return nil }
+
+        self.layers = entity.textureLayerArray?
+            .compactMap { $0 as? TextureLayerStorageEntity }
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map { layer -> TextureLayerModel in
+                .init(
+                    fileName: layer.fileName ?? "",
+                    title: layer.title ?? "",
+                    alpha: Int(layer.alpha),
+                    isVisible: layer.isVisible
+                )
+            } ?? []
+
+        self.layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
+
+        self.textureSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
+
+        // Return nil if the layers are nil or the texture size is zero
+        if layers.isEmpty || textureSize == .zero {
+            return nil
+        }
+    }
 }

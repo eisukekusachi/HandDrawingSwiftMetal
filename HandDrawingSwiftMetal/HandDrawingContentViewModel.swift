@@ -18,11 +18,11 @@ final class HandDrawingContentViewModel: ObservableObject {
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     public init() {
-        drawingToolController = PersistenceController(modelName: "DrawingToolStorage")
+        drawingToolController = PersistenceController(xcdatamodeldName: "DrawingToolStorage", location: .mainApp)
 
         drawingToolStorage = CoreDataDrawingToolStorage(
             drawingTool: DrawingTool(),
-            context: drawingToolController.context
+            context: drawingToolController.viewContext
         )
 
         brushPaletteStorage = CoreDataBrushPaletteStorage(
@@ -37,7 +37,7 @@ final class HandDrawingContentViewModel: ObservableObject {
                     .purple.withAlphaComponent(0.8)
                 ]
             ),
-            context: drawingToolController.context
+            context: drawingToolController.viewContext
         )
 
         eraserPaletteStorage = CoreDataEraserPaletteStorage(
@@ -54,8 +54,20 @@ final class HandDrawingContentViewModel: ObservableObject {
                 ],
                 index: 0
             ),
-            context: drawingToolController.context
+            context: drawingToolController.viewContext
         )
+
+        Task {
+            if let drawingToolEntity = try drawingToolStorage.fetch() {
+                drawingToolStorage.update(drawingToolEntity)
+            }
+            if let brushEntity = try brushPaletteStorage.fetch() {
+                brushPaletteStorage.update(brushEntity)
+            }
+            if let eraserEntity = try eraserPaletteStorage.fetch() {
+                eraserPaletteStorage.update(eraserEntity)
+            }
+        }
     }
 
     func changeDrawingTool() {

@@ -55,9 +55,6 @@ public final class CanvasViewModel {
     /// Maintains the state of the canvas
     private var textureLayersStorage: CoreDataTextureLayersStorage?
 
-    /// Stores the canvas state in CoreData
-    private var canvasStorage: CoreDataCanvasStorage?
-
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
@@ -98,7 +95,21 @@ public final class CanvasViewModel {
 
     private var undoStack: UndoStack? = nil
 
+    private let persistenceController: PersistenceController
+
     private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        persistenceController = PersistenceController(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
+
+        textureLayersStorage = CoreDataTextureLayersStorage(
+            textureLayers: TextureLayers(),
+            context: persistenceController.viewContext
+        )
+    }
 
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
@@ -128,10 +139,6 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        textureLayersStorage = CoreDataTextureLayersStorage(
-            textureLayers: TextureLayers()
-        )
-
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
@@ -149,12 +156,14 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            let textureSize = configuration.textureLayserArrayConfiguration.textureSize ?? defaultTextureSize()
+            let configuration: TextureLayserArrayConfiguration = .init(entity: try? textureLayersStorage?.fetch()) ?? configuration.textureLayserArrayConfiguration
 
-            try await initializeCanvas(
-                configuration: canvasStorage?.coreDataConfiguration ?? configuration.textureLayserArrayConfiguration,
-                fallbackTextureSize: textureSize
+            // Initialize the texture repository
+            let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+                configuration: configuration,
+                fallbackTextureSize: defaultTextureSize()
             )
+            await setupCanvas(resolvedConfiguration)
         }
     }
 
@@ -199,14 +208,6 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        canvasStorage?.alertSubject
-            .sink { [weak self] error in
-                self?.alertSubject.send(
-                    ErrorModel.create(error)
-                )
-            }
-            .store(in: &cancellables)
-
         transforming.matrixPublisher
             .sink { [weak self] matrix in
                 self?.canvasRenderer?.matrix = matrix
@@ -224,21 +225,9 @@ public final class CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    private func initializeCanvas(
-        configuration: TextureLayserArrayConfiguration,
-        fallbackTextureSize: CGSize
-    ) async throws {
-        // Initialize the texture repository
-        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
-            configuration: configuration,
-            fallbackTextureSize: fallbackTextureSize
-        )
-
-        await setupCanvas(resolvedConfiguration)
-    }
-
     private func setupCanvas(_ configuration: ResolvedTextureLayserArrayConfiguration) async {
         guard let textureLayersStorage else { return }
+
         await textureLayersStorage.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
@@ -376,7 +365,13 @@ public extension CanvasViewModel {
     }
 
     func newCanvas(configuration: TextureLayserArrayConfiguration) async throws {
-        try await initializeCanvas(configuration: configuration, fallbackTextureSize: defaultTextureSize())
+        // Initialize the texture repository
+        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+            configuration: configuration,
+            fallbackTextureSize: defaultTextureSize()
+        )
+        await setupCanvas(resolvedConfiguration)
+
         transforming.setMatrix(.identity)
     }
 

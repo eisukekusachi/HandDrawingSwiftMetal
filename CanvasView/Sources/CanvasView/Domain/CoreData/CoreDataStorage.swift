@@ -1,16 +1,29 @@
 //
 //  CoreDataStorage.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/05/03.
+//  Created by Eisuke Kusachi on 2025/09/15.
 //
 
 import CoreData
-import UIKit
 
-public protocol CoreDataStorage {
+public final class CoreDataStorage<Entity: NSManagedObject> {
+    public let context: NSManagedObjectContext
 
-    var context: NSManagedObjectContext { get }
+    public init(
+        context: NSManagedObjectContext
+    ) {
+        self.context = context
+    }
 
-    func saveContext() throws
+    public func fetchRequest() -> NSFetchRequest<Entity> {
+        let request = Entity.fetchRequest()
+        request.fetchLimit = 1
+        request.returnsObjectsAsFaults = false
+        return request as! NSFetchRequest<Entity>
+    }
+
+    public func fetch() throws -> Entity? {
+        try context.fetch(fetchRequest()).first
+    }
 }
