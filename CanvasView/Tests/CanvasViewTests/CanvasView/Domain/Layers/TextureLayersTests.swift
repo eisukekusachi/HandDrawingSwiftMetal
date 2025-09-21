@@ -7,40 +7,30 @@
 import Foundation
 import Combine
 import CoreGraphics
+import MetalKit
 import Testing
 
 @testable import CanvasView
 
 @MainActor
 struct TextureLayersTests {
-/*
-    func initialize_setsState_andTriggersCopy() async {
-        let ids = [UUID(), UUID(), UUID()]
-        let cfg = ResolvedTextureLayserArrayConfiguration(
-            textureSize: .init(width: 512, height: 256),
-            layers: ids.enumerated().map { (i, id) in
-                TextureLayerModel(id: id, title: "L\(i)", alpha: 100, isVisible: true, thumbnail: nil)
-            },
-            selectedLayerId: ids[1]
-        )
-        let repo = MockTextureRepository()
-        let sut = TextureLayers()
 
-        await sut.initialize(configuration: cfg, textureRepository: repo, undoStack: nil)
-
-        #expect(sut.textureSize == cfg.textureSize)
-        #expect(sut.layers.map(\.id) == ids)
-        #expect(sut.selectedLayerId == ids[1])
-
-        // copyTextures が Task で呼ばれるので少し待つ
-        let ok = await eventually {
-            repo.copyRequests.first == ids
+    // Reusable texture for all tests
+    static let texture: MTLTexture = {
+        guard
+            let device = MTLCreateSystemDefaultDevice(),
+            let texture = MTLTextureCreator.makeTexture(
+                width: 16,
+                height: 16,
+                with: device
+            )
+        else {
+            fatalError("Failed to create test MTLTexture.")
         }
-        #expect(ok, "copyTextures(uuids:) が呼ばれていません")
-    }
+        return texture
+    }()
 
-*/
-
+    @Test("Confirms that adding a layer increases the count and selects the new layer")
     func testAddLayer() async throws {
 
         let subject = TextureLayers()
@@ -57,7 +47,7 @@ struct TextureLayersTests {
 
         try await subject.addLayer(
             layer: layer0,
-            texture: nil,
+            texture: TextureLayersTests.texture,
             at: 0
         )
 
@@ -70,7 +60,7 @@ struct TextureLayersTests {
 
         try await subject.addLayer(
             layer: layer1,
-            texture: nil,
+            texture: TextureLayersTests.texture,
             at: 1
         )
 
@@ -80,179 +70,181 @@ struct TextureLayersTests {
         #expect(subject.selectedLayerId == layer1.id)
     }
 
+    @Test("Confirms that deleting a layer works but at least one layer always remains")
     func testRemoveLayer() async throws {
 
         let subject = TextureLayers()
+
+        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
                 textureSize: .init(width: 16, height: 16),
                 layerIndex: 0,
-                layers: []
+                layers: [
+                    layer0,
+                    layer1
+                ]
             ),
             textureRepository: MockTextureRepository()
         )
 
+        #expect(subject.layers.count == 2)
+
+        // The layer at the index is deleted
         try await subject.removeLayer(layerIndexToDelete: 1)
 
         #expect(subject.layers.count == 1)
+        #expect(subject.selectedLayerId == layer0.id)
 
-        #expect(subject.selectedLayerId != nil)
+        // At least one layer always remains.
+        // If only one layer exists, it cannot be deleted.
+        try await subject.removeLayer(layerIndexToDelete: 0)
+
+        #expect(subject.layers.count == 1)
+        #expect(subject.selectedLayerId == layer0.id)
     }
 
-    /*
-    func moveLayer_reorders_andPublishesFullUpdate() async {
-        let ids = [UUID(), UUID(), UUID()]
-        let sut = TextureLayers()
-        sut._layers = ids.enumerated().map {
-            TextureLayerItem(id: $0.element, title: "L\($0.offset)", alpha: 100, isVisible: true, thumbnail: nil)
-        }
+    @Test("Confirms that moving a layer changes the order as expected")
+    func testMoveLayer() async {
 
-        let first = await firstValue(from: sut.fullCanvasUpdateRequestedPublisher)
-        #expect(first == nil) // まだ発火していない
+        let subject = TextureLayers()
 
-        // 末尾を先頭へ（MoveLayerIndices の型に合わせて作成）
-        let indices = MoveLayerIndices(sourceIndexSet: IndexSet(integer: 2), destinationIndex: 0)
-        sut.moveLayer(indices: indices)
+        let layer2: TextureLayerModel = .init(id: UUID(), title: "layer2", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
 
-        let fired = await firstValue(from: sut.fullCanvasUpdateRequestedPublisher)
-        #expect(fired != nil, "fullCanvasUpdateRequestedPublisher が発火していません")
-        #expect(sut.layers.count == 3)
-    }
-
-    // MARK: selectLayer()
-
-    @Test @MainActor
-    func selectLayer_setsSelected_andPublishesFullUpdate() async {
-        let id = UUID()
-        let sut = TextureLayers()
-        sut._layers = [TextureLayerItem(id: id, title: "A", alpha: 100, isVisible: true, thumbnail: nil)]
-
-        sut.selectLayer(id: id)
-        let fired = await firstValue(from: sut.fullCanvasUpdateRequestedPublisher)
-        #expect(fired != nil)
-        #expect(sut.selectedLayerId == id)
-    }
-
-    // MARK: updateTitle()
-
-    @Test @MainActor
-    func updateTitle_changesOnlyTitle() {
-        let id = UUID()
-        let sut = TextureLayers()
-        sut._layers = [TextureLayerItem(id: id, title: "Old", alpha: 11, isVisible: true, thumbnail: nil)]
-
-        sut.updateTitle(id: id, title: "New")
-
-        #expect(sut.layers.first?.title == "New")
-        #expect(sut.layers.first?.alpha == 11)
-        #expect(sut.layers.first?.isVisible == true)
-    }
-
-    // MARK: updateVisibility()
-
-    @Test @MainActor
-    func updateVisibility_changesFlag_andPublishesFullUpdate() async {
-        let id = UUID()
-        let sut = TextureLayers()
-        sut._layers = [TextureLayerItem(id: id, title: "L", alpha: 100, isVisible: false, thumbnail: nil)]
-
-        sut.updateVisibility(id: id, isVisible: true)
-        let fired = await firstValue(from: sut.fullCanvasUpdateRequestedPublisher)
-        #expect(fired != nil)
-        #expect(sut.layers.first?.isVisible == true)
-    }
-
-    // MARK: updateAlpha()
-
-    @Test @MainActor
-    func updateAlpha_changesOnlyAlpha_andPublishesCanvasUpdate() async {
-        let id = UUID()
-        let sut = TextureLayers()
-        sut._layers = [TextureLayerItem(id: id, title: "L", alpha: 10, isVisible: true, thumbnail: nil)]
-
-        sut.updateAlpha(id: id, alpha: 42, isStartHandleDragging: false)
-
-        let fired = await firstValue(from: sut.canvasUpdateRequestedPublisher)
-        #expect(fired != nil)
-        #expect(sut.layers.first?.alpha == 42)
-        #expect(sut.layers.first?.title == "L")
-    }
-
-    // MARK: undoAlphaObject()
-
-    @Test @MainActor
-    func undoAlphaObject_buildsUndoRedo_onDragEnd() {
-        let id = UUID()
-        let sut = TextureLayers()
-        sut._layers = [TextureLayerItem(id: id, title: "L", alpha: 10, isVisible: true, thumbnail: nil)]
-        sut._selectedLayerId = id
-
-        // drag start → oldAlpha を記録
-        #expect(sut.undoAlphaObject(dragging: true) == nil)
-
-        // 値変更
-        sut.updateAlpha(id: id, alpha: 99, isStartHandleDragging: false)
-
-        // drag end → Undo/Redo を返す
-        let model = sut.undoAlphaObject(dragging: false)
-        #expect(model != nil)
-        #expect(model?.undoObject != nil)
-        #expect(model?.redoObject != nil)
-    }
-
-    // MARK: undoAddition / undoDeletion / undoMove
-
-    @Test @MainActor
-    func undoAdditionObject_returnsModel() {
-        let ids = [UUID(), UUID()]
-        let sut = TextureLayers()
-        sut._layers = ids.map { TextureLayerItem(id: $0, title: "L", alpha: 100, isVisible: true, thumbnail: nil) }
-
-        let model = TextureLayerModel(item: sut.layers[1])
-        let result = sut.undoAdditionObject(
-            previousLayerIndex: 0,
-            currentLayerIndex: 1,
-            layer: model,
-            texture: nil
+        await subject.initialize(
+            configuration: .init(
+                textureSize: .init(width: 16, height: 16),
+                layerIndex: 0,
+                layers: [
+                    layer2,
+                    layer1,
+                    layer0
+                ]
+            ),
+            textureRepository: MockTextureRepository()
         )
-        #expect(result != nil)
-        #expect(result?.undoObject != nil)
-        #expect(result?.redoObject != nil)
-    }
 
-    @Test @MainActor
-    func undoDeletionObject_returnsModel() {
-        let ids = [UUID(), UUID(), UUID()]
-        let sut = TextureLayers()
-        sut._layers = ids.map { TextureLayerItem(id: $0, title: "L", alpha: 100, isVisible: true, thumbnail: nil) }
+        #expect(subject.layers.map { $0.title } == ["layer2", "layer1", "layer0"])
 
-        let model = TextureLayerModel(item: sut.layers[1])
-        let result = sut.undoDeletionObject(
-            previousLayerIndex: 1,
-            currentLayerIndex: 2,
-            layer: model,
-            texture: nil
+        subject.moveLayer(
+            indices: MoveLayerIndices(sourceIndexSet: IndexSet(integer: 2), destinationIndex: 0)
         )
-        #expect(result != nil)
-        #expect(result?.undoObject != nil)
-        #expect(result?.redoObject != nil)
+
+        // In this app, new textures are stacked on top of old ones, so the order is the reverse of a normal array
+        #expect(subject.layers.map { $0.title } == ["layer1", "layer0", "layer2"])
+
+        // Since the move operation is implemented as a combination of insert and remove,
+        // when moving an item from a smaller index to a larger one,
+        // The index must be set to one greater than the expected position.
+        subject.moveLayer(
+            indices: MoveLayerIndices(sourceIndexSet: IndexSet(integer: 0), destinationIndex: 3)
+        )
+
+        #expect(subject.layers.map { $0.title } == ["layer2", "layer1", "layer0"])
     }
 
-    @Test @MainActor
-    func undoMoveObject_returnsModel_andReversed() {
-        let ids = [UUID(), UUID(), UUID()]
-        let sut = TextureLayers()
-        sut._layers = ids.map { TextureLayerItem(id: $0, title: "L", alpha: 100, isVisible: true, thumbnail: nil) }
+    @Test("Confirms that selectLayer updates selectedLayerId to the given layer's id")
+    func testSelectLayer() async {
 
-        let indices = MoveLayerIndices(sourceIndexSet: IndexSet(integer: 0), destinationIndex: 2)
-        let selectedId = ids[1]
-        let model = TextureLayerModel(item: sut.layers[0])
+        let subject = TextureLayers()
 
-        let result = sut.undoMoveObject(indices: indices, selectedLayerId: selectedId, textureLayer: model)
-        #expect(result != nil)
-        #expect(result?.undoObject != nil)
-        #expect(result?.redoObject != nil)
+        let layer2: TextureLayerModel = .init(id: UUID(), title: "layer2", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
+
+        await subject.initialize(
+            configuration: .init(
+                textureSize: .init(width: 16, height: 16),
+                layerIndex: 0,
+                layers: [
+                    layer2,
+                    layer1,
+                    layer0
+                ]
+            ),
+            textureRepository: MockTextureRepository()
+        )
+
+        #expect(subject.selectedLayerId == layer2.id)
+
+        subject.selectLayer(id: layer0.id)
+
+        #expect(subject.selectedLayerId == layer0.id)
     }
-     */
+
+    @Test("Confirms that updateTitle updates the layer's title")
+    func testUpdateTitle() async {
+
+        let subject = TextureLayers()
+
+        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+
+        await subject.initialize(
+            configuration: .init(
+                textureSize: .init(width: 16, height: 16),
+                layerIndex: 0,
+                layers: [
+                    layer
+                ]
+            ),
+            textureRepository: MockTextureRepository()
+        )
+        #expect(subject.layers.first?.title == "oldLayer")
+
+        subject.updateTitle(id: layer.id, title: "newLayer")
+
+        #expect(subject.layers.first?.title == "newLayer")
+    }
+
+    @Test("Confirms that updateAlpha updates the layer's alpha")
+    func testUpdateAlpha() async {
+
+        let subject = TextureLayers()
+
+        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+
+        await subject.initialize(
+            configuration: .init(
+                textureSize: .init(width: 16, height: 16),
+                layerIndex: 0,
+                layers: [
+                    layer
+                ]
+            ),
+            textureRepository: MockTextureRepository()
+        )
+        #expect(subject.layers.first?.alpha == 255)
+
+        subject.updateAlpha(id: layer.id, alpha: 100)
+
+        #expect(subject.layers.first?.alpha == 100)
+    }
+
+    @Test("Confirms that updateVisibility updates the layer's visibility")
+    func testUpdateVisibility() async {
+
+        let subject = TextureLayers()
+
+        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+
+        await subject.initialize(
+            configuration: .init(
+                textureSize: .init(width: 16, height: 16),
+                layerIndex: 0,
+                layers: [
+                    layer
+                ]
+            ),
+            textureRepository: MockTextureRepository()
+        )
+        #expect(subject.layers.first?.isVisible == true)
+
+        subject.updateVisibility(id: layer.id, isVisible: false)
+
+        #expect(subject.layers.first?.isVisible == false)
+    }
 }

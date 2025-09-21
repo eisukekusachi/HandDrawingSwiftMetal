@@ -120,29 +120,35 @@ public extension TextureLayers {
 
         self._layers.insert(layer, at: index)
 
-        selectLayer(id: layer.id)
+        _selectedLayerId = layer.id
 
         try await textureRepository
             .addTexture(
                 texture,
                 newTextureUUID: layer.id
             )
+
+        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
             let textureRepository,
-            let selectedLayer
+            let selectedLayer,
+            _layers.count > 1
         else { return }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
+        let newLayerId = _layers[newLayerIndex].id
 
         _layers.remove(at: index)
 
-        selectLayer(id: _layers[newLayerIndex].id)
+        _selectedLayerId = newLayerId
 
         textureRepository
             .removeTexture(selectedLayer.id)
+
+        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func moveLayer(indices: MoveLayerIndices) {
@@ -167,6 +173,7 @@ public extension TextureLayers {
 
     func selectLayer(id: UUID) {
         _selectedLayerId = id
+
         fullCanvasUpdateRequestedSubject.send(())
     }
 
@@ -205,7 +212,7 @@ public extension TextureLayers {
         fullCanvasUpdateRequestedSubject.send(())
     }
 
-    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
+    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool = false) {
         guard
             let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
         else { return }
