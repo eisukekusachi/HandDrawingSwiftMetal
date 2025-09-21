@@ -39,7 +39,9 @@ public extension ResolvedTextureLayerArrayConfiguration {
         self.layers = configuration.layers
     }
 
-    var selectedLayerId: UUID {
+    var selectedLayerId: UUID? {
+        guard !layers.isEmpty else { return nil }
+
         let index = layerIndex < layers.count ? layerIndex : 0
         return layers[index].id
     }
