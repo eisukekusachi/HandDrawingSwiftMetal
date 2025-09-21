@@ -175,7 +175,6 @@ private extension CoreDataTextureLayersStorage {
                 for (index, layer) in layers.enumerated() {
                     if let entity = currentTextureLayerEntityDictionary[layer.id] {
                         if entity.title != layer.title { entity.title = layer.title }
-                        if entity.fileName != layer.fileName { entity.fileName = layer.fileName }
                         if entity.alpha != Int16(layer.alpha) { entity.alpha = Int16(layer.alpha) }
                         if entity.isVisible != layer.isVisible { entity.isVisible = layer.isVisible }
                         if entity.orderIndex != Int16(index) { entity.orderIndex = Int16(index) }
@@ -184,7 +183,6 @@ private extension CoreDataTextureLayersStorage {
                         let newEntity = TextureLayerStorageEntity(context: context)
                         newEntity.id = layer.id
                         newEntity.title = layer.title
-                        newEntity.fileName = layer.fileName
                         newEntity.alpha = Int16(layer.alpha)
                         newEntity.isVisible = layer.isVisible
                         newEntity.orderIndex = Int16(index)
