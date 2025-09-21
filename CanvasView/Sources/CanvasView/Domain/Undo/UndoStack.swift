@@ -168,11 +168,12 @@ public extension UndoStack {
     func pushUndoAdditionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
+        guard let texture = undoRedoObject.texture else { return }
         do {
             // Add a texture to the UndoTextureRepository for restoration
             try await undoTextureRepository
                 .addTexture(
-                    undoRedoObject.texture,
+                    texture,
                     newTextureUUID: undoRedoObject.redoObject.undoTextureUUID
                 )
 
@@ -187,11 +188,12 @@ public extension UndoStack {
     func pushUndoDeletionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
+        guard let texture = undoRedoObject.texture else { return }
         do {
             // Add a texture to the UndoTextureRepository for restoration
             try await undoTextureRepository
                 .addTexture(
-                    undoRedoObject.texture,
+                    texture,
                     newTextureUUID: undoRedoObject.undoObject.undoTextureUUID
                 )
 

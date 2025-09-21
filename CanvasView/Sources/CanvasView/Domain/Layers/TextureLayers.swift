@@ -115,7 +115,7 @@ public extension TextureLayers {
         }
     }
 
-    func addLayer(layer: TextureLayerItem, texture: MTLTexture?, at index: Int) async throws {
+    func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
         guard let textureRepository else { return }
 
         self._layers.insert(layer, at: index)

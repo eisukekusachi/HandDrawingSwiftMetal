@@ -45,7 +45,7 @@ public protocol TextureRepository: Sendable {
     /// Adds a texture using UUID
     @discardableResult
     @MainActor
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
 
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture

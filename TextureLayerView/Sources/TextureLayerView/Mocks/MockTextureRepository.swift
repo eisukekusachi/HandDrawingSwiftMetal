@@ -66,9 +66,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         uuid
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        let context = try MockMetalContext()
-        let texture = try context.makeTexture(width: 16, height: 16)
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         return .init(
             uuid: UUID(),
             texture: texture

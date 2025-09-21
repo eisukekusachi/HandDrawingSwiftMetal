@@ -233,16 +233,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     @discardableResult
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        guard let texture else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard textures[uuid] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

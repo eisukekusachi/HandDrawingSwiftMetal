@@ -11,10 +11,10 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    func addTexture(_ texture: (any MTLTexture)?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: (any MTLTexture), newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         .init(
             uuid: uuid,
-            texture: texture!
+            texture: texture
         )
     }
 

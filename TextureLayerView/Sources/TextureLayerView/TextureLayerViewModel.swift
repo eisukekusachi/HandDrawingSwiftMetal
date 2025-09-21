@@ -91,21 +91,20 @@ public extension TextureLayerViewModel {
         guard
             let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
-            let device: MTLDevice = MTLCreateSystemDefaultDevice()
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let texture = MTLTextureCreator.makeTexture(
+                width: Int(textureLayers.textureSize.width),
+                height: Int(textureLayers.textureSize.height),
+                with: device
+            )
         else { return }
-
-        let texture = MTLTextureCreator.makeTexture(
-            width: Int(textureLayers.textureSize.width),
-            height: Int(textureLayers.textureSize.height),
-            with: device
-        )
 
         let layer: TextureLayerItem = .init(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true,
-            thumbnail: texture?.makeThumbnail()
+            thumbnail: texture.makeThumbnail()
         )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 

@@ -317,15 +317,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         return uuid
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        guard let texture else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
 
         let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
