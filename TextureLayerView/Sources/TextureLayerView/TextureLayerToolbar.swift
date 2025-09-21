@@ -98,7 +98,6 @@ private struct PreviewView: View {
     private let repository = MockTextureRepository()
 
     private let previewConfig: ResolvedTextureLayerArrayConfiguration = .init(
-        projectName: "",
         textureSize: .zero,
         layerIndex: 0,
         layers: [

@@ -89,8 +89,7 @@ public extension TextureLayers {
 
     func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureRepository? = nil,
-        undoStack: UndoStack? = nil
+        textureRepository: TextureRepository? = nil
     ) async {
         self._textureSize = configuration.textureSize
 

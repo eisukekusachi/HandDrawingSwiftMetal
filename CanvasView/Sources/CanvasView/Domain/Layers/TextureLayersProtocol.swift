@@ -36,8 +36,7 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureRepository?,
-        undoStack: UndoStack?
+        textureRepository: TextureRepository?
     ) async
 
     func layer(_ layerId: UUID) -> TextureLayerItem?

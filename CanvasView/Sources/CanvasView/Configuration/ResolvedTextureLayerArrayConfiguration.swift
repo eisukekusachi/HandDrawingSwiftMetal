@@ -16,7 +16,6 @@ public struct ResolvedTextureLayerArrayConfiguration: Sendable {
     public let layers: [TextureLayerModel]
 
     public init(
-        projectName: String,
         textureSize: CGSize,
         layerIndex: Int,
         layers: [TextureLayerModel]
