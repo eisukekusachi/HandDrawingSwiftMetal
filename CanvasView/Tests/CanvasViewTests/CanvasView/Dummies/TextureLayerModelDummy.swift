@@ -12,14 +12,12 @@ public extension TextureLayerModel {
 
     static func generate(
         id: UUID = UUID(),
-        thumbnail: UIImage? = nil,
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true
-    ) -> Self {
+    ) -> TextureLayerModel {
         .init(
             id: id,
-            thumbnail: thumbnail,
             title: title,
             alpha: alpha,
             isVisible: isVisible

@@ -10,7 +10,7 @@ import UIKit
 public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
 
     /// The unique identifier for the layer
-    public let textureName: String
+    public let id: UUID
 
     /// The name of the layer
     public let title: String
@@ -21,25 +21,19 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
     /// Whether the layer is visible or not
     public let isVisible: Bool
 
-
-    /// Retrieve the UUID from the file name since it uses a UUID
-    public var id: UUID {
-        UUID.init(uuidString: textureName) ?? UUID()
-    }
-
     public var fileName: String {
         id.uuidString
     }
 
-    public init(fileName: String, title: String, alpha: Int, isVisible: Bool) {
-        self.textureName = fileName
+    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
+        self.id = id
         self.title = title
         self.alpha = alpha
         self.isVisible = isVisible
     }
 
     public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
-        lhs.textureName == rhs.textureName &&
+        lhs.id == rhs.id &&
         lhs.title == rhs.title &&
         lhs.alpha == rhs.alpha &&
         lhs.isVisible == rhs.isVisible
@@ -54,7 +48,7 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
 extension TextureLayerModel {
     public convenience init(item: TextureLayerItem) {
         self.init(
-            fileName: item.fileName,
+            id: item.id,
             title: item.title,
             alpha: item.alpha,
             isVisible: item.isVisible

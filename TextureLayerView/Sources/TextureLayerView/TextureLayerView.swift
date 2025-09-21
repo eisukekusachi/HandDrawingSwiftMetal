@@ -50,31 +50,31 @@ private struct PreviewView: View {
         layerIndex: 3,
         layers: [
             .init(
-                fileName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer0",
                 alpha: 255,
                 isVisible: true
             ),
             .init(
-                fileName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer1",
                 alpha: 200,
                 isVisible: true
             ),
             .init(
-                fileName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer2",
                 alpha: 150,
                 isVisible: true
             ),
             .init(
-                fileName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer3",
                 alpha: 100,
                 isVisible: true
             ),
             .init(
-                fileName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer4",
                 alpha: 50,
                 isVisible: true

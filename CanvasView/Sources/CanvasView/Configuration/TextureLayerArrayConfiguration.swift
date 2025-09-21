@@ -51,7 +51,7 @@ extension TextureLayerArrayConfiguration {
             .sorted { $0.orderIndex < $1.orderIndex }
             .map { layer -> TextureLayerModel in
                 .init(
-                    fileName: layer.fileName ?? "",
+                    id: layer.id ?? UUID(),
                     title: layer.title ?? "",
                     alpha: Int(layer.alpha),
                     isVisible: layer.isVisible

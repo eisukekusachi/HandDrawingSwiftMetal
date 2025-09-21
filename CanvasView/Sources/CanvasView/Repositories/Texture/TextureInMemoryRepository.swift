@@ -67,7 +67,7 @@ class TextureInMemoryRepository: TextureRepository {
         removeAll()
 
         let layer = TextureLayerModel(
-            fileName: UUID().uuidString,
+            id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
@@ -95,7 +95,7 @@ class TextureInMemoryRepository: TextureRepository {
         defaultTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.textureName },
+            fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(

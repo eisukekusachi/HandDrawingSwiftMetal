@@ -76,7 +76,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         if let textureSize = configuration.textureSize,
            FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.textureName },
+            fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
             // Retain IDs
@@ -103,7 +103,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         defaultTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
-            fileNames: configuration.layers.map { $0.textureName },
+            fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -195,7 +195,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         removeAll()
 
         let layer = TextureLayerModel(
-            fileName: UUID().uuidString,
+            id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
