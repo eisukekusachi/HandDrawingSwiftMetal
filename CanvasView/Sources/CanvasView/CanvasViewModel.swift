@@ -11,10 +11,6 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
-    public static var fileSuffix: String {
-        "zip"
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             canvasRenderer?.frameSize = frameSize
@@ -51,6 +47,8 @@ public final class CanvasViewModel {
     }
 
     private var dependencies: CanvasViewDependencies!
+
+    private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
     /// Maintains the state of the canvas
     private var textureLayersStorage: CoreDataTextureLayersStorage?
@@ -105,10 +103,21 @@ public final class CanvasViewModel {
             location: .swiftPackageManager
         )
 
+        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
+            project: ProjectMetaData(),
+            context: persistenceController.viewContext
+        )
+
         textureLayersStorage = CoreDataTextureLayersStorage(
             textureLayers: TextureLayers(),
             context: persistenceController.viewContext
         )
+
+        Task {
+            if let entity = try projectMetaDataStorage.fetch() {
+                projectMetaDataStorage.update(entity)
+            }
+        }
     }
 
     func initialize(
@@ -252,11 +261,13 @@ public extension CanvasViewModel {
 
         undoStack?.initialize(configuration.textureSize)
 
+        projectMetaDataStorage.refreshUpdatedAt()
+
+        updateCanvasView()
+
         textureLayersPreparedSubject.send(textureLayersStorage)
 
         canvasViewSetupCompletedSubject.send(configuration)
-
-        updateCanvasView()
     }
 }
 
@@ -373,6 +384,8 @@ public extension CanvasViewModel {
         await setupCanvas(resolvedConfiguration)
 
         transforming.setMatrix(.identity)
+
+        projectMetaDataStorage.refresh()
     }
 
     func undo() {
@@ -385,19 +398,22 @@ public extension CanvasViewModel {
     func loadFile(
         zipFileURL: URL,
         optionalEntities: [AnyLocalFileLoader] = [],
-        completion: ((ResolvedTextureLayerArrayConfiguration) -> Void)?
+        completion: ((ResolvedTextureLayerArrayConfiguration) -> Void)? = nil
     ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
 
             do {
+                // Create a working directory
                 try dependencies.localFileRepository.createWorkingDirectory()
 
+                // Extract the zip file into the working directory
                 let workingDirectoryURL = try await dependencies.localFileRepository.unzipToWorkingDirectoryAsync(
                     from: zipFileURL
                 )
 
+                // Restore the repository from the extracted textures
                 let model: ArchiveModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ArchiveModel.jsonFileName)
                 )
@@ -406,20 +422,29 @@ public extension CanvasViewModel {
                     layerIndex: model.layerIndex,
                     layers: model.layers
                 )
-                /// Restore the repository from the extracted textures
                 let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
                     configuration: configuration,
                     defaultTextureSize: defaultTextureSize()
                 )
-
                 await setupCanvas(resolvedConfiguration)
 
+                // Restore the metadata
+                let projectMetaData: ProjectMetaDataModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataModel.jsonFileName)
+                )
+                projectMetaDataStorage.update(
+                    projectName: projectMetaData.projectName,
+                    createdAt: projectMetaData.createdAt,
+                    updatedAt: projectMetaData.updatedAt
+                )
+
+                // Restore data from externally configured entities
                 for entity in optionalEntities {
                     try entity.load(in: workingDirectoryURL)
                 }
 
-                /// Remove the working space
+                // Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
 
                 toastSubject.send(
@@ -443,7 +468,6 @@ public extension CanvasViewModel {
     }
 
     func saveFile(
-        projectName: String,
         additionalItems: [AnyLocalFileNamedItem] = []
     ) {
         // Create a thumbnail image from the current canvas texture
@@ -484,20 +508,26 @@ public extension CanvasViewModel {
                 )
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
 
-                // Save the canvas entity (JSON metadata)
+                // Save the texture layers as JSON
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
                     namedItem: archiveModel.namedItem()
                 )
 
+                // Save the project metadata as JSON
+                async let resultProjectMetaDataEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: ProjectMetaDataModel.namedItem(from: projectMetaDataStorage)
+                )
+
+                // Save an externally provided entities as JSON
                 async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
                     namedItems: additionalItems
                 )
 
-                _ = try await (resultCanvasEntity, resultAdditional)
+                _ = try await (resultCanvasEntity, resultProjectMetaDataEntity, resultAdditional)
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL(fileName: projectName)
+                    to: zipFileURL(fileName: projectMetaDataStorage.projectName)
                 )
 
                 /// Remove the working space
@@ -644,7 +674,7 @@ extension CanvasViewModel {
     func zipFileURL(fileName: String) -> URL {
         FileManager.documentsFileURL(
             projectName: fileName,
-            suffix: CanvasViewModel.fileSuffix
+            suffix: ProjectMetaData.fileSuffix
         )
     }
 }

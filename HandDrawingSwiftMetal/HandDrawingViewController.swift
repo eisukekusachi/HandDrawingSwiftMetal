@@ -203,13 +203,12 @@ extension HandDrawingViewController {
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
-            suffix: CanvasViewModel.fileSuffix,
+            suffix: ProjectMetaData.fileSuffix,
             onTapItem: { [weak self] url in
                 guard let `self` else { return }
 
                 self.presentedViewController?.dismiss(animated: true)
                 self.contentView.canvasView.loadFile(
-                    projectName: "test",
                     zipFileURL: url,
                     optionalEntities: [
                         self.contentView.drawingToolLoader,

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25A354" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="ProjectEntity" representedClassName="ProjectEntity" syncable="YES" codeGenerationType="class">
+    <entity name="ProjectMetaDataEntity" representedClassName="ProjectMetaDataEntity" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="projectName" attributeType="String"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="textureLayer" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerArrayStorageEntity"/>
     </entity>
     <entity name="TextureLayerArrayStorageEntity" representedClassName="TextureLayerArrayStorageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="selectedLayerId" attributeType="UUID" usesScalarValueType="NO"/>

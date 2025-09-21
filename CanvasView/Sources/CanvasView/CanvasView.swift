@@ -10,9 +10,6 @@ import UIKit
 
 @objc public class CanvasView: UIView {
 
-    /// A name of the file to be saved
-    private(set) var projectName: String = Calendar.currentDate
-
     private var drawingRenderers: [DrawingToolRenderer] = []
 
     public var displayTexture: MTLTexture? {
@@ -136,21 +133,17 @@ import UIKit
 
     public func saveFile(additionalItems: [AnyLocalFileNamedItem] = []) {
         canvasViewModel.saveFile(
-            projectName: projectName,
             additionalItems: additionalItems
         )
     }
     public func loadFile(
-        projectName: String,
         zipFileURL: URL,
         optionalEntities: [AnyLocalFileLoader] = []
     ) {
         canvasViewModel.loadFile(
             zipFileURL: zipFileURL,
             optionalEntities: optionalEntities
-        ) { [weak self] configuration in
-            self?.projectName = projectName
-        }
+        )
     }
 
     public func undo() {
