@@ -121,8 +121,6 @@ public extension TextureLayers {
 
         self._layers.insert(layer, at: index)
 
-        try? await Task.sleep(nanoseconds: 1_000_000)
-
         selectLayer(id: layer.id)
 
         try await textureRepository
@@ -141,8 +139,6 @@ public extension TextureLayers {
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
 
         _layers.remove(at: index)
-
-        try? await Task.sleep(nanoseconds: 1_000_000)
 
         selectLayer(id: _layers[newLayerIndex].id)
 
