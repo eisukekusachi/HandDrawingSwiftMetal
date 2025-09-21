@@ -10,7 +10,7 @@ import UIKit
 
 @preconcurrency import CoreData
 
-/// Color palette managed by Core Data
+/// Texture layers managed by Core Data
 @MainActor
 public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
 
