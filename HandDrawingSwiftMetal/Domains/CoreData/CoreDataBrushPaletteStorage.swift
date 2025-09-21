@@ -46,6 +46,10 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         .store(in: &cancellables)
     }
 
+    var id: UUID {
+        palette.id
+    }
+
     var color: UIColor? {
         palette.color
     }
@@ -81,6 +85,9 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
 
 extension CoreDataBrushPaletteStorage {
     func update(_ entity: BrushPaletteEntity) {
+
+        self.palette.setId(entity.id ?? UUID())
+
         let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
             guard let hex = $0.hex else { return nil }
             return UIColor(hex: hex)
@@ -101,6 +108,7 @@ private extension CoreDataBrushPaletteStorage {
     func save(_ target: BrushPalette) async {
         let index  = target.index
         let hexes  = target.colors.map { $0.hex() }
+        let id: UUID = target.id
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()
@@ -109,13 +117,18 @@ private extension CoreDataBrushPaletteStorage {
             do {
                 let entity = try context.fetch(request).first ?? BrushPaletteEntity(context: context)
 
+                let currentId = entity.id
                 let currentIndex = Int(entity.index)
                 let currentHexes: [String] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap { $0.hex } ?? []
 
                 // Return if no changes
                 guard
-                    currentIndex != index || currentHexes != hexes
+                    currentId != id || currentIndex != index || currentHexes != hexes
                 else { return }
+
+                if currentId != id {
+                    entity.id = id
+                }
 
                 if currentIndex != index {
                     entity.index = Int16(index)

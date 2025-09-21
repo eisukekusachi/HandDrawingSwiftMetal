@@ -44,6 +44,10 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
         .store(in: &cancellables)
     }
 
+    var id: UUID {
+        palette.id
+    }
+
     var alpha: Int? {
         palette.alpha
     }
@@ -79,6 +83,9 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
 
 extension CoreDataEraserPaletteStorage {
     func update(_ entity: EraserPaletteEntity) {
+
+        self.palette.setId(entity.id ?? UUID())
+
         // Load alphas from Core Data
         let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
             Int($0.alpha)
@@ -99,6 +106,7 @@ private extension CoreDataEraserPaletteStorage {
     func save(_ target: EraserPalette) async {
         let index  = target.index
         let alphas  = target.alphas
+        let id: UUID = target.id
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()
@@ -107,13 +115,18 @@ private extension CoreDataEraserPaletteStorage {
             do {
                 let entity = try context.fetch(request).first ?? EraserPaletteEntity(context: context)
 
+                let currentId = entity.id
                 let currentIndex = Int(entity.index)
                 let currentAlphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
 
                 // Return if no changes
                 guard
-                    currentIndex != index || currentAlphas != alphas
+                    currentId != id || currentIndex != index || currentAlphas != alphas
                 else { return }
+
+                if currentId != id {
+                    entity.id = id
+                }
 
                 if currentIndex != index {
                     entity.index = Int16(index)

@@ -48,6 +48,10 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
         .store(in: &cancellables)
     }
 
+    var id: UUID {
+        drawingTool.id
+    }
+
     var type: DrawingToolType {
         drawingTool.type
     }
@@ -79,6 +83,9 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
 
 extension CoreDataDrawingToolStorage {
     func update(_ entity: DrawingToolEntity) {
+
+        drawingTool.setId(entity.id ?? UUID())
+
         setDrawingTool(.init(rawValue: Int(entity.type)))
         setBrushDiameter(Int(entity.brushDiameter))
         setEraserDiameter(Int(entity.eraserDiameter))
@@ -93,6 +100,7 @@ private extension CoreDataDrawingToolStorage {
         let brushDiameter: Int = target.brushDiameter
         let eraserDiameter: Int = target.eraserDiameter
         let type: Int = target.type.rawValue
+        let id: UUID = target.id
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()
@@ -101,14 +109,19 @@ private extension CoreDataDrawingToolStorage {
             do {
                 let entity = try context.fetch(request).first ?? DrawingToolEntity(context: context)
 
+                let currentId = entity.id
                 let currentBrushDiameter = Int(entity.brushDiameter)
                 let currentEraserDiameter = Int(entity.eraserDiameter)
                 let currentType = Int(entity.type)
 
                 // Return if no changes
                 guard
-                    currentBrushDiameter != brushDiameter || currentEraserDiameter != eraserDiameter || currentType != type
+                    currentId != id || currentBrushDiameter != brushDiameter || currentEraserDiameter != eraserDiameter || currentType != type
                 else { return }
+
+                if currentId != id {
+                    entity.id = id
+                }
 
                 if currentBrushDiameter != brushDiameter {
                     entity.brushDiameter = Int16(brushDiameter)

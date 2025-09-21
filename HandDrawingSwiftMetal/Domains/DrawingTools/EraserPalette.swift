@@ -12,6 +12,8 @@ import UIKit
 @MainActor
 protocol EraserPaletteProtocol {
 
+    var id: UUID { get }
+
     var alpha: Int? { get }
 
     func alpha(at index: Int) -> Int?
@@ -32,16 +34,21 @@ protocol EraserPaletteProtocol {
 @MainActor
 public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
 
+    private(set) var id: UUID
+
     @Published private(set) var alphas: [Int] = []
     @Published private(set) var index: Int = 0
 
     private let initialAlphas: [Int]
 
     public init(
+        id: UUID = UUID(),
         alphas: [Int],
         index: Int = 0,
         initialAlphas: [Int]? = nil
     ) {
+        self.id = id
+
         let newAlphas = alphas.isEmpty ? [255] : alphas
         self.alphas = newAlphas
         self.index = max(0, min(index, newAlphas.count - 1))
@@ -51,15 +58,19 @@ public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
 
 extension EraserPalette {
 
-    public var alpha: Int? {
+    func setId(_ id: UUID) {
+        self.id = id
+    }
+
+    var alpha: Int? {
         self.alphas.indices.contains(index) ? alphas[index] : nil
     }
 
-    public func alpha(at index: Int) -> Int? {
+    func alpha(at index: Int) -> Int? {
         self.alphas.indices.contains(index) ? alphas[index] : nil
     }
 
-    public func update(
+    func update(
         alphas: [Int] = [],
         currentIndex: Int = 0
     ) {
@@ -67,16 +78,16 @@ extension EraserPalette {
         self.index = max(0, min(currentIndex, alphas.count - 1))
     }
 
-    public func select(_ index: Int) {
+    func select(_ index: Int) {
         self.index = index
     }
 
-    public func insert(_ alpha: Int, at index: Int) {
+    func insert(_ alpha: Int, at index: Int) {
         guard (0 ... alphas.count).contains(index) else { return }
         alphas.insert(alpha, at: index)
     }
 
-    public func update(
+    func update(
         alphas: [Int] = [],
         index: Int = 0
     ) {
@@ -84,7 +95,7 @@ extension EraserPalette {
         self.index = max(0, min(index, self.alphas.count - 1))
     }
 
-    public func update(
+    func update(
         alpha: Int,
         at index: Int
     ) {
@@ -92,12 +103,12 @@ extension EraserPalette {
         alphas[index] = alpha
     }
 
-    public func remove(at index: Int) {
+    func remove(at index: Int) {
         guard alphas.indices.contains(index) && alphas.count > 1 else { return }
         alphas.remove(at: index)
     }
 
-    public func reset() {
+    func reset() {
         alphas = initialAlphas
         index = 0
     }

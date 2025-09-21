@@ -11,6 +11,8 @@ import UIKit
 @MainActor
 protocol DrawingToolProtocol {
 
+    var id: UUID { get }
+
     var type: DrawingToolType { get }
 
     var brushDiameter: Int { get }
@@ -29,18 +31,25 @@ protocol DrawingToolProtocol {
 @MainActor
 public final class DrawingTool: DrawingToolProtocol, ObservableObject {
 
+    private(set) var id: UUID
+
     @Published private(set) var type: DrawingToolType = .brush
     @Published private(set) var brushDiameter: Int = 8
     @Published private(set) var eraserDiameter: Int = 8
 
+    private let initialType: DrawingToolType
     private let initialBrushDiameter: Int
     private let initialEraserDiameter: Int
 
     public init(
+        id: UUID = UUID(),
         initialType: DrawingToolType = .brush,
         initialBrushDiameter: Int = 8,
         initialEraserDiameter: Int = 8
     ) {
+        self.id = id
+
+        self.initialType = initialType
         self.initialBrushDiameter = initialBrushDiameter
         self.initialEraserDiameter = initialEraserDiameter
     }
@@ -49,9 +58,13 @@ public final class DrawingTool: DrawingToolProtocol, ObservableObject {
 extension DrawingTool {
 
     func reset() {
-        self.type = .brush
+        self.type = initialType
         self.brushDiameter = initialBrushDiameter
         self.eraserDiameter = initialEraserDiameter
+    }
+
+    func setId(_ id: UUID) {
+        self.id = id
     }
 
     func setDrawingTool(_ type: DrawingToolType) {

@@ -11,6 +11,8 @@ import UIKit
 @MainActor
 protocol BrushPaletteProtocol {
 
+    var id: UUID { get }
+
     var color: UIColor? { get }
 
     func color(at index: Int) -> UIColor?
@@ -31,16 +33,21 @@ protocol BrushPaletteProtocol {
 @MainActor
 public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
 
+    private(set) var id: UUID
+
     @Published private(set) var colors: [UIColor] = []
     @Published private(set) var index: Int = 0
 
     private let initialColors: [UIColor]
 
     public init(
+        id: UUID = UUID(),
         colors: [UIColor],
         index: Int = 0,
         initialColors: [UIColor]? = nil
     ) {
+        self.id = id
+
         let newColors = colors.isEmpty ? [.black] : colors
         self.colors = newColors
         self.index = max(0, min(index, newColors.count - 1))
@@ -50,25 +57,29 @@ public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
 
 extension BrushPalette {
 
-    public var color: UIColor? {
+    func setId(_ id: UUID) {
+        self.id = id
+    }
+
+    var color: UIColor? {
         guard index < colors.count else { return nil }
         return colors[index]
     }
 
-    public func color(at index: Int) -> UIColor? {
+    func color(at index: Int) -> UIColor? {
         self.colors.indices.contains(index) ? colors[index] : nil
     }
 
-    public func select(_ index: Int) {
+    func select(_ index: Int) {
         self.index = index
     }
 
-    public func insert(_ color: UIColor, at index: Int) {
+    func insert(_ color: UIColor, at index: Int) {
         guard (0 ... colors.count).contains(index) else { return }
         colors.insert(color, at: index)
     }
 
-    public func update(
+    func update(
         colors: [UIColor] = [],
         index: Int = 0
     ) {
@@ -76,7 +87,7 @@ extension BrushPalette {
         self.index = max(0, min(index, self.colors.count - 1))
     }
 
-    public func update(
+    func update(
         color: UIColor,
         at index: Int
     ) {
@@ -84,12 +95,12 @@ extension BrushPalette {
         colors[index] = color
     }
 
-    public func remove(at index: Int) {
+    func remove(at index: Int) {
         guard colors.indices.contains(index) && colors.count > 1 else { return }
         colors.remove(at: index)
     }
 
-    public func reset() {
+    func reset() {
         colors = initialColors
         index = 0
     }
