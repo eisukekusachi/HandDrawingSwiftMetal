@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25A354" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="ProjectEntity" representedClassName="ProjectEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="projectName" optional="YES" attributeType="String"/>
-        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="projectName" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="textureLayer" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerArrayStorageEntity"/>
     </entity>
     <entity name="TextureLayerArrayStorageEntity" representedClassName="TextureLayerArrayStorageEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="textureHeight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="textureWidth" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="selectedLayerId" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="textureHeight" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="textureWidth" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="textureLayerArray" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TextureLayerStorageEntity" inverseName="textureLayerArray" inverseEntity="TextureLayerStorageEntity"/>
     </entity>
     <entity name="TextureLayerStorageEntity" representedClassName="TextureLayerStorageEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="alpha" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="isVisible" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="orderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="alpha" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isVisible" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="orderIndex" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" attributeType="String"/>
         <relationship name="textureLayerArray" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerArrayStorageEntity" inverseName="textureLayerArray" inverseEntity="TextureLayerArrayStorageEntity"/>
     </entity>
 </model>
