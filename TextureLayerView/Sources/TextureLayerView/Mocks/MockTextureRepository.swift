@@ -22,9 +22,9 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func setTextureSize(_ size: CGSize) {}
 
     func initializeStorage(
-        configuration: TextureLayserArrayConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayserArrayConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? fallbackTextureSize
@@ -33,9 +33,9 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayserArrayConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayserArrayConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? defaultTextureSize

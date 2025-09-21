@@ -47,9 +47,9 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     func initializeStorage(
-        configuration: TextureLayserArrayConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayserArrayConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
@@ -81,7 +81,7 @@ class TextureInMemoryRepository: TextureRepository {
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        let configuration: TextureLayserArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
+        let configuration: TextureLayerArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
 
         return try await .init(
             configuration: configuration,
@@ -91,9 +91,9 @@ class TextureInMemoryRepository: TextureRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayserArrayConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayserArrayConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.textureName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)

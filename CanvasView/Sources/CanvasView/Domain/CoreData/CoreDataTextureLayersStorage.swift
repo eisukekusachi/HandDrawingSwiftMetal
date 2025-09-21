@@ -91,7 +91,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     }
 
     public func initialize(
-        configuration: ResolvedTextureLayserArrayConfiguration,
+        configuration: ResolvedTextureLayerArrayConfiguration,
         textureRepository: TextureRepository? = nil,
         undoStack: UndoStack? = nil
     ) async {

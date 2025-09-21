@@ -1,5 +1,5 @@
 //
-//  ResolvedTextureLayserArrayConfiguration.swift
+//  ResolvedTextureLayerArrayConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-/// `TextureLayserArrayConfiguration` with a determined texture size
-public struct ResolvedTextureLayserArrayConfiguration: Sendable {
+/// `TextureLayerArrayConfiguration` with a determined texture size
+public struct ResolvedTextureLayerArrayConfiguration: Sendable {
 
     public let textureSize: CGSize
 
@@ -27,10 +27,10 @@ public struct ResolvedTextureLayserArrayConfiguration: Sendable {
     }
 }
 
-public extension ResolvedTextureLayserArrayConfiguration {
+public extension ResolvedTextureLayerArrayConfiguration {
 
     init(
-        configuration: TextureLayserArrayConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         resolvedTextureSize: CGSize
     ) async throws {
 

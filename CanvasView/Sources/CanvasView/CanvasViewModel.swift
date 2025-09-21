@@ -41,7 +41,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayserArrayConfiguration, Never> {
+    var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -87,7 +87,7 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayserArrayConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
@@ -156,7 +156,7 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            let configuration: TextureLayserArrayConfiguration = .init(entity: try? textureLayersStorage?.fetch()) ?? configuration.textureLayserArrayConfiguration
+            let configuration: TextureLayerArrayConfiguration = .init(entity: try? textureLayersStorage?.fetch()) ?? configuration.textureLayerArrayConfiguration
 
             // Initialize the texture repository
             let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
@@ -225,7 +225,7 @@ public final class CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    private func setupCanvas(_ configuration: ResolvedTextureLayserArrayConfiguration) async {
+    private func setupCanvas(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
         guard let textureLayersStorage else { return }
 
         await textureLayersStorage.initialize(
@@ -243,7 +243,7 @@ public extension CanvasViewModel {
         }
     }
 
-    private func completeCanvasSetup(configuration: ResolvedTextureLayserArrayConfiguration) {
+    private func completeCanvasSetup(configuration: ResolvedTextureLayerArrayConfiguration) {
         guard let textureLayersStorage else { return }
 
         for i in 0 ..< drawingToolRenderers.count {
@@ -364,7 +364,7 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func newCanvas(configuration: TextureLayserArrayConfiguration) async throws {
+    func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
         // Initialize the texture repository
         let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
             configuration: configuration,
@@ -385,7 +385,7 @@ public extension CanvasViewModel {
     func loadFile(
         zipFileURL: URL,
         optionalEntities: [AnyLocalFileLoader] = [],
-        completion: ((ResolvedTextureLayserArrayConfiguration) -> Void)?
+        completion: ((ResolvedTextureLayerArrayConfiguration) -> Void)?
     ) {
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -401,7 +401,7 @@ public extension CanvasViewModel {
                 let model: ArchiveModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ArchiveModel.jsonFileName)
                 )
-                let configuration: TextureLayserArrayConfiguration = .init(
+                let configuration: TextureLayerArrayConfiguration = .init(
                     textureSize: model.textureSize,
                     layerIndex: model.layerIndex,
                     layers: model.layers

@@ -39,7 +39,7 @@ import UIKit
     }
 
     /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayserArrayConfiguration, Never> {
+    public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
@@ -58,7 +58,7 @@ import UIKit
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayserArrayConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
@@ -117,7 +117,7 @@ import UIKit
         )
     }
 
-    public func newCanvas(configuration: TextureLayserArrayConfiguration) {
+    public func newCanvas(configuration: TextureLayerArrayConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)

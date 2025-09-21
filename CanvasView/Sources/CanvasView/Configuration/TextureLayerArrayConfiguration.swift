@@ -1,5 +1,5 @@
 //
-//  TextureLayserArrayConfiguration.swift
+//  TextureLayerArrayConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct TextureLayserArrayConfiguration: Sendable {
+public struct TextureLayerArrayConfiguration: Sendable {
     /// The size of the texture used for the canvas.
     /// If nothing is set, the screen size is applied.
     public let textureSize: CGSize?
@@ -29,7 +29,7 @@ public struct TextureLayserArrayConfiguration: Sendable {
     }
 }
 
-extension TextureLayserArrayConfiguration {
+extension TextureLayerArrayConfiguration {
 
     public init(
         _ configuration: Self,
