@@ -13,7 +13,7 @@
     </entity>
     <entity name="TextureLayerStorageEntity" representedClassName="TextureLayerStorageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="alpha" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isVisible" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="orderIndex" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" attributeType="String"/>
