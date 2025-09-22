@@ -21,18 +21,21 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     func setTextureSize(_ size: CGSize) {}
 
-    func initializeStorage(configuration: CanvasConfiguration, defaultTextureSize: CGSize) async throws -> CanvasResolvedConfiguration {
+    func initializeStorage(
+        configuration: TextureLayerArrayConfiguration,
+        fallbackTextureSize: CGSize
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
-            resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
+            resolvedTextureSize: configuration.textureSize ?? fallbackTextureSize
         )
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
@@ -63,9 +66,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         uuid
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        let context = try MockMetalContext()
-        let texture = try context.makeTexture(width: 16, height: 16)
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         return .init(
             uuid: UUID(),
             texture: texture

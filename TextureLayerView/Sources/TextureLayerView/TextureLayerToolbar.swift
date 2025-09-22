@@ -92,47 +92,41 @@ private extension Image {
 }
 
 private struct PreviewView: View {
-    let canvasState = CanvasState()
-    let textureLayerConfiguration: TextureLayerConfiguration
-    let viewModel = TextureLayerViewModel()
+    private let viewModel = TextureLayerViewModel()
 
-    init() {
-        let layers: [TextureLayerItem] = [
+    private let textureLayers = TextureLayers()
+    private let repository = MockTextureRepository()
+
+    private let previewConfig: ResolvedTextureLayerArrayConfiguration = .init(
+        textureSize: .zero,
+        layerIndex: 0,
+        layers: [
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer0",
-                alpha: 255
-            ),
-            .init(textureName: UUID().uuidString, title: "Layer1", alpha: 200),
-            .init(textureName: UUID().uuidString, title: "Layer2", alpha: 150),
-            .init(textureName: UUID().uuidString, title: "Layer3", alpha: 100),
-            .init(textureName: UUID().uuidString, title: "Layer4", alpha: 50),
+                alpha: 255,
+                isVisible: true
+            )
         ]
+    )
 
-        let configuration: CanvasResolvedConfiguration = .init(
-            projectName: "",
-            textureSize: .zero,
-            layerIndex: 0,
-            layers: layers
-        )
-
-        canvasState.initialize(
-            configuration: configuration
-        )
-
-        textureLayerConfiguration = .init(
-            canvasState: canvasState,
-            textureRepository: MockTextureRepository(),
-            undoStack: nil
-        )
-
-        viewModel.initialize(configuration: textureLayerConfiguration)
-    }
     var body: some View {
         TextureLayerToolbar(
             viewModel: viewModel
         )
         .frame(width: 320, height: 300)
+        .onAppear {
+            Task {
+                await textureLayers.initialize(
+                    configuration: previewConfig,
+                    textureRepository: repository
+                )
+
+                viewModel.initialize(
+                    textureLayers: textureLayers
+                )
+            }
+        }
     }
 }
 

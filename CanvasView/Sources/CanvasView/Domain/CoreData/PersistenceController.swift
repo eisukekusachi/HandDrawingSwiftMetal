@@ -8,13 +8,31 @@
 import CoreData
 
 public final class PersistenceController {
+    public enum ModelLocation {
+        case mainApp
+        case swiftPackageManager
+    }
 
-    public var context: NSManagedObjectContext { container.viewContext }
+    public var viewContext: NSManagedObjectContext { container.viewContext }
 
     private let container: NSPersistentContainer
 
-    public init(modelName: String, excludeFromBackup: Bool = true) {
-        container = NSPersistentContainer(name: modelName)
+    public init(xcdatamodeldName: String, location: ModelLocation, excludeFromBackup: Bool = true) {
+        let bundle: Bundle = {
+            switch location {
+            case .mainApp: return .main
+            case .swiftPackageManager: return .module
+            }
+        }()
+
+        guard
+            let modelURL = bundle.url(forResource: xcdatamodeldName, withExtension: "momd"),
+            let model = NSManagedObjectModel(contentsOf: modelURL)
+        else {
+            fatalError("Failed to load Core Data model '\(xcdatamodeldName)' from bundle: \(bundle)")
+        }
+
+        container = NSPersistentContainer(name: xcdatamodeldName, managedObjectModel: model)
 
         container.loadPersistentStores { storeDescription, _error in
             precondition(_error == nil, "Store load failed: \(_error!)")
@@ -26,10 +44,6 @@ public final class PersistenceController {
 
         container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         container.viewContext.automaticallyMergesChangesFromParent = true
-    }
-
-    public func saveIfNeeded() throws {
-        if context.hasChanges { try context.save() }
     }
 
     private func excludeStoreFilesFromBackup() {

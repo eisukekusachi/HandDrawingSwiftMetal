@@ -1,5 +1,5 @@
 //
-//  CanvasResolvedConfiguration.swift
+//  ResolvedTextureLayerArrayConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,44 +7,42 @@
 
 import UIKit
 
-public struct CanvasResolvedConfiguration: Sendable {
-
-    public let projectName: String
+/// `TextureLayerArrayConfiguration` with a determined texture size
+public struct ResolvedTextureLayerArrayConfiguration: Sendable {
 
     public let textureSize: CGSize
 
     public let layerIndex: Int
-    public let layers: [TextureLayerItem]
+    public let layers: [TextureLayerModel]
 
     public init(
-        projectName: String,
         textureSize: CGSize,
         layerIndex: Int,
-        layers: [TextureLayerItem]
+        layers: [TextureLayerModel]
     ) {
-        self.projectName = projectName
         self.textureSize = textureSize
         self.layerIndex = layerIndex
         self.layers = layers
     }
 }
 
-public extension CanvasResolvedConfiguration {
+public extension ResolvedTextureLayerArrayConfiguration {
 
     init(
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         resolvedTextureSize: CGSize
     ) async throws {
 
         self.textureSize = resolvedTextureSize
 
-        self.projectName = configuration.projectName
-
         self.layerIndex = configuration.layerIndex
         self.layers = configuration.layers
     }
 
-    var selectedLayerId: UUID {
-        layers[layerIndex].id
+    var selectedLayerId: UUID? {
+        guard !layers.isEmpty else { return nil }
+
+        let index = layerIndex < layers.count ? layerIndex : 0
+        return layers[index].id
     }
 }

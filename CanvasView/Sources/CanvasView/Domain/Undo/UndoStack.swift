@@ -19,7 +19,7 @@ public final class UndoStack {
 
     private let undoManager = UndoManager()
 
-    private let canvasState: CanvasState
+    private let textureLayers: TextureLayers
 
     private let textureRepository: TextureRepository!
 
@@ -32,17 +32,17 @@ public final class UndoStack {
 
     init(
         undoCount: Int = 64,
-        canvasState: CanvasState,
+        textureLayers: TextureLayers,
         textureRepository: TextureRepository,
         undoTextureRepository: TextureRepository
     ) {
-        self.canvasState = canvasState
-
-        self.undoManager.levelsOfUndo = undoCount
-        self.undoManager.groupsByEvent = false
+        self.textureLayers = textureLayers
 
         self.textureRepository = textureRepository
         self.undoTextureRepository = undoTextureRepository
+
+        self.undoManager.levelsOfUndo = undoCount
+        self.undoManager.groupsByEvent = false
 
         didUndoSubject.send(.init(undoManager))
     }
@@ -71,12 +71,12 @@ public extension UndoStack {
 
     func setDrawingUndoObject() async {
         guard
-            let textureLayerId = canvasState.selectedLayerId,
-            let undoLayer = canvasState.selectedLayer
+            let textureLayerId = textureLayers.selectedLayerId,
+            let undoLayer = textureLayers.selectedLayer
         else { return }
 
         let undoObject = UndoDrawingObject(
-            layer: .init(model: undoLayer)
+            from: .init(item: undoLayer)
         )
 
         do {
@@ -101,11 +101,11 @@ public extension UndoStack {
     ) async {
         guard
             let undoObject = drawingUndoObject,
-            let redoLayer = canvasState.selectedLayer
+            let redoLayer = textureLayers.selectedLayer
         else { return }
 
         let redoObject = UndoDrawingObject(
-            layer: .init(model: redoLayer)
+            from: .init(item: redoLayer)
         )
 
         do {
@@ -135,11 +135,11 @@ public extension UndoStack {
     ) async {
         guard
             let undoObject = drawingUndoObject,
-            let redoLayer = canvasState.selectedLayer
+            let redoLayer = textureLayers.selectedLayer
         else { return }
 
         let redoObject = UndoDrawingObject(
-            layer: .init(model: redoLayer)
+            from: .init(item: redoLayer)
         )
 
         do {
@@ -168,11 +168,12 @@ public extension UndoStack {
     func pushUndoAdditionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
+        guard let texture = undoRedoObject.texture else { return }
         do {
             // Add a texture to the UndoTextureRepository for restoration
             try await undoTextureRepository
                 .addTexture(
-                    undoRedoObject.texture,
+                    texture,
                     newTextureUUID: undoRedoObject.redoObject.undoTextureUUID
                 )
 
@@ -187,11 +188,12 @@ public extension UndoStack {
     func pushUndoDeletionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
+        guard let texture = undoRedoObject.texture else { return }
         do {
             // Add a texture to the UndoTextureRepository for restoration
             try await undoTextureRepository
                 .addTexture(
-                    undoRedoObject.texture,
+                    texture,
                     newTextureUUID: undoRedoObject.undoObject.undoTextureUUID
                 )
 
@@ -211,25 +213,17 @@ public extension UndoStack {
 
         undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                do {
-                    try self?.undoTextureRepository.removeTexture(
-                        result.undoTextureUUID
-                    )
-                } catch {
-                    Logger.error(error)
-                }
+                self?.undoTextureRepository.removeTexture(
+                    result.undoTextureUUID
+                )
             })
             .store(in: &cancellables)
 
         redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                do {
-                    try self?.undoTextureRepository.removeTexture(
-                        result.undoTextureUUID
-                    )
-                } catch {
-                    Logger.error(error)
-                }
+                self?.undoTextureRepository.removeTexture(
+                    result.undoTextureUUID
+                )
             })
             .store(in: &cancellables)
 
@@ -284,49 +278,45 @@ extension UndoStack {
         undoObject: UndoObject,
         textureRepository: TextureRepository
     ) async throws {
+        /*
         if let undoObject = undoObject as? UndoDrawingObject {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
-            canvasState.updateThumbnail(result)
-            canvasState.selectedLayerId = undoObject.textureLayer.id
-            canvasState.fullCanvasUpdateSubject.send()
+            textureLayers.updateThumbnail(result)
+            textureLayers.selectedLayerId = undoObject.textureLayer.id
+            textureLayers.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
-            canvasState.addLayer(
-                newTextureLayer: .init(
-                    item: undoObject.textureLayer,
-                    thumbnail: result.texture.makeThumbnail()
-                ),
+            textureLayers.addLayer(
+                newTextureLayer: .init(model: undoObject.textureLayer, thumbnail: nil),
                 at: undoObject.insertIndex
             )
-            canvasState.fullCanvasUpdateSubject.send()
+            textureLayers.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
-            canvasState.removeLayer(
+            textureLayers.removeLayer(
                 layerIdToDelete: undoObject.textureLayer.id,
                 newLayerId: undoObject.selectedLayerIdAfterDeletion
             )
-            canvasState.fullCanvasUpdateSubject.send()
+            textureLayers.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoMoveObject {
-            canvasState.moveLayer(
+            textureLayers.moveLayer(
                 indices: undoObject.indices,
                 selectedLayerId: undoObject.selectedLayerId
             )
-            canvasState.fullCanvasUpdateSubject.send()
+            textureLayers.fullCanvasUpdateSubject.send()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
             let result = try await textureRepository.copyTexture(uuid: undoObject.textureLayer.id)
 
-            canvasState.updateLayer(
-                newTextureLayer: .init(
-                    item: undoObject.textureLayer,
-                    thumbnail: result.texture.makeThumbnail()
-                )
+            textureLayers.updateLayer(
+                newTextureLayer: .init(model: undoObject.textureLayer, thumbnail: nil)
             )
-            canvasState.canvasUpdateSubject.send()
+            textureLayers.canvasUpdateSubject.send()
         }
+        */
     }
 }

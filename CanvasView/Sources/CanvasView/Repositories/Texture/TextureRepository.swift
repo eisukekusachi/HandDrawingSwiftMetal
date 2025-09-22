@@ -27,16 +27,16 @@ public protocol TextureRepository: Sendable {
 
     /// Initializes the storage from the given configuration, falling back to a new texture if that fails
     func initializeStorage(
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration
+        configuration: TextureLayerArrayConfiguration,
+        fallbackTextureSize: CGSize
+    ) async throws -> ResolvedTextureLayerArrayConfiguration
 
     /// Initializes the texture storage by loading textures from the source URL and setting the texture size
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration
+    ) async throws -> ResolvedTextureLayerArrayConfiguration
 
     func setTextureSize(_ size: CGSize)
 
@@ -45,7 +45,7 @@ public protocol TextureRepository: Sendable {
     /// Adds a texture using UUID
     @discardableResult
     @MainActor
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
 
     /// Copies a texture for the given UUID
     func copyTexture(uuid: UUID) async throws -> IdentifiedTexture

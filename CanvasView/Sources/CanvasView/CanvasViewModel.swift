@@ -11,13 +11,6 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
-    /// Maintains the state of the canvas
-    let canvasState = CanvasState()
-
-    public static var fileSuffix: String {
-        "zip"
-    }
-
     var frameSize: CGSize = .zero {
         didSet {
             canvasRenderer?.frameSize = frameSize
@@ -43,25 +36,23 @@ public final class CanvasViewModel {
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `Void` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
+    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
+    var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    var textureLayerConfiguration: TextureLayerConfiguration {
-        .init(
-            canvasState: canvasState,
-            textureRepository: self.dependencies.textureRepository,
-            undoStack: undoStack,
-            defaultBackgroundColor: UIColor(named: "defaultBackgroundColor") ?? .clear,
-            selectedBackgroundColor: UIColor(named: "selectedBackgroundColor") ?? .clear
-        )
+    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
+    var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
+        textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
     private var dependencies: CanvasViewDependencies!
 
-    /// It persists the canvas state to disk using `CoreData` when `textureRepository` is `TextureLayerDocumentsDirectorySingletonRepository`
-    private var canvasStateStorage: CanvasStateStorage?
+    /// Metadata stored in Core Data
+    private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
+
+    /// Texture layers stored in Core Data
+    private var textureLayersStorage: CoreDataTextureLayersStorage?
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
@@ -95,25 +86,48 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
+
+    private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     private var undoStack: UndoStack? = nil
 
+    private let persistenceController: PersistenceController
+
     private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        persistenceController = PersistenceController(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
+
+        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
+            project: ProjectMetaData(),
+            context: persistenceController.viewContext
+        )
+
+        textureLayersStorage = CoreDataTextureLayersStorage(
+            textureLayers: TextureLayers(),
+            context: persistenceController.viewContext
+        )
+
+        Task {
+            if let entity = try projectMetaDataStorage.fetch() {
+                projectMetaDataStorage.update(entity)
+            }
+        }
+    }
 
     func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
-        configuration: CanvasConfiguration,
-        environmentConfiguration: CanvasEnvironmentConfiguration,
-        defaultTextureSize: CGSize,
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable
+        configuration: CanvasConfiguration
     ) {
         drawingToolRenderers.forEach {
-            $0.configure(displayView: displayView, renderer: renderer)
+            $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
         self.drawingToolRenderers = drawingToolRenderers
 
@@ -122,27 +136,18 @@ public final class CanvasViewModel {
         self.dependencies = dependencies
 
         self.canvasRenderer = CanvasRenderer(
-            displayView: displayView,
-            renderer: renderer
-        )
-
-        self.canvasRenderer?.initialize(
-            environmentConfiguration: environmentConfiguration
+            displayView: dependencies.displayView,
+            renderer: dependencies.renderer,
+            environmentConfiguration: configuration.environmentConfiguration
         )
 
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            environmentConfiguration.drawingGestureRecognitionSecond
+            configuration.environmentConfiguration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            environmentConfiguration.transformingGestureRecognitionSecond
+            configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
-
-        // If `TextureLayerDocumentsDirectorySingletonRepository` is used, `CanvasStateStorage` is enabled
-        if self.dependencies.textureRepository is TextureDocumentsDirectoryRepository {
-            canvasStateStorage = CanvasStateStorage()
-            canvasStateStorage?.setupStorage(canvasState)
-        }
 
         /*
         // If `undoTextureRepository` is used, undo functionality is enabled
@@ -156,14 +161,19 @@ public final class CanvasViewModel {
         }
         */
 
+        bindData()
+
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            try await initializeCanvas(
-                configuration: canvasStateStorage?.coreDataConfiguration ?? configuration,
-                defaultTextureSize: defaultTextureSize
+            let configuration: TextureLayerArrayConfiguration = .init(entity: try? textureLayersStorage?.fetch()) ?? configuration.textureLayerArrayConfiguration
+
+            // Initialize the texture repository
+            let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+                configuration: configuration,
+                fallbackTextureSize: defaultTextureSize()
             )
-            bindData()
+            await setupCanvas(resolvedConfiguration)
         }
     }
 
@@ -174,7 +184,7 @@ public final class CanvasViewModel {
                 guard
                     let drawingCurve = self?.drawingCurve,
                     let texture = self?.canvasRenderer?.selectedTexture,
-                    let selectedLayerId = self?.canvasState.selectedLayer?.id
+                    let selectedLayerId = self?.textureLayersStorage?.selectedLayer?.id
                 else { return }
 
                 self?.drawingToolRenderer?.drawCurve(
@@ -195,24 +205,16 @@ public final class CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas
-        canvasState.canvasUpdateSubject
+        textureLayersStorage?.canvasUpdateRequestedPublisher
             .sink { [weak self] in
                 self?.updateCanvasView()
             }
             .store(in: &cancellables)
 
         // Update the entire canvas, including all drawing textures
-        canvasState.fullCanvasUpdateSubject
+        textureLayersStorage?.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
                 self?.updateCanvasByMergingAllLayers()
-            }
-            .store(in: &cancellables)
-
-        canvasStateStorage?.alertSubject
-            .sink { [weak self] error in
-                self?.alertSubject.send(
-                    ErrorModel.create(error)
-                )
             }
             .store(in: &cancellables)
 
@@ -233,25 +235,10 @@ public final class CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    var currentTextureSize: CGSize {
-        canvasState.textureSize
-    }
+    private func setupCanvas(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+        guard let textureLayersStorage else { return }
 
-    func initializeCanvas(
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) async throws {
-        // Initialize the texture repository
-        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
-            configuration: configuration,
-            defaultTextureSize: defaultTextureSize
-        )
-
-        setupCanvas(resolvedConfiguration)
-    }
-
-    private func setupCanvas(_ configuration: CanvasResolvedConfiguration) {
-        canvasState.initialize(
+        await textureLayersStorage.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
         )
@@ -259,23 +246,29 @@ public extension CanvasViewModel {
         canvasRenderer?.initTextures(textureSize: configuration.textureSize)
 
         canvasRenderer?.updateDrawingTextures(
-            canvasState: canvasState,
+            textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
             self?.completeCanvasSetup(configuration: configuration)
         }
     }
 
-    private func completeCanvasSetup(configuration: CanvasResolvedConfiguration) {
+    private func completeCanvasSetup(configuration: ResolvedTextureLayerArrayConfiguration) {
+        guard let textureLayersStorage else { return }
+
         for i in 0 ..< drawingToolRenderers.count {
             drawingToolRenderers[i].initTextures(configuration.textureSize)
         }
 
         undoStack?.initialize(configuration.textureSize)
 
-        canvasViewSetupCompletedSubject.send(configuration)
+        projectMetaDataStorage.refreshUpdatedAt()
 
         updateCanvasView()
+
+        textureLayersPreparedSubject.send(textureLayersStorage)
+
+        canvasViewSetupCompletedSubject.send(configuration)
     }
 }
 
@@ -383,9 +376,17 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func newCanvas(configuration: CanvasConfiguration) async throws {
-        try await initializeCanvas(configuration: configuration, defaultTextureSize: defaultTextureSize())
+    func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
+        // Initialize the texture repository
+        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+            configuration: configuration,
+            fallbackTextureSize: defaultTextureSize()
+        )
+        await setupCanvas(resolvedConfiguration)
+
         transforming.setMatrix(.identity)
+
+        projectMetaDataStorage.refresh()
     }
 
     func undo() {
@@ -397,43 +398,62 @@ public extension CanvasViewModel {
 
     func loadFile(
         zipFileURL: URL,
-        requiredEntityType: [CanvasEntityConvertible.Type],
-        optionalEntities: [AnyLocalFileLoader] = []
+        optionalEntities: [AnyLocalFileLoader] = [],
+        completion: ((ResolvedTextureLayerArrayConfiguration) -> Void)? = nil
     ) {
         Task {
-            defer { activityIndicatorSubject.send(false) }
+            defer {
+                // Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
             activityIndicatorSubject.send(true)
 
             do {
+                // Create a temporary working directory
                 try dependencies.localFileRepository.createWorkingDirectory()
 
+                // Extract the zip file into the working directory
                 let workingDirectoryURL = try await dependencies.localFileRepository.unzipToWorkingDirectoryAsync(
                     from: zipFileURL
                 )
 
-                let entity: CanvasEntity = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(CanvasEntity.jsonFileName),
-                    compatibleTypes: requiredEntityType
+                // Load texture layer data from the JSON file
+                let textureLayersModel: TextureLayersArchiveModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.jsonFileName)
                 )
-                let configuration: CanvasConfiguration = .init(
-                    projectName: zipFileURL.fileName,
-                    entity: entity
+                let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
+                    textureSize: textureLayersModel.textureSize,
+                    layerIndex: textureLayersModel.layerIndex,
+                    layers: textureLayersModel.layers
                 )
-                /// Restore the repository from the extracted textures
-                let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
+
+                let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
-                    configuration: configuration,
+                    configuration: textureLayersConfiguration,
                     defaultTextureSize: defaultTextureSize()
                 )
 
-                setupCanvas(resolvedConfiguration)
+                // Load project metadata, falling back if it is missing
+                let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
+                )
 
+                // Restore the canvas
+                await setupCanvas(resolvedTextureLayersConfiguration)
+
+                // Update metadata
+                projectMetaDataStorage.update(
+                    projectName: projectMetaData?.projectName ?? zipFileURL.fileName,
+                    createdAt: projectMetaData?.createdAt ?? Date(),
+                    updatedAt: projectMetaData?.updatedAt ?? Date()
+                )
+
+                // Restore data from externally configured entities
                 for entity in optionalEntities {
-                    try entity.load(in: workingDirectoryURL)
+                    entity.loadIgnoringError(in: workingDirectoryURL)
                 }
-
-                /// Remove the working space
-                dependencies.localFileRepository.removeWorkingDirectory()
 
                 toastSubject.send(
                     .init(
@@ -441,6 +461,8 @@ public extension CanvasViewModel {
                         icon: UIImage(systemName: "hand.thumbsup.fill")
                     )
                 )
+
+                completion?(resolvedTextureLayersConfiguration)
             }
             catch {
                 alertSubject.send(
@@ -458,15 +480,20 @@ public extension CanvasViewModel {
     ) {
         // Create a thumbnail image from the current canvas texture
         guard
-            let canvasTexture = canvasRenderer?.canvasTexture,
-            let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: CanvasEntity.thumbnailLength,
+            let textureLayersStorage,
+            let thumbnailImage = canvasRenderer?.canvasTexture?.uiImage?.resizeWithAspectRatio(
+                height: TextureLayersArchiveModel.thumbnailLength,
                 scale: 1.0
             )
         else { return }
 
         Task {
-            defer { activityIndicatorSubject.send(false) }
+            defer {
+                /// Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
             activityIndicatorSubject.send(true)
 
             do {
@@ -475,12 +502,12 @@ public extension CanvasViewModel {
 
                 // Copy all textures from the textureRepository
                 let textures = try await dependencies.textureRepository.copyTextures(
-                    uuids: canvasState.layers.map { $0.id }
+                    uuids: textureLayersStorage.layers.map { $0.id }
                 )
 
                 // Save the thumbnail image into the working directory
                 async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(fileName: CanvasEntity.thumbnailName, item: thumbnailImage)
+                    namedItem: .init(fileName: TextureLayersArchiveModel.thumbnailName, item: thumbnailImage)
                 )
 
                 // Save the textures into the working directory
@@ -491,24 +518,28 @@ public extension CanvasViewModel {
                 )
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
 
-                // Save the canvas entity (JSON metadata)
+                // Save the texture layers as JSON
+                let textureLayersModel: TextureLayersArchiveModel = .init(textureLayers: textureLayersStorage)
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: CanvasEntity.namedItem(canvasState)
+                    namedItem: textureLayersModel.namedItem()
                 )
 
+                // Save the project metadata as JSON
+                async let resultProjectMetaDataEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
+                    namedItem: ProjectMetaDataArchiveModel.namedItem(from: projectMetaDataStorage)
+                )
+
+                // Save an externally provided entities as JSON
                 async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
                     namedItems: additionalItems
                 )
 
-                _ = try await (resultCanvasEntity, resultAdditional)
+                _ = try await (resultCanvasEntity, resultProjectMetaDataEntity, resultAdditional)
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL(fileName: canvasState.projectName)
+                    to: zipFileURL(fileName: projectMetaDataStorage.projectName)
                 )
-
-                /// Remove the working space
-                dependencies.localFileRepository.removeWorkingDirectory()
 
                 toastSubject.send(
                     .init(
@@ -598,6 +629,10 @@ extension CanvasViewModel {
                     texture: texture,
                     for: selectedTextureId
                 )
+
+                // Update `updatedAt` when drawing completes
+                projectMetaDataStorage.refreshUpdatedAt()
+
                 await undoStack?.pushUndoDrawingObject(
                     texture: resultTexture.texture
                 )
@@ -607,7 +642,7 @@ extension CanvasViewModel {
             }
         }
 
-        canvasState.updateThumbnail(
+        textureLayersStorage?.updateThumbnail(
             .init(uuid: selectedTextureId, texture: texture)
         )
     }
@@ -624,8 +659,10 @@ extension CanvasViewModel {
     }
 
     func updateCanvasByMergingAllLayers() {
+        guard let textureLayersStorage else { return }
+
         canvasRenderer?.updateDrawingTextures(
-            canvasState: canvasState,
+            textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
             self?.updateCanvasView()
@@ -634,12 +671,12 @@ extension CanvasViewModel {
 
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
-            let selectedLayer = canvasState.selectedLayer
+            let selectedLayer = textureLayersStorage?.selectedLayer
         else { return }
 
         canvasRenderer?.updateCanvasView(
             realtimeDrawingTexture: realtimeDrawingTexture,
-            selectedLayer: selectedLayer
+            selectedLayer: .init(item: selectedLayer)
         )
     }
 }
@@ -649,7 +686,7 @@ extension CanvasViewModel {
     func zipFileURL(fileName: String) -> URL {
         FileManager.documentsFileURL(
             projectName: fileName,
-            suffix: CanvasViewModel.fileSuffix
+            suffix: ProjectMetaData.fileSuffix
         )
     }
 }

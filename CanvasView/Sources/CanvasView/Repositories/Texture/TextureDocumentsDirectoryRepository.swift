@@ -70,13 +70,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+        configuration: TextureLayerArrayConfiguration,
+        fallbackTextureSize: CGSize
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
 
-        let textureSize = configuration.textureSize ?? defaultTextureSize
-
-        if FileManager.containsAll(
+        if let textureSize = configuration.textureSize,
+           FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
@@ -93,16 +92,16 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         } else {
             return try await initializeStorageWithNewTexture(
                 configuration: configuration,
-                textureSize: textureSize
+                textureSize: fallbackTextureSize
             )
         }
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -177,9 +176,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     private func initializeStorageWithNewTexture(
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         textureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard
             Int(textureSize.width) > canvasMinimumTextureLength &&
             Int(textureSize.height) > canvasMinimumTextureLength
@@ -195,7 +194,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         // Delete all textures in the repository
         removeAll()
 
-        let layer = TextureLayerItem(
+        let layer = TextureLayerModel(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
@@ -211,7 +210,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         setTextureSize(textureSize)
 
         return try await .init(
-            configuration: .init(configuration, newLayers: [layer]),
+            configuration: .init(configuration, layers: [layer]),
             resolvedTextureSize: textureSize
         )
     }
@@ -219,7 +218,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     func createTexture(uuid: UUID, textureSize: CGSize) async throws {
         guard
             let device = renderer.device
-        else { return }
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Missing required parameter", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
 
         if let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
@@ -252,10 +258,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         guard
             let device = renderer.device,
-            let newTexture: MTLTexture = try FileInput.loadTexture(
+            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
-                device: device
+                with: device
             )
         else {
             let error = NSError(
@@ -311,15 +317,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         return uuid
     }
 
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        guard let texture else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
 
         let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 

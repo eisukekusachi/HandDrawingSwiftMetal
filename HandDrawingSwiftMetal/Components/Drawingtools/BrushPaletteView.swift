@@ -46,7 +46,7 @@ struct BrushPaletteView: View {
                         color: palette.colors[i],
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.currentIndex == i
+                        selected: palette.index == i
                     ) {
                         palette.select(i)
                     }
@@ -73,18 +73,12 @@ struct BrushPaletteView: View {
 private struct Preview: View {
     let paletteHeight: CGFloat = 32
 
-    class BrushPaletteStorageStub: BrushPaletteStorage {
-        init(index: Int = 0, hexColors: [String] = []) {}
-        func load() async throws -> (index: Int, hexColors: [String])? { nil }
-        func save(index: Int, hexColors: [String]) async throws {}
-    }
-
     var body: some View {
         VStack {
             Spacer()
             BrushPaletteView(
                 palette: .init(
-                    initialColors: [
+                    colors: [
                         .red,
                         .blue,
                         .green,
@@ -95,8 +89,7 @@ private struct Preview: View {
                         UIColor.blue.withAlphaComponent(0.25),
                         UIColor.green.withAlphaComponent(0.25)
                     ],
-                    initialIndex: 5,
-                    storage: BrushPaletteStorageStub()
+                    index: 5
                 ),
                 paletteHeight: paletteHeight
             )

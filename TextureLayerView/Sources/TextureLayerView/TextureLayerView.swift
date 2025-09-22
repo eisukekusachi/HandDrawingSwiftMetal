@@ -38,64 +38,67 @@ public struct TextureLayerView: View {
     }
 }
 
+@MainActor
 private struct PreviewView: View {
-    let viewModel = TextureLayerViewModel()
+    private var viewModel = TextureLayerViewModel()
 
-    init() {
-        let canvasState = CanvasState()
+    private let textureLayers = TextureLayers()
+    private let repository = MockTextureRepository()
 
-        let layers: [TextureLayerItem] = [
+    private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
+        textureSize: .zero,
+        layerIndex: 3,
+        layers: [
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer0",
-                alpha: 255
+                alpha: 255,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer1",
-                alpha: 200
+                alpha: 200,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer2",
-                alpha: 150
+                alpha: 150,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer3",
-                alpha: 100
+                alpha: 100,
+                isVisible: true
             ),
             .init(
-                textureName: UUID().uuidString,
+                id: UUID(),
                 title: "Layer4",
-                alpha: 50
+                alpha: 50,
+                isVisible: true
             )
         ]
+    )
 
-        let canvasResolvedConfiguration: CanvasResolvedConfiguration = .init(
-            projectName: "",
-            textureSize: .zero,
-            layerIndex: 0,
-            layers: layers
-        )
-
-        canvasState.initialize(
-            configuration: canvasResolvedConfiguration
-        )
-
-        viewModel.initialize(
-            configuration: .init(
-                canvasState: canvasState,
-                textureRepository: MockTextureRepository(),
-                undoStack: nil
-            )
-        )
-    }
     var body: some View {
         TextureLayerView(
             viewModel: viewModel
         )
         .frame(width: 320, height: 300)
+        .onAppear {
+            Task {
+                await textureLayers.initialize(
+                    configuration: configuration,
+                    textureRepository: repository
+                )
+
+                viewModel.initialize(
+                    textureLayers: textureLayers
+                )
+            }
+        }
     }
 }
 

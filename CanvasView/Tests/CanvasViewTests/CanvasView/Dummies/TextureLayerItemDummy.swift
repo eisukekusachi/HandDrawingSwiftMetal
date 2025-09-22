@@ -6,7 +6,7 @@
 //
 
 import CanvasView
-import Foundation
+import UIKit
 
 public extension TextureLayerItem {
 
@@ -14,13 +14,15 @@ public extension TextureLayerItem {
         id: UUID = UUID(),
         title: String = "",
         alpha: Int = 255,
-        isVisible: Bool = true
-    ) -> Self {
+        isVisible: Bool = true,
+        thumbnail: UIImage? = nil
+    ) -> TextureLayerItem {
         .init(
             id: id,
             title: title,
             alpha: alpha,
-            isVisible: isVisible
+            isVisible: isVisible,
+            thumbnail: thumbnail
         )
     }
 }

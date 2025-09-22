@@ -47,10 +47,10 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     func initializeStorage(
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
-        let textureSize = configuration.textureSize ?? defaultTextureSize
+        configuration: TextureLayerArrayConfiguration,
+        fallbackTextureSize: CGSize
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+        let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
             Int(textureSize.width) > canvasMinimumTextureLength &&
@@ -66,7 +66,7 @@ class TextureInMemoryRepository: TextureRepository {
 
         removeAll()
 
-        let layer = TextureLayerItem(
+        let layer = TextureLayerModel(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
@@ -81,7 +81,7 @@ class TextureInMemoryRepository: TextureRepository {
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
-        let configuration: CanvasConfiguration = .init(textureSize: textureSize, layers: [layer])
+        let configuration: TextureLayerArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
 
         return try await .init(
             configuration: configuration,
@@ -91,9 +91,9 @@ class TextureInMemoryRepository: TextureRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -174,7 +174,7 @@ class TextureInMemoryRepository: TextureRepository {
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
+                message: String(localized: "Missing required parameter", bundle: .module)
             )
             Logger.error(error)
             throw error
@@ -232,17 +232,8 @@ class TextureInMemoryRepository: TextureRepository {
         }
     }
 
-
-    func addTexture(_ texture: MTLTexture?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        guard let texture else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
+    @discardableResult
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         guard textures[uuid] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

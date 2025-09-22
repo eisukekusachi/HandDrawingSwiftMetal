@@ -17,10 +17,10 @@ final class CanvasRenderer: ObservableObject {
     var matrix: CGAffineTransform = .identity
 
     /// The background color of the canvas
-    var backgroundColor: UIColor = .white
+    private var backgroundColor: UIColor = .white
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
-    var baseBackgroundColor: UIColor = .lightGray
+    private var baseBackgroundColor: UIColor = .lightGray
 
     private let renderer: MTLRendering
 
@@ -46,7 +46,8 @@ final class CanvasRenderer: ObservableObject {
 
     init(
         displayView: CanvasDisplayable,
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        environmentConfiguration: EnvironmentConfiguration
     ) {
         self.renderer = renderer
 
@@ -56,11 +57,7 @@ final class CanvasRenderer: ObservableObject {
         )
 
         self.displayView = displayView
-    }
 
-    func initialize(
-        environmentConfiguration: CanvasEnvironmentConfiguration
-    ) {
         self.backgroundColor = environmentConfiguration.backgroundColor
         self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor
     }
@@ -120,10 +117,10 @@ extension CanvasRenderer {
     func resetCommandBuffer() {
         displayView.resetCommandBuffer()
     }
-    func bottomLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
+    func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
-    func topLayers(selectedIndex: Int, layers: [TextureLayerItem]) -> [TextureLayerItem] {
+    func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
@@ -131,20 +128,20 @@ extension CanvasRenderer {
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     func updateDrawingTextures(
-        canvasState: CanvasState,
+        textureLayers: any TextureLayersProtocol,
         textureRepository: TextureRepository,
         onCompleted: (() -> Void)?
     ) {
         guard
-            let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex,
+            let selectedLayer = textureLayers.selectedLayer,
+            let selectedIndex = textureLayers.selectedIndex,
             let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
         else {
             return
         }
 
         // The selected texture is kept opaque here because transparency is applied when used
-        let opaqueLayer: TextureLayerItem = .init(
+        let opaqueLayer: TextureLayerModel = .init(
             id: selectedLayer.id,
             title: selectedLayer.title,
             alpha: 255,
@@ -153,15 +150,15 @@ extension CanvasRenderer {
 
         Task {
             let textures = try await textureRepository.copyTextures(
-                uuids: canvasState.layers.map { $0.id }
+                uuids: textureLayers.layers.map { $0.id }
             )
             let bottomLayers = bottomLayers(
                 selectedIndex: selectedIndex,
-                layers: canvasState.layers.map { .init(model: $0) }
+                layers: textureLayers.layers.map { .init(item: $0) }
             )
             let topLayers = topLayers(
                 selectedIndex: selectedIndex,
-                layers: canvasState.layers.map { .init(model: $0) }
+                layers: textureLayers.layers.map { .init(item: $0) }
             )
 
             Task { @MainActor in
@@ -258,7 +255,7 @@ extension CanvasRenderer {
 
     func drawLayerTextures(
         textures: [IdentifiedTexture],
-        layers: [TextureLayerItem],
+        layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {

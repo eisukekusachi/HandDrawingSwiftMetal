@@ -1,6 +1,6 @@
 //
-//  CanvasEnvironmentConfiguration.swift
-//  HandDrawingSwiftMetal
+//  EnvironmentConfiguration.swift
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/07/28.
 //
@@ -12,7 +12,7 @@ public enum StorageType: Sendable {
     case memory
 }
 
-public struct CanvasEnvironmentConfiguration: Sendable {
+public struct EnvironmentConfiguration: Sendable {
     /// The background color of the canvas
     let backgroundColor: UIColor
 

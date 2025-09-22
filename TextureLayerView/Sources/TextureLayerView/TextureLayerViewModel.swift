@@ -11,17 +11,18 @@ import MetalKit
 
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
-    @Published private(set) var layers: [TextureLayerModel] = []
+
+    @Published private(set) var layers: [TextureLayerItem] = []
 
     @Published public var currentAlpha: Int = 0
 
     @Published public var isDragging: Bool = false
 
-    public var selectedLayer: TextureLayerModel? {
-        canvasState?.selectedLayer
+    public var selectedLayer: TextureLayerItem? {
+        textureLayers?.selectedLayer
     }
 
-    private(set) var canvasState: CanvasState?
+    private(set) var textureLayers: (any TextureLayersProtocol)?
 
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
@@ -29,7 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
     @Published private var selectedLayerId: UUID? {
         didSet {
             // Update the slider value when selectedLayerId changes
-            if let selectedLayerId, let layer = canvasState?.layer(selectedLayerId) {
+            if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
                 currentAlpha = layer.alpha
             }
         }
@@ -37,190 +38,121 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var textureRepository: TextureRepository!
 
-    private var layerHandler: LayerHandler?
-
-    private var undoHandler: UndoHandler?
-
     private var cancellables = Set<AnyCancellable>()
 
     public init() {}
 
     public func initialize(
-        configuration: TextureLayerConfiguration
+        textureLayers: any TextureLayersProtocol
     ) {
-        canvasState = configuration.canvasState
-        textureRepository = configuration.textureRepository
-
-        defaultBackgroundColor = configuration.defaultBackgroundColor
-        selectedBackgroundColor = configuration.selectedBackgroundColor
-
-        layerHandler = .init(canvasState: canvasState)
-
-        undoHandler = .init(canvasState: canvasState, undoStack: configuration.undoStack)
-
+        self.textureLayers = textureLayers
         subscribe()
     }
 
     private func subscribe() {
-        // Bind the drag gesture of the alpha slider
-        $isDragging
-            .sink { [weak self] startDragging in
-                self?.undoHandler?.addUndoAlphaObject(
-                    dragging: startDragging
-                )
-            }
-            .store(in: &cancellables)
+        // Bind the alpha slider
+        Publishers.CombineLatest(
+            $currentAlpha.removeDuplicates(),
+            $isDragging.removeDuplicates()
+        )
+        .sink { [weak self] alpha, isDragging in
+            guard
+                let selectedLayerId = self?.selectedLayerId
+            else { return }
+            self?.textureLayers?.updateAlpha(
+                id: selectedLayerId,
+                alpha: Int(alpha),
+                isStartHandleDragging: isDragging
+            )
+        }
+        .store(in: &cancellables)
 
-        // Bind the value of the alpha slider
-        $currentAlpha
+        textureLayers?.selectedLayerIdPublisher
             .sink { [weak self] value in
-                guard
-                    let selectedLayerId = self?.selectedLayerId
-                else { return }
-                self?.layerHandler?.updateLayer(
-                    id: selectedLayerId,
-                    alpha: Int(value)
-                )
+                self?.selectedLayerId = value
             }
             .store(in: &cancellables)
 
-        // Bind `canvasState.selectedLayerId` to `selectedLayerId`
-        canvasState?.$selectedLayerId.assign(to: \.selectedLayerId, on: self)
+        textureLayers?.layersPublisher
+            .sink { [weak self] value in
+                self?.layers = value
+            }
             .store(in: &cancellables)
-
-        canvasState?.$layers
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$layers)
     }
 }
 
 public extension TextureLayerViewModel {
 
     func isSelected(_ uuid: UUID) -> Bool {
-        canvasState?.selectedLayer?.id == uuid
+        textureLayers?.selectedLayer?.id == uuid
     }
 
     func onTapInsertButton() {
         guard
-            let canvasState,
-            let selectedIndex = canvasState.selectedIndex,
-            let device: MTLDevice = MTLCreateSystemDefaultDevice()
+            let textureLayers,
+            let selectedIndex = textureLayers.selectedIndex,
+            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
+            let texture = MTLTextureCreator.makeTexture(
+                width: Int(textureLayers.textureSize.width),
+                height: Int(textureLayers.textureSize.height),
+                with: device
+            )
         else { return }
 
         let layer: TextureLayerItem = .init(
             id: UUID(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
-            isVisible: true
+            isVisible: true,
+            thumbnail: texture.makeThumbnail()
         )
         let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        let previousLayerIndex = canvasState.selectedIndex ?? 0
-
-        let texture = MTLTextureCreator.makeTexture(
-            width: Int(canvasState.currentTextureSize.width),
-            height: Int(canvasState.currentTextureSize.height),
-            with: device
-        )
-
-        let thumbnail = texture?.makeThumbnail()
-
-        layerHandler?.insertLayer(
-            layer: layer,
-            thumbnail: thumbnail,
-            at: index
-        )
-        // Add Task to prevent flickering
-        Task {
-            layerHandler?.selectLayer(id: layer.id)
-        }
 
         Task {
-            let result = try await textureRepository
-                .addTexture(
-                    texture,
-                    newTextureUUID: layer.id
+            do {
+                try await textureLayers.addLayer(
+                    layer: layer,
+                    texture: texture,
+                    at: index
                 )
+            } catch {
 
-            let currentLayerIndex = canvasState.selectedIndex ?? 0
-            await undoHandler?.addUndoAdditionObject(
-                previousLayerIndex: previousLayerIndex,
-                currentLayerIndex: currentLayerIndex,
-                layer: layer,
-                texture: result.texture
-            )
+            }
         }
     }
 
     func onTapDeleteButton() {
         guard
-            let canvasState,
-            let selectedLayer = canvasState.selectedLayer,
-            let selectedIndex = canvasState.selectedIndex,
-            canvasState.layers.count > 1
+            let textureLayers,
+            let selectedIndex = textureLayers.selectedIndex,
+            textureLayers.layerCount > 1
         else { return }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
-
-        layerHandler?.removeLayer(
-            selectedLayerIndex: selectedIndex
-        )
         Task {
-            layerHandler?.selectLayer(id: canvasState.layers[newLayerIndex].id)
-        }
-
-        Task {
-            let result = try await textureRepository.copyTexture(
-                uuid: selectedLayer.id
-            )
-
-            await undoHandler?.addUndoDeletionObject(
-                previousLayerIndex: selectedIndex,
-                currentLayerIndex: newLayerIndex,
-                layer: .init(model: selectedLayer),
-                texture: result.texture
-            )
-
-            textureRepository
-                .removeTexture(selectedLayer.id)
+            try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
         }
     }
 
     func onTapTitleButton(id: UUID, title: String) {
-        layerHandler?.updateLayer(id: id, title: title)
+        textureLayers?.updateTitle(id: id, title: title)
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        layerHandler?.updateLayer(id: id, isVisible: isVisible)
+        textureLayers?.updateVisibility(id: id, isVisible: isVisible)
     }
 
     func onTapCell(id: UUID) {
-        layerHandler?.selectLayer(id: id)
+        textureLayers?.selectLayer(id: id)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
-        guard let canvasState else { return }
-
-        let indices: MoveLayerIndices = .init(
-            sourceIndexSet: source,
-            destinationIndex: destination
-        )
-
-        layerHandler?.moveLayer(indices: indices)
-
-        canvasState.fullCanvasUpdateSubject.send(())
-
-        guard
-            let selectedLayerId = canvasState.selectedLayer?.id,
-            let textureLayer = canvasState.layers.first(where: { $0.id == selectedLayerId })
-        else { return }
-
-        undoHandler?.addUndoMoveObject(
-            indices: MoveLayerIndices.reversedIndices(
-                indices: indices,
-                layerCount: canvasState.layers.count
-            ),
-            selectedLayerId: selectedLayerId,
-            textureLayer: .init(model: textureLayer)
-        )
+        Task {
+            textureLayers?.moveLayer(
+                indices: .init(
+                    sourceIndexSet: source,
+                    destinationIndex: destination
+                )
+            )
+        }
     }
 }

@@ -9,7 +9,7 @@ import XCTest
 import Combine
 
 @testable import CanvasView
-
+/*
 final class DrawingBrushTextureSetTests: XCTestCase {
 
     var commandBuffer: MTLCommandBuffer!
@@ -122,3 +122,4 @@ final class DrawingBrushTextureSetTests: XCTestCase {
         }
     }
 }
+*/

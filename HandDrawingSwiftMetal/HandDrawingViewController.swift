@@ -16,7 +16,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var configuration = CanvasConfiguration()
+    private var canvasConfiguration: CanvasConfiguration?
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -33,16 +33,18 @@ class HandDrawingViewController: UIViewController {
         addEvents()
         bindData()
 
+        addBrushPalette()
+        addEraserPalette()
+
         contentView.canvasView.initialize(
             drawingToolRenderers: [
                 contentView.brushDrawingToolRenderer,
                 contentView.eraserDrawingToolRenderer
             ],
-            configuration: configuration
+            configuration: canvasConfiguration ?? .init()
         )
 
         setupNewCanvasDialogPresenter()
-        setupLayerView()
     }
 }
 
@@ -54,6 +56,13 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.contentView.setup()
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.textureLayersPrepared
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] textureLayers in
+                self?.setupLayerView(textureLayers)
             }
             .store(in: &cancellables)
 
@@ -94,9 +103,9 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.contentView.canvasView.saveFile(
                 additionalItems: [
-                    DrawingToolModel.anyNamedItem(from: contentView.viewModel.drawingTool),
-                    BrushPaletteModel.anyNamedItem(from: contentView.viewModel.brushPalette),
-                    EraserPaletteModel.anyNamedItem(from: contentView.viewModel.eraserPalette)
+                    DrawingToolArchiveModel.anyNamedItem(from: contentView.viewModel.drawingToolStorage.drawingTool),
+                    BrushPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
+                    EraserPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.eraserPaletteStorage.palette)
                 ]
             )
         }
@@ -121,23 +130,23 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.contentView.viewModel.drawingTool.reset()
-            self.contentView.viewModel.brushPalette.reset()
-            self.contentView.viewModel.eraserPalette.reset()
+            self.contentView.viewModel.drawingToolStorage.reset()
+            self.contentView.viewModel.brushPaletteStorage.reset()
+            self.contentView.viewModel.eraserPaletteStorage.reset()
 
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
             self.contentView.canvasView.newCanvas(
-                configuration: CanvasConfiguration(
+                configuration: TextureLayerArrayConfiguration(
                     textureSize: .init(width: size.width * scale, height: size.height * scale)
                 )
             )
         }
     }
 
-    private func setupLayerView() {
+    private func setupLayerView(_ textureLayers: any TextureLayersProtocol) {
         textureLayerViewPresenter.initialize(
-            textureLayerConfiguration: contentView.canvasView.textureLayerConfiguration,
+            textureLayers: textureLayers,
             popupConfiguration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
@@ -147,9 +156,6 @@ extension HandDrawingViewController {
                 )
             )
         )
-
-        addBrushPalette()
-        addEraserPalette()
     }
 
     private func addBrushPalette() {
@@ -157,7 +163,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: contentView.viewModel.brushPalette,
+                palette: contentView.viewModel.brushPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -178,7 +184,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: contentView.viewModel.eraserPalette,
+                palette: contentView.viewModel.eraserPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -197,16 +203,16 @@ extension HandDrawingViewController {
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
-            suffix: CanvasViewModel.fileSuffix,
+            suffix: ProjectMetaData.fileSuffix,
             onTapItem: { [weak self] url in
                 guard let `self` else { return }
 
                 self.presentedViewController?.dismiss(animated: true)
+
+                self.textureLayerViewPresenter.hide()
+
                 self.contentView.canvasView.loadFile(
                     zipFileURL: url,
-                    requiredEntityType: [
-                        CanvasEntity.self
-                    ],
                     optionalEntities: [
                         self.contentView.drawingToolLoader,
                         self.contentView.brushPaletteLoader,
@@ -265,10 +271,10 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        configuration: CanvasConfiguration
+        canvasConfiguration: CanvasConfiguration? = nil
     ) -> Self {
         let viewController = Self()
-        viewController.configuration = configuration
+        viewController.canvasConfiguration = canvasConfiguration
         return viewController
     }
 }

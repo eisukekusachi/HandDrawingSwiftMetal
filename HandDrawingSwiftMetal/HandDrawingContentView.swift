@@ -45,53 +45,45 @@ final class HandDrawingContentView: UIView {
 
     lazy var drawingToolLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<DrawingToolModel>(
-                fileName: DrawingToolModel.fileName
+            LocalFileNamedLoader<DrawingToolArchiveModel>(
+                fileName: DrawingToolArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.drawingTool.update(
-                        type: .init(rawValue: file.type),
-                        brushDiameter: file.brushDiameter,
-                        eraserDiameter: file.eraserDiameter
-                    )
+                    self?.viewModel.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
+                    self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
+                    self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 
     lazy var brushPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<BrushPaletteModel>(
-                fileName: BrushPaletteModel.fileName
+            LocalFileNamedLoader<BrushPaletteArchiveModel>(
+                fileName: BrushPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.brushPalette.update(
+                    self?.viewModel.brushPaletteStorage.update(
                         colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                        currentIndex: file.index
+                        index: file.index
                     )
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 
     lazy var eraserPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<EraserPaletteModel>(
-                fileName: EraserPaletteModel.fileName
+            LocalFileNamedLoader<EraserPaletteArchiveModel>(
+                fileName: EraserPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
-                    self?.viewModel.eraserPalette.update(
+                    self?.viewModel.eraserPaletteStorage.update(
                         alphas: file.alphas,
-                        currentIndex: file.index
+                        index: file.index
                     )
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 
@@ -121,24 +113,24 @@ final class HandDrawingContentView: UIView {
         redoButton.isHidden = true
 
         updateDrawingComponents(
-            viewModel.drawingTool.type
+            viewModel.drawingToolStorage.type
         )
     }
 
     func setup() {
-        brushDrawingToolRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
         brushDiameterSlider.setValue(
-            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.brushDiameter),
+            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.brushDiameter),
             animated: false
         )
 
-        eraserDrawingToolRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
         eraserDiameterSlider.setValue(
-            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingTool.eraserDiameter),
+            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.eraserDiameter),
             animated: false
         )
 
-        updateDrawingComponents(viewModel.drawingTool.type)
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
 
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.canvasView.alpha = 1.0
@@ -151,29 +143,29 @@ final class HandDrawingContentView: UIView {
 private extension HandDrawingContentView {
 
     func subscribe() {
-        viewModel.brushPalette.$currentIndex
+        viewModel.brushPaletteStorage.palette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
-                let newColor = viewModel.brushPalette.colors[index]
+                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
+                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
                 self.brushDrawingToolRenderer.setColor(newColor)
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPalette.$currentIndex
+        viewModel.eraserPaletteStorage.palette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPalette.alphas[index]
+                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
                 self.eraserDrawingToolRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingTool.$brushDiameter
+        viewModel.drawingToolStorage.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
                 self?.brushDrawingToolRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingTool.$eraserDiameter
+        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
                 self?.eraserDrawingToolRenderer.setDiameter(diameter)
             }
@@ -182,7 +174,7 @@ private extension HandDrawingContentView {
 
     func changeDrawingTool() {
         viewModel.changeDrawingTool()
-        updateDrawingComponents(viewModel.drawingTool.type)
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
     }
 
     func addEvents() {
@@ -227,12 +219,16 @@ private extension HandDrawingContentView {
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingTool.setBrushDiameter(slider.value)
+            self?.viewModel.drawingToolStorage.setBrushDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(slider.value)
+            )
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingTool.setEraserDiameter(slider.value)
+            self?.viewModel.drawingToolStorage.setEraserDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(slider.value)
+            )
         }, for: .valueChanged)
     }
 

@@ -13,51 +13,66 @@ final class HandDrawingContentViewModel: ObservableObject {
 
     private let drawingToolController: PersistenceController
 
-    @Published var drawingTool: DrawingTool
-    @Published var brushPalette: BrushPalette
-    @Published var eraserPalette: EraserPalette
+    @Published var drawingToolStorage: CoreDataDrawingToolStorage
+    @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
+    @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     public init() {
-        drawingToolController = PersistenceController(modelName: "DrawingToolStorage")
+        drawingToolController = PersistenceController(xcdatamodeldName: "DrawingToolStorage", location: .mainApp)
 
-        drawingTool = DrawingTool(
-            storage: DrawingTool.CoreDataStorage(
-                context: drawingToolController.context
-            )
+        drawingToolStorage = CoreDataDrawingToolStorage(
+            drawingTool: DrawingTool(),
+            context: drawingToolController.viewContext
         )
 
-        brushPalette = BrushPalette(
-            initialColors: [
-                .black.withAlphaComponent(0.8),
-                .gray.withAlphaComponent(0.8),
-                .red.withAlphaComponent(0.8),
-                .blue.withAlphaComponent(0.8),
-                .green.withAlphaComponent(0.8),
-                .yellow.withAlphaComponent(0.8),
-                .purple.withAlphaComponent(0.8)
-            ],
-            storage: BrushPalette.CoreDataStorage(
-                context: drawingToolController.context
-            )
+        brushPaletteStorage = CoreDataBrushPaletteStorage(
+            palette: BrushPalette(
+                colors: [
+                    .black.withAlphaComponent(0.8),
+                    .gray.withAlphaComponent(0.8),
+                    .red.withAlphaComponent(0.8),
+                    .blue.withAlphaComponent(0.8),
+                    .green.withAlphaComponent(0.8),
+                    .yellow.withAlphaComponent(0.8),
+                    .purple.withAlphaComponent(0.8)
+                ]
+            ),
+            context: drawingToolController.viewContext
         )
-        eraserPalette = EraserPalette(
-            initialAlphas: [
-                255,
-                225,
-                200,
-                175,
-                150,
-                125,
-                100,
-                50
-            ],
-            storage: EraserPalette.CoreDataStorage(
-                context: drawingToolController.context
-            )
+
+        eraserPaletteStorage = CoreDataEraserPaletteStorage(
+            palette: EraserPalette(
+                alphas: [
+                    255,
+                    225,
+                    200,
+                    175,
+                    150,
+                    125,
+                    100,
+                    50
+                ],
+                index: 0
+            ),
+            context: drawingToolController.viewContext
         )
+
+        Task {
+            if let drawingToolEntity = try drawingToolStorage.fetch() {
+                drawingToolStorage.update(drawingToolEntity)
+            }
+            if let brushEntity = try brushPaletteStorage.fetch() {
+                brushPaletteStorage.update(brushEntity)
+            }
+            if let eraserEntity = try eraserPaletteStorage.fetch() {
+                eraserPaletteStorage.update(eraserEntity)
+            }
+        }
     }
 
     func changeDrawingTool() {
-        drawingTool.setDrawingTool(drawingTool.type == .brush ? .eraser: .brush)
+        drawingToolStorage.setDrawingTool(
+            drawingToolStorage.type == .brush ? .eraser: .brush
+        )
     }
 }

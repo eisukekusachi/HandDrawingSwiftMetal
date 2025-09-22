@@ -17,14 +17,17 @@
 		D4168F202E59F101007F7904 /* DoubleStrokeCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168F1F2E59F101007F7904 /* DoubleStrokeCircle.swift */; };
 		D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168F212E59F14A007F7904 /* UIImageExtensions.swift */; };
 		D4168F242E59F7B4007F7904 /* EraserPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168F232E59F7B4007F7904 /* EraserPaletteView.swift */; };
+		D41C72192E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41C72182E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift */; };
+		D41C721B2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41C721A2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift */; };
 		D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */; };
-		D426FC5C2E5C003400CC116D /* BrushPaletteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5B2E5C003400CC116D /* BrushPaletteModel.swift */; };
-		D426FC5E2E5C08AA00CC116D /* EraserPaletteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5D2E5C08AA00CC116D /* EraserPaletteModel.swift */; };
-		D426FC602E5C0A8B00CC116D /* DrawingToolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5F2E5C0A8B00CC116D /* DrawingToolModel.swift */; };
+		D426FC5C2E5C003400CC116D /* BrushPaletteArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5B2E5C003400CC116D /* BrushPaletteArchiveModel.swift */; };
+		D426FC5E2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5D2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift */; };
+		D426FC602E5C0A8B00CC116D /* DrawingToolArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC5F2E5C0A8B00CC116D /* DrawingToolArchiveModel.swift */; };
 		D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */; };
 		D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */; };
 		D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */; };
 		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
+		D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
@@ -80,14 +83,17 @@
 		D4168F1F2E59F101007F7904 /* DoubleStrokeCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleStrokeCircle.swift; sourceTree = "<group>"; };
 		D4168F212E59F14A007F7904 /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		D4168F232E59F7B4007F7904 /* EraserPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteView.swift; sourceTree = "<group>"; };
+		D41C72182E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataBrushPaletteStorage.swift; sourceTree = "<group>"; };
+		D41C721A2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataEraserPaletteStorage.swift; sourceTree = "<group>"; };
 		D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
-		D426FC5B2E5C003400CC116D /* BrushPaletteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPaletteModel.swift; sourceTree = "<group>"; };
-		D426FC5D2E5C08AA00CC116D /* EraserPaletteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteModel.swift; sourceTree = "<group>"; };
-		D426FC5F2E5C0A8B00CC116D /* DrawingToolModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolModel.swift; sourceTree = "<group>"; };
+		D426FC5B2E5C003400CC116D /* BrushPaletteArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPaletteArchiveModel.swift; sourceTree = "<group>"; };
+		D426FC5D2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteArchiveModel.swift; sourceTree = "<group>"; };
+		D426FC5F2E5C0A8B00CC116D /* DrawingToolArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolArchiveModel.swift; sourceTree = "<group>"; };
 		D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPaletteTests.swift; sourceTree = "<group>"; };
 		D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserPaletteTests.swift; sourceTree = "<group>"; };
 		D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolTests.swift; sourceTree = "<group>"; };
 		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
+		D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataDrawingToolStorage.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
@@ -157,6 +163,16 @@
 			path = Drawingtools;
 			sourceTree = "<group>";
 		};
+		D41C72172E6C479500D524DE /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				D41C72182E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift */,
+				D41C721A2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift */,
+				D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
 		D426FC612E5C4B2700CC116D /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -186,7 +202,8 @@
 		D426FC9C2E5DD88600CC116D /* Domains */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC9E2E5DD90500CC116D /* InputOutput */,
+				D41C72172E6C479500D524DE /* CoreData */,
+				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
 			);
 			path = Domains;
@@ -203,14 +220,14 @@
 			path = DrawingTools;
 			sourceTree = "<group>";
 		};
-		D426FC9E2E5DD90500CC116D /* InputOutput */ = {
+		D426FC9E2E5DD90500CC116D /* FileIO */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC5B2E5C003400CC116D /* BrushPaletteModel.swift */,
-				D426FC5F2E5C0A8B00CC116D /* DrawingToolModel.swift */,
-				D426FC5D2E5C08AA00CC116D /* EraserPaletteModel.swift */,
+				D426FC5B2E5C003400CC116D /* BrushPaletteArchiveModel.swift */,
+				D426FC5F2E5C0A8B00CC116D /* DrawingToolArchiveModel.swift */,
+				D426FC5D2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift */,
 			);
-			path = InputOutput;
+			path = FileIO;
 			sourceTree = "<group>";
 		};
 		D42F40992B4402EC00B32707 /* Components */ = {
@@ -505,7 +522,8 @@
 				D4168F202E59F101007F7904 /* DoubleStrokeCircle.swift in Sources */,
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
-				D426FC5E2E5C08AA00CC116D /* EraserPaletteModel.swift in Sources */,
+				D426FC5E2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift in Sources */,
+				D41C721B2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift in Sources */,
 				D4168F242E59F7B4007F7904 /* EraserPaletteView.swift in Sources */,
 				D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,
@@ -513,8 +531,10 @@
 				D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */,
 				D4168DAD2E594E9A007F7904 /* EraserPalette.swift in Sources */,
 				D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */,
-				D426FC5C2E5C003400CC116D /* BrushPaletteModel.swift in Sources */,
-				D426FC602E5C0A8B00CC116D /* DrawingToolModel.swift in Sources */,
+				D41C72192E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift in Sources */,
+				D426FC5C2E5C003400CC116D /* BrushPaletteArchiveModel.swift in Sources */,
+				D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */,
+				D426FC602E5C0A8B00CC116D /* DrawingToolArchiveModel.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingContentViewModel.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,

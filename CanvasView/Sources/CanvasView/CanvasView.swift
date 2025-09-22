@@ -35,20 +35,17 @@ import UIKit
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `CanvasConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<CanvasResolvedConfiguration, Never> {
+    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
+    public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    public var currentTextureSize: CGSize {
-        canvasViewModel.currentTextureSize
+    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
+    public var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
+        textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
-    public var textureLayerConfiguration: TextureLayerConfiguration {
-        canvasViewModel.textureLayerConfiguration
-    }
-
-    private var renderer: MTLRendering
+    private let renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
 
@@ -58,7 +55,9 @@ import UIKit
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<CanvasResolvedConfiguration, Never>()
+    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
+
+    private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -101,32 +100,21 @@ import UIKit
 
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
-        configuration: CanvasConfiguration,
-        environmentConfiguration: CanvasEnvironmentConfiguration = CanvasEnvironmentConfiguration()
+        configuration: CanvasConfiguration
     ) {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-
         displayView.configure(renderer: renderer)
 
         canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
-                environmentConfiguration: environmentConfiguration,
-                renderer: renderer
+                renderer: renderer,
+                displayView: displayView
             ),
-            configuration: configuration,
-            environmentConfiguration: environmentConfiguration,
-            defaultTextureSize: .init(
-                width: size.width * scale,
-                height: size.height * scale
-            ),
-            renderer: renderer,
-            displayView: displayView
+            configuration: configuration
         )
     }
 
-    public func newCanvas(configuration: CanvasConfiguration) {
+    public func newCanvas(configuration: TextureLayerArrayConfiguration) {
         Task {
             defer { activityIndicatorSubject.send(false) }
             activityIndicatorSubject.send(true)
@@ -150,12 +138,10 @@ import UIKit
     }
     public func loadFile(
         zipFileURL: URL,
-        requiredEntityType: [CanvasEntityConvertible.Type],
         optionalEntities: [AnyLocalFileLoader] = []
     ) {
         canvasViewModel.loadFile(
             zipFileURL: zipFileURL,
-            requiredEntityType: requiredEntityType,
             optionalEntities: optionalEntities
         )
     }
@@ -180,6 +166,12 @@ extension CanvasView {
         canvasViewModel.canvasViewSetupCompleted
             .sink { [weak self] value in
                 self?.canvasViewSetupCompletedSubject.send(value)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.textureLayersPrepared
+            .sink { [weak self] value in
+                self?.textureLayersPreparedSubject.send(value)
             }
             .store(in: &cancellables)
 

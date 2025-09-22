@@ -11,10 +11,10 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    func addTexture(_ texture: (any MTLTexture)?, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: (any MTLTexture), newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
         .init(
             uuid: uuid,
-            texture: texture!
+            texture: texture
         )
     }
 
@@ -41,20 +41,20 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func setTextureSize(_ size: CGSize) {}
 
     func initializeStorage(
-        configuration: CanvasConfiguration,
-        defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+        configuration: TextureLayerArrayConfiguration,
+        fallbackTextureSize: CGSize
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
-            resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
+            resolvedTextureSize: configuration.textureSize ?? fallbackTextureSize
         )
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: CanvasConfiguration,
+        configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
-    ) async throws -> CanvasResolvedConfiguration {
+    ) async throws -> ResolvedTextureLayerArrayConfiguration {
         try await .init(
             configuration: configuration,
             resolvedTextureSize: configuration.textureSize ?? defaultTextureSize

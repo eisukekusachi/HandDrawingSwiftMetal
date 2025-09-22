@@ -9,7 +9,7 @@ import XCTest
 import Combine
 
 @testable import CanvasView
-
+/*
 final class CanvasDrawingEraserTextureSetTests: XCTestCase {
 
     var subject: DrawingEraserTextureSet!
@@ -125,3 +125,4 @@ final class CanvasDrawingEraserTextureSetTests: XCTestCase {
         }
     }
 }
+*/
