@@ -1,5 +1,5 @@
 //
-//  ArchiveModel.swift
+//  TextureLayersArchiveModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ArchiveModel: Codable, Equatable {
+public struct TextureLayersArchiveModel: Codable, Equatable {
 
     let textureSize: CGSize
     let layerIndex: Int
@@ -24,7 +24,7 @@ public struct ArchiveModel: Codable, Equatable {
     }
 }
 
-extension ArchiveModel {
+extension TextureLayersArchiveModel {
 
     static let thumbnailName: String = "thumbnail.png"
 
@@ -45,9 +45,9 @@ extension ArchiveModel {
     init(fileURL: URL) throws {
         let data = try Data(contentsOf: fileURL)
         do {
-            self = try JSONDecoder().decode(ArchiveModel.self, from: data).model()
+            self = try JSONDecoder().decode(TextureLayersArchiveModel.self, from: data).model()
         } catch {
-            let className = String(describing: ArchiveModel.self)
+            let className = String(describing: TextureLayersArchiveModel.self)
             let nsError = NSError(
                 domain: className,
                 code: -1,
@@ -63,17 +63,17 @@ extension ArchiveModel {
     }
 }
 
-extension ArchiveModel: CanvasEntityConvertible {
+extension TextureLayersArchiveModel: TextureLayersEntityConvertible {
     public func model() -> Self {
         self
     }
 }
 
-extension ArchiveModel: LocalFileConvertible {
+extension TextureLayersArchiveModel: LocalFileConvertible {
 
-    public func namedItem() -> LocalFileNamedItem<ArchiveModel> {
+    public func namedItem() -> LocalFileNamedItem<TextureLayersArchiveModel> {
         .init(
-            fileName: ArchiveModel.jsonFileName,
+            fileName: TextureLayersArchiveModel.jsonFileName,
             item: self
         )
     }
@@ -83,6 +83,6 @@ extension ArchiveModel: LocalFileConvertible {
     }
 }
 
-public protocol CanvasEntityConvertible: Decodable {
-    func model() -> ArchiveModel
+public protocol TextureLayersEntityConvertible: Decodable {
+    func model() -> TextureLayersArchiveModel
 }

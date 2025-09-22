@@ -405,7 +405,7 @@ public extension CanvasViewModel {
             activityIndicatorSubject.send(true)
 
             do {
-                // Create a working directory
+                // Create a temporary working directory
                 try dependencies.localFileRepository.createWorkingDirectory()
 
                 // Extract the zip file into the working directory
@@ -414,17 +414,17 @@ public extension CanvasViewModel {
                 )
 
                 // Restore the repository from the extracted textures
-                let model: ArchiveModel = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(ArchiveModel.jsonFileName)
+                let textureLayersModel: TextureLayersArchiveModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.jsonFileName)
                 )
-                let configuration: TextureLayerArrayConfiguration = .init(
-                    textureSize: model.textureSize,
-                    layerIndex: model.layerIndex,
-                    layers: model.layers
+                let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
+                    textureSize: textureLayersModel.textureSize,
+                    layerIndex: textureLayersModel.layerIndex,
+                    layers: textureLayersModel.layers
                 )
-                let resolvedConfiguration = try await dependencies.textureRepository.restoreStorage(
+                let resolvedConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
-                    configuration: configuration,
+                    configuration: textureLayersConfiguration,
                     defaultTextureSize: defaultTextureSize()
                 )
                 await setupCanvas(resolvedConfiguration)
@@ -475,12 +475,10 @@ public extension CanvasViewModel {
             let textureLayersStorage,
             let canvasTexture = canvasRenderer?.canvasTexture,
             let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
-                height: ArchiveModel.thumbnailLength,
+                height: TextureLayersArchiveModel.thumbnailLength,
                 scale: 1.0
             )
         else { return }
-
-        let archiveModel: ArchiveModel = .init(textureLayers: textureLayersStorage)
 
         Task {
             defer { activityIndicatorSubject.send(false) }
@@ -497,7 +495,7 @@ public extension CanvasViewModel {
 
                 // Save the thumbnail image into the working directory
                 async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(fileName: ArchiveModel.thumbnailName, item: thumbnailImage)
+                    namedItem: .init(fileName: TextureLayersArchiveModel.thumbnailName, item: thumbnailImage)
                 )
 
                 // Save the textures into the working directory
@@ -509,8 +507,9 @@ public extension CanvasViewModel {
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
 
                 // Save the texture layers as JSON
+                let textureLayersModel: TextureLayersArchiveModel = .init(textureLayers: textureLayersStorage)
                 async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: archiveModel.namedItem()
+                    namedItem: textureLayersModel.namedItem()
                 )
 
                 // Save the project metadata as JSON
