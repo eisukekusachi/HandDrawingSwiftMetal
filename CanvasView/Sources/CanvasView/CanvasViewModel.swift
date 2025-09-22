@@ -628,6 +628,10 @@ extension CanvasViewModel {
                     texture: texture,
                     for: selectedTextureId
                 )
+
+                // Update `updatedAt` when drawing completes
+                projectMetaDataStorage.refreshUpdatedAt()
+
                 await undoStack?.pushUndoDrawingObject(
                     texture: resultTexture.texture
                 )
