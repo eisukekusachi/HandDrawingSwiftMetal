@@ -31,7 +31,7 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
-        // Save to Core Data when the index is updated
+        // Save to Core Data when the properties are updated
         Publishers.Merge(
             palette.$index.map { _ in () }.eraseToAnyPublisher(),
             palette.$colors.map { _ in () }.eraseToAnyPublisher()

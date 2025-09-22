@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// A store that manages the layer stack of a canvas
+/// A class that manages texture layers
 public final class TextureLayers: TextureLayersProtocol, ObservableObject {
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {

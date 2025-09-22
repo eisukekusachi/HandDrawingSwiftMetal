@@ -39,6 +39,7 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
         self.project = project
         self.storage = .init(context: context)
 
+        // Save to Core Data when the properties are updated
         Publishers.Merge3(
             self.project.$projectName.map { _ in () }.eraseToAnyPublisher(),
             self.project.$updatedAt.map { _ in () }.eraseToAnyPublisher(),

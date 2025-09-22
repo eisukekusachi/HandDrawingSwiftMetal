@@ -34,7 +34,7 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
-        // Save to Core Data when the index is updated
+        // Save to Core Data when the properties are updated
         Publishers.Merge3(
             drawingTool.$brushDiameter.map { _ in () }.eraseToAnyPublisher(),
             drawingTool.$eraserDiameter.map { _ in () }.eraseToAnyPublisher(),
