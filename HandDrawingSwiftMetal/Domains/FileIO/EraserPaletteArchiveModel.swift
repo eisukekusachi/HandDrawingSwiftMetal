@@ -1,5 +1,5 @@
 //
-//  EraserPaletteModel.swift
+//  EraserPaletteArchiveModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,14 +8,14 @@
 import CanvasView
 import Foundation
 
-struct EraserPaletteModel: Codable, Sendable {
+struct EraserPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let alphas: [Int]
 
-    public static let fileName = "eraser_palette"
+    public static let jsonFileName = "eraser_palette"
 }
 
-extension EraserPaletteModel: LocalFileConvertible {
+extension EraserPaletteArchiveModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -25,10 +25,10 @@ extension EraserPaletteModel: LocalFileConvertible {
 }
 
 @MainActor
-extension EraserPaletteModel {
-    static func namedItem(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteModel> {
+extension EraserPaletteArchiveModel {
+    static func namedItem(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: "\(Self.jsonFileName)",
             item: .init(
                 index: palette.index,
                 alphas: palette.alphas
@@ -41,4 +41,4 @@ extension EraserPaletteModel {
     }
 }
 
-extension EraserPaletteModel: LocalFileLoadable {}
+extension EraserPaletteArchiveModel: LocalFileLoadable {}

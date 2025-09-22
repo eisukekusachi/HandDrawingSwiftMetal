@@ -430,8 +430,8 @@ public extension CanvasViewModel {
                 await setupCanvas(resolvedConfiguration)
 
                 // Restore the metadata
-                let projectMetaData: ProjectMetaDataModel = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataModel.jsonFileName)
+                let projectMetaData: ProjectMetaDataArchiveModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )
                 projectMetaDataStorage.update(
                     projectName: projectMetaData.projectName,
@@ -514,7 +514,7 @@ public extension CanvasViewModel {
 
                 // Save the project metadata as JSON
                 async let resultProjectMetaDataEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: ProjectMetaDataModel.namedItem(from: projectMetaDataStorage)
+                    namedItem: ProjectMetaDataArchiveModel.namedItem(from: projectMetaDataStorage)
                 )
 
                 // Save an externally provided entities as JSON

@@ -1,5 +1,5 @@
 //
-//  BrushPaletteModel.swift
+//  BrushPaletteArchiveModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,14 +8,14 @@
 import CanvasView
 import Foundation
 
-struct BrushPaletteModel: Codable, Sendable {
+struct BrushPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let hexColors: [String]
 
-    public static let fileName = "brush_palette"
+    public static let jsonFileName = "brush_palette"
 }
 
-extension BrushPaletteModel: LocalFileConvertible {
+extension BrushPaletteArchiveModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -25,10 +25,10 @@ extension BrushPaletteModel: LocalFileConvertible {
 }
 
 @MainActor
-extension BrushPaletteModel {
-    static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteModel> {
+extension BrushPaletteArchiveModel {
+    static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: "\(Self.jsonFileName)",
             item: .init(
                 index: palette.index,
                 hexColors: palette.colors.map { $0.hex() }
@@ -41,4 +41,4 @@ extension BrushPaletteModel {
     }
 }
 
-extension BrushPaletteModel: LocalFileLoadable {}
+extension BrushPaletteArchiveModel: LocalFileLoadable {}

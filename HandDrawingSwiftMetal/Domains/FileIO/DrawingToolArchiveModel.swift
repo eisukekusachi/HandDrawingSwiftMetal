@@ -1,5 +1,5 @@
 //
-//  DrawingToolModel.swift
+//  DrawingToolArchiveModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,15 +8,15 @@
 import CanvasView
 import Foundation
 
-struct DrawingToolModel: Codable, Sendable {
+struct DrawingToolArchiveModel: Codable, Sendable {
     public let type: Int
     public let brushDiameter: Int
     public let eraserDiameter: Int
 
-    public static let fileName = "drawing_tool"
+    public static let jsonFileName = "drawing_tool"
 }
 
-extension DrawingToolModel: LocalFileConvertible {
+extension DrawingToolArchiveModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -26,10 +26,10 @@ extension DrawingToolModel: LocalFileConvertible {
 }
 
 @MainActor
-extension DrawingToolModel {
-    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolModel> {
+extension DrawingToolArchiveModel {
+    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: "\(Self.jsonFileName)",
             item: .init(
                 type: drawingTool.type.rawValue,
                 brushDiameter: drawingTool.brushDiameter,
@@ -43,4 +43,4 @@ extension DrawingToolModel {
     }
 }
 
-extension DrawingToolModel: LocalFileLoadable {}
+extension DrawingToolArchiveModel: LocalFileLoadable {}

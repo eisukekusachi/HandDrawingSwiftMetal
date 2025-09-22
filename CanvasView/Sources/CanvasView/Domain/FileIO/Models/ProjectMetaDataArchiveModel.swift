@@ -1,5 +1,5 @@
 //
-//  ProjectMetaDataModel.swift
+//  ProjectMetaDataArchiveModel.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/09/22.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ProjectMetaDataModel: Codable, Sendable {
+public struct ProjectMetaDataArchiveModel: Codable, Sendable {
     public let projectName: String
     public let createdAt: Date
     public let updatedAt: Date
@@ -26,7 +26,7 @@ public struct ProjectMetaDataModel: Codable, Sendable {
 }
 
 @MainActor
-extension ProjectMetaDataModel {
+extension ProjectMetaDataArchiveModel {
     public init(project: ProjectMetaDataProtocol) {
         self.projectName = project.projectName
         self.createdAt = project.createdAt
@@ -37,9 +37,9 @@ extension ProjectMetaDataModel {
     public init(fileURL: URL) throws {
         let data = try Data(contentsOf: fileURL)
         do {
-            self = try JSONDecoder().decode(ProjectMetaDataModel.self, from: data).model()
+            self = try JSONDecoder().decode(ProjectMetaDataArchiveModel.self, from: data).model()
         } catch {
-            let className = String(describing: ProjectMetaDataModel.self)
+            let className = String(describing: ProjectMetaDataArchiveModel.self)
             let nsError = NSError(
                 domain: className,
                 code: -1,
@@ -55,7 +55,7 @@ extension ProjectMetaDataModel {
     }
 }
 
-extension ProjectMetaDataModel: LocalFileConvertible {
+extension ProjectMetaDataArchiveModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -65,7 +65,7 @@ extension ProjectMetaDataModel: LocalFileConvertible {
 }
 
 @MainActor
-extension ProjectMetaDataModel {
+extension ProjectMetaDataArchiveModel {
     static func namedItem(from project: ProjectMetaDataProtocol) -> LocalFileNamedItem<Self> {
         .init(
             fileName: "\(Self.jsonFileName)",
@@ -82,14 +82,14 @@ extension ProjectMetaDataModel {
     }
 }
 
-extension ProjectMetaDataModel: ProjectMetaDataConvertible {
+extension ProjectMetaDataArchiveModel: ProjectMetaDataConvertible {
     public func model() -> Self {
         self
     }
 }
 
-extension ProjectMetaDataModel: LocalFileLoadable {}
+extension ProjectMetaDataArchiveModel: LocalFileLoadable {}
 
 public protocol ProjectMetaDataConvertible: Decodable {
-    func model() -> ProjectMetaDataModel
+    func model() -> ProjectMetaDataArchiveModel
 }
