@@ -35,8 +35,8 @@ extension ProjectMetaDataArchiveModel {
 
     /// Initializes by decoding a JSON file at the given URL
     public init(fileURL: URL) throws {
-        let data = try Data(contentsOf: fileURL)
         do {
+            let data = try Data(contentsOf: fileURL)
             self = try JSONDecoder().decode(ProjectMetaDataArchiveModel.self, from: data).model()
         } catch {
             let className = String(describing: ProjectMetaDataArchiveModel.self)

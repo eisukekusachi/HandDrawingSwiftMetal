@@ -53,9 +53,7 @@ final class HandDrawingContentView: UIView {
                     self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
                     self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 
@@ -70,9 +68,7 @@ final class HandDrawingContentView: UIView {
                         index: file.index
                     )
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 
@@ -87,9 +83,7 @@ final class HandDrawingContentView: UIView {
                         index: file.index
                     )
                 }
-            },
-            // Since this file is optional, if it is not found or an error occurs, simply do nothing
-            ignoreError: true
+            }
          )
     }()
 

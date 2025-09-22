@@ -451,7 +451,7 @@ public extension CanvasViewModel {
 
                 // Restore data from externally configured entities
                 for entity in optionalEntities {
-                    try entity.load(in: workingDirectoryURL)
+                    entity.loadIgnoringError(in: workingDirectoryURL)
                 }
 
                 toastSubject.send(

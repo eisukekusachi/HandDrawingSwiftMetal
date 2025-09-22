@@ -35,41 +35,28 @@ public struct LocalFileNamedLoader<T: LocalFileLoadable & Sendable>: Sendable {
         let value = try T.load(from: url)
         onLoaded(value)
     }
-
-    @Sendable func loadIgnoringError(in directory: URL) {
-        do {
-            let url = directory.appendingPathComponent(fileName)
-            let value = try T.load(from: url)
-            onLoaded(value)
-        } catch {
-            Logger.error(error)
-        }
-    }
 }
 
 public struct AnyLocalFileLoader: Sendable {
     public let fileName: String
     private let _load: @Sendable (URL) throws -> Void
-    private let ignoreError: Bool
 
     public init<T: LocalFileLoadable & Sendable>(
-        _ base: LocalFileNamedLoader<T>,
-        ignoreError: Bool = false
+        _ base: LocalFileNamedLoader<T>
     ) {
         self.fileName = base.fileName
         self._load = base.load(in:)
-        self.ignoreError = ignoreError
     }
 
     public func load(in directory: URL) throws {
-        do {
-            try _load(directory)
-        } catch {
-            if ignoreError {
-                Logger.error(error)
-            } else {
-                throw error
-            }
-        }
+        try _load(directory)
     }
+
+    public func loadIgnoringError(in directory: URL) {
+       do {
+           try _load(directory)
+       } catch {
+           Logger.error(error)
+       }
+   }
 }
