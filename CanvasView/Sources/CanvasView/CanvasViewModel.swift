@@ -401,7 +401,12 @@ public extension CanvasViewModel {
         completion: ((ResolvedTextureLayerArrayConfiguration) -> Void)? = nil
     ) {
         Task {
-            defer { activityIndicatorSubject.send(false) }
+            defer {
+                // Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
             activityIndicatorSubject.send(true)
 
             do {
@@ -413,7 +418,7 @@ public extension CanvasViewModel {
                     from: zipFileURL
                 )
 
-                // Restore the repository from the extracted textures
+                // Load texture layer data from the JSON file
                 let textureLayersModel: TextureLayersArchiveModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.jsonFileName)
                 )
@@ -422,30 +427,32 @@ public extension CanvasViewModel {
                     layerIndex: textureLayersModel.layerIndex,
                     layers: textureLayersModel.layers
                 )
-                let resolvedConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
+
+                let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
                     configuration: textureLayersConfiguration,
                     defaultTextureSize: defaultTextureSize()
                 )
-                await setupCanvas(resolvedConfiguration)
 
-                // Restore the metadata
-                let projectMetaData: ProjectMetaDataArchiveModel = try .init(
+                // Load project metadata, falling back if it is missing.
+                let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )
+
+                // Restore the canvas
+                await setupCanvas(resolvedTextureLayersConfiguration)
+
+                // Update metadata
                 projectMetaDataStorage.update(
-                    projectName: projectMetaData.projectName,
-                    createdAt: projectMetaData.createdAt,
-                    updatedAt: projectMetaData.updatedAt
+                    projectName: projectMetaData?.projectName ?? zipFileURL.fileName,
+                    createdAt: projectMetaData?.createdAt ?? Date(),
+                    updatedAt: projectMetaData?.updatedAt ?? Date()
                 )
 
                 // Restore data from externally configured entities
                 for entity in optionalEntities {
                     try entity.load(in: workingDirectoryURL)
                 }
-
-                // Remove the working space
-                dependencies.localFileRepository.removeWorkingDirectory()
 
                 toastSubject.send(
                     .init(
@@ -454,7 +461,7 @@ public extension CanvasViewModel {
                     )
                 )
 
-                completion?(resolvedConfiguration)
+                completion?(resolvedTextureLayersConfiguration)
             }
             catch {
                 alertSubject.send(
@@ -473,15 +480,19 @@ public extension CanvasViewModel {
         // Create a thumbnail image from the current canvas texture
         guard
             let textureLayersStorage,
-            let canvasTexture = canvasRenderer?.canvasTexture,
-            let thumbnailImage = canvasTexture.uiImage?.resizeWithAspectRatio(
+            let thumbnailImage = canvasRenderer?.canvasTexture?.uiImage?.resizeWithAspectRatio(
                 height: TextureLayersArchiveModel.thumbnailLength,
                 scale: 1.0
             )
         else { return }
 
         Task {
-            defer { activityIndicatorSubject.send(false) }
+            defer {
+                /// Remove the working space
+                dependencies.localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
             activityIndicatorSubject.send(true)
 
             do {
@@ -528,9 +539,6 @@ public extension CanvasViewModel {
                 try dependencies.localFileRepository.zipWorkingDirectory(
                     to: zipFileURL(fileName: projectMetaDataStorage.projectName)
                 )
-
-                /// Remove the working space
-                dependencies.localFileRepository.removeWorkingDirectory()
 
                 toastSubject.send(
                     .init(
