@@ -533,7 +533,7 @@ public extension CanvasViewModel {
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL(fileName: projectMetaDataStorage.projectName)
+                    to: projectMetaDataStorage.zipFileURL
                 )
 
                 toastSubject.send(
@@ -670,16 +670,6 @@ extension CanvasViewModel {
         canvasRenderer?.updateCanvasView(
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: .init(item: selectedLayer)
-        )
-    }
-}
-
-extension CanvasViewModel {
-
-    func zipFileURL(fileName: String) -> URL {
-        FileManager.documentsFileURL(
-            projectName: fileName,
-            suffix: ProjectMetaData.fileSuffix
         )
     }
 }
