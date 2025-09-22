@@ -29,14 +29,11 @@ final class TextureLayerViewPresenter {
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
     }
+    func hide() {
+        layerViewController.view.isHidden = true
+    }
 
-    @MainActor
-    func initialize(
-        textureLayers: any TextureLayersProtocol,
-        popupConfiguration: PopupWithArrowConfiguration
-    ) {
-        viewModel.initialize(textureLayers: textureLayers)
-
+    init() {
         let layerView = TextureLayerView(
             viewModel: viewModel
         )
@@ -53,6 +50,14 @@ final class TextureLayerViewPresenter {
         layerViewController = UIHostingController(rootView: popupWithArrowView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
+    }
+
+    @MainActor
+    func initialize(
+        textureLayers: any TextureLayersProtocol,
+        popupConfiguration: PopupWithArrowConfiguration
+    ) {
+        viewModel.initialize(textureLayers: textureLayers)
 
         popupConfiguration.initialize(
             sourceView: layerViewController.view

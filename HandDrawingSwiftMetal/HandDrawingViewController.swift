@@ -208,6 +208,9 @@ extension HandDrawingViewController {
                 guard let `self` else { return }
 
                 self.presentedViewController?.dismiss(animated: true)
+
+                self.textureLayerViewPresenter.hide()
+
                 self.contentView.canvasView.loadFile(
                     zipFileURL: url,
                     optionalEntities: [
