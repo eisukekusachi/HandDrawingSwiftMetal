@@ -36,21 +36,22 @@ public final class CanvasViewModel {
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
+    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `TextureLayers` when `TextureLayers` setup is prepared
+    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
     var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
         textureLayersPreparedSubject.eraseToAnyPublisher()
     }
 
     private var dependencies: CanvasViewDependencies!
 
+    /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
-    /// Maintains the state of the canvas
+    /// Texture layers stored in Core Data
     private var textureLayersStorage: CoreDataTextureLayersStorage?
 
     /// Handles input from finger touches
@@ -434,7 +435,7 @@ public extension CanvasViewModel {
                     defaultTextureSize: defaultTextureSize()
                 )
 
-                // Load project metadata, falling back if it is missing.
+                // Load project metadata, falling back if it is missing
                 let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )

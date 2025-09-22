@@ -35,12 +35,12 @@ import UIKit
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `ResolvedCanvasConfiguration` when the canvas view setup is completed
+    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         canvasViewSetupCompletedSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `TextureLayers` when `TextureLayers` setup is prepared
+    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
     public var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
         textureLayersPreparedSubject.eraseToAnyPublisher()
     }

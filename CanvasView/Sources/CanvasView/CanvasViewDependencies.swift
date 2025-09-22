@@ -9,8 +9,7 @@ import Foundation
 
 @MainActor
 struct CanvasViewDependencies {
-    /// Repository that manages textures for canvas layers
-    /// In order to restore the canvas after the app is closed, this app stores and manages layer textures in the Documents directory
+    /// Repository that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
     let textureRepository: TextureDocumentsDirectoryRepository
 
     /// Repository that manages textures used for undo
