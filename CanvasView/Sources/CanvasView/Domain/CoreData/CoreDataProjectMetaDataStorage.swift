@@ -62,9 +62,6 @@ extension CoreDataProjectMetaDataStorage {
 
     public func refresh() {
         project.refresh()
-        Task {
-            await save(project)
-        }
     }
 
     public func refreshUpdatedAt() {
