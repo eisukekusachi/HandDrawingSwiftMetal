@@ -48,6 +48,9 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies!
 
+    /// A class that manages rendering to the canvas
+    private var canvasRenderer: CanvasRenderer
+
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
@@ -56,16 +59,13 @@ public final class CanvasViewModel {
 
     private let persistenceController: PersistenceController
 
+    /// An iterator that manages a single curve being drawn in realtime
+    private var drawingCurve: DrawingCurve?
+
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
     private let pencilStroke = PencilStroke()
-
-    /// An iterator that manages a single curve being drawn in realtime
-    private var drawingCurve: DrawingCurve?
-
-    /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
 
     /// A class that manages drawing lines onto textures
     private var drawingToolRenderer: DrawingToolRenderer?
