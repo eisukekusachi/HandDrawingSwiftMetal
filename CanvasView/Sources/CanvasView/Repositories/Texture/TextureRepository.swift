@@ -6,7 +6,6 @@
 //
 
 import Combine
-import Foundation
 import MetalKit
 
 /// A protocol that defines a repository for managing textures

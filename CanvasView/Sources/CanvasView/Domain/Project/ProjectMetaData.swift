@@ -13,6 +13,13 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
     @Published public var createdAt: Date
     @Published public var updatedAt: Date
 
+    var zipFileURL: URL {
+        FileManager.documentsFileURL(
+            projectName: projectName,
+            suffix: ProjectMetaData.fileSuffix
+        )
+    }
+
     public static var fileSuffix: String {
         "zip"
     }

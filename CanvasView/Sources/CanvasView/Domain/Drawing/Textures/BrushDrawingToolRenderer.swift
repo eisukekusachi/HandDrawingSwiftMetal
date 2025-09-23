@@ -32,7 +32,7 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 
 public extension BrushDrawingToolRenderer {
 
-    func configure(displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
         self.displayView = displayView
         self.renderer = renderer
 
@@ -42,7 +42,7 @@ public extension BrushDrawingToolRenderer {
         )
     }
 
-    func initTextures(_ textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         guard let device = renderer?.device else { return }
 
         self.textureSize = textureSize

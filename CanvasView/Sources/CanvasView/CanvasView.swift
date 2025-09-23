@@ -22,12 +22,12 @@ import UIKit
     }
 
     /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<ErrorModel, Never> {
+    public var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits a request to show or hide the toast
-    public var toast: AnyPublisher<ToastModel, Never> {
+    public var toast: AnyPublisher<CanvasMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
 
@@ -36,13 +36,13 @@ import UIKit
     }
 
     /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
-    public var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
-        canvasViewSetupCompletedSubject.eraseToAnyPublisher()
+    public var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
+        didInitializeCanvasViewSubject.eraseToAnyPublisher()
     }
 
     /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    public var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
-        textureLayersPreparedSubject.eraseToAnyPublisher()
+    public var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeTexturesSubject.eraseToAnyPublisher()
     }
 
     private let renderer: MTLRendering
@@ -51,13 +51,13 @@ import UIKit
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    private let toastSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
+    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
-    private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -71,7 +71,7 @@ import UIKit
 
         super.init(frame: .zero)
 
-        setup()
+        initialize()
     }
     public required init?(coder: NSCoder) {
 
@@ -79,14 +79,14 @@ import UIKit
 
         super.init(coder: coder)
 
-        setup()
+        initialize()
     }
 
     public override func layoutSubviews() {
         canvasViewModel.frameSize = frame.size
     }
 
-    private func setup() {
+    private func initialize() {
         layoutView()
         bindData()
 
@@ -102,7 +102,7 @@ import UIKit
         drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration
     ) {
-        displayView.configure(renderer: renderer)
+        displayView.initialize(renderer: renderer)
 
         canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
@@ -163,15 +163,15 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.canvasViewSetupCompleted
+        canvasViewModel.didInitializeCanvasView
             .sink { [weak self] value in
-                self?.canvasViewSetupCompletedSubject.send(value)
+                self?.didInitializeCanvasViewSubject.send(value)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.textureLayersPrepared
+        canvasViewModel.didInitializeTextures
             .sink { [weak self] value in
-                self?.textureLayersPreparedSubject.send(value)
+                self?.didInitializeTexturesSubject.send(value)
             }
             .store(in: &cancellables)
 

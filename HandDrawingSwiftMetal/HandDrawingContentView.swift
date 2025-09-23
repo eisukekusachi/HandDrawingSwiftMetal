@@ -117,7 +117,7 @@ final class HandDrawingContentView: UIView {
         )
     }
 
-    func setup() {
+    func initialize() {
         brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
         brushDiameterSlider.setValue(
             BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.brushDiameter),

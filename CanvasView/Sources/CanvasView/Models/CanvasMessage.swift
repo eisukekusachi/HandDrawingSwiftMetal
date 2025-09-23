@@ -1,5 +1,5 @@
 //
-//  ToastModel.swift
+//  CanvasMessage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct ToastModel: Identifiable {
+public struct CanvasMessage: Identifiable {
     public let id: UUID
     public let title: String
     public let icon: UIImage?

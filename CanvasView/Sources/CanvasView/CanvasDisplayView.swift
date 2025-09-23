@@ -48,7 +48,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         commonInit()
     }
 
-    func configure(renderer: MTLRendering) {
+    func initialize(renderer: MTLRendering) {
         self.renderer = renderer
     }
 
