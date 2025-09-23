@@ -102,7 +102,7 @@ import UIKit
         drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration
     ) {
-        displayView.configure(renderer: renderer)
+        displayView.initialize(renderer: renderer)
 
         canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,

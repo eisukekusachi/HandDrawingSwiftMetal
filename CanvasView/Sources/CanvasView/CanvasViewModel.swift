@@ -130,7 +130,7 @@ public final class CanvasViewModel {
         configuration: CanvasConfiguration
     ) {
         drawingToolRenderers.forEach {
-            $0.configure(displayView: dependencies.displayView, renderer: dependencies.renderer)
+            $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
         self.drawingToolRenderers = drawingToolRenderers
 

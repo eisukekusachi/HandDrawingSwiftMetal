@@ -33,7 +33,7 @@ public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 
 public extension EraserDrawingToolRenderer {
 
-    func configure(displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
         self.displayView = displayView
         self.renderer = renderer
 

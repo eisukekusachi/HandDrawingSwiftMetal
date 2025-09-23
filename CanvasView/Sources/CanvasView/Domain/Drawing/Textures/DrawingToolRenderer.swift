@@ -18,7 +18,7 @@ public protocol DrawingToolRenderer {
     func setDiameter(_ diameter: Int)
 
     /// Injects external dependencies `CanvasDisplayable` and `MTLRendering`
-    func configure(displayView: CanvasDisplayable, renderer: MTLRendering)
+    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering)
 
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],
