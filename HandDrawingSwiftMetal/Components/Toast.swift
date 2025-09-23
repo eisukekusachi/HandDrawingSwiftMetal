@@ -105,17 +105,20 @@ class Toast: UIView {
             showTemporarily()
         }
     }
+}
 
-    @objc private func tapView() {
-        removeViewWithAnimation()
-    }
-
-    func initialize(_ model: ToastModel) {
+extension Toast {
+    func showMessage(_ model: CanvasMessage) {
         label.text = model.title
         imageView.image = model.icon
         duration = model.duration
+    }
+}
 
-        commonInit()
+extension Toast {
+    @objc
+    private func tapView() {
+        removeViewWithAnimation()
     }
 
     private func showTemporarily() {
@@ -159,5 +162,4 @@ class Toast: UIView {
             parentResponder = nextResponder
         }
     }
-
 }

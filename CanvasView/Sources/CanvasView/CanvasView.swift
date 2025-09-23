@@ -27,7 +27,7 @@ import UIKit
     }
 
     /// A publisher that emits a request to show or hide the toast
-    public var toast: AnyPublisher<ToastModel, Never> {
+    public var toast: AnyPublisher<CanvasMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
 
@@ -53,7 +53,7 @@ import UIKit
 
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    private let toastSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 

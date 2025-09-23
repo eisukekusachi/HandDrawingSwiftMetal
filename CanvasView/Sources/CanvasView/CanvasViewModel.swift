@@ -28,7 +28,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show or hide the toast
-    var toast: AnyPublisher<ToastModel, Never> {
+    var toast: AnyPublisher<CanvasMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
 
@@ -86,7 +86,7 @@ public final class CanvasViewModel {
 
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    private let toastSubject = PassthroughSubject<ToastModel, Never>()
+    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
     /// Emit `TextureLayersProtocol` when the texture update is completed
     private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()

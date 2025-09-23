@@ -235,9 +235,9 @@ extension HandDrawingViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    private func showToast(_ model: ToastModel) {
+    private func showToast(_ model: CanvasMessage) {
         let toast = Toast()
-        toast.initialize(model)
+        toast.showMessage(model)
         view.addSubview(toast)
     }
 }
