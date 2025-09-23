@@ -227,7 +227,7 @@ extension HandDrawingViewController {
         )
     }
 
-    private func showAlert(_ error: ErrorModel) {
+    private func showAlert(_ error: CanvasError) {
         dialogPresenter.configuration = .init(
             title: error.title,
             message: error.message

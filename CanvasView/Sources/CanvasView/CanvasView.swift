@@ -22,7 +22,7 @@ import UIKit
     }
 
     /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<ErrorModel, Never> {
+    public var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -51,7 +51,7 @@ import UIKit
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 

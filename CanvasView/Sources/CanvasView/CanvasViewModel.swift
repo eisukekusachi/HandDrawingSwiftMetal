@@ -23,7 +23,7 @@ public final class CanvasViewModel {
     }
 
     /// A publisher that emits a request to show the alert
-    var alert: AnyPublisher<ErrorModel, Never> {
+    var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
 
@@ -84,7 +84,7 @@ public final class CanvasViewModel {
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<ErrorModel, Never>()
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
@@ -472,7 +472,7 @@ public extension CanvasViewModel {
             }
             catch {
                 alertSubject.send(
-                    ErrorModel.create(
+                    CanvasError.create(
                         error as NSError,
                         title: String(localized: "Loading Error", bundle: .module)
                     )
@@ -554,7 +554,7 @@ public extension CanvasViewModel {
                 )
             } catch {
                 alertSubject.send(
-                    ErrorModel.create(
+                    CanvasError.create(
                         error as NSError,
                         title: String(localized: "Saving Error", bundle: .module)
                     )
