@@ -177,7 +177,7 @@ public final class CanvasViewModel {
             // Initialize the texture repository
             let resolvedTextureLayersConfiguration = try await dependencies.textureRepository.initializeStorage(
                 configuration: textureLayersConfiguration,
-                fallbackTextureSize: defaultTextureSize()
+                fallbackTextureSize: TextureLayerModel.defaultTextureSize()
             )
             await initializeTextures(resolvedTextureLayersConfiguration)
         }
@@ -362,16 +362,6 @@ extension CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    func defaultTextureSize() -> CGSize {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-
-        return .init(
-            width: size.width * scale,
-            height: size.height * scale
-        )
-    }
-
     func resetTransforming() {
         transforming.setMatrix(.identity)
         canvasRenderer.updateCanvasView()
@@ -386,7 +376,7 @@ public extension CanvasViewModel {
         // Initialize the texture repository
         let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
             configuration: configuration,
-            fallbackTextureSize: defaultTextureSize()
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
         await initializeTextures(resolvedConfiguration)
 
@@ -438,7 +428,7 @@ public extension CanvasViewModel {
                 let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
                     configuration: textureLayersConfiguration,
-                    defaultTextureSize: defaultTextureSize()
+                    defaultTextureSize: TextureLayerModel.defaultTextureSize()
                 )
 
                 // Load project metadata, falling back if it is missing
