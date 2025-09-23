@@ -22,7 +22,11 @@ final class CanvasRenderer: ObservableObject {
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     private var baseBackgroundColor: UIColor = .lightGray
 
-    private let renderer: MTLRendering
+    private var renderer: MTLRendering?
+
+    private var displayView: CanvasDisplayable?
+
+    private var flippedTextureBuffers: MTLTextureBuffers?
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
@@ -33,18 +37,14 @@ final class CanvasRenderer: ObservableObject {
     /// The texture of the selected layer.
     private(set) var selectedTexture: MTLTexture!
 
-    private let displayView: CanvasDisplayable
-
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture!
-
-    private var flippedTextureBuffers: MTLTextureBuffers?
 
     private var cancellables = Set<AnyCancellable>()
 
     private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
 
-    init(
+    func initialize(
         displayView: CanvasDisplayable,
         renderer: MTLRendering,
         environmentConfiguration: EnvironmentConfiguration
@@ -111,11 +111,11 @@ final class CanvasRenderer: ObservableObject {
 
 extension CanvasRenderer {
     var drawableSize: CGSize? {
-        displayView.displayTexture?.size
+        displayView?.displayTexture?.size
     }
 
     func resetCommandBuffer() {
-        displayView.resetCommandBuffer()
+        displayView?.resetCommandBuffer()
     }
     func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
@@ -201,7 +201,8 @@ extension CanvasRenderer {
         selectedLayer: TextureLayerModel
     ) {
         guard
-            let commandBuffer = displayView.commandBuffer,
+            let renderer,
+            let commandBuffer = displayView?.commandBuffer,
             let canvasTexture
         else { return }
 
@@ -237,8 +238,9 @@ extension CanvasRenderer {
 
     func updateCanvasView() {
         guard
-            let commandBuffer = displayView.commandBuffer,
-            let displayTexture = displayView.displayTexture
+            let renderer,
+            let commandBuffer = displayView?.commandBuffer,
+            let displayTexture = displayView?.displayTexture
         else { return }
 
         renderer.drawTexture(
@@ -250,7 +252,7 @@ extension CanvasRenderer {
             device: device,
             with: commandBuffer
         )
-        displayView.setNeedsDisplay()
+        displayView?.setNeedsDisplay()
     }
 
     func drawLayerTextures(
@@ -259,6 +261,7 @@ extension CanvasRenderer {
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
+        guard let renderer else { return }
 
         renderer.clearTexture(texture: destination, with: commandBuffer)
 

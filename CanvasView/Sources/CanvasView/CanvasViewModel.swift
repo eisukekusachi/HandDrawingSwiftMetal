@@ -13,7 +13,7 @@ public final class CanvasViewModel {
 
     var frameSize: CGSize = .zero {
         didSet {
-            canvasRenderer?.frameSize = frameSize
+            canvasRenderer.frameSize = frameSize
         }
     }
 
@@ -65,7 +65,7 @@ public final class CanvasViewModel {
     private var drawingCurve: DrawingCurve?
 
     /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer?
+    private var canvasRenderer: CanvasRenderer
 
     /// A class that manages drawing lines onto textures
     private var drawingToolRenderer: DrawingToolRenderer?
@@ -99,6 +99,9 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
+
+        canvasRenderer = CanvasRenderer()
+
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
@@ -135,7 +138,7 @@ public final class CanvasViewModel {
 
         self.dependencies = dependencies
 
-        self.canvasRenderer = CanvasRenderer(
+        self.canvasRenderer.initialize(
             displayView: dependencies.displayView,
             renderer: dependencies.renderer,
             environmentConfiguration: configuration.environmentConfiguration
@@ -183,7 +186,7 @@ public final class CanvasViewModel {
             .sink { [weak self] in
                 guard
                     let drawingCurve = self?.drawingCurve,
-                    let texture = self?.canvasRenderer?.selectedTexture,
+                    let texture = self?.canvasRenderer.selectedTexture,
                     let selectedLayerId = self?.textureLayersStorage.selectedLayer?.id
                 else { return }
 
@@ -220,7 +223,7 @@ public final class CanvasViewModel {
 
         transforming.matrixPublisher
             .sink { [weak self] matrix in
-                self?.canvasRenderer?.matrix = matrix
+                self?.canvasRenderer.matrix = matrix
             }
             .store(in: &cancellables)
 
@@ -241,9 +244,9 @@ public extension CanvasViewModel {
             textureRepository: dependencies.textureRepository
         )
 
-        canvasRenderer?.initTextures(textureSize: configuration.textureSize)
+        canvasRenderer.initTextures(textureSize: configuration.textureSize)
 
-        canvasRenderer?.updateDrawingTextures(
+        canvasRenderer.updateDrawingTextures(
             textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
@@ -364,7 +367,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        canvasRenderer?.updateCanvasView()
+        canvasRenderer.updateCanvasView()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
@@ -476,7 +479,7 @@ public extension CanvasViewModel {
     ) {
         // Create a thumbnail image from the current canvas texture
         guard
-            let thumbnailImage = canvasRenderer?.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            let thumbnailImage = canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
                 height: TextureLayersArchiveModel.thumbnailLength,
                 scale: 1.0
             )
@@ -558,7 +561,6 @@ extension CanvasViewModel {
 
     private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let canvasRenderer,
             let drawingToolRenderer,
             let drawableSize = canvasRenderer.drawableSize
         else { return }
@@ -577,8 +579,6 @@ extension CanvasViewModel {
     }
 
     private func transformCanvas() {
-        guard let canvasRenderer else { return }
-
         if transforming.isNotKeysInitialized {
             transforming.initialize(
                 fingerStroke.touchHistories
@@ -612,9 +612,9 @@ extension CanvasViewModel {
         drawingCurve = nil
         transforming.resetMatrix()
 
-        canvasRenderer?.resetCommandBuffer()
+        canvasRenderer.resetCommandBuffer()
 
-        canvasRenderer?.updateCanvasView()
+        canvasRenderer.updateCanvasView()
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
@@ -654,7 +654,7 @@ extension CanvasViewModel {
     }
 
     func updateCanvasByMergingAllLayers() {
-        canvasRenderer?.updateDrawingTextures(
+        canvasRenderer.updateDrawingTextures(
             textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
         ) { [weak self] in
@@ -667,7 +667,7 @@ extension CanvasViewModel {
             let selectedLayer = textureLayersStorage.selectedLayer
         else { return }
 
-        canvasRenderer?.updateCanvasView(
+        canvasRenderer.updateCanvasView(
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: .init(item: selectedLayer)
         )
