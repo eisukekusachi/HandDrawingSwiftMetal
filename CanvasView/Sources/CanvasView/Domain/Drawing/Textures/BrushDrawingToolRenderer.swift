@@ -42,7 +42,7 @@ public extension BrushDrawingToolRenderer {
         )
     }
 
-    func initTextures(_ textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         guard let device = renderer?.device else { return }
 
         self.textureSize = textureSize

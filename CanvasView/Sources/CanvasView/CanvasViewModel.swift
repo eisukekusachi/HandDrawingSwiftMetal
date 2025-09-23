@@ -244,7 +244,7 @@ public extension CanvasViewModel {
             textureRepository: dependencies.textureRepository
         )
 
-        canvasRenderer.initTextures(textureSize: configuration.textureSize)
+        canvasRenderer.initializeTextures(textureSize: configuration.textureSize)
 
         canvasRenderer.updateDrawingTextures(
             textureLayers: textureLayersStorage,
@@ -256,7 +256,7 @@ public extension CanvasViewModel {
 
     private func completeCanvasSetup(configuration: ResolvedTextureLayerArrayConfiguration) {
         for i in 0 ..< drawingToolRenderers.count {
-            drawingToolRenderers[i].initTextures(configuration.textureSize)
+            drawingToolRenderers[i].initializeTextures(configuration.textureSize)
         }
 
         undoStack?.initialize(configuration.textureSize)

@@ -62,7 +62,7 @@ final class CanvasRenderer: ObservableObject {
         self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor
     }
 
-    func initTextures(textureSize: CGSize) {
+    func initializeTextures(textureSize: CGSize) {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength

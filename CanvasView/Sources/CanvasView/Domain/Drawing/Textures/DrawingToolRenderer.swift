@@ -13,7 +13,7 @@ import MetalKit
 public protocol DrawingToolRenderer {
 
     /// Initializes the textures for realtime drawing with the specified texture size.
-    func initTextures(_ textureSize: CGSize)
+    func initializeTextures(_ textureSize: CGSize)
 
     func setDiameter(_ diameter: Int)
 
