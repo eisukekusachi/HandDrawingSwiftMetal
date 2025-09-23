@@ -36,14 +36,14 @@ public final class CanvasViewModel {
         didUndoSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
-    var canvasViewSetupCompleted: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
-        canvasViewSetupCompletedSubject.eraseToAnyPublisher()
+    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
+    var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeTexturesSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    var textureLayersPrepared: AnyPublisher<any TextureLayersProtocol, Never> {
-        textureLayersPreparedSubject.eraseToAnyPublisher()
+    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
+    var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
+        didInitializeCanvasViewSubject.eraseToAnyPublisher()
     }
 
     private var dependencies: CanvasViewDependencies!
@@ -88,9 +88,11 @@ public final class CanvasViewModel {
 
     private let toastSubject = PassthroughSubject<ToastModel, Never>()
 
-    private let canvasViewSetupCompletedSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
+    /// Emit `TextureLayersProtocol` when the texture update is completed
+    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
-    private let textureLayersPreparedSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    /// Emit `ResolvedTextureLayerArrayConfiguration` when the canvas view update is completed
+    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
@@ -99,7 +101,6 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-
         canvasRenderer = CanvasRenderer()
 
         persistenceController = PersistenceController(
@@ -169,14 +170,16 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
-            let configuration: TextureLayerArrayConfiguration = .init(entity: try? textureLayersStorage.fetch()) ?? configuration.textureLayerArrayConfiguration
+            let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
+                entity: try? textureLayersStorage.fetch()
+            ) ?? configuration.textureLayerArrayConfiguration
 
             // Initialize the texture repository
-            let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
-                configuration: configuration,
+            let resolvedTextureLayersConfiguration = try await dependencies.textureRepository.initializeStorage(
+                configuration: textureLayersConfiguration,
                 fallbackTextureSize: defaultTextureSize()
             )
-            await setupCanvas(resolvedConfiguration)
+            await initializeTextures(resolvedTextureLayersConfiguration)
         }
     }
 
@@ -238,36 +241,40 @@ public final class CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    private func setupCanvas(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+    private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+        // Initialize the textures used in the texture layers
         await textureLayersStorage.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
         )
 
-        canvasRenderer.initializeTextures(textureSize: configuration.textureSize)
+        // Initialize the textures used for Undo
+        undoStack?.initialize(configuration.textureSize)
 
-        canvasRenderer.updateDrawingTextures(
-            textureLayers: textureLayersStorage,
-            textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            self?.completeCanvasSetup(configuration: configuration)
-        }
-    }
-
-    private func completeCanvasSetup(configuration: ResolvedTextureLayerArrayConfiguration) {
+        // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingToolRenderers.count {
             drawingToolRenderers[i].initializeTextures(configuration.textureSize)
         }
 
-        undoStack?.initialize(configuration.textureSize)
+        // Initialize the textures used in the renderer
+        canvasRenderer.initializeTextures(
+            textureSize: configuration.textureSize
+        )
 
-        projectMetaDataStorage.refreshUpdatedAt()
+        // Update the canvas view
+        canvasRenderer.updateDrawingTextures(
+            textureLayers: textureLayersStorage,
+            textureRepository: dependencies.textureRepository
+        ) { [weak self] in
+            guard let `self` else { return }
+            self.updateCanvasView()
 
-        updateCanvasView()
+            self.didInitializeTexturesSubject.send(self.textureLayersStorage)
+            self.didInitializeCanvasViewSubject.send(configuration)
 
-        textureLayersPreparedSubject.send(textureLayersStorage)
-
-        canvasViewSetupCompletedSubject.send(configuration)
+            // Update to the latest date
+            self.projectMetaDataStorage.refreshUpdatedAt()
+        }
     }
 }
 
@@ -381,7 +388,7 @@ public extension CanvasViewModel {
             configuration: configuration,
             fallbackTextureSize: defaultTextureSize()
         )
-        await setupCanvas(resolvedConfiguration)
+        await initializeTextures(resolvedConfiguration)
 
         transforming.setMatrix(.identity)
 
@@ -439,8 +446,8 @@ public extension CanvasViewModel {
                     fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )
 
-                // Restore the canvas
-                await setupCanvas(resolvedTextureLayersConfiguration)
+                // Restore the textures
+                await initializeTextures(resolvedTextureLayersConfiguration)
 
                 // Update metadata
                 projectMetaDataStorage.update(

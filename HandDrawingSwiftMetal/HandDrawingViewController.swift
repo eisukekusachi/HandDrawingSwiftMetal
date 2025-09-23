@@ -44,7 +44,7 @@ class HandDrawingViewController: UIViewController {
             configuration: canvasConfiguration ?? .init()
         )
 
-        setupNewCanvasDialogPresenter()
+        initializeNewCanvasDialogPresenter()
     }
 }
 
@@ -52,17 +52,17 @@ extension HandDrawingViewController {
 
     private func bindData() {
 
-        contentView.canvasView.canvasViewSetupCompleted
+        contentView.canvasView.didInitializeCanvasView
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.contentView.setup()
+                self?.contentView.initialize()
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.textureLayersPrepared
+        contentView.canvasView.didInitializeTextures
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureLayers in
-                self?.setupLayerView(textureLayers)
+                self?.initializeLayerView(textureLayers)
             }
             .store(in: &cancellables)
 
@@ -126,7 +126,7 @@ extension HandDrawingViewController {
 
 extension HandDrawingViewController {
 
-    private func setupNewCanvasDialogPresenter() {
+    private func initializeNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
@@ -144,7 +144,7 @@ extension HandDrawingViewController {
         }
     }
 
-    private func setupLayerView(_ textureLayers: any TextureLayersProtocol) {
+    private func initializeLayerView(_ textureLayers: any TextureLayersProtocol) {
         textureLayerViewPresenter.initialize(
             textureLayers: textureLayers,
             popupConfiguration: .init(
@@ -237,7 +237,7 @@ extension HandDrawingViewController {
 
     private func showToast(_ model: ToastModel) {
         let toast = Toast()
-        toast.setupView(model)
+        toast.initialize(model)
         view.addSubview(toast)
     }
 }

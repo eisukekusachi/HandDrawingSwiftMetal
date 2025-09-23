@@ -49,14 +49,6 @@ class Toast: UIView {
         commonInit()
     }
 
-    func setupView(_ model: ToastModel) {
-        label.text = model.title
-        imageView.image = model.icon
-        duration = model.duration
-
-        commonInit()
-    }
-
     private func commonInit() {
         addSubview(label)
         addSubview(imageView)
@@ -116,6 +108,14 @@ class Toast: UIView {
 
     @objc private func tapView() {
         removeViewWithAnimation()
+    }
+
+    func initialize(_ model: ToastModel) {
+        label.text = model.title
+        imageView.image = model.icon
+        duration = model.duration
+
+        commonInit()
     }
 
     private func showTemporarily() {
