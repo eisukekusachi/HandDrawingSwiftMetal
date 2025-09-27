@@ -6,6 +6,7 @@
 //
 
 import CanvasView
+import Combine
 import TextureLayerView
 import UIKit
 import SwiftUI
@@ -13,8 +14,9 @@ import SwiftUI
 @MainActor
 final class TextureLayerViewPresenter {
 
-    private class TextureLayerViewPresenterController: ObservableObject {
+    @Published public var isAlphaSliderDragging: Bool = false
 
+    private class TextureLayerViewPresenterController: ObservableObject {
         @Published public var arrowX: CGFloat = 0
     }
 
@@ -25,6 +27,8 @@ final class TextureLayerViewPresenter {
     private var popupWithArrowView: PopupWithArrowView<TextureLayerView>!
 
     private let controller = TextureLayerViewPresenterController()
+
+    private var cancellables = Set<AnyCancellable>()
 
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
@@ -50,6 +54,10 @@ final class TextureLayerViewPresenter {
         layerViewController = UIHostingController(rootView: popupWithArrowView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
+
+        viewModel.$isDragging
+            .assign(to: \.isAlphaSliderDragging, on: self)
+            .store(in: &cancellables)
     }
 
     @MainActor

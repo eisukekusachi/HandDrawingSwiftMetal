@@ -235,6 +235,7 @@ public final class CanvasViewModel {
                 self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
+
     }
 }
 
@@ -369,6 +370,14 @@ public extension CanvasViewModel {
     func setDrawingTool(_ drawingToolIndex: Int) {
         guard drawingToolIndex < drawingToolRenderers.count else { return }
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
+    }
+
+    func beginAlphaChange() {
+        undoTextureLayers.setAlphaUndoObject()
+    }
+
+    func endAlphaChange() {
+        undoTextureLayers.pushUndoAlphaObject()
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {

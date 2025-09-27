@@ -229,7 +229,7 @@ public extension TextureLayers {
         fullCanvasUpdateRequestedSubject.send(())
     }
 
-    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool = false) {
+    func updateAlpha(id: UUID, alpha: Int) {
         guard
             let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
         else { return }

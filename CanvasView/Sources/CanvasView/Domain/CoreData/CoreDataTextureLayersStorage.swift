@@ -135,8 +135,8 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.updateVisibility(id: id, isVisible: isVisible)
     }
 
-    public func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
-        textureLayers.updateAlpha(id: id, alpha: alpha, isStartHandleDragging: isStartHandleDragging)
+    public func updateAlpha(id: UUID, alpha: Int) {
+        textureLayers.updateAlpha(id: id, alpha: alpha)
     }
 
     public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {

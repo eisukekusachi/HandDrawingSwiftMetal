@@ -152,10 +152,16 @@ import UIKit
     public func redo() {
         canvasViewModel.redo()
     }
+
+    public func beginAlphaChange() {
+        canvasViewModel.beginAlphaChange()
+    }
+    public func endAlphaChange() {
+        canvasViewModel.endAlphaChange()
+    }
 }
 
 extension CanvasView {
-
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in

@@ -51,21 +51,18 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private func subscribe() {
         // Bind the alpha slider
-        Publishers.CombineLatest(
-            $currentAlpha.removeDuplicates(),
-            $isDragging.removeDuplicates()
-        )
-        .sink { [weak self] alpha, isDragging in
-            guard
-                let selectedLayerId = self?.selectedLayerId
-            else { return }
-            self?.textureLayers?.updateAlpha(
-                id: selectedLayerId,
-                alpha: Int(alpha),
-                isStartHandleDragging: isDragging
-            )
-        }
-        .store(in: &cancellables)
+        $currentAlpha
+            .sink { [weak self] alpha in
+                guard
+                    let selectedLayerId = self?.selectedLayerId
+                else { return }
+
+                self?.textureLayers?.updateAlpha(
+                    id: selectedLayerId,
+                    alpha: Int(alpha)
+                )
+            }
+            .store(in: &cancellables)
 
         textureLayers?.selectedLayerIdPublisher
             .sink { [weak self] value in

@@ -44,8 +44,8 @@ public struct TwoRowsSliderView: View {
             IntSliderView(
                 $value,
                 range: range
-            ) { isEditing in
-                self.isDragging = isEditing
+            ) { dragging in
+                self.isDragging = dragging
             }
         }
     }

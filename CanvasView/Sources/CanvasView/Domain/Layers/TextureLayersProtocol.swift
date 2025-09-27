@@ -72,7 +72,7 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func updateVisibility(id: UUID, isVisible: Bool)
 
-    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool)
+    func updateAlpha(id: UUID, alpha: Int)
 
     func updateThumbnail(_ identifiedTexture: IdentifiedTexture)
 

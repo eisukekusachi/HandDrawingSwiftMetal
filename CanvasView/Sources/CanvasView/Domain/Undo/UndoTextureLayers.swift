@@ -250,31 +250,8 @@ extension UndoTextureLayers {
         )
     }
 
-    public func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
-        textureLayers.updateAlpha(id: id, alpha: alpha, isStartHandleDragging: isStartHandleDragging)
-
-        if isStartHandleDragging, let alpha = textureLayers.selectedLayer?.alpha {
-            self.oldAlpha = alpha
-        }
-
-        if let oldAlpha = self.oldAlpha,
-           let selectedLayer = textureLayers.selectedLayer {
-
-            let undoObject = UndoAlphaChangedObject(
-                layer: .init(item: selectedLayer),
-                withNewAlpha: Int(oldAlpha)
-            )
-
-            pushUndoObject(
-                .init(
-                    undoObject: undoObject,
-                    redoObject: UndoAlphaChangedObject(
-                        layer: undoObject.textureLayer,
-                        withNewAlpha: selectedLayer.alpha
-                    )
-                )
-            )
-        }
+    public func updateAlpha(id: UUID, alpha: Int) {
+        textureLayers.updateAlpha(id: id, alpha: alpha)
     }
 }
 
@@ -377,6 +354,37 @@ extension UndoTextureLayers {
             // No action on error
             Logger.error(error)
         }
+    }
+
+    public func setAlphaUndoObject() {
+        guard let alpha = textureLayers.selectedLayer?.alpha else { return }
+
+        self.oldAlpha = alpha
+    }
+    public func pushUndoAlphaObject() {
+        guard
+            let oldAlpha = self.oldAlpha,
+            let selectedLayer = textureLayers.selectedLayer,
+            oldAlpha != selectedLayer.alpha
+        else { return }
+
+        let undoObject = UndoAlphaChangedObject(
+            layer: .init(item: selectedLayer),
+            withNewAlpha: Int(oldAlpha)
+        )
+        let redoObject = UndoAlphaChangedObject(
+            layer: undoObject.textureLayer,
+            withNewAlpha: selectedLayer.alpha
+        )
+
+        pushUndoObject(
+            .init(
+                undoObject: undoObject,
+                redoObject: redoObject
+            )
+        )
+
+        self.oldAlpha = nil
     }
 }
 
