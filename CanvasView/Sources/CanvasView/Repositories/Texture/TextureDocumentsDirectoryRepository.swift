@@ -305,12 +305,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    func removeTexture(_ uuid: UUID) -> UUID {
+    func removeTexture(_ uuid: UUID) throws -> UUID {
         let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 
         if FileManager.default.fileExists(atPath: fileURL.path) {
-            // Do nothing on error
-            try? FileManager.default.removeItem(at: fileURL)
+            try FileManager.default.removeItem(at: fileURL)
         }
 
         textureIds.remove(uuid)

@@ -10,6 +10,7 @@ import UIKit
 
 /// A class that manages texture layers
 public final class TextureLayers: TextureLayersProtocol, ObservableObject {
+
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         canvasUpdateRequestedSubject.eraseToAnyPublisher()
@@ -82,6 +83,11 @@ public extension TextureLayers {
     func layer(_ layerId: UUID) -> TextureLayerItem? {
         _layers.first(where: { $0.id == layerId })
     }
+
+    /// Copies a texture for the given UUID
+    func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
+        try await textureRepository?.copyTexture(uuid: id)
+    }
 }
 
 @MainActor
@@ -145,7 +151,7 @@ public extension TextureLayers {
 
         _selectedLayerId = newLayerId
 
-        textureRepository
+        try textureRepository
             .removeTexture(selectedLayer.id)
 
         fullCanvasUpdateRequestedSubject.send(())
@@ -175,6 +181,17 @@ public extension TextureLayers {
         _selectedLayerId = id
 
         fullCanvasUpdateRequestedSubject.send(())
+    }
+
+    func updateLayer(_ layer: TextureLayerItem) {
+        guard
+            let selectedIndex = _layers.firstIndex(where: { $0.id == layer.id })
+        else {
+            Logger.error(String(localized: "Unable to find the index of the textureLayer to update", bundle: .module))
+            return
+        }
+
+        _layers[selectedIndex] = layer
     }
 
     func updateTitle(id: UUID, title: String) {
@@ -229,6 +246,37 @@ public extension TextureLayers {
 
         // Only the alpha of the selected layer can be changed, so other layers will not be updated
         canvasUpdateRequestedSubject.send(())
+    }
+
+    /// Requests a partial canvas update
+    func requestCanvasUpdate() {
+        canvasUpdateRequestedSubject.send(())
+    }
+
+    /// Requests a full canvas update (all layers composited)
+    func requestFullCanvasUpdate() {
+        fullCanvasUpdateRequestedSubject.send(())
+    }
+
+    func addTexture(_ texture: any MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        guard let textureRepository else {
+            throw unwrappingError
+        }
+        return try await textureRepository.addTexture(texture, newTextureUUID: uuid)
+    }
+
+    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) async throws -> IdentifiedTexture {
+        guard let textureRepository else {
+            throw unwrappingError
+        }
+        return try await textureRepository.updateTexture(texture: texture, for: uuid)
+    }
+
+    func removeTexture(_ uuid: UUID) throws -> UUID {
+        guard let textureRepository else {
+            throw unwrappingError
+        }
+        return try textureRepository.removeTexture(uuid)
     }
 }
 
@@ -338,5 +386,14 @@ public extension TextureLayers {
             undoObject: undoObject,
             redoObject: redoObject
         )
+    }
+
+    private var unwrappingError: NSError {
+        let error = NSError(
+            title: String(localized: "Error", bundle: .module),
+            message: String(localized: "Failed to unwrap texture repository", bundle: .module)
+        )
+        Logger.error(error)
+        return error
     }
 }

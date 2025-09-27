@@ -60,11 +60,4 @@ public final class UndoMoveObject: UndoObject {
         self.selectedLayerId = selectedLayerId
         self.textureLayer = layer
     }
-
-    public func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws {
-        // Do nothing
-    }
 }

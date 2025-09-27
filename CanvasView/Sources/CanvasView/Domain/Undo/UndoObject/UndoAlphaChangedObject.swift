@@ -34,11 +34,4 @@ public final class UndoAlphaChangedObject: UndoObject {
             isVisible: layer.isVisible
         )
     }
-
-    public func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws {
-        // Do nothing
-    }
 }

@@ -66,7 +66,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayers,
+        textureLayers: any TextureLayersProtocol,
         context: NSManagedObjectContext
     ) {
         self.textureLayers = textureLayers
@@ -103,6 +103,10 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.layer(layerId)
     }
 
+    public func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
+        try await textureLayers.duplicatedTexture(id: id)
+    }
+
     public func selectLayer(id: UUID) {
         textureLayers.selectLayer(id: id)
     }
@@ -117,6 +121,10 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
 
     public func moveLayer(indices: MoveLayerIndices) {
         textureLayers.moveLayer(indices: indices)
+    }
+
+    public func updateLayer(_ layer: TextureLayerItem) {
+        textureLayers.updateLayer(layer)
     }
 
     public func updateTitle(id: UUID, title: String) {
@@ -134,6 +142,32 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
         textureLayers.updateThumbnail(identifiedTexture)
     }
+
+    public func requestCanvasUpdate() {
+        textureLayers.requestCanvasUpdate()
+    }
+
+    public func requestFullCanvasUpdate() {
+        textureLayers.requestFullCanvasUpdate()
+    }
+
+    /// Adds a texture using UUID
+    @discardableResult
+    public func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.addTexture(texture, newTextureUUID: uuid)
+    }
+
+    /// Updates an existing texture for UUID
+    @discardableResult
+    public func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.updateTexture(texture: texture, for: uuid)
+    }
+
+    /// Removes a texture with UUID
+    @discardableResult
+    public func removeTexture(_ uuid: UUID) throws -> UUID {
+        try textureLayers.removeTexture(uuid)
+    }
 }
 
 extension CoreDataTextureLayersStorage {
@@ -143,13 +177,13 @@ extension CoreDataTextureLayersStorage {
 }
 
 private extension CoreDataTextureLayersStorage {
-    func save(_ target: TextureLayers) async {
+    func save(_ target: any TextureLayersProtocol) async {
 
         // Convert it to Sendable
         let layers = target.layers.map { TextureLayerModel(item: $0) }
 
         let textureSize = target.textureSize
-        let selectedLayerId = target.selectedLayerId
+        let selectedLayerId = target.selectedLayer?.id
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()

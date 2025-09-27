@@ -96,12 +96,16 @@ public final class CanvasViewModel {
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    private var undoStack: UndoStack? = nil
+    private let undoTextureLayers: UndoTextureLayers
 
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         canvasRenderer = CanvasRenderer()
+
+        undoTextureLayers = UndoTextureLayers(
+            textureLayers: TextureLayers()
+        )
 
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
@@ -114,7 +118,7 @@ public final class CanvasViewModel {
         )
 
         textureLayersStorage = CoreDataTextureLayersStorage(
-            textureLayers: TextureLayers(),
+            textureLayers: undoTextureLayers,
             context: persistenceController.viewContext
         )
 
@@ -153,17 +157,12 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        /*
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            let textureRepository = self.dependencies.textureRepository
-            undoStack = .init(
-                canvasState: canvasState,
-                textureRepository: textureRepository,
+            self.undoTextureLayers.setUndoStack(
                 undoTextureRepository: undoTextureRepository
             )
         }
-        */
 
         bindData()
 
@@ -230,7 +229,7 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        undoStack?.didUndo
+        undoTextureLayers.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.didUndoSubject.send(state)
@@ -249,7 +248,7 @@ public extension CanvasViewModel {
         )
 
         // Initialize the textures used for Undo
-        undoStack?.initialize(configuration.textureSize)
+        undoTextureLayers.initialize(configuration.textureSize)
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingToolRenderers.count {
@@ -300,7 +299,7 @@ extension CanvasViewModel {
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
-                    await undoStack?.setDrawingUndoObject()
+                    await undoTextureLayers.setDrawingUndoObject()
                 }
             }
 
@@ -346,7 +345,7 @@ extension CanvasViewModel {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
             Task {
-                await undoStack?.setDrawingUndoObject()
+                await undoTextureLayers.setDrawingUndoObject()
             }
         }
 
@@ -386,10 +385,10 @@ public extension CanvasViewModel {
     }
 
     func undo() {
-        undoStack?.undo()
+        undoTextureLayers.undo()
     }
     func redo() {
-        undoStack?.redo()
+        undoTextureLayers.redo()
     }
 
     func loadFile(
@@ -625,7 +624,7 @@ extension CanvasViewModel {
                 // Update `updatedAt` when drawing completes
                 projectMetaDataStorage.refreshUpdatedAt()
 
-                await undoStack?.pushUndoDrawingObject(
+                await undoTextureLayers.pushUndoDrawingObject(
                     texture: resultTexture.texture
                 )
             } catch {

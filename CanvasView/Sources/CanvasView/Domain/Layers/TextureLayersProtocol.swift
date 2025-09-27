@@ -44,13 +44,29 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func layer(_ layerId: UUID) -> TextureLayerItem?
 
+    func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture?
+
     func selectLayer(id: UUID)
+
+    /// Adds a texture using UUID
+    @discardableResult
+    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
+
+    /// Updates an existing texture for UUID
+    @discardableResult
+    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture
+
+    /// Removes a texture with UUID
+    @discardableResult
+    func removeTexture(_ uuid: UUID) throws -> UUID
 
     func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws
 
     func removeLayer(layerIndexToDelete index: Int) async throws
 
     func moveLayer(indices: MoveLayerIndices)
+
+    func updateLayer(_ layer: TextureLayerItem)
 
     func updateTitle(id: UUID, title: String)
 
@@ -59,4 +75,10 @@ public protocol TextureLayersProtocol: ObservableObject {
     func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool)
 
     func updateThumbnail(_ identifiedTexture: IdentifiedTexture)
+
+    /// Requests a partial canvas update
+    func requestCanvasUpdate()
+
+    /// Requests a full canvas update (all layers composited)
+    func requestFullCanvasUpdate()
 }
