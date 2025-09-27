@@ -14,7 +14,7 @@ import UIKit
 @MainActor
 public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
 
-    @Published private var textureLayers: TextureLayers
+    @Published private var textureLayers: any TextureLayersProtocol
 
     private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
 
@@ -36,6 +36,11 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     /// Emits whenever `selectedLayerId` change
     public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
         textureLayers.selectedLayerIdPublisher
+    }
+
+    /// Emits whenever `textureSize` change
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        textureLayers.textureSizePublisher
     }
 
     public var selectedLayer: TextureLayerItem? {
@@ -67,12 +72,6 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         self.textureLayers = textureLayers
 
         self.storage = .init(context: context)
-
-        // Propagate changes from children to the parent
-        self.textureLayers.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(

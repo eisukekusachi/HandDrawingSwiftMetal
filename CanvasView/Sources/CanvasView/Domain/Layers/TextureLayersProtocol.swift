@@ -24,6 +24,9 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Emits whenever `selectedLayerId` change
     var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> { get }
 
+    /// Emits whenever `textureSize` change
+    var textureSizePublisher: AnyPublisher<CGSize, Never> { get }
+
     var selectedLayer: TextureLayerItem? { get }
 
     var selectedIndex: Int? { get }
