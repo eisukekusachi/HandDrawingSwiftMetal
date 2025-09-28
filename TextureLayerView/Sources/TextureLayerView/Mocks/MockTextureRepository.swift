@@ -47,7 +47,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     func removeAll() {}
 
     /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
         let context = try MockMetalContext()
         let texture = try context.makeTexture(width: 16, height: 16)
         return .init(
@@ -57,7 +57,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
     }
 
     /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
         []
     }
 
@@ -66,7 +66,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         uuid
     }
 
-    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
         return .init(
             uuid: UUID(),
             texture: texture

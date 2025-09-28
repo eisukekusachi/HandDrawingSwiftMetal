@@ -244,7 +244,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
         if textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -276,10 +276,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in uuids {
-                group.addTask { try await self.copyTexture(uuid: id) }
+                group.addTask { try await self.duplicatedTexture(uuid: id) }
             }
 
             var results: [IdentifiedTexture] = []
@@ -316,7 +316,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         return uuid
     }
 
-    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
 
         let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
 

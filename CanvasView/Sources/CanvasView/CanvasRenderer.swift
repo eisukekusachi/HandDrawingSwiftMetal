@@ -149,7 +149,7 @@ extension CanvasRenderer {
         )
 
         Task {
-            let textures = try await textureRepository.copyTextures(
+            let textures = try await textureRepository.duplicatedTextures(
                 uuids: textureLayers.layers.map { $0.id }
             )
             let bottomLayers = bottomLayers(

@@ -103,10 +103,6 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.layer(layerId)
     }
 
-    public func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
-        try await textureLayers.duplicatedTexture(id: id)
-    }
-
     public func selectLayer(id: UUID) {
         textureLayers.selectLayer(id: id)
     }
@@ -127,6 +123,10 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.updateLayer(layer)
     }
 
+    public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
+        textureLayers.updateThumbnail(identifiedTexture)
+    }
+
     public func updateTitle(id: UUID, title: String) {
         textureLayers.updateTitle(id: id, title: title)
     }
@@ -139,8 +139,14 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.updateAlpha(id: id, alpha: alpha)
     }
 
-    public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        textureLayers.updateThumbnail(identifiedTexture)
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        textureLayers.beginAlphaChange()
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        textureLayers.endAlphaChange()
     }
 
     public func requestCanvasUpdate() {
@@ -149,6 +155,10 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
 
     public func requestFullCanvasUpdate() {
         textureLayers.requestFullCanvasUpdate()
+    }
+
+    public func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
+        try await textureLayers.duplicatedTexture(id: id)
     }
 
     /// Adds a texture using UUID
@@ -167,16 +177,6 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     @discardableResult
     public func removeTexture(_ uuid: UUID) throws -> UUID {
         try textureLayers.removeTexture(uuid)
-    }
-
-    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
-        textureLayers.beginAlphaChange()
-    }
-
-    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
-        textureLayers.endAlphaChange()
     }
 }
 

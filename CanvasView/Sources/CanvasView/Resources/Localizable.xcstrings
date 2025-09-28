@@ -37,6 +37,9 @@
     "Texture size mismatch" : {
       "extractionState" : "manual"
     },
+    "Unable to find %@" : {
+      "extractionState" : "manual"
+    },
     "Unable to load required data" : {
       "extractionState" : "manual"
     }

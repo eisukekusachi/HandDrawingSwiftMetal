@@ -28,10 +28,10 @@ public final class UndoAdditionObject: UndoObject {
 
     public init(
         layerToBeAdded textureLayer: TextureLayerModel,
-        insertIndex: Int
+        at index: Int
     ) {
         self.undoTextureUUID = UUID()
         self.textureLayer = textureLayer
-        self.insertIndex = insertIndex
+        self.insertIndex = index
     }
 }

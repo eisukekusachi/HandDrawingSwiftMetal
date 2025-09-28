@@ -496,7 +496,7 @@ public extension CanvasViewModel {
                 try dependencies.localFileRepository.createWorkingDirectory()
 
                 // Copy all textures from the textureRepository
-                let textures = try await dependencies.textureRepository.copyTextures(
+                let textures = try await dependencies.textureRepository.duplicatedTextures(
                     uuids: textureLayersStorage.layers.map { $0.id }
                 )
 

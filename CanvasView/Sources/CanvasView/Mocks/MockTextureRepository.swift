@@ -11,7 +11,7 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    func addTexture(_ texture: (any MTLTexture), newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: (any MTLTexture), uuid: UUID) async throws -> IdentifiedTexture {
         .init(
             uuid: uuid,
             texture: texture
@@ -76,7 +76,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
         let context = try MockMetalContext()
         let mockTexture = try context.makeTexture(width: 16, height: 16)
         return  .init(
@@ -85,7 +85,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
         []
     }
 

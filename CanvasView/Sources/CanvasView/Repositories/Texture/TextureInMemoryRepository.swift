@@ -199,7 +199,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[uuid],
             let newTexture = await renderer.duplicateTexture(
@@ -218,10 +218,10 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in uuids {
-                group.addTask { try await self.copyTexture(uuid: id) }
+                group.addTask { try await self.duplicatedTexture(uuid: id) }
             }
 
             var results: [IdentifiedTexture] = []
@@ -233,7 +233,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     @discardableResult
-    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
         guard textures[uuid] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
