@@ -152,7 +152,7 @@ extension UndoTextureLayers {
 }
 
 extension UndoTextureLayers {
-    public func setUndoStack(
+    public func setUndoTextureRepository(
         undoCount: Int = 64,
         undoTextureRepository: TextureRepository,
     ) {
