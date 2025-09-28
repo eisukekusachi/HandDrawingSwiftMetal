@@ -76,6 +76,12 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func updateThumbnail(_ identifiedTexture: IdentifiedTexture)
 
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    func beginAlphaChange()
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    func endAlphaChange()
+
     /// Requests a partial canvas update
     func requestCanvasUpdate()
 

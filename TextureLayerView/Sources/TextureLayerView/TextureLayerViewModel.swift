@@ -64,6 +64,16 @@ public final class TextureLayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        $isDragging
+            .sink { [weak self] isDragging in
+                if isDragging {
+                    self?.textureLayers?.beginAlphaChange()
+                } else {
+                    self?.textureLayers?.endAlphaChange()
+                }
+            }
+            .store(in: &cancellables)
+
         textureLayers?.selectedLayerIdPublisher
             .sink { [weak self] value in
                 self?.selectedLayerId = value

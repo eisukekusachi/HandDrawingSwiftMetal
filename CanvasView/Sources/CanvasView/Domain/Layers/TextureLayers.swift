@@ -248,6 +248,16 @@ public extension TextureLayers {
         canvasUpdateRequestedSubject.send(())
     }
 
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    func beginAlphaChange() {
+        // Do nothing
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    func endAlphaChange() {
+        // Do nothing
+    }
+
     /// Requests a partial canvas update
     func requestCanvasUpdate() {
         canvasUpdateRequestedSubject.send(())

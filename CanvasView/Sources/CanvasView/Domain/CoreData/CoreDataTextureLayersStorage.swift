@@ -168,6 +168,16 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     public func removeTexture(_ uuid: UUID) throws -> UUID {
         try textureLayers.removeTexture(uuid)
     }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        textureLayers.beginAlphaChange()
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        textureLayers.endAlphaChange()
+    }
 }
 
 extension CoreDataTextureLayersStorage {

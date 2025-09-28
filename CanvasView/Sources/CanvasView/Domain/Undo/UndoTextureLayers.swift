@@ -253,6 +253,16 @@ extension UndoTextureLayers {
     public func updateAlpha(id: UUID, alpha: Int) {
         textureLayers.updateAlpha(id: id, alpha: alpha)
     }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        setAlphaUndoObject()
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        pushUndoAlphaObject()
+    }
 }
 
 extension UndoTextureLayers {

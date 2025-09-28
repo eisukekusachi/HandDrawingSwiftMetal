@@ -14,8 +14,6 @@ import SwiftUI
 @MainActor
 final class TextureLayerViewPresenter {
 
-    @Published public var isAlphaSliderDragging: Bool = false
-
     private class TextureLayerViewPresenterController: ObservableObject {
         @Published public var arrowX: CGFloat = 0
     }
@@ -54,10 +52,6 @@ final class TextureLayerViewPresenter {
         layerViewController = UIHostingController(rootView: popupWithArrowView)
         layerViewController.view.backgroundColor = .clear
         layerViewController.view.isHidden = true
-
-        viewModel.$isDragging
-            .assign(to: \.isAlphaSliderDragging, on: self)
-            .store(in: &cancellables)
     }
 
     @MainActor

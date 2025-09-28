@@ -86,16 +86,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        textureLayerViewPresenter.$isAlphaSliderDragging
-            .sink { [weak self] isDragging in
-                if isDragging {
-                    self?.contentView.canvasView.beginAlphaChange()
-                } else {
-                    self?.contentView.canvasView.endAlphaChange()
-                }
-            }
-            .store(in: &cancellables)
-
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)

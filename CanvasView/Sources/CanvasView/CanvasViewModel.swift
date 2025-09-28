@@ -372,14 +372,6 @@ public extension CanvasViewModel {
         drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
     }
 
-    func beginAlphaChange() {
-        undoTextureLayers.setAlphaUndoObject()
-    }
-
-    func endAlphaChange() {
-        undoTextureLayers.pushUndoAlphaObject()
-    }
-
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
         // Initialize the texture repository
         let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
