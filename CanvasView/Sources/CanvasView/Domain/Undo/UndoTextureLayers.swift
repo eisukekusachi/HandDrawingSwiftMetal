@@ -439,72 +439,83 @@ extension UndoTextureLayers {
             })
             .store(in: &cancellables)
 
-        let undoStack: UndoStackModel<UndoObject> = .init(
-            undoObject: undoObject,
-            redoObject: redoObject
-        )
-        undoManager.beginUndoGrouping()
-        undoManager.registerUndo(withTarget: self) { target in
-            Task { @MainActor in
-                do {
-                    try await target.didPerformUndo(undoStack.undoObject)
-                } catch {
-                    Logger.error(error)
-                }
-
-                // Redo Registration
-                target.pushUndoObject(
-                    undoStack.reversedObject
-                )
-            }
-        }
-        undoManager.endUndoGrouping()
-        didUndoSubject.send(
-            .init(undoManager)
+        pushUndoObjectToUndoStack(
+            .init(
+                undoObject: undoObject,
+                redoObject: redoObject
+            )
         )
     }
 }
 
 extension UndoTextureLayers {
-    private func didPerformUndo(_ undoObject: UndoObject) async throws {
+
+    private func pushUndoObjectToUndoStack(
+        _ undoStack: UndoStackModel<UndoObject>
+    ) {
+        undoManager.beginUndoGrouping()
+        undoManager.registerUndo(withTarget: self) { [weak self] _ in
+            self?.performUndo(undoStack.undoObject)
+
+            // Redo Registration
+            self?.pushUndoObject(undoStack.reversedObject)
+        }
+        undoManager.endUndoGrouping()
+        didUndoSubject.send(.init(undoManager))
+    }
+
+    private func performUndo(
+        _ undoObject: UndoObject
+    ) {
+        Task {
+            do {
+                try await performTextureOperation(
+                    undoObject: undoObject,
+                    undoTextureRepository: undoTextureRepository
+                )
+            } catch {
+                Logger.error(error)
+            }
+        }
+    }
+
+    public func performTextureOperation(
+        undoObject: UndoObject,
+        undoTextureRepository: TextureRepository?
+    ) async throws {
         guard let undoTextureRepository else { return }
 
         if let undoObject = undoObject as? UndoDrawingObject {
-            let undoRepositoryUUID = undoObject.undoTextureUUID
-            let textureLayerId = undoObject.textureLayer.id
+            let result = try await undoTextureRepository.duplicatedTexture(uuid: undoObject.undoTextureUUID)
 
-            let result = try await undoTextureRepository.duplicatedTexture(uuid: undoRepositoryUUID)
+            let textureLayerId = undoObject.textureLayer.id
 
             try await textureLayers.updateTexture(
                 texture: result.texture,
                 for: textureLayerId
             )
 
-            textureLayers.updateThumbnail(result)
+            textureLayers.updateThumbnail(
+                .init(uuid: textureLayerId, texture: result.texture)
+            )
             textureLayers.selectLayer(id: textureLayerId)
+            textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
-            let undoRepositoryUUID = undoObject.undoTextureUUID
-            let undoTexture = try await undoTextureRepository
-                .duplicatedTexture(uuid: undoRepositoryUUID)
+            let result = try await undoTextureRepository
+                .duplicatedTexture(uuid: undoObject.undoTextureUUID)
 
-            let newTextureLayer = undoObject.textureLayer
-            let newThumbnail = undoTexture.texture.makeThumbnail()
-
-            try await textureLayers.addTexture(
-                undoTexture.texture,
-                newTextureUUID: newTextureLayer.id
-            )
+            let textureLayer = undoObject.textureLayer
+            let texture = result.texture
 
             try await textureLayers.addLayer(
                 layer: .init(
-                    model: newTextureLayer,
-                    thumbnail: newThumbnail
+                    model: textureLayer,
+                    thumbnail: texture.makeThumbnail()
                 ),
-                texture: undoTexture.texture,
+                texture: texture,
                 at: undoObject.insertIndex
             )
-
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
@@ -514,9 +525,6 @@ extension UndoTextureLayers {
                 Logger.error(String(localized: "Unable to find the index of the textureLayer to remove while undoing", bundle: .module))
                 return
             }
-
-            try textureLayers
-                .removeTexture(undoObject.textureLayer.id)
 
             try await textureLayers.removeLayer(
                 layerIndexToDelete: index
