@@ -142,6 +142,7 @@ public extension TextureLayerViewModel {
 
         Task {
             try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
+            textureLayers.requestFullCanvasUpdate()
         }
     }
 

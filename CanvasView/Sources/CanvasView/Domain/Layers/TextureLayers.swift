@@ -150,8 +150,6 @@ public extension TextureLayers {
 
         try textureRepository
             .removeTexture(selectedLayer.id)
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func moveLayer(indices: MoveLayerIndices) {
