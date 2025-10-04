@@ -165,8 +165,6 @@ public extension TextureLayers {
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func updateLayer(_ layer: TextureLayerItem) {

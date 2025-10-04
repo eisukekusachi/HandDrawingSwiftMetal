@@ -163,13 +163,16 @@ public extension TextureLayerViewModel {
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
+        guard let textureLayers else { return }
+
         Task {
-            textureLayers?.moveLayer(
+            textureLayers.moveLayer(
                 indices: .init(
                     sourceIndexSet: source,
                     destinationIndex: destination
                 )
             )
+            textureLayers.requestFullCanvasUpdate()
         }
     }
 }
