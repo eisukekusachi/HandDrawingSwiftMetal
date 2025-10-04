@@ -122,6 +122,12 @@ extension HandDrawingViewController {
         contentView.tapDrawingToolButton = { [weak self] in
             self?.contentView.toggleDrawingTool()
         }
+        contentView.tapUndoButton = { [weak self] in
+            self?.contentView.undo()
+        }
+        contentView.tapRedoButton = { [weak self] in
+            self?.contentView.redo()
+        }
     }
 }
 
