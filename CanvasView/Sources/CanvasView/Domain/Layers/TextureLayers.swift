@@ -38,6 +38,11 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
         $_textureSize.eraseToAnyPublisher()
     }
 
+    /// Emits whenever `alpha` change
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        $_alpha.eraseToAnyPublisher()
+    }
+
     public var textureSize: CGSize {
         _textureSize
     }
@@ -72,6 +77,8 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     // Set a default value to avoid nil
     @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
+
+    @Published private var _alpha: Int = 255
 
     private var oldAlpha: Int?
 
@@ -248,6 +255,8 @@ public extension TextureLayers {
             isVisible: layer.isVisible,
             thumbnail: layer.thumbnail
         )
+
+        _alpha = alpha
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).

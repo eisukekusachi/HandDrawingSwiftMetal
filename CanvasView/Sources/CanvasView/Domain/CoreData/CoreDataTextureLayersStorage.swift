@@ -41,6 +41,11 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.selectedLayerIdPublisher
     }
 
+    /// Emits whenever `alpha` change
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        textureLayers.alphaPublisher
+    }
+
     /// Emits whenever `textureSize` change
     public var textureSizePublisher: AnyPublisher<CGSize, Never> {
         textureLayers.textureSizePublisher

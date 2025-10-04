@@ -78,6 +78,10 @@ extension UndoTextureLayers {
         textureLayers.textureSizePublisher
     }
 
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        textureLayers.alphaPublisher
+    }
+
     public var selectedLayer: TextureLayerItem? {
         textureLayers.selectedLayer
     }
@@ -541,13 +545,10 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
-            guard let result = try await textureLayers.duplicatedTexture(undoObject.textureLayer.id) else { return }
 
-            textureLayers.updateLayer(
-                .init(
-                    model: undoObject.textureLayer,
-                    thumbnail: result.texture.makeThumbnail()
-                )
+            textureLayers.updateAlpha(
+                undoObject.textureLayer.id,
+                alpha: undoObject.textureLayer.alpha
             )
 
             textureLayers.requestFullCanvasUpdate()

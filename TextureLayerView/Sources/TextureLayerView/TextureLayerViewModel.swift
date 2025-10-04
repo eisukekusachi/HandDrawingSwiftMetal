@@ -90,6 +90,16 @@ public final class TextureLayerViewModel: ObservableObject {
                 self?.layers = value
             }
             .store(in: &cancellables)
+
+        textureLayers?.alphaPublisher
+            .removeDuplicates()
+            .filter { [weak self] alpha in
+                self?.currentAlpha != alpha
+            }
+            .sink { [weak self] alpha in
+                self?.currentAlpha = alpha
+            }
+            .store(in: &cancellables)
     }
 }
 
