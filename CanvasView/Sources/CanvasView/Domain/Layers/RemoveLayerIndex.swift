@@ -9,7 +9,10 @@ import Foundation
 
 public enum RemoveLayerIndex {
 
-    public  static func selectedIndexAfterDeletion(selectedIndex: Int) -> Int {
-        max(selectedIndex - 1, 0)
+    // After deleting the layer at the specified index:
+    // if the index is 0, the next index becomes 1;
+    // otherwise, the next index is (index - 1).
+    public static func nextLayerIndexAfterDeletion(index: Int) -> Int {
+        index == 0 ? 1 : index - 1
     }
 }

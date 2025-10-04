@@ -132,24 +132,25 @@ public extension TextureLayers {
 
     func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
+            _layers.count > 1,
             let textureRepository,
-            let selectedLayer,
-            _layers.count > 1
+            let selectedLayerId = selectedLayer?.id
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
-        let newLayerId = _layers[newLayerIndex].id
+        let newLayerId = _layers[
+            RemoveLayerIndex.nextLayerIndexAfterDeletion(index: index)
+        ].id
 
         _layers.remove(at: index)
 
         _selectedLayerId = newLayerId
 
         try textureRepository
-            .removeTexture(selectedLayer.id)
+            .removeTexture(selectedLayerId)
     }
 
     func moveLayer(indices: MoveLayerIndices) {

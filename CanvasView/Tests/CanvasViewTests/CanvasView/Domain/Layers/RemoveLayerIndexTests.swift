@@ -11,22 +11,21 @@ import Testing
 @testable import CanvasView
 
 /*
- In this app, layers with smaller indices are positioned further back. For example, moving a layer from index 0 to 1 brings it to the front.
+ In this app, layers are arranged in descending order by their indices
 */
 struct RemoveLayerIndexTests {
 
-    @Test("Confirms that selectedIndex is decremented after deletion when it is greater than 0.")
+    @Test("Confirms that deleting a non-zero indexed layer selects the layer at index - 1.")
     func testSelectedIndexAfterDeletion_decrementsWhenGreaterThanZero() {
         let selectedIndex = 3
-        let result = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
+        let result = RemoveLayerIndex.nextLayerIndexAfterDeletion(index: selectedIndex)
         #expect(result == 2)
     }
 
-    @Test("Confirms that selectedIndex does not go below 0 after deletion.")
+    @Test("Confirms that deleting a zero indexed layer selects the layer at index + 1.")
     func testSelectedIndexAfterDeletion_doesNotGoBelowZero() {
         let selectedIndex = 0
-        let result = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: selectedIndex)
-        #expect(result == 0)
+        let result = RemoveLayerIndex.nextLayerIndexAfterDeletion(index: selectedIndex)
+        #expect(result == 1)
     }
-
 }
