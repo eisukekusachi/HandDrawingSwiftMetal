@@ -160,7 +160,10 @@ public extension TextureLayerViewModel {
     }
 
     func onTapCell(id: UUID) {
-        textureLayers?.selectLayer(id: id)
+        guard let textureLayers else { return }
+
+        textureLayers.selectLayer(id: id)
+        textureLayers.requestFullCanvasUpdate()
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {

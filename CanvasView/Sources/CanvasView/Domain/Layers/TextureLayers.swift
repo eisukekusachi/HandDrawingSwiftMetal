@@ -114,8 +114,6 @@ public extension TextureLayers {
 
     func selectLayer(id: UUID) {
         _selectedLayerId = id
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
