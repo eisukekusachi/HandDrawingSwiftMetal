@@ -495,13 +495,15 @@ extension UndoTextureLayers {
                 for: textureLayerId
             )
 
-            textureLayers.updateThumbnail(textureLayerId, texture: result.texture)
+            // Drawing may occur on a different layer, so explicitly select the layer to use
             textureLayers.selectLayer(textureLayerId)
+
+            textureLayers.updateThumbnail(textureLayerId, texture: result.texture)
+
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
-            let result = try await undoTextureRepository
-                .duplicatedTexture(undoObject.undoTextureUUID)
+            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureUUID)
 
             let textureLayer = undoObject.textureLayer
             let texture = result.texture
@@ -514,25 +516,28 @@ extension UndoTextureLayers {
                 texture: texture,
                 at: undoObject.insertIndex
             )
+
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
             guard
                 let index = textureLayers.layers.firstIndex(where: { $0.id == undoObject.textureLayer.id })
             else {
-                Logger.error(String(localized: "Unable to find the index of the textureLayer to remove while undoing", bundle: .module))
+                Logger.error(String(localized: "Unable to find the index of the textureLayer to remove", bundle: .module))
                 return
             }
 
             try await textureLayers.removeLayer(
                 layerIndexToDelete: index
             )
+
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoMoveObject {
             textureLayers.moveLayer(
                 indices: undoObject.indices
             )
+
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
@@ -544,6 +549,7 @@ extension UndoTextureLayers {
                     thumbnail: result.texture.makeThumbnail()
                 )
             )
+
             textureLayers.requestFullCanvasUpdate()
         }
     }
