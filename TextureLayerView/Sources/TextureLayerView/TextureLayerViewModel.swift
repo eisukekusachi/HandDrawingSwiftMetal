@@ -60,7 +60,7 @@ public final class TextureLayerViewModel: ObservableObject {
                 else { return }
 
                 textureLayers.updateAlpha(
-                    id: selectedLayerId,
+                    selectedLayerId,
                     alpha: Int(alpha)
                 )
 
@@ -95,8 +95,8 @@ public final class TextureLayerViewModel: ObservableObject {
 
 public extension TextureLayerViewModel {
 
-    func isSelected(_ uuid: UUID) -> Bool {
-        textureLayers?.selectedLayer?.id == uuid
+    func isSelected(_ id: UUID) -> Bool {
+        textureLayers?.selectedLayer?.id == id
     }
 
     func onTapInsertButton() {
@@ -147,23 +147,23 @@ public extension TextureLayerViewModel {
         }
     }
 
-    func onTapTitleButton(id: UUID, title: String) {
-        textureLayers?.updateTitle(id: id, title: title)
+    func onTapTitleButton(_ id: UUID, title: String) {
+        textureLayers?.updateTitle(id, title: title)
     }
 
-    func onTapVisibleButton(id: UUID, isVisible: Bool) {
+    func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
         guard let textureLayers else { return }
 
-        textureLayers.updateVisibility(id: id, isVisible: isVisible)
+        textureLayers.updateVisibility(id, isVisible: isVisible)
 
         // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
         textureLayers.requestFullCanvasUpdate()
     }
 
-    func onTapCell(id: UUID) {
+    func onTapCell(_ id: UUID) {
         guard let textureLayers else { return }
 
-        textureLayers.selectLayer(id: id)
+        textureLayers.selectLayer(id)
         textureLayers.requestFullCanvasUpdate()
     }
 

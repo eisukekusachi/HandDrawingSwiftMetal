@@ -74,7 +74,7 @@ class TextureInMemoryRepository: TextureRepository {
         )
 
         try await createTexture(
-            uuid: layer.id,
+            layer.id,
             textureSize: textureSize
         )
 
@@ -168,7 +168,7 @@ class TextureInMemoryRepository: TextureRepository {
         _textureSize = size
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) async throws {
+    func createTexture(_ id: UUID, textureSize: CGSize) async throws {
         guard
             let device = renderer.device
         else {
@@ -180,7 +180,7 @@ class TextureInMemoryRepository: TextureRepository {
             throw error
         }
 
-        textures[uuid] = MTLTextureCreator.makeTexture(
+        textures[id] = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: device
@@ -193,15 +193,15 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Removes a texture with UUID
-    func removeTexture(_ uuid: UUID) -> UUID {
-        textures.removeValue(forKey: uuid)
-        return uuid
+    func removeTexture(_ id: UUID) -> UUID {
+        textures.removeValue(forKey: id)
+        return id
     }
 
     /// Copies a texture for the given UUID
-    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         guard
-            let texture = textures[uuid],
+            let texture = textures[id],
             let newTexture = await renderer.duplicateTexture(
                 texture: texture
             )
@@ -214,14 +214,14 @@ class TextureInMemoryRepository: TextureRepository {
             throw error
         }
 
-        return .init(uuid: uuid, texture: newTexture)
+        return .init(id: id, texture: newTexture)
     }
 
     /// Copies multiple textures for the given UUIDs
-    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
-            for id in uuids {
-                group.addTask { try await self.duplicatedTexture(uuid: id) }
+            for id in ids {
+                group.addTask { try await self.duplicatedTexture(id) }
             }
 
             var results: [IdentifiedTexture] = []
@@ -233,8 +233,8 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     @discardableResult
-    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
-        guard textures[uuid] == nil else {
+    func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+        guard textures[id] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "File already exists", bundle: .module)
@@ -243,12 +243,12 @@ class TextureInMemoryRepository: TextureRepository {
             throw error
         }
 
-        textures[uuid] = texture
+        textures[id] = texture
 
-        return .init(uuid: uuid, texture: texture)
+        return .init(id: id, texture: texture)
     }
 
-    @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+    @discardableResult func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
         guard
             let texture,
             let newTexture = await renderer.duplicateTexture(texture: texture)
@@ -261,17 +261,17 @@ class TextureInMemoryRepository: TextureRepository {
             throw error
         }
 
-        guard self.textures[uuid] != nil else {
+        guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: "\(String(localized: "File not found", bundle: .module)):\(uuid.uuidString)"
+                message: "\(String(localized: "File not found", bundle: .module)):\(id.uuidString)"
             )
             Logger.error(error)
             throw error
         }
 
-        textures[uuid] = newTexture
+        textures[id] = newTexture
 
-        return .init(uuid: uuid, texture: newTexture)
+        return .init(id: id, texture: newTexture)
     }
 }

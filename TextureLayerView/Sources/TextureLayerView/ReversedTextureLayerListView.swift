@@ -26,11 +26,13 @@ public struct ReversedTextureLayerListView: View {
                     defaultBackgroundColor: viewModel.defaultBackgroundColor,
                     selectedBackgroundColor: viewModel.selectedBackgroundColor,
                     didTapRow: { targetLayer in
-                        viewModel.onTapCell(id: targetLayer.id)
+                        viewModel.onTapCell(
+                            targetLayer.id
+                        )
                     },
                     didTapVisibleButton: { targetLayer in
                         viewModel.onTapVisibleButton(
-                            id: targetLayer.id,
+                            targetLayer.id,
                             isVisible: !targetLayer.isVisible
                         )
                     }

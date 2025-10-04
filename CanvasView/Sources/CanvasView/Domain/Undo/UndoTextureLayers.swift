@@ -106,24 +106,24 @@ extension UndoTextureLayers {
         textureLayers.layer(layerId)
     }
 
-    public func selectLayer(id: UUID) {
-        textureLayers.selectLayer(id: id)
+    public func selectLayer(_ id: UUID) {
+        textureLayers.selectLayer(id)
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {
         textureLayers.updateLayer(layer)
     }
 
-    public func updateThumbnail(id: UUID, texture: MTLTexture) {
-        textureLayers.updateThumbnail(id: id, texture: texture)
+    public func updateThumbnail(_ id: UUID, texture: MTLTexture) {
+        textureLayers.updateThumbnail(id, texture: texture)
     }
 
-    public func updateTitle(id: UUID, title: String) {
-        textureLayers.updateTitle(id: id, title: title)
+    public func updateTitle(_ id: UUID, title: String) {
+        textureLayers.updateTitle(id, title: title)
     }
 
-    public func updateVisibility(id: UUID, isVisible: Bool) {
-        textureLayers.updateVisibility(id: id, isVisible: isVisible)
+    public func updateVisibility(_ id: UUID, isVisible: Bool) {
+        textureLayers.updateVisibility(id, isVisible: isVisible)
     }
 
     public func requestCanvasUpdate() {
@@ -134,20 +134,20 @@ extension UndoTextureLayers {
         textureLayers.requestFullCanvasUpdate()
     }
 
-    public func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
-        try await textureLayers.duplicatedTexture(id: id)
+    public func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture? {
+        try await textureLayers.duplicatedTexture(id)
     }
 
-    public func addTexture(_ texture: any MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
-        try await textureLayers.addTexture(texture, uuid: uuid)
+    public func addTexture(_ texture: any MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.addTexture(texture, id: id)
     }
 
-    public func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) async throws -> IdentifiedTexture {
-        try await textureLayers.updateTexture(texture: texture, for: uuid)
+    public func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.updateTexture(texture: texture, for: id)
     }
 
-    public func removeTexture(_ uuid: UUID) throws -> UUID {
-        try textureLayers.removeTexture(uuid)
+    public func removeTexture(_ id: UUID) throws -> UUID {
+        try textureLayers.removeTexture(id)
     }
 }
 
@@ -195,7 +195,7 @@ extension UndoTextureLayers {
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
             let selectedLayer = textureLayers.selectedLayer,
-            let identifiedTexture = try await textureLayers.duplicatedTexture(id: selectedLayer.id)
+            let identifiedTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
             return
@@ -250,8 +250,8 @@ extension UndoTextureLayers {
         )
     }
 
-    public func updateAlpha(id: UUID, alpha: Int) {
-        textureLayers.updateAlpha(id: id, alpha: alpha)
+    public func updateAlpha(_ id: UUID, alpha: Int) {
+        textureLayers.updateAlpha(id, alpha: alpha)
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
@@ -275,14 +275,14 @@ extension UndoTextureLayers {
         }
 
         do {
-            if let result = try await textureLayers.duplicatedTexture(id: selectedLayer.id) {
+            if let result = try await textureLayers.duplicatedTexture(selectedLayer.id) {
                 let undoObject = UndoDrawingObject(
                     from: .init(item: selectedLayer)
                 )
 
                 try await undoTextureRepository?.addTexture(
                     result.texture,
-                    uuid: undoObject.undoTextureUUID
+                    id: undoObject.undoTextureUUID
                 )
                 drawingUndoObject = undoObject
             }
@@ -312,7 +312,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     texture,
-                    uuid: redoObject.undoTextureUUID
+                    id: redoObject.undoTextureUUID
                 )
 
             pushUndoObject(
@@ -345,7 +345,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     undoTexture,
-                    uuid: undoRedoObject.redoObject.undoTextureUUID
+                    id: undoRedoObject.redoObject.undoTextureUUID
                 )
 
             pushUndoObject(undoRedoObject)
@@ -371,7 +371,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     undoTexture,
-                    uuid: undoRedoObject.undoObject.undoTextureUUID
+                    id: undoRedoObject.undoObject.undoTextureUUID
                 )
 
             pushUndoObject(undoRedoObject)
@@ -486,7 +486,7 @@ extension UndoTextureLayers {
         guard let undoTextureRepository else { return }
 
         if let undoObject = undoObject as? UndoDrawingObject {
-            let result = try await undoTextureRepository.duplicatedTexture(uuid: undoObject.undoTextureUUID)
+            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureUUID)
 
             let textureLayerId = undoObject.textureLayer.id
 
@@ -495,13 +495,13 @@ extension UndoTextureLayers {
                 for: textureLayerId
             )
 
-            textureLayers.updateThumbnail(id: textureLayerId, texture: result.texture)
-            textureLayers.selectLayer(id: textureLayerId)
+            textureLayers.updateThumbnail(textureLayerId, texture: result.texture)
+            textureLayers.selectLayer(textureLayerId)
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
             let result = try await undoTextureRepository
-                .duplicatedTexture(uuid: undoObject.undoTextureUUID)
+                .duplicatedTexture(undoObject.undoTextureUUID)
 
             let textureLayer = undoObject.textureLayer
             let texture = result.texture
@@ -536,7 +536,7 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
-            guard let result = try await textureLayers.duplicatedTexture(id: undoObject.textureLayer.id) else { return }
+            guard let result = try await textureLayers.duplicatedTexture(undoObject.textureLayer.id) else { return }
 
             textureLayers.updateLayer(
                 .init(

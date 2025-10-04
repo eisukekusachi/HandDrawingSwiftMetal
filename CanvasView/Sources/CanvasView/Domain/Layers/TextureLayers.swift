@@ -101,18 +101,18 @@ public extension TextureLayers {
         self.textureRepository = textureRepository
 
         Task {
-            let textures = try await textureRepository?.duplicatedTextures(uuids: _layers.map { $0.id })
+            let textures = try await textureRepository?.duplicatedTextures(_layers.map { $0.id })
             textures?.forEach { [weak self] identifiedTexture in
-                self?.updateThumbnail(id: identifiedTexture.uuid, texture: identifiedTexture.texture)
+                self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
         }
     }
 
-    func layer(_ layerId: UUID) -> TextureLayerItem? {
-        _layers.first(where: { $0.id == layerId })
+    func layer(_ id: UUID) -> TextureLayerItem? {
+        _layers.first(where: { $0.id == id })
     }
 
-    func selectLayer(id: UUID) {
+    func selectLayer(_ id: UUID) {
         _selectedLayerId = id
     }
 
@@ -126,7 +126,7 @@ public extension TextureLayers {
         try await textureRepository
             .addTexture(
                 texture,
-                uuid: layer.id
+                id: layer.id
             )
     }
 
@@ -172,7 +172,7 @@ public extension TextureLayers {
         _layers[index] = layer
     }
 
-    func updateThumbnail(id: UUID, texture: MTLTexture) {
+    func updateThumbnail(_ id: UUID, texture: MTLTexture) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -183,7 +183,7 @@ public extension TextureLayers {
         self._layers[index].thumbnail = texture.makeThumbnail()
     }
 
-    func updateTitle(id: UUID, title: String) {
+    func updateTitle(_ id: UUID, title: String) {
         guard
             let index = _layers.map({ $0.id }).firstIndex(of: id)
         else {
@@ -202,7 +202,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateVisibility(id: UUID, isVisible: Bool) {
+    func updateVisibility(_ id: UUID, isVisible: Bool) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -221,7 +221,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateAlpha(id: UUID, alpha: Int) {
+    func updateAlpha(_ id: UUID, alpha: Int) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -263,11 +263,11 @@ public extension TextureLayers {
 
 public extension TextureLayers {
     /// Copies a texture for the given UUID
-    func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
-        try await textureRepository?.duplicatedTexture(uuid: id)
+    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture? {
+        try await textureRepository?.duplicatedTexture(id)
     }
 
-    func addTexture(_ texture: any MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: any MTLTexture, id: UUID) async throws -> IdentifiedTexture {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -276,10 +276,10 @@ public extension TextureLayers {
             Logger.error(error)
             throw error
         }
-        return try await textureRepository.addTexture(texture, uuid: uuid)
+        return try await textureRepository.addTexture(texture, id: id)
     }
 
-    func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) async throws -> IdentifiedTexture {
+    func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws -> IdentifiedTexture {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -288,10 +288,10 @@ public extension TextureLayers {
             Logger.error(error)
             throw error
         }
-        return try await textureRepository.updateTexture(texture: texture, for: uuid)
+        return try await textureRepository.updateTexture(texture: texture, for: id)
     }
 
-    func removeTexture(_ uuid: UUID) throws -> UUID {
+    func removeTexture(_ id: UUID) throws -> UUID {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -300,6 +300,6 @@ public extension TextureLayers {
             Logger.error(error)
             throw error
         }
-        return try textureRepository.removeTexture(uuid)
+        return try textureRepository.removeTexture(id)
     }
 }

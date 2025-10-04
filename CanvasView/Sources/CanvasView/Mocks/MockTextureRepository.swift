@@ -11,15 +11,15 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    func addTexture(_ texture: (any MTLTexture), uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: (any MTLTexture), id: UUID) async throws -> IdentifiedTexture {
         .init(
-            uuid: uuid,
+            id: id,
             texture: texture
         )
     }
 
-    func removeTexture(_ uuid: UUID) -> UUID {
-        uuid
+    func removeTexture(_ id: UUID) -> UUID {
+        id
     }
 
     var textures: [UUID: MTLTexture] = [:]
@@ -61,31 +61,31 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) async throws {}
+    func createTexture(_ id: UUID, textureSize: CGSize) async throws {}
 
-    func thumbnail(_ uuid: UUID) -> UIImage? {
-        callHistory.append("thumbnail(\(uuid))")
+    func thumbnail(_ id: UUID) -> UIImage? {
+        callHistory.append("thumbnail(\(id))")
         return nil
     }
 
-    func loadTexture(_ uuid: UUID) -> AnyPublisher<MTLTexture?, Error> {
-        callHistory.append("loadTexture(\(uuid))")
-        let resultTexture: MTLTexture? = textures[uuid].flatMap { $0 }
+    func loadTexture(_ id: UUID) -> AnyPublisher<MTLTexture?, Error> {
+        callHistory.append("loadTexture(\(id))")
+        let resultTexture: MTLTexture? = textures[id].flatMap { $0 }
         return Just(resultTexture)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
 
-    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         let context = try MockMetalContext()
         let mockTexture = try context.makeTexture(width: 16, height: 16)
         return  .init(
-            uuid: UUID(),
+            id: id,
             texture: mockTexture
         )
     }
 
-    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
         []
     }
 
@@ -93,16 +93,16 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         callHistory.append("removeAll()")
     }
 
-    func setThumbnail(texture: MTLTexture?, for uuid: UUID) {
-        callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(uuid))")
+    func setThumbnail(texture: MTLTexture?, for id: UUID) {
+        callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(id))")
     }
 
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
         let context = try MockMetalContext()
         let mockTexture = try context.makeTexture(width: 16, height: 16)
-        callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(uuid))")
+        callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(id))")
         return  .init(
-            uuid: UUID(),
+            id: id,
             texture: texture ?? mockTexture
         )
     }

@@ -71,7 +71,10 @@ public struct TextureLayerToolbar: View {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = viewModel.selectedLayer else { return }
-                    viewModel.onTapTitleButton(id: selectedLayer.id, title: textFieldTitle)
+                    viewModel.onTapTitleButton(
+                        selectedLayer.id,
+                        title: textFieldTitle
+                    )
                 })
                 Button("Cancel", action: {})
             }

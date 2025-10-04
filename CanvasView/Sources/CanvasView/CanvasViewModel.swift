@@ -497,7 +497,7 @@ public extension CanvasViewModel {
 
                 // Copy all textures from the textureRepository
                 let textures = try await dependencies.textureRepository.duplicatedTextures(
-                    uuids: textureLayersStorage.layers.map { $0.id }
+                    textureLayersStorage.layers.map { $0.id }
                 )
 
                 // Save the thumbnail image into the working directory
@@ -508,7 +508,7 @@ public extension CanvasViewModel {
                 // Save the textures into the working directory
                 async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
                     namedItems: textures.map {
-                        .init(fileName: $0.uuid.uuidString, item: $0)
+                        .init(fileName: $0.id.uuidString, item: $0)
                     }
                 )
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
@@ -634,7 +634,7 @@ extension CanvasViewModel {
             }
         }
 
-        textureLayersStorage.updateThumbnail(id: selectedTextureId, texture: texture)
+        textureLayersStorage.updateThumbnail(selectedTextureId, texture: texture)
     }
 
     private func resetAllInputParameters() {

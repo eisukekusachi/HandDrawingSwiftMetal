@@ -44,7 +44,7 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func layer(_ layerId: UUID) -> TextureLayerItem?
 
-    func selectLayer(id: UUID)
+    func selectLayer(_ id: UUID)
 
     func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws
 
@@ -54,13 +54,13 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func updateLayer(_ layer: TextureLayerItem)
 
-    func updateThumbnail(id: UUID, texture: MTLTexture)
+    func updateThumbnail(_ id: UUID, texture: MTLTexture)
 
-    func updateTitle(id: UUID, title: String)
+    func updateTitle(_ id: UUID, title: String)
 
-    func updateVisibility(id: UUID, isVisible: Bool)
+    func updateVisibility(_ id: UUID, isVisible: Bool)
 
-    func updateAlpha(id: UUID, alpha: Int)
+    func updateAlpha(_ id: UUID, alpha: Int)
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     func beginAlphaChange()
@@ -74,17 +74,17 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Requests a full canvas update (all layers composited)
     func requestFullCanvasUpdate()
 
-    func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture?
+    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture?
 
     /// Adds a texture using UUID
     @discardableResult
-    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture
+    func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture
 
     /// Updates an existing texture for UUID
     @discardableResult
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture
 
     /// Removes a texture with UUID
     @discardableResult
-    func removeTexture(_ uuid: UUID) throws -> UUID
+    func removeTexture(_ id: UUID) throws -> UUID
 }

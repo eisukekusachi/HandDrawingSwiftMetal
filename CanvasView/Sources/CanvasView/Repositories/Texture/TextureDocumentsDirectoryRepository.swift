@@ -202,7 +202,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
 
         try await createTexture(
-            uuid: layer.id,
+            layer.id,
             textureSize: textureSize
         )
 
@@ -215,7 +215,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) async throws {
+    func createTexture(_ id: UUID, textureSize: CGSize) async throws {
         guard
             let device = renderer.device
         else {
@@ -234,9 +234,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         ) {
             try FileOutput.saveTextureAsData(
                 bytes: texture.bytes,
-                to: workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+                to: workingDirectoryURL.appendingPathComponent(id.uuidString)
             )
-            textureIds.insert(uuid)
+            textureIds.insert(id)
         }
     }
     func setTextureSize(_ size: CGSize) {
@@ -244,7 +244,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     /// Copies a texture for the given UUID
-    func duplicatedTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         if textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -254,7 +254,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        let destinationUrl = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+        let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
             let device = renderer.device,
@@ -272,14 +272,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        return .init(uuid: uuid, texture: newTexture)
+        return .init(id: id, texture: newTexture)
     }
 
     /// Copies multiple textures for the given UUIDs
-    func duplicatedTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
-            for id in uuids {
-                group.addTask { try await self.duplicatedTexture(uuid: id) }
+            for id in ids {
+                group.addTask { try await self.duplicatedTexture(id) }
             }
 
             var results: [IdentifiedTexture] = []
@@ -305,19 +305,19 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    func removeTexture(_ uuid: UUID) throws -> UUID {
-        let fileURL = self.workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+    func removeTexture(_ id: UUID) throws -> UUID {
+        let fileURL = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         if FileManager.default.fileExists(atPath: fileURL.path) {
             try FileManager.default.removeItem(at: fileURL)
         }
 
-        textureIds.remove(uuid)
-        return uuid
+        textureIds.remove(id)
+        return id
     }
 
-    func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
-        let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+    func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard !FileManager.default.fileExists(atPath: fileURL.path) else {
             let error = NSError(
@@ -332,11 +332,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             bytes: texture.bytes,
             to: fileURL
         )
-        return .init(uuid: uuid, texture: texture)
+        return .init(id: id, texture: texture)
     }
 
     @discardableResult
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
         guard
             let texture
         else {
@@ -348,7 +348,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        let fileURL = workingDirectoryURL.appendingPathComponent(uuid.uuidString)
+        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             let error = NSError(
@@ -372,7 +372,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         do {
             try FileOutput.saveTextureAsData(bytes: newTexture.bytes, to: fileURL)
-            return .init(uuid: uuid, texture: newTexture)
+            return .init(id: id, texture: newTexture)
         } catch {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),
