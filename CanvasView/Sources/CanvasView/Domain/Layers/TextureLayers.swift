@@ -135,7 +135,11 @@ public extension TextureLayers {
             let textureRepository,
             let selectedLayer,
             _layers.count > 1
-        else { return }
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
 
         let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
         let newLayerId = _layers[newLayerIndex].id
@@ -165,7 +169,8 @@ public extension TextureLayers {
         guard
             let index = _layers.firstIndex(where: { $0.id == layer.id })
         else {
-            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
@@ -176,7 +181,8 @@ public extension TextureLayers {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
-            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
@@ -187,7 +193,8 @@ public extension TextureLayers {
         guard
             let index = _layers.map({ $0.id }).firstIndex(of: id)
         else {
-            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
@@ -206,7 +213,8 @@ public extension TextureLayers {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
-            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
@@ -225,7 +233,8 @@ public extension TextureLayers {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
-            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
             return
         }
 
