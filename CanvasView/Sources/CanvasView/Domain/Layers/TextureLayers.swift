@@ -215,9 +215,6 @@ public extension TextureLayers {
             isVisible: isVisible,
             thumbnail: layer.thumbnail
         )
-
-        // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func updateAlpha(id: UUID, alpha: Int) {

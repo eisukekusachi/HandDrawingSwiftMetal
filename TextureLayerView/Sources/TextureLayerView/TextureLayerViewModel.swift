@@ -145,7 +145,12 @@ public extension TextureLayerViewModel {
     }
 
     func onTapVisibleButton(id: UUID, isVisible: Bool) {
-        textureLayers?.updateVisibility(id: id, isVisible: isVisible)
+        guard let textureLayers else { return }
+
+        textureLayers.updateVisibility(id: id, isVisible: isVisible)
+
+        // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
+        textureLayers.requestFullCanvasUpdate()
     }
 
     func onTapCell(id: UUID) {
