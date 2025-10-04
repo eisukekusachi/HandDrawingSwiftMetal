@@ -171,7 +171,7 @@ struct TextureLayersTests {
 
         #expect(subject.selectedLayerId == layer2.id)
 
-        subject.selectLayer(id: layer0.id)
+        subject.selectLayer(layer0.id)
 
         #expect(subject.selectedLayerId == layer0.id)
     }
@@ -195,7 +195,7 @@ struct TextureLayersTests {
         )
         #expect(subject.layers.first?.title == "oldLayer")
 
-        subject.updateTitle(id: layer.id, title: "newLayer")
+        subject.updateTitle(layer.id, title: "newLayer")
 
         #expect(subject.layers.first?.title == "newLayer")
     }
@@ -219,7 +219,7 @@ struct TextureLayersTests {
         )
         #expect(subject.layers.first?.alpha == 255)
 
-        subject.updateAlpha(id: layer.id, alpha: 100)
+        subject.updateAlpha(layer.id, alpha: 100)
 
         #expect(subject.layers.first?.alpha == 100)
     }
@@ -243,7 +243,7 @@ struct TextureLayersTests {
         )
         #expect(subject.layers.first?.isVisible == true)
 
-        subject.updateVisibility(id: layer.id, isVisible: false)
+        subject.updateVisibility(layer.id, isVisible: false)
 
         #expect(subject.layers.first?.isVisible == false)
     }

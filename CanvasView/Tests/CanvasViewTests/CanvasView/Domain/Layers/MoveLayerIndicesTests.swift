@@ -111,5 +111,4 @@ struct MoveLayerIndicesTests {
             #expect(reversedIndices.destinationIndex == 3)
         }
     }
-
 }
