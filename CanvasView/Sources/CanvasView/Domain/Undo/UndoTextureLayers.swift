@@ -114,8 +114,8 @@ extension UndoTextureLayers {
         textureLayers.updateLayer(layer)
     }
 
-    public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        textureLayers.updateThumbnail(identifiedTexture)
+    public func updateThumbnail(id: UUID, texture: MTLTexture) {
+        textureLayers.updateThumbnail(id: id, texture: texture)
     }
 
     public func updateTitle(id: UUID, title: String) {
@@ -138,8 +138,8 @@ extension UndoTextureLayers {
         try await textureLayers.duplicatedTexture(id: id)
     }
 
-    public func addTexture(_ texture: any MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        try await textureLayers.addTexture(texture, newTextureUUID: uuid)
+    public func addTexture(_ texture: any MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.addTexture(texture, uuid: uuid)
     }
 
     public func updateTexture(texture: (any MTLTexture)?, for uuid: UUID) async throws -> IdentifiedTexture {
@@ -495,9 +495,7 @@ extension UndoTextureLayers {
                 for: textureLayerId
             )
 
-            textureLayers.updateThumbnail(
-                .init(uuid: textureLayerId, texture: result.texture)
-            )
+            textureLayers.updateThumbnail(id: textureLayerId, texture: result.texture)
             textureLayers.selectLayer(id: textureLayerId)
             textureLayers.requestFullCanvasUpdate()
 

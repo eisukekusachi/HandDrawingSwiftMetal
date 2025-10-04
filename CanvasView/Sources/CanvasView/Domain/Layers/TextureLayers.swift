@@ -102,8 +102,8 @@ public extension TextureLayers {
 
         Task {
             let textures = try await textureRepository?.duplicatedTextures(uuids: _layers.map { $0.id })
-            textures?.forEach { [weak self] texture in
-                self?.updateThumbnail(texture)
+            textures?.forEach { [weak self] identifiedTexture in
+                self?.updateThumbnail(id: identifiedTexture.uuid, texture: identifiedTexture.texture)
             }
         }
     }
@@ -163,28 +163,37 @@ public extension TextureLayers {
 
     func updateLayer(_ layer: TextureLayerItem) {
         guard
-            let selectedIndex = _layers.firstIndex(where: { $0.id == layer.id })
+            let index = _layers.firstIndex(where: { $0.id == layer.id })
         else {
-            Logger.error(String(localized: "Unable to find the index of the textureLayer to update", bundle: .module))
+            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
             return
         }
 
-        _layers[selectedIndex] = layer
+        _layers[index] = layer
     }
 
-    func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        guard let index = _layers.firstIndex(where: { $0.id == identifiedTexture.uuid }) else { return }
-        self._layers[index].thumbnail = identifiedTexture.texture.makeThumbnail()
+    func updateThumbnail(id: UUID, texture: MTLTexture) {
+        guard
+            let index = _layers.firstIndex(where: { $0.id == id })
+        else {
+            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            return
+        }
+
+        self._layers[index].thumbnail = texture.makeThumbnail()
     }
 
     func updateTitle(id: UUID, title: String) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = _layers.map({ $0.id }).firstIndex(of: id)
+        else {
+            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        let layer = _layers[index]
 
-        _layers[selectedIndex] = .init(
+        _layers[index] = .init(
             id: layer.id,
             title: title,
             alpha: layer.alpha,
@@ -195,12 +204,15 @@ public extension TextureLayers {
 
     func updateVisibility(id: UUID, isVisible: Bool) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = _layers.firstIndex(where: { $0.id == id })
+        else {
+            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        let layer = _layers[index]
 
-        _layers[selectedIndex] = .init(
+        _layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: layer.alpha,
@@ -211,12 +223,15 @@ public extension TextureLayers {
 
     func updateAlpha(id: UUID, alpha: Int) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = _layers.firstIndex(where: { $0.id == id })
+        else {
+            Logger.error(String(localized: "Unable to find \("index")", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        let layer = _layers[index]
 
-        _layers[selectedIndex] = .init(
+        _layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: alpha,
@@ -244,17 +259,19 @@ public extension TextureLayers {
     func requestFullCanvasUpdate() {
         fullCanvasUpdateRequestedSubject.send(())
     }
+}
 
+public extension TextureLayers {
     /// Copies a texture for the given UUID
     func duplicatedTexture(id: UUID) async throws -> IdentifiedTexture? {
         try await textureRepository?.duplicatedTexture(uuid: id)
     }
 
-    func addTexture(_ texture: any MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: any MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to unwrap texture repository", bundle: .module)
+                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
             )
             Logger.error(error)
             throw error
@@ -266,7 +283,7 @@ public extension TextureLayers {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to unwrap texture repository", bundle: .module)
+                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
             )
             Logger.error(error)
             throw error
@@ -278,7 +295,7 @@ public extension TextureLayers {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to unwrap texture repository", bundle: .module)
+                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
             )
             Logger.error(error)
             throw error

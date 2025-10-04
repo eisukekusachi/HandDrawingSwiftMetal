@@ -634,9 +634,7 @@ extension CanvasViewModel {
             }
         }
 
-        textureLayersStorage.updateThumbnail(
-            .init(uuid: selectedTextureId, texture: texture)
-        )
+        textureLayersStorage.updateThumbnail(id: selectedTextureId, texture: texture)
     }
 
     private func resetAllInputParameters() {

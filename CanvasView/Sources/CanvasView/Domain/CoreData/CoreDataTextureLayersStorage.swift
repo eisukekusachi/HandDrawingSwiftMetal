@@ -123,8 +123,8 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.updateLayer(layer)
     }
 
-    public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        textureLayers.updateThumbnail(identifiedTexture)
+    public func updateThumbnail(id: UUID, texture: MTLTexture) {
+        textureLayers.updateThumbnail(id: id, texture: texture)
     }
 
     public func updateTitle(id: UUID, title: String) {
@@ -163,8 +163,8 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
 
     /// Adds a texture using UUID
     @discardableResult
-    public func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        try await textureLayers.addTexture(texture, newTextureUUID: uuid)
+    public func addTexture(_ texture: MTLTexture, uuid: UUID) async throws -> IdentifiedTexture {
+        try await textureLayers.addTexture(texture, uuid: uuid)
     }
 
     /// Updates an existing texture for UUID
