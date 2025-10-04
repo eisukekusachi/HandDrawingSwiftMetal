@@ -90,6 +90,8 @@ final class HandDrawingContentView: UIView {
          )
     }()
 
+    private let throttle = Throttle(delay: 0.15)
+
     private var cancellables = Set<AnyCancellable>()
 
     override init(frame: CGRect) {
@@ -220,11 +222,17 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
-            self?.tapUndoButton?()
+            guard let `self` else { return }
+            self.throttle.run([self.undoButton, self.redoButton]) {
+                self.tapUndoButton?()
+            }
         }, for: .touchUpInside)
 
         redoButton.addAction(.init { [weak self] _ in
-            self?.tapRedoButton?()
+            guard let `self` else { return }
+            self.throttle.run([self.undoButton, self.redoButton]) {
+                self.tapRedoButton?()
+            }
         }, for: .touchUpInside)
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
