@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
-import MetalKit
+@preconcurrency import MetalKit
 
 let canvasMinimumTextureLength: Int = 16
 
@@ -356,10 +356,21 @@ public final class MTLRenderer: Sendable, MTLRendering {
             destinationLevel: 0,
             destinationOrigin: origin
         )
-
         encoder.endEncoding()
-        commandBuffer.commit()
 
-        return resultTexture
+        return await withCheckedContinuation { (continuation: CheckedContinuation<MTLTexture?, Never>) in
+            commandBuffer.addCompletedHandler { @Sendable buffer in
+                switch buffer.status {
+                case .completed:
+                    continuation.resume(returning: resultTexture)
+                case .error:
+                    if let e = buffer.error { Logger.error(e) }
+                    continuation.resume(returning: nil)
+                default:
+                    continuation.resume(returning: nil)
+                }
+            }
+            commandBuffer.commit()
+        }
     }
 }
