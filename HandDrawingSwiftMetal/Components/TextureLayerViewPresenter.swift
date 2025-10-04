@@ -6,7 +6,6 @@
 //
 
 import CanvasView
-import Combine
 import TextureLayerView
 import UIKit
 import SwiftUI
@@ -25,8 +24,6 @@ final class TextureLayerViewPresenter {
     private var popupWithArrowView: PopupWithArrowView<TextureLayerView>!
 
     private let controller = TextureLayerViewPresenterController()
-
-    private var cancellables = Set<AnyCancellable>()
 
     func toggleView() {
         layerViewController.view.isHidden = !layerViewController.view.isHidden
@@ -54,7 +51,6 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = true
     }
 
-    @MainActor
     func initialize(
         textureLayers: any TextureLayersProtocol,
         popupConfiguration: PopupWithArrowConfiguration

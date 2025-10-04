@@ -235,7 +235,6 @@ public final class CanvasViewModel {
                 self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
-
     }
 }
 
