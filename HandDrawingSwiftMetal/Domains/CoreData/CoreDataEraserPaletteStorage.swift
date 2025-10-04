@@ -36,7 +36,7 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
             palette.$index.map { _ in () }.eraseToAnyPublisher(),
             palette.$alphas.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task { await self.save(self.palette) }

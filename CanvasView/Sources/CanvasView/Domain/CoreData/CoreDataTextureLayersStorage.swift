@@ -10,6 +10,9 @@ import UIKit
 
 @preconcurrency import CoreData
 
+/// The debounce duration before performing a save operation.
+public let saveDebounceMilliseconds: Int = 500
+
 /// Texture layers managed by Core Data
 @MainActor
 public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
@@ -79,7 +82,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
             self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
             self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {

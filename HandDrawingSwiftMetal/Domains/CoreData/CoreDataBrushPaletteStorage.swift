@@ -36,7 +36,7 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
             palette.$index.map { _ in () }.eraseToAnyPublisher(),
             palette.$colors.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {
