@@ -119,6 +119,9 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
+        contentView.tapDrawingToolButton = { [weak self] in
+            self?.contentView.toggleDrawingTool()
+        }
     }
 }
 

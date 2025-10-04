@@ -70,7 +70,7 @@ final class HandDrawingContentViewModel: ObservableObject {
         }
     }
 
-    func changeDrawingTool() {
+    func toggleDrawingTool() {
         drawingToolStorage.setDrawingTool(
             drawingToolStorage.type == .brush ? .eraser: .brush
         )

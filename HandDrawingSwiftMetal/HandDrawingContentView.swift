@@ -37,6 +37,7 @@ final class HandDrawingContentView: UIView {
     var tapLoadButton: (() -> Void)?
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
+    var tapDrawingToolButton: (() -> Void)?
 
     let brushDrawingToolRenderer = BrushDrawingToolRenderer()
     let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
@@ -140,6 +141,11 @@ final class HandDrawingContentView: UIView {
         undoButton.isEnabled = state.isUndoEnabled
         redoButton.isEnabled = state.isRedoEnabled
     }
+
+    func toggleDrawingTool() {
+        viewModel.toggleDrawingTool()
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
+    }
 }
 
 private extension HandDrawingContentView {
@@ -174,11 +180,6 @@ private extension HandDrawingContentView {
             .store(in: &cancellables)
     }
 
-    func changeDrawingTool() {
-        viewModel.changeDrawingTool()
-        updateDrawingComponents(viewModel.drawingToolStorage.type)
-    }
-
     func addEvents() {
 
         resetTransformButton.addAction(.init { [weak self] _ in
@@ -206,7 +207,7 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         drawingToolButton.addAction(.init { [weak self] _ in
-            self?.changeDrawingTool()
+            self?.tapDrawingToolButton?()
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
