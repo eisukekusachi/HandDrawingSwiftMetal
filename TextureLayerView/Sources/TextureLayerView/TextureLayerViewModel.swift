@@ -54,13 +54,18 @@ public final class TextureLayerViewModel: ObservableObject {
         $currentAlpha
             .sink { [weak self] alpha in
                 guard
-                    let selectedLayerId = self?.selectedLayerId
+                    let `self`,
+                    let textureLayers = self.textureLayers,
+                    let selectedLayerId = self.selectedLayerId
                 else { return }
 
-                self?.textureLayers?.updateAlpha(
+                textureLayers.updateAlpha(
                     id: selectedLayerId,
                     alpha: Int(alpha)
                 )
+
+                // Only the alpha of the selected layer can be changed, so other layers will not be updated
+                textureLayers.requestCanvasUpdate()
             }
             .store(in: &cancellables)
 

@@ -231,9 +231,6 @@ public extension TextureLayers {
             isVisible: layer.isVisible,
             thumbnail: layer.thumbnail
         )
-
-        // Only the alpha of the selected layer can be changed, so other layers will not be updated
-        canvasUpdateRequestedSubject.send(())
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
