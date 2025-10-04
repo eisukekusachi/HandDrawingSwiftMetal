@@ -127,6 +127,7 @@ public extension TextureLayerViewModel {
                     texture: texture,
                     at: index
                 )
+                textureLayers.requestFullCanvasUpdate()
             } catch {
 
             }

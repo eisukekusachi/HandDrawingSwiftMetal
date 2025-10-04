@@ -128,8 +128,6 @@ public extension TextureLayers {
                 texture,
                 uuid: layer.id
             )
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func removeLayer(layerIndexToDelete index: Int) async throws {
