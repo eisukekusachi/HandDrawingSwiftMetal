@@ -79,11 +79,6 @@ public protocol MTLRendering {
         texture: MTLTexture?
     ) async -> MTLTexture?
 
-    func duplicateTexture(
-        texture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) -> MTLTexture?
-
     func clearTextures(
         textures: [MTLTexture?],
         with commandBuffer: MTLCommandBuffer

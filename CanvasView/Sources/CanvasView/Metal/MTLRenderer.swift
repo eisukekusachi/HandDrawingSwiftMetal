@@ -316,48 +316,50 @@ public final class MTLRenderer: Sendable, MTLRendering {
         texture: MTLTexture?
     ) async -> MTLTexture? {
         guard
-            let commandBuffer = commandQueue?.makeCommandBuffer(),
-            let duplicatedTexture = duplicateTexture(
-                texture: texture,
-                with: commandBuffer
-            )
-        else { return nil }
-
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            commandBuffer.addCompletedHandler { @Sendable _ in continuation.resume() }
-            commandBuffer.commit()
-        }
-
-        return duplicatedTexture
-    }
-
-    public func duplicateTexture(
-        texture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) -> MTLTexture? {
-        guard
             let device,
             let texture,
-            let newTexture = MTLTextureCreator.makeTexture(
+            let commandBuffer = commandQueue?.makeCommandBuffer(),
+            let resultTexture = MTLTextureCreator.makeTexture(
                 label: texture.label,
-                width: Int(texture.size.width),
-                height: Int(texture.size.height),
-                with: device
-            ),
-            let flippedTextureBuffers: MTLTextureBuffers = MTLBuffers.makeTextureBuffers(
-                nodes: .flippedTextureNodes,
+                width: texture.width,
+                height: texture.height,
                 with: device
             )
         else { return nil }
 
-        drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: newTexture,
-            with: commandBuffer
+        guard
+            texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
+            Logger.error(error)
+            return nil
+        }
+
+        guard
+            let encoder = commandBuffer.makeBlitCommandEncoder()
+        else { return nil }
+
+        let origin = MTLOrigin(x: 0, y: 0, z: 0)
+        let size = MTLSize(width: texture.width, height: texture.height, depth: 1)
+
+        encoder.copy(
+            from: texture,
+            sourceSlice: 0,
+            sourceLevel: 0,
+            sourceOrigin: origin,
+            sourceSize: size,
+            to: resultTexture,
+            destinationSlice: 0,
+            destinationLevel: 0,
+            destinationOrigin: origin
         )
 
-        return newTexture
+        encoder.endEncoding()
+        commandBuffer.commit()
+
+        return resultTexture
     }
 }
