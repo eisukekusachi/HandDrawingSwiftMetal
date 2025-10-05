@@ -177,11 +177,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             isVisible: true
         )
 
-        let newTexture = try await newTexture(
-            layer.id,
-            textureSize: textureSize
-        )
-        try await addTexture(newTexture.texture, id: newTexture.id)
+        let newTexture = try await newTexture(textureSize)
+        try await addTexture(newTexture, id: layer.id)
 
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
@@ -192,13 +189,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
     }
 
-    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
-        let texture = MTLTextureCreator.makeTexture(
+    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
+        MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: renderer.device
         )!
-        return .init(id: id, texture: texture)
     }
 
     /// Copies a texture for the given UUID

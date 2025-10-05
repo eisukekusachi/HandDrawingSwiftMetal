@@ -57,13 +57,9 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
+    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
         let context = try MockMetalContext()
-        let mockTexture = try context.makeTexture(width: 16, height: 16)
-        return .init(
-            id: UUID(),
-            texture: mockTexture
-        )
+        return try context.makeTexture(width: 16, height: 16)
     }
 
     func thumbnail(_ id: UUID) -> UIImage? {

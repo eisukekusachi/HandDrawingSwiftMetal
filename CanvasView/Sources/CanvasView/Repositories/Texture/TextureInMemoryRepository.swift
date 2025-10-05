@@ -168,13 +168,12 @@ class TextureInMemoryRepository: TextureRepository {
         return id
     }
 
-    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
-        let texture = MTLTextureCreator.makeTexture(
+    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
+        return MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: renderer.device
         )!
-        return .init(id: id, texture: texture)
     }
 
     /// Copies a texture for the given UUID
