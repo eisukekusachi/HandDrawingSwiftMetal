@@ -17,12 +17,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     let workingDirectoryURL: URL
 
-    /// IDs of the textures stored in the repository
-    var textureIds: Set<UUID> = []
-
-    var textureNum: Int {
-        textureIds.count
-    }
     var textureSize: CGSize {
         _textureSize
     }
@@ -40,10 +34,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     init(
         storageDirectoryURL: URL,
         directoryName: String,
-        textures: Set<UUID> = [],
         renderer: MTLRendering
     ) {
-        self.textureIds = textures
         self.renderer = renderer
 
         self.directoryName = directoryName
@@ -79,9 +71,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) {
-            // Retain IDs
-            textureIds = Set(configuration.layers.map { $0.id })
-
             // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
 
@@ -153,8 +142,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             )
         }
 
-        textureIds = tmpTextureIds
-
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
 
@@ -190,10 +177,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             isVisible: true
         )
 
-        try await createTexture(
+        let newTexture = try await newTexture(
             layer.id,
             textureSize: textureSize
         )
+        try await addTexture(newTexture.texture, id: newTexture.id)
 
         // Set the texture size after the initialization of this repository is completed
         setTextureSize(textureSize)
@@ -204,21 +192,13 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
     }
 
-    func createTexture(_ id: UUID, textureSize: CGSize) async throws {
-        if let texture = MTLTextureCreator.makeTexture(
+    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
+        let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: renderer.device
-        ) {
-            try FileOutput.saveTextureAsData(
-                bytes: texture.bytes,
-                to: workingDirectoryURL.appendingPathComponent(id.uuidString)
-            )
-            textureIds.insert(id)
-        }
-    }
-    func setTextureSize(_ size: CGSize) {
-        _textureSize = size
+        )!
+        return .init(id: id, texture: texture)
     }
 
     /// Copies a texture for the given UUID
@@ -267,15 +247,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-
     /// Recreate the directory and removes textures and thumbnails
     func removeAll() {
         do {
             // Create a new folder
             try FileManager.createNewDirectory(workingDirectoryURL)
-
-            // Removes texture IDs
-            textureIds = []
         } catch {
             // Do nothing on error
             Logger.error(error)
@@ -289,10 +265,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             try FileManager.default.removeItem(at: fileURL)
         }
 
-        textureIds.remove(id)
         return id
     }
 
+    @discardableResult
     func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
@@ -309,6 +285,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             bytes: texture.bytes,
             to: fileURL
         )
+
         return .init(id: id, texture: texture)
     }
 
@@ -358,5 +335,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             Logger.error(error)
             throw error
         }
+    }
+
+    func setTextureSize(_ size: CGSize) {
+        _textureSize = size
     }
 }

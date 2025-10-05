@@ -24,13 +24,9 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     var textures: [UUID: MTLTexture] = [:]
 
-    var textureIds: Set<UUID> = Set([])
-
     var callHistory: [String] = []
 
     var textureSize: CGSize = .zero
-
-    var textureNum: Int = 0
 
     var isInitialized: Bool { false }
 
@@ -61,7 +57,14 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func createTexture(_ id: UUID, textureSize: CGSize) async throws {}
+    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
+        let context = try MockMetalContext()
+        let mockTexture = try context.makeTexture(width: 16, height: 16)
+        return .init(
+            id: UUID(),
+            texture: mockTexture
+        )
+    }
 
     func thumbnail(_ id: UUID) -> UIImage? {
         callHistory.append("thumbnail(\(id))")

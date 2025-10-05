@@ -11,11 +11,7 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    var textureNum: Int = 0
-
     var textureSize: CGSize = .zero
-
-    var textureIds: Set<UUID> { Set([]) }
 
     var isInitialized: Bool = false
 
@@ -42,9 +38,11 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func createTexture(_ id: UUID, textureSize: CGSize) async throws {}
-
-    func removeAll() {}
+    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
+        let context = try MockMetalContext()
+        let texture = try context.makeTexture(width: 16, height: 16)
+        return .init(id: id, texture: texture)
+    }
 
     /// Copies a texture for the given UUID
     func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
@@ -58,11 +56,13 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         []
     }
 
+    func removeAll() {}
 
     func removeTexture(_ id: UUID) -> UUID {
         id
     }
 
+    @discardableResult
     func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
         .init(id: UUID(), texture: texture)
     }

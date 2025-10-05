@@ -12,12 +12,6 @@ import MetalKit
 @MainActor
 public protocol TextureRepository: Sendable {
 
-    /// The number of textures currently managed
-    var textureNum: Int { get }
-
-    /// IDs of the textures stored in the repository
-    var textureIds: Set<UUID> { get }
-
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }
 
@@ -39,7 +33,7 @@ public protocol TextureRepository: Sendable {
 
     func setTextureSize(_ size: CGSize)
 
-    func createTexture(_ id: UUID, textureSize: CGSize) async throws
+    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture
 
     /// Adds a texture using UUID
     @discardableResult

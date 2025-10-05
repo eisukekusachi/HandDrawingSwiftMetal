@@ -16,14 +16,6 @@ class TextureInMemoryRepository: TextureRepository {
     /// A dictionary with UUID as the key and MTLTexture as the value
     var textures: [UUID: MTLTexture?] = [:]
 
-    var textureNum: Int {
-        textures.count
-    }
-
-    /// IDs of the textures stored in the repository
-    var textureIds: Set<UUID> {
-        Set(textures.keys.map { $0 })
-    }
     var textureSize: CGSize {
         _textureSize
     }
@@ -174,6 +166,15 @@ class TextureInMemoryRepository: TextureRepository {
     func removeTexture(_ id: UUID) -> UUID {
         textures.removeValue(forKey: id)
         return id
+    }
+
+    func newTexture(_ id: UUID, textureSize: CGSize) async throws -> IdentifiedTexture {
+        let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: renderer.device
+        )!
+        return .init(id: id, texture: texture)
     }
 
     /// Copies a texture for the given UUID
