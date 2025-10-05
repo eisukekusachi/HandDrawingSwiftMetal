@@ -181,7 +181,21 @@ extension UndoTextureLayers {
         self.undoManager.groupsByEvent = false
     }
 
-    public func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
+    public func addNewLayer(at index: Int) async throws {
+        guard let undoTextureRepository else { return }
+
+        let layer: TextureLayerModel = .init(
+            id: UUID(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
+
+        let texture = try await undoTextureRepository.newTexture(textureSize)
+        try await addLayer(layer: layer, texture: texture, at: index)
+    }
+
+    public func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws {
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -189,14 +203,16 @@ extension UndoTextureLayers {
             return
         }
 
+        let item: TextureLayerItem = .init(model: layer, thumbnail: texture.makeThumbnail())
+
         let redoObject = UndoAdditionObject(
-            layerToBeAdded: .init(item: layer),
+            layerToBeAdded: .init(item: item),
             at: index
         )
 
         // Create a deletion undo object to cancel the addition
         let undoObject = UndoDeletionObject(
-            layerToBeDeleted: .init(item: layer),
+            layerToBeDeleted: .init(item: item),
             selectedLayerIdAfterDeletion: selectedLayer.id
         )
 
@@ -528,10 +544,7 @@ extension UndoTextureLayers {
             let texture = result.texture
 
             try await textureLayers.addLayer(
-                layer: .init(
-                    model: textureLayer,
-                    thumbnail: texture.makeThumbnail()
-                ),
+                layer: textureLayer,
                 texture: texture,
                 at: undoObject.insertIndex
             )

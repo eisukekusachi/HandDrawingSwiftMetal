@@ -123,10 +123,30 @@ public extension TextureLayers {
         _selectedLayerId = id
     }
 
-    func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
+    func addNewLayer(at index: Int) async throws {
         guard let textureRepository else { return }
 
-        self._layers.insert(layer, at: index)
+        let layer: TextureLayerModel = .init(
+            id: UUID(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
+
+        let texture = try await textureRepository.newTexture(_textureSize)
+        try await addLayer(layer: layer, texture: texture, at: index)
+    }
+
+    func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws {
+        guard let textureRepository else { return }
+
+        self._layers.insert(
+            .init(
+                model: layer,
+                thumbnail: texture.makeThumbnail()
+            ),
+            at: index
+        )
 
         _selectedLayerId = layer.id
 

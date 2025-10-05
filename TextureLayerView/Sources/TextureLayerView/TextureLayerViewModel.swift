@@ -40,8 +40,6 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
     public init() {}
 
     public func initialize(
@@ -114,29 +112,13 @@ public extension TextureLayerViewModel {
     func onTapInsertButton() {
         guard
             let textureLayers,
-            let selectedIndex = textureLayers.selectedIndex,
-            let texture = MTLTextureCreator.makeTexture(
-                width: Int(textureLayers.textureSize.width),
-                height: Int(textureLayers.textureSize.height),
-                with: device
-            )
+            let selectedIndex = textureLayers.selectedIndex
         else { return }
-
-        let layer: TextureLayerItem = .init(
-            id: UUID(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true,
-            thumbnail: texture.makeThumbnail()
-        )
-        let index = AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
 
         Task {
             do {
-                try await textureLayers.addLayer(
-                    layer: layer,
-                    texture: texture,
-                    at: index
+                try await textureLayers.addNewLayer(
+                    at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
                 )
                 textureLayers.requestFullCanvasUpdate()
             } catch {

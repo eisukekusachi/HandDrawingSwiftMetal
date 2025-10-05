@@ -49,7 +49,9 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func selectLayer(_ id: UUID)
 
-    func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws
+    func addNewLayer(at index: Int) async throws
+
+    func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws
 
     func removeLayer(layerIndexToDelete index: Int) async throws
 

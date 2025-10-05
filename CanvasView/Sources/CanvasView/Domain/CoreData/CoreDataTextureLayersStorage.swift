@@ -115,7 +115,11 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.selectLayer(id)
     }
 
-    public func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
+    public func addNewLayer(at index: Int) async throws {
+        try await textureLayers.addNewLayer(at: index)
+    }
+
+    public func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws {
         try await textureLayers.addLayer(layer: layer, texture: texture, at: index)
     }
 
