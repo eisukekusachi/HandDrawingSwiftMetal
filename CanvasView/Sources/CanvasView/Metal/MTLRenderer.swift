@@ -12,19 +12,19 @@ let canvasMinimumTextureLength: Int = 16
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public var device: MTLDevice? {
+    public var device: MTLDevice {
         _device
     }
-    private var _device: MTLDevice?
+    private var _device: MTLDevice
 
     private let commandQueue: MTLCommandQueue?
 
     private let pipelines: MTLPipelines
 
-    init(device: MTLDevice?) {
+    init(device: MTLDevice) {
         self._device = device
         self.pipelines = MTLPipelines(device: device)
-        self.commandQueue = device?.makeCommandQueue()
+        self.commandQueue = device.makeCommandQueue()
     }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
@@ -316,7 +316,6 @@ public final class MTLRenderer: Sendable, MTLRendering {
         texture: MTLTexture?
     ) async -> MTLTexture? {
         guard
-            let device,
             let texture,
             let commandBuffer = commandQueue?.makeCommandBuffer(),
             let resultTexture = MTLTextureCreator.makeTexture(

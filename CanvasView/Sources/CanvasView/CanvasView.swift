@@ -67,7 +67,7 @@ import UIKit
 
     public init() {
 
-        renderer = MTLRenderer(device: displayView.device)
+        renderer = MTLRenderer(device: displayView.device ?? MTLCreateSystemDefaultDevice()!)
 
         super.init(frame: .zero)
 
@@ -75,7 +75,7 @@ import UIKit
     }
     public required init?(coder: NSCoder) {
 
-        renderer = MTLRenderer(device: displayView.device)
+        renderer = MTLRenderer(device: displayView.device ?? MTLCreateSystemDefaultDevice()!)
 
         super.init(coder: coder)
 

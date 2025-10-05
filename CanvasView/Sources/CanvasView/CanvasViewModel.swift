@@ -241,6 +241,8 @@ public final class CanvasViewModel {
 public extension CanvasViewModel {
 
     private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+        guard let device = canvasRenderer.device else { return }
+
         // Initialize the textures used in the texture layers
         await textureLayersStorage.initialize(
             configuration: configuration,
@@ -248,7 +250,7 @@ public extension CanvasViewModel {
         )
 
         // Initialize the textures used for Undo
-        undoTextureLayers.initialize(configuration.textureSize)
+        undoTextureLayers.initialize(configuration.textureSize, device: device)
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingToolRenderers.count {

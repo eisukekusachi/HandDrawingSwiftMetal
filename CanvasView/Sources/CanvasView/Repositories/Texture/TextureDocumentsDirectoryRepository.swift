@@ -114,17 +114,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        guard
-            let device = renderer.device
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
         let textureSize = configuration.textureSize ?? defaultTextureSize
 
         var tmpTextureIds: Set<UUID> = []
@@ -139,7 +128,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
-                    with: device
+                    with: renderer.device
                 )
             else {
                 let error = NSError(
@@ -216,21 +205,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     func createTexture(_ id: UUID, textureSize: CGSize) async throws {
-        guard
-            let device = renderer.device
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Missing required parameter", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
         if let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         ) {
             try FileOutput.saveTextureAsData(
                 bytes: texture.bytes,
@@ -257,11 +235,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let device = renderer.device,
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
-                with: device
+                with: renderer.device
             )
         else {
             let error = NSError(

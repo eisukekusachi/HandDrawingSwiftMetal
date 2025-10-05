@@ -10,7 +10,7 @@ import MetalKit
 @MainActor
 public protocol MTLRendering {
 
-    var device: MTLDevice? { get }
+    var device: MTLDevice { get }
 
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,

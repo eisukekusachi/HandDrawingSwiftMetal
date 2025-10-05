@@ -25,6 +25,9 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
     /// An undo object captured at the start of the stroke, shown when undo is triggered.
     private var drawingUndoObject: UndoObject?
 
+    private var undoDrawingTexture: MTLTexture?
+    private var redoDrawingTexture: MTLTexture?
+
     private var oldAlpha: Int?
 
     private var cancellables = Set<AnyCancellable>()
@@ -35,9 +38,21 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         self.textureLayers = textureLayers
     }
 
-    func initialize(_ size: CGSize) {
+    func initialize(_ size: CGSize, device: MTLDevice) {
         reset()
         undoTextureRepository?.setTextureSize(size)
+
+        undoDrawingTexture = MTLTextureCreator.makeTexture(
+            width: Int(size.width),
+            height: Int(size.height),
+            with: device
+        )
+
+        redoDrawingTexture = MTLTextureCreator.makeTexture(
+            width: Int(size.width),
+            height: Int(size.height),
+            with: device
+        )
     }
 
     func undo() {

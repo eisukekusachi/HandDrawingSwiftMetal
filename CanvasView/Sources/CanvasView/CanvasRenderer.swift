@@ -12,6 +12,10 @@ import Combine
 @MainActor
 final class CanvasRenderer: ObservableObject {
 
+    var device: MTLDevice? {
+        renderer?.device
+    }
+
     var frameSize: CGSize = .zero
 
     var matrix: CGAffineTransform = .identity
@@ -42,8 +46,6 @@ final class CanvasRenderer: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-
     func initialize(
         displayView: CanvasDisplayable,
         renderer: MTLRendering,
@@ -53,7 +55,7 @@ final class CanvasRenderer: ObservableObject {
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
 
         self.displayView = displayView
@@ -72,6 +74,7 @@ final class CanvasRenderer: ObservableObject {
         }
 
         guard
+            let device = renderer?.device,
             let unselectedBottomTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
@@ -133,6 +136,7 @@ extension CanvasRenderer {
         onCompleted: (() -> Void)?
     ) {
         guard
+            let device = renderer?.device,
             let selectedLayer = textureLayers.selectedLayer,
             let selectedIndex = textureLayers.selectedIndex,
             let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
@@ -249,7 +253,7 @@ extension CanvasRenderer {
             frameSize: frameSize,
             backgroundColor: baseBackgroundColor,
             on: displayTexture,
-            device: device,
+            device: renderer.device,
             with: commandBuffer
         )
         displayView?.setNeedsDisplay()

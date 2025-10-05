@@ -62,7 +62,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
         flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: device!
         )
 
         self.delegate = self

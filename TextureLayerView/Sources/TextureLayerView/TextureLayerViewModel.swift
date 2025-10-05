@@ -40,6 +40,8 @@ public final class TextureLayerViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+
     public init() {}
 
     public func initialize(
@@ -113,7 +115,6 @@ public extension TextureLayerViewModel {
         guard
             let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
-            let device: MTLDevice = MTLCreateSystemDefaultDevice(),
             let texture = MTLTextureCreator.makeTexture(
                 width: Int(textureLayers.textureSize.width),
                 height: Int(textureLayers.textureSize.height),
