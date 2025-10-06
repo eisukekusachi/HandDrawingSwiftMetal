@@ -9,6 +9,7 @@ import Metal
 import UIKit
 
 final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
+    var newCommandBuffer: (any MTLCommandBuffer)?
 
     var callHistory: [String] = []
 
@@ -104,6 +105,9 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
                 ")"
             ].joined()
         )
+    }
+
+    func copyTexture(srctexture: (any MTLTexture)?, dstTexture: (any MTLTexture)?, commandBuffer: any MTLCommandBuffer) async {
     }
 
     func subtractTextureWithEraseBlendMode(

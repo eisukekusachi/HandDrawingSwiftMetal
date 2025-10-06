@@ -12,6 +12,8 @@ public protocol MTLRendering {
 
     var device: MTLDevice { get }
 
+    var newCommandBuffer: MTLCommandBuffer? { get }
+
     func drawGrayPointBuffersWithMaxBlendMode(
         buffers: MTLGrayscalePointBuffers?,
         onGrayscaleTexture texture: MTLTexture,
@@ -78,6 +80,12 @@ public protocol MTLRendering {
     func duplicateTexture(
         texture: MTLTexture?
     ) async -> MTLTexture?
+
+    func copyTexture(
+        srctexture: MTLTexture?,
+        dstTexture: MTLTexture?,
+        commandBuffer: MTLCommandBuffer
+    ) async
 
     func clearTextures(
         textures: [MTLTexture?],

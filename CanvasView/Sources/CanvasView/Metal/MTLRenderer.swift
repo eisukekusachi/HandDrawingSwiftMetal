@@ -17,6 +17,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
     }
     private var _device: MTLDevice
 
+    public var newCommandBuffer: MTLCommandBuffer? {
+        commandQueue?.makeCommandBuffer()
+    }
+
     private let commandQueue: MTLCommandQueue?
 
     private let pipelines: MTLPipelines
@@ -337,25 +341,11 @@ public final class MTLRenderer: Sendable, MTLRendering {
             return nil
         }
 
-        guard
-            let encoder = commandBuffer.makeBlitCommandEncoder()
-        else { return nil }
-
-        let origin = MTLOrigin(x: 0, y: 0, z: 0)
-        let size = MTLSize(width: texture.width, height: texture.height, depth: 1)
-
-        encoder.copy(
-            from: texture,
-            sourceSlice: 0,
-            sourceLevel: 0,
-            sourceOrigin: origin,
-            sourceSize: size,
-            to: resultTexture,
-            destinationSlice: 0,
-            destinationLevel: 0,
-            destinationOrigin: origin
+        await copyTexture(
+            srctexture: texture,
+            dstTexture: resultTexture,
+            commandBuffer: commandBuffer
         )
-        encoder.endEncoding()
 
         return await withCheckedContinuation { (continuation: CheckedContinuation<MTLTexture?, Never>) in
             commandBuffer.addCompletedHandler { @Sendable buffer in
@@ -371,5 +361,34 @@ public final class MTLRenderer: Sendable, MTLRendering {
             }
             commandBuffer.commit()
         }
+    }
+
+    public func copyTexture(
+        srctexture: MTLTexture?,
+        dstTexture: MTLTexture?,
+        commandBuffer: MTLCommandBuffer
+    ) async {
+        guard
+            let srctexture,
+            let dstTexture,
+            let encoder = commandBuffer.makeBlitCommandEncoder(),
+            srctexture.pixelFormat == dstTexture.pixelFormat && srctexture.sampleCount == dstTexture.sampleCount
+        else { return }
+
+        let origin = MTLOrigin(x: 0, y: 0, z: 0)
+        let size = MTLSize(width: srctexture.width, height: srctexture.height, depth: 1)
+
+        encoder.copy(
+            from: srctexture,
+            sourceSlice: 0,
+            sourceLevel: 0,
+            sourceOrigin: origin,
+            sourceSize: size,
+            to: dstTexture,
+            destinationSlice: 0,
+            destinationLevel: 0,
+            destinationOrigin: origin
+        )
+        encoder.endEncoding()
     }
 }
