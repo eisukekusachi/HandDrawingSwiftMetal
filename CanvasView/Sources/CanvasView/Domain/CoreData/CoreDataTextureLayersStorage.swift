@@ -174,8 +174,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     }
 
     /// Adds a texture using UUID
-    @discardableResult
-    public func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+    public func addTexture(_ texture: MTLTexture, id: UUID) async throws {
         try await textureLayers.addTexture(texture, id: id)
     }
 

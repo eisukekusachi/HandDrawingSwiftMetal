@@ -210,8 +210,7 @@ class TextureInMemoryRepository: TextureRepository {
         }
     }
 
-    @discardableResult
-    func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: MTLTexture, id: UUID) async throws {
         guard textures[id] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -222,8 +221,6 @@ class TextureInMemoryRepository: TextureRepository {
         }
 
         textures[id] = texture
-
-        return .init(id: id, texture: texture)
     }
 
     @discardableResult func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {

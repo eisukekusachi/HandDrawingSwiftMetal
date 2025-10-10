@@ -306,7 +306,7 @@ public extension TextureLayers {
         try await textureRepository?.duplicatedTexture(id)
     }
 
-    func addTexture(_ texture: any MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: any MTLTexture, id: UUID) async throws {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -315,7 +315,7 @@ public extension TextureLayers {
             Logger.error(error)
             throw error
         }
-        return try await textureRepository.addTexture(texture, id: id)
+        try await textureRepository.addTexture(texture, id: id)
     }
 
     func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws -> IdentifiedTexture {

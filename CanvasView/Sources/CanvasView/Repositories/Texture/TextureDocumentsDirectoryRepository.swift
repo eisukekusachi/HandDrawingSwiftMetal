@@ -264,8 +264,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         return id
     }
 
-    @discardableResult
-    func addTexture(_ texture: MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+    func addTexture(_ texture: MTLTexture, id: UUID) async throws {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard !FileManager.default.fileExists(atPath: fileURL.path) else {
@@ -281,8 +280,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             bytes: texture.bytes,
             to: fileURL
         )
-
-        return .init(id: id, texture: texture)
     }
 
     @discardableResult

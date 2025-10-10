@@ -157,7 +157,7 @@ extension UndoTextureLayers {
         try await textureLayers.duplicatedTexture(id)
     }
 
-    public func addTexture(_ texture: any MTLTexture, id: UUID) async throws -> IdentifiedTexture {
+    public func addTexture(_ texture: any MTLTexture, id: UUID) async throws {
         try await textureLayers.addTexture(texture, id: id)
     }
 
