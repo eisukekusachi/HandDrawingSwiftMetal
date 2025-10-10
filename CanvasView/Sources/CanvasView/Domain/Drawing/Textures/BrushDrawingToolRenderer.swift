@@ -151,15 +151,18 @@ extension BrushDrawingToolRenderer {
         on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let renderer else { return }
-
-        renderer.drawGrayPointBuffersWithMaxBlendMode(
-            buffers: MTLBuffers.makeGrayscalePointBuffers(
+        guard
+            let renderer,
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
                 with: renderer.device
-            ),
+            )
+        else { return }
+
+        renderer.drawGrayPointBuffersWithMaxBlendMode(
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )

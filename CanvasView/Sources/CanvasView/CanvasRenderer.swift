@@ -117,9 +117,8 @@ extension CanvasRenderer {
         displayView?.displayTexture?.size
     }
 
-    func duplicatedTexture(_ texture: MTLTexture?) async throws -> MTLTexture? {
+    func duplicatedTexture(_ texture: MTLTexture) async throws -> MTLTexture? {
         guard
-            let texture,
             let renderer
         else { return nil }
 
@@ -222,7 +221,7 @@ extension CanvasRenderer {
             let canvasTexture
         else { return }
 
-        renderer.fillTexture(
+        renderer.fillColor(
             texture: canvasTexture,
             withRGB: backgroundColor.rgb,
             with: commandBuffer
@@ -265,7 +264,6 @@ extension CanvasRenderer {
             frameSize: frameSize,
             backgroundColor: baseBackgroundColor,
             on: displayTexture,
-            device: renderer.device,
             with: commandBuffer
         )
         displayView?.setNeedsDisplay()

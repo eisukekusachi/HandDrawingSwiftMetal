@@ -158,15 +158,18 @@ private extension EraserDrawingToolRenderer {
         on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let renderer else { return }
-
-        renderer.drawGrayPointBuffersWithMaxBlendMode(
-            buffers: MTLBuffers.makeGrayscalePointBuffers(
+        guard
+            let renderer,
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
                 with: renderer.device
-            ),
+            )
+        else { return }
+
+        renderer.drawGrayPointBuffersWithMaxBlendMode(
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )

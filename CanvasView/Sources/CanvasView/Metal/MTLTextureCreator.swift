@@ -21,7 +21,7 @@ public enum MTLTextureCreator {
         guard
             let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals
         else { return nil }
-        return MTLTextureCreator.makeTexture(
+        return try MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             from: hexadecimalData,
@@ -60,8 +60,15 @@ public enum MTLTextureCreator {
         height: Int,
         from colorArray: [UInt8],
         with device: MTLDevice
-    ) -> MTLTexture? {
-        guard colorArray.count == Int(width * height) * bytesPerPixel else { return nil }
+    ) throws -> MTLTexture? {
+        guard colorArray.count == Int(width * height) * bytesPerPixel else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
+            Logger.error(error)
+            return nil
+        }
 
         let bytesPerRow = bytesPerPixel * width
 
@@ -84,11 +91,10 @@ public enum MTLTextureCreator {
 
     @MainActor
     public static func duplicateTexture(
-        texture: MTLTexture?,
+        texture: MTLTexture,
         renderer: MTLRendering
     ) async throws -> MTLTexture? {
         guard
-            let texture,
             let commandBuffer = renderer.newCommandBuffer,
             let resultTexture = MTLTextureCreator.makeTexture(
                 label: texture.label,
@@ -96,7 +102,9 @@ public enum MTLTextureCreator {
                 height: texture.height,
                 with: renderer.device
             )
-        else { return nil }
+        else {
+            return nil
+        }
 
         guard
             texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
@@ -112,7 +120,7 @@ public enum MTLTextureCreator {
         renderer.copyTexture(
             srctexture: texture,
             dstTexture: resultTexture,
-            commandBuffer: commandBuffer
+            with: commandBuffer
         )
 
         try await commandBuffer.commitAndWaitAsync()

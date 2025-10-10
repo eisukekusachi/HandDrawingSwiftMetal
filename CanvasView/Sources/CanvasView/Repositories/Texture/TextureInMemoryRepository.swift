@@ -117,7 +117,7 @@ class TextureInMemoryRepository: TextureRepository {
                 throw error
             }
 
-            guard let newTexture = MTLTextureCreator.makeTexture(
+            guard let newTexture = try MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
                 from: hexadecimalData,
@@ -180,6 +180,7 @@ class TextureInMemoryRepository: TextureRepository {
     func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[id],
+            let texture,
             let newTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: texture,
                 renderer: renderer

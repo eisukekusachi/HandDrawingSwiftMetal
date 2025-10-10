@@ -115,15 +115,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         let textureSize = configuration.textureSize ?? defaultTextureSize
 
-        var tmpTextureIds: Set<UUID> = []
-
         try configuration.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
+            // Check if the data can be converted into a texture
             guard
                 let hexadecimalData = textureData.encodedHexadecimals,
-                let _ = MTLTextureCreator.makeTexture(
+                let _ = try MTLTextureCreator.makeTexture(
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
@@ -137,8 +136,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
                 Logger.error(error)
                 throw error
             }
-
-            tmpTextureIds.insert(layer.id)
         }
 
         // Delete all textures in the repository
@@ -320,7 +317,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         renderer.copyTexture(
             srctexture: sourceTexture,
             dstTexture: destinationTexture,
-            commandBuffer: commmandBuffer
+            with: commmandBuffer
         )
 
         try await commmandBuffer.commitAndWaitAsync()
