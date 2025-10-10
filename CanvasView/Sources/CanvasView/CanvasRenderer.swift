@@ -117,6 +117,18 @@ extension CanvasRenderer {
         displayView?.displayTexture?.size
     }
 
+    func duplicatedTexture(_ texture: MTLTexture?) async throws -> MTLTexture? {
+        guard
+            let texture,
+            let renderer
+        else { return nil }
+
+        return try await MTLTextureCreator.duplicateTexture(
+            texture: texture,
+            renderer: renderer
+        )
+    }
+
     func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
     }

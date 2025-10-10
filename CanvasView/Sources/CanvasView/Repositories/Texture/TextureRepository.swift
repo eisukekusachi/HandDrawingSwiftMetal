@@ -52,6 +52,5 @@ public protocol TextureRepository: Sendable {
     func removeAll()
 
     /// Updates an existing texture for UUID
-    @discardableResult
-    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws
 }

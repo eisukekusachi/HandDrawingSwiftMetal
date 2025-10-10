@@ -161,7 +161,7 @@ extension UndoTextureLayers {
         try await textureLayers.addTexture(texture, id: id)
     }
 
-    public func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws -> IdentifiedTexture {
+    public func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
     }
 
@@ -328,9 +328,10 @@ extension UndoTextureLayers {
     }
 
     func pushUndoDrawingObject(
-        texture: MTLTexture
+        texture: MTLTexture?
     ) async {
         guard
+            let texture,
             let undoObject = drawingUndoObject,
             let selectedLayer = textureLayers.selectedLayer
         else {

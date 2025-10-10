@@ -618,7 +618,7 @@ extension CanvasViewModel {
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
         Task {
             do {
-                let resultTexture = try await dependencies.textureRepository.updateTexture(
+                try await dependencies.textureRepository.updateTexture(
                     texture: texture,
                     for: selectedTextureId
                 )
@@ -626,16 +626,21 @@ extension CanvasViewModel {
                 // Update `updatedAt` when drawing completes
                 projectMetaDataStorage.refreshUpdatedAt()
 
-                await undoTextureLayers.pushUndoDrawingObject(
-                    texture: resultTexture.texture
-                )
+                Task(priority: .background) {
+                    let newTexture = try await canvasRenderer.duplicatedTexture(
+                        texture
+                    )
+                    await undoTextureLayers.pushUndoDrawingObject(
+                        texture: newTexture
+                    )
+                }
             } catch {
                 // No action on error
                 Logger.error(error)
             }
-        }
 
-        textureLayersStorage.updateThumbnail(selectedTextureId, texture: texture)
+            textureLayersStorage.updateThumbnail(selectedTextureId, texture: texture)
+        }
     }
 
     private func resetAllInputParameters() {

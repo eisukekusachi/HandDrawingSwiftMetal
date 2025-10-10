@@ -91,14 +91,8 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(id))")
     }
 
-    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
-        let context = try MockMetalContext()
-        let mockTexture = try context.makeTexture(width: 16, height: 16)
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(id))")
-        return  .init(
-            id: id,
-            texture: texture ?? mockTexture
-        )
     }
 }
 

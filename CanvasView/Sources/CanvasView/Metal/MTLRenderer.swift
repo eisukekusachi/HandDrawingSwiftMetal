@@ -316,53 +316,6 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
-    public func duplicateTexture(
-        texture: MTLTexture?
-    ) async -> MTLTexture? {
-        guard
-            let texture,
-            let commandBuffer = commandQueue?.makeCommandBuffer(),
-            let resultTexture = MTLTextureCreator.makeTexture(
-                label: texture.label,
-                width: texture.width,
-                height: texture.height,
-                with: device
-            )
-        else { return nil }
-
-        guard
-            texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Invalid value", bundle: .module)
-            )
-            Logger.error(error)
-            return nil
-        }
-
-        copyTexture(
-            srctexture: texture,
-            dstTexture: resultTexture,
-            commandBuffer: commandBuffer
-        )
-
-        return await withCheckedContinuation { (continuation: CheckedContinuation<MTLTexture?, Never>) in
-            commandBuffer.addCompletedHandler { @Sendable buffer in
-                switch buffer.status {
-                case .completed:
-                    continuation.resume(returning: resultTexture)
-                case .error:
-                    if let e = buffer.error { Logger.error(e) }
-                    continuation.resume(returning: nil)
-                default:
-                    continuation.resume(returning: nil)
-                }
-            }
-            commandBuffer.commit()
-        }
-    }
-
     public func copyTexture(
         srctexture: MTLTexture?,
         dstTexture: MTLTexture?,

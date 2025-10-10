@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2023/12/30.
 //
 
-import MetalKit
-import Accelerate
+@preconcurrency import Accelerate
+@preconcurrency import MetalKit
 
 private let bytesPerPixel = 4
 private let bitsPerComponent = 8
@@ -80,5 +80,43 @@ public enum MTLTextureCreator {
             bytesPerImage: bytesPerRow * height
         )
         return texture
+    }
+
+    @MainActor
+    public static func duplicateTexture(
+        texture: MTLTexture?,
+        renderer: MTLRendering
+    ) async throws -> MTLTexture? {
+        guard
+            let texture,
+            let commandBuffer = renderer.newCommandBuffer,
+            let resultTexture = MTLTextureCreator.makeTexture(
+                label: texture.label,
+                width: texture.width,
+                height: texture.height,
+                with: renderer.device
+            )
+        else { return nil }
+
+        guard
+            texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
+            Logger.error(error)
+            return nil
+        }
+
+        renderer.copyTexture(
+            srctexture: texture,
+            dstTexture: resultTexture,
+            commandBuffer: commandBuffer
+        )
+
+        try await commandBuffer.commitAndWaitAsync()
+
+        return resultTexture
     }
 }

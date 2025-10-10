@@ -85,8 +85,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     func addTexture(_ texture: MTLTexture, id: UUID) async throws
 
     /// Updates an existing texture for UUID
-    @discardableResult
-    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws
 
     /// Removes a texture with UUID
     @discardableResult

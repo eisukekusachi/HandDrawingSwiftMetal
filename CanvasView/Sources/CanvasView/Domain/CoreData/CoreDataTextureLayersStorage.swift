@@ -179,8 +179,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     }
 
     /// Updates an existing texture for UUID
-    @discardableResult
-    public func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
+    public func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
     }
 

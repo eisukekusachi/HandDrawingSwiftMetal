@@ -292,8 +292,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
     }
 
-    @discardableResult
-    func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         guard
             let sourceTexture = texture,
             let destinationTexture = tmpTexture,
@@ -330,7 +329,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         do {
             try FileOutput.saveTextureAsData(bytes: bytes, to: fileURL)
-            return .init(id: id, texture: destinationTexture)
         } catch {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),

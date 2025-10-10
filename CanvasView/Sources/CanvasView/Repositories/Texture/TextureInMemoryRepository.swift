@@ -180,8 +180,9 @@ class TextureInMemoryRepository: TextureRepository {
     func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[id],
-            let newTexture = await renderer.duplicateTexture(
-                texture: texture
+            let newTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                renderer: renderer
             )
         else {
             let error = NSError(
@@ -223,10 +224,13 @@ class TextureInMemoryRepository: TextureRepository {
         textures[id] = texture
     }
 
-    @discardableResult func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
+    func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         guard
             let texture,
-            let newTexture = await renderer.duplicateTexture(texture: texture)
+            let newTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                renderer: renderer
+            )
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -246,7 +250,5 @@ class TextureInMemoryRepository: TextureRepository {
         }
 
         textures[id] = newTexture
-
-        return .init(id: id, texture: newTexture)
     }
 }
