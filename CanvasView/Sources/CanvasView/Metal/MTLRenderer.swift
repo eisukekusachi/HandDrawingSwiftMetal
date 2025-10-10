@@ -341,7 +341,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
             return nil
         }
 
-        await copyTexture(
+        copyTexture(
             srctexture: texture,
             dstTexture: resultTexture,
             commandBuffer: commandBuffer
@@ -367,7 +367,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
         srctexture: MTLTexture?,
         dstTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer
-    ) async {
+    ) {
         guard
             let srctexture,
             let dstTexture,

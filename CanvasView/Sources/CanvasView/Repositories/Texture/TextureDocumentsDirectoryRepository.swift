@@ -6,7 +6,7 @@
 //
 
 import Combine
-import MetalKit
+@preconcurrency import MetalKit
 import SwiftUI
 
 /// A repository that manages on-disk textures
@@ -30,6 +30,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
+
+    private var tmpTexture: MTLTexture?
 
     init(
         storageDirectoryURL: URL,
@@ -66,13 +68,21 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
 
-        if let textureSize = configuration.textureSize,
-           FileManager.containsAll(
+        if FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
-        ) {
+           ),
+           let textureSize = configuration.textureSize,
+           let tmpTexture = MTLTextureCreator.makeTexture(
+               width: Int(textureSize.width),
+               height: Int(textureSize.height),
+               with: renderer.device
+           )
+        {
             // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
+
+            self.tmpTexture = tmpTexture
 
             return try await .init(
                 configuration: configuration,
@@ -285,7 +295,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     @discardableResult
     func updateTexture(texture: MTLTexture?, for id: UUID) async throws -> IdentifiedTexture {
         guard
-            let texture
+            let sourceTexture = texture,
+            let destinationTexture = tmpTexture,
+            let commmandBuffer = renderer.newCommandBuffer
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -306,20 +318,19 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        guard let newTexture = await renderer.duplicateTexture(
-            texture: texture
-        ) else {
-            let error = NSError(
-                title: String(localized :"Error", bundle: .module),
-                message: String(localized :"Failed to create new texture", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
+        renderer.copyTexture(
+            srctexture: sourceTexture,
+            dstTexture: destinationTexture,
+            commandBuffer: commmandBuffer
+        )
+
+        try await commmandBuffer.commitAndWaitAsync()
+
+        let bytes = tmpTexture?.bytes ?? []
 
         do {
-            try FileOutput.saveTextureAsData(bytes: newTexture.bytes, to: fileURL)
-            return .init(id: id, texture: newTexture)
+            try FileOutput.saveTextureAsData(bytes: bytes, to: fileURL)
+            return .init(id: id, texture: destinationTexture)
         } catch {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),

@@ -85,7 +85,7 @@ public protocol MTLRendering {
         srctexture: MTLTexture?,
         dstTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer
-    ) async
+    )
 
     func clearTextures(
         textures: [MTLTexture?],

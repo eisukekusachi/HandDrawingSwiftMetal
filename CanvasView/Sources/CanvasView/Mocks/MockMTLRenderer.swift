@@ -107,7 +107,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         )
     }
 
-    func copyTexture(srctexture: (any MTLTexture)?, dstTexture: (any MTLTexture)?, commandBuffer: any MTLCommandBuffer) async {
+    func copyTexture(srctexture: (any MTLTexture)?, dstTexture: (any MTLTexture)?, commandBuffer: any MTLCommandBuffer) {
     }
 
     func subtractTextureWithEraseBlendMode(
