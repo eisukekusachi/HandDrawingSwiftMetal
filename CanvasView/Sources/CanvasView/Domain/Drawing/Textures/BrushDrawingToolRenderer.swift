@@ -107,10 +107,13 @@ public extension BrushDrawingToolRenderer {
     ) {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
-        updateRealTimeDrawingTexture(
-            baseTexture: baseTexture,
+        drawCurveOnDrawingTexture(
             drawingCurve: drawingCurve,
-            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+
+        drawDrawingTextureOnRealTimeDrawingTexture(
+            baseTexture: baseTexture,
             with: commandBuffer
         )
 
@@ -143,10 +146,8 @@ public extension BrushDrawingToolRenderer {
 
 extension BrushDrawingToolRenderer {
 
-    private func updateRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
+    private func drawCurveOnDrawingTexture(
         drawingCurve: DrawingCurve,
-        on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -171,18 +172,27 @@ extension BrushDrawingToolRenderer {
             on: drawingTexture,
             with: commandBuffer
         )
+    }
+
+    private func drawDrawingTextureOnRealTimeDrawingTexture(
+        baseTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer
+        else { return }
 
         renderer.drawTexture(
             texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: texture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: texture,
+            into: realtimeDrawingTexture,
             with: commandBuffer
         )
     }

@@ -117,7 +117,6 @@ public extension EraserDrawingToolRenderer {
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
-            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
@@ -153,7 +152,6 @@ private extension EraserDrawingToolRenderer {
     func updateRealTimeDrawingTexture(
         baseTexture: MTLTexture,
         drawingCurve: DrawingCurve,
-        on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -198,7 +196,7 @@ private extension EraserDrawingToolRenderer {
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: texture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
     }
