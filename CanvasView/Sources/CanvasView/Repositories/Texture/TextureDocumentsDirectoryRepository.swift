@@ -31,8 +31,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
     private var _textureSize: CGSize = .zero
 
-    private var tmpTexture: MTLTexture?
-
     init(
         storageDirectoryURL: URL,
         directoryName: String,
@@ -81,8 +79,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         {
             // Retain the texture size
             setTextureSize(configuration.textureSize ?? .zero)
-
-            self.tmpTexture = tmpTexture
 
             return try await .init(
                 configuration: configuration,
@@ -291,8 +287,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
     func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         guard
-            let sourceTexture = texture,
-            let destinationTexture = tmpTexture,
+            let texture,
             let commmandBuffer = renderer.newCommandBuffer
         else {
             let error = NSError(
@@ -314,15 +309,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        renderer.copyTexture(
-            srctexture: sourceTexture,
-            dstTexture: destinationTexture,
-            with: commmandBuffer
-        )
-
-        try await commmandBuffer.commitAndWaitAsync()
-
-        let bytes = tmpTexture?.bytes ?? []
+        let bytes = texture.bytes
 
         do {
             try FileOutput.saveTextureAsData(bytes: bytes, to: fileURL)
@@ -336,7 +323,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    func setTextureSize(_ size: CGSize) {
+    private func setTextureSize(_ size: CGSize) {
         _textureSize = size
     }
 }
