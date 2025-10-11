@@ -30,6 +30,8 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var oldAlpha: Int?
 
+    private var canvasRenderer: CanvasRenderer?
+
     private var cancellables = Set<AnyCancellable>()
 
     public init(
@@ -38,7 +40,17 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         self.textureLayers = textureLayers
     }
 
-    func initialize(_ size: CGSize, device: MTLDevice) {
+    func initialize(
+        _ size: CGSize,
+        canvasRenderer: CanvasRenderer
+    ) {
+        self.canvasRenderer = canvasRenderer
+
+        guard let device = canvasRenderer.device else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "device"))
+            return
+        }
+
         reset()
         undoTextureRepository?.setTextureSize(size)
 
