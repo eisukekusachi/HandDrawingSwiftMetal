@@ -50,7 +50,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         self.undoManager.groupsByEvent = false
     }
 
-    func initializeStorage(
+    public func initializeStorage(
         _ size: CGSize,
         canvasRenderer: CanvasRenderer
     ) {
@@ -87,15 +87,15 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         }
     }
 
-    func undo() {
+    public func undo() {
         undoManager.undo()
         didUndoSubject.send(.init(undoManager))
     }
-    func redo() {
+    public func redo() {
         undoManager.redo()
         didUndoSubject.send(.init(undoManager))
     }
-    func resetUndo() {
+    public func resetUndo() {
         undoManager.removeAllActions()
         undoTextureRepository?.removeAll()
         didUndoSubject.send(.init(undoManager))
@@ -486,7 +486,7 @@ extension UndoTextureLayers {
 
         undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                _ = try? self?.undoTextureRepository?.removeTexture(
+                _ = self?.undoTextureRepository?.removeTexture(
                     result.undoTextureUUID
                 )
             })
@@ -494,7 +494,7 @@ extension UndoTextureLayers {
 
         redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                _ = try? self?.undoTextureRepository?.removeTexture(
+                _ = self?.undoTextureRepository?.removeTexture(
                     result.undoTextureUUID
                 )
             })

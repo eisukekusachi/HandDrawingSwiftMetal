@@ -10,15 +10,15 @@ import Combine
 
 /// A class that renders textures from `TextureRepository` onto the canvas
 @MainActor
-final class CanvasRenderer: ObservableObject {
+public final class CanvasRenderer: ObservableObject {
 
-    var device: MTLDevice? {
+    public var device: MTLDevice? {
         renderer?.device
     }
 
-    var frameSize: CGSize = .zero
+    public var frameSize: CGSize = .zero
 
-    var matrix: CGAffineTransform = .identity
+    public var matrix: CGAffineTransform = .identity
 
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
@@ -46,7 +46,7 @@ final class CanvasRenderer: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    func initialize(
+    public func initialize(
         displayView: CanvasDisplayable,
         renderer: MTLRendering,
         environmentConfiguration: EnvironmentConfiguration
@@ -64,7 +64,7 @@ final class CanvasRenderer: ObservableObject {
         self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    public func initializeTextures(textureSize: CGSize) {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
@@ -113,11 +113,11 @@ final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-    var drawableSize: CGSize? {
+    public var drawableSize: CGSize? {
         displayView?.displayTexture?.size
     }
 
-    func duplicatedTexture(_ texture: MTLTexture) async throws -> MTLTexture? {
+    public func duplicatedTexture(_ texture: MTLTexture) async throws -> MTLTexture? {
         guard
             let renderer
         else { return nil }
@@ -128,20 +128,14 @@ extension CanvasRenderer {
         )
     }
 
-    func resetCommandBuffer() {
+    public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
-    }
-    func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
-    }
-    func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
     /// Updates `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    func updateDrawingTextures(
+    public func updateDrawingTextures(
         textureLayers: any TextureLayersProtocol,
         textureRepository: TextureRepository,
         onCompleted: (() -> Void)?
@@ -210,8 +204,15 @@ extension CanvasRenderer {
         }
     }
 
+    public func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
+    }
+    public func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
+    }
+
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
-    func updateCanvasView(
+    public func updateCanvasView(
         realtimeDrawingTexture: MTLTexture? = nil,
         selectedLayer: TextureLayerModel
     ) {
@@ -251,7 +252,7 @@ extension CanvasRenderer {
         updateCanvasView()
     }
 
-    func updateCanvasView() {
+    public func updateCanvasView() {
         guard
             let renderer,
             let commandBuffer = displayView?.commandBuffer,
@@ -269,7 +270,7 @@ extension CanvasRenderer {
         displayView?.setNeedsDisplay()
     }
 
-    func drawLayerTextures(
+    public func drawLayerTextures(
         textures: [IdentifiedTexture],
         layers: [TextureLayerModel],
         on destination: MTLTexture,
