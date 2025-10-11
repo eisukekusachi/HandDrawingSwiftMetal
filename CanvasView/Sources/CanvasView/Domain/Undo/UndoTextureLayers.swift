@@ -11,7 +11,7 @@ import UIKit
 /// A class that manages texture layers
 public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
 
-    @Published private var textureLayers: any TextureLayersProtocol
+    @Published private var textureLayers: TextureLayers
 
     private let undoManager = UndoManager()
 
@@ -35,7 +35,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: any TextureLayersProtocol
+        textureLayers: TextureLayers
     ) {
         self.textureLayers = textureLayers
     }
