@@ -625,11 +625,8 @@ extension CanvasViewModel {
                 projectMetaDataStorage.refreshUpdatedAt()
 
                 Task(priority: .background) {
-                    let newTexture = try await canvasRenderer.duplicatedTexture(
-                        texture
-                    )
                     await undoTextureLayers.pushUndoDrawingObject(
-                        texture: newTexture
+                        texture: texture
                     )
                 }
             } catch {

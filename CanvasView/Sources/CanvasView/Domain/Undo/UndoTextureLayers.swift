@@ -344,6 +344,9 @@ extension UndoTextureLayers {
     ) async {
         guard
             let texture,
+            let newTexture = try? await canvasRenderer?.duplicatedTexture(
+                texture
+            ),
             let undoObject = drawingUndoObject,
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -359,7 +362,7 @@ extension UndoTextureLayers {
             // Add a texture to the UndoTextureRepository for restoration
             try await undoTextureRepository?
                 .addTexture(
-                    texture,
+                    newTexture,
                     id: redoObject.undoTextureUUID
                 )
 
