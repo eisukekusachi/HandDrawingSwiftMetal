@@ -182,30 +182,34 @@ public final class CanvasViewModel {
         }
     }
 
+    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
+        guard
+            let selectedLayer = textureLayersStorage.selectedLayer
+        else { return }
+
+        canvasRenderer.updateCanvasView(
+            realtimeDrawingTexture: realtimeDrawingTexture,
+            selectedLayer: .init(item: selectedLayer)
+        )
+    }
+
+    func updateCanvasByMergingAllLayers() {
+        canvasRenderer.updateDrawingTextures(
+            textureLayers: textureLayersStorage,
+            textureRepository: dependencies.textureRepository
+        ) { [weak self] in
+            self?.updateCanvasView()
+        }
+    }
+}
+
+public extension CanvasViewModel {
+
     private func bindData() {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.updatePublisher
             .sink { [weak self] in
-                guard
-                    let drawingCurve = self?.drawingCurve,
-                    let texture = self?.canvasRenderer.selectedTexture,
-                    let selectedLayerId = self?.textureLayersStorage.selectedLayer?.id
-                else { return }
-
-                self?.drawingToolRenderer?.drawCurve(
-                    drawingCurve,
-                    using: texture,
-                    onDrawing: { [weak self] resultTexture in
-                        self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
-                    },
-                    onDrawingCompleted: { [weak self] resultTexture in
-                        // Reset parameters on drawing completion
-                        self?.resetAllInputParameters()
-                    },
-                    onCommandBufferCompleted: { [weak self] resultTexture in
-                        self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
-                    }
-                )
+                self?.drawCurvePointsOnCanvas()
             }
             .store(in: &cancellables)
 
@@ -236,9 +240,6 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
     }
-}
-
-public extension CanvasViewModel {
 
     private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
         guard let device = canvasRenderer.device else { return }
@@ -307,7 +308,9 @@ extension CanvasViewModel {
 
             fingerStroke.setActiveDictionaryKeyIfNil()
 
-            drawCurveOnCanvas(fingerStroke.latestTouchPoints)
+            appendCurvePoints(fingerStroke.latestTouchPoints)
+
+            drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
 
         case .transforming: transformCanvas()
         default: break
@@ -357,7 +360,9 @@ extension CanvasViewModel {
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
+        appendCurvePoints(pencilStroke.latestActualTouchPoints)
+
+        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
     }
 }
 
@@ -557,7 +562,7 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
+    private func appendCurvePoints(_ screenTouchPoints: [TouchPoint]) {
         guard
             let drawingToolRenderer,
             let drawableSize = canvasRenderer.drawableSize
@@ -572,47 +577,39 @@ extension CanvasViewModel {
             ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )
-
-        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
     }
 
-    private func transformCanvas() {
-        if transforming.isNotKeysInitialized {
-            transforming.initialize(
-                fingerStroke.touchHistories
-            )
-        }
+    private func drawCurvePointsOnCanvas() {
+        guard
+            let drawingCurve,
+            let texture = canvasRenderer.selectedTexture,
+            let selectedLayerId = textureLayersStorage.selectedLayer?.id
+        else { return }
 
-        if fingerStroke.isAllFingersOnScreen {
-            transforming.transformCanvas(
-                screenCenter: .init(
-                    x: canvasRenderer.frameSize.width * 0.5,
-                    y: canvasRenderer.frameSize.height * 0.5
-                ),
-                touchHistories: fingerStroke.touchHistories
-            )
-        } else {
-            transforming.endTransformation()
-        }
+        drawingToolRenderer?.drawCurve(
+            drawingCurve,
+            using: texture,
+            onDrawing: { [weak self] resultTexture in
+                self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
+            },
+            onCommandBufferCompleted: { [weak self] resultTexture in
+                // Reset parameters on drawing completion
+                self?.resetAllInputParameters()
 
-        canvasRenderer.updateCanvasView()
+                self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
+            }
+        )
     }
-}
 
-extension CanvasViewModel {
-
-    private func cancelFingerDrawing() {
-
-        drawingToolRenderer?.clearTextures()
+    private func resetAllInputParameters() {
+        inputDevice.reset()
+        touchGesture.reset()
 
         fingerStroke.reset()
+        pencilStroke.reset()
 
         drawingCurve = nil
         transforming.resetMatrix()
-
-        canvasRenderer.resetCommandBuffer()
-
-        canvasRenderer.updateCanvasView()
     }
 
     private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
@@ -643,34 +640,39 @@ extension CanvasViewModel {
         }
     }
 
-    private func resetAllInputParameters() {
-        inputDevice.reset()
-        touchGesture.reset()
+    private func transformCanvas() {
+        if transforming.isNotKeysInitialized {
+            transforming.initialize(
+                fingerStroke.touchHistories
+            )
+        }
+
+        if fingerStroke.isAllFingersOnScreen {
+            transforming.transformCanvas(
+                screenCenter: .init(
+                    x: canvasRenderer.frameSize.width * 0.5,
+                    y: canvasRenderer.frameSize.height * 0.5
+                ),
+                touchHistories: fingerStroke.touchHistories
+            )
+        } else {
+            transforming.endTransformation()
+        }
+
+        canvasRenderer.updateCanvasView()
+    }
+
+    private func cancelFingerDrawing() {
+
+        drawingToolRenderer?.clearTextures()
 
         fingerStroke.reset()
-        pencilStroke.reset()
 
         drawingCurve = nil
         transforming.resetMatrix()
-    }
 
-    func updateCanvasByMergingAllLayers() {
-        canvasRenderer.updateDrawingTextures(
-            textureLayers: textureLayersStorage,
-            textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            self?.updateCanvasView()
-        }
-    }
+        canvasRenderer.resetCommandBuffer()
 
-    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
-        guard
-            let selectedLayer = textureLayersStorage.selectedLayer
-        else { return }
-
-        canvasRenderer.updateCanvasView(
-            realtimeDrawingTexture: realtimeDrawingTexture,
-            selectedLayer: .init(item: selectedLayer)
-        )
+        canvasRenderer.updateCanvasView()
     }
 }
