@@ -15,7 +15,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
 
     private let undoManager = UndoManager()
 
-    private var undoTextureRepository: TextureRepository? = nil
+    private var undoTextureRepository: TextureInMemoryRepository? = nil
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
@@ -51,20 +51,30 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
             return
         }
 
-        reset()
-        undoTextureRepository?.setTextureSize(size)
+        resetUndo()
 
-        undoDrawingTexture = MTLTextureCreator.makeTexture(
-            width: Int(size.width),
-            height: Int(size.height),
-            with: device
-        )
+        Task {
+            do {
+                if let resolvedTextureLayersConfiguration = try await undoTextureRepository?.initializeStorage(
+                    configuration: .init(textureSize: size),
+                    fallbackTextureSize: size
+                ) {
+                    undoDrawingTexture = MTLTextureCreator.makeTexture(
+                        width: Int(resolvedTextureLayersConfiguration.textureSize.width),
+                        height: Int(resolvedTextureLayersConfiguration.textureSize.height),
+                        with: device
+                    )
 
-        redoDrawingTexture = MTLTextureCreator.makeTexture(
-            width: Int(size.width),
-            height: Int(size.height),
-            with: device
-        )
+                    redoDrawingTexture = MTLTextureCreator.makeTexture(
+                        width: Int(resolvedTextureLayersConfiguration.textureSize.width),
+                        height: Int(resolvedTextureLayersConfiguration.textureSize.height),
+                        with: device
+                    )
+                }
+            } catch {
+                Logger.error(error)
+            }
+        }
     }
 
     func undo() {
@@ -75,7 +85,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         undoManager.redo()
         didUndoSubject.send(.init(undoManager))
     }
-    func reset() {
+    func resetUndo() {
         undoManager.removeAllActions()
         undoTextureRepository?.removeAll()
         didUndoSubject.send(.init(undoManager))
@@ -185,7 +195,7 @@ extension UndoTextureLayers {
 extension UndoTextureLayers {
     public func setUndoTextureRepository(
         undoCount: Int = 64,
-        undoTextureRepository: TextureRepository,
+        undoTextureRepository: TextureInMemoryRepository,
     ) {
         self.undoTextureRepository = undoTextureRepository
 

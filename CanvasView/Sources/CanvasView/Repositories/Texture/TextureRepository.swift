@@ -31,8 +31,6 @@ public protocol TextureRepository: Sendable {
         defaultTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration
 
-    func setTextureSize(_ size: CGSize)
-
     func newTexture(_ textureSize: CGSize) async throws -> MTLTexture
 
     /// Adds a texture using UUID

@@ -11,16 +11,16 @@ import SwiftUI
 
 /// A repository that manages in-memory textures
 @MainActor
-class TextureInMemoryRepository: TextureRepository {
+public class TextureInMemoryRepository: TextureRepository {
 
     /// A dictionary with UUID as the key and MTLTexture as the value
-    var textures: [UUID: MTLTexture?] = [:]
+    public var textures: [UUID: MTLTexture?] = [:]
 
-    var textureSize: CGSize {
+    public var textureSize: CGSize {
         _textureSize
     }
 
-    var isInitialized: Bool {
+    public var isInitialized: Bool {
         _textureSize != .zero
     }
 
@@ -30,7 +30,7 @@ class TextureInMemoryRepository: TextureRepository {
 
     private var _textureSize: CGSize = .zero
 
-    init(
+    public init(
         textures: [UUID: MTLTexture?] = [:],
         renderer: MTLRendering
     ) {
@@ -38,7 +38,7 @@ class TextureInMemoryRepository: TextureRepository {
         self.renderer = renderer
     }
 
-    func initializeStorage(
+    public func initializeStorage(
         configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
@@ -81,7 +81,7 @@ class TextureInMemoryRepository: TextureRepository {
         )
     }
 
-    func restoreStorage(
+    public func restoreStorage(
         from sourceFolderURL: URL,
         configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
@@ -145,10 +145,6 @@ class TextureInMemoryRepository: TextureRepository {
         )
     }
 
-    func setTextureSize(_ size: CGSize) {
-        _textureSize = size
-    }
-
     func createTexture(_ id: UUID, textureSize: CGSize) async throws {
         textures[id] = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
@@ -158,17 +154,17 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Removes all textures
-    func removeAll() {
+    public func removeAll() {
         textures = [:]
     }
 
     /// Removes a texture with UUID
-    func removeTexture(_ id: UUID) -> UUID {
+    public func removeTexture(_ id: UUID) -> UUID {
         textures.removeValue(forKey: id)
         return id
     }
 
-    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
+    public func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
         return MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
@@ -177,7 +173,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Copies a texture for the given UUID
-    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
+    public func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture {
         guard
             let texture = textures[id],
             let texture,
@@ -198,7 +194,7 @@ class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Copies multiple textures for the given UUIDs
-    func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
+    public func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in ids {
                 group.addTask { try await self.duplicatedTexture(id) }
@@ -212,7 +208,7 @@ class TextureInMemoryRepository: TextureRepository {
         }
     }
 
-    func addTexture(_ texture: MTLTexture, id: UUID) async throws {
+    public func addTexture(_ texture: MTLTexture, id: UUID) async throws {
         guard textures[id] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -225,7 +221,7 @@ class TextureInMemoryRepository: TextureRepository {
         textures[id] = texture
     }
 
-    func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
+    public func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
         guard
             let texture,
             let newTexture = try await MTLTextureCreator.duplicateTexture(
@@ -251,5 +247,9 @@ class TextureInMemoryRepository: TextureRepository {
         }
 
         textures[id] = newTexture
+    }
+
+    private func setTextureSize(_ size: CGSize) {
+        _textureSize = size
     }
 }
