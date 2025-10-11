@@ -40,7 +40,17 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
         self.textureLayers = textureLayers
     }
 
-    func initialize(
+    public func initialize(
+        undoCount: Int = 64,
+        undoTextureRepository: TextureInMemoryRepository,
+    ) {
+        self.undoTextureRepository = undoTextureRepository
+
+        self.undoManager.levelsOfUndo = undoCount
+        self.undoManager.groupsByEvent = false
+    }
+
+    func initializeStorage(
         _ size: CGSize,
         canvasRenderer: CanvasRenderer
     ) {
@@ -193,16 +203,6 @@ extension UndoTextureLayers {
 }
 
 extension UndoTextureLayers {
-    public func setUndoTextureRepository(
-        undoCount: Int = 64,
-        undoTextureRepository: TextureInMemoryRepository,
-    ) {
-        self.undoTextureRepository = undoTextureRepository
-
-        self.undoManager.levelsOfUndo = undoCount
-        self.undoManager.groupsByEvent = false
-    }
-
     public func addNewLayer(at index: Int) async throws {
         guard let undoTextureRepository else { return }
 
