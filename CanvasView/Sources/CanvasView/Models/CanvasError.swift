@@ -7,8 +7,10 @@
 
 import Foundation
 
+public typealias CanvasErrorId = UUID
+
 public struct CanvasError: Identifiable {
-    public let id: UUID
+    public let id: CanvasErrorId
     public let domain: String
     public let title: String
     public let message: String
@@ -19,7 +21,7 @@ public struct CanvasError: Identifiable {
         message: String? = nil
     ) -> Self {
         .init(
-            id: UUID(),
+            id: CanvasErrorId(),
             domain: error?.domain ?? "",
             title: title ?? (error?.localizedDescription ?? ""),
             message: message ?? (error?.localizedFailureReason ?? "")

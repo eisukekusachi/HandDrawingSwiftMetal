@@ -13,13 +13,13 @@ import MetalKit
 public final class UndoDeletionObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UUID = UUID()
+    public let undoTextureUUID: UndoTextureId = UUID()
 
     public let textureLayer: TextureLayerModel
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    public let selectedLayerIdAfterDeletion: UUID
+    public let selectedLayerIdAfterDeletion: LayerId
 
     deinit {
         deinitSubject.send(self)
@@ -27,7 +27,7 @@ public final class UndoDeletionObject: UndoObject {
 
     public init(
         layerToBeDeleted textureLayer: TextureLayerModel,
-        selectedLayerIdAfterDeletion layerId: UUID
+        selectedLayerIdAfterDeletion layerId: LayerId
     ) {
         self.textureLayer = textureLayer
         self.selectedLayerIdAfterDeletion = layerId

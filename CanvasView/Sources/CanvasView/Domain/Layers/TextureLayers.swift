@@ -55,7 +55,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
         _layers.count
     }
 
-    public var selectedLayerId: UUID? {
+    public var selectedLayerId: LayerId? {
         _selectedLayerId
     }
 
@@ -73,7 +73,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     @Published private var _layers: [TextureLayerItem] = []
 
-    @Published private var _selectedLayerId: UUID?
+    @Published private var _selectedLayerId: LayerId?
 
     // Set a default value to avoid nil
     @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
@@ -115,11 +115,11 @@ public extension TextureLayers {
         }
     }
 
-    func layer(_ id: UUID) -> TextureLayerItem? {
+    func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
     }
 
-    func selectLayer(_ id: UUID) {
+    func selectLayer(_ id: LayerId) {
         _selectedLayerId = id
     }
 
@@ -205,7 +205,7 @@ public extension TextureLayers {
         _layers[index] = layer
     }
 
-    func updateThumbnail(_ id: UUID, texture: MTLTexture) {
+    func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -217,7 +217,7 @@ public extension TextureLayers {
         self._layers[index].thumbnail = texture.makeThumbnail()
     }
 
-    func updateTitle(_ id: UUID, title: String) {
+    func updateTitle(_ id: LayerId, title: String) {
         guard
             let index = _layers.map({ $0.id }).firstIndex(of: id)
         else {
@@ -237,7 +237,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateVisibility(_ id: UUID, isVisible: Bool) {
+    func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -257,7 +257,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateAlpha(_ id: UUID, alpha: Int) {
+    func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
             let index = _layers.firstIndex(where: { $0.id == id })
         else {
@@ -298,27 +298,13 @@ public extension TextureLayers {
     func requestFullCanvasUpdate() {
         fullCanvasUpdateRequestedSubject.send(())
     }
-}
 
-public extension TextureLayers {
     /// Copies a texture for the given UUID
-    func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture? {
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
         try await textureRepository?.duplicatedTexture(id)
     }
 
-    func addTexture(_ texture: any MTLTexture, id: UUID) async throws {
-        guard let textureRepository else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-        try await textureRepository.addTexture(texture, id: id)
-    }
-
-    func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws {
+    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -328,17 +314,5 @@ public extension TextureLayers {
             throw error
         }
         try await textureRepository.updateTexture(texture: texture, for: id)
-    }
-
-    func removeTexture(_ id: UUID) throws -> UUID {
-        guard let textureRepository else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-        return try textureRepository.removeTexture(id)
     }
 }

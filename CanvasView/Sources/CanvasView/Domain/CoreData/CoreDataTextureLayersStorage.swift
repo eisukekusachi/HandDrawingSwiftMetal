@@ -107,11 +107,11 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         )
     }
 
-    public func layer(_ layerId: UUID) -> TextureLayerItem? {
-        textureLayers.layer(layerId)
+    public func layer(_ id: LayerId) -> TextureLayerItem? {
+        textureLayers.layer(id)
     }
 
-    public func selectLayer(_ id: UUID) {
+    public func selectLayer(_ id: LayerId) {
         textureLayers.selectLayer(id)
     }
 
@@ -135,19 +135,19 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.updateLayer(layer)
     }
 
-    public func updateThumbnail(_ id: UUID, texture: MTLTexture) {
+    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
         textureLayers.updateThumbnail(id, texture: texture)
     }
 
-    public func updateTitle(_ id: UUID, title: String) {
+    public func updateTitle(_ id: LayerId, title: String) {
         textureLayers.updateTitle(id, title: title)
     }
 
-    public func updateVisibility(_ id: UUID, isVisible: Bool) {
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
         textureLayers.updateVisibility(id, isVisible: isVisible)
     }
 
-    public func updateAlpha(_ id: UUID, alpha: Int) {
+    public func updateAlpha(_ id: LayerId, alpha: Int) {
         textureLayers.updateAlpha(id, alpha: alpha)
     }
 
@@ -169,24 +169,13 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.requestFullCanvasUpdate()
     }
 
-    public func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture? {
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
         try await textureLayers.duplicatedTexture(id)
     }
 
-    /// Adds a texture using UUID
-    public func addTexture(_ texture: MTLTexture, id: UUID) async throws {
-        try await textureLayers.addTexture(texture, id: id)
-    }
-
     /// Updates an existing texture for UUID
-    public func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
+    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
-    }
-
-    /// Removes a texture with UUID
-    @discardableResult
-    public func removeTexture(_ id: UUID) throws -> UUID {
-        try textureLayers.removeTexture(id)
     }
 }
 

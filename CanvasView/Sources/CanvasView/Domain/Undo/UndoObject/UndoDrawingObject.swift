@@ -12,7 +12,7 @@ import MetalKit
 /// An undo object for drawing
 final class UndoDrawingObject: UndoObject {
 
-    let undoTextureUUID: UUID
+    let undoTextureUUID: UndoTextureId
 
     let textureLayer: TextureLayerModel
 

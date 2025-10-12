@@ -597,7 +597,7 @@ extension CanvasViewModel {
                 // Reset parameters on drawing completion
                 self?.resetAllInputParameters()
 
-                self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
+                self?.completeDrawing(texture: resultTexture, layerId: selectedLayerId)
             }
         )
     }
@@ -613,12 +613,12 @@ extension CanvasViewModel {
         transforming.resetMatrix()
     }
 
-    private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
+    private func completeDrawing(texture: MTLTexture, layerId: LayerId) {
         Task {
             do {
                 try await dependencies.textureRepository.updateTexture(
                     texture: texture,
-                    for: selectedTextureId
+                    for: layerId
                 )
 
                 // Update `updatedAt` when drawing completes
@@ -634,7 +634,7 @@ extension CanvasViewModel {
                 Logger.error(error)
             }
 
-            textureLayersStorage.updateThumbnail(selectedTextureId, texture: texture)
+            textureLayersStorage.updateThumbnail(layerId, texture: texture)
         }
     }
 

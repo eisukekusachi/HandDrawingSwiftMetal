@@ -13,13 +13,13 @@ import MetalKit
 public final class UndoMoveObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UUID = UUID()
+    public let undoTextureUUID: UndoTextureId = UUID()
 
     public let textureLayer: TextureLayerModel
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    public let selectedLayerId: UUID
+    public let selectedLayerId: LayerId
 
     public let indices: MoveLayerIndices
 
@@ -53,7 +53,7 @@ public final class UndoMoveObject: UndoObject {
 
     public init(
         indices: MoveLayerIndices,
-        selectedLayerId: UUID,
+        selectedLayerId: LayerId,
         layer: TextureLayerModel
     ) {
         self.indices = indices

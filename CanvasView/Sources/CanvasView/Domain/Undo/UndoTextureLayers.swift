@@ -153,11 +153,11 @@ extension UndoTextureLayers {
         await textureLayers.initialize(configuration: configuration, textureRepository: textureRepository)
     }
 
-    public func layer(_ layerId: UUID) -> TextureLayerItem? {
-        textureLayers.layer(layerId)
+    public func layer(_ id: LayerId) -> TextureLayerItem? {
+        textureLayers.layer(id)
     }
 
-    public func selectLayer(_ id: UUID) {
+    public func selectLayer(_ id: LayerId) {
         textureLayers.selectLayer(id)
     }
 
@@ -165,15 +165,15 @@ extension UndoTextureLayers {
         textureLayers.updateLayer(layer)
     }
 
-    public func updateThumbnail(_ id: UUID, texture: MTLTexture) {
+    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
         textureLayers.updateThumbnail(id, texture: texture)
     }
 
-    public func updateTitle(_ id: UUID, title: String) {
+    public func updateTitle(_ id: LayerId, title: String) {
         textureLayers.updateTitle(id, title: title)
     }
 
-    public func updateVisibility(_ id: UUID, isVisible: Bool) {
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
         textureLayers.updateVisibility(id, isVisible: isVisible)
     }
 
@@ -185,20 +185,12 @@ extension UndoTextureLayers {
         textureLayers.requestFullCanvasUpdate()
     }
 
-    public func duplicatedTexture(_ id: UUID) async throws -> IdentifiedTexture? {
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
         try await textureLayers.duplicatedTexture(id)
     }
 
-    public func addTexture(_ texture: any MTLTexture, id: UUID) async throws {
-        try await textureLayers.addTexture(texture, id: id)
-    }
-
-    public func updateTexture(texture: (any MTLTexture)?, for id: UUID) async throws {
+    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
-    }
-
-    public func removeTexture(_ id: UUID) throws -> UUID {
-        try textureLayers.removeTexture(id)
     }
 }
 
@@ -307,7 +299,7 @@ extension UndoTextureLayers {
         )
     }
 
-    public func updateAlpha(_ id: UUID, alpha: Int) {
+    public func updateAlpha(_ id: LayerId, alpha: Int) {
         textureLayers.updateAlpha(id, alpha: alpha)
     }
 
@@ -547,7 +539,8 @@ extension UndoTextureLayers {
         guard let undoTextureRepository else { return }
 
         if let undoObject = undoObject as? UndoDrawingObject {
-            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureUUID)
+            let textureRepositoryId: UndoTextureId = undoObject.undoTextureUUID
+            let result = try await undoTextureRepository.duplicatedTexture(textureRepositoryId)
 
             let textureLayerId = undoObject.textureLayer.id
 
@@ -564,7 +557,8 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
-            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureUUID)
+            let textureRepositoryId: UndoTextureId = undoObject.undoTextureUUID
+            let result = try await undoTextureRepository.duplicatedTexture(textureRepositoryId)
 
             let textureLayer = undoObject.textureLayer
             let texture = result.texture
@@ -599,7 +593,6 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAlphaChangedObject {
-
             textureLayers.updateAlpha(
                 undoObject.textureLayer.id,
                 alpha: undoObject.textureLayer.alpha
