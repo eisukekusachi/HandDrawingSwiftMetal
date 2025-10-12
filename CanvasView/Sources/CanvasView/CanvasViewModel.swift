@@ -98,6 +98,8 @@ public final class CanvasViewModel {
 
     private let undoTextureLayers: UndoTextureLayers
 
+    private let debouncer = Debouncer(delay: 0.5)
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -629,29 +631,29 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        Task {
+        debouncer.scheduleAsync { [weak self] in
             do {
-                try await dependencies.textureRepository.updateTexture(
+                try await self?.dependencies.textureRepository.updateTexture(
                     texture: selectedLayerTexture,
                     for: layerId
                 )
 
                 // Update `updatedAt` when drawing completes
-                projectMetaDataStorage.refreshUpdatedAt()
+                self?.projectMetaDataStorage.refreshUpdatedAt()
 
-                textureLayersStorage.updateThumbnail(
+                self?.textureLayersStorage.updateThumbnail(
                     layerId,
                     texture: selectedLayerTexture
                 )
-
-                await undoTextureLayers.pushUndoDrawingObject(
-                    texture: selectedLayerTexture
-                )
-
             } catch {
-                // No action on error
                 Logger.error(error)
             }
+        }
+
+        Task {
+            await undoTextureLayers.pushUndoDrawingObject(
+                texture: selectedLayerTexture
+            )
         }
     }
 
