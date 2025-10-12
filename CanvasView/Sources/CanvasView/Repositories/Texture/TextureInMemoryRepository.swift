@@ -160,6 +160,7 @@ public class TextureInMemoryRepository: TextureRepository {
 
     /// Removes a texture with `LayerId`
     public func removeTexture(_ id: LayerId) throws {
+        // If the file exists, delete it
         guard textures.keys.contains(id) else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -215,6 +216,7 @@ public class TextureInMemoryRepository: TextureRepository {
     }
 
     public func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
+        // If it doesn’t exist, add it
         guard textures[id] == nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

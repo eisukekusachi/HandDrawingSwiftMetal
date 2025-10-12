@@ -577,7 +577,8 @@ extension UndoTextureLayers {
             guard
                 let index = textureLayers.layers.firstIndex(where: { $0.id == undoObject.textureLayer.id })
             else {
-                Logger.error(String(localized: "Unable to find the index of the textureLayer to remove", bundle: .module))
+                let message = "index \(String(describing: index))"
+                Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
                 return
             }
 

@@ -259,8 +259,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     func removeTexture(_ id: LayerId) throws {
-        let fileURL = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
-        guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
+
+        // If the file exists, delete it
+        guard
+            FileManager.default.fileExists(atPath: fileURL.path)
+        else {
             // Log the error only, as nothing can be done
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -274,7 +278,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
-        guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+        // If it doesn’t exist, add it
+        guard
+            !FileManager.default.fileExists(atPath: fileURL.path)
+        else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "File already exists", bundle: .module)
@@ -303,7 +310,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
-        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+        // If the file exists, update it
+        guard
+            FileManager.default.fileExists(atPath: fileURL.path)
+        else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: "\(String(localized: "File not found", bundle: .module)):\(fileURL.path)"
