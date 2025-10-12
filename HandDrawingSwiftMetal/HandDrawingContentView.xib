@@ -90,7 +90,7 @@
                         <constraint firstAttribute="width" constant="256" id="eVt-lc-xIh"/>
                     </constraints>
                 </slider>
-                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
+                <stackView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
                     <rect key="frame" x="289" y="745" width="96" height="34.333333333333371"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="999" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
@@ -106,9 +106,15 @@
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
                         </button>
                     </subviews>
+                    <color key="backgroundColor" white="1" alpha="0.014167033450704225" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="96" id="7q1-tn-YPt"/>
                     </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                            <integer key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59x-cS-eat" userLabel="ContentView">
                     <rect key="frame" x="68" y="746" width="213" height="32"/>
