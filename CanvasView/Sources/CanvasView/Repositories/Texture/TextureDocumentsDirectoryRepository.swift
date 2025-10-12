@@ -258,14 +258,20 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
     }
 
-    func removeTexture(_ id: LayerId) throws -> UUID {
+    func removeTexture(_ id: LayerId) throws {
         let fileURL = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            try FileManager.default.removeItem(at: fileURL)
+        guard !FileManager.default.fileExists(atPath: fileURL.path) else {
+            // Log the error only, as nothing can be done
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to find \(id.uuidString)", bundle: .module)
+            )
+            Logger.error(error)
+            return
         }
 
-        return id
+        try FileManager.default.removeItem(at: fileURL)
     }
 
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {

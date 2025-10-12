@@ -43,8 +43,7 @@ public protocol TextureRepository: Sendable {
     func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture]
 
     /// Removes a texture with UUID
-    @discardableResult
-    func removeTexture(_ id: LayerId) throws -> LayerId
+    func removeTexture(_ id: LayerId) throws
 
     /// Removes all managed textures
     func removeAll()
