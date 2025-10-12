@@ -184,7 +184,7 @@ public final class CanvasViewModel {
                 configuration: textureLayersConfiguration,
                 fallbackTextureSize: TextureLayerModel.defaultTextureSize()
             )
-            await initializeTextures(resolvedTextureLayersConfiguration)
+            try await initializeTextures(resolvedTextureLayersConfiguration)
         }
     }
 
@@ -250,7 +250,7 @@ public extension CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+    private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async throws {
         // Initialize the textures used in the texture layers
         await textureLayersStorage.initialize(
             configuration: configuration,
@@ -268,29 +268,24 @@ public extension CanvasViewModel {
             drawingToolRenderers[i].initializeTextures(configuration.textureSize)
         }
 
-        do {
-            // Initialize the textures used in the renderer
-            canvasRenderer.initializeTextures(
-                textureSize: configuration.textureSize
-            )
+        // Initialize the textures used in the renderer
+        canvasRenderer.initializeTextures(
+            textureSize: configuration.textureSize
+        )
 
-            // Set the texture of the selected texture layer to the renderer
-            try await canvasRenderer.updateSelectedTexture(
-                textureLayers: textureLayersStorage,
-                textureRepository: dependencies.textureRepository
-            )
+        // Set the texture of the selected texture layer to the renderer
+        try await canvasRenderer.updateSelectedTexture(
+            textureLayers: textureLayersStorage,
+            textureRepository: dependencies.textureRepository
+        )
 
-            didInitializeTexturesSubject.send(self.textureLayersStorage)
-            didInitializeCanvasViewSubject.send(configuration)
+        didInitializeTexturesSubject.send(self.textureLayersStorage)
+        didInitializeCanvasViewSubject.send(configuration)
 
-            // Update to the latest date
-            projectMetaDataStorage.refreshUpdatedAt()
+        // Update to the latest date
+        projectMetaDataStorage.refreshUpdatedAt()
 
-            updateCanvasView()
-
-        } catch {
-            Logger.error(error)
-        }
+        updateCanvasView()
     }
 }
 
@@ -402,7 +397,7 @@ public extension CanvasViewModel {
             configuration: configuration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
-        await initializeTextures(resolvedConfiguration)
+        try await initializeTextures(resolvedConfiguration)
 
         transforming.setMatrix(.identity)
 
@@ -461,7 +456,7 @@ public extension CanvasViewModel {
                 )
 
                 // Restore the textures
-                await initializeTextures(resolvedTextureLayersConfiguration)
+                try await initializeTextures(resolvedTextureLayersConfiguration)
 
                 // Update metadata
                 projectMetaDataStorage.update(
