@@ -33,21 +33,21 @@ public protocol TextureRepository: Sendable {
 
     func newTexture(_ textureSize: CGSize) async throws -> MTLTexture
 
-    /// Adds a texture using UUID
+    /// Adds a texture using `LayerId`
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws
 
-    /// Copies a texture for the given UUID
+    /// Copies a texture for the given `LayerId`
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture
 
-    /// Copies multiple textures for the given UUIDs
+    /// Copies multiple textures for the given `LayerId`s
     func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture]
 
-    /// Removes a texture with UUID
+    /// Removes a texture with `LayerId`
     func removeTexture(_ id: LayerId) throws
 
     /// Removes all managed textures
     func removeAll()
 
-    /// Updates an existing texture for UUID
+    /// Updates an existing texture for `LayerId`
     func updateTexture(texture: MTLTexture?, for id: LayerId) async throws
 }

@@ -43,7 +43,7 @@ struct TextureLayersTests {
         #expect(subject.layers.count == 0)
         #expect(subject.selectedLayerId == nil)
 
-        let layer0: TextureLayerItem = .init(id: UUID(), title: "New0", alpha: 255, isVisible: true, thumbnail: nil)
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
 
         try await subject.addLayer(
             layer: layer0,
@@ -56,7 +56,7 @@ struct TextureLayersTests {
         #expect(subject.layers[0].id == layer0.id)
         #expect(subject.selectedLayerId == layer0.id)
 
-        let layer1: TextureLayerItem = .init(id: UUID(), title: "New1", alpha: 255, isVisible: true, thumbnail: nil)
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
 
         try await subject.addLayer(
             layer: layer1,
@@ -75,8 +75,8 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
-        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
@@ -111,9 +111,9 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer2: TextureLayerModel = .init(id: UUID(), title: "layer2", alpha: 255, isVisible: true)
-        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
-        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
+        let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
@@ -152,9 +152,9 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer2: TextureLayerModel = .init(id: UUID(), title: "layer2", alpha: 255, isVisible: true)
-        let layer1: TextureLayerModel = .init(id: UUID(), title: "layer1", alpha: 255, isVisible: true)
-        let layer0: TextureLayerModel = .init(id: UUID(), title: "layer0", alpha: 255, isVisible: true)
+        let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
@@ -181,7 +181,7 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+        let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
@@ -205,7 +205,7 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+        let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(
@@ -229,7 +229,7 @@ struct TextureLayersTests {
 
         let subject = TextureLayers()
 
-        let layer: TextureLayerModel = .init(id: UUID(), title: "oldLayer", alpha: 255, isVisible: true)
+        let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(

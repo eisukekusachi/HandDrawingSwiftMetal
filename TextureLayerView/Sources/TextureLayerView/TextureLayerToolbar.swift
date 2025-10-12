@@ -105,7 +105,7 @@ private struct PreviewView: View {
         layerIndex: 0,
         layers: [
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer0",
                 alpha: 255,
                 isVisible: true

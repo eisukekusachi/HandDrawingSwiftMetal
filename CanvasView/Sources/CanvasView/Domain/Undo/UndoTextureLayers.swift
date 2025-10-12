@@ -117,7 +117,7 @@ extension UndoTextureLayers {
         textureLayers.layersPublisher
     }
 
-    public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
         textureLayers.selectedLayerIdPublisher
     }
 
@@ -199,7 +199,7 @@ extension UndoTextureLayers {
         guard let undoTextureRepository else { return }
 
         let layer: TextureLayerModel = .init(
-            id: UUID(),
+            id: LayerId(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
@@ -331,7 +331,7 @@ extension UndoTextureLayers {
 
                 try await undoTextureRepository?.addTexture(
                     result.texture,
-                    id: undoObject.undoTextureUUID
+                    id: undoObject.undoTextureId
                 )
                 drawingUndoObject = undoObject
             }
@@ -365,7 +365,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     newTexture,
-                    id: redoObject.undoTextureUUID
+                    id: redoObject.undoTextureId
                 )
 
             pushUndoObject(
@@ -398,7 +398,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     undoTexture,
-                    id: undoRedoObject.redoObject.undoTextureUUID
+                    id: undoRedoObject.redoObject.undoTextureId
                 )
 
             pushUndoObject(undoRedoObject)
@@ -424,7 +424,7 @@ extension UndoTextureLayers {
             try await undoTextureRepository?
                 .addTexture(
                     undoTexture,
-                    id: undoRedoObject.undoObject.undoTextureUUID
+                    id: undoRedoObject.undoObject.undoTextureId
                 )
 
             pushUndoObject(undoRedoObject)
@@ -479,7 +479,7 @@ extension UndoTextureLayers {
         undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 _ = self?.undoTextureRepository?.removeTexture(
-                    result.undoTextureUUID
+                    result.undoTextureId
                 )
             })
             .store(in: &cancellables)
@@ -487,7 +487,7 @@ extension UndoTextureLayers {
         redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 _ = self?.undoTextureRepository?.removeTexture(
-                    result.undoTextureUUID
+                    result.undoTextureId
                 )
             })
             .store(in: &cancellables)
@@ -539,8 +539,8 @@ extension UndoTextureLayers {
         guard let undoTextureRepository else { return }
 
         if let undoObject = undoObject as? UndoDrawingObject {
-            let textureRepositoryId: UndoTextureId = undoObject.undoTextureUUID
-            let result = try await undoTextureRepository.duplicatedTexture(textureRepositoryId)
+            let undoTextureRepositoryId: UndoTextureId = undoObject.undoTextureId
+            let result = try await undoTextureRepository.duplicatedTexture(undoTextureRepositoryId)
 
             let textureLayerId = undoObject.textureLayer.id
 
@@ -557,8 +557,8 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
-            let textureRepositoryId: UndoTextureId = undoObject.undoTextureUUID
-            let result = try await undoTextureRepository.duplicatedTexture(textureRepositoryId)
+            let undoTextureRepositoryId: UndoTextureId = undoObject.undoTextureId
+            let result = try await undoTextureRepository.duplicatedTexture(undoTextureRepositoryId)
 
             let textureLayer = undoObject.textureLayer
             let texture = result.texture

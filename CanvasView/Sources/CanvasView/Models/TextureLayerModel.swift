@@ -38,10 +38,10 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let id: LayerId
-        if let decodedID = try? container.decode(UUID.self, forKey: .id) {
+        if let decodedID = try? container.decode(LayerId.self, forKey: .id) {
             id = decodedID
         } else if let legacyIDString = try? container.decode(String.self, forKey: .textureName),
-                  let legacyID = UUID(uuidString: legacyIDString) {
+                  let legacyID = LayerId(uuidString: legacyIDString) {
             id = legacyID
         } else {
             throw DecodingError.keyNotFound(
@@ -82,9 +82,9 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         lhs.isVisible == rhs.isVisible
     }
 
-    /// Retrieve the UUID from the file name since it uses a UUID
+    /// Retrieve the '`LayerId` from the file name since it uses a `LayerId`
     static func id(fromFileName string: String?) -> LayerId {
-        UUID.init(uuidString: string ?? "") ?? UUID()
+        LayerId.init(uuidString: string ?? "") ?? LayerId()
     }
 }
 

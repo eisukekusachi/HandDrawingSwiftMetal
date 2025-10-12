@@ -22,7 +22,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     var layersPublisher: AnyPublisher<[TextureLayerItem], Never> { get }
 
     /// Emits whenever `selectedLayerId` change
-    var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> { get }
+    var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> { get }
 
     /// Emits whenever `alpha` change
     var alphaPublisher: AnyPublisher<Int, Never> { get }

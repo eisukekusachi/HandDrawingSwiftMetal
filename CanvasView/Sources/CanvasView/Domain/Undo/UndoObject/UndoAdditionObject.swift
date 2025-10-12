@@ -12,7 +12,7 @@ import MetalKit
 /// An undo object for adding a texture layer
 public final class UndoAdditionObject: UndoObject {
 
-    public let undoTextureUUID: UndoTextureId
+    public let undoTextureId: UndoTextureId
 
     /// The layer added by undo
     public let textureLayer: TextureLayerModel
@@ -30,7 +30,7 @@ public final class UndoAdditionObject: UndoObject {
         layerToBeAdded textureLayer: TextureLayerModel,
         at index: Int
     ) {
-        self.undoTextureUUID = UUID()
+        self.undoTextureId = UndoTextureId()
         self.textureLayer = textureLayer
         self.insertIndex = index
     }

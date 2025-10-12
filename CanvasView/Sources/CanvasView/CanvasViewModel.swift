@@ -624,11 +624,9 @@ extension CanvasViewModel {
                 // Update `updatedAt` when drawing completes
                 projectMetaDataStorage.refreshUpdatedAt()
 
-                Task(priority: .background) {
-                    await undoTextureLayers.pushUndoDrawingObject(
-                        texture: texture
-                    )
-                }
+                await undoTextureLayers.pushUndoDrawingObject(
+                    texture: texture
+                )
             } catch {
                 // No action on error
                 Logger.error(error)

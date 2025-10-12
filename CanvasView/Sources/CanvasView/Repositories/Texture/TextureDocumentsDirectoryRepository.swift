@@ -201,7 +201,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )!
     }
 
-    /// Copies a texture for the given UUID
+    /// Copies a texture for the given `LayerId`
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         if textureSize == .zero {
             let error = NSError(
@@ -232,8 +232,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         return .init(id: id, texture: newTexture)
     }
 
-    /// Copies multiple textures for the given UUIDs
-    func duplicatedTextures(_ ids: [UUID]) async throws -> [IdentifiedTexture] {
+    /// Copies multiple textures for the given `LayerId`s
+    func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in ids {
                 group.addTask { try await self.duplicatedTexture(id) }

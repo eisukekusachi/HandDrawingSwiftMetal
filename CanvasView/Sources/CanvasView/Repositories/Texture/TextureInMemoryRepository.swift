@@ -13,7 +13,7 @@ import SwiftUI
 @MainActor
 public class TextureInMemoryRepository: TextureRepository {
 
-    /// A dictionary with UUID as the key and MTLTexture as the value
+    /// A dictionary with `LayerId` as the key and MTLTexture as the value
     public var textures: [LayerId: MTLTexture?] = [:]
 
     public var textureSize: CGSize {
@@ -158,7 +158,7 @@ public class TextureInMemoryRepository: TextureRepository {
         textures = [:]
     }
 
-    /// Removes a texture with UUID
+    /// Removes a texture with `LayerId`
     public func removeTexture(_ id: LayerId) {
         guard textures.keys.contains(id) else {
             // Log the error only, as nothing can be done
@@ -180,7 +180,7 @@ public class TextureInMemoryRepository: TextureRepository {
         )!
     }
 
-    /// Copies a texture for the given UUID
+    /// Copies a texture for the given `LayerId`
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         guard
             let texture = textures[id],
@@ -201,7 +201,7 @@ public class TextureInMemoryRepository: TextureRepository {
         return .init(id: id, texture: newTexture)
     }
 
-    /// Copies multiple textures for the given UUIDs
+    /// Copies multiple textures for the given `LayerId`s
     public func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in ids {
@@ -234,7 +234,7 @@ public class TextureInMemoryRepository: TextureRepository {
         textures[id] = newTexture
     }
 
-    public func updateTexture(texture: MTLTexture?, for id: UUID) async throws {
+    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

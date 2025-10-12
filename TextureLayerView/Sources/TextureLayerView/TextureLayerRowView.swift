@@ -133,7 +133,7 @@ public struct TextureLayerRowView: View {
     VStack(spacing: 24) {
         TextureLayerRowView(
             layer: .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Title",
                 alpha: 255,
                 isVisible: true,
@@ -151,7 +151,7 @@ public struct TextureLayerRowView: View {
 
         TextureLayerRowView(
             layer: .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Title",
                 alpha: 255,
                 isVisible: false,
@@ -169,7 +169,7 @@ public struct TextureLayerRowView: View {
 
         TextureLayerRowView(
             layer: .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Title",
                 alpha: 255,
                 isVisible: true,
@@ -187,7 +187,7 @@ public struct TextureLayerRowView: View {
 
         TextureLayerRowView(
             layer: .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Title",
                 alpha: 255,
                 isVisible: true,
@@ -205,7 +205,7 @@ public struct TextureLayerRowView: View {
 
         TextureLayerRowView(
             layer: .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Title",
                 alpha: 255,
                 isVisible: false,

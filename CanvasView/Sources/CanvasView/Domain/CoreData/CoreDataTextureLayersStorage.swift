@@ -37,7 +37,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     }
 
     /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
         textureLayers.selectedLayerIdPublisher
     }
 
@@ -173,7 +173,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         try await textureLayers.duplicatedTexture(id)
     }
 
-    /// Updates an existing texture for UUID
+    /// Updates an existing texture for `LayerId`
     public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
     }

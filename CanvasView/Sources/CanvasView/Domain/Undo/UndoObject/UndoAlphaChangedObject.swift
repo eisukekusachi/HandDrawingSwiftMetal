@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoAlphaChangedObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UndoTextureId = UUID()
+    public let undoTextureId: UndoTextureId = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 

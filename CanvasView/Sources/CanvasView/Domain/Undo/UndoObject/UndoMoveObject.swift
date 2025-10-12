@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoMoveObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UndoTextureId = UUID()
+    public let undoTextureId = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 

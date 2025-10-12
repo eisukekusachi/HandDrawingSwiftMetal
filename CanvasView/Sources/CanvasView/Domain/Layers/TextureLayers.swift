@@ -29,7 +29,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
         $_selectedLayerId.eraseToAnyPublisher()
     }
 
@@ -127,7 +127,7 @@ public extension TextureLayers {
         guard let textureRepository else { return }
 
         let layer: TextureLayerModel = .init(
-            id: UUID(),
+            id: LayerId(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
@@ -299,7 +299,7 @@ public extension TextureLayers {
         fullCanvasUpdateRequestedSubject.send(())
     }
 
-    /// Copies a texture for the given UUID
+    /// Copies a texture for the given `LayerId`
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
         try await textureRepository?.duplicatedTexture(id)
     }
