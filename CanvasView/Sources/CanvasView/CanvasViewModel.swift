@@ -311,7 +311,7 @@ extension CanvasViewModel {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
                     await undoTextureLayers.setDrawingUndoObject(
-                        texture: canvasRenderer.selectedTexture
+                        texture: canvasRenderer.selectedLayerTexture
                     )
                 }
             }
@@ -361,7 +361,7 @@ extension CanvasViewModel {
             drawingCurve = DefaultDrawingCurve()
             Task {
                 await undoTextureLayers.setDrawingUndoObject(
-                    texture: canvasRenderer.selectedTexture
+                    texture: canvasRenderer.selectedLayerTexture
                 )
             }
         }
@@ -594,12 +594,12 @@ extension CanvasViewModel {
     private func drawCurvePointsOnCanvas() {
         guard
             let drawingCurve,
-            let texture = canvasRenderer.selectedTexture
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
         drawingToolRenderer?.drawCurve(
             drawingCurve,
-            using: texture,
+            using: selectedLayerTexture,
             onDrawing: { [weak self] resultTexture in
                 self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
             },
@@ -626,23 +626,26 @@ extension CanvasViewModel {
     private func completeDrawing() {
         guard
             let layerId = textureLayersStorage.selectedLayer?.id,
-            let layerTexture = canvasRenderer.selectedTexture
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
         Task {
             do {
                 try await dependencies.textureRepository.updateTexture(
-                    texture: layerTexture,
+                    texture: selectedLayerTexture,
                     for: layerId
                 )
 
                 // Update `updatedAt` when drawing completes
                 projectMetaDataStorage.refreshUpdatedAt()
 
-                textureLayersStorage.updateThumbnail(layerId, texture: layerTexture)
+                textureLayersStorage.updateThumbnail(
+                    layerId,
+                    texture: selectedLayerTexture
+                )
 
                 await undoTextureLayers.pushUndoDrawingObject(
-                    texture: layerTexture
+                    texture: selectedLayerTexture
                 )
 
             } catch {

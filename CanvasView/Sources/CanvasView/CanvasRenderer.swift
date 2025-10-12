@@ -33,7 +33,7 @@ public final class CanvasRenderer: ObservableObject {
     private var flippedTextureBuffers: MTLTextureBuffers?
 
     /// The texture of the selected layer
-    private(set) var selectedTexture: MTLTexture!
+    private(set) var selectedLayerTexture: MTLTexture!
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
@@ -80,7 +80,7 @@ public final class CanvasRenderer: ObservableObject {
                 height: Int(textureSize.height),
                 with: device
             ),
-            let selectedTexture = MTLTextureCreator.makeTexture(
+            let selectedLayerTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
                 with: device
@@ -101,12 +101,12 @@ public final class CanvasRenderer: ObservableObject {
         }
 
         self.unselectedBottomTexture = unselectedBottomTexture
-        self.selectedTexture = selectedTexture
+        self.selectedLayerTexture = selectedLayerTexture
         self.unselectedTopTexture = unselectedTopTexture
         self.canvasTexture = canvasTexture
 
         self.unselectedBottomTexture?.label = "unselectedBottomTexture"
-        self.selectedTexture?.label = "selectedTexture"
+        self.selectedLayerTexture?.label = "selectedLayerTexture"
         self.unselectedTopTexture?.label = "unselectedTopTexture"
         self.canvasTexture?.label = "canvasTexture"
     }
@@ -174,7 +174,7 @@ extension CanvasRenderer {
         )
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
-        renderer.clearTexture(texture: selectedTexture, with: newCommandBuffer)
+        renderer.clearTexture(texture: selectedLayerTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         let textures = try await textureRepository.duplicatedTextures(
@@ -191,7 +191,7 @@ extension CanvasRenderer {
         try await drawLayerTextures(
             textures: textures,
             layers: [opaqueLayer],
-            on: selectedTexture,
+            on: selectedLayerTexture,
             with: newCommandBuffer
         )
 
@@ -230,7 +230,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedTexture,
+                texture: realtimeDrawingTexture ?? selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
