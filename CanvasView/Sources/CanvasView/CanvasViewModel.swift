@@ -98,7 +98,7 @@ public final class CanvasViewModel {
 
     private let undoTextureLayers: UndoTextureLayers
 
-    private let debouncer = Debouncer(delay: 0.5)
+    private let debouncer = Debouncer(delay: 0.1)
 
     private var cancellables = Set<AnyCancellable>()
 
