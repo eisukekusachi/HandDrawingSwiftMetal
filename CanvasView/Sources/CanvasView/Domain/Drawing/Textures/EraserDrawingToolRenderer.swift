@@ -110,7 +110,7 @@ public extension EraserDrawingToolRenderer {
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@Sendable @MainActor (MTLTexture) -> Void)?
+        onCommandBufferCompleted: (@MainActor () -> Void)?
     ) {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
@@ -130,9 +130,8 @@ public extension EraserDrawingToolRenderer {
             )
 
             commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor [weak self] in
-                    guard let `self` else { return }
-                    onCommandBufferCompleted?(self.realtimeDrawingTexture)
+                Task { @MainActor in
+                    onCommandBufferCompleted?()
                 }
             }
         }

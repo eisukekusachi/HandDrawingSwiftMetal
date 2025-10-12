@@ -310,7 +310,9 @@ extension CanvasViewModel {
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
-                    await undoTextureLayers.setDrawingUndoObject()
+                    await undoTextureLayers.setDrawingUndoObject(
+                        texture: canvasRenderer.selectedTexture
+                    )
                 }
             }
 
@@ -358,7 +360,9 @@ extension CanvasViewModel {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
             Task {
-                await undoTextureLayers.setDrawingUndoObject()
+                await undoTextureLayers.setDrawingUndoObject(
+                    texture: canvasRenderer.selectedTexture
+                )
             }
         }
 
@@ -590,8 +594,7 @@ extension CanvasViewModel {
     private func drawCurvePointsOnCanvas() {
         guard
             let drawingCurve,
-            let texture = canvasRenderer.selectedTexture,
-            let selectedLayerId = textureLayersStorage.selectedLayer?.id
+            let texture = canvasRenderer.selectedTexture
         else { return }
 
         drawingToolRenderer?.drawCurve(
@@ -600,11 +603,11 @@ extension CanvasViewModel {
             onDrawing: { [weak self] resultTexture in
                 self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
             },
-            onCommandBufferCompleted: { [weak self] resultTexture in
+            onCommandBufferCompleted: { [weak self] in
                 // Reset parameters on drawing completion
                 self?.resetAllInputParameters()
 
-                self?.completeDrawing(texture: resultTexture, layerId: selectedLayerId)
+                self?.completeDrawing()
             }
         )
     }
@@ -620,26 +623,32 @@ extension CanvasViewModel {
         transforming.resetMatrix()
     }
 
-    private func completeDrawing(texture: MTLTexture, layerId: LayerId) {
+    private func completeDrawing() {
+        guard
+            let layerId = textureLayersStorage.selectedLayer?.id,
+            let layerTexture = canvasRenderer.selectedTexture
+        else { return }
+
         Task {
             do {
                 try await dependencies.textureRepository.updateTexture(
-                    texture: texture,
+                    texture: layerTexture,
                     for: layerId
                 )
 
                 // Update `updatedAt` when drawing completes
                 projectMetaDataStorage.refreshUpdatedAt()
 
+                textureLayersStorage.updateThumbnail(layerId, texture: layerTexture)
+
                 await undoTextureLayers.pushUndoDrawingObject(
-                    texture: texture
+                    texture: layerTexture
                 )
+
             } catch {
                 // No action on error
                 Logger.error(error)
             }
-
-            textureLayersStorage.updateThumbnail(layerId, texture: texture)
         }
     }
 

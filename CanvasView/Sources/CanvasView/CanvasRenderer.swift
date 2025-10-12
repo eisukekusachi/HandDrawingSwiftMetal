@@ -121,6 +121,24 @@ extension CanvasRenderer {
         displayView?.resetCommandBuffer()
     }
 
+    public func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws {
+        guard
+            let commandBuffer = renderer?.newCommandBuffer else {
+            return
+        }
+
+        renderer?.copyTexture(
+            srctexture: srcTexture,
+            dstTexture: dstTexture,
+            with: commandBuffer
+        )
+
+        try await commandBuffer.commitAndWaitAsync()
+    }
+
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
