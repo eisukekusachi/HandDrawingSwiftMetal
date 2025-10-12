@@ -124,8 +124,6 @@ public extension TextureLayers {
     }
 
     func addNewLayer(at index: Int) async throws {
-        guard let textureRepository else { return }
-
         let layer: TextureLayerModel = .init(
             id: LayerId(),
             title: TimeStampFormatter.currentDate,
@@ -133,17 +131,29 @@ public extension TextureLayers {
             isVisible: true
         )
 
-        let texture = try await textureRepository.newTexture(_textureSize)
-        try await addLayer(layer: layer, texture: texture, at: index)
+        try await addLayer(layer: layer, texture: nil, at: index)
     }
 
-    func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws {
+    func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard let textureRepository else { return }
+
+        var newTexture: MTLTexture? = texture
+        if newTexture == nil {
+            newTexture = MTLTextureCreator.makeTexture(
+                width: Int(_textureSize.width),
+                height: Int(_textureSize.height),
+                with: textureRepository.device
+            )
+        }
+
+        guard
+            let newTexture
+        else { return }
 
         self._layers.insert(
             .init(
                 model: layer,
-                thumbnail: texture.makeThumbnail()
+                thumbnail: newTexture.makeThumbnail()
             ),
             at: index
         )
@@ -152,7 +162,7 @@ public extension TextureLayers {
 
         try await textureRepository
             .addTexture(
-                texture,
+                newTexture,
                 id: layer.id
             )
     }

@@ -17,6 +17,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     let workingDirectoryURL: URL
 
+    var device: MTLDevice {
+        renderer.device
+    }
+
     var textureSize: CGSize {
         _textureSize
     }
@@ -75,7 +79,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
            let _ = MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),
                height: Int(textureSize.height),
-               with: renderer.device
+               with: device
            )
         {
             // Retain the texture size
@@ -123,7 +127,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
-                    with: renderer.device
+                    with: device
                 )
             else {
                 let error = NSError(
@@ -197,7 +201,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: renderer.device
+            with: device
         )!
     }
 
@@ -218,7 +222,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
-                with: renderer.device
+                with: device
             )
         else {
             let error = NSError(

@@ -16,6 +16,10 @@ public class TextureInMemoryRepository: TextureRepository {
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     public var textures: [LayerId: MTLTexture?] = [:]
 
+    public var device: MTLDevice {
+        renderer.device
+    }
+
     public var textureSize: CGSize {
         _textureSize
     }
@@ -121,7 +125,7 @@ public class TextureInMemoryRepository: TextureRepository {
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
                 from: hexadecimalData,
-                with: renderer.device
+                with: device
             ) else {
                 let error = NSError(
                     title: String(localized: "Error", bundle: .module),
@@ -149,7 +153,7 @@ public class TextureInMemoryRepository: TextureRepository {
         textures[id] = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: renderer.device
+            with: device
         )
     }
 
@@ -169,14 +173,6 @@ public class TextureInMemoryRepository: TextureRepository {
             throw error
         }
         textures.removeValue(forKey: id)
-    }
-
-    public func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
-        return MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )!
     }
 
     /// Copies a texture for the given `LayerId`

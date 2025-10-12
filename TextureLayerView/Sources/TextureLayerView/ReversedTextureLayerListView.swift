@@ -53,7 +53,6 @@ private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers()
-    private let repository = MockTextureRepository()
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,

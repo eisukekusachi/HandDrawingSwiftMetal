@@ -36,8 +36,7 @@ struct TextureLayersTests {
         let subject = TextureLayers()
 
         await subject.initialize(
-            configuration: .init(textureSize: .init(width: 16, height: 16), layerIndex: 0, layers: []),
-            textureRepository: MockTextureRepository()
+            configuration: .init(textureSize: .init(width: 16, height: 16), layerIndex: 0, layers: [])
         )
 
         #expect(subject.layers.count == 0)
@@ -86,8 +85,7 @@ struct TextureLayersTests {
                     layer0,
                     layer1
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
 
         #expect(subject.layers.count == 2)
@@ -124,8 +122,7 @@ struct TextureLayersTests {
                     layer1,
                     layer0
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
 
         #expect(subject.layers.map { $0.title } == ["layer2", "layer1", "layer0"])
@@ -165,8 +162,7 @@ struct TextureLayersTests {
                     layer1,
                     layer0
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
 
         #expect(subject.selectedLayerId == layer2.id)
@@ -190,8 +186,7 @@ struct TextureLayersTests {
                 layers: [
                     layer
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
         #expect(subject.layers.first?.title == "oldLayer")
 
@@ -214,8 +209,7 @@ struct TextureLayersTests {
                 layers: [
                     layer
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
         #expect(subject.layers.first?.alpha == 255)
 
@@ -238,8 +232,7 @@ struct TextureLayersTests {
                 layers: [
                     layer
                 ]
-            ),
-            textureRepository: MockTextureRepository()
+            )
         )
         #expect(subject.layers.first?.isVisible == true)
 

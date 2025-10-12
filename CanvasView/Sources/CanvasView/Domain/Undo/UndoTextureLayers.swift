@@ -208,7 +208,7 @@ extension UndoTextureLayers {
         try await addLayer(layer: layer, texture: texture, at: index)
     }
 
-    public func addLayer(layer: TextureLayerModel, texture: MTLTexture, at index: Int) async throws {
+    public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {

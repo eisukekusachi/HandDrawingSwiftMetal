@@ -43,7 +43,6 @@ private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers()
-    private let repository = MockTextureRepository()
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,
@@ -90,8 +89,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 await textureLayers.initialize(
-                    configuration: configuration,
-                    textureRepository: repository
+                    configuration: configuration
                 )
 
                 viewModel.initialize(

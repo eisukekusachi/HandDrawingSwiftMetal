@@ -11,7 +11,9 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    func addTexture(_ texture: MTLTexture, id: LayerId) async throws {}
+    var device: MTLDevice {
+        MTLCreateSystemDefaultDevice()!
+    }
 
     func removeTexture(_ id: LayerId) throws {}
 
@@ -23,7 +25,9 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     var isInitialized: Bool { false }
 
-    init(textures: [LayerId : MTLTexture] = [:]) {
+    init(
+        textures: [LayerId : MTLTexture] = [:]
+    ) {
         self.textures = textures
     }
 
@@ -49,6 +53,8 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
             resolvedTextureSize: configuration.textureSize ?? defaultTextureSize
         )
     }
+
+    func addTexture(_ texture: MTLTexture, id: LayerId) async throws {}
 
     func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
         let context = try MockMetalContext()

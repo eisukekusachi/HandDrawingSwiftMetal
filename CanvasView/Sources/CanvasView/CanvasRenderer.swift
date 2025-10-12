@@ -46,6 +46,8 @@ public final class CanvasRenderer: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    public init() {}
+
     public func initialize(
         displayView: CanvasDisplayable,
         renderer: MTLRendering,

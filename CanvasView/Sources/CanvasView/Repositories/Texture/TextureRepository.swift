@@ -12,6 +12,8 @@ import MetalKit
 @MainActor
 public protocol TextureRepository: Sendable {
 
+    var device: MTLDevice { get }
+
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }
 
@@ -30,8 +32,6 @@ public protocol TextureRepository: Sendable {
         configuration: TextureLayerArrayConfiguration,
         defaultTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration
-
-    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture
 
     /// Adds a texture using `LayerId`
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws

@@ -11,6 +11,10 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
+    var device: MTLDevice {
+        MTLCreateSystemDefaultDevice()!
+    }
+
     var textureSize: CGSize = .zero
 
     var isInitialized: Bool = false
