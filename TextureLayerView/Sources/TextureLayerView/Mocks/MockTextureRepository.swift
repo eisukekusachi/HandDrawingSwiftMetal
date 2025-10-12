@@ -57,7 +57,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     func removeAll() {}
 
-    func removeTexture(_ id: LayerId) {}
+    func removeTexture(_ id: LayerId) throws {}
 
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {}
 

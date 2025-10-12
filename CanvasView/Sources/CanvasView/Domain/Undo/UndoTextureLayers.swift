@@ -478,7 +478,8 @@ extension UndoTextureLayers {
 
         undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                _ = self?.undoTextureRepository?.removeTexture(
+                // Do nothing if an error occurs, since nothing can be done
+                try? self?.undoTextureRepository?.removeTexture(
                     result.undoTextureId
                 )
             })
@@ -486,7 +487,8 @@ extension UndoTextureLayers {
 
         redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
-                _ = self?.undoTextureRepository?.removeTexture(
+                // Do nothing if an error occurs, since nothing can be done
+                try? self?.undoTextureRepository?.removeTexture(
                     result.undoTextureId
                 )
             })

@@ -159,15 +159,13 @@ public class TextureInMemoryRepository: TextureRepository {
     }
 
     /// Removes a texture with `LayerId`
-    public func removeTexture(_ id: LayerId) {
+    public func removeTexture(_ id: LayerId) throws {
         guard textures.keys.contains(id) else {
-            // Log the error only, as nothing can be done
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(localized: "Unable to find \(id.uuidString)", bundle: .module)
             )
-            Logger.error(error)
-            return
+            throw error
         }
         textures.removeValue(forKey: id)
     }
