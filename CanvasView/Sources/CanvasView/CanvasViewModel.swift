@@ -136,6 +136,8 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) {
+        activityIndicatorSubject.send(true)
+
         drawingToolRenderers.forEach {
             $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
@@ -171,6 +173,8 @@ public final class CanvasViewModel {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
+            defer { activityIndicatorSubject.send(false) }
+
             let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
                 entity: try? textureLayersStorage.fetch()
             ) ?? configuration.textureLayerArrayConfiguration
