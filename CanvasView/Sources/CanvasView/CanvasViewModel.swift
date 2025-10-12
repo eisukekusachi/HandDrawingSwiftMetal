@@ -194,11 +194,14 @@ public final class CanvasViewModel {
     }
 
     func updateCanvasByMergingAllLayers() {
-        canvasRenderer.updateDrawingTextures(
-            textureLayers: textureLayersStorage,
-            textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            self?.updateCanvasView()
+        Task {
+            // Set the texture of the selected texture layer to the renderer
+            try await canvasRenderer.updateSelectedTexture(
+                textureLayers: textureLayersStorage,
+                textureRepository: dependencies.textureRepository
+            )
+
+            updateCanvasView()
         }
     }
 }
@@ -259,24 +262,28 @@ public extension CanvasViewModel {
             drawingToolRenderers[i].initializeTextures(configuration.textureSize)
         }
 
-        // Initialize the textures used in the renderer
-        canvasRenderer.initializeTextures(
-            textureSize: configuration.textureSize
-        )
+        do {
+            // Initialize the textures used in the renderer
+            canvasRenderer.initializeTextures(
+                textureSize: configuration.textureSize
+            )
 
-        // Update the canvas view
-        canvasRenderer.updateDrawingTextures(
-            textureLayers: textureLayersStorage,
-            textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            guard let `self` else { return }
-            self.updateCanvasView()
+            // Set the texture of the selected texture layer to the renderer
+            try await canvasRenderer.updateSelectedTexture(
+                textureLayers: textureLayersStorage,
+                textureRepository: dependencies.textureRepository
+            )
 
-            self.didInitializeTexturesSubject.send(self.textureLayersStorage)
-            self.didInitializeCanvasViewSubject.send(configuration)
+            didInitializeTexturesSubject.send(self.textureLayersStorage)
+            didInitializeCanvasViewSubject.send(configuration)
 
             // Update to the latest date
-            self.projectMetaDataStorage.refreshUpdatedAt()
+            projectMetaDataStorage.refreshUpdatedAt()
+
+            updateCanvasView()
+
+        } catch {
+            Logger.error(error)
         }
     }
 }

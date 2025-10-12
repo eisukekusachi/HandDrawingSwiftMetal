@@ -346,8 +346,10 @@ extension UndoTextureLayers {
     ) async {
         guard
             let texture,
-            let newTexture = try? await canvasRenderer?.duplicatedTexture(
-                texture
+            let renderer = canvasRenderer?.renderer,
+            let newTexture = try? await MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                renderer: renderer
             ),
             let undoObject = drawingUndoObject,
             let selectedLayer = textureLayers.selectedLayer

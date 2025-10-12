@@ -8,7 +8,7 @@
 import Combine
 @preconcurrency import MetalKit
 
-/// A class that renders textures from `TextureRepository` onto the canvas
+/// A class that renders textures from `TextureRepository` onto the texture of `displayView`
 @MainActor
 public final class CanvasRenderer: ObservableObject {
 
@@ -20,26 +20,26 @@ public final class CanvasRenderer: ObservableObject {
 
     public var matrix: CGAffineTransform = .identity
 
+    private(set) var renderer: MTLRendering?
+
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     private var baseBackgroundColor: UIColor = .lightGray
 
-    private var renderer: MTLRendering?
-
     private var displayView: CanvasDisplayable?
 
     private var flippedTextureBuffers: MTLTextureBuffers?
+
+    /// The texture of the selected layer
+    private(set) var selectedTexture: MTLTexture!
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
     /// A texture that combines the textures of all layers below the selected layer.
     private var unselectedBottomTexture: MTLTexture!
-
-    /// The texture of the selected layer.
-    private(set) var selectedTexture: MTLTexture!
 
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture!
@@ -117,37 +117,30 @@ extension CanvasRenderer {
         displayView?.displayTexture?.size
     }
 
-    public func duplicatedTexture(_ texture: MTLTexture) async throws -> MTLTexture? {
-        guard
-            let renderer
-        else { return nil }
-
-        return try await MTLTextureCreator.duplicateTexture(
-            texture: texture,
-            renderer: renderer
-        )
-    }
-
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
     }
 
-    /// Updates `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`.
+    /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func updateDrawingTextures(
+    public func updateSelectedTexture(
         textureLayers: any TextureLayersProtocol,
-        textureRepository: TextureRepository,
-        onCompleted: (() -> Void)?
-    ) {
+        textureRepository: TextureRepository
+    ) async throws {
         guard
-            let device = renderer?.device,
+            let renderer,
             let selectedLayer = textureLayers.selectedLayer,
             let selectedIndex = textureLayers.selectedIndex,
-            let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+            let newCommandBuffer = renderer.newCommandBuffer
         else {
             return
         }
+
+        let bottomLayers = bottomLayers(
+            selectedIndex: selectedIndex,
+            layers: textureLayers.layers.map { .init(item: $0) }
+        )
 
         // The selected texture is kept opaque here because transparency is applied when used
         let opaqueLayer: TextureLayerModel = .init(
@@ -157,58 +150,41 @@ extension CanvasRenderer {
             isVisible: selectedLayer.isVisible
         )
 
-        Task {
-            let textures = try await textureRepository.duplicatedTextures(
-                textureLayers.layers.map { $0.id }
-            )
-            let bottomLayers = bottomLayers(
-                selectedIndex: selectedIndex,
-                layers: textureLayers.layers.map { .init(item: $0) }
-            )
-            let topLayers = topLayers(
-                selectedIndex: selectedIndex,
-                layers: textureLayers.layers.map { .init(item: $0) }
-            )
+        let topLayers = topLayers(
+            selectedIndex: selectedIndex,
+            layers: textureLayers.layers.map { .init(item: $0) }
+        )
 
-            Task { @MainActor in
-                try await drawLayerTextures(
-                    textures: textures,
-                    layers: bottomLayers,
-                    on: unselectedBottomTexture,
-                    with: commandBuffer
-                )
+        renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
+        renderer.clearTexture(texture: selectedTexture, with: newCommandBuffer)
+        renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
-                try await drawLayerTextures(
-                    textures: textures,
-                    layers: [opaqueLayer],
-                    on: selectedTexture,
-                    with: commandBuffer
-                )
+        let textures = try await textureRepository.duplicatedTextures(
+            textureLayers.layers.map { $0.id }
+        )
 
-                try await drawLayerTextures(
-                    textures: textures,
-                    layers: topLayers,
-                    on: unselectedTopTexture,
-                    with: commandBuffer
-                )
+        try await drawLayerTextures(
+            textures: textures,
+            layers: bottomLayers,
+            on: unselectedBottomTexture,
+            with: newCommandBuffer
+        )
 
-                try await withCheckedThrowingContinuation { continuation in
-                    commandBuffer.addCompletedHandler { @Sendable _ in
-                        continuation.resume()
-                    }
-                    commandBuffer.commit()
-                }
+        try await drawLayerTextures(
+            textures: textures,
+            layers: [opaqueLayer],
+            on: selectedTexture,
+            with: newCommandBuffer
+        )
 
-                onCompleted?()
-            }
-        }
-    }
+        try await drawLayerTextures(
+            textures: textures,
+            layers: topLayers,
+            on: unselectedTopTexture,
+            with: newCommandBuffer
+        )
 
-    public func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
-    }
-    public func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
-        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
+        try await newCommandBuffer.commitAndWaitAsync()
     }
 
     /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
@@ -269,16 +245,23 @@ extension CanvasRenderer {
         )
         displayView?.setNeedsDisplay()
     }
+}
 
-    public func drawLayerTextures(
+extension CanvasRenderer {
+    private func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
+    }
+    private func topLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
+        layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
+    }
+
+    private func drawLayerTextures(
         textures: [IdentifiedTexture],
         layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
         guard let renderer else { return }
-
-        renderer.clearTexture(texture: destination, with: commandBuffer)
 
         let textureDictionary = IdentifiedTexture.dictionary(from: Set(textures))
 
