@@ -15,6 +15,8 @@ import Testing
 @MainActor
 struct TextureLayersTests {
 
+    typealias Subject = TextureLayers
+
     // Reusable texture for all tests
     static let texture: MTLTexture = {
         guard
@@ -33,10 +35,11 @@ struct TextureLayersTests {
     @Test("Confirms that adding a layer increases the count and selects the new layer")
     func testAddLayer() async throws {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         await subject.initialize(
-            configuration: .init(textureSize: .init(width: 16, height: 16), layerIndex: 0, layers: [])
+            configuration: .init(textureSize: .init(width: 16, height: 16), layerIndex: 0, layers: []),
+            textureRepository: MockTextureRepository()
         )
 
         #expect(subject.layers.count == 0)
@@ -72,7 +75,7 @@ struct TextureLayersTests {
     @Test("Confirms that deleting a layer works but at least one layer always remains")
     func testRemoveLayer() async throws {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
@@ -85,7 +88,8 @@ struct TextureLayersTests {
                     layer0,
                     layer1
                 ]
-            )
+            ),
+            textureRepository: MockTextureRepository()
         )
 
         #expect(subject.layers.count == 2)
@@ -107,7 +111,7 @@ struct TextureLayersTests {
     @Test("Confirms that moving a layer changes the order as expected")
     func testMoveLayer() async {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
@@ -147,7 +151,7 @@ struct TextureLayersTests {
     @Test("Confirms that selectLayer updates selectedLayerId to the given layer's id")
     func testSelectLayer() async {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
@@ -175,7 +179,7 @@ struct TextureLayersTests {
     @Test("Confirms that updateTitle updates the layer's title")
     func testUpdateTitle() async {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
@@ -198,7 +202,7 @@ struct TextureLayersTests {
     @Test("Confirms that updateAlpha updates the layer's alpha")
     func testUpdateAlpha() async {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
@@ -221,7 +225,7 @@ struct TextureLayersTests {
     @Test("Confirms that updateVisibility updates the layer's visibility")
     func testUpdateVisibility() async {
 
-        let subject = TextureLayers()
+        let subject = Subject()
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
