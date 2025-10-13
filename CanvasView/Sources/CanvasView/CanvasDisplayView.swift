@@ -55,14 +55,18 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     private func commonInit() {
         self.device = MTLCreateSystemDefaultDevice()
 
-        assert(self.device != nil, "Device is nil.")
+        guard
+            let device
+        else {
+            fatalError("Device is nil")
+        }
 
-        commandQueue = self.device!.makeCommandQueue()
+        commandQueue = device.makeCommandQueue()
         resetCommandBuffer()
 
         flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device!
+            with: device
         )
 
         self.delegate = self
@@ -70,14 +74,6 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         self.autoResizeDrawable = true
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
-
-        if let device, let textureSize: CGSize = currentDrawable?.texture.size {
-            _displayTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            )
-        }
     }
 
     // MARK: - DrawTexture
