@@ -203,7 +203,7 @@ public final class CanvasViewModel {
     func updateCanvasByMergingAllLayers() {
         Task {
             // Set the texture of the selected texture layer to the renderer
-            try await canvasRenderer.updateSelectedTexture(
+            try await canvasRenderer.updateSelectedLayerTexture(
                 textureLayers: textureLayersStorage,
                 textureRepository: dependencies.textureRepository
             )
@@ -276,7 +276,7 @@ public extension CanvasViewModel {
         )
 
         // Set the texture of the selected texture layer to the renderer
-        try await canvasRenderer.updateSelectedTexture(
+        try await canvasRenderer.updateSelectedLayerTexture(
             textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
         )

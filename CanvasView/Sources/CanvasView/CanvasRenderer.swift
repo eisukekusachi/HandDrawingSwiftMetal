@@ -144,7 +144,7 @@ extension CanvasRenderer {
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func updateSelectedTexture(
+    public func updateSelectedLayerTexture(
         textureLayers: any TextureLayersProtocol,
         textureRepository: TextureRepository
     ) async throws {
