@@ -541,8 +541,7 @@ extension UndoTextureLayers {
         guard let undoTextureRepository else { return }
 
         if let undoObject = undoObject as? UndoDrawingObject {
-            let undoTextureRepositoryId: UndoTextureId = undoObject.undoTextureId
-            let result = try await undoTextureRepository.duplicatedTexture(undoTextureRepositoryId)
+            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureId)
 
             let textureLayerId = undoObject.textureLayer.id
 
@@ -559,15 +558,11 @@ extension UndoTextureLayers {
             textureLayers.requestFullCanvasUpdate()
 
         } else if let undoObject = undoObject as? UndoAdditionObject {
-            let undoTextureRepositoryId: UndoTextureId = undoObject.undoTextureId
-            let result = try await undoTextureRepository.duplicatedTexture(undoTextureRepositoryId)
-
-            let textureLayer = undoObject.textureLayer
-            let texture = result.texture
+            let result = try await undoTextureRepository.duplicatedTexture(undoObject.undoTextureId)
 
             try await textureLayers.addLayer(
-                layer: textureLayer,
-                texture: texture,
+                layer: undoObject.textureLayer,
+                texture: result.texture,
                 at: undoObject.insertIndex
             )
 
@@ -575,9 +570,9 @@ extension UndoTextureLayers {
 
         } else if let undoObject = undoObject as? UndoDeletionObject {
             guard
-                let index = textureLayers.layers.firstIndex(where: { $0.id == undoObject.textureLayer.id })
+                let index = textureLayers.index(for: undoObject.textureLayer.id)
             else {
-                let message = "index \(String(describing: index))"
+                let message = "id: \(undoObject.textureLayer.id.uuidString)"
                 Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
                 return
             }
