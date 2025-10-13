@@ -53,11 +53,13 @@ public final class CanvasRenderer: ObservableObject {
         renderer: MTLRendering,
         environmentConfiguration: EnvironmentConfiguration
     ) {
+        guard let device = renderer.device else { return }
+
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         )
 
         self.displayView = displayView

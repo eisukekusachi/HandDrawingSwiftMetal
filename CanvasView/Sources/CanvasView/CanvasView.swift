@@ -66,19 +66,15 @@ import UIKit
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
-
-        renderer = MTLRenderer(device: displayView.device ?? MTLCreateSystemDefaultDevice()!)
+        renderer = MTLRenderer(device: displayView.device)
 
         super.init(frame: .zero)
-
         initialize()
     }
     public required init?(coder: NSCoder) {
-
-        renderer = MTLRenderer(device: displayView.device ?? MTLCreateSystemDefaultDevice()!)
+        renderer = MTLRenderer(device: displayView.device)
 
         super.init(coder: coder)
-
         initialize()
     }
 

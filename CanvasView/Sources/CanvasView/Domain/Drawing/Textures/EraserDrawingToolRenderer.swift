@@ -34,12 +34,14 @@ public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 public extension EraserDrawingToolRenderer {
 
     func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
+        guard let device = renderer.device else { fatalError("Device is nil") }
+
         self.displayView = displayView
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         )
     }
 
@@ -155,11 +157,12 @@ private extension EraserDrawingToolRenderer {
     ) {
         guard
             let renderer,
+            let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
-                with: renderer.device
+                with: device
             )
         else { return }
 

@@ -17,7 +17,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     let workingDirectoryURL: URL
 
-    var device: MTLDevice {
+    var device: MTLDevice? {
         renderer.device
     }
 
@@ -76,6 +76,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
            ),
            // Check if the texture can be created before proceeding
            let textureSize = configuration.textureSize,
+           let device,
            let _ = MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),
                height: Int(textureSize.height),
@@ -122,6 +123,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             )
             // Check if the data can be converted into a texture
             guard
+                let device,
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = try MTLTextureCreator.makeTexture(
                     width: Int(textureSize.width),
@@ -165,7 +167,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard
             Int(textureSize.width) > canvasMinimumTextureLength &&
-            Int(textureSize.height) > canvasMinimumTextureLength
+            Int(textureSize.height) > canvasMinimumTextureLength,
+            let newTexture = try await newTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -185,7 +188,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             isVisible: true
         )
 
-        let newTexture = try await newTexture(textureSize)
         try await addTexture(newTexture, id: layer.id)
 
         // Set the texture size after the initialization of this repository is completed
@@ -197,12 +199,14 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         )
     }
 
-    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
-        MTLTextureCreator.makeTexture(
+    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture? {
+        guard let device else { return nil }
+
+        return MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: device
-        )!
+        )
     }
 
     /// Copies a texture for the given `LayerId`
@@ -219,6 +223,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
+            let device,
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,

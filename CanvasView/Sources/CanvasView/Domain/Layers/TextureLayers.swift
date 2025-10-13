@@ -139,14 +139,17 @@ public extension TextureLayers {
     }
 
     func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
-        guard let textureRepository else { return }
+        guard
+            let textureRepository,
+            let device = textureRepository.device
+        else { return }
 
         var newTexture: MTLTexture? = texture
         if newTexture == nil {
             newTexture = MTLTextureCreator.makeTexture(
                 width: Int(_textureSize.width),
                 height: Int(_textureSize.height),
-                with: textureRepository.device
+                with: device
             )
         }
 

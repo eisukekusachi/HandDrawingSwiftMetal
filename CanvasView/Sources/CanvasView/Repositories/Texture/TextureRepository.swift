@@ -12,7 +12,7 @@ import MetalKit
 @MainActor
 public protocol TextureRepository: Sendable {
 
-    var device: MTLDevice { get }
+    var device: MTLDevice? { get }
 
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }

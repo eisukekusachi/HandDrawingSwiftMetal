@@ -12,10 +12,10 @@ let canvasMinimumTextureLength: Int = 16
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public var device: MTLDevice {
+    public var device: MTLDevice? {
         _device
     }
-    private var _device: MTLDevice
+    private var _device: MTLDevice?
 
     public var newCommandBuffer: MTLCommandBuffer? {
         commandQueue?.makeCommandBuffer()
@@ -25,7 +25,9 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     private let pipelines: MTLPipelines
 
-    init(device: MTLDevice) {
+    init(device: MTLDevice?) {
+        guard let device else { fatalError("Device is nil") }
+
         self._device = device
         self.pipelines = MTLPipelines(device: device)
         self.commandQueue = device.makeCommandQueue()
@@ -60,6 +62,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         guard
             let texture,
+            let device,
             let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 matrix: matrix,
                 frameSize: frameSize,
@@ -68,7 +71,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
                     height: texture.size.height * ViewSize.getScaleToFit(texture.size, to: destinationTexture.size)
                 ),
                 destinationSize: destinationTexture.size,
-                with: _device
+                with: device
             )
         else {
             Logger.error(String(localized: "Unable to load required data", bundle: .module))

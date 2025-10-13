@@ -33,12 +33,14 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 public extension BrushDrawingToolRenderer {
 
     func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
+        guard let device = renderer.device else { return }
+
         self.displayView = displayView
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         )
     }
 
@@ -151,11 +153,12 @@ extension BrushDrawingToolRenderer {
     ) {
         guard
             let renderer,
+            let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
-                with: renderer.device
+                with: device
             )
         else { return }
 

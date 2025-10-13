@@ -13,7 +13,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     var callHistory: [String] = []
 
-    let device: MTLDevice
+    let device: MTLDevice?
 
     init() {
         device = MTLCreateSystemDefaultDevice()!
@@ -45,6 +45,8 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let device else { return }
+
         let textureLabel = texture?.label ?? ""
         let destinationTextureLabel = destinationTexture.label ?? ""
         let commandBufferLabel = commandBuffer.label ?? ""
