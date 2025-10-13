@@ -123,6 +123,10 @@ public extension TextureLayers {
         _selectedLayerId = id
     }
 
+    func index(for id: LayerId) -> Int? {
+        _layers.firstIndex(where: { $0.id == id })
+    }
+
     func addNewLayer(at index: Int) async throws {
         let layer: TextureLayerModel = .init(
             id: LayerId(),
@@ -217,7 +221,7 @@ public extension TextureLayers {
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
         guard
-            let index = _layers.firstIndex(where: { $0.id == id })
+            let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
@@ -229,7 +233,7 @@ public extension TextureLayers {
 
     func updateTitle(_ id: LayerId, title: String) {
         guard
-            let index = _layers.map({ $0.id }).firstIndex(of: id)
+            let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
@@ -249,7 +253,7 @@ public extension TextureLayers {
 
     func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
-            let index = _layers.firstIndex(where: { $0.id == id })
+            let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
@@ -269,7 +273,7 @@ public extension TextureLayers {
 
     func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
-            let index = _layers.firstIndex(where: { $0.id == id })
+            let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
