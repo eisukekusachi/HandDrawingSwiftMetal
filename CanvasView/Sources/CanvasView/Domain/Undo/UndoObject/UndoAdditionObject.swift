@@ -34,4 +34,17 @@ public final class UndoAdditionObject: UndoObject {
         self.textureLayer = textureLayer
         self.insertIndex = index
     }
+
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        let result = try await repository.duplicatedTexture(undoTextureId)
+
+        try await layers.addLayer(
+            layer: textureLayer,
+            texture: result.texture,
+            at: insertIndex
+        )
+
+        layers.requestFullCanvasUpdate()
+    }
 }

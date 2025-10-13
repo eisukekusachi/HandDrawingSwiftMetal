@@ -106,7 +106,8 @@ public final class CanvasViewModel {
         canvasRenderer = CanvasRenderer()
 
         undoTextureLayers = UndoTextureLayers(
-            textureLayers: TextureLayers()
+            textureLayers: TextureLayers(),
+            canvasRenderer: canvasRenderer
         )
 
         persistenceController = PersistenceController(
@@ -163,7 +164,7 @@ public final class CanvasViewModel {
 
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            self.undoTextureLayers.initialize(
+            self.undoTextureLayers.setupUndoManager(
                 undoTextureRepository: undoTextureRepository
             )
         }
@@ -258,10 +259,11 @@ public extension CanvasViewModel {
         )
 
         // Initialize the repository used for Undo
-        undoTextureLayers.initializeStorage(
-            configuration.textureSize,
-            canvasRenderer: canvasRenderer
-        )
+        if undoTextureLayers.isUndoEnabled {
+            undoTextureLayers.initializeUndoTextureRepository(
+                configuration.textureSize
+            )
+        }
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingToolRenderers.count {

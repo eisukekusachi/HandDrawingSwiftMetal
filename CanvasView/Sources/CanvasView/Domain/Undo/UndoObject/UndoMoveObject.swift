@@ -60,4 +60,13 @@ public final class UndoMoveObject: UndoObject {
         self.selectedLayerId = selectedLayerId
         self.textureLayer = layer
     }
+
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        layers.moveLayer(
+            indices: indices
+        )
+
+        layers.requestFullCanvasUpdate()
+    }
 }

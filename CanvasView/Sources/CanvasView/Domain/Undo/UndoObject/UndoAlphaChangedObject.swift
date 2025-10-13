@@ -34,4 +34,14 @@ public final class UndoAlphaChangedObject: UndoObject {
             isVisible: layer.isVisible
         )
     }
+
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        layers.updateAlpha(
+            textureLayer.id,
+            alpha: textureLayer.alpha
+        )
+
+        layers.requestFullCanvasUpdate()
+    }
 }

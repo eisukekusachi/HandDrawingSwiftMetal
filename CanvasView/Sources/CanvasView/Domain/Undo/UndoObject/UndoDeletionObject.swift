@@ -32,4 +32,21 @@ public final class UndoDeletionObject: UndoObject {
         self.textureLayer = textureLayer
         self.selectedLayerIdAfterDeletion = layerId
     }
+
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        guard
+            let index = layers.index(for: textureLayer.id)
+        else {
+            let message = "id: \(textureLayer.id.uuidString)"
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
+            return
+        }
+
+        try await layers.removeLayer(
+            layerIndexToDelete: index
+        )
+
+        layers.requestFullCanvasUpdate()
+    }
 }

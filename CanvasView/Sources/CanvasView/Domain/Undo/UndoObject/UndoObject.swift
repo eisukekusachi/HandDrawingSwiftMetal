@@ -17,4 +17,7 @@ public protocol UndoObject {
 
     /// A subject that emits an UndoObjectProtocol instance when the undo object is deallocated
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
+
+    @MainActor
+    func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws
 }
