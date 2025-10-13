@@ -90,7 +90,7 @@ final class HandDrawingContentView: UIView {
          )
     }()
 
-    private let throttle = Throttle(delay: 0.1)
+    private let throttle = Throttle(delay: 0.2)
 
     private var cancellables = Set<AnyCancellable>()
 
