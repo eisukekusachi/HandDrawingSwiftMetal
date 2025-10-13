@@ -9,13 +9,18 @@ import Metal
 import UIKit
 
 final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
+    var newCommandBuffer: (any MTLCommandBuffer)?
 
     var callHistory: [String] = []
 
-    let device: MTLDevice? = MTLCreateSystemDefaultDevice()
+    let device: MTLDevice?
+
+    init() {
+        device = MTLCreateSystemDefaultDevice()!
+    }
 
     func drawGrayPointBuffersWithMaxBlendMode(
-        buffers: MTLGrayscalePointBuffers?,
+        buffers: MTLGrayscalePointBuffers,
         onGrayscaleTexture texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -38,9 +43,10 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         frameSize: CGSize,
         backgroundColor: UIColor,
         on destinationTexture: MTLTexture,
-        device: MTLDevice,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let device else { return }
+
         let textureLabel = texture?.label ?? ""
         let destinationTextureLabel = destinationTexture.label ?? ""
         let commandBufferLabel = commandBuffer.label ?? ""
@@ -102,6 +108,8 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         )
     }
 
+    func copyTexture(srctexture: (any MTLTexture), dstTexture: (any MTLTexture), with commandBuffer: any MTLCommandBuffer) {}
+
     func subtractTextureWithEraseBlendMode(
         texture: any MTLTexture,
         buffers: MTLTextureBuffers,
@@ -123,7 +131,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         )
     }
 
-    func fillTexture(
+    func fillColor(
         texture: MTLTexture,
         withRGB rgb: IntRGB,
         with commandBuffer: any MTLCommandBuffer
@@ -132,7 +140,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         let commandBufferLabel = commandBuffer.label ?? ""
         callHistory.append(
             [
-                "fillTexture(",
+                "fillColor(",
                 "texture: \(textureLabel), ",
                 "withRGB: \(rgb), ",
                 "with: \(commandBufferLabel)",
@@ -141,7 +149,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         )
     }
 
-    func fillTexture(
+    func fillColor(
         texture: MTLTexture,
         withRGBA rgba: IntRGBA,
         with commandBuffer: any MTLCommandBuffer
@@ -150,7 +158,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         let commandBufferLabel = commandBuffer.label ?? ""
         callHistory.append(
             [
-                "fillTexture(",
+                "fillColor(",
                 "texture: \(textureLabel), ",
                 "withRGBA: \(rgba), ",
                 "with: \(commandBufferLabel)",
@@ -232,14 +240,14 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     }
 
     func duplicateTexture(
-        texture: MTLTexture?
+        texture: MTLTexture
     ) -> MTLTexture? {
-        let textureLabel = texture?.label ?? ""
+        let textureLabel = texture.label
 
         callHistory.append(
             [
                 "duplicateTexture(",
-                "texture: \(textureLabel)",
+                "texture: \(String(describing: textureLabel))",
                 ")"
             ].joined()
         )
@@ -247,15 +255,15 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     }
 
     func duplicateTexture(
-        texture: MTLTexture?,
+        texture: MTLTexture,
         with commandBuffer: any MTLCommandBuffer
     ) -> MTLTexture? {
-        let textureLabel = texture?.label ?? ""
+        let textureLabel = texture.label
         let commandBufferLabel = commandBuffer.label ?? ""
         callHistory.append(
             [
                 "clearTexture(",
-                "texture: \(textureLabel), ",
+                "texture: \(String(describing: textureLabel)), ",
                 "with: \(commandBufferLabel)",
                 ")"
             ].joined()

@@ -7,19 +7,20 @@
 
 import UIKit
 
+public typealias CanvasMessageId = UUID
+
 public struct CanvasMessage: Identifiable {
-    public let id: UUID
+    public let id: CanvasMessageId
     public let title: String
     public let icon: UIImage?
     public let duration: Double
 
     public init(
-        id: UUID = UUID(),
         title: String,
         icon: UIImage?,
         duration: Double = 2.0
     ) {
-        self.id = id
+        self.id = CanvasMessageId()
         self.title = title
         self.icon = icon
         self.duration = duration

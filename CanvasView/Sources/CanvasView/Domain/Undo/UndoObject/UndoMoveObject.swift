@@ -13,13 +13,13 @@ import MetalKit
 public final class UndoMoveObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UUID = UUID()
+    public let undoTextureId = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    public let selectedLayerId: UUID
+    public let selectedLayerId: LayerId
 
     public let indices: MoveLayerIndices
 
@@ -53,7 +53,7 @@ public final class UndoMoveObject: UndoObject {
 
     public init(
         indices: MoveLayerIndices,
-        selectedLayerId: UUID,
+        selectedLayerId: LayerId,
         layer: TextureLayerModel
     ) {
         self.indices = indices
@@ -61,10 +61,12 @@ public final class UndoMoveObject: UndoObject {
         self.textureLayer = layer
     }
 
-    public func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws {
-        // Do nothing
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        layers.moveLayer(
+            indices: indices
+        )
+
+        layers.requestFullCanvasUpdate()
     }
 }

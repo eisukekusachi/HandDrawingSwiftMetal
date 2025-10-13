@@ -12,7 +12,7 @@ import MetalKit
 /// An undo object for drawing
 final class UndoDrawingObject: UndoObject {
 
-    let undoTextureUUID: UUID
+    let undoTextureId: UndoTextureId
 
     let textureLayer: TextureLayerModel
 
@@ -25,19 +25,18 @@ final class UndoDrawingObject: UndoObject {
     init(
         from layer: TextureLayerModel
     ) {
-        self.undoTextureUUID = UUID()
+        self.undoTextureId = UndoTextureId()
         self.textureLayer = layer
     }
 
-    /// Copies a texture from the `undoTextureRepository` to the `textureRepository` to restore a layer during an undo operation
-    func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws {
-        let result = try await undoTextureRepository.copyTexture(uuid: undoTextureUUID)
-        try await textureRepository.updateTexture(
-            texture: result.texture,
-            for: textureLayer.id
-        )
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        let result = try await repository.duplicatedTexture(undoTextureId)
+        let textureLayerId = textureLayer.id
+
+        try await layers.updateTexture(texture: result.texture, for: textureLayerId)
+        layers.selectLayer(textureLayerId)
+        layers.updateThumbnail(textureLayerId, texture: result.texture)
+        layers.requestFullCanvasUpdate()
     }
 }

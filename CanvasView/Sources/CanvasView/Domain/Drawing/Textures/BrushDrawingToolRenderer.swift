@@ -33,12 +33,14 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
 public extension BrushDrawingToolRenderer {
 
     func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
+        guard let device = renderer.device else { return }
+
         self.displayView = displayView
         self.renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         )
     }
 
@@ -103,15 +105,17 @@ public extension BrushDrawingToolRenderer {
         _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
-        onDrawingCompleted: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@Sendable @MainActor (MTLTexture) -> Void)?
+        onCommandBufferCompleted: (@MainActor () -> Void)?
     ) {
         guard let commandBuffer = displayView?.commandBuffer else { return }
 
-        updateRealTimeDrawingTexture(
-            baseTexture: baseTexture,
+        drawCurveOnDrawingTexture(
             drawingCurve: drawingCurve,
-            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+
+        drawDrawingTextureOnRealTimeDrawingTexture(
+            baseTexture: baseTexture,
             with: commandBuffer
         )
 
@@ -123,12 +127,10 @@ public extension BrushDrawingToolRenderer {
                 on: baseTexture,
                 with: commandBuffer
             )
-            onDrawingCompleted?(realtimeDrawingTexture)
 
             commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor [weak self] in
-                    guard let `self` else { return }
-                    onCommandBufferCompleted?(self.realtimeDrawingTexture)
+                Task { @MainActor in
+                    onCommandBufferCompleted?()
                 }
             }
         }
@@ -145,24 +147,23 @@ public extension BrushDrawingToolRenderer {
 
 extension BrushDrawingToolRenderer {
 
-    private func updateRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
+    private func drawCurveOnDrawingTexture(
         drawingCurve: DrawingCurve,
-        on texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let renderer,
-            let device = renderer.device
-        else { return }
-
-        renderer.drawGrayPointBuffersWithMaxBlendMode(
-            buffers: MTLBuffers.makeGrayscalePointBuffers(
+            let device = renderer.device,
+            let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
                 with: device
-            ),
+            )
+        else { return }
+
+        renderer.drawGrayPointBuffersWithMaxBlendMode(
+            buffers: buffers,
             onGrayscaleTexture: grayscaleTexture,
             with: commandBuffer
         )
@@ -173,18 +174,27 @@ extension BrushDrawingToolRenderer {
             on: drawingTexture,
             with: commandBuffer
         )
+    }
+
+    private func drawDrawingTextureOnRealTimeDrawingTexture(
+        baseTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer
+        else { return }
 
         renderer.drawTexture(
             texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: texture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: texture,
+            into: realtimeDrawingTexture,
             with: commandBuffer
         )
     }

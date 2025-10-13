@@ -96,12 +96,20 @@ public final class CanvasViewModel {
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    private var undoStack: UndoStack? = nil
+    private let undoTextureLayers: UndoTextureLayers
+
+    /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
+    private let undoDrawingDebouncer = Debouncer(delay: 0.5)
 
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         canvasRenderer = CanvasRenderer()
+
+        undoTextureLayers = UndoTextureLayers(
+            textureLayers: TextureLayers(),
+            canvasRenderer: canvasRenderer
+        )
 
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
@@ -114,7 +122,7 @@ public final class CanvasViewModel {
         )
 
         textureLayersStorage = CoreDataTextureLayersStorage(
-            textureLayers: TextureLayers(),
+            textureLayers: undoTextureLayers,
             context: persistenceController.viewContext
         )
 
@@ -130,6 +138,8 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) {
+        activityIndicatorSubject.send(true)
+
         drawingToolRenderers.forEach {
             $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
@@ -153,23 +163,20 @@ public final class CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
 
-        /*
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            let textureRepository = self.dependencies.textureRepository
-            undoStack = .init(
-                canvasState: canvasState,
-                textureRepository: textureRepository,
+            self.undoTextureLayers.setupUndoManager(
                 undoTextureRepository: undoTextureRepository
             )
         }
-        */
 
         bindData()
 
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         Task {
+            defer { activityIndicatorSubject.send(false) }
+
             let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
                 entity: try? textureLayersStorage.fetch()
             ) ?? configuration.textureLayerArrayConfiguration
@@ -179,34 +186,41 @@ public final class CanvasViewModel {
                 configuration: textureLayersConfiguration,
                 fallbackTextureSize: TextureLayerModel.defaultTextureSize()
             )
-            await initializeTextures(resolvedTextureLayersConfiguration)
+            try await initializeTextures(resolvedTextureLayersConfiguration)
         }
     }
+
+    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
+        guard
+            let selectedLayer = textureLayersStorage.selectedLayer
+        else { return }
+
+        canvasRenderer.updateCanvasView(
+            realtimeDrawingTexture: realtimeDrawingTexture,
+            selectedLayer: .init(item: selectedLayer)
+        )
+    }
+
+    func updateCanvasByMergingAllLayers() {
+        Task {
+            // Set the texture of the selected texture layer to the renderer
+            try await canvasRenderer.updateSelectedLayerTexture(
+                textureLayers: textureLayersStorage,
+                textureRepository: dependencies.textureRepository
+            )
+
+            updateCanvasView()
+        }
+    }
+}
+
+public extension CanvasViewModel {
 
     private func bindData() {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.updatePublisher
             .sink { [weak self] in
-                guard
-                    let drawingCurve = self?.drawingCurve,
-                    let texture = self?.canvasRenderer.selectedTexture,
-                    let selectedLayerId = self?.textureLayersStorage.selectedLayer?.id
-                else { return }
-
-                self?.drawingToolRenderer?.drawCurve(
-                    drawingCurve,
-                    using: texture,
-                    onDrawing: { [weak self] resultTexture in
-                        self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
-                    },
-                    onDrawingCompleted: { [weak self] resultTexture in
-                        // Reset parameters on drawing completion
-                        self?.resetAllInputParameters()
-                    },
-                    onCommandBufferCompleted: { [weak self] resultTexture in
-                        self?.completeDrawing(texture: resultTexture, for: selectedLayerId)
-                    }
-                )
+                self?.drawCurvePointsOnCanvas()
             }
             .store(in: &cancellables)
 
@@ -230,26 +244,27 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        undoStack?.didUndo
+        undoTextureLayers.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
     }
-}
 
-public extension CanvasViewModel {
-
-    private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async {
+    private func initializeTextures(_ configuration: ResolvedTextureLayerArrayConfiguration) async throws {
         // Initialize the textures used in the texture layers
         await textureLayersStorage.initialize(
             configuration: configuration,
             textureRepository: dependencies.textureRepository
         )
 
-        // Initialize the textures used for Undo
-        undoStack?.initialize(configuration.textureSize)
+        // Initialize the repository used for Undo
+        if undoTextureLayers.isUndoEnabled {
+            undoTextureLayers.initializeUndoTextureRepository(
+                configuration.textureSize
+            )
+        }
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingToolRenderers.count {
@@ -261,20 +276,19 @@ public extension CanvasViewModel {
             textureSize: configuration.textureSize
         )
 
-        // Update the canvas view
-        canvasRenderer.updateDrawingTextures(
+        // Set the texture of the selected texture layer to the renderer
+        try await canvasRenderer.updateSelectedLayerTexture(
             textureLayers: textureLayersStorage,
             textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            guard let `self` else { return }
-            self.updateCanvasView()
+        )
 
-            self.didInitializeTexturesSubject.send(self.textureLayersStorage)
-            self.didInitializeCanvasViewSubject.send(configuration)
+        didInitializeTexturesSubject.send(self.textureLayersStorage)
+        didInitializeCanvasViewSubject.send(configuration)
 
-            // Update to the latest date
-            self.projectMetaDataStorage.refreshUpdatedAt()
-        }
+        // Update to the latest date
+        projectMetaDataStorage.refreshUpdatedAt()
+
+        updateCanvasView()
     }
 }
 
@@ -300,13 +314,17 @@ extension CanvasViewModel {
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
-                    await undoStack?.setDrawingUndoObject()
+                    await undoTextureLayers.setDrawingUndoObject(
+                        texture: canvasRenderer.selectedLayerTexture
+                    )
                 }
             }
 
             fingerStroke.setActiveDictionaryKeyIfNil()
 
-            drawCurveOnCanvas(fingerStroke.latestTouchPoints)
+            appendCurvePoints(fingerStroke.latestTouchPoints)
+
+            drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
 
         case .transforming: transformCanvas()
         default: break
@@ -346,7 +364,9 @@ extension CanvasViewModel {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
             Task {
-                await undoStack?.setDrawingUndoObject()
+                await undoTextureLayers.setDrawingUndoObject(
+                    texture: canvasRenderer.selectedLayerTexture
+                )
             }
         }
 
@@ -356,7 +376,9 @@ extension CanvasViewModel {
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        drawCurveOnCanvas(pencilStroke.latestActualTouchPoints)
+        appendCurvePoints(pencilStroke.latestActualTouchPoints)
+
+        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
     }
 }
 
@@ -378,7 +400,7 @@ public extension CanvasViewModel {
             configuration: configuration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
-        await initializeTextures(resolvedConfiguration)
+        try await initializeTextures(resolvedConfiguration)
 
         transforming.setMatrix(.identity)
 
@@ -386,10 +408,10 @@ public extension CanvasViewModel {
     }
 
     func undo() {
-        undoStack?.undo()
+        undoTextureLayers.undo()
     }
     func redo() {
-        undoStack?.redo()
+        undoTextureLayers.redo()
     }
 
     func loadFile(
@@ -437,7 +459,7 @@ public extension CanvasViewModel {
                 )
 
                 // Restore the textures
-                await initializeTextures(resolvedTextureLayersConfiguration)
+                try await initializeTextures(resolvedTextureLayersConfiguration)
 
                 // Update metadata
                 projectMetaDataStorage.update(
@@ -496,8 +518,8 @@ public extension CanvasViewModel {
                 try dependencies.localFileRepository.createWorkingDirectory()
 
                 // Copy all textures from the textureRepository
-                let textures = try await dependencies.textureRepository.copyTextures(
-                    uuids: textureLayersStorage.layers.map { $0.id }
+                let textures = try await dependencies.textureRepository.duplicatedTextures(
+                    textureLayersStorage.layers.map { $0.id }
                 )
 
                 // Save the thumbnail image into the working directory
@@ -508,7 +530,7 @@ public extension CanvasViewModel {
                 // Save the textures into the working directory
                 async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
                     namedItems: textures.map {
-                        .init(fileName: $0.uuid.uuidString, item: $0)
+                        .init(fileName: $0.id.uuidString, item: $0)
                     }
                 )
                 _ = try await (resultCanvasThumbnail, resultCanvasTextures)
@@ -556,7 +578,7 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func drawCurveOnCanvas(_ screenTouchPoints: [TouchPoint]) {
+    private func appendCurvePoints(_ screenTouchPoints: [TouchPoint]) {
         guard
             let drawingToolRenderer,
             let drawableSize = canvasRenderer.drawableSize
@@ -571,8 +593,70 @@ extension CanvasViewModel {
             ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )
+    }
 
-        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
+    private func drawCurvePointsOnCanvas() {
+        guard
+            let drawingCurve,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+        else { return }
+
+        drawingToolRenderer?.drawCurve(
+            drawingCurve,
+            using: selectedLayerTexture,
+            onDrawing: { [weak self] resultTexture in
+                self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
+            },
+            onCommandBufferCompleted: { [weak self] in
+                // Reset parameters on drawing completion
+                self?.resetAllInputParameters()
+
+                self?.completeDrawing()
+            }
+        )
+    }
+
+    private func resetAllInputParameters() {
+        inputDevice.reset()
+        touchGesture.reset()
+
+        fingerStroke.reset()
+        pencilStroke.reset()
+
+        drawingCurve = nil
+        transforming.resetMatrix()
+    }
+
+    private func completeDrawing() {
+        guard
+            let layerId = textureLayersStorage.selectedLayer?.id,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+        else { return }
+
+        undoDrawingDebouncer.scheduleAsync { [weak self] in
+            do {
+                try await self?.dependencies.textureRepository.updateTexture(
+                    texture: selectedLayerTexture,
+                    for: layerId
+                )
+
+                // Update `updatedAt` when drawing completes
+                self?.projectMetaDataStorage.refreshUpdatedAt()
+
+                self?.textureLayersStorage.updateThumbnail(
+                    layerId,
+                    texture: selectedLayerTexture
+                )
+            } catch {
+                Logger.error(error)
+            }
+        }
+
+        Task {
+            await undoTextureLayers.pushUndoDrawingObject(
+                texture: selectedLayerTexture
+            )
+        }
     }
 
     private func transformCanvas() {
@@ -596,9 +680,6 @@ extension CanvasViewModel {
 
         canvasRenderer.updateCanvasView()
     }
-}
-
-extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
 
@@ -612,61 +693,5 @@ extension CanvasViewModel {
         canvasRenderer.resetCommandBuffer()
 
         canvasRenderer.updateCanvasView()
-    }
-
-    private func completeDrawing(texture: MTLTexture, for selectedTextureId: UUID) {
-        Task {
-            do {
-                let resultTexture = try await dependencies.textureRepository.updateTexture(
-                    texture: texture,
-                    for: selectedTextureId
-                )
-
-                // Update `updatedAt` when drawing completes
-                projectMetaDataStorage.refreshUpdatedAt()
-
-                await undoStack?.pushUndoDrawingObject(
-                    texture: resultTexture.texture
-                )
-            } catch {
-                // No action on error
-                Logger.error(error)
-            }
-        }
-
-        textureLayersStorage.updateThumbnail(
-            .init(uuid: selectedTextureId, texture: texture)
-        )
-    }
-
-    private func resetAllInputParameters() {
-        inputDevice.reset()
-        touchGesture.reset()
-
-        fingerStroke.reset()
-        pencilStroke.reset()
-
-        drawingCurve = nil
-        transforming.resetMatrix()
-    }
-
-    func updateCanvasByMergingAllLayers() {
-        canvasRenderer.updateDrawingTextures(
-            textureLayers: textureLayersStorage,
-            textureRepository: dependencies.textureRepository
-        ) { [weak self] in
-            self?.updateCanvasView()
-        }
-    }
-
-    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
-        guard
-            let selectedLayer = textureLayersStorage.selectedLayer
-        else { return }
-
-        canvasRenderer.updateCanvasView(
-            realtimeDrawingTexture: realtimeDrawingTexture,
-            selectedLayer: .init(item: selectedLayer)
-        )
     }
 }

@@ -12,11 +12,7 @@ import MetalKit
 @MainActor
 public protocol TextureRepository: Sendable {
 
-    /// The number of textures currently managed
-    var textureNum: Int { get }
-
-    /// IDs of the textures stored in the repository
-    var textureIds: Set<UUID> { get }
+    var device: MTLDevice? { get }
 
     /// The size of the textures managed by this repository
     var textureSize: CGSize { get }
@@ -37,29 +33,21 @@ public protocol TextureRepository: Sendable {
         defaultTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration
 
-    func setTextureSize(_ size: CGSize)
+    /// Adds a texture using `LayerId`
+    func addTexture(_ texture: MTLTexture, id: LayerId) async throws
 
-    func createTexture(uuid: UUID, textureSize: CGSize) async throws
+    /// Copies a texture for the given `LayerId`
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture
 
-    /// Adds a texture using UUID
-    @discardableResult
-    @MainActor
-    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture
+    /// Copies multiple textures for the given `LayerId`s
+    func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture]
 
-    /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture
-
-    /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture]
-
-    /// Removes a texture with UUID
-    @discardableResult
-    func removeTexture(_ uuid: UUID) -> UUID
+    /// Removes a texture with `LayerId`
+    func removeTexture(_ id: LayerId) throws
 
     /// Removes all managed textures
     func removeAll()
 
-    /// Updates an existing texture for UUID
-    @discardableResult
-    func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture
+    /// Updates an existing texture for `LayerId`
+    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws
 }

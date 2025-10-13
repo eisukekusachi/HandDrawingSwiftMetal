@@ -10,11 +10,14 @@ import UIKit
 
 @preconcurrency import CoreData
 
+/// The debounce duration before performing a save operation.
+public let saveDebounceMilliseconds: Int = 500
+
 /// Texture layers managed by Core Data
 @MainActor
 public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
 
-    @Published private var textureLayers: TextureLayers
+    @Published private var textureLayers: any TextureLayersProtocol
 
     private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
 
@@ -34,8 +37,18 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     }
 
     /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
         textureLayers.selectedLayerIdPublisher
+    }
+
+    /// Emits whenever `alpha` change
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        textureLayers.alphaPublisher
+    }
+
+    /// Emits whenever `textureSize` change
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        textureLayers.textureSizePublisher
     }
 
     public var selectedLayer: TextureLayerItem? {
@@ -61,18 +74,12 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayers,
+        textureLayers: any TextureLayersProtocol,
         context: NSManagedObjectContext
     ) {
         self.textureLayers = textureLayers
 
         self.storage = .init(context: context)
-
-        // Propagate changes from children to the parent
-        self.textureLayers.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -80,7 +87,7 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
             self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
             self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {
@@ -100,15 +107,19 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         )
     }
 
-    public func layer(_ layerId: UUID) -> TextureLayerItem? {
-        textureLayers.layer(layerId)
+    public func layer(_ id: LayerId) -> TextureLayerItem? {
+        textureLayers.layer(id)
     }
 
-    public func selectLayer(id: UUID) {
-        textureLayers.selectLayer(id: id)
+    public func selectLayer(_ id: LayerId) {
+        textureLayers.selectLayer(id)
     }
 
-    public func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
+    public func addNewLayer(at index: Int) async throws {
+        try await textureLayers.addNewLayer(at: index)
+    }
+
+    public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         try await textureLayers.addLayer(layer: layer, texture: texture, at: index)
     }
 
@@ -120,20 +131,51 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.moveLayer(indices: indices)
     }
 
-    public func updateTitle(id: UUID, title: String) {
-        textureLayers.updateTitle(id: id, title: title)
+    public func updateLayer(_ layer: TextureLayerItem) {
+        textureLayers.updateLayer(layer)
     }
 
-    public func updateVisibility(id: UUID, isVisible: Bool) {
-        textureLayers.updateVisibility(id: id, isVisible: isVisible)
+    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
+        textureLayers.updateThumbnail(id, texture: texture)
     }
 
-    public func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool) {
-        textureLayers.updateAlpha(id: id, alpha: alpha, isStartHandleDragging: isStartHandleDragging)
+    public func updateTitle(_ id: LayerId, title: String) {
+        textureLayers.updateTitle(id, title: title)
     }
 
-    public func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        textureLayers.updateThumbnail(identifiedTexture)
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
+        textureLayers.updateVisibility(id, isVisible: isVisible)
+    }
+
+    public func updateAlpha(_ id: LayerId, alpha: Int) {
+        textureLayers.updateAlpha(id, alpha: alpha)
+    }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        textureLayers.beginAlphaChange()
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        textureLayers.endAlphaChange()
+    }
+
+    public func requestCanvasUpdate() {
+        textureLayers.requestCanvasUpdate()
+    }
+
+    public func requestFullCanvasUpdate() {
+        textureLayers.requestFullCanvasUpdate()
+    }
+
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
+        try await textureLayers.duplicatedTexture(id)
+    }
+
+    /// Updates an existing texture for `LayerId`
+    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+        try await textureLayers.updateTexture(texture: texture, for: id)
     }
 }
 
@@ -144,13 +186,18 @@ extension CoreDataTextureLayersStorage {
 }
 
 private extension CoreDataTextureLayersStorage {
-    func save(_ target: TextureLayers) async {
+    func save(_ target: any TextureLayersProtocol) async {
+
+        guard
+            let selectedLayerId = target.selectedLayer?.id,
+            target.layers.count != 0,
+            target.textureSize != .zero
+        else { return }
 
         // Convert it to Sendable
         let layers = target.layers.map { TextureLayerModel(item: $0) }
 
         let textureSize = target.textureSize
-        let selectedLayerId = target.selectedLayerId
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()

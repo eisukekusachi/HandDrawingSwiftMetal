@@ -9,33 +9,33 @@
 
 /// A struct that represents a texture entity with `UUID` and `MTLTexture`
 public struct IdentifiedTexture: Hashable, @unchecked Sendable {
-    public let uuid: UUID
+    public let id: UUID
     public let texture: MTLTexture
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(uuid)
+        hasher.combine(id)
     }
 
     public static func == (lhs: IdentifiedTexture, rhs: IdentifiedTexture) -> Bool {
-        lhs.uuid == rhs.uuid
+        lhs.id == rhs.id
     }
 
     /// Converts a single IdentifiedTexture to a dictionary [UUID: MTLTexture]
     static func dictionary(from item: IdentifiedTexture) -> [UUID: MTLTexture] {
-        [item.uuid: item.texture]
+        [item.id: item.texture]
     }
 
     /// Converts a Set of IdentifiedTexture to a dictionary [UUID: MTLTexture]
     static func dictionary(from set: Set<IdentifiedTexture>) -> [UUID: MTLTexture] {
         Dictionary(
             uniqueKeysWithValues: set.compactMap { item in
-                return (item.uuid, item.texture)
+                return (item.id, item.texture)
             }
         )
     }
 
-    public init(uuid: UUID, texture: MTLTexture) {
-        self.uuid = uuid
+    public init(id: UUID, texture: MTLTexture) {
+        self.id = id
         self.texture = texture
     }
 }

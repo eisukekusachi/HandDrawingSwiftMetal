@@ -10,7 +10,7 @@ import Foundation
 
 public protocol UndoObject {
     /// The texture ID used for the undo operation
-    var undoTextureUUID: UUID { get }
+    var undoTextureId: UndoTextureId { get }
 
     /// The texture layer targeted by the undo operation
     var textureLayer: TextureLayerModel { get }
@@ -18,9 +18,6 @@ public protocol UndoObject {
     /// A subject that emits an UndoObjectProtocol instance when the undo object is deallocated
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
 
-    /// A method called when the undo operation is performed
-    func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws
+    @MainActor
+    func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws
 }

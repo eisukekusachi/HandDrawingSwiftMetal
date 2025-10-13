@@ -11,11 +11,11 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    var textureNum: Int = 0
+    var device: MTLDevice? {
+        MTLCreateSystemDefaultDevice()
+    }
 
     var textureSize: CGSize = .zero
-
-    var textureIds: Set<UUID> { Set([]) }
 
     var isInitialized: Bool = false
 
@@ -42,45 +42,30 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         )
     }
 
-    func createTexture(uuid: UUID, textureSize: CGSize) async throws {}
-
-    func removeAll() {}
-
-    /// Copies a texture for the given UUID
-    func copyTexture(uuid: UUID) async throws -> IdentifiedTexture {
+    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture {
         let context = try MockMetalContext()
-        let texture = try context.makeTexture(width: 16, height: 16)
-        return .init(
-            uuid: uuid,
-            texture: texture
-        )
+        return try context.makeTexture(width: 16, height: 16)
     }
 
-    /// Copies multiple textures for the given UUIDs
-    func copyTextures(uuids: [UUID]) async throws -> [IdentifiedTexture] {
+    /// Copies a texture for the given `LayerId`
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
+        let context = try MockMetalContext()
+        let texture = try context.makeTexture(width: 16, height: 16)
+        return .init(id: id, texture: texture)
+    }
+
+    /// Copies multiple textures for the given `LayerId`s
+    func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
         []
     }
 
+    func removeAll() {}
 
-    func removeTexture(_ uuid: UUID) -> UUID {
-        uuid
-    }
+    func removeTexture(_ id: LayerId) throws {}
 
-    func addTexture(_ texture: MTLTexture, newTextureUUID uuid: UUID) async throws -> IdentifiedTexture {
-        return .init(
-            uuid: UUID(),
-            texture: texture
-        )
-    }
+    func addTexture(_ texture: MTLTexture, id: LayerId) async throws {}
 
-    @discardableResult func updateTexture(texture: MTLTexture?, for uuid: UUID) async throws -> IdentifiedTexture {
-        let context = try MockMetalContext()
-        let texture = try context.makeTexture(width: 16, height: 16)
-        return .init(
-            uuid: UUID(),
-            texture: texture
-        )
-    }
+    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {}
 }
 
 private struct MockMetalContext {

@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// A struct that manages and configures the display of the Undo/Redo buttons
 @MainActor
 public struct UndoRedoButtonState: Sendable {
     public let isUndoEnabled: Bool

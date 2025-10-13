@@ -66,19 +66,15 @@ import UIKit
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
-
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(frame: .zero)
-
         initialize()
     }
     public required init?(coder: NSCoder) {
-
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(coder: coder)
-
         initialize()
     }
 
@@ -155,7 +151,6 @@ import UIKit
 }
 
 extension CanvasView {
-
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in

@@ -11,7 +11,7 @@ import UIKit
 public extension TextureLayerItem {
 
     static func generate(
-        id: UUID = UUID(),
+        id: LayerId = LayerId(),
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true,

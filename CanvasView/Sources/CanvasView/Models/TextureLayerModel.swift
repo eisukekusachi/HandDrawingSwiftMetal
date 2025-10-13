@@ -10,7 +10,7 @@ import UIKit
 public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
 
     /// The unique identifier for the layer
-    public let id: UUID
+    public let id: LayerId
 
     /// The name of the layer
     public let title: String
@@ -37,11 +37,11 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
     public convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let id: UUID
-        if let decodedID = try? container.decode(UUID.self, forKey: .id) {
+        let id: LayerId
+        if let decodedID = try? container.decode(LayerId.self, forKey: .id) {
             id = decodedID
         } else if let legacyIDString = try? container.decode(String.self, forKey: .textureName),
-                  let legacyID = UUID(uuidString: legacyIDString) {
+                  let legacyID = LayerId(uuidString: legacyIDString) {
             id = legacyID
         } else {
             throw DecodingError.keyNotFound(
@@ -68,7 +68,7 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         try container.encode(isVisible, forKey: .isVisible)
     }
 
-    public init(id: UUID, title: String, alpha: Int, isVisible: Bool) {
+    public init(id: LayerId, title: String, alpha: Int, isVisible: Bool) {
         self.id = id
         self.title = title
         self.alpha = alpha
@@ -82,9 +82,9 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         lhs.isVisible == rhs.isVisible
     }
 
-    /// Retrieve the UUID from the file name since it uses a UUID
-    static func id(fromFileName string: String?) -> UUID {
-        UUID.init(uuidString: string ?? "") ?? UUID()
+    /// Retrieve the '`LayerId` from the file name since it uses a `LayerId`
+    static func id(fromFileName string: String?) -> LayerId {
+        LayerId.init(uuidString: string ?? "") ?? LayerId()
     }
 }
 

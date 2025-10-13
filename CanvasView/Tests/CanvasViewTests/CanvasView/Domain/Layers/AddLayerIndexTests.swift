@@ -22,5 +22,4 @@ struct AddLayerIndexTests {
         // A new layer is added one position above the currently selected layer
         #expect(result == 3)
     }
-
 }

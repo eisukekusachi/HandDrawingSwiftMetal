@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24093.9" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24127" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24057"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -90,7 +90,7 @@
                         <constraint firstAttribute="width" constant="256" id="eVt-lc-xIh"/>
                     </constraints>
                 </slider>
-                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
+                <stackView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w1G-k3-kW5" userLabel="UndoStackView">
                     <rect key="frame" x="289" y="745" width="96" height="34.333333333333371"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="999" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ib-t7-xwq">
@@ -106,9 +106,15 @@
                             <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.forward.square" catalog="system"/>
                         </button>
                     </subviews>
+                    <color key="backgroundColor" white="1" alpha="0.014167033450704225" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="96" id="7q1-tn-YPt"/>
                     </constraints>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                            <integer key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59x-cS-eat" userLabel="ContentView">
                     <rect key="frame" x="68" y="746" width="213" height="32"/>
@@ -152,7 +158,7 @@
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="1ki-Ki-Gw5"/>
                 <constraint firstItem="Rri-Cz-Fww" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3hA-PR-FpI"/>
                 <constraint firstItem="UxJ-dV-AbQ" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="4lu-2J-etw"/>
-                <constraint firstItem="w1G-k3-kW5" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="trailing" priority="750" constant="8" id="BfW-B7-6aH"/>
+                <constraint firstItem="w1G-k3-kW5" firstAttribute="leading" secondItem="59x-cS-eat" secondAttribute="trailing" priority="999" constant="8" id="BfW-B7-6aH"/>
                 <constraint firstItem="w1G-k3-kW5" firstAttribute="centerY" secondItem="5LT-Wg-ht9" secondAttribute="centerY" id="E8G-aa-3GT"/>
                 <constraint firstItem="s4f-db-5LA" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="-106" id="Epa-wm-YYq"/>
                 <constraint firstAttribute="trailing" secondItem="Rri-Cz-Fww" secondAttribute="trailing" id="GBO-3G-gPJ"/>

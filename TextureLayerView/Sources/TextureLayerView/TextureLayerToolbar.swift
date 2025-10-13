@@ -71,7 +71,10 @@ public struct TextureLayerToolbar: View {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = viewModel.selectedLayer else { return }
-                    viewModel.onTapTitleButton(id: selectedLayer.id, title: textFieldTitle)
+                    viewModel.onTapTitleButton(
+                        selectedLayer.id,
+                        title: textFieldTitle
+                    )
                 })
                 Button("Cancel", action: {})
             }
@@ -95,14 +98,13 @@ private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers()
-    private let repository = MockTextureRepository()
 
     private let previewConfig: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,
         layerIndex: 0,
         layers: [
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer0",
                 alpha: 255,
                 isVisible: true
@@ -118,8 +120,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 await textureLayers.initialize(
-                    configuration: previewConfig,
-                    textureRepository: repository
+                    configuration: previewConfig
                 )
 
                 viewModel.initialize(

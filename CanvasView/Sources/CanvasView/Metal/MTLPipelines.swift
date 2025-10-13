@@ -17,11 +17,7 @@ final public class MTLPipelines: Sendable {
     let mergeTextures: MTLComputePipelineState
     let fillColor: MTLComputePipelineState
 
-    public init(device: MTLDevice?) {
-        guard let device else {
-            fatalError("this device is nil.")
-        }
-
+    public init(device: MTLDevice) {
         /*
         // Use the main bundle in the main app
         guard

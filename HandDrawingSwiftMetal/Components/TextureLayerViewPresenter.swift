@@ -14,7 +14,6 @@ import SwiftUI
 final class TextureLayerViewPresenter {
 
     private class TextureLayerViewPresenterController: ObservableObject {
-
         @Published public var arrowX: CGFloat = 0
     }
 
@@ -52,7 +51,6 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = true
     }
 
-    @MainActor
     func initialize(
         textureLayers: any TextureLayersProtocol,
         popupConfiguration: PopupWithArrowConfiguration

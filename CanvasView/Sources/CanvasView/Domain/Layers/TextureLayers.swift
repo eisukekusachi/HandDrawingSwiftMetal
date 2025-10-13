@@ -10,6 +10,7 @@ import UIKit
 
 /// A class that manages texture layers
 public final class TextureLayers: TextureLayersProtocol, ObservableObject {
+
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         canvasUpdateRequestedSubject.eraseToAnyPublisher()
@@ -28,7 +29,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> {
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
         $_selectedLayerId.eraseToAnyPublisher()
     }
 
@@ -37,54 +38,53 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
         $_textureSize.eraseToAnyPublisher()
     }
 
+    /// Emits whenever `alpha` change
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        $_alpha.eraseToAnyPublisher()
+    }
+
+    public var textureSize: CGSize {
+        _textureSize
+    }
+
+    public var layers: [TextureLayerItem] {
+        _layers
+    }
+
+    public var layerCount: Int {
+        _layers.count
+    }
+
+    public var selectedLayerId: LayerId? {
+        _selectedLayerId
+    }
+
+    public var selectedLayer: TextureLayerItem? {
+        guard let _selectedLayerId else { return nil }
+        return _layers.first(where: { $0.id == _selectedLayerId })
+    }
+
+    public var selectedIndex: Int? {
+        guard let _selectedLayerId else { return nil }
+        return _layers.firstIndex(where: { $0.id == _selectedLayerId })
+    }
+
     private var textureRepository: TextureRepository?
 
     @Published private var _layers: [TextureLayerItem] = []
 
-    @Published private var _selectedLayerId: UUID?
+    @Published private var _selectedLayerId: LayerId?
 
     // Set a default value to avoid nil
     @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
+
+    @Published private var _alpha: Int = 255
 
     private var oldAlpha: Int?
 
     public init() {}
 }
 
-public extension TextureLayers {
-
-    var textureSize: CGSize {
-        _textureSize
-    }
-
-    var layers: [TextureLayerItem] {
-        _layers
-    }
-
-    var layerCount: Int {
-        _layers.count
-    }
-
-    var selectedLayerId: UUID? {
-        _selectedLayerId
-    }
-
-    var selectedLayer: TextureLayerItem? {
-        guard let _selectedLayerId else { return nil }
-        return _layers.first(where: { $0.id == _selectedLayerId })
-    }
-
-    var selectedIndex: Int? {
-        guard let _selectedLayerId else { return nil }
-        return _layers.firstIndex(where: { $0.id == _selectedLayerId })
-    }
-
-    func layer(_ layerId: UUID) -> TextureLayerItem? {
-        _layers.first(where: { $0.id == layerId })
-    }
-}
-
-@MainActor
 public extension TextureLayers {
 
     func initialize(
@@ -108,47 +108,93 @@ public extension TextureLayers {
         self.textureRepository = textureRepository
 
         Task {
-            let textures = try await textureRepository?.copyTextures(uuids: _layers.map { $0.id })
-            textures?.forEach { [weak self] texture in
-                self?.updateThumbnail(texture)
+            let textures = try await textureRepository?.duplicatedTextures(_layers.map { $0.id })
+            textures?.forEach { [weak self] identifiedTexture in
+                self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
         }
     }
 
-    func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws {
-        guard let textureRepository else { return }
+    func layer(_ id: LayerId) -> TextureLayerItem? {
+        _layers.first(where: { $0.id == id })
+    }
 
-        self._layers.insert(layer, at: index)
+    func selectLayer(_ id: LayerId) {
+        _selectedLayerId = id
+    }
+
+    func index(for id: LayerId) -> Int? {
+        _layers.firstIndex(where: { $0.id == id })
+    }
+
+    func addNewLayer(at index: Int) async throws {
+        let layer: TextureLayerModel = .init(
+            id: LayerId(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
+
+        try await addLayer(layer: layer, texture: nil, at: index)
+    }
+
+    func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
+        guard
+            let textureRepository,
+            let device = textureRepository.device
+        else { return }
+
+        var newTexture: MTLTexture? = texture
+        if newTexture == nil {
+            newTexture = MTLTextureCreator.makeTexture(
+                width: Int(_textureSize.width),
+                height: Int(_textureSize.height),
+                with: device
+            )
+        }
+
+        guard
+            let newTexture
+        else { return }
+
+        self._layers.insert(
+            .init(
+                model: layer,
+                thumbnail: newTexture.makeThumbnail()
+            ),
+            at: index
+        )
 
         _selectedLayerId = layer.id
 
         try await textureRepository
             .addTexture(
-                texture,
-                newTextureUUID: layer.id
+                newTexture,
+                id: layer.id
             )
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
     func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
+            _layers.count > 1,
             let textureRepository,
-            let selectedLayer,
-            _layers.count > 1
-        else { return }
+            let selectedLayerId = selectedLayer?.id
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
 
-        let newLayerIndex = RemoveLayerIndex.selectedIndexAfterDeletion(selectedIndex: index)
-        let newLayerId = _layers[newLayerIndex].id
+        let newLayerId = _layers[
+            RemoveLayerIndex.nextLayerIndexAfterDeletion(index: index)
+        ].id
 
         _layers.remove(at: index)
 
         _selectedLayerId = newLayerId
 
-        textureRepository
-            .removeTexture(selectedLayer.id)
-
-        fullCanvasUpdateRequestedSubject.send(())
+        try textureRepository
+            .removeTexture(selectedLayerId)
     }
 
     func moveLayer(indices: MoveLayerIndices) {
@@ -162,29 +208,44 @@ public extension TextureLayers {
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
-
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
-    func updateThumbnail(_ identifiedTexture: IdentifiedTexture) {
-        guard let index = _layers.firstIndex(where: { $0.id == identifiedTexture.uuid }) else { return }
-        self._layers[index].thumbnail = identifiedTexture.texture.makeThumbnail()
-    }
-
-    func selectLayer(id: UUID) {
-        _selectedLayerId = id
-
-        fullCanvasUpdateRequestedSubject.send(())
-    }
-
-    func updateTitle(id: UUID, title: String) {
+    func updateLayer(_ layer: TextureLayerItem) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = _layers.firstIndex(where: { $0.id == layer.id })
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        _layers[index] = layer
+    }
 
-        _layers[selectedIndex] = .init(
+    func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
+        guard
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        self._layers[index].thumbnail = texture.makeThumbnail()
+    }
+
+    func updateTitle(_ id: LayerId, title: String) {
+        guard
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        let layer = _layers[index]
+
+        _layers[index] = .init(
             id: layer.id,
             title: title,
             alpha: layer.alpha,
@@ -193,33 +254,38 @@ public extension TextureLayers {
         )
     }
 
-    func updateVisibility(id: UUID, isVisible: Bool) {
+    func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        let layer = _layers[index]
 
-        _layers[selectedIndex] = .init(
+        _layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: layer.alpha,
             isVisible: isVisible,
             thumbnail: layer.thumbnail
         )
-
-        // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-        fullCanvasUpdateRequestedSubject.send(())
     }
 
-    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool = false) {
+    func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
-            let selectedIndex = _layers.map({ $0.id }).firstIndex(of: id)
-        else { return }
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
 
-        let layer = _layers[selectedIndex]
+        let layer = _layers[index]
 
-        _layers[selectedIndex] = .init(
+        _layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: alpha,
@@ -227,116 +293,43 @@ public extension TextureLayers {
             thumbnail: layer.thumbnail
         )
 
-        // Only the alpha of the selected layer can be changed, so other layers will not be updated
+        _alpha = alpha
+    }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    func beginAlphaChange() {
+        // Do nothing
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    func endAlphaChange() {
+        // Do nothing
+    }
+
+    /// Requests a partial canvas update
+    func requestCanvasUpdate() {
         canvasUpdateRequestedSubject.send(())
     }
-}
 
-@MainActor
-public extension TextureLayers {
+    /// Requests a full canvas update (all layers composited)
+    func requestFullCanvasUpdate() {
+        fullCanvasUpdateRequestedSubject.send(())
+    }
 
-    func undoAlphaObject(dragging: Bool) -> UndoStackModel<UndoObject>? {
-        var undoObject: UndoObject? = nil
-        var redoObject: UndoObject? = nil
+    /// Copies a texture for the given `LayerId`
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
+        try await textureRepository?.duplicatedTexture(id)
+    }
 
-        if dragging, let alpha = selectedLayer?.alpha {
-            self.oldAlpha = alpha
-
-        } else {
-            if let oldAlpha = self.oldAlpha,
-               let newAlpha = selectedLayer?.alpha,
-               let selectedLayer = selectedLayer {
-
-                undoObject = UndoAlphaChangedObject(
-                    layer: .init(item: selectedLayer),
-                    withNewAlpha: Int(oldAlpha)
-                )
-
-                redoObject = UndoAlphaChangedObject(
-                    layer: .init(item: selectedLayer),
-                    withNewAlpha: newAlpha
-                )
-            }
-
-            self.oldAlpha = nil
+    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+        guard let textureRepository else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
         }
-
-        guard
-            let undoObject,
-            let redoObject
-        else { return nil }
-
-        return .init(
-            undoObject: undoObject,
-            redoObject: redoObject
-        )
-    }
-
-    func undoAdditionObject(
-        previousLayerIndex: Int,
-        currentLayerIndex: Int,
-        layer: TextureLayerModel,
-        texture: MTLTexture?
-    ) -> UndoStackModel<UndoObject>? {
-        let redoObject = UndoAdditionObject(
-            layerToBeAdded: layer,
-            insertIndex: currentLayerIndex
-        )
-
-        // Create a deletion undo object to cancel the addition
-        let undoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: _layers[previousLayerIndex].id
-        )
-
-        return .init(
-            undoObject: undoObject,
-            redoObject: redoObject,
-            texture: texture
-        )
-    }
-
-    func undoDeletionObject(
-        previousLayerIndex: Int,
-        currentLayerIndex: Int,
-        layer: TextureLayerModel,
-        texture: MTLTexture?
-    ) -> UndoStackModel<UndoObject>? {
-        // Add an undo object to the undo stack
-        let redoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: _layers[currentLayerIndex].id
-        )
-
-        // Create a addition undo object to cancel the deletion
-        let undoObject = UndoAdditionObject(
-            layerToBeAdded: redoObject.textureLayer,
-            insertIndex: previousLayerIndex
-        )
-
-        return .init(
-            undoObject: undoObject,
-            redoObject: redoObject,
-            texture: texture
-        )
-    }
-
-    func undoMoveObject(
-        indices: MoveLayerIndices,
-        selectedLayerId: UUID,
-        textureLayer: TextureLayerModel
-    ) -> UndoStackModel<UndoObject>? {
-        let redoObject = UndoMoveObject(
-            indices: indices,
-            selectedLayerId: selectedLayerId,
-            layer: textureLayer
-        )
-
-        let undoObject = redoObject.reversedObject
-
-        return .init(
-            undoObject: undoObject,
-            redoObject: redoObject
-        )
+        try await textureRepository.updateTexture(texture: texture, for: id)
     }
 }

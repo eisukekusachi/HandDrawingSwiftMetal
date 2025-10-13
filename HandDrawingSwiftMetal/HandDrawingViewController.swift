@@ -86,13 +86,11 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        /*
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
-        */
     }
 
     private func addEvents() {
@@ -120,6 +118,15 @@ extension HandDrawingViewController {
         contentView.tapNewButton = { [weak self] in
             guard let `self` else { return }
             self.newCanvasDialogPresenter.presentAlert(on: self)
+        }
+        contentView.tapDrawingToolButton = { [weak self] in
+            self?.contentView.toggleDrawingTool()
+        }
+        contentView.tapUndoButton = { [weak self] in
+            self?.contentView.undo()
+        }
+        contentView.tapRedoButton = { [weak self] in
+            self?.contentView.redo()
         }
     }
 }

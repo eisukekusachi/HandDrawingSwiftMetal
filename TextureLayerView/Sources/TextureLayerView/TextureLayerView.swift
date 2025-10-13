@@ -43,38 +43,37 @@ private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers()
-    private let repository = MockTextureRepository()
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,
         layerIndex: 3,
         layers: [
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer0",
                 alpha: 255,
                 isVisible: true
             ),
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer1",
                 alpha: 200,
                 isVisible: true
             ),
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer2",
                 alpha: 150,
                 isVisible: true
             ),
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer3",
                 alpha: 100,
                 isVisible: true
             ),
             .init(
-                id: UUID(),
+                id: LayerId(),
                 title: "Layer4",
                 alpha: 50,
                 isVisible: true
@@ -90,8 +89,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 await textureLayers.initialize(
-                    configuration: configuration,
-                    textureRepository: repository
+                    configuration: configuration
                 )
 
                 viewModel.initialize(

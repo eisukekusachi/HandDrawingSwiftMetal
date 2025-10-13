@@ -27,7 +27,7 @@ public enum MTLBuffers {
         points: [GrayscaleDotPoint],
         alpha: Int,
         textureSize: CGSize,
-        with device: MTLDevice?
+        with device: MTLDevice
     ) -> MTLGrayscalePointBuffers? {
         guard points.count != .zero else { return nil }
 
@@ -49,7 +49,6 @@ public enum MTLBuffers {
         }
 
         guard
-            let device,
             let vertexBuffer = device.makeBuffer(bytes: vertexArray, length: vertexArray.count * MemoryLayout<Float>.size),
             let diameterBuffer = device.makeBuffer(bytes: diameterArray, length: diameterArray.count * MemoryLayout<Float>.size),
             let alphaBuffer = device.makeBuffer(bytes: alphaArray, length: alphaArray.count * MemoryLayout<Float>.size),
@@ -67,14 +66,13 @@ public enum MTLBuffers {
 
     static func makeTextureBuffers(
         nodes: MTLTextureNodes = .textureNodes,
-        with device: MTLDevice?
+        with device: MTLDevice
     ) -> MTLTextureBuffers? {
         let vertices = nodes.vertices.getValues()
         let texCoords = nodes.textureCoord.getValues()
         let indices = nodes.indices.getValues()
 
         guard
-            let device,
             let vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size),
             let texCoordsBuffer = device.makeBuffer(bytes: texCoords, length: texCoords.count * MemoryLayout<Float>.size),
             let indexBuffer = device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size)
@@ -95,7 +93,7 @@ public enum MTLBuffers {
         destinationSize: CGSize,
         textureCoord: MTLTextureCoordinates = .screenTextureCoordinates,
         indices: MTLTextureIndices = .init(),
-        with device: MTLDevice?
+        with device: MTLDevice
     ) -> MTLTextureBuffers? {
         let vertices: [Float] = MTLTextureVertices.makeCenterAlignedTextureVertices(
             matrix: matrix,
@@ -107,7 +105,6 @@ public enum MTLBuffers {
         let indices: [UInt16] = indices.getValues()
 
         guard
-            let device,
             let vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size),
             let texCoordsBuffer = device.makeBuffer(bytes: textureCoord, length: textureCoord.count * MemoryLayout<Float>.size),
             let indexBuffer = device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt16>.size)
@@ -122,5 +119,4 @@ public enum MTLBuffers {
             indicesCount: indices.count
         )
     }
-
 }

@@ -49,7 +49,7 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
             self.project.$updatedAt.map { _ in () }.eraseToAnyPublisher(),
             self.project.$createdAt.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {

@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoAlphaChangedObject: UndoObject {
 
     /// Not used
-    public let undoTextureUUID: UUID = UUID()
+    public let undoTextureId: UndoTextureId = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 
@@ -35,10 +35,13 @@ public final class UndoAlphaChangedObject: UndoObject {
         )
     }
 
-    public func performTextureOperation(
-        textureRepository: TextureRepository,
-        undoTextureRepository: TextureRepository
-    ) async throws {
-        // Do nothing
+    @MainActor
+    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+        layers.updateAlpha(
+            textureLayer.id,
+            alpha: textureLayer.alpha
+        )
+
+        layers.requestFullCanvasUpdate()
     }
 }

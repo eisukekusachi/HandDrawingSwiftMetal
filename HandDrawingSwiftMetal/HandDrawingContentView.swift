@@ -37,6 +37,9 @@ final class HandDrawingContentView: UIView {
     var tapLoadButton: (() -> Void)?
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
+    var tapDrawingToolButton: (() -> Void)?
+    var tapUndoButton: (() -> Void)?
+    var tapRedoButton: (() -> Void)?
 
     let brushDrawingToolRenderer = BrushDrawingToolRenderer()
     let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
@@ -87,6 +90,8 @@ final class HandDrawingContentView: UIView {
          )
     }()
 
+    private let throttle = Throttle(delay: 0.2)
+
     private var cancellables = Set<AnyCancellable>()
 
     override init(frame: CGRect) {
@@ -108,9 +113,6 @@ final class HandDrawingContentView: UIView {
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        undoButton.isHidden = true
-        redoButton.isHidden = true
 
         updateDrawingComponents(
             viewModel.drawingToolStorage.type
@@ -137,6 +139,23 @@ final class HandDrawingContentView: UIView {
         }
 
         backgroundColor = .white
+    }
+
+    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
+        undoButton.isEnabled = state.isUndoEnabled
+        redoButton.isEnabled = state.isRedoEnabled
+    }
+
+    func toggleDrawingTool() {
+        viewModel.toggleDrawingTool()
+        updateDrawingComponents(viewModel.drawingToolStorage.type)
+    }
+
+    func undo() {
+        canvasView.undo()
+    }
+    func redo() {
+        canvasView.redo()
     }
 }
 
@@ -172,11 +191,6 @@ private extension HandDrawingContentView {
             .store(in: &cancellables)
     }
 
-    func changeDrawingTool() {
-        viewModel.changeDrawingTool()
-        updateDrawingComponents(viewModel.drawingToolStorage.type)
-    }
-
     func addEvents() {
 
         resetTransformButton.addAction(.init { [weak self] _ in
@@ -204,18 +218,22 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         drawingToolButton.addAction(.init { [weak self] _ in
-            self?.changeDrawingTool()
+            self?.tapDrawingToolButton?()
         }, for: .touchUpInside)
 
-/*
         undoButton.addAction(.init { [weak self] _ in
-            self?.canvasView.undo()
+            guard let `self` else { return }
+            self.throttle.run([self.undoButton, self.redoButton]) {
+                self.tapUndoButton?()
+            }
         }, for: .touchUpInside)
 
         redoButton.addAction(.init { [weak self] _ in
-            self?.canvasView.redo()
+            guard let `self` else { return }
+            self.throttle.run([self.undoButton, self.redoButton]) {
+                self.tapRedoButton?()
+            }
         }, for: .touchUpInside)
-*/
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let slider = action.sender as? UISlider else { return }
@@ -250,11 +268,4 @@ private extension HandDrawingContentView {
 
         canvasView.setDrawingTool(tool.rawValue)
     }
-
-    /*
-    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
-        undoButton.isEnabled = state.isUndoEnabled
-        redoButton.isEnabled = state.isRedoEnabled
-    }
-    */
 }

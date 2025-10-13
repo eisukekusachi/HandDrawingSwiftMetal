@@ -9,7 +9,7 @@ import UIKit
 
 public class TextureLayerItem: ObservableObject {
     /// The unique identifier for the layer
-    public let id: UUID
+    public let id: LayerId
     /// The name of the layer
     @Published public var title: String
     /// The opacity of the layer
@@ -24,7 +24,7 @@ public class TextureLayerItem: ObservableObject {
     }
 
     public init(
-        id: UUID,
+        id: LayerId,
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true,

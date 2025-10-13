@@ -22,7 +22,13 @@ public protocol TextureLayersProtocol: ObservableObject {
     var layersPublisher: AnyPublisher<[TextureLayerItem], Never> { get }
 
     /// Emits whenever `selectedLayerId` change
-    var selectedLayerIdPublisher: AnyPublisher<UUID?, Never> { get }
+    var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> { get }
+
+    /// Emits whenever `alpha` change
+    var alphaPublisher: AnyPublisher<Int, Never> { get }
+
+    /// Emits whenever `textureSize` change
+    var textureSizePublisher: AnyPublisher<CGSize, Never> { get }
 
     var selectedLayer: TextureLayerItem? { get }
 
@@ -39,21 +45,42 @@ public protocol TextureLayersProtocol: ObservableObject {
         textureRepository: TextureRepository?
     ) async
 
-    func layer(_ layerId: UUID) -> TextureLayerItem?
+    func layer(_ id: LayerId) -> TextureLayerItem?
 
-    func selectLayer(id: UUID)
+    func selectLayer(_ id: LayerId)
 
-    func addLayer(layer: TextureLayerItem, texture: MTLTexture, at index: Int) async throws
+    func addNewLayer(at index: Int) async throws
+
+    func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws
 
     func removeLayer(layerIndexToDelete index: Int) async throws
 
     func moveLayer(indices: MoveLayerIndices)
 
-    func updateTitle(id: UUID, title: String)
+    func updateLayer(_ layer: TextureLayerItem)
 
-    func updateVisibility(id: UUID, isVisible: Bool)
+    func updateThumbnail(_ id: LayerId, texture: MTLTexture)
 
-    func updateAlpha(id: UUID, alpha: Int, isStartHandleDragging: Bool)
+    func updateTitle(_ id: LayerId, title: String)
 
-    func updateThumbnail(_ identifiedTexture: IdentifiedTexture)
+    func updateVisibility(_ id: LayerId, isVisible: Bool)
+
+    func updateAlpha(_ id: LayerId, alpha: Int)
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    func beginAlphaChange()
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    func endAlphaChange()
+
+    /// Requests a partial canvas update
+    func requestCanvasUpdate()
+
+    /// Requests a full canvas update (all layers composited)
+    func requestFullCanvasUpdate()
+
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
+
+    /// Updates an existing texture for LayerId
+    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws
 }

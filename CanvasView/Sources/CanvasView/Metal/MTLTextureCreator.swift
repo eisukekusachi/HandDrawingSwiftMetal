@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2023/12/30.
 //
 
-import MetalKit
-import Accelerate
+@preconcurrency import Accelerate
+@preconcurrency import MetalKit
 
 private let bytesPerPixel = 4
 private let bitsPerComponent = 8
@@ -21,7 +21,7 @@ public enum MTLTextureCreator {
         guard
             let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals
         else { return nil }
-        return MTLTextureCreator.makeTexture(
+        return try MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             from: hexadecimalData,
@@ -60,8 +60,15 @@ public enum MTLTextureCreator {
         height: Int,
         from colorArray: [UInt8],
         with device: MTLDevice
-    ) -> MTLTexture? {
-        guard colorArray.count == Int(width * height) * bytesPerPixel else { return nil }
+    ) throws -> MTLTexture? {
+        guard colorArray.count == Int(width * height) * bytesPerPixel else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
+            Logger.error(error)
+            return nil
+        }
 
         let bytesPerRow = bytesPerPixel * width
 
@@ -80,5 +87,45 @@ public enum MTLTextureCreator {
             bytesPerImage: bytesPerRow * height
         )
         return texture
+    }
+
+    @MainActor
+    public static func duplicateTexture(
+        texture: MTLTexture,
+        renderer: MTLRendering
+    ) async throws -> MTLTexture? {
+        guard
+            let device = renderer.device,
+            let commandBuffer = renderer.newCommandBuffer,
+            let resultTexture = MTLTextureCreator.makeTexture(
+                label: texture.label,
+                width: texture.width,
+                height: texture.height,
+                with: device
+            )
+        else {
+            return nil
+        }
+
+        guard
+            texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
+            )
+            Logger.error(error)
+            return nil
+        }
+
+        renderer.copyTexture(
+            srctexture: texture,
+            dstTexture: resultTexture,
+            with: commandBuffer
+        )
+
+        try await commandBuffer.commitAndWaitAsync()
+
+        return resultTexture
     }
 }
