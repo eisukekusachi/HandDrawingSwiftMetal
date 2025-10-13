@@ -188,11 +188,16 @@ extension CoreDataTextureLayersStorage {
 private extension CoreDataTextureLayersStorage {
     func save(_ target: any TextureLayersProtocol) async {
 
+        guard
+            let selectedLayerId = target.selectedLayer?.id,
+            target.layers.count != 0,
+            target.textureSize != .zero
+        else { return }
+
         // Convert it to Sendable
         let layers = target.layers.map { TextureLayerModel(item: $0) }
 
         let textureSize = target.textureSize
-        let selectedLayerId = target.selectedLayer?.id
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()
