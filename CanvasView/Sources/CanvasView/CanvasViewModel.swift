@@ -98,7 +98,8 @@ public final class CanvasViewModel {
 
     private let undoTextureLayers: UndoTextureLayers
 
-    private let debouncer = Debouncer(delay: 0.1)
+    /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
+    private let undoDrawingDebouncer = Debouncer(delay: 0.2)
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -632,7 +633,7 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        debouncer.scheduleAsync { [weak self] in
+        undoDrawingDebouncer.scheduleAsync { [weak self] in
             do {
                 try await self?.dependencies.textureRepository.updateTexture(
                     texture: selectedLayerTexture,
