@@ -321,7 +321,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         // If the file exists, update it
         guard
-            FileManager.default.fileExists(atPath: fileURL.path)
+            FileManager.default.fileExists(atPath: fileURL.path),
+            let device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -331,10 +332,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        let bytes = texture.bytes
-
         do {
-            try FileOutput.saveTextureAsData(bytes: bytes, to: fileURL)
+            try await FileOutput.saveTexture(
+                from: texture,
+                with: device,
+                to: fileURL
+            )
         } catch {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),

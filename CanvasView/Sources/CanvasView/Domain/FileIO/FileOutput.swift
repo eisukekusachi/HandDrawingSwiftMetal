@@ -10,6 +10,51 @@ import ZIPFoundation
 
 enum FileOutput {
 
+    static func saveTexture(
+        from texture: MTLTexture,
+        with device: MTLDevice,
+        to url: URL
+    ) async throws {
+        let width = texture.width
+        let height = texture.height
+        let bytesPerPixel = 4
+        let bytesPerRow = width * bytesPerPixel
+        let dataSize = bytesPerRow * height
+
+        guard
+            let buffer = device.makeBuffer(length: dataSize, options: [.storageModeShared]),
+            let commandQueue = device.makeCommandQueue(),
+            let commandBuffer = commandQueue.makeCommandBuffer(),
+            let commandEncoder = commandBuffer.makeBlitCommandEncoder()
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        commandEncoder.copy(
+            from: texture,
+            sourceSlice: 0,
+            sourceLevel: 0,
+            sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+            sourceSize: MTLSize(width: width, height: height, depth: 1),
+            to: buffer,
+            destinationOffset: 0,
+            destinationBytesPerRow: bytesPerRow,
+            destinationBytesPerImage: dataSize
+        )
+        commandEncoder.endEncoding()
+
+        try await commandBuffer.commitAndWaitAsync()
+
+        let rawPointer = buffer.contents()
+        let data = Data(bytes: rawPointer, count: dataSize)
+        try data.write(to: url, options: .atomic)
+    }
+
     static func saveTextureAsData(
         bytes: [UInt8],
         to url: URL
