@@ -99,7 +99,7 @@ public final class CanvasViewModel {
     private let undoTextureLayers: UndoTextureLayers
 
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
-    private let undoDrawingDebouncer = Debouncer(delay: 0.5)
+    private let undoDrawingDebouncer = Debouncer(delay: 0.1)
 
     private var cancellables = Set<AnyCancellable>()
 

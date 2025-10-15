@@ -47,7 +47,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func setupUndoManager(
-        undoCount: Int = 64,
+        undoCount: Int = 24,
         undoTextureRepository: TextureInMemoryRepository
     ) {
         self.undoTextureRepository = undoTextureRepository
