@@ -106,27 +106,23 @@ public final class CanvasViewModel {
     init() {
         canvasRenderer = CanvasRenderer()
 
-        let textureLayers = TextureLayers(
-            canvasRenderer: canvasRenderer
-        )
-
-        undoTextureLayers = UndoTextureLayers(
-            textureLayers: textureLayers,
-            canvasRenderer: canvasRenderer
-        )
-
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
         )
 
-        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
-            project: ProjectMetaData(),
+        textureLayersStorage = CoreDataTextureLayersStorage(
+            canvasRenderer: canvasRenderer,
             context: persistenceController.viewContext
         )
 
-        textureLayersStorage = CoreDataTextureLayersStorage(
-            textureLayers: undoTextureLayers,
+        undoTextureLayers = UndoTextureLayers(
+            textureLayers: textureLayersStorage,
+            canvasRenderer: canvasRenderer
+        )
+
+        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
+            project: ProjectMetaData(),
             context: persistenceController.viewContext
         )
 

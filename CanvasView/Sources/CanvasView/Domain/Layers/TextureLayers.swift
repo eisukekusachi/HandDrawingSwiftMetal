@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 /// A class that manages texture layers
-public final class TextureLayers: TextureLayersProtocol, ObservableObject {
+public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {

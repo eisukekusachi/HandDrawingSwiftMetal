@@ -15,163 +15,34 @@ public let saveDebounceMilliseconds: Int = 500
 
 /// Texture layers managed by Core Data
 @MainActor
-public final class CoreDataTextureLayersStorage: TextureLayersProtocol, ObservableObject {
-
-    @Published private var textureLayers: any TextureLayersProtocol
+public final class CoreDataTextureLayersStorage: TextureLayers {
 
     private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
-
-    /// Emits when a canvas update is requested
-    public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.canvasUpdateRequestedPublisher
-    }
-
-    /// Emits when a full canvas update is requested
-    public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.fullCanvasUpdateRequestedPublisher
-    }
-
-    /// Emits whenever `layers` change
-    public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
-        textureLayers.layersPublisher
-    }
-
-    /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
-        textureLayers.selectedLayerIdPublisher
-    }
-
-    /// Emits whenever `alpha` change
-    public var alphaPublisher: AnyPublisher<Int, Never> {
-        textureLayers.alphaPublisher
-    }
-
-    /// Emits whenever `textureSize` change
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        textureLayers.textureSizePublisher
-    }
-
-    public var selectedLayer: TextureLayerItem? {
-        textureLayers.selectedLayer
-    }
-
-    public var selectedIndex: Int? {
-        textureLayers.selectedIndex
-    }
-
-    public var layers: [TextureLayerItem] {
-        textureLayers.layers
-    }
-
-    public var layerCount: Int {
-        textureLayers.layerCount
-    }
-
-    public var textureSize: CGSize {
-        textureLayers.textureSize
-    }
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: any TextureLayersProtocol,
+        canvasRenderer: CanvasRenderer?,
         context: NSManagedObjectContext
     ) {
-        self.textureLayers = textureLayers
-
         self.storage = .init(context: context)
+
+        super.init(canvasRenderer: canvasRenderer)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
-            self.textureLayers.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
+            self.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {
-                await self.save(textureLayers)
+                await self.save()
             }
         }
         .store(in: &cancellables)
-    }
-
-    public func initialize(
-        configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureRepository? = nil
-    ) async {
-        await textureLayers.initialize(
-            configuration: configuration,
-            textureRepository: textureRepository
-        )
-    }
-
-    public func layer(_ id: LayerId) -> TextureLayerItem? {
-        textureLayers.layer(id)
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        textureLayers.selectLayer(id)
-    }
-
-    public func addNewLayer(at index: Int) async throws {
-        try await textureLayers.addNewLayer(at: index)
-    }
-
-    public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
-        try await textureLayers.addLayer(layer: layer, texture: texture, at: index)
-    }
-
-    public func removeLayer(layerIndexToDelete index: Int) async throws {
-        try await textureLayers.removeLayer(layerIndexToDelete: index)
-    }
-
-    public func moveLayer(indices: MoveLayerIndices) {
-        textureLayers.moveLayer(indices: indices)
-    }
-
-    public func updateLayer(_ layer: TextureLayerItem) {
-        textureLayers.updateLayer(layer)
-    }
-
-    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
-        textureLayers.updateThumbnail(id, texture: texture)
-    }
-
-    public func updateTitle(_ id: LayerId, title: String) {
-        textureLayers.updateTitle(id, title: title)
-    }
-
-    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
-        textureLayers.updateVisibility(id, isVisible: isVisible)
-    }
-
-    public func updateAlpha(_ id: LayerId, alpha: Int) {
-        textureLayers.updateAlpha(id, alpha: alpha)
-    }
-
-    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
-        textureLayers.beginAlphaChange()
-    }
-
-    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
-        textureLayers.endAlphaChange()
-    }
-
-    public func requestCanvasUpdate() {
-        textureLayers.requestCanvasUpdate()
-    }
-
-    public func requestFullCanvasUpdate() {
-        textureLayers.requestFullCanvasUpdate()
-    }
-
-    /// Updates an existing texture for `LayerId`
-    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
-        try await textureLayers.updateTexture(texture: texture, for: id)
     }
 }
 
@@ -182,21 +53,20 @@ extension CoreDataTextureLayersStorage {
 }
 
 private extension CoreDataTextureLayersStorage {
-    func save(_ target: any TextureLayersProtocol) async {
-
+    func save() async {
         guard
-            let selectedLayerId = target.selectedLayer?.id,
-            target.layers.count != 0,
-            target.textureSize != .zero
+            let selectedLayerId = selectedLayer?.id,
+            layers.count != 0,
+            textureSize != .zero
         else { return }
 
         // Convert it to Sendable
-        let layers = target.layers.map { TextureLayerModel(item: $0) }
-
-        let textureSize = target.textureSize
+        let layers = layers.map { TextureLayerModel(item: $0) }
 
         let context = self.storage.context
         let request = self.storage.fetchRequest()
+
+        let textureSize = self.textureSize
 
         await context.perform { [context] in
             do {
