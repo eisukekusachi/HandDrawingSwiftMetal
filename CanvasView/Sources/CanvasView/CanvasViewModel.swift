@@ -106,8 +106,12 @@ public final class CanvasViewModel {
     init() {
         canvasRenderer = CanvasRenderer()
 
+        let textureLayers = TextureLayers(
+            canvasRenderer: canvasRenderer
+        )
+
         undoTextureLayers = UndoTextureLayers(
-            textureLayers: TextureLayers(),
+            textureLayers: textureLayers,
             canvasRenderer: canvasRenderer
         )
 

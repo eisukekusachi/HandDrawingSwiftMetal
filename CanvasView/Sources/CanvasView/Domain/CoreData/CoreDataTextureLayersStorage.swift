@@ -169,10 +169,6 @@ public final class CoreDataTextureLayersStorage: TextureLayersProtocol, Observab
         textureLayers.requestFullCanvasUpdate()
     }
 
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureLayers.duplicatedTexture(id)
-    }
-
     /// Updates an existing texture for `LayerId`
     public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)

@@ -42,7 +42,9 @@ public struct TextureLayerView: View {
 private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel()
 
-    private let textureLayers = TextureLayers()
+    private let textureLayers = TextureLayers(
+        canvasRenderer: nil
+    )
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,

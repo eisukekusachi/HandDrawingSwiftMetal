@@ -52,7 +52,9 @@ public struct ReversedTextureLayerListView: View {
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
-    private let textureLayers = TextureLayers()
+    private let textureLayers = TextureLayers(
+        canvasRenderer: nil
+    )
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
         textureSize: .zero,

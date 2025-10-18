@@ -79,8 +79,6 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Requests a full canvas update (all layers composited)
     func requestFullCanvasUpdate()
 
-    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
-
     /// Updates an existing texture for LayerId
     func updateTexture(texture: MTLTexture?, for id: LayerId) async throws
 }
