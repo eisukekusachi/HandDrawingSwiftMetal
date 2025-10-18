@@ -7,7 +7,7 @@
 
 import CanvasView
 import Combine
-import MetalKit
+import UIKit
 
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
