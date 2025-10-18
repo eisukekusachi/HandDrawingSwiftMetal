@@ -33,30 +33,14 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         $_selectedLayerId.eraseToAnyPublisher()
     }
 
-    /// Emits whenever `textureSize` change
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        $_textureSize.eraseToAnyPublisher()
-    }
-
     /// Emits whenever `alpha` change
     public var alphaPublisher: AnyPublisher<Int, Never> {
         $_alpha.eraseToAnyPublisher()
     }
 
-    public var textureSize: CGSize {
-        _textureSize
-    }
-
-    public var layers: [TextureLayerItem] {
-        _layers
-    }
-
-    public var layerCount: Int {
-        _layers.count
-    }
-
-    public var selectedLayerId: LayerId? {
-        _selectedLayerId
+    /// Emits whenever `textureSize` change
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        $_textureSize.eraseToAnyPublisher()
     }
 
     public var selectedLayer: TextureLayerItem? {
@@ -67,6 +51,18 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public var selectedIndex: Int? {
         guard let _selectedLayerId else { return nil }
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
+    }
+
+    public var layers: [TextureLayerItem] {
+        _layers
+    }
+
+    public var layerCount: Int {
+        _layers.count
+    }
+
+    public var textureSize: CGSize {
+        _textureSize
     }
 
     private var canvasRenderer: CanvasRenderer?
@@ -116,18 +112,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
                 self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
         }
-    }
-
-    public func layer(_ id: LayerId) -> TextureLayerItem? {
-        _layers.first(where: { $0.id == id })
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        _selectedLayerId = id
-    }
-
-    public func index(for id: LayerId) -> Int? {
-        _layers.firstIndex(where: { $0.id == id })
     }
 
     public func addNewLayer(at index: Int) async throws {
@@ -185,7 +169,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            _layers.count > 1,
+            layerCount > 1,
             let textureRepository,
             let selectedLayerId = selectedLayer?.id
         else {
@@ -210,13 +194,40 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
-            layerCount: self._layers.count
+            layerCount: layerCount
         )
 
         self._layers.move(
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
+    }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        // Do nothing
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        // Do nothing
+    }
+
+    /// Copies a texture for the given `LayerId`
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
+        try await textureRepository?.duplicatedTexture(id)
+    }
+
+    public func index(for id: LayerId) -> Int? {
+        _layers.firstIndex(where: { $0.id == id })
+    }
+
+    public func layer(_ id: LayerId) -> TextureLayerItem? {
+        _layers.first(where: { $0.id == id })
+    }
+
+    public func selectLayer(_ id: LayerId) {
+        _selectedLayerId = id
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {
@@ -305,31 +316,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         _alpha = alpha
     }
 
-    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
-        // Do nothing
-    }
-
-    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
-        // Do nothing
-    }
-
-    /// Requests a partial canvas update
-    public func requestCanvasUpdate() {
-        canvasUpdateRequestedSubject.send(())
-    }
-
-    /// Requests a full canvas update (all layers composited)
-    public func requestFullCanvasUpdate() {
-        fullCanvasUpdateRequestedSubject.send(())
-    }
-
-    /// Copies a texture for the given `LayerId`
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureRepository?.duplicatedTexture(id)
-    }
-
     public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         guard let textureRepository else {
             let error = NSError(
@@ -340,5 +326,15 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             throw error
         }
         try await textureRepository.updateTexture(texture: texture, for: id)
+    }
+
+    /// Requests a partial canvas update
+    public func requestCanvasUpdate() {
+        canvasUpdateRequestedSubject.send(())
+    }
+
+    /// Requests a full canvas update (all layers composited)
+    public func requestFullCanvasUpdate() {
+        fullCanvasUpdateRequestedSubject.send(())
     }
 }

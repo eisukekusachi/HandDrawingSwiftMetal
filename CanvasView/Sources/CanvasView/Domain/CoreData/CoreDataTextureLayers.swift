@@ -37,9 +37,8 @@ public final class CoreDataTextureLayers: TextureLayers {
         )
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
-            guard let self else { return }
             Task {
-                await self.save()
+                await self?.save()
             }
         }
         .store(in: &cancellables)

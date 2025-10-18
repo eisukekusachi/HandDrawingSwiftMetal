@@ -59,9 +59,9 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     func endAlphaChange()
 
-    func index(for id: LayerId) -> Int?
-
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
+
+    func index(for id: LayerId) -> Int?
 
     func layer(_ id: LayerId) -> TextureLayerItem?
 
