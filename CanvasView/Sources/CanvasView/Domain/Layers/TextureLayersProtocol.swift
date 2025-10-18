@@ -45,6 +45,10 @@ public protocol TextureLayersProtocol: ObservableObject {
         textureRepository: TextureRepository?
     ) async
 
+    func index(for id: LayerId) -> Int?
+
+    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
+
     func layer(_ id: LayerId) -> TextureLayerItem?
 
     func selectLayer(_ id: LayerId)

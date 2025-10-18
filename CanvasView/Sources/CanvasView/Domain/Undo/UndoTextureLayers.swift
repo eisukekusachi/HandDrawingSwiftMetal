@@ -11,7 +11,7 @@ import UIKit
 /// A class that manages texture layers with undo functionality
 public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
 
-    @Published private var textureLayers: TextureLayers
+    @Published private var textureLayers: any TextureLayersProtocol
 
     private let undoManager = UndoManager()
 
@@ -39,7 +39,7 @@ public final class UndoTextureLayers: TextureLayersProtocol, ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayers,
+        textureLayers: any TextureLayersProtocol,
         canvasRenderer: CanvasRenderer
     ) {
         self.textureLayers = textureLayers
@@ -136,6 +136,10 @@ extension UndoTextureLayers {
 
     public func initialize(configuration: ResolvedTextureLayerArrayConfiguration, textureRepository: (any TextureRepository)?) async {
         await textureLayers.initialize(configuration: configuration, textureRepository: textureRepository)
+    }
+
+    public func index(for id: LayerId) -> Int? {
+        textureLayers.index(for: id)
     }
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {

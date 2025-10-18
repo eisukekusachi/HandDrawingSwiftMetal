@@ -19,5 +19,5 @@ public protocol UndoObject {
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
 
     @MainActor
-    func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws
+    func applyUndo(layers: any TextureLayersProtocol, repository: TextureRepository) async throws
 }
