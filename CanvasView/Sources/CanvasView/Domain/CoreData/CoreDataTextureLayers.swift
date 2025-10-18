@@ -1,5 +1,5 @@
 //
-//  CoreDataTextureLayersStorage.swift
+//  CoreDataTextureLayers.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/09/15.
@@ -15,7 +15,7 @@ public let saveDebounceMilliseconds: Int = 500
 
 /// Texture layers managed by Core Data
 @MainActor
-public final class CoreDataTextureLayersStorage: TextureLayers {
+public final class CoreDataTextureLayers: TextureLayers {
 
     private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
 
@@ -46,13 +46,13 @@ public final class CoreDataTextureLayersStorage: TextureLayers {
     }
 }
 
-extension CoreDataTextureLayersStorage {
+extension CoreDataTextureLayers {
     public func fetch() throws -> TextureLayerArrayStorageEntity? {
         try storage.fetch()
     }
 }
 
-private extension CoreDataTextureLayersStorage {
+private extension CoreDataTextureLayers {
     func save() async {
         guard
             let selectedLayerId = selectedLayer?.id,
