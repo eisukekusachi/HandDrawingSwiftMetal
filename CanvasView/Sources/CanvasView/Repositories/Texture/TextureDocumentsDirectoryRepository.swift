@@ -17,10 +17,6 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
     let workingDirectoryURL: URL
 
-    var device: MTLDevice? {
-        renderer.device
-    }
-
     var textureSize: CGSize {
         _textureSize
     }
@@ -76,7 +72,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
            ),
            // Check if the texture can be created before proceeding
            let textureSize = configuration.textureSize,
-           let device,
+           let device = renderer.device,
            let _ = MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),
                height: Int(textureSize.height),
@@ -123,7 +119,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             )
             // Check if the data can be converted into a texture
             guard
-                let device,
+                let device = renderer.device,
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = try MTLTextureCreator.makeTexture(
                     width: Int(textureSize.width),
@@ -200,7 +196,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     func newTexture(_ textureSize: CGSize) async throws -> MTLTexture? {
-        guard let device else { return nil }
+        guard let device = renderer.device else { return nil }
 
         return MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
@@ -223,7 +219,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let device,
+            let device = renderer.device,
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,

@@ -11,10 +11,6 @@ import Metal
 
 final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
-    var device: MTLDevice? {
-        MTLCreateSystemDefaultDevice()
-    }
-
     func removeTexture(_ id: LayerId) throws {}
 
     var textures: [LayerId: MTLTexture] = [:]
