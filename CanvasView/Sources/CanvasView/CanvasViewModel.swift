@@ -54,8 +54,8 @@ public final class CanvasViewModel {
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
-    /// Texture layers stored in Core Data
-    private var textureLayers: any TextureLayersProtocol
+    /// Undoable texture layers
+    private let textureLayers: UndoTextureLayers
 
     private let persistenceController: PersistenceController
 
@@ -96,8 +96,6 @@ public final class CanvasViewModel {
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    private let undoTextureLayers: UndoTextureLayers
-
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
     private let undoDrawingDebouncer = Debouncer(delay: 0.5)
 
@@ -111,13 +109,12 @@ public final class CanvasViewModel {
             location: .swiftPackageManager
         )
 
-        textureLayers = CoreDataTextureLayers(
-            canvasRenderer: canvasRenderer,
-            context: persistenceController.viewContext
-        )
-
-        undoTextureLayers = UndoTextureLayers(
-            textureLayers: textureLayers,
+        // Initialize texture layers that supports undo and stores its data in Core Data
+        textureLayers = UndoTextureLayers(
+            textureLayers: CoreDataTextureLayers(
+                canvasRenderer: canvasRenderer,
+                context: persistenceController.viewContext
+            ),
             canvasRenderer: canvasRenderer
         )
 
@@ -165,7 +162,7 @@ public final class CanvasViewModel {
 
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            self.undoTextureLayers.setupUndoManager(
+            self.textureLayers.setupUndoManager(
                 undoTextureRepository: undoTextureRepository
             )
         }
@@ -178,7 +175,7 @@ public final class CanvasViewModel {
             defer { activityIndicatorSubject.send(false) }
 
             let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
-                entity: try? (textureLayers as? CoreDataTextureLayers)?.fetch()
+                entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
             ) ?? configuration.textureLayerArrayConfiguration
 
             // Initialize the texture repository
@@ -244,7 +241,7 @@ public extension CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        undoTextureLayers.didUndo
+        textureLayers.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.didUndoSubject.send(state)
@@ -260,8 +257,8 @@ public extension CanvasViewModel {
         )
 
         // Initialize the repository used for Undo
-        if undoTextureLayers.isUndoEnabled {
-            undoTextureLayers.initializeUndoTextureRepository(
+        if textureLayers.isUndoEnabled {
+            textureLayers.initializeUndoTextureRepository(
                 configuration.textureSize
             )
         }
@@ -314,7 +311,7 @@ extension CanvasViewModel {
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
-                    await undoTextureLayers.setDrawingUndoObject(
+                    await textureLayers.setDrawingUndoObject(
                         texture: canvasRenderer.selectedLayerTexture
                     )
                 }
@@ -364,7 +361,7 @@ extension CanvasViewModel {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
             Task {
-                await undoTextureLayers.setDrawingUndoObject(
+                await textureLayers.setDrawingUndoObject(
                     texture: canvasRenderer.selectedLayerTexture
                 )
             }
@@ -408,10 +405,10 @@ public extension CanvasViewModel {
     }
 
     func undo() {
-        undoTextureLayers.undo()
+        textureLayers.undo()
     }
     func redo() {
-        undoTextureLayers.redo()
+        textureLayers.redo()
     }
 
     func loadFile(
@@ -653,7 +650,7 @@ extension CanvasViewModel {
         }
 
         Task {
-            await undoTextureLayers.pushUndoDrawingObject(
+            await textureLayers.pushUndoDrawingObject(
                 texture: selectedLayerTexture
             )
         }
