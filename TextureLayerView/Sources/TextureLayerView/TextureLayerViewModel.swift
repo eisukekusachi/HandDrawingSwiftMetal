@@ -7,7 +7,7 @@
 
 import CanvasView
 import Combine
-import MetalKit
+import UIKit
 
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
@@ -122,7 +122,7 @@ public extension TextureLayerViewModel {
                 )
                 textureLayers.requestFullCanvasUpdate()
             } catch {
-
+                Logger.error(error)
             }
         }
     }

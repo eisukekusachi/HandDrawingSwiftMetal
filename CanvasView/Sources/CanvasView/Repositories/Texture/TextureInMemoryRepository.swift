@@ -16,10 +16,6 @@ public class TextureInMemoryRepository: TextureRepository {
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     public var textures: [LayerId: MTLTexture?] = [:]
 
-    public var device: MTLDevice? {
-        renderer.device
-    }
-
     public var textureSize: CGSize {
         _textureSize
     }
@@ -122,7 +118,7 @@ public class TextureInMemoryRepository: TextureRepository {
             }
 
             guard
-                let device,
+                let device = renderer.device,
                 let newTexture = try MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
@@ -152,7 +148,7 @@ public class TextureInMemoryRepository: TextureRepository {
     }
 
     func createTexture(_ id: LayerId, textureSize: CGSize) async throws {
-        guard let device else { return }
+        guard let device = renderer.device else { return }
 
         textures[id] = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),

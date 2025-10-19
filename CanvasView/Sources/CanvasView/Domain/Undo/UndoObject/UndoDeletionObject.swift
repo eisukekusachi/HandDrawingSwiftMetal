@@ -34,7 +34,7 @@ public final class UndoDeletionObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: TextureLayers, repository: TextureRepository) async throws {
+    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureRepository) async throws {
         guard
             let index = layers.index(for: textureLayer.id)
         else {

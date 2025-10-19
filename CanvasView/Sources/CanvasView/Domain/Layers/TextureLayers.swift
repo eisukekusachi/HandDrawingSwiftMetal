@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 /// A class that manages texture layers
-public final class TextureLayers: TextureLayersProtocol, ObservableObject {
+public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -23,7 +23,7 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
     private let fullCanvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
 
-    /// Emits whenever `layers` change
+    /// Emits whenever `layers` change such as when layers are added or removed
     public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
         $_layers.eraseToAnyPublisher()
     }
@@ -33,30 +33,14 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
         $_selectedLayerId.eraseToAnyPublisher()
     }
 
-    /// Emits whenever `textureSize` change
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        $_textureSize.eraseToAnyPublisher()
-    }
-
     /// Emits whenever `alpha` change
     public var alphaPublisher: AnyPublisher<Int, Never> {
         $_alpha.eraseToAnyPublisher()
     }
 
-    public var textureSize: CGSize {
-        _textureSize
-    }
-
-    public var layers: [TextureLayerItem] {
-        _layers
-    }
-
-    public var layerCount: Int {
-        _layers.count
-    }
-
-    public var selectedLayerId: LayerId? {
-        _selectedLayerId
+    /// Emits whenever `textureSize` change
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        $_textureSize.eraseToAnyPublisher()
     }
 
     public var selectedLayer: TextureLayerItem? {
@@ -68,6 +52,20 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
         guard let _selectedLayerId else { return nil }
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
+
+    public var layers: [TextureLayerItem] {
+        _layers
+    }
+
+    public var layerCount: Int {
+        _layers.count
+    }
+
+    public var textureSize: CGSize {
+        _textureSize
+    }
+
+    private var canvasRenderer: CanvasRenderer?
 
     private var textureRepository: TextureRepository?
 
@@ -82,12 +80,13 @@ public final class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var oldAlpha: Int?
 
-    public init() {}
-}
+    public init(
+        canvasRenderer: CanvasRenderer?
+    ) {
+        self.canvasRenderer = canvasRenderer
+    }
 
-public extension TextureLayers {
-
-    func initialize(
+    public func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
         textureRepository: TextureRepository? = nil
     ) async {
@@ -115,46 +114,40 @@ public extension TextureLayers {
         }
     }
 
-    func layer(_ id: LayerId) -> TextureLayerItem? {
-        _layers.first(where: { $0.id == id })
-    }
-
-    func selectLayer(_ id: LayerId) {
-        _selectedLayerId = id
-    }
-
-    func index(for id: LayerId) -> Int? {
-        _layers.firstIndex(where: { $0.id == id })
-    }
-
-    func addNewLayer(at index: Int) async throws {
-        let layer: TextureLayerModel = .init(
-            id: LayerId(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true
-        )
-
-        try await addLayer(layer: layer, texture: nil, at: index)
-    }
-
-    func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
+    public func addNewLayer(at index: Int) async throws {
         guard
-            let textureRepository,
-            let device = textureRepository.device
-        else { return }
-
-        var newTexture: MTLTexture? = texture
-        if newTexture == nil {
-            newTexture = MTLTextureCreator.makeTexture(
-                width: Int(_textureSize.width),
-                height: Int(_textureSize.height),
+            let device = canvasRenderer?.device,
+            let texture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
                 with: device
             )
-        }
+            else { return }
 
+        try await addLayer(
+            layer: .init(
+                id: LayerId(),
+                title: TimeStampFormatter.currentDate,
+                alpha: 255,
+                isVisible: true
+            ),
+            texture: texture,
+            at: index
+        )
+    }
+
+    public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
-            let newTexture
+            let textureRepository,
+            let device = canvasRenderer?.device
+        else { return }
+
+        // If a texture is provided as an argument, use it. otherwise create a new one.
+        guard let newTexture: MTLTexture = texture ?? MTLTextureCreator.makeTexture(
+            width: Int(_textureSize.width),
+            height: Int(_textureSize.height),
+            with: device
+        )
         else { return }
 
         self._layers.insert(
@@ -174,9 +167,9 @@ public extension TextureLayers {
             )
     }
 
-    func removeLayer(layerIndexToDelete index: Int) async throws {
+    public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            _layers.count > 1,
+            layerCount > 1,
             let textureRepository,
             let selectedLayerId = selectedLayer?.id
         else {
@@ -197,11 +190,11 @@ public extension TextureLayers {
             .removeTexture(selectedLayerId)
     }
 
-    func moveLayer(indices: MoveLayerIndices) {
+    public func moveLayer(indices: MoveLayerIndices) {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
-            layerCount: self._layers.count
+            layerCount: layerCount
         )
 
         self._layers.move(
@@ -210,9 +203,36 @@ public extension TextureLayers {
         )
     }
 
-    func updateLayer(_ layer: TextureLayerItem) {
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        // Do nothing
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        // Do nothing
+    }
+
+    /// Copies a texture for the given `LayerId`
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
+        try await textureRepository?.duplicatedTexture(id)
+    }
+
+    public func index(for id: LayerId) -> Int? {
+        _layers.firstIndex(where: { $0.id == id })
+    }
+
+    public func layer(_ id: LayerId) -> TextureLayerItem? {
+        _layers.first(where: { $0.id == id })
+    }
+
+    public func selectLayer(_ id: LayerId) {
+        _selectedLayerId = id
+    }
+
+    public func updateLayer(_ layer: TextureLayerItem) {
         guard
-            let index = _layers.firstIndex(where: { $0.id == layer.id })
+            let index = index(for: layer.id)
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
@@ -222,7 +242,7 @@ public extension TextureLayers {
         _layers[index] = layer
     }
 
-    func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
+    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
         guard
             let index = index(for: id)
         else {
@@ -234,7 +254,7 @@ public extension TextureLayers {
         self._layers[index].thumbnail = texture.makeThumbnail()
     }
 
-    func updateTitle(_ id: LayerId, title: String) {
+    public func updateTitle(_ id: LayerId, title: String) {
         guard
             let index = index(for: id)
         else {
@@ -254,7 +274,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateVisibility(_ id: LayerId, isVisible: Bool) {
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
             let index = index(for: id)
         else {
@@ -274,7 +294,7 @@ public extension TextureLayers {
         )
     }
 
-    func updateAlpha(_ id: LayerId, alpha: Int) {
+    public func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
             let index = index(for: id)
         else {
@@ -296,32 +316,7 @@ public extension TextureLayers {
         _alpha = alpha
     }
 
-    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    func beginAlphaChange() {
-        // Do nothing
-    }
-
-    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    func endAlphaChange() {
-        // Do nothing
-    }
-
-    /// Requests a partial canvas update
-    func requestCanvasUpdate() {
-        canvasUpdateRequestedSubject.send(())
-    }
-
-    /// Requests a full canvas update (all layers composited)
-    func requestFullCanvasUpdate() {
-        fullCanvasUpdateRequestedSubject.send(())
-    }
-
-    /// Copies a texture for the given `LayerId`
-    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureRepository?.duplicatedTexture(id)
-    }
-
-    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -331,5 +326,15 @@ public extension TextureLayers {
             throw error
         }
         try await textureRepository.updateTexture(texture: texture, for: id)
+    }
+
+    /// Requests a partial canvas update
+    public func requestCanvasUpdate() {
+        canvasUpdateRequestedSubject.send(())
+    }
+
+    /// Requests a full canvas update (all layers composited)
+    public func requestFullCanvasUpdate() {
+        fullCanvasUpdateRequestedSubject.send(())
     }
 }
