@@ -48,7 +48,7 @@ final class HandDrawingContentView: UIView {
 
     lazy var drawingToolLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<DrawingToolArchiveModel>(
+            LocalFileLoader<DrawingToolArchiveModel>(
                 fileName: DrawingToolArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
@@ -62,7 +62,7 @@ final class HandDrawingContentView: UIView {
 
     lazy var brushPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<BrushPaletteArchiveModel>(
+            LocalFileLoader<BrushPaletteArchiveModel>(
                 fileName: BrushPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
@@ -77,7 +77,7 @@ final class HandDrawingContentView: UIView {
 
     lazy var eraserPaletteLoader: AnyLocalFileLoader = {
          AnyLocalFileLoader(
-            LocalFileNamedLoader<EraserPaletteArchiveModel>(
+            LocalFileLoader<EraserPaletteArchiveModel>(
                 fileName: EraserPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
