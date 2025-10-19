@@ -122,7 +122,7 @@ public extension TextureLayerViewModel {
                 )
                 textureLayers.requestFullCanvasUpdate()
             } catch {
-
+                Logger.error(error)
             }
         }
     }

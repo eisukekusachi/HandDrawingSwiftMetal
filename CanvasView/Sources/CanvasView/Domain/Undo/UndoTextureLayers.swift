@@ -318,6 +318,28 @@ private extension UndoTextureLayers {
 
 extension UndoTextureLayers: TextureLayersProtocol {
 
+    public func addNewLayer(at index: Int) async throws {
+        guard
+            let device = canvasRenderer?.device,
+            let texture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
+            else { return }
+
+        try await addLayer(
+            layer: .init(
+                id: LayerId(),
+                title: TimeStampFormatter.currentDate,
+                alpha: 255,
+                isVisible: true
+            ),
+            texture: texture,
+            at: index
+        )
+    }
+
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
             let selectedLayer = textureLayers.selectedLayer
@@ -515,10 +537,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func selectLayer(_ id: LayerId) {
         textureLayers.selectLayer(id)
-    }
-
-    public func addNewLayer(at index: Int) async throws {
-        try await textureLayers.addNewLayer(at: index)
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {
