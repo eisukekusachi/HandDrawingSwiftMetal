@@ -40,13 +40,16 @@ public final class UndoTextureLayers: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        undoCount: Int = 24,
         textureLayers: any TextureLayersProtocol,
         canvasRenderer: CanvasRenderer
     ) {
         self.textureLayers = textureLayers
         self.canvasRenderer = canvasRenderer
+    }
 
+    public func setupUndoManager(
+        undoCount: Int = 24
+    ) {
         self.undoManager.levelsOfUndo = undoCount
         self.undoManager.groupsByEvent = false
     }

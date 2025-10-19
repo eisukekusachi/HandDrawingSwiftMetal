@@ -303,7 +303,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
     func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
         guard
-            let texture
+            let texture,
+            let device = renderer.device
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -327,10 +328,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        let bytes = texture.bytes
-
         do {
-            try FileOutput.saveTextureAsData(bytes: bytes, to: fileURL)
+            try await FileOutput.saveTexture(
+                from: texture,
+                with: device,
+                to: fileURL
+            )
         } catch {
             let error = NSError(
                 title: String(localized :"Error", bundle: .module),
