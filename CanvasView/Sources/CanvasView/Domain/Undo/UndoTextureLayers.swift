@@ -12,6 +12,16 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
+    public var isUndoEnabled: Bool {
+        undoTextureRepository != nil
+    }
+
+    /// Emits `UndoRedoButtonState` when the undo stack changes
+    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+        didUndoSubject.eraseToAnyPublisher()
+    }
+    private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
+
     @Published private(set) var textureLayers: any TextureLayersProtocol
 
     private let undoManager = UndoManager()
@@ -20,16 +30,6 @@ public final class UndoTextureLayers: ObservableObject {
     private var undoTextureRepository: TextureInMemoryRepository? = nil
 
     private var canvasRenderer: CanvasRenderer?
-
-    var isUndoEnabled: Bool {
-        undoTextureRepository != nil
-    }
-
-    /// Emits `UndoRedoButtonState` when the undo stack changes
-    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
-    }
-    private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
     /// Holds the previous texture to support undoing drawings
     private var previousDrawingTextureForUndo: MTLTexture?
@@ -40,21 +40,21 @@ public final class UndoTextureLayers: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
+        undoCount: Int = 24,
         textureLayers: any TextureLayersProtocol,
         canvasRenderer: CanvasRenderer
     ) {
         self.textureLayers = textureLayers
         self.canvasRenderer = canvasRenderer
-    }
-
-    public func setupUndoManager(
-        undoCount: Int = 64,
-        undoTextureRepository: TextureInMemoryRepository
-    ) {
-        self.undoTextureRepository = undoTextureRepository
 
         self.undoManager.levelsOfUndo = undoCount
         self.undoManager.groupsByEvent = false
+    }
+
+    public func setUndoTextureRepository(
+        undoTextureRepository: TextureInMemoryRepository
+    ) {
+        self.undoTextureRepository = undoTextureRepository
     }
 
     public func initializeUndoTextureRepository(
@@ -76,6 +76,7 @@ public final class UndoTextureLayers: ObservableObject {
                     configuration: .init(textureSize: size),
                     fallbackTextureSize: size
                 ) {
+                    // Create a texture for use in drawing undo operations
                     previousDrawingTextureForUndo = MTLTextureCreator.makeTexture(
                         width: Int(resolvedTextureLayersConfiguration.textureSize.width),
                         height: Int(resolvedTextureLayersConfiguration.textureSize.height),
@@ -89,24 +90,38 @@ public final class UndoTextureLayers: ObservableObject {
     }
 }
 
-extension UndoTextureLayers {
+public extension UndoTextureLayers {
 
-    public func undo() {
+    func undo() {
         undoManager.undo()
         didUndoSubject.send(.init(undoManager))
     }
-    public func redo() {
+    func redo() {
         undoManager.redo()
         didUndoSubject.send(.init(undoManager))
     }
-    public func resetUndo() {
+    func resetUndo() {
         undoManager.removeAllActions()
         undoTextureRepository?.removeAll()
         didUndoSubject.send(.init(undoManager))
         cancellables = Set<AnyCancellable>()
     }
 
-    public func setDrawingUndoObject(
+    func setUndoDrawing(
+        texture: MTLTexture?
+    ) async {
+        await setDrawingUndoObject(texture: texture)
+    }
+    func pushUndoDrawingObjectToUndoStack(
+        texture: MTLTexture?
+    ) async {
+        await pushUndoDrawingObject(texture: texture)
+    }
+}
+
+private extension UndoTextureLayers {
+
+    func setDrawingUndoObject(
         texture: MTLTexture?
     ) async {
         guard
@@ -129,7 +144,7 @@ extension UndoTextureLayers {
         }
     }
 
-    public func pushUndoDrawingObject(
+    func pushUndoDrawingObject(
         texture: MTLTexture?
     ) async {
         guard
@@ -175,7 +190,7 @@ extension UndoTextureLayers {
         }
     }
 
-    private func pushUndoAdditionObject(
+    func pushUndoAdditionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
         guard
@@ -202,7 +217,7 @@ extension UndoTextureLayers {
         }
     }
 
-    private func pushUndoDeletionObject(
+    func pushUndoDeletionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) async {
         guard
@@ -228,11 +243,8 @@ extension UndoTextureLayers {
             Logger.error(error)
         }
     }
-}
 
-extension UndoTextureLayers {
-
-    private func pushUndoObject(
+    func pushUndoObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
     ) {
         guard let undoTextureRepository else { return }
@@ -258,15 +270,18 @@ extension UndoTextureLayers {
             })
             .store(in: &cancellables)
 
-        pushUndoObjectToUndoStack(
+        registerUndo(
             .init(
                 undoObject: undoObject,
                 redoObject: redoObject
             )
         )
     }
+}
 
-    private func pushUndoObjectToUndoStack(
+private extension UndoTextureLayers {
+
+    func registerUndo(
         _ undoStack: UndoStackModel<UndoObject>
     ) {
         guard let _ = undoTextureRepository else { return }
@@ -282,7 +297,7 @@ extension UndoTextureLayers {
         didUndoSubject.send(.init(undoManager))
     }
 
-    private func performUndo(
+    func performUndo(
         _ undoObject: UndoObject
     ) {
         guard let undoTextureRepository else { return }
@@ -302,30 +317,6 @@ extension UndoTextureLayers {
 }
 
 extension UndoTextureLayers: TextureLayersProtocol {
-
-    public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.canvasUpdateRequestedPublisher
-    }
-
-    public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.fullCanvasUpdateRequestedPublisher
-    }
-
-    public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
-        textureLayers.layersPublisher
-    }
-
-    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
-        textureLayers.selectedLayerIdPublisher
-    }
-
-    public var alphaPublisher: AnyPublisher<Int, Never> {
-        textureLayers.alphaPublisher
-    }
-
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        textureLayers.textureSizePublisher
-    }
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
@@ -454,6 +445,30 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
 
         self.previousAlphaForUndo = nil
+    }
+
+    public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
+        textureLayers.canvasUpdateRequestedPublisher
+    }
+
+    public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
+        textureLayers.fullCanvasUpdateRequestedPublisher
+    }
+
+    public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
+        textureLayers.layersPublisher
+    }
+
+    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
+        textureLayers.selectedLayerIdPublisher
+    }
+
+    public var alphaPublisher: AnyPublisher<Int, Never> {
+        textureLayers.alphaPublisher
+    }
+
+    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
+        textureLayers.textureSizePublisher
     }
 
     public var selectedLayer: TextureLayerItem? {

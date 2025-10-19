@@ -162,7 +162,7 @@ public final class CanvasViewModel {
 
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
-            self.textureLayers.setupUndoManager(
+            self.textureLayers.setUndoTextureRepository(
                 undoTextureRepository: undoTextureRepository
             )
         }
@@ -311,7 +311,7 @@ extension CanvasViewModel {
             if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
                 drawingCurve = SmoothDrawingCurve()
                 Task {
-                    await textureLayers.setDrawingUndoObject(
+                    await textureLayers.setUndoDrawing(
                         texture: canvasRenderer.selectedLayerTexture
                     )
                 }
@@ -361,7 +361,7 @@ extension CanvasViewModel {
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
             drawingCurve = DefaultDrawingCurve()
             Task {
-                await textureLayers.setDrawingUndoObject(
+                await textureLayers.setUndoDrawing(
                     texture: canvasRenderer.selectedLayerTexture
                 )
             }
@@ -650,7 +650,7 @@ extension CanvasViewModel {
         }
 
         Task {
-            await textureLayers.pushUndoDrawingObject(
+            await textureLayers.pushUndoDrawingObjectToUndoStack(
                 texture: selectedLayerTexture
             )
         }
