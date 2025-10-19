@@ -37,7 +37,7 @@ extension ProjectMetaDataArchiveModel {
     public init(fileURL: URL) throws {
         do {
             let data = try Data(contentsOf: fileURL)
-            self = try JSONDecoder().decode(ProjectMetaDataArchiveModel.self, from: data).model()
+            self = try JSONDecoder().decode(ProjectMetaDataArchiveModel.self, from: data)
         } catch {
             let className = String(describing: ProjectMetaDataArchiveModel.self)
             let nsError = NSError(
@@ -82,14 +82,4 @@ extension ProjectMetaDataArchiveModel {
     }
 }
 
-extension ProjectMetaDataArchiveModel: ProjectMetaDataConvertible {
-    public func model() -> Self {
-        self
-    }
-}
-
 extension ProjectMetaDataArchiveModel: LocalFileLoadable {}
-
-public protocol ProjectMetaDataConvertible: Decodable {
-    func model() -> ProjectMetaDataArchiveModel
-}

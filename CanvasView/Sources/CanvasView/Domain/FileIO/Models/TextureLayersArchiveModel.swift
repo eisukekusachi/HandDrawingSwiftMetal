@@ -45,7 +45,7 @@ extension TextureLayersArchiveModel {
     init(fileURL: URL) throws {
         let data = try Data(contentsOf: fileURL)
         do {
-            self = try JSONDecoder().decode(TextureLayersArchiveModel.self, from: data).model()
+            self = try JSONDecoder().decode(TextureLayersArchiveModel.self, from: data)
         } catch {
             let className = String(describing: TextureLayersArchiveModel.self)
             let nsError = NSError(
@@ -63,12 +63,6 @@ extension TextureLayersArchiveModel {
     }
 }
 
-extension TextureLayersArchiveModel: TextureLayersEntityConvertible {
-    public func model() -> Self {
-        self
-    }
-}
-
 extension TextureLayersArchiveModel: LocalFileConvertible {
 
     public func namedItem() -> LocalFileNamedItem<TextureLayersArchiveModel> {
@@ -81,8 +75,4 @@ extension TextureLayersArchiveModel: LocalFileConvertible {
     public func write(to url: URL) throws {
         try FileOutput.saveJson(self, to: url)
     }
-}
-
-public protocol TextureLayersEntityConvertible: Decodable {
-    func model() -> TextureLayersArchiveModel
 }
