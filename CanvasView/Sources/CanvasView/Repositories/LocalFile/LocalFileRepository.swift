@@ -10,6 +10,8 @@ import Foundation
 @MainActor
 public protocol LocalFileRepository: Sendable {
 
+    var workingDirectoryURL: URL { get }
+
     func createWorkingDirectory() throws
 
     func removeWorkingDirectory()
@@ -19,11 +21,4 @@ public protocol LocalFileRepository: Sendable {
 
     /// Unzips a file into the working directory
     func unzipToWorkingDirectoryAsync(from zipFileURL: URL) async throws -> URL
-
-    /// Saves a single file item to the working directory
-    func saveItemToWorkingDirectory<T: LocalFileConvertible>(namedItem: LocalFileNamedItem<T>) async throws -> URL
-
-    func saveItemToWorkingDirectory(namedItem: AnyLocalFileNamedItem) async throws -> URL
-
-    func saveAllItemsToWorkingDirectory(namedItems: [AnyLocalFileNamedItem]) async throws -> [URL]
 }

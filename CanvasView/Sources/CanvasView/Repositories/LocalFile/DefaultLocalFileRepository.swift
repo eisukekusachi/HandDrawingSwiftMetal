@@ -12,7 +12,7 @@ import Foundation
 public final class DefaultLocalFileRepository: LocalFileRepository {
 
     /// The URL of the directory for storing temporary files
-    let workingDirectoryURL: URL
+    public let workingDirectoryURL: URL
 
     init(workingDirectoryURL: URL) {
         self.workingDirectoryURL = workingDirectoryURL
@@ -60,43 +60,6 @@ public extension DefaultLocalFileRepository {
             to: workingDirectoryURL
         )
         return workingDirectoryURL
-    }
-
-    /// Saves a single file item to the working directory
-    func saveItemToWorkingDirectory<T: LocalFileConvertible>(
-        namedItem: LocalFileNamedItem<T>
-    ) async throws -> URL {
-        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.fileName)
-        try namedItem.item.write(to: fileURL)
-        return fileURL
-    }
-
-    /// Saves a single file item to the working directory
-    func saveItemToWorkingDirectory(
-        namedItem: AnyLocalFileNamedItem
-    ) async throws -> URL {
-        let fileURL = workingDirectoryURL.appendingPathComponent(namedItem.fileName)
-        try namedItem.write(to: fileURL)
-        return fileURL
-    }
-
-    func saveAllItemsToWorkingDirectory(
-        namedItems: [AnyLocalFileNamedItem]
-    ) async throws -> [URL] {
-        try await withThrowingTaskGroup(of: URL.self) { group in
-            for namedItem in namedItems {
-                let item = namedItem
-                group.addTask {
-                    try await self.saveItemToWorkingDirectory(namedItem: item)
-                }
-            }
-
-            var urls: [URL] = []
-            for try await url in group {
-                urls.append(url)
-            }
-            return urls
-        }
     }
 }
 

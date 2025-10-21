@@ -436,7 +436,7 @@ public extension CanvasViewModel {
 
                 // Load texture layer data from the JSON file
                 let textureLayersModel: TextureLayersArchiveModel = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.jsonFileName)
+                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
                 )
                 let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
                     textureSize: textureLayersModel.textureSize,
@@ -501,7 +501,7 @@ public extension CanvasViewModel {
             )
         else { return }
 
-        Task {
+        Task(priority: .userInitiated) {
             defer {
                 /// Remove the working space
                 dependencies.localFileRepository.removeWorkingDirectory()
@@ -519,36 +519,48 @@ public extension CanvasViewModel {
                     textureLayers.layers.map { $0.id }
                 )
 
+                let url: URL = dependencies.localFileRepository.workingDirectoryURL
+
                 // Save the thumbnail image into the working directory
-                async let resultCanvasThumbnail = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: .init(fileName: TextureLayersArchiveModel.thumbnailName, item: thumbnailImage)
+                try thumbnailImage.write(
+                    to: url.appendingPathComponent(TextureLayersArchiveModel.thumbnailName)
                 )
 
-                // Save the textures into the working directory
-                async let resultCanvasTextures = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
-                    namedItems: textures.map {
-                        .init(fileName: $0.id.uuidString, item: $0)
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    for texture in textures {
+                        let fileName = texture.fileName
+                        group.addTask {
+                            try texture.write(
+                                to: url.appendingPathComponent(fileName)
+                            )
+                        }
                     }
-                )
-                _ = try await (resultCanvasThumbnail, resultCanvasTextures)
+                    try await group.waitForAll()
+                }
 
                 // Save the texture layers as JSON
-                let textureLayersModel: TextureLayersArchiveModel = .init(textureLayers: textureLayers)
-                async let resultCanvasEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: textureLayersModel.namedItem()
+                try TextureLayersArchiveModel(textureLayers: textureLayers).write(
+                    to: url.appendingPathComponent(TextureLayersArchiveModel.fileName)
                 )
 
                 // Save the project metadata as JSON
-                async let resultProjectMetaDataEntity = try await dependencies.localFileRepository.saveItemToWorkingDirectory(
-                    namedItem: ProjectMetaDataArchiveModel.namedItem(from: projectMetaDataStorage)
+               try ProjectMetaDataArchiveModel(
+                    projectName: projectMetaDataStorage.projectName,
+                    createdAt: projectMetaDataStorage.createdAt,
+                    updatedAt: projectMetaDataStorage.updatedAt
+                ).write(
+                    to: url.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )
 
-                // Save an externally provided entities as JSON
-                async let resultAdditional = try await dependencies.localFileRepository.saveAllItemsToWorkingDirectory(
-                    namedItems: additionalItems
-                )
-
-                _ = try await (resultCanvasEntity, resultProjectMetaDataEntity, resultAdditional)
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    for item in additionalItems {
+                        group.addTask {
+                            let fileURL = url.appendingPathComponent(item.fileName)
+                            try item.write(to: fileURL)
+                        }
+                    }
+                    try await group.waitForAll()
+                }
 
                 // Zip the working directory into a single project file
                 try dependencies.localFileRepository.zipWorkingDirectory(

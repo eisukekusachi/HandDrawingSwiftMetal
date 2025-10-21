@@ -41,6 +41,9 @@ public struct IdentifiedTexture: Hashable, @unchecked Sendable {
 }
 
 extension IdentifiedTexture: LocalFileConvertible {
+    public var fileName: String {
+        id.uuidString
+    }
     public func write(to url: URL) throws {
         try FileOutput.saveTextureAsData(bytes: self.texture.bytes, to: url)
     }

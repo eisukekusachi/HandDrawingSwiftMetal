@@ -28,7 +28,7 @@ extension TextureLayersArchiveModel {
 
     static let thumbnailName: String = "thumbnail.png"
 
-    static let jsonFileName: String = "data"
+    static let fileName: String = "data"
 
     static let thumbnailLength: CGFloat = 500
 
@@ -67,7 +67,7 @@ extension TextureLayersArchiveModel: LocalFileConvertible {
 
     public func namedItem() -> LocalFileNamedItem<TextureLayersArchiveModel> {
         .init(
-            fileName: TextureLayersArchiveModel.jsonFileName,
+            fileName: TextureLayersArchiveModel.fileName,
             item: self
         )
     }
