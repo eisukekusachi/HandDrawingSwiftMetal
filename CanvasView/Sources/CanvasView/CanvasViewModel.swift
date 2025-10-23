@@ -438,25 +438,24 @@ public extension CanvasViewModel {
                 let textureLayersModel: TextureLayersArchiveModel = try .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
                 )
-                let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
-                    textureSize: textureLayersModel.textureSize,
-                    layerIndex: textureLayersModel.layerIndex,
-                    layers: textureLayersModel.layers
-                )
 
                 let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
                     from: workingDirectoryURL,
-                    configuration: textureLayersConfiguration,
+                    configuration: .init(
+                        textureSize: textureLayersModel.textureSize,
+                        layerIndex: textureLayersModel.layerIndex,
+                        layers: textureLayersModel.layers
+                    ),
                     defaultTextureSize: TextureLayerModel.defaultTextureSize()
                 )
+
+                // Restore the textures
+                try await initializeTextures(resolvedTextureLayersConfiguration)
 
                 // Load project metadata, falling back if it is missing
                 let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
                     fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
                 )
-
-                // Restore the textures
-                try await initializeTextures(resolvedTextureLayersConfiguration)
 
                 // Update metadata
                 projectMetaDataStorage.update(
@@ -466,6 +465,7 @@ public extension CanvasViewModel {
                 )
 
                 // Restore data from externally configured entities
+                // Since it’s optional, ignore any errors that occur
                 for entity in optionalEntities {
                     entity.loadIgnoringError(in: workingDirectoryURL)
                 }
