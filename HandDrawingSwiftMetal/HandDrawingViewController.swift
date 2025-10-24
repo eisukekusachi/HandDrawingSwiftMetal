@@ -27,6 +27,55 @@ class HandDrawingViewController: UIViewController {
 
     private let paletteHeight: CGFloat = 44
 
+    private let brushDrawingToolRenderer = BrushDrawingToolRenderer()
+    private let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
+
+    private lazy var drawingToolLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<DrawingToolArchiveModel>(
+                fileName: DrawingToolArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
+                    self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
+                    self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
+                }
+            }
+         )
+    }()
+
+    private lazy var brushPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<BrushPaletteArchiveModel>(
+                fileName: BrushPaletteArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.brushPaletteStorage.update(
+                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
+                        index: file.index
+                    )
+                }
+            }
+         )
+    }()
+
+    private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<EraserPaletteArchiveModel>(
+                fileName: EraserPaletteArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.viewModel.eraserPaletteStorage.update(
+                        alphas: file.alphas,
+                        index: file.index
+                    )
+                }
+            }
+         )
+    }()
+
+    private let viewModel = HandDrawingContentViewModel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -36,10 +85,17 @@ class HandDrawingViewController: UIViewController {
         addBrushPalette()
         addEraserPalette()
 
+        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
+        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
+
+        contentView.updateDrawingComponents(
+            viewModel.drawingToolStorage.type
+        )
+
         contentView.canvasView.initialize(
             drawingToolRenderers: [
-                contentView.brushDrawingToolRenderer,
-                contentView.eraserDrawingToolRenderer
+                brushDrawingToolRenderer,
+                eraserDrawingToolRenderer
             ],
             configuration: canvasConfiguration ?? .init()
         )
@@ -91,6 +147,34 @@ extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
+
+        viewModel.brushPaletteStorage.palette.$index
+            .sink { [weak self] index in
+                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
+                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
+                self.brushDrawingToolRenderer.setColor(newColor)
+            }
+            .store(in: &cancellables)
+
+        viewModel.eraserPaletteStorage.palette.$index
+            .sink { [weak self] index in
+                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
+                self.eraserDrawingToolRenderer.setAlpha(newAlpha)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingToolStorage.drawingTool.$brushDiameter
+            .sink { [weak self] diameter in
+                self?.brushDrawingToolRenderer.setDiameter(diameter)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
+            .sink { [weak self] diameter in
+                self?.eraserDrawingToolRenderer.setDiameter(diameter)
+            }
+            .store(in: &cancellables)
     }
 
     private func addEvents() {
@@ -101,9 +185,9 @@ extension HandDrawingViewController {
             guard let `self` else { return }
             self.contentView.canvasView.saveFile(
                 additionalItems: [
-                    DrawingToolArchiveModel.anyNamedItem(from: contentView.viewModel.drawingToolStorage.drawingTool),
-                    BrushPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
-                    EraserPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.eraserPaletteStorage.palette)
+                    DrawingToolArchiveModel.anyNamedItem(from: viewModel.drawingToolStorage.drawingTool),
+                    BrushPaletteArchiveModel.anyNamedItem(from: viewModel.brushPaletteStorage.palette),
+                    EraserPaletteArchiveModel.anyNamedItem(from: viewModel.eraserPaletteStorage.palette)
                 ]
             )
         }
@@ -120,13 +204,26 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            self?.contentView.toggleDrawingTool()
+            guard let `self` else { return }
+            viewModel.toggleDrawingTool()
+            contentView.updateDrawingComponents(viewModel.drawingToolStorage.type)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.undo()
         }
         contentView.tapRedoButton = { [weak self] in
             self?.contentView.redo()
+        }
+
+        contentView.dragBrushSlider = { [weak self] value in
+            self?.viewModel.drawingToolStorage.setBrushDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(value)
+            )
+        }
+        contentView.dragEraserSlider = { [weak self] value in
+            self?.viewModel.drawingToolStorage.setEraserDiameter(
+                EraserDrawingToolRenderer.diameterIntValue(value)
+            )
         }
     }
 }
@@ -137,9 +234,9 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.contentView.viewModel.drawingToolStorage.reset()
-            self.contentView.viewModel.brushPaletteStorage.reset()
-            self.contentView.viewModel.eraserPaletteStorage.reset()
+            self.viewModel.drawingToolStorage.reset()
+            self.viewModel.brushPaletteStorage.reset()
+            self.viewModel.eraserPaletteStorage.reset()
 
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size
@@ -170,7 +267,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: contentView.viewModel.brushPaletteStorage.palette,
+                palette: viewModel.brushPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -191,7 +288,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: contentView.viewModel.eraserPaletteStorage.palette,
+                palette: viewModel.eraserPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -221,9 +318,9 @@ extension HandDrawingViewController {
                 self.contentView.canvasView.loadFile(
                     zipFileURL: url,
                     optionalEntities: [
-                        self.contentView.drawingToolLoader,
-                        self.contentView.brushPaletteLoader,
-                        self.contentView.eraserPaletteLoader
+                        self.drawingToolLoader,
+                        self.brushPaletteLoader,
+                        self.eraserPaletteLoader
                     ]
                 )
             }
