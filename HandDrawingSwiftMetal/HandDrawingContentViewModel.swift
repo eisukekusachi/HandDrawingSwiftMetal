@@ -21,7 +21,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     private lazy var drawingToolLoader: AnyLocalFileLoader = {
         AnyLocalFileLoader(
             LocalFileLoader<DrawingToolArchiveModel>(
-                fileName: DrawingToolArchiveModel.jsonFileName
+                fileName: DrawingToolArchiveModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
@@ -35,7 +35,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     private lazy var brushPaletteLoader: AnyLocalFileLoader = {
         AnyLocalFileLoader(
             LocalFileLoader<BrushPaletteArchiveModel>(
-                fileName: BrushPaletteArchiveModel.jsonFileName
+                fileName: BrushPaletteArchiveModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.brushPaletteStorage.update(
@@ -50,7 +50,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
         AnyLocalFileLoader(
             LocalFileLoader<EraserPaletteArchiveModel>(
-                fileName: EraserPaletteArchiveModel.jsonFileName
+                fileName: EraserPaletteArchiveModel.fileName
             ) { [weak self] file in
                 Task { @MainActor [weak self] in
                     self?.eraserPaletteStorage.update(
@@ -209,6 +209,14 @@ extension HandDrawingContentViewModel {
                 let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
 
                 try await action?(workingDirectoryURL)
+
+                [
+                    AnyLocalFileNamedItem(DrawingToolArchiveModel.namedItem(from: drawingToolStorage.drawingTool)),
+                    AnyLocalFileNamedItem(BrushPaletteArchiveModel.namedItem(from: brushPaletteStorage.palette)),
+                    AnyLocalFileNamedItem(EraserPaletteArchiveModel.namedItem(from: eraserPaletteStorage.palette))
+                ].forEach { item in
+                    try? item.write(to: workingDirectoryURL.appendingPathComponent(item.fileName))
+                }
 
                 // Zip the working directory into a single project file
                 try localFileRepository.zipWorkingDirectory(

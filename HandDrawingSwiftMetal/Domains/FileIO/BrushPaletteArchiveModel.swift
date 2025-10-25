@@ -12,7 +12,7 @@ struct BrushPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let hexColors: [String]
 
-    public static let jsonFileName = "brush_palette"
+    public static let fileName = "brush_palette"
 }
 
 extension BrushPaletteArchiveModel: LocalFileConvertible {
@@ -28,16 +28,12 @@ extension BrushPaletteArchiveModel: LocalFileConvertible {
 extension BrushPaletteArchiveModel {
     static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.jsonFileName)",
+            fileName: "\(Self.fileName)",
             item: .init(
                 index: palette.index,
                 hexColors: palette.colors.map { $0.hex() }
             )
         )
-    }
-
-    static func anyNamedItem(from palette: BrushPalette) -> AnyLocalFileNamedItem {
-        AnyLocalFileNamedItem(Self.namedItem(from: palette))
     }
 }
 

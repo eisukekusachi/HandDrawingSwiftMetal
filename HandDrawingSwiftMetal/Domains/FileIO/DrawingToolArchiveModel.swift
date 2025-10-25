@@ -13,7 +13,7 @@ struct DrawingToolArchiveModel: Codable, Sendable {
     public let brushDiameter: Int
     public let eraserDiameter: Int
 
-    public static let jsonFileName = "drawing_tool"
+    public static let fileName = "drawing_tool"
 }
 
 extension DrawingToolArchiveModel: LocalFileConvertible {
@@ -29,17 +29,13 @@ extension DrawingToolArchiveModel: LocalFileConvertible {
 extension DrawingToolArchiveModel {
     static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
         .init(
-            fileName: "\(Self.jsonFileName)",
+            fileName: "\(Self.fileName)",
             item: .init(
                 type: drawingTool.type.rawValue,
                 brushDiameter: drawingTool.brushDiameter,
                 eraserDiameter: drawingTool.eraserDiameter
             )
         )
-    }
-
-    static func anyNamedItem(from drawingTool: DrawingTool) -> AnyLocalFileNamedItem {
-        AnyLocalFileNamedItem(Self.namedItem(from: drawingTool))
     }
 }
 

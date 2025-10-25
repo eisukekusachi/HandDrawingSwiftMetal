@@ -401,7 +401,7 @@ public extension CanvasViewModel {
 
         // Load project metadata, falling back if it is missing
         let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
-            fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
+            fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.fileName)
         )
 
         // Update metadata
@@ -453,7 +453,7 @@ public extension CanvasViewModel {
             createdAt: projectMetaDataStorage.createdAt,
             updatedAt: projectMetaDataStorage.updatedAt
         ).write(
-            to: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
+            to: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.fileName)
         )
     }
 }

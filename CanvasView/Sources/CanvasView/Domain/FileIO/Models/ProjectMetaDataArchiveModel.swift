@@ -12,7 +12,7 @@ public struct ProjectMetaDataArchiveModel: Codable, Sendable {
     public let createdAt: Date
     public let updatedAt: Date
 
-    public static let jsonFileName = "project"
+    public static let fileName = "project"
 
     public init(
         projectName: String,
@@ -68,17 +68,13 @@ extension ProjectMetaDataArchiveModel: LocalFileConvertible {
 extension ProjectMetaDataArchiveModel {
     static func namedItem(from project: ProjectMetaDataProtocol) -> LocalFileNamedItem<Self> {
         .init(
-            fileName: "\(Self.jsonFileName)",
+            fileName: "\(Self.fileName)",
             item: .init(
                 projectName: project.projectName,
                 createdAt: project.createdAt,
                 updatedAt: project.updatedAt
             )
         )
-    }
-
-    static func anyNamedItem(from project: ProjectMetaDataProtocol) -> AnyLocalFileNamedItem {
-        AnyLocalFileNamedItem(Self.namedItem(from: project))
     }
 }
 

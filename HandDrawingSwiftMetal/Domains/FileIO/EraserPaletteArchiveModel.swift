@@ -12,7 +12,7 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let alphas: [Int]
 
-    public static let jsonFileName = "eraser_palette"
+    public static let fileName = "eraser_palette"
 }
 
 extension EraserPaletteArchiveModel: LocalFileConvertible {
@@ -28,16 +28,12 @@ extension EraserPaletteArchiveModel: LocalFileConvertible {
 extension EraserPaletteArchiveModel {
     static func namedItem(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.jsonFileName)",
+            fileName: "\(Self.fileName)",
             item: .init(
                 index: palette.index,
                 alphas: palette.alphas
             )
         )
-    }
-
-    static func anyNamedItem(from palette: EraserPalette) -> AnyLocalFileNamedItem {
-        AnyLocalFileNamedItem(Self.namedItem(from: palette))
     }
 }
 
