@@ -123,13 +123,13 @@ import UIKit
         }
     }
 
-    public func restore(
+    public func loadFiles(
         textureLayersModel: TextureLayersArchiveModel,
-        workingDirectoryURL: URL
+        from workingDirectoryURL: URL
     ) async throws {
-        try await canvasViewModel.restore(
-            textureLayersModel,
-            workingDirectoryURL: workingDirectoryURL
+        try await canvasViewModel.loadFiles(
+            textureLayersModel: textureLayersModel,
+            from: workingDirectoryURL
         )
     }
     public func exportFiles(
@@ -148,21 +148,6 @@ import UIKit
 
     public func setDrawingTool(_ drawingToolType: Int) {
         canvasViewModel.setDrawingTool(drawingToolType)
-    }
-
-    public func saveFile(additionalItems: [AnyLocalFileNamedItem] = []) {
-        canvasViewModel.saveFile(
-            additionalItems: additionalItems
-        )
-    }
-    public func loadFile(
-        zipFileURL: URL,
-        optionalEntities: [AnyLocalFileLoader] = []
-    ) {
-        canvasViewModel.loadFile(
-            zipFileURL: zipFileURL,
-            optionalEntities: optionalEntities
-        )
     }
 
     public func undo() {

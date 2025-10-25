@@ -257,46 +257,17 @@ extension HandDrawingViewController {
         let fileView = FileView(
             targetURL: URL.documents,
             suffix: ProjectMetaData.fileSuffix,
-            onTapItem: { [weak self] url in
+            onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
-
                 self.presentedViewController?.dismiss(animated: true)
-
                 self.textureLayerViewPresenter.hide()
 
-                self.viewModel.loadFile(
-                    zipFileURL: url,
-                    action: { [weak self] workingDirectoryURL in
-                        guard let `self` else { return }
-
-                        // Load texture layer data from the JSON file
-                        let textureLayersModel: TextureLayersArchiveModel = try .init(
-                            fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
-                        )
-
-                        try await contentView.canvasView.restore(
-                            textureLayersModel: textureLayersModel,
-                            workingDirectoryURL: workingDirectoryURL
-                        )
-                    }
-                )
+                self.loadProject(zipFileURL: zipFileURL)
             }
         )
         present(
             UIHostingController(rootView: fileView),
             animated: true
-        )
-    }
-
-    private func saveProject() {
-        viewModel.saveProject(
-            action: { [weak self] workingDirectoryURL in
-                guard let `self` else { return }
-                try await contentView.canvasView.exportFiles(
-                    to: workingDirectoryURL
-                )
-            },
-            zipFileURL: contentView.canvasView.zipFileURL
         )
     }
 
@@ -316,6 +287,37 @@ extension HandDrawingViewController {
 }
 
 extension HandDrawingViewController {
+
+    private func loadProject(zipFileURL: URL) {
+        self.viewModel.loadFile(
+            zipFileURL: zipFileURL,
+            action: { [weak self] workingDirectoryURL in
+                guard let `self` else { return }
+
+                // Load texture layer data from the JSON file
+                let textureLayersModel: TextureLayersArchiveModel = try .init(
+                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
+                )
+
+                try await self.contentView.canvasView.loadFiles(
+                    textureLayersModel: textureLayersModel,
+                    from: workingDirectoryURL
+                )
+            }
+        )
+    }
+    private func saveProject() {
+        viewModel.saveProject(
+            action: { [weak self] workingDirectoryURL in
+                guard let `self` else { return }
+
+                try await self.contentView.canvasView.exportFiles(
+                    to: workingDirectoryURL
+                )
+            },
+            zipFileURL: self.contentView.canvasView.zipFileURL
+        )
+    }
 
     private func saveImage() {
         if let image = contentView.canvasView.displayTexture?.uiImage {

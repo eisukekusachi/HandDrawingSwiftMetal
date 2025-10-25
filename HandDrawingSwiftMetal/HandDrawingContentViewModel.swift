@@ -19,7 +19,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     private lazy var drawingToolLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
+        AnyLocalFileLoader(
             LocalFileLoader<DrawingToolArchiveModel>(
                 fileName: DrawingToolArchiveModel.jsonFileName
             ) { [weak self] file in
@@ -29,11 +29,11 @@ final class HandDrawingContentViewModel: ObservableObject {
                     self?.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
                 }
             }
-         )
+        )
     }()
 
     private lazy var brushPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
+        AnyLocalFileLoader(
             LocalFileLoader<BrushPaletteArchiveModel>(
                 fileName: BrushPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
@@ -44,11 +44,11 @@ final class HandDrawingContentViewModel: ObservableObject {
                     )
                 }
             }
-         )
+        )
     }()
 
     private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
+        AnyLocalFileLoader(
             LocalFileLoader<EraserPaletteArchiveModel>(
                 fileName: EraserPaletteArchiveModel.jsonFileName
             ) { [weak self] file in
@@ -59,7 +59,7 @@ final class HandDrawingContentViewModel: ObservableObject {
                     )
                 }
             }
-         )
+        )
     }()
 
     /// Repository that manages files in the Documents directory
@@ -73,7 +73,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     }
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
+    private let alertSubject = PassthroughSubject<any Error, Never>()
 
     private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
@@ -136,7 +136,9 @@ final class HandDrawingContentViewModel: ObservableObject {
             drawingToolStorage.type == .brush ? .eraser: .brush
         )
     }
+}
 
+extension HandDrawingContentViewModel {
     func loadFile(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?
@@ -173,6 +175,15 @@ final class HandDrawingContentViewModel: ObservableObject {
                 for entity in optionalEntities {
                     entity.loadIgnoringError(in: workingDirectoryURL)
                 }
+
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
+            } catch {
+                alertSubject.send(error)
             }
         }
     }
@@ -200,6 +211,15 @@ final class HandDrawingContentViewModel: ObservableObject {
                 try localFileRepository.zipWorkingDirectory(
                     to: zipFileURL
                 )
+
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
+            } catch {
+                alertSubject.send(error)
             }
         }
     }
