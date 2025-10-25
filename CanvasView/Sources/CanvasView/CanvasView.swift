@@ -101,10 +101,10 @@ import UIKit
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration
-    ) {
+    ) async throws {
         displayView.initialize(renderer: renderer)
 
-        canvasViewModel.initialize(
+        try await canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
                 renderer: renderer,
@@ -178,24 +178,10 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicator
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.activityIndicatorSubject.send(value)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.toast
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.toastSubject.send(value)
             }
             .store(in: &cancellables)
 

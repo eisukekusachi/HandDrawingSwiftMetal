@@ -44,19 +44,32 @@ class HandDrawingViewController: UIViewController {
         brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
         eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
 
-        contentView.updateDrawingComponents(
-            viewModel.drawingToolStorage.type
-        )
-
-        contentView.canvasView.initialize(
-            drawingToolRenderers: [
-                brushDrawingToolRenderer,
-                eraserDrawingToolRenderer
-            ],
-            configuration: canvasConfiguration ?? .init()
-        )
-
         initializeNewCanvasDialogPresenter()
+
+        Task {
+            do {
+                showActivityIndicator(true)
+                showContentView(false)
+
+                try await contentView.canvasView.initialize(
+                    drawingToolRenderers: [
+                        brushDrawingToolRenderer,
+                        eraserDrawingToolRenderer
+                    ],
+                    configuration: canvasConfiguration ?? .init()
+                )
+
+                contentView.updateDrawingComponents(
+                    viewModel.drawingToolStorage.type
+                )
+
+                showActivityIndicator(false)
+                showContentView(true)
+
+            } catch {
+                fatalError("Failed to initialize the canvas")
+            }
+        }
     }
 }
 
@@ -283,6 +296,14 @@ extension HandDrawingViewController {
         let toast = Toast()
         toast.showMessage(model)
         view.addSubview(toast)
+    }
+
+    private func showActivityIndicator(_ isShown: Bool) {
+        activityIndicatorView.isHidden = !isShown
+    }
+
+    private func showContentView(_ isShown: Bool) {
+        contentView.isHidden = !isShown
     }
 }
 

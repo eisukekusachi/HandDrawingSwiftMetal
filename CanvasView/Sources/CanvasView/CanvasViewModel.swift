@@ -21,19 +21,9 @@ public final class CanvasViewModel {
         projectMetaDataStorage.zipFileURL
     }
 
-    /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicator: AnyPublisher<Bool, Never> {
-        activityIndicatorSubject.eraseToAnyPublisher()
-    }
-
     /// A publisher that emits a request to show the alert
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
-    }
-
-    /// A publisher that emits a request to show or hide the toast
-    var toast: AnyPublisher<CanvasMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
     }
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
@@ -86,11 +76,9 @@ public final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
 
-    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
+    //private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
     /// Emit `TextureLayersProtocol` when the texture update is completed
     private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
@@ -138,9 +126,7 @@ public final class CanvasViewModel {
         drawingToolRenderers: [DrawingToolRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
-    ) {
-        activityIndicatorSubject.send(true)
-
+    ) async throws {
         drawingToolRenderers.forEach {
             $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
@@ -175,20 +161,16 @@ public final class CanvasViewModel {
 
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
-        Task {
-            defer { activityIndicatorSubject.send(false) }
+        let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
+            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+        ) ?? configuration.textureLayerArrayConfiguration
 
-            let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
-                entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-            ) ?? configuration.textureLayerArrayConfiguration
-
-            // Initialize the texture repository
-            let resolvedTextureLayersConfiguration = try await dependencies.textureRepository.initializeStorage(
-                configuration: textureLayersConfiguration,
-                fallbackTextureSize: TextureLayerModel.defaultTextureSize()
-            )
-            try await initializeTextures(resolvedTextureLayersConfiguration)
-        }
+        // Initialize the texture repository
+        let resolvedTextureLayersConfiguration = try await dependencies.textureRepository.initializeStorage(
+            configuration: textureLayersConfiguration,
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+        )
+        try await initializeTextures(resolvedTextureLayersConfiguration)
     }
 
     private func bindData() {
