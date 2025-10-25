@@ -45,6 +45,10 @@ import UIKit
         didInitializeTexturesSubject.eraseToAnyPublisher()
     }
 
+    public var zipFileURL: URL {
+        canvasViewModel.zipFileURL
+    }
+
     private let renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
@@ -126,6 +130,15 @@ import UIKit
         try await canvasViewModel.restore(
             textureLayersModel,
             workingDirectoryURL: workingDirectoryURL
+        )
+    }
+    public func exportFiles(
+        thumbnailLength: CGFloat = TextureLayersArchiveModel.thumbnailLength,
+        to workingDirectoryURL: URL
+    ) async throws {
+        try await canvasViewModel.exportFiles(
+            thumbnailLength: thumbnailLength,
+            to: workingDirectoryURL
         )
     }
 

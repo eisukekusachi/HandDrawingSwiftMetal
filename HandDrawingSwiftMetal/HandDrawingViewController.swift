@@ -138,14 +138,7 @@ extension HandDrawingViewController {
             self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
-            guard let `self` else { return }
-            self.contentView.canvasView.saveFile(
-                additionalItems: [
-                    DrawingToolArchiveModel.anyNamedItem(from: viewModel.drawingToolStorage.drawingTool),
-                    BrushPaletteArchiveModel.anyNamedItem(from: viewModel.brushPaletteStorage.palette),
-                    EraserPaletteArchiveModel.anyNamedItem(from: viewModel.eraserPaletteStorage.palette)
-                ]
-            )
+            self?.saveProject()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -292,6 +285,18 @@ extension HandDrawingViewController {
         present(
             UIHostingController(rootView: fileView),
             animated: true
+        )
+    }
+
+    private func saveProject() {
+        viewModel.saveProject(
+            action: { [weak self] workingDirectoryURL in
+                guard let `self` else { return }
+                try await contentView.canvasView.exportFiles(
+                    to: workingDirectoryURL
+                )
+            },
+            zipFileURL: contentView.canvasView.zipFileURL
         )
     }
 

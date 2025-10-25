@@ -177,8 +177,9 @@ final class HandDrawingContentViewModel: ObservableObject {
         }
     }
 
-    func saveFile(
-        action: ((URL) async throws -> Void)?
+    func saveProject(
+        action: ((URL) async throws -> Void)?,
+        zipFileURL: URL
     ) {
         Task(priority: .userInitiated) {
             defer {
@@ -194,6 +195,11 @@ final class HandDrawingContentViewModel: ObservableObject {
                 let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
 
                 try await action?(workingDirectoryURL)
+
+                // Zip the working directory into a single project file
+                try localFileRepository.zipWorkingDirectory(
+                    to: zipFileURL
+                )
             }
         }
     }

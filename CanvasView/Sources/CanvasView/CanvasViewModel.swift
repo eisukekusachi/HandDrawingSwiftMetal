@@ -17,6 +17,10 @@ public final class CanvasViewModel {
         }
     }
 
+    var zipFileURL: URL {
+        projectMetaDataStorage.zipFileURL
+    }
+
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
@@ -187,6 +191,13 @@ public final class CanvasViewModel {
         }
     }
 
+    func thumbnail(length: CGFloat = TextureLayersArchiveModel.thumbnailLength) -> UIImage? {
+        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: length,
+            scale: 1.0
+        )
+    }
+
     func restore(
         _ textureLayersModel: TextureLayersArchiveModel,
         workingDirectoryURL: URL
@@ -215,6 +226,48 @@ public final class CanvasViewModel {
             projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
             createdAt: projectMetaData?.createdAt ?? Date(),
             updatedAt: projectMetaData?.updatedAt ?? Date()
+        )
+    }
+
+    func exportFiles(
+        thumbnailLength: CGFloat = TextureLayersArchiveModel.thumbnailLength,
+        to workingDirectoryURL: URL
+    ) async throws {
+
+        // Save the thumbnail image into the working directory
+        try thumbnail(length: thumbnailLength)?.write(
+            to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.thumbnailName)
+        )
+
+        // Copy all textures from the textureRepository
+        let textures = try await dependencies.textureRepository.duplicatedTextures(
+            textureLayers.layers.map { $0.id }
+        )
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for texture in textures {
+                let fileName = texture.fileName
+                group.addTask {
+                    try texture.write(
+                        to: workingDirectoryURL.appendingPathComponent(fileName)
+                    )
+                }
+            }
+            try await group.waitForAll()
+        }
+
+        // Save the texture layers as JSON
+        try TextureLayersArchiveModel(textureLayers: textureLayers).write(
+            to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
+        )
+
+        // Save the project metadata as JSON
+       try ProjectMetaDataArchiveModel(
+            projectName: projectMetaDataStorage.projectName,
+            createdAt: projectMetaDataStorage.createdAt,
+            updatedAt: projectMetaDataStorage.updatedAt
+        ).write(
+            to: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
         )
     }
 
