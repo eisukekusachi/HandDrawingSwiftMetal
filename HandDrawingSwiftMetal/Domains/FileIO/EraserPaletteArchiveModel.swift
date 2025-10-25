@@ -11,24 +11,20 @@ import Foundation
 struct EraserPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let alphas: [Int]
-
-    public static let fileName = "eraser_palette"
 }
 
 extension EraserPaletteArchiveModel: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(self)
-        try data.write(to: url, options: .atomic)
-    }
-}
+    static var fileName: String { "eraser_palette" }
 
-@MainActor
-extension EraserPaletteArchiveModel {
-    static func namedItem(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteArchiveModel> {
+    static func read(from url: URL) throws -> Self {
+        let data = try Data(contentsOf: url.appendingPathComponent(EraserPaletteArchiveModel.fileName))
+        return try JSONDecoder().decode(Self.self, from: data)
+    }
+
+    @MainActor
+    static func savableFile(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: EraserPaletteArchiveModel.fileName,
             item: .init(
                 index: palette.index,
                 alphas: palette.alphas
@@ -36,5 +32,3 @@ extension EraserPaletteArchiveModel {
         )
     }
 }
-
-extension EraserPaletteArchiveModel: LocalFileLoadable {}

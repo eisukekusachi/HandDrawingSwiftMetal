@@ -56,11 +56,11 @@ extension ProjectMetaDataArchiveModel {
 }
 
 extension ProjectMetaDataArchiveModel: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(self)
-        try data.write(to: url, options: .atomic)
+    public var fileName: String { "project" }
+
+    public static func read(from url: URL) throws -> Self {
+        let data = try Data(contentsOf: url.appendingPathComponent(ProjectMetaDataArchiveModel.fileName))
+        return try JSONDecoder().decode(Self.self, from: data)
     }
 }
 
@@ -77,5 +77,3 @@ extension ProjectMetaDataArchiveModel {
         )
     }
 }
-
-extension ProjectMetaDataArchiveModel: LocalFileLoadable {}

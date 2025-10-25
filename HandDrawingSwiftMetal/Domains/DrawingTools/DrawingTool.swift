@@ -19,8 +19,6 @@ protocol DrawingToolProtocol {
 
     var eraserDiameter: Int { get }
 
-    func reset()
-
     func setDrawingTool(_ type: DrawingToolType)
 
     func setBrushDiameter(_ diameter: Int)
@@ -56,12 +54,6 @@ public final class DrawingTool: DrawingToolProtocol, ObservableObject {
 }
 
 extension DrawingTool {
-
-    func reset() {
-        self.type = initialType
-        self.brushDiameter = initialBrushDiameter
-        self.eraserDiameter = initialEraserDiameter
-    }
 
     func setId(_ id: UUID) {
         self.id = id

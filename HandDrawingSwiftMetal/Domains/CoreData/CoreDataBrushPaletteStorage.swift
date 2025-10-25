@@ -77,10 +77,6 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
     func remove(at index: Int) {
         palette.remove(at: index)
     }
-
-    func reset() {
-        palette.reset()
-    }
 }
 
 extension CoreDataBrushPaletteStorage {
@@ -99,6 +95,15 @@ extension CoreDataBrushPaletteStorage {
             index: index
         )
     }
+
+    func update(url: URL) {
+        guard let result = try? BrushPaletteArchiveModel.read(from: url) else { return }
+        palette.update(
+            colors: result.hexColors.map { UIColor(hex: $0) },
+            index: result.index
+        )
+    }
+
     func fetch() throws -> BrushPaletteEntity? {
         try storage.fetch()
     }

@@ -12,24 +12,20 @@ struct DrawingToolArchiveModel: Codable, Sendable {
     public let type: Int
     public let brushDiameter: Int
     public let eraserDiameter: Int
-
-    public static let fileName = "drawing_tool"
 }
 
 extension DrawingToolArchiveModel: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(self)
-        try data.write(to: url, options: .atomic)
-    }
-}
+    static var fileName: String { "drawing_tool" }
 
-@MainActor
-extension DrawingToolArchiveModel {
-    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
+    static func read(from url: URL) throws -> Self {
+        let data = try Data(contentsOf: url.appendingPathComponent(DrawingToolArchiveModel.fileName))
+        return try JSONDecoder().decode(Self.self, from: data)
+    }
+
+    @MainActor
+    static func savableFile(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: DrawingToolArchiveModel.fileName,
             item: .init(
                 type: drawingTool.type.rawValue,
                 brushDiameter: drawingTool.brushDiameter,
@@ -38,5 +34,3 @@ extension DrawingToolArchiveModel {
         )
     }
 }
-
-extension DrawingToolArchiveModel: LocalFileLoadable {}

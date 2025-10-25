@@ -28,8 +28,6 @@ extension TextureLayersArchiveModel {
 
     public static let thumbnailName: String = "thumbnail.png"
 
-    public static let fileName: String = "data"
-
     public static let thumbnailLength: CGFloat = 500
 
     @MainActor
@@ -65,6 +63,8 @@ extension TextureLayersArchiveModel {
 
 extension TextureLayersArchiveModel: LocalFileConvertible {
 
+    public static var fileName: String { "data" }
+
     public func namedItem() -> LocalFileNamedItem<TextureLayersArchiveModel> {
         .init(
             fileName: TextureLayersArchiveModel.fileName,
@@ -72,7 +72,8 @@ extension TextureLayersArchiveModel: LocalFileConvertible {
         )
     }
 
-    public func write(to url: URL) throws {
-        try FileOutput.saveJson(self, to: url)
+    public static func read(from url: URL) throws -> Self {
+        let data = try Data(contentsOf: url.appendingPathComponent(TextureLayersArchiveModel.fileName))
+        return try JSONDecoder().decode(Self.self, from: data)
     }
 }

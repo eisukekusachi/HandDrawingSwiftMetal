@@ -196,9 +196,19 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.viewModel.drawingToolStorage.reset()
-            self.viewModel.brushPaletteStorage.reset()
-            self.viewModel.eraserPaletteStorage.reset()
+            self.viewModel.drawingToolStorage.update(
+                type: .brush,
+                brushDiameter: 8,
+                eraserDiameter: 8
+            )
+            self.viewModel.brushPaletteStorage.update(
+                colors: viewModel.initializeColors,
+                index: 0
+            )
+            self.viewModel.eraserPaletteStorage.update(
+                alphas: viewModel.initializeAlphas,
+                index: 0
+            )
 
             let scale = UIScreen.main.scale
             let size = UIScreen.main.bounds.size

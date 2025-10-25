@@ -12,43 +12,32 @@ import UIKit
 @MainActor
 final class HandDrawingContentViewModel: ObservableObject {
 
+    let initializeColors: [UIColor] = [
+        .black.withAlphaComponent(0.8),
+        .gray.withAlphaComponent(0.8),
+        .red.withAlphaComponent(0.8),
+        .blue.withAlphaComponent(0.8),
+        .green.withAlphaComponent(0.8),
+        .yellow.withAlphaComponent(0.8),
+        .purple.withAlphaComponent(0.8)
+    ]
+
+    let initializeAlphas: [Int] = [
+        255,
+        225,
+        200,
+        175,
+        150,
+        125,
+        100,
+        50
+    ]
+
     private let drawingToolController: PersistenceController
 
     @Published var drawingToolStorage: CoreDataDrawingToolStorage
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
-
-    private lazy var drawingToolLoader: LocalFileLoader = {
-        LocalFileLoader<DrawingToolArchiveModel> { [weak self] file in
-            Task { @MainActor [weak self] in
-                self?.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
-                self?.drawingToolStorage.setBrushDiameter(file.brushDiameter)
-                self?.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
-            }
-        }
-    }()
-
-    private lazy var brushPaletteLoader: LocalFileLoader = {
-        LocalFileLoader<BrushPaletteArchiveModel> { [weak self] file in
-            Task { @MainActor [weak self] in
-                self?.brushPaletteStorage.update(
-                    colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                    index: file.index
-                )
-            }
-        }
-    }()
-
-    private lazy var eraserPaletteLoader: LocalFileLoader = {
-        LocalFileLoader<EraserPaletteArchiveModel> { [weak self] file in
-            Task { @MainActor [weak self] in
-                self?.eraserPaletteStorage.update(
-                    alphas: file.alphas,
-                    index: file.index
-                )
-            }
-        }
-    }()
 
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
@@ -79,31 +68,15 @@ final class HandDrawingContentViewModel: ObservableObject {
 
         brushPaletteStorage = CoreDataBrushPaletteStorage(
             palette: BrushPalette(
-                colors: [
-                    .black.withAlphaComponent(0.8),
-                    .gray.withAlphaComponent(0.8),
-                    .red.withAlphaComponent(0.8),
-                    .blue.withAlphaComponent(0.8),
-                    .green.withAlphaComponent(0.8),
-                    .yellow.withAlphaComponent(0.8),
-                    .purple.withAlphaComponent(0.8)
-                ]
+                colors: initializeColors,
+                index: 0
             ),
             context: drawingToolController.viewContext
         )
 
         eraserPaletteStorage = CoreDataEraserPaletteStorage(
             palette: EraserPalette(
-                alphas: [
-                    255,
-                    225,
-                    200,
-                    175,
-                    150,
-                    125,
-                    100,
-                    50
-                ],
+                alphas: initializeAlphas,
                 index: 0
             ),
             context: drawingToolController.viewContext
@@ -158,15 +131,9 @@ extension HandDrawingContentViewModel {
 
                 // Restore data from externally configured entities
                 // Since it’s optional, ignore any errors that occur
-                self.drawingToolLoader.loadIgnoringError(
-                    fileURL: workingDirectoryURL.appendingPathComponent(DrawingToolArchiveModel.fileName)
-                )
-                self.brushPaletteLoader.loadIgnoringError(
-                    fileURL: workingDirectoryURL.appendingPathComponent(BrushPaletteArchiveModel.fileName)
-                )
-                self.eraserPaletteLoader.loadIgnoringError(
-                    fileURL: workingDirectoryURL.appendingPathComponent(EraserPaletteArchiveModel.fileName)
-                )
+                drawingToolStorage.update(url: workingDirectoryURL)
+                brushPaletteStorage.update(url: workingDirectoryURL)
+                eraserPaletteStorage.update(url: workingDirectoryURL)
 
                 toastSubject.send(
                     .init(
@@ -199,13 +166,9 @@ extension HandDrawingContentViewModel {
 
                 try await action?(workingDirectoryURL)
 
-                [
-                    AnyLocalFileNamedItem(DrawingToolArchiveModel.namedItem(from: drawingToolStorage.drawingTool)),
-                    AnyLocalFileNamedItem(BrushPaletteArchiveModel.namedItem(from: brushPaletteStorage.palette)),
-                    AnyLocalFileNamedItem(EraserPaletteArchiveModel.namedItem(from: eraserPaletteStorage.palette))
-                ].forEach { item in
-                    try? item.write(to: workingDirectoryURL.appendingPathComponent(item.fileName))
-                }
+                try DrawingToolArchiveModel.savableFile(from: drawingToolStorage.drawingTool).write(to: workingDirectoryURL)
+                try BrushPaletteArchiveModel.savableFile(from: brushPaletteStorage.palette).write(to: workingDirectoryURL)
+                try EraserPaletteArchiveModel.savableFile(from: eraserPaletteStorage.palette).write(to: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
                 try localFileRepository.zipWorkingDirectory(

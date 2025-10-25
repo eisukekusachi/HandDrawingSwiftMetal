@@ -420,7 +420,8 @@ public extension CanvasViewModel {
         let device = canvasRenderer.device
 
         // Save the thumbnail image into the working directory
-        try thumbnail(length: thumbnailLength)?.write(
+        try FileOutput.saveImage(
+            image: thumbnail(length: thumbnailLength),
             to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.thumbnailName)
         )
 

@@ -75,10 +75,6 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
     func remove(at index: Int) {
         palette.remove(at: index)
     }
-
-    func reset() {
-        palette.reset()
-    }
 }
 
 extension CoreDataEraserPaletteStorage {
@@ -97,6 +93,15 @@ extension CoreDataEraserPaletteStorage {
             index: index
         )
     }
+
+    func update(url: URL) {
+        guard let result = try? EraserPaletteArchiveModel.read(from: url) else { return }
+        self.palette.update(
+            alphas: result.alphas,
+            index: result.index
+        )
+    }
+
     func fetch() throws -> EraserPaletteEntity? {
         try storage.fetch()
     }

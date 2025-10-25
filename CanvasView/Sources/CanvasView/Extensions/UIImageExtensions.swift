@@ -123,9 +123,3 @@ extension UIImage {
         return UIGraphicsGetImageFromCurrentImageContext()
     }
 }
-
-extension UIImage: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        try FileOutput.saveImage(image: self, to: url)
-    }
-}

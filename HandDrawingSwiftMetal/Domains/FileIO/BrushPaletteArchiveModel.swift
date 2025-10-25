@@ -11,24 +11,21 @@ import Foundation
 struct BrushPaletteArchiveModel: Codable, Sendable {
     public let index: Int
     public let hexColors: [String]
-
-    public static let fileName = "brush_palette"
 }
 
 extension BrushPaletteArchiveModel: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(self)
-        try data.write(to: url, options: .atomic)
-    }
-}
 
-@MainActor
-extension BrushPaletteArchiveModel {
-    static func namedItem(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteArchiveModel> {
+    public static var fileName: String { "brush_palette" }
+
+    static func read(from url: URL) throws -> Self {
+        let data = try Data(contentsOf: url.appendingPathComponent(BrushPaletteArchiveModel.fileName))
+        return try JSONDecoder().decode(Self.self, from: data)
+    }
+
+    @MainActor
+    static func savableFile(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteArchiveModel> {
         .init(
-            fileName: "\(Self.fileName)",
+            fileName: BrushPaletteArchiveModel.fileName,
             item: .init(
                 index: palette.index,
                 hexColors: palette.colors.map { $0.hex() }
@@ -36,5 +33,3 @@ extension BrushPaletteArchiveModel {
         )
     }
 }
-
-extension BrushPaletteArchiveModel: LocalFileLoadable {}

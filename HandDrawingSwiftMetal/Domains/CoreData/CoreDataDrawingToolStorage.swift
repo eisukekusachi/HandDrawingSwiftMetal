@@ -64,8 +64,10 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
         drawingTool.eraserDiameter
     }
 
-    func reset() {
-        drawingTool.reset()
+    func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
+        drawingTool.setDrawingTool(type)
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
     }
 
     func setDrawingTool(_ type: DrawingToolType) {
@@ -90,6 +92,14 @@ extension CoreDataDrawingToolStorage {
         setBrushDiameter(Int(entity.brushDiameter))
         setEraserDiameter(Int(entity.eraserDiameter))
     }
+
+    func update(url: URL) {
+        guard let result = try? DrawingToolArchiveModel.read(from: url) else { return }
+        self.drawingTool.setDrawingTool(.init(rawValue: result.type))
+        self.drawingTool.setBrushDiameter(result.brushDiameter)
+        self.drawingTool.setEraserDiameter(result.eraserDiameter)
+    }
+
     func fetch() throws -> DrawingToolEntity? {
         try storage.fetch()
     }
