@@ -23,7 +23,7 @@ extension BrushPaletteArchiveModel: LocalFileConvertible {
     }
 
     @MainActor
-    static func savableFile(from palette: BrushPalette) -> LocalFileNamedItem<BrushPaletteArchiveModel> {
+    static func savableFile(from palette: BrushPalette) -> SavableFile<BrushPaletteArchiveModel> {
         .init(
             fileName: BrushPaletteArchiveModel.fileName,
             item: .init(

@@ -12,8 +12,6 @@ public struct ProjectMetaDataArchiveModel: Codable, Sendable {
     public let createdAt: Date
     public let updatedAt: Date
 
-    public static let fileName = "project"
-
     public init(
         projectName: String,
         createdAt: Date,
@@ -56,7 +54,9 @@ extension ProjectMetaDataArchiveModel {
 }
 
 extension ProjectMetaDataArchiveModel: LocalFileConvertible {
-    public var fileName: String { "project" }
+    public static var fileName: String {
+        "project"
+    }
 
     public static func read(from url: URL) throws -> Self {
         let data = try Data(contentsOf: url.appendingPathComponent(ProjectMetaDataArchiveModel.fileName))
@@ -66,7 +66,7 @@ extension ProjectMetaDataArchiveModel: LocalFileConvertible {
 
 @MainActor
 extension ProjectMetaDataArchiveModel {
-    static func namedItem(from project: ProjectMetaDataProtocol) -> LocalFileNamedItem<Self> {
+    static func savableFile(from project: ProjectMetaDataProtocol) -> SavableFile<Self> {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(

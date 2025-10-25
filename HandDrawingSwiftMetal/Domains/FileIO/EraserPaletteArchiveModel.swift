@@ -22,7 +22,7 @@ extension EraserPaletteArchiveModel: LocalFileConvertible {
     }
 
     @MainActor
-    static func savableFile(from palette: EraserPalette) -> LocalFileNamedItem<EraserPaletteArchiveModel> {
+    static func savableFile(from palette: EraserPalette) -> SavableFile<EraserPaletteArchiveModel> {
         .init(
             fileName: EraserPaletteArchiveModel.fileName,
             item: .init(

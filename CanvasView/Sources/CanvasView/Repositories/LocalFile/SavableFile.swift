@@ -1,5 +1,5 @@
 //
-//  LocalFileNamedItem.swift
+//  SavableFile.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/07/12.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LocalFileNamedItem<T: LocalFileConvertible & Sendable>: Sendable {
+public struct SavableFile<T: LocalFileConvertible & Sendable>: Sendable {
     let fileName: String
     let item: T
 

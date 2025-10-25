@@ -23,7 +23,7 @@ extension DrawingToolArchiveModel: LocalFileConvertible {
     }
 
     @MainActor
-    static func savableFile(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
+    static func savableFile(from drawingTool: DrawingTool) -> SavableFile<DrawingToolArchiveModel> {
         .init(
             fileName: DrawingToolArchiveModel.fileName,
             item: .init(
