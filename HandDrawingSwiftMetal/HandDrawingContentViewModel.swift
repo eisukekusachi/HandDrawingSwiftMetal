@@ -18,48 +18,36 @@ final class HandDrawingContentViewModel: ObservableObject {
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
-    private lazy var drawingToolLoader: AnyLocalFileLoader = {
-        AnyLocalFileLoader(
-            LocalFileLoader<DrawingToolArchiveModel>(
-                fileName: DrawingToolArchiveModel.fileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
-                    self?.drawingToolStorage.setBrushDiameter(file.brushDiameter)
-                    self?.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
-                }
+    private lazy var drawingToolLoader: LocalFileLoader = {
+        LocalFileLoader<DrawingToolArchiveModel> { [weak self] file in
+            Task { @MainActor [weak self] in
+                self?.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
+                self?.drawingToolStorage.setBrushDiameter(file.brushDiameter)
+                self?.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
             }
-        )
+        }
     }()
 
-    private lazy var brushPaletteLoader: AnyLocalFileLoader = {
-        AnyLocalFileLoader(
-            LocalFileLoader<BrushPaletteArchiveModel>(
-                fileName: BrushPaletteArchiveModel.fileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.brushPaletteStorage.update(
-                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                        index: file.index
-                    )
-                }
+    private lazy var brushPaletteLoader: LocalFileLoader = {
+        LocalFileLoader<BrushPaletteArchiveModel> { [weak self] file in
+            Task { @MainActor [weak self] in
+                self?.brushPaletteStorage.update(
+                    colors: file.hexColors.compactMap { UIColor(hex: $0) },
+                    index: file.index
+                )
             }
-        )
+        }
     }()
 
-    private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
-        AnyLocalFileLoader(
-            LocalFileLoader<EraserPaletteArchiveModel>(
-                fileName: EraserPaletteArchiveModel.fileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.eraserPaletteStorage.update(
-                        alphas: file.alphas,
-                        index: file.index
-                    )
-                }
+    private lazy var eraserPaletteLoader: LocalFileLoader = {
+        LocalFileLoader<EraserPaletteArchiveModel> { [weak self] file in
+            Task { @MainActor [weak self] in
+                self?.eraserPaletteStorage.update(
+                    alphas: file.alphas,
+                    index: file.index
+                )
             }
-        )
+        }
     }()
 
     /// Repository that manages files in the Documents directory
@@ -170,14 +158,15 @@ extension HandDrawingContentViewModel {
 
                 // Restore data from externally configured entities
                 // Since it’s optional, ignore any errors that occur
-                let optionalEntities = [
-                    self.drawingToolLoader,
-                    self.brushPaletteLoader,
-                    self.eraserPaletteLoader
-                ]
-                for entity in optionalEntities {
-                    entity.loadIgnoringError(in: workingDirectoryURL)
-                }
+                self.drawingToolLoader.loadIgnoringError(
+                    fileURL: workingDirectoryURL.appendingPathComponent(DrawingToolArchiveModel.fileName)
+                )
+                self.brushPaletteLoader.loadIgnoringError(
+                    fileURL: workingDirectoryURL.appendingPathComponent(BrushPaletteArchiveModel.fileName)
+                )
+                self.eraserPaletteLoader.loadIgnoringError(
+                    fileURL: workingDirectoryURL.appendingPathComponent(EraserPaletteArchiveModel.fileName)
+                )
 
                 toastSubject.send(
                     .init(
