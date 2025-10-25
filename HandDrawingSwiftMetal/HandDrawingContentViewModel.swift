@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/08/10.
 //
 
+import Combine
 import CanvasView
 import UIKit
 
@@ -17,7 +18,23 @@ final class HandDrawingContentViewModel: ObservableObject {
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
+    /// Repository that manages files in the Documents directory
+    private let localFileRepository: LocalFileRepository = LocalFileRepository(
+        workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
+    )
+
+    /// A publisher that emits a request to show or hide the activity indicator
+    public var activityIndicator: AnyPublisher<Bool, Never> {
+        activityIndicatorSubject.eraseToAnyPublisher()
+    }
+    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
+
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
+
+    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
+
     public init() {
+
         drawingToolController = PersistenceController(xcdatamodeldName: "DrawingToolStorage", location: .mainApp)
 
         drawingToolStorage = CoreDataDrawingToolStorage(
@@ -74,5 +91,55 @@ final class HandDrawingContentViewModel: ObservableObject {
         drawingToolStorage.setDrawingTool(
             drawingToolStorage.type == .brush ? .eraser: .brush
         )
+    }
+
+    func loadFile(
+        zipFileURL: URL,
+        action: ((URL) async throws -> Void)?
+    ) {
+        Task {
+            defer {
+                // Remove the working space
+                localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
+            activityIndicatorSubject.send(true)
+
+            do {
+                // Create a temporary working directory
+                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+
+                // Extract the zip file into the working directory
+                try await FileInput.unzip(
+                    sourceURL: zipFileURL,
+                    to: workingDirectoryURL,
+                    priority: .userInitiated
+                )
+
+                try await action?(workingDirectoryURL)
+            }
+        }
+    }
+
+    func saveFile(
+        action: ((URL) async throws -> Void)?
+    ) {
+        Task(priority: .userInitiated) {
+            defer {
+                /// Remove the working space
+                localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
+            activityIndicatorSubject.send(true)
+
+            do {
+                // Create a temporary working directory for saving project files
+                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+
+                try await action?(workingDirectoryURL)
+            }
+        }
     }
 }

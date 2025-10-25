@@ -122,12 +122,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.activityIndicator
-            .map { !$0 }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.isHidden, on: activityIndicatorView)
-            .store(in: &cancellables)
-
         contentView.canvasView.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
@@ -146,6 +140,12 @@ extension HandDrawingViewController {
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
+            .store(in: &cancellables)
+
+        viewModel.activityIndicator
+            .map { !$0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
         viewModel.brushPaletteStorage.palette.$index
