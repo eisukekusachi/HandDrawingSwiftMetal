@@ -30,50 +30,6 @@ class HandDrawingViewController: UIViewController {
     private let brushDrawingToolRenderer = BrushDrawingToolRenderer()
     private let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
 
-    private lazy var drawingToolLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileLoader<DrawingToolArchiveModel>(
-                fileName: DrawingToolArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
-                    self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
-                    self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
-                }
-            }
-         )
-    }()
-
-    private lazy var brushPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileLoader<BrushPaletteArchiveModel>(
-                fileName: BrushPaletteArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.brushPaletteStorage.update(
-                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                        index: file.index
-                    )
-                }
-            }
-         )
-    }()
-
-    private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileLoader<EraserPaletteArchiveModel>(
-                fileName: EraserPaletteArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.eraserPaletteStorage.update(
-                        alphas: file.alphas,
-                        index: file.index
-                    )
-                }
-            }
-         )
-    }()
-
     private let viewModel = HandDrawingContentViewModel()
 
     override func viewDidLoad() {
@@ -315,13 +271,21 @@ extension HandDrawingViewController {
 
                 self.textureLayerViewPresenter.hide()
 
-                self.contentView.canvasView.loadFile(
+                self.viewModel.loadFile(
                     zipFileURL: url,
-                    optionalEntities: [
-                        self.drawingToolLoader,
-                        self.brushPaletteLoader,
-                        self.eraserPaletteLoader
-                    ]
+                    action: { [weak self] workingDirectoryURL in
+                        guard let `self` else { return }
+
+                        // Load texture layer data from the JSON file
+                        let textureLayersModel: TextureLayersArchiveModel = try .init(
+                            fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
+                        )
+
+                        try await contentView.canvasView.restore(
+                            textureLayersModel: textureLayersModel,
+                            workingDirectoryURL: workingDirectoryURL
+                        )
+                    }
                 )
             }
         )

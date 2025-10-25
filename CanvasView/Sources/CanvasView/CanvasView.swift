@@ -119,6 +119,16 @@ import UIKit
         }
     }
 
+    public func restore(
+        textureLayersModel: TextureLayersArchiveModel,
+        workingDirectoryURL: URL
+    ) async throws {
+        try await canvasViewModel.restore(
+            textureLayersModel,
+            workingDirectoryURL: workingDirectoryURL
+        )
+    }
+
     public func resetTransforming() {
         canvasViewModel.resetTransforming()
     }

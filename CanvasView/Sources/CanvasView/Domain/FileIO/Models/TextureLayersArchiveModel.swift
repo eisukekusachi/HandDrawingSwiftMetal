@@ -26,14 +26,14 @@ public struct TextureLayersArchiveModel: Codable, Equatable {
 
 extension TextureLayersArchiveModel {
 
-    static let thumbnailName: String = "thumbnail.png"
+    public static let thumbnailName: String = "thumbnail.png"
 
-    static let fileName: String = "data"
+    public static let fileName: String = "data"
 
-    static let thumbnailLength: CGFloat = 500
+    public static let thumbnailLength: CGFloat = 500
 
     @MainActor
-    init(
+    public init(
         textureLayers: any TextureLayersProtocol
     ) {
         self.textureSize = textureLayers.textureSize
@@ -42,7 +42,7 @@ extension TextureLayersArchiveModel {
     }
 
     /// Initializes by decoding a JSON file at the given URL
-    init(fileURL: URL) throws {
+    public init(fileURL: URL) throws {
         let data = try Data(contentsOf: fileURL)
         do {
             self = try JSONDecoder().decode(TextureLayersArchiveModel.self, from: data)

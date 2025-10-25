@@ -187,6 +187,37 @@ public final class CanvasViewModel {
         }
     }
 
+    func restore(
+        _ textureLayersModel: TextureLayersArchiveModel,
+        workingDirectoryURL: URL
+    ) async throws {
+
+        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
+            from: workingDirectoryURL,
+            configuration: .init(
+                textureSize: textureLayersModel.textureSize,
+                layerIndex: textureLayersModel.layerIndex,
+                layers: textureLayersModel.layers
+            ),
+            defaultTextureSize: TextureLayerModel.defaultTextureSize()
+        )
+
+        // Restore the textures
+        try await initializeTextures(resolvedTextureLayersConfiguration)
+
+        // Load project metadata, falling back if it is missing
+        let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
+            fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.jsonFileName)
+        )
+
+        // Update metadata
+        projectMetaDataStorage.update(
+            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
+            createdAt: projectMetaData?.createdAt ?? Date(),
+            updatedAt: projectMetaData?.updatedAt ?? Date()
+        )
+    }
+
     func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
         guard
             let selectedLayer = textureLayers.selectedLayer

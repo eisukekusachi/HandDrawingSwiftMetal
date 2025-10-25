@@ -18,6 +18,50 @@ final class HandDrawingContentViewModel: ObservableObject {
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
+    private lazy var drawingToolLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<DrawingToolArchiveModel>(
+                fileName: DrawingToolArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
+                    self?.drawingToolStorage.setBrushDiameter(file.brushDiameter)
+                    self?.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
+                }
+            }
+         )
+    }()
+
+    private lazy var brushPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<BrushPaletteArchiveModel>(
+                fileName: BrushPaletteArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.brushPaletteStorage.update(
+                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
+                        index: file.index
+                    )
+                }
+            }
+         )
+    }()
+
+    private lazy var eraserPaletteLoader: AnyLocalFileLoader = {
+         AnyLocalFileLoader(
+            LocalFileLoader<EraserPaletteArchiveModel>(
+                fileName: EraserPaletteArchiveModel.jsonFileName
+            ) { [weak self] file in
+                Task { @MainActor [weak self] in
+                    self?.eraserPaletteStorage.update(
+                        alphas: file.alphas,
+                        index: file.index
+                    )
+                }
+            }
+         )
+    }()
+
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
         workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
@@ -118,6 +162,17 @@ final class HandDrawingContentViewModel: ObservableObject {
                 )
 
                 try await action?(workingDirectoryURL)
+
+                // Restore data from externally configured entities
+                // Since it’s optional, ignore any errors that occur
+                let optionalEntities = [
+                    self.drawingToolLoader,
+                    self.brushPaletteLoader,
+                    self.eraserPaletteLoader
+                ]
+                for entity in optionalEntities {
+                    entity.loadIgnoringError(in: workingDirectoryURL)
+                }
             }
         }
     }
