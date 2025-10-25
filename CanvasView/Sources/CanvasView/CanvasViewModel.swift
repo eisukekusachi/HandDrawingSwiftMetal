@@ -234,6 +234,8 @@ public final class CanvasViewModel {
         to workingDirectoryURL: URL
     ) async throws {
 
+        let device = canvasRenderer.device
+
         // Save the thumbnail image into the working directory
         try thumbnail(length: thumbnailLength)?.write(
             to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.thumbnailName)
@@ -248,8 +250,9 @@ public final class CanvasViewModel {
             for texture in textures {
                 let fileName = texture.fileName
                 group.addTask {
-                    try texture.write(
-                        to: workingDirectoryURL.appendingPathComponent(fileName)
+                    try await texture.write(
+                        to: workingDirectoryURL.appendingPathComponent(fileName),
+                        device: device
                     )
                 }
             }
@@ -598,6 +601,8 @@ public extension CanvasViewModel {
                 // Create a temporary working directory for saving project files
                 try dependencies.localFileRepository.createWorkingDirectory()
 
+                let device = canvasRenderer.device
+
                 // Copy all textures from the textureRepository
                 let textures = try await dependencies.textureRepository.duplicatedTextures(
                     textureLayers.layers.map { $0.id }
@@ -614,8 +619,9 @@ public extension CanvasViewModel {
                     for texture in textures {
                         let fileName = texture.fileName
                         group.addTask {
-                            try texture.write(
-                                to: url.appendingPathComponent(fileName)
+                            try await texture.write(
+                                to: url.appendingPathComponent(fileName),
+                                device: device
                             )
                         }
                     }

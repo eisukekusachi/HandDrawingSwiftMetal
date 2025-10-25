@@ -12,7 +12,7 @@ enum FileOutput {
 
     static func saveTexture(
         from texture: MTLTexture,
-        with device: MTLDevice,
+        with device: MTLDevice?,
         to url: URL
     ) async throws {
         let width = texture.width
@@ -22,6 +22,7 @@ enum FileOutput {
         let dataSize = bytesPerRow * height
 
         guard
+            let device,
             let buffer = device.makeBuffer(length: dataSize, options: [.storageModeShared]),
             let commandQueue = device.makeCommandQueue(),
             let commandBuffer = commandQueue.makeCommandBuffer(),

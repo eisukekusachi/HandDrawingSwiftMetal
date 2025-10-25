@@ -40,11 +40,15 @@ public struct IdentifiedTexture: Hashable, @unchecked Sendable {
     }
 }
 
-extension IdentifiedTexture: LocalFileConvertible {
+extension IdentifiedTexture: LocalTextureConvertible {
     public var fileName: String {
         id.uuidString
     }
-    public func write(to url: URL) throws {
-        try FileOutput.saveTextureAsData(bytes: self.texture.bytes, to: url)
+    public func write(to url: URL, device: MTLDevice?) async throws {
+        try await FileOutput.saveTexture(
+            from: texture,
+            with: device,
+            to: url
+        )
     }
 }
