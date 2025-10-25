@@ -1,5 +1,5 @@
 //
-//  CanvasMessage.swift
+//  ToastMessage.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/05/04.
@@ -7,10 +7,10 @@
 
 import UIKit
 
-public typealias CanvasMessageId = UUID
+public typealias ToastMessageId = UUID
 
-public struct CanvasMessage: Identifiable {
-    public let id: CanvasMessageId
+public struct ToastMessage: Identifiable {
+    public let id: ToastMessageId
     public let title: String
     public let icon: UIImage?
     public let duration: Double
@@ -20,7 +20,7 @@ public struct CanvasMessage: Identifiable {
         icon: UIImage?,
         duration: Double = 2.0
     ) {
-        self.id = CanvasMessageId()
+        self.id = ToastMessageId()
         self.title = title
         self.icon = icon
         self.duration = duration

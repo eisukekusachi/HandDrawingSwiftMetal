@@ -26,11 +26,6 @@ import UIKit
         alertSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits a request to show or hide the toast
-    public var toast: AnyPublisher<CanvasMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
-    }
-
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -56,8 +51,6 @@ import UIKit
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 

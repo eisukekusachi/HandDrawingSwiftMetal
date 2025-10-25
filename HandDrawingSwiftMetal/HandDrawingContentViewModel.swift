@@ -75,7 +75,10 @@ final class HandDrawingContentViewModel: ObservableObject {
 
     private let alertSubject = PassthroughSubject<any Error, Never>()
 
-    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
+    public var toast: AnyPublisher<ToastMessage, Never> {
+        toastSubject.eraseToAnyPublisher()
+    }
+    private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     public init() {
 

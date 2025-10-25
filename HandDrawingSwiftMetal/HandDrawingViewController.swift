@@ -98,13 +98,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.toast
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.showToast(model)
-            }
-            .store(in: &cancellables)
-
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
@@ -115,6 +108,13 @@ extension HandDrawingViewController {
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
+            .store(in: &cancellables)
+
+        viewModel.toast
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.showToast(model)
+            }
             .store(in: &cancellables)
 
         viewModel.brushPaletteStorage.palette.$index
@@ -292,7 +292,7 @@ extension HandDrawingViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    private func showToast(_ model: CanvasMessage) {
+    private func showToast(_ model: ToastMessage) {
         let toast = Toast()
         toast.showMessage(model)
         view.addSubview(toast)
