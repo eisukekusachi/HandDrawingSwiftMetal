@@ -66,7 +66,7 @@ extension ProjectMetaDataArchiveModel: LocalFileConvertible {
 
 @MainActor
 extension ProjectMetaDataArchiveModel {
-    static func savableFile(from project: ProjectMetaDataProtocol) -> SavableFile<Self> {
+    static func localFileItem(from project: ProjectMetaDataProtocol) -> LocalFileItem<Self> {
         .init(
             fileName: "\(Self.fileName)",
             item: .init(

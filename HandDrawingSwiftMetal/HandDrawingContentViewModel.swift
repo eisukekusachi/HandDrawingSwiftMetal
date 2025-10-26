@@ -164,9 +164,9 @@ extension HandDrawingContentViewModel {
 
                 try await action?(workingDirectoryURL)
 
-                try DrawingToolArchiveModel.savableFile(from: drawingToolStorage.drawingTool).write(to: workingDirectoryURL)
-                try BrushPaletteArchiveModel.savableFile(from: brushPaletteStorage.palette).write(to: workingDirectoryURL)
-                try EraserPaletteArchiveModel.savableFile(from: eraserPaletteStorage.palette).write(to: workingDirectoryURL)
+                try DrawingToolArchiveModel.localFileItem(from: drawingToolStorage.drawingTool).write(to: workingDirectoryURL)
+                try BrushPaletteArchiveModel.localFileItem(from: brushPaletteStorage.palette).write(to: workingDirectoryURL)
+                try EraserPaletteArchiveModel.localFileItem(from: eraserPaletteStorage.palette).write(to: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
                 try localFileRepository.zipWorkingDirectory(

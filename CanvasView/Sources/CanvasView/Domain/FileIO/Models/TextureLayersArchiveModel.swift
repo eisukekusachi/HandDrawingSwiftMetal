@@ -65,7 +65,7 @@ extension TextureLayersArchiveModel: LocalFileConvertible {
 
     public static var fileName: String { "data" }
 
-    public func savableFile() -> SavableFile<TextureLayersArchiveModel> {
+    public func localFileItem() -> LocalFileItem<TextureLayersArchiveModel> {
         .init(
             fileName: TextureLayersArchiveModel.fileName,
             item: self
