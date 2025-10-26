@@ -21,6 +21,7 @@ public final class LocalFileRepository {
 
 public extension LocalFileRepository {
 
+    @discardableResult
     func createWorkingDirectory() throws -> URL {
         try FileManager.createNewDirectory(workingDirectoryURL)
         return workingDirectoryURL
@@ -50,6 +51,16 @@ public extension LocalFileRepository {
 
         // Overwrite if a file with the same name exists
         try moveFiles(from: tempZipURL, to: zipFileURL)
+    }
+
+    func unzipToWorkingDirectory(
+        from zipFileURL: URL
+    ) async throws {
+        try await FileInput.unzip(
+            sourceURL: zipFileURL,
+            to: workingDirectoryURL,
+            priority: .high
+        )
     }
 }
 

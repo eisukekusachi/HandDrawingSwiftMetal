@@ -121,10 +121,8 @@ extension HandDrawingContentViewModel {
                 let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
 
                 // Extract the zip file into the working directory
-                try await FileInput.unzip(
-                    sourceURL: zipFileURL,
-                    to: workingDirectoryURL,
-                    priority: .userInitiated
+                try await localFileRepository.unzipToWorkingDirectory(
+                    from: zipFileURL
                 )
 
                 try await action?(workingDirectoryURL)
