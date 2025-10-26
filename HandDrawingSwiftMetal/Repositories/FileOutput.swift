@@ -10,20 +10,6 @@ import ZIPFoundation
 
 enum FileOutput {
 
-    static func saveTextureAsData(
-        bytes: [UInt8],
-        to url: URL
-    ) throws {
-        try Data(bytes).write(to: url)
-    }
-
-    static func saveImage(
-        image: UIImage?,
-        to url: URL
-    ) throws {
-        try image?.pngData()?.write(to: url)
-    }
-
     static func saveJson<T: Codable>(
         _ data: T,
         to jsonURL: URL
