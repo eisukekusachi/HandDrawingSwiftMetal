@@ -59,9 +59,7 @@ class HandDrawingViewController: UIViewController {
                     configuration: canvasConfiguration ?? .init()
                 )
 
-                contentView.updateDrawingComponents(
-                    viewModel.drawingToolStorage.type
-                )
+                updateComponents()
 
                 showActivityIndicator(false)
                 showContentView(true)
@@ -283,6 +281,12 @@ extension HandDrawingViewController {
         ])
     }
 
+    private func updateComponents() {
+        contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
+        contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
+        contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
+    }
+
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
@@ -351,11 +355,7 @@ extension HandDrawingViewController {
                 )
             },
             completion: { [weak self] in
-                guard let `self` else { return }
-
-                self.contentView.updateDrawingComponents(self.viewModel.drawingToolStorage.drawingTool.type)
-                self.contentView.setBrushDiameterSlider(self.viewModel.drawingToolStorage.brushDiameter)
-                self.contentView.setEraserDiameterSlider(self.viewModel.drawingToolStorage.eraserDiameter)
+                self?.updateComponents()
             }
         )
     }
