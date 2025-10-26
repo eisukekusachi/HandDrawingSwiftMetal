@@ -50,6 +50,9 @@ final class HandDrawingContentViewModel: ObservableObject {
     }
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
+    public var alert: AnyPublisher<any Error, Never> {
+        alertSubject.eraseToAnyPublisher()
+    }
     private let alertSubject = PassthroughSubject<any Error, Never>()
 
     public var toast: AnyPublisher<ToastMessage, Never> {

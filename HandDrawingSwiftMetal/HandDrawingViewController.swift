@@ -110,6 +110,13 @@ extension HandDrawingViewController {
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
+        viewModel.alert
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                self?.showAlert(error)
+            }
+            .store(in: &cancellables)
+
         viewModel.toast
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
@@ -298,6 +305,14 @@ extension HandDrawingViewController {
         dialogPresenter.configuration = .init(
             title: error.title,
             message: error.message
+        )
+        dialogPresenter.presentAlert(on: self)
+    }
+
+    private func showAlert(_ error: Error) {
+        dialogPresenter.configuration = .init(
+            title: "Error",
+            message: error.localizedDescription
         )
         dialogPresenter.presentAlert(on: self)
     }
