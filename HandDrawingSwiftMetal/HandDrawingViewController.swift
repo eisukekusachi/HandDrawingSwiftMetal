@@ -201,27 +201,34 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.viewModel.drawingToolStorage.update(
-                type: .brush,
-                brushDiameter: 8,
-                eraserDiameter: 8
-            )
-            self.viewModel.brushPaletteStorage.update(
-                colors: viewModel.initializeColors,
-                index: 0
-            )
-            self.viewModel.eraserPaletteStorage.update(
-                alphas: viewModel.initializeAlphas,
-                index: 0
-            )
+            Task {
+                defer { self.viewModel.showActivityIndicator(false) }
+                self.viewModel.showActivityIndicator(true)
 
-            let scale = UIScreen.main.scale
-            let size = UIScreen.main.bounds.size
-            self.contentView.canvasView.newCanvas(
-                configuration: TextureLayerArrayConfiguration(
-                    textureSize: .init(width: size.width * scale, height: size.height * scale)
+                self.viewModel.drawingToolStorage.update(
+                    type: .brush,
+                    brushDiameter: 8,
+                    eraserDiameter: 8
                 )
-            )
+                self.viewModel.brushPaletteStorage.update(
+                    colors: self.viewModel.initializeColors,
+                    index: 0
+                )
+                self.viewModel.eraserPaletteStorage.update(
+                    alphas: self.viewModel.initializeAlphas,
+                    index: 0
+                )
+
+                let scale = UIScreen.main.scale
+                let size = UIScreen.main.bounds.size
+                try await self.contentView.canvasView.newCanvas(
+                    configuration: TextureLayerArrayConfiguration(
+                        textureSize: .init(width: size.width * scale, height: size.height * scale)
+                    )
+                )
+
+                self.updateComponents()
+            }
         }
     }
 

@@ -103,6 +103,10 @@ final class HandDrawingContentViewModel: ObservableObject {
             drawingToolStorage.type == .brush ? .eraser: .brush
         )
     }
+
+    func showActivityIndicator(_ shown: Bool) {
+        activityIndicatorSubject.send(shown)
+    }
 }
 
 extension HandDrawingContentViewModel {

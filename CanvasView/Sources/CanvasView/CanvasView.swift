@@ -107,13 +107,8 @@ import UIKit
         )
     }
 
-    public func newCanvas(configuration: TextureLayerArrayConfiguration) {
-        Task {
-            defer { activityIndicatorSubject.send(false) }
-            activityIndicatorSubject.send(true)
-
-            try await canvasViewModel.newCanvas(configuration: configuration)
-        }
+    public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
+        try await canvasViewModel.newCanvas(configuration: configuration)
     }
 
     public func loadFiles(
