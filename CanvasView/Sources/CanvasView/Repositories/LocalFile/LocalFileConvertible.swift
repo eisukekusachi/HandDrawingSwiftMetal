@@ -7,20 +7,27 @@
 
 import Foundation
 
-public protocol LocalFileConvertible: Sendable {
-    associatedtype T: Codable & Sendable
-
+public protocol LocalFileConvertible: Sendable, Codable {
     static var fileName: String { get }
 
-    static func read(from url: URL) throws -> T
+    /// Read from a **directory** URL (fileName is appended)
+    init(in directory: URL) throws
 
-    /// Save this value to a local file at the specified URL
-    func write(to url: URL) throws
+    /// Write to a **directory** URL (fileName is appended)
+    func write(in directory: URL) throws
 }
 
-public extension LocalFileConvertible where Self: Codable & Sendable, T == Self {
-    func write(to url: URL) throws {
+public extension LocalFileConvertible {
+    init(in directory: URL) throws {
+        let fileURL = directory.appendingPathComponent(Self.fileName)
+        let data = try Data(contentsOf: fileURL)
+        self = try JSONDecoder().decode(Self.self, from: data)
+    }
+
+    func write(in directory: URL) throws {
+        let fileURL = directory.appendingPathComponent(Self.fileName)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let data = try JSONEncoder().encode(self)
-        try data.write(to: url, options: .atomic)
+        try data.write(to: fileURL, options: .atomic)
     }
 }

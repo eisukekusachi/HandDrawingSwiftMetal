@@ -87,9 +87,11 @@ extension CoreDataProjectMetaDataStorage {
         if let projectName = entity.projectName,
            let createdAt = entity.createdAt,
            let updatedAt = entity.updatedAt {
-            project.projectName = projectName
-            project.createdAt = createdAt
-            project.updatedAt = updatedAt
+            update(
+                projectName: projectName,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            )
         }
     }
 }

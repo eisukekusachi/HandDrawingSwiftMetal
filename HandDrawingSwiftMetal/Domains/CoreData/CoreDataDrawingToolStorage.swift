@@ -93,8 +93,22 @@ extension CoreDataDrawingToolStorage {
         setEraserDiameter(Int(entity.eraserDiameter))
     }
 
-    func update(url: URL) {
-        guard let result = try? DrawingToolArchiveModel.read(from: url) else { return }
+    func update(directoryURL: URL) throws {
+        // Do nothing if an error occurs, since nothing can be done
+        guard
+            let result = try? DrawingToolArchiveModel(in: directoryURL)
+        else {
+            let nsError = NSError(
+                domain: String(describing: Self.self),
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
+                    "directoryURL": directoryURL.path
+                ]
+            )
+            Logger.error(nsError)
+            throw nsError
+        }
         self.drawingTool.setDrawingTool(.init(rawValue: result.type))
         self.drawingTool.setBrushDiameter(result.brushDiameter)
         self.drawingTool.setEraserDiameter(result.eraserDiameter)

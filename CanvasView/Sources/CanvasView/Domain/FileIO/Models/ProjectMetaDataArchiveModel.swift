@@ -8,9 +8,10 @@
 import Foundation
 
 public struct ProjectMetaDataArchiveModel: Codable, Sendable {
-    public let projectName: String
-    public let createdAt: Date
-    public let updatedAt: Date
+
+    let projectName: String
+    let createdAt: Date
+    let updatedAt: Date
 
     public init(
         projectName: String,
@@ -23,57 +24,6 @@ public struct ProjectMetaDataArchiveModel: Codable, Sendable {
     }
 }
 
-@MainActor
-extension ProjectMetaDataArchiveModel {
-    public init(project: ProjectMetaDataProtocol) {
-        self.projectName = project.projectName
-        self.createdAt = project.createdAt
-        self.updatedAt = project.updatedAt
-    }
-
-    /// Initializes by decoding a JSON file at the given URL
-    public init(fileURL: URL) throws {
-        do {
-            let data = try Data(contentsOf: fileURL)
-            self = try JSONDecoder().decode(ProjectMetaDataArchiveModel.self, from: data)
-        } catch {
-            let className = String(describing: ProjectMetaDataArchiveModel.self)
-            let nsError = NSError(
-                domain: className,
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to decode \(className) from JSON.",
-                    NSUnderlyingErrorKey: error,
-                    "fileURL": fileURL.path
-                ]
-            )
-            Logger.error(nsError)
-            throw nsError
-        }
-    }
-}
-
 extension ProjectMetaDataArchiveModel: LocalFileConvertible {
-    public static var fileName: String {
-        "project"
-    }
-
-    public static func read(from url: URL) throws -> Self {
-        let data = try Data(contentsOf: url.appendingPathComponent(ProjectMetaDataArchiveModel.fileName))
-        return try JSONDecoder().decode(Self.self, from: data)
-    }
-}
-
-@MainActor
-extension ProjectMetaDataArchiveModel {
-    static func localFileItem(from project: ProjectMetaDataProtocol) -> LocalFileItem<Self> {
-        .init(
-            fileName: "\(Self.fileName)",
-            item: .init(
-                projectName: project.projectName,
-                createdAt: project.createdAt,
-                updatedAt: project.updatedAt
-            )
-        )
-    }
+    public static var fileName: String { "project" }
 }

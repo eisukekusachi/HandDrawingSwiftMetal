@@ -129,9 +129,9 @@ extension HandDrawingContentViewModel {
 
                 // Restore data from externally configured entities
                 // Since it’s optional, ignore any errors that occur
-                drawingToolStorage.update(url: workingDirectoryURL)
-                brushPaletteStorage.update(url: workingDirectoryURL)
-                eraserPaletteStorage.update(url: workingDirectoryURL)
+                try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
+                try? brushPaletteStorage.update(directoryURL: workingDirectoryURL)
+                try? eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
 
                 toastSubject.send(
                     .init(
@@ -164,9 +164,9 @@ extension HandDrawingContentViewModel {
 
                 try await action?(workingDirectoryURL)
 
-                try DrawingToolArchiveModel.localFileItem(from: drawingToolStorage.drawingTool).write(to: workingDirectoryURL)
-                try BrushPaletteArchiveModel.localFileItem(from: brushPaletteStorage.palette).write(to: workingDirectoryURL)
-                try EraserPaletteArchiveModel.localFileItem(from: eraserPaletteStorage.palette).write(to: workingDirectoryURL)
+                try DrawingToolArchiveModel(drawingToolStorage.drawingTool).write(in: workingDirectoryURL)
+                try BrushPaletteArchiveModel(brushPaletteStorage.palette).write(in: workingDirectoryURL)
+                try EraserPaletteArchiveModel(eraserPaletteStorage.palette).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
                 try localFileRepository.zipWorkingDirectory(

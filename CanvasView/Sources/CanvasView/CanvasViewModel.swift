@@ -93,6 +93,10 @@ public final class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
+    public static let thumbnailName: String = "thumbnail.png"
+
+    public static let thumbnailLength: CGFloat = 500
+
     init() {
         canvasRenderer = CanvasRenderer()
 
@@ -374,7 +378,7 @@ public extension CanvasViewModel {
 
 public extension CanvasViewModel {
 
-    func thumbnail(length: CGFloat = TextureLayersArchiveModel.thumbnailLength) -> UIImage? {
+    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
         canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
             height: length,
             scale: 1.0
@@ -401,7 +405,7 @@ public extension CanvasViewModel {
 
         // Load project metadata, falling back if it is missing
         let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
-            fileURL: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.fileName)
+            in: workingDirectoryURL
         )
 
         // Update metadata
@@ -413,7 +417,7 @@ public extension CanvasViewModel {
     }
 
     func exportFiles(
-        thumbnailLength: CGFloat = TextureLayersArchiveModel.thumbnailLength,
+        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
         to workingDirectoryURL: URL
     ) async throws {
 
@@ -422,7 +426,7 @@ public extension CanvasViewModel {
         // Save the thumbnail image into the working directory
         try FileOutput.saveImage(
             image: thumbnail(length: thumbnailLength),
-            to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.thumbnailName)
+            to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
         )
 
         // Copy all textures from the textureRepository
@@ -444,9 +448,11 @@ public extension CanvasViewModel {
         }
 
         // Save the texture layers as JSON
-        try TextureLayersArchiveModel(textureLayers: textureLayers).write(
-            to: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
-        )
+        try TextureLayersArchiveModel(
+            textureSize: textureLayers.textureSize,
+            layerIndex: textureLayers.selectedIndex ?? 0,
+            layers: textureLayers.layers.map { .init(item: $0) }
+        ).write(in: workingDirectoryURL)
 
         // Save the project metadata as JSON
        try ProjectMetaDataArchiveModel(
@@ -454,7 +460,7 @@ public extension CanvasViewModel {
             createdAt: projectMetaDataStorage.createdAt,
             updatedAt: projectMetaDataStorage.updatedAt
         ).write(
-            to: workingDirectoryURL.appendingPathComponent(ProjectMetaDataArchiveModel.fileName)
+            in: workingDirectoryURL
         )
     }
 }

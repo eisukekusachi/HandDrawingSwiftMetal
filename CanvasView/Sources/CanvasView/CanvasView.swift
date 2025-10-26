@@ -126,7 +126,7 @@ import UIKit
         )
     }
     public func exportFiles(
-        thumbnailLength: CGFloat = TextureLayersArchiveModel.thumbnailLength,
+        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
         to workingDirectoryURL: URL
     ) async throws {
         try await canvasViewModel.exportFiles(

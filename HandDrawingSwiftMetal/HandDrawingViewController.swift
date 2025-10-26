@@ -327,7 +327,7 @@ extension HandDrawingViewController {
 
                 // Load texture layer data from the JSON file
                 let textureLayersModel: TextureLayersArchiveModel = try .init(
-                    fileURL: workingDirectoryURL.appendingPathComponent(TextureLayersArchiveModel.fileName)
+                    in: workingDirectoryURL
                 )
 
                 try await self.contentView.canvasView.loadFiles(

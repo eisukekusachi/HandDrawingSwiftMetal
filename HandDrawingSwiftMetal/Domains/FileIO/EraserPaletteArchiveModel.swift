@@ -13,22 +13,14 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
     public let alphas: [Int]
 }
 
+extension EraserPaletteArchiveModel {
+    @MainActor
+    init(_ palette: EraserPalette) {
+        self.index = palette.index
+        self.alphas = palette.alphas
+    }
+}
+
 extension EraserPaletteArchiveModel: LocalFileConvertible {
     static var fileName: String { "eraser_palette" }
-
-    static func read(from url: URL) throws -> Self {
-        let data = try Data(contentsOf: url.appendingPathComponent(EraserPaletteArchiveModel.fileName))
-        return try JSONDecoder().decode(Self.self, from: data)
-    }
-
-    @MainActor
-    static func localFileItem(from palette: EraserPalette) -> LocalFileItem<EraserPaletteArchiveModel> {
-        .init(
-            fileName: EraserPaletteArchiveModel.fileName,
-            item: .init(
-                index: palette.index,
-                alphas: palette.alphas
-            )
-        )
-    }
 }
