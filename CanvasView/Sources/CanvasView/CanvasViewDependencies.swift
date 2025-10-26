@@ -15,9 +15,6 @@ struct CanvasViewDependencies {
     /// Repository that manages textures used for undo in memory
     let undoTextureRepository: TextureInMemoryRepository?
 
-    /// Repository that manages files in the Documents directory
-    let localFileRepository: LocalFileRepository
-
     let renderer: MTLRendering
 
     let displayView: CanvasDisplayable
@@ -28,18 +25,14 @@ extension CanvasViewDependencies {
         renderer: MTLRendering,
         displayView: CanvasDisplayable
     ) {
-        textureRepository = TextureDocumentsDirectoryRepository(
+        self.textureRepository = TextureDocumentsDirectoryRepository(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage",
             renderer: renderer
         )
 
-        undoTextureRepository = TextureInMemoryRepository(
+        self.undoTextureRepository = TextureInMemoryRepository(
             renderer: renderer
-        )
-
-        localFileRepository = DefaultLocalFileRepository(
-            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
         )
 
         self.renderer = renderer

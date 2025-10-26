@@ -47,5 +47,5 @@ public protocol TextureRepository: Sendable {
     func removeAll()
 
     /// Updates an existing texture for `LayerId`
-    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws
+    func updateTexture(texture: MTLTexture, for id: LayerId) async throws
 }

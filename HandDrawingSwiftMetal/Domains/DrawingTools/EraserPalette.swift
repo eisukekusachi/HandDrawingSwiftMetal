@@ -9,7 +9,6 @@ import Combine
 import CoreData
 import UIKit
 
-@MainActor
 protocol EraserPaletteProtocol {
 
     var id: UUID { get }
@@ -27,11 +26,8 @@ protocol EraserPaletteProtocol {
     func update(alpha: Int, at index: Int)
 
     func remove(at index: Int)
-
-    func reset()
 }
 
-@MainActor
 public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
 
     private(set) var id: UUID
@@ -39,20 +35,16 @@ public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
     @Published private(set) var alphas: [Int] = []
     @Published private(set) var index: Int = 0
 
-    private let initialAlphas: [Int]
-
     public init(
         id: UUID = UUID(),
         alphas: [Int],
-        index: Int = 0,
-        initialAlphas: [Int]? = nil
+        index: Int
     ) {
         self.id = id
 
         let newAlphas = alphas.isEmpty ? [255] : alphas
         self.alphas = newAlphas
         self.index = max(0, min(index, newAlphas.count - 1))
-        self.initialAlphas = initialAlphas ?? newAlphas
     }
 }
 
@@ -106,10 +98,5 @@ extension EraserPalette {
     func remove(at index: Int) {
         guard alphas.indices.contains(index) && alphas.count > 1 else { return }
         alphas.remove(at: index)
-    }
-
-    func reset() {
-        alphas = initialAlphas
-        index = 0
     }
 }

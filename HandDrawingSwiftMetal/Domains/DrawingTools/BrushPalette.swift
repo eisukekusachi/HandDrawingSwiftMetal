@@ -8,7 +8,6 @@
 import Combine
 import UIKit
 
-@MainActor
 protocol BrushPaletteProtocol {
 
     var id: UUID { get }
@@ -26,11 +25,8 @@ protocol BrushPaletteProtocol {
     func update(color: UIColor, at index: Int)
 
     func remove(at index: Int)
-
-    func reset()
 }
 
-@MainActor
 public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
 
     private(set) var id: UUID
@@ -38,20 +34,16 @@ public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
     @Published private(set) var colors: [UIColor] = []
     @Published private(set) var index: Int = 0
 
-    private let initialColors: [UIColor]
-
     public init(
         id: UUID = UUID(),
         colors: [UIColor],
-        index: Int = 0,
-        initialColors: [UIColor]? = nil
+        index: Int
     ) {
         self.id = id
 
         let newColors = colors.isEmpty ? [.black] : colors
         self.colors = newColors
         self.index = max(0, min(index, newColors.count - 1))
-        self.initialColors = initialColors ?? newColors
     }
 }
 
@@ -98,10 +90,5 @@ extension BrushPalette {
     func remove(at index: Int) {
         guard colors.indices.contains(index) && colors.count > 1 else { return }
         colors.remove(at: index)
-    }
-
-    func reset() {
-        colors = initialColors
-        index = 0
     }
 }

@@ -40,55 +40,8 @@ final class HandDrawingContentView: UIView {
     var tapDrawingToolButton: (() -> Void)?
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
-
-    let brushDrawingToolRenderer = BrushDrawingToolRenderer()
-    let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
-
-    let viewModel = HandDrawingContentViewModel()
-
-    lazy var drawingToolLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileNamedLoader<DrawingToolArchiveModel>(
-                fileName: DrawingToolArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.drawingToolStorage.setDrawingTool(.init(rawValue: file.type))
-                    self?.viewModel.drawingToolStorage.setBrushDiameter(file.brushDiameter)
-                    self?.viewModel.drawingToolStorage.setEraserDiameter(file.eraserDiameter)
-                }
-            }
-         )
-    }()
-
-    lazy var brushPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileNamedLoader<BrushPaletteArchiveModel>(
-                fileName: BrushPaletteArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.brushPaletteStorage.update(
-                        colors: file.hexColors.compactMap { UIColor(hex: $0) },
-                        index: file.index
-                    )
-                }
-            }
-         )
-    }()
-
-    lazy var eraserPaletteLoader: AnyLocalFileLoader = {
-         AnyLocalFileLoader(
-            LocalFileNamedLoader<EraserPaletteArchiveModel>(
-                fileName: EraserPaletteArchiveModel.jsonFileName
-            ) { [weak self] file in
-                Task { @MainActor [weak self] in
-                    self?.viewModel.eraserPaletteStorage.update(
-                        alphas: file.alphas,
-                        index: file.index
-                    )
-                }
-            }
-         )
-    }()
+    var dragBrushSlider: ((Float) -> Void)?
+    var dragEraserSlider: ((Float) -> Void)?
 
     private let throttle = Throttle(delay: 0.2)
 
@@ -108,47 +61,18 @@ final class HandDrawingContentView: UIView {
     private func commonInit() {
         canvasView.alpha = 0.0
 
-        subscribe()
         addEvents()
 
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-
-        updateDrawingComponents(
-            viewModel.drawingToolStorage.type
-        )
     }
 
     func initialize() {
-        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-        brushDiameterSlider.setValue(
-            BrushDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.brushDiameter),
-            animated: false
-        )
-
-        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
-        eraserDiameterSlider.setValue(
-            EraserDrawingToolRenderer.diameterFloatValue(viewModel.drawingToolStorage.eraserDiameter),
-            animated: false
-        )
-
-        updateDrawingComponents(viewModel.drawingToolStorage.type)
-
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.canvasView.alpha = 1.0
         }
 
         backgroundColor = .white
-    }
-
-    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
-        undoButton.isEnabled = state.isUndoEnabled
-        redoButton.isEnabled = state.isRedoEnabled
-    }
-
-    func toggleDrawingTool() {
-        viewModel.toggleDrawingTool()
-        updateDrawingComponents(viewModel.drawingToolStorage.type)
     }
 
     func undo() {
@@ -157,42 +81,46 @@ final class HandDrawingContentView: UIView {
     func redo() {
         canvasView.redo()
     }
+
+    func updateDrawingComponents(_ tool: DrawingToolType) {
+        drawingToolButton.setImage(.init(systemName: tool == .brush ? "pencil" : "eraser"), for: .normal)
+
+        brushDiameterSlider.isHidden = tool != .brush
+        brushPaletteView.isHidden = tool != .brush
+
+        eraserDiameterSlider.isHidden = tool != .eraser
+        eraserPaletteView.isHidden = tool != .eraser
+
+        canvasView.setDrawingTool(tool.rawValue)
+    }
+
+    func setBrushDiameterSlider(_ value: Int) {
+        brushDiameterSlider.setValue(
+            BrushDrawingToolRenderer.diameterFloatValue(value),
+            animated: false
+        )
+    }
+    func setEraserDiameterSlider(_ value: Int) {
+        eraserDiameterSlider.setValue(
+            EraserDrawingToolRenderer.diameterFloatValue(value),
+            animated: false
+        )
+    }
+    func setBrushDiameterSlider(_ value: Float) {
+        brushDiameterSlider.setValue(value, animated: false)
+    }
+    func setEraserDiameterSlider(_ value: Float) {
+        eraserDiameterSlider.setValue(value, animated: false)
+    }
+
+    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
+        undoButton.isEnabled = state.isUndoEnabled
+        redoButton.isEnabled = state.isRedoEnabled
+    }
 }
 
 private extension HandDrawingContentView {
-
-    func subscribe() {
-        viewModel.brushPaletteStorage.palette.$index
-            .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
-                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
-                self.brushDrawingToolRenderer.setColor(newColor)
-            }
-            .store(in: &cancellables)
-
-        viewModel.eraserPaletteStorage.palette.$index
-            .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
-                self.eraserDrawingToolRenderer.setAlpha(newAlpha)
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingToolStorage.drawingTool.$brushDiameter
-            .sink { [weak self] diameter in
-                self?.brushDrawingToolRenderer.setDiameter(diameter)
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
-            .sink { [weak self] diameter in
-                self?.eraserDrawingToolRenderer.setDiameter(diameter)
-            }
-            .store(in: &cancellables)
-    }
-
     func addEvents() {
-
         resetTransformButton.addAction(.init { [weak self] _ in
             self?.canvasView.resetTransforming()
         }, for: .touchUpInside)
@@ -236,36 +164,13 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
-            guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingToolStorage.setBrushDiameter(
-                BrushDrawingToolRenderer.diameterIntValue(slider.value)
-            )
+            guard let `self`, let slider = action.sender as? UISlider else { return }
+            dragBrushSlider?(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
-            guard let slider = action.sender as? UISlider else { return }
-            self?.viewModel.drawingToolStorage.setEraserDiameter(
-                BrushDrawingToolRenderer.diameterIntValue(slider.value)
-            )
+            guard let `self`,  let slider = action.sender as? UISlider else { return }
+            dragEraserSlider?(slider.value)
         }, for: .valueChanged)
-    }
-
-    func updateDrawingComponents(_ tool: DrawingToolType) {
-        if tool == .brush {
-            drawingToolButton.setImage(.init(systemName: "pencil"), for: .normal)
-            canvasView.setDrawingTool(DrawingToolType.brush.rawValue)
-
-        } else {
-            drawingToolButton.setImage(.init(systemName: "eraser"), for: .normal)
-            canvasView.setDrawingTool(DrawingToolType.eraser.rawValue)
-        }
-
-        brushDiameterSlider.isHidden = tool != .brush
-        brushPaletteView.isHidden = tool != .brush
-
-        eraserDiameterSlider.isHidden = tool != .eraser
-        eraserPaletteView.isHidden = tool != .eraser
-
-        canvasView.setDrawingTool(tool.rawValue)
     }
 }

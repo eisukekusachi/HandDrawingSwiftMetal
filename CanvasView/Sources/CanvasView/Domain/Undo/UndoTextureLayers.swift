@@ -562,7 +562,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
         textureLayers.updateAlpha(id, alpha: alpha)
     }
 
-    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
     }
 

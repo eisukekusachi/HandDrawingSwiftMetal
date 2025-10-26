@@ -1,0 +1,36 @@
+//
+//  FileOutput.swift
+//  HandDrawingSwiftMetal
+//
+//  Created by Eisuke Kusachi on 2025/10/25.
+//
+
+import UIKit
+import ZIPFoundation
+
+enum FileOutput {
+
+    static func saveJson<T: Codable>(
+        _ data: T,
+        to jsonURL: URL
+    ) throws {
+        let jsonData = try JSONEncoder().encode(data)
+        let jsonString = String(data: jsonData, encoding: .utf8)
+        try jsonString?.write(
+            to: jsonURL,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
+    static func zip(sourceURLs: [URL], to zipFileURL: URL) throws {
+        let archive = try Archive(url: zipFileURL, accessMode: .create)
+        try sourceURLs.forEach { url in
+            try archive.addEntry(
+                with: url.lastPathComponent,
+                fileURL: url,
+                compressionMethod: .deflate
+            )
+        }
+    }
+}

@@ -9,38 +9,19 @@ import CanvasView
 import Foundation
 
 struct DrawingToolArchiveModel: Codable, Sendable {
-    public let type: Int
-    public let brushDiameter: Int
-    public let eraserDiameter: Int
+    let type: Int
+    let brushDiameter: Int
+    let eraserDiameter: Int
+}
 
-    public static let jsonFileName = "drawing_tool"
+extension DrawingToolArchiveModel {
+    init(_ drawingTool: DrawingTool) {
+        type = drawingTool.type.rawValue
+        brushDiameter = drawingTool.brushDiameter
+        eraserDiameter = drawingTool.eraserDiameter
+    }
 }
 
 extension DrawingToolArchiveModel: LocalFileConvertible {
-    public func write(to url: URL) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(self)
-        try data.write(to: url, options: .atomic)
-    }
+    static var fileName: String { "drawing_tool" }
 }
-
-@MainActor
-extension DrawingToolArchiveModel {
-    static func namedItem(from drawingTool: DrawingTool) -> LocalFileNamedItem<DrawingToolArchiveModel> {
-        .init(
-            fileName: "\(Self.jsonFileName)",
-            item: .init(
-                type: drawingTool.type.rawValue,
-                brushDiameter: drawingTool.brushDiameter,
-                eraserDiameter: drawingTool.eraserDiameter
-            )
-        )
-    }
-
-    static func anyNamedItem(from drawingTool: DrawingTool) -> AnyLocalFileNamedItem {
-        AnyLocalFileNamedItem(Self.namedItem(from: drawingTool))
-    }
-}
-
-extension DrawingToolArchiveModel: LocalFileLoadable {}

@@ -26,11 +26,6 @@ import UIKit
         alertSubject.eraseToAnyPublisher()
     }
 
-    /// A publisher that emits a request to show or hide the toast
-    public var toast: AnyPublisher<CanvasMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
-    }
-
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -45,6 +40,10 @@ import UIKit
         didInitializeTexturesSubject.eraseToAnyPublisher()
     }
 
+    public var zipFileURL: URL {
+        canvasViewModel.zipFileURL
+    }
+
     private let renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
@@ -52,8 +51,6 @@ import UIKit
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    private let toastSubject = PassthroughSubject<CanvasMessage, Never>()
 
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
@@ -97,10 +94,10 @@ import UIKit
     public func initialize(
         drawingToolRenderers: [DrawingToolRenderer],
         configuration: CanvasConfiguration
-    ) {
+    ) async throws {
         displayView.initialize(renderer: renderer)
 
-        canvasViewModel.initialize(
+        try await canvasViewModel.initialize(
             drawingToolRenderers: drawingToolRenderers,
             dependencies: .init(
                 renderer: renderer,
@@ -110,13 +107,27 @@ import UIKit
         )
     }
 
-    public func newCanvas(configuration: TextureLayerArrayConfiguration) {
-        Task {
-            defer { activityIndicatorSubject.send(false) }
-            activityIndicatorSubject.send(true)
+    public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
+        try await canvasViewModel.newCanvas(configuration: configuration)
+    }
 
-            try await canvasViewModel.newCanvas(configuration: configuration)
-        }
+    public func loadFiles(
+        textureLayersModel: TextureLayersArchiveModel,
+        from workingDirectoryURL: URL
+    ) async throws {
+        try await canvasViewModel.loadFiles(
+            textureLayersModel: textureLayersModel,
+            from: workingDirectoryURL
+        )
+    }
+    public func exportFiles(
+        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
+        to workingDirectoryURL: URL
+    ) async throws {
+        try await canvasViewModel.exportFiles(
+            thumbnailLength: thumbnailLength,
+            to: workingDirectoryURL
+        )
     }
 
     public func resetTransforming() {
@@ -125,21 +136,6 @@ import UIKit
 
     public func setDrawingTool(_ drawingToolType: Int) {
         canvasViewModel.setDrawingTool(drawingToolType)
-    }
-
-    public func saveFile(additionalItems: [AnyLocalFileNamedItem] = []) {
-        canvasViewModel.saveFile(
-            additionalItems: additionalItems
-        )
-    }
-    public func loadFile(
-        zipFileURL: URL,
-        optionalEntities: [AnyLocalFileLoader] = []
-    ) {
-        canvasViewModel.loadFile(
-            zipFileURL: zipFileURL,
-            optionalEntities: optionalEntities
-        )
     }
 
     public func undo() {
@@ -170,24 +166,10 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        canvasViewModel.activityIndicator
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.activityIndicatorSubject.send(value)
-            }
-            .store(in: &cancellables)
-
         canvasViewModel.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.toast
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.toastSubject.send(value)
             }
             .store(in: &cancellables)
 

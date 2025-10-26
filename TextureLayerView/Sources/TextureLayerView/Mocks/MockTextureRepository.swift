@@ -61,7 +61,7 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
 
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {}
 
-    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {}
+    func updateTexture(texture: MTLTexture, for id: LayerId) async throws {}
 }
 
 private struct MockMetalContext {

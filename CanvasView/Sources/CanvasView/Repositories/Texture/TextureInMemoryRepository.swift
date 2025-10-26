@@ -230,7 +230,7 @@ public class TextureInMemoryRepository: TextureRepository {
         textures[id] = newTexture
     }
 
-    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -239,8 +239,6 @@ public class TextureInMemoryRepository: TextureRepository {
             Logger.error(error)
             throw error
         }
-
-        guard let texture else { return }
 
         // MTLTexture is a class type, so a new instance needs to be created
         let newTexture = try await MTLTextureCreator.duplicateTexture(

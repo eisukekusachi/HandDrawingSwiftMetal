@@ -75,10 +75,6 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
     func remove(at index: Int) {
         palette.remove(at: index)
     }
-
-    func reset() {
-        palette.reset()
-    }
 }
 
 extension CoreDataEraserPaletteStorage {
@@ -97,6 +93,29 @@ extension CoreDataEraserPaletteStorage {
             index: index
         )
     }
+
+    func update(directoryURL: URL) throws {
+        // Do nothing if an error occurs, since nothing can be done
+        guard
+            let result = try? EraserPaletteArchiveModel(in: directoryURL)
+        else {
+            let nsError = NSError(
+                domain: String(describing: Self.self),
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
+                    "directoryURL": directoryURL.path
+                ]
+            )
+            Logger.error(nsError)
+            throw nsError
+        }
+        self.palette.update(
+            alphas: result.alphas,
+            index: result.index
+        )
+    }
+
     func fetch() throws -> EraserPaletteEntity? {
         try storage.fetch()
     }

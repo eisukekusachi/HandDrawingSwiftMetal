@@ -316,7 +316,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         _alpha = alpha
     }
 
-    public func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
+    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         guard let textureRepository else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

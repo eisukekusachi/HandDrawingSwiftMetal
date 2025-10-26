@@ -108,7 +108,7 @@ class Toast: UIView {
 }
 
 extension Toast {
-    func showMessage(_ model: CanvasMessage) {
+    func showMessage(_ model: ToastMessage) {
         label.text = model.title
         imageView.image = model.icon
         duration = model.duration

@@ -65,12 +65,12 @@ extension CoreDataProjectMetaDataStorage {
         try storage.fetch()
     }
 
-    public func refresh() {
-        project.refresh()
+    public func update(_ projectName: String = Calendar.currentDate) {
+        project.update(projectName)
     }
 
-    public func refreshUpdatedAt() {
-        project.refreshUpdatedAt()
+    public func updateUpdatedAt() {
+        project.updateUpdatedAt()
     }
 
     public func update(
@@ -87,9 +87,11 @@ extension CoreDataProjectMetaDataStorage {
         if let projectName = entity.projectName,
            let createdAt = entity.createdAt,
            let updatedAt = entity.updatedAt {
-            project.projectName = projectName
-            project.createdAt = createdAt
-            project.updatedAt = updatedAt
+            update(
+                projectName: projectName,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            )
         }
     }
 }

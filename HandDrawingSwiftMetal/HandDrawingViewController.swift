@@ -27,6 +27,11 @@ class HandDrawingViewController: UIViewController {
 
     private let paletteHeight: CGFloat = 44
 
+    private let brushDrawingToolRenderer = BrushDrawingToolRenderer()
+    private let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
+
+    private let viewModel = HandDrawingContentViewModel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -36,15 +41,34 @@ class HandDrawingViewController: UIViewController {
         addBrushPalette()
         addEraserPalette()
 
-        contentView.canvasView.initialize(
-            drawingToolRenderers: [
-                contentView.brushDrawingToolRenderer,
-                contentView.eraserDrawingToolRenderer
-            ],
-            configuration: canvasConfiguration ?? .init()
-        )
+        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
+        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
 
         initializeNewCanvasDialogPresenter()
+
+        view.backgroundColor = .white
+        showActivityIndicator(true)
+        showContentView(false)
+
+        Task {
+            do {
+                try await contentView.canvasView.initialize(
+                    drawingToolRenderers: [
+                        brushDrawingToolRenderer,
+                        eraserDrawingToolRenderer
+                    ],
+                    configuration: canvasConfiguration ?? .init()
+                )
+
+                updateComponents()
+
+                showActivityIndicator(false)
+                showContentView(true)
+
+            } catch {
+                fatalError("Failed to initialize the canvas")
+            }
+        }
     }
 }
 
@@ -66,12 +90,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.activityIndicator
-            .map { !$0 }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.isHidden, on: activityIndicatorView)
-            .store(in: &cancellables)
-
         contentView.canvasView.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
@@ -79,16 +97,57 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.toast
+        contentView.canvasView.didUndo
+            .sink { [weak self] state in
+                self?.contentView.setUndoRedoButtonState(state)
+            }
+            .store(in: &cancellables)
+
+        viewModel.activityIndicator
+            .map { !$0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isHidden, on: activityIndicatorView)
+            .store(in: &cancellables)
+
+        viewModel.alert
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                self?.showAlert(error)
+            }
+            .store(in: &cancellables)
+
+        viewModel.toast
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.didUndo
-            .sink { [weak self] state in
-                self?.contentView.setUndoRedoButtonState(state)
+        viewModel.brushPaletteStorage.palette.$index
+            .sink { [weak self] index in
+                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
+                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
+                self.brushDrawingToolRenderer.setColor(newColor)
+            }
+            .store(in: &cancellables)
+
+        viewModel.eraserPaletteStorage.palette.$index
+            .sink { [weak self] index in
+                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
+                self.eraserDrawingToolRenderer.setAlpha(newAlpha)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingToolStorage.drawingTool.$brushDiameter
+            .sink { [weak self] diameter in
+                self?.brushDrawingToolRenderer.setDiameter(diameter)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
+            .sink { [weak self] diameter in
+                self?.eraserDrawingToolRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
     }
@@ -98,14 +157,7 @@ extension HandDrawingViewController {
             self?.textureLayerViewPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
-            guard let `self` else { return }
-            self.contentView.canvasView.saveFile(
-                additionalItems: [
-                    DrawingToolArchiveModel.anyNamedItem(from: contentView.viewModel.drawingToolStorage.drawingTool),
-                    BrushPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.brushPaletteStorage.palette),
-                    EraserPaletteArchiveModel.anyNamedItem(from: contentView.viewModel.eraserPaletteStorage.palette)
-                ]
-            )
+            self?.saveProject()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -120,13 +172,26 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            self?.contentView.toggleDrawingTool()
+            guard let `self` else { return }
+            viewModel.toggleDrawingTool()
+            contentView.updateDrawingComponents(viewModel.drawingToolStorage.type)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.undo()
         }
         contentView.tapRedoButton = { [weak self] in
             self?.contentView.redo()
+        }
+
+        contentView.dragBrushSlider = { [weak self] value in
+            self?.viewModel.drawingToolStorage.setBrushDiameter(
+                BrushDrawingToolRenderer.diameterIntValue(value)
+            )
+        }
+        contentView.dragEraserSlider = { [weak self] value in
+            self?.viewModel.drawingToolStorage.setEraserDiameter(
+                EraserDrawingToolRenderer.diameterIntValue(value)
+            )
         }
     }
 }
@@ -137,17 +202,34 @@ extension HandDrawingViewController {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard let `self` else { return }
 
-            self.contentView.viewModel.drawingToolStorage.reset()
-            self.contentView.viewModel.brushPaletteStorage.reset()
-            self.contentView.viewModel.eraserPaletteStorage.reset()
+            Task {
+                defer { self.viewModel.showActivityIndicator(false) }
+                self.viewModel.showActivityIndicator(true)
 
-            let scale = UIScreen.main.scale
-            let size = UIScreen.main.bounds.size
-            self.contentView.canvasView.newCanvas(
-                configuration: TextureLayerArrayConfiguration(
-                    textureSize: .init(width: size.width * scale, height: size.height * scale)
+                self.viewModel.drawingToolStorage.update(
+                    type: .brush,
+                    brushDiameter: 8,
+                    eraserDiameter: 8
                 )
-            )
+                self.viewModel.brushPaletteStorage.update(
+                    colors: self.viewModel.initializeColors,
+                    index: 0
+                )
+                self.viewModel.eraserPaletteStorage.update(
+                    alphas: self.viewModel.initializeAlphas,
+                    index: 0
+                )
+
+                let scale = UIScreen.main.scale
+                let size = UIScreen.main.bounds.size
+                try await self.contentView.canvasView.newCanvas(
+                    configuration: TextureLayerArrayConfiguration(
+                        textureSize: .init(width: size.width * scale, height: size.height * scale)
+                    )
+                )
+
+                self.updateComponents()
+            }
         }
     }
 
@@ -170,7 +252,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: contentView.viewModel.brushPaletteStorage.palette,
+                palette: viewModel.brushPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -191,7 +273,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: contentView.viewModel.eraserPaletteStorage.palette,
+                palette: viewModel.eraserPaletteStorage.palette,
                 paletteHeight: paletteHeight
             )
         )
@@ -207,25 +289,22 @@ extension HandDrawingViewController {
         ])
     }
 
+    private func updateComponents() {
+        contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
+        contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
+        contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
+    }
+
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
             suffix: ProjectMetaData.fileSuffix,
-            onTapItem: { [weak self] url in
+            onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
-
                 self.presentedViewController?.dismiss(animated: true)
-
                 self.textureLayerViewPresenter.hide()
 
-                self.contentView.canvasView.loadFile(
-                    zipFileURL: url,
-                    optionalEntities: [
-                        self.contentView.drawingToolLoader,
-                        self.contentView.brushPaletteLoader,
-                        self.contentView.eraserPaletteLoader
-                    ]
-                )
+                self.loadProject(zipFileURL: zipFileURL)
             }
         )
         present(
@@ -242,14 +321,64 @@ extension HandDrawingViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    private func showToast(_ model: CanvasMessage) {
+    private func showAlert(_ error: Error) {
+        dialogPresenter.configuration = .init(
+            title: "Error",
+            message: error.localizedDescription
+        )
+        dialogPresenter.presentAlert(on: self)
+    }
+
+    private func showToast(_ model: ToastMessage) {
         let toast = Toast()
         toast.showMessage(model)
         view.addSubview(toast)
     }
+
+    private func showActivityIndicator(_ isShown: Bool) {
+        activityIndicatorView.isHidden = !isShown
+    }
+
+    private func showContentView(_ isShown: Bool) {
+        contentView.isHidden = !isShown
+    }
 }
 
 extension HandDrawingViewController {
+
+    private func loadProject(zipFileURL: URL) {
+        self.viewModel.loadFile(
+            zipFileURL: zipFileURL,
+            action: { [weak self] workingDirectoryURL in
+                guard let `self` else { return }
+
+                // Load texture layer data from the JSON file
+                let textureLayersModel: TextureLayersArchiveModel = try .init(
+                    in: workingDirectoryURL
+                )
+
+                try await self.contentView.canvasView.loadFiles(
+                    textureLayersModel: textureLayersModel,
+                    from: workingDirectoryURL
+                )
+            },
+            completion: { [weak self] in
+                self?.updateComponents()
+            }
+        )
+    }
+    private func saveProject() {
+        viewModel.saveProject(
+            action: { [weak self] workingDirectoryURL in
+                guard let `self` else { return }
+
+                try await self.contentView.canvasView.exportFiles(
+                    to: workingDirectoryURL
+                )
+            },
+            zipFileURL: self.contentView.canvasView.zipFileURL
+        )
+    }
 
     private func saveImage() {
         if let image = contentView.canvasView.displayTexture?.uiImage {
