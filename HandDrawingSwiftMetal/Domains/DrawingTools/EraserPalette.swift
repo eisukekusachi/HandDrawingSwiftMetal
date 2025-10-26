@@ -9,7 +9,6 @@ import Combine
 import CoreData
 import UIKit
 
-@MainActor
 protocol EraserPaletteProtocol {
 
     var id: UUID { get }
@@ -29,7 +28,6 @@ protocol EraserPaletteProtocol {
     func remove(at index: Int)
 }
 
-@MainActor
 public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
 
     private(set) var id: UUID

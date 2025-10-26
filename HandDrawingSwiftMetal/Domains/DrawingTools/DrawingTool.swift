@@ -8,7 +8,6 @@
 import CanvasView
 import UIKit
 
-@MainActor
 protocol DrawingToolProtocol {
 
     var id: UUID { get }
@@ -26,7 +25,6 @@ protocol DrawingToolProtocol {
     func setEraserDiameter(_ diameter: Int)
 }
 
-@MainActor
 public final class DrawingTool: DrawingToolProtocol, ObservableObject {
 
     private(set) var id: UUID

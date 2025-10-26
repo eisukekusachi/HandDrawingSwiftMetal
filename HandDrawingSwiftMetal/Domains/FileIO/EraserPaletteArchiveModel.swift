@@ -14,7 +14,6 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
 }
 
 extension EraserPaletteArchiveModel {
-    @MainActor
     init(_ palette: EraserPalette) {
         self.index = palette.index
         self.alphas = palette.alphas

@@ -8,7 +8,6 @@
 import Combine
 import UIKit
 
-@MainActor
 protocol BrushPaletteProtocol {
 
     var id: UUID { get }
@@ -28,7 +27,6 @@ protocol BrushPaletteProtocol {
     func remove(at index: Int)
 }
 
-@MainActor
 public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
 
     private(set) var id: UUID
