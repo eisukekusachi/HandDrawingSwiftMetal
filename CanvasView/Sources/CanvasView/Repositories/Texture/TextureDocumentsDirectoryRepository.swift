@@ -281,11 +281,9 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
-        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
-
         // If it doesn’t exist, add it
         guard
-            !FileManager.default.fileExists(atPath: fileURL.path)
+            !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -295,44 +293,35 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        try FileOutput.saveTextureAsData(
-            bytes: texture.bytes,
-            to: fileURL
+        try await IdentifiedTexture(
+            id: id,
+            texture: texture
+        ).write(
+            in: workingDirectoryURL,
+            device: renderer.device
         )
     }
 
-    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
-        guard
-            let texture,
-            let device = renderer.device
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
-
+    func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         // If the file exists, update it
         guard
-            FileManager.default.fileExists(atPath: fileURL.path)
+            FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
-                message: "\(String(localized: "File not found", bundle: .module)):\(fileURL.path)"
+                message: "\(String(localized: "File not found", bundle: .module))"
             )
             Logger.error(error)
             throw error
         }
 
         do {
-            try await FileOutput.saveTexture(
-                from: texture,
-                with: device,
-                to: fileURL
+            try await IdentifiedTexture(
+                id: id,
+                texture: texture
+            ).write(
+                in: workingDirectoryURL,
+                device: renderer.device
             )
         } catch {
             let error = NSError(

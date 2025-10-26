@@ -247,7 +247,7 @@ public final class CanvasViewModel {
         didInitializeCanvasViewSubject.send(configuration)
 
         // Update to the latest date
-        projectMetaDataStorage.refreshUpdatedAt()
+        projectMetaDataStorage.updateUpdatedAt()
 
         updateCanvasView()
     }
@@ -365,7 +365,7 @@ public extension CanvasViewModel {
 
         transforming.setMatrix(.identity)
 
-        projectMetaDataStorage.refresh()
+        projectMetaDataStorage.update()
     }
 
     func undo() {
@@ -424,8 +424,7 @@ public extension CanvasViewModel {
         let device = canvasRenderer.device
 
         // Save the thumbnail image into the working directory
-        try FileOutput.saveImage(
-            image: thumbnail(length: thumbnailLength),
+        try thumbnail(length: thumbnailLength)?.pngData()?.write(
             to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
         )
 
@@ -436,10 +435,9 @@ public extension CanvasViewModel {
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             for texture in textures {
-                let fileName = texture.fileName
                 group.addTask {
                     try await texture.write(
-                        to: workingDirectoryURL.appendingPathComponent(fileName),
+                        in: workingDirectoryURL,
                         device: device
                     )
                 }
@@ -530,7 +528,7 @@ extension CanvasViewModel {
                 )
 
                 // Update `updatedAt` when drawing completes
-                self?.projectMetaDataStorage.refreshUpdatedAt()
+                self?.projectMetaDataStorage.updateUpdatedAt()
 
                 self?.textureLayers.updateThumbnail(
                     layerId,

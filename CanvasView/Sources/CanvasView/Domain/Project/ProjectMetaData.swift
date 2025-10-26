@@ -34,13 +34,13 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
         self.updatedAt = updatedAt
     }
 
-    public func refresh(_ projectName: String = Calendar.currentDate) {
+    public func update(_ projectName: String = Calendar.currentDate) {
         self.projectName = projectName
         self.createdAt = Date()
         self.updatedAt = Date()
     }
 
-    public func refreshUpdatedAt() {
+    public func updateUpdatedAt() {
         self.updatedAt = Date()
     }
 }

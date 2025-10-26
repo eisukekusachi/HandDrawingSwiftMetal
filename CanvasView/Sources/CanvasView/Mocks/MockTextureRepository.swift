@@ -91,8 +91,8 @@ final class MockTextureRepository: TextureRepository, @unchecked Sendable {
         callHistory.append("setThumbnail(texture: \(texture?.label ?? "nil"), for: \(id))")
     }
 
-    func updateTexture(texture: MTLTexture?, for id: LayerId) async throws {
-        callHistory.append("updateTexture(texture: \(texture?.label ?? "nil"), for: \(id))")
+    func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
+        callHistory.append("updateTexture(texture: \(texture.label ?? "nil"), for: \(id))")
     }
 }
 

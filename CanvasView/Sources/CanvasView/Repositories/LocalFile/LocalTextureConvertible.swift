@@ -9,5 +9,5 @@ import MetalKit
 
 public protocol LocalTextureConvertible: Sendable {
     /// Save this value to a local file at the specified URL
-    func write(to url: URL, device: MTLDevice?) async throws
+    func write(in directory: URL, device: MTLDevice?) async throws
 }
