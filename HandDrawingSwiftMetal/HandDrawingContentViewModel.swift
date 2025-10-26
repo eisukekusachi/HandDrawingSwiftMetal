@@ -127,7 +127,6 @@ extension HandDrawingContentViewModel {
 
                 try await action?(workingDirectoryURL)
 
-                // Restore data from externally configured entities
                 // Since it’s optional, ignore any errors that occur
                 try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
                 try? brushPaletteStorage.update(directoryURL: workingDirectoryURL)
