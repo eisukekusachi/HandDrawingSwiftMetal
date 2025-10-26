@@ -334,6 +334,13 @@ extension HandDrawingViewController {
                     textureLayersModel: textureLayersModel,
                     from: workingDirectoryURL
                 )
+            },
+            completion: { [weak self] in
+                guard let `self` else { return }
+
+                self.contentView.updateDrawingComponents(self.viewModel.drawingToolStorage.drawingTool.type)
+                self.contentView.setBrushDiameterSlider(self.viewModel.drawingToolStorage.brushDiameter)
+                self.contentView.setEraserDiameterSlider(self.viewModel.drawingToolStorage.eraserDiameter)
             }
         )
     }

@@ -75,18 +75,6 @@ final class HandDrawingContentView: UIView {
         backgroundColor = .white
     }
 
-    func setBrushDiameterSlider(_ value: Float) {
-        brushDiameterSlider.setValue(value, animated: false)
-    }
-    func setEraserDiameterSlider(_ value: Float) {
-        eraserDiameterSlider.setValue(value, animated: false)
-    }
-
-    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
-        undoButton.isEnabled = state.isUndoEnabled
-        redoButton.isEnabled = state.isRedoEnabled
-    }
-
     func undo() {
         canvasView.undo()
     }
@@ -104,6 +92,30 @@ final class HandDrawingContentView: UIView {
         eraserPaletteView.isHidden = tool != .eraser
 
         canvasView.setDrawingTool(tool.rawValue)
+    }
+
+    func setBrushDiameterSlider(_ value: Int) {
+        brushDiameterSlider.setValue(
+            BrushDrawingToolRenderer.diameterFloatValue(value),
+            animated: false
+        )
+    }
+    func setEraserDiameterSlider(_ value: Int) {
+        eraserDiameterSlider.setValue(
+            EraserDrawingToolRenderer.diameterFloatValue(value),
+            animated: false
+        )
+    }
+    func setBrushDiameterSlider(_ value: Float) {
+        brushDiameterSlider.setValue(value, animated: false)
+    }
+    func setEraserDiameterSlider(_ value: Float) {
+        eraserDiameterSlider.setValue(value, animated: false)
+    }
+
+    func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
+        undoButton.isEnabled = state.isUndoEnabled
+        redoButton.isEnabled = state.isRedoEnabled
     }
 }
 

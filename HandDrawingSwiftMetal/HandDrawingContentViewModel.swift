@@ -105,7 +105,8 @@ final class HandDrawingContentViewModel: ObservableObject {
 extension HandDrawingContentViewModel {
     func loadFile(
         zipFileURL: URL,
-        action: ((URL) async throws -> Void)?
+        action: ((URL) async throws -> Void)?,
+        completion: (() -> Void)?
     ) {
         Task {
             defer {
@@ -131,6 +132,8 @@ extension HandDrawingContentViewModel {
                 try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
                 try? brushPaletteStorage.update(directoryURL: workingDirectoryURL)
                 try? eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
+
+                completion?()
 
                 toastSubject.send(
                     .init(
