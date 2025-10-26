@@ -112,12 +112,10 @@ import UIKit
     }
 
     public func loadFiles(
-        textureLayersModel: TextureLayersArchiveModel,
-        from workingDirectoryURL: URL
+        in workingDirectoryURL: URL
     ) async throws {
         try await canvasViewModel.loadFiles(
-            textureLayersModel: textureLayersModel,
-            from: workingDirectoryURL
+            in: workingDirectoryURL
         )
     }
     public func exportFiles(

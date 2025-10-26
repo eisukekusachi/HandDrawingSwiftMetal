@@ -84,7 +84,7 @@ public class TextureInMemoryRepository: TextureRepository {
     public func restoreStorage(
         from sourceFolderURL: URL,
         configuration: TextureLayerArrayConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
@@ -98,7 +98,7 @@ public class TextureInMemoryRepository: TextureRepository {
             throw error
         }
 
-        let textureSize = configuration.textureSize ?? defaultTextureSize
+        let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [LayerId: MTLTexture] = [:]

@@ -28,7 +28,7 @@ public protocol TextureRepository: Sendable {
     func restoreStorage(
         from sourceFolderURL: URL,
         configuration: TextureLayerArrayConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration
 
     /// Adds a texture using `LayerId`

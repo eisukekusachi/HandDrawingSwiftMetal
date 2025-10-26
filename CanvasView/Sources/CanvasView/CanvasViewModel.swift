@@ -386,9 +386,13 @@ public extension CanvasViewModel {
     }
 
     func loadFiles(
-        textureLayersModel: TextureLayersArchiveModel,
-        from workingDirectoryURL: URL
+        in workingDirectoryURL: URL
     ) async throws {
+
+        // Load texture layer data from the JSON file
+        let textureLayersModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
 
         let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
             from: workingDirectoryURL,
@@ -397,7 +401,7 @@ public extension CanvasViewModel {
                 layerIndex: textureLayersModel.layerIndex,
                 layers: textureLayersModel.layers
             ),
-            defaultTextureSize: TextureLayerModel.defaultTextureSize()
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
 
         // Restore the textures
@@ -450,7 +454,9 @@ public extension CanvasViewModel {
             textureSize: textureLayers.textureSize,
             layerIndex: textureLayers.selectedIndex ?? 0,
             layers: textureLayers.layers.map { .init(item: $0) }
-        ).write(in: workingDirectoryURL)
+        ).write(
+            in: workingDirectoryURL
+        )
 
         // Save the project metadata as JSON
        try ProjectMetaDataArchiveModel(

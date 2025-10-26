@@ -350,16 +350,8 @@ extension HandDrawingViewController {
         self.viewModel.loadFile(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
-                guard let `self` else { return }
-
-                // Load texture layer data from the JSON file
-                let textureLayersModel: TextureLayersArchiveModel = try .init(
+                try await self?.contentView.canvasView.loadFiles(
                     in: workingDirectoryURL
-                )
-
-                try await self.contentView.canvasView.loadFiles(
-                    textureLayersModel: textureLayersModel,
-                    from: workingDirectoryURL
                 )
             },
             completion: { [weak self] in
@@ -370,9 +362,7 @@ extension HandDrawingViewController {
     private func saveProject() {
         viewModel.saveProject(
             action: { [weak self] workingDirectoryURL in
-                guard let `self` else { return }
-
-                try await self.contentView.canvasView.exportFiles(
+                try await self?.contentView.canvasView.exportFiles(
                     to: workingDirectoryURL
                 )
             },
