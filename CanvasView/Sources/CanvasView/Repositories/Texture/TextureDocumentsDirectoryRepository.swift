@@ -97,7 +97,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     func restoreStorage(
         from sourceFolderURL: URL,
         configuration: TextureLayerArrayConfiguration,
-        defaultTextureSize: CGSize
+        fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard FileManager.containsAll(
             fileNames: configuration.layers.map { $0.fileName },
@@ -111,7 +111,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             throw error
         }
 
-        let textureSize = configuration.textureSize ?? defaultTextureSize
+        let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         try configuration.layers.forEach { layer in
             let textureData = try Data(
@@ -153,7 +153,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
 
         return try await .init(
             configuration: configuration,
-            resolvedTextureSize: defaultTextureSize
+            resolvedTextureSize: textureSize
         )
     }
 

@@ -401,7 +401,7 @@ public extension CanvasViewModel {
                 layerIndex: textureLayersModel.layerIndex,
                 layers: textureLayersModel.layers
             ),
-            defaultTextureSize: TextureLayerModel.defaultTextureSize()
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
 
         // Restore the textures
