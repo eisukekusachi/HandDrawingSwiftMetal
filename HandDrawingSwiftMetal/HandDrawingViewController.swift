@@ -46,11 +46,12 @@ class HandDrawingViewController: UIViewController {
 
         initializeNewCanvasDialogPresenter()
 
+        view.backgroundColor = .white
+        showActivityIndicator(true)
+        showContentView(false)
+
         Task {
             do {
-                showActivityIndicator(true)
-                showContentView(false)
-
                 try await contentView.canvasView.initialize(
                     drawingToolRenderers: [
                         brushDrawingToolRenderer,
