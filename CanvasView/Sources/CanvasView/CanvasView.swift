@@ -10,7 +10,7 @@ import UIKit
 
 @objc public class CanvasView: UIView {
 
-    private var drawingRenderers: [DrawingToolRenderer] = []
+    private var drawingRenderers: [DrawingRenderer] = []
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
@@ -92,13 +92,13 @@ import UIKit
     }
 
     public func initialize(
-        drawingToolRenderers: [DrawingToolRenderer],
+        drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
         displayView.initialize(renderer: renderer)
 
         try await canvasViewModel.initialize(
-            drawingToolRenderers: drawingToolRenderers,
+            drawingRenderers: drawingRenderers,
             dependencies: .init(
                 renderer: renderer,
                 displayView: displayView

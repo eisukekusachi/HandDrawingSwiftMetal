@@ -96,13 +96,13 @@ final class HandDrawingContentView: UIView {
 
     func setBrushDiameterSlider(_ value: Int) {
         brushDiameterSlider.setValue(
-            BrushDrawingToolRenderer.diameterFloatValue(value),
+            BrushDrawingRenderer.diameterFloatValue(value),
             animated: false
         )
     }
     func setEraserDiameterSlider(_ value: Int) {
         eraserDiameterSlider.setValue(
-            EraserDrawingToolRenderer.diameterFloatValue(value),
+            EraserDrawingRenderer.diameterFloatValue(value),
             animated: false
         )
     }

@@ -1,5 +1,5 @@
 //
-//  BrushDrawingToolRenderer.swift
+//  BrushDrawingRenderer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -10,7 +10,7 @@ import MetalKit
 
 /// A set of textures for realtime brush drawing
 @MainActor
-public final class BrushDrawingToolRenderer: DrawingToolRenderer {
+public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var color: UIColor = .black
 
@@ -30,7 +30,7 @@ public final class BrushDrawingToolRenderer: DrawingToolRenderer {
     public init() {}
 }
 
-public extension BrushDrawingToolRenderer {
+public extension BrushDrawingRenderer {
 
     func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { return }
@@ -145,7 +145,7 @@ public extension BrushDrawingToolRenderer {
     }
 }
 
-extension BrushDrawingToolRenderer {
+extension BrushDrawingRenderer {
 
     private func drawCurveOnDrawingTexture(
         drawingCurve: DrawingCurve,
@@ -230,7 +230,7 @@ extension BrushDrawingToolRenderer {
     }
 }
 
-extension BrushDrawingToolRenderer {
+extension BrushDrawingRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 

@@ -62,8 +62,8 @@ public final class CanvasViewModel {
     private let pencilStroke = PencilStroke()
 
     /// A class that manages drawing lines onto textures
-    private var drawingToolRenderer: DrawingToolRenderer?
-    private var drawingToolRenderers: [DrawingToolRenderer] = []
+    private var drawingRenderer: DrawingRenderer?
+    private var drawingRenderers: [DrawingRenderer] = []
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -127,16 +127,16 @@ public final class CanvasViewModel {
     }
 
     func initialize(
-        drawingToolRenderers: [DrawingToolRenderer],
+        drawingRenderers: [DrawingRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
-        drawingToolRenderers.forEach {
+        drawingRenderers.forEach {
             $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
-        self.drawingToolRenderers = drawingToolRenderers
+        self.drawingRenderers = drawingRenderers
 
-        self.drawingToolRenderer = self.drawingToolRenderers[0]
+        self.drawingRenderer = self.drawingRenderers[0]
 
         self.dependencies = dependencies
 
@@ -228,8 +228,8 @@ public final class CanvasViewModel {
         }
 
         // Initialize the textures used in the drawing tool
-        for i in 0 ..< drawingToolRenderers.count {
-            drawingToolRenderers[i].initializeTextures(configuration.textureSize)
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initializeTextures(configuration.textureSize)
         }
 
         // Initialize the textures used in the renderer
@@ -351,8 +351,8 @@ public extension CanvasViewModel {
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
-        guard drawingToolIndex < drawingToolRenderers.count else { return }
-        drawingToolRenderer = drawingToolRenderers[drawingToolIndex]
+        guard drawingToolIndex < drawingRenderers.count else { return }
+        drawingRenderer = drawingRenderers[drawingToolIndex]
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
@@ -473,12 +473,12 @@ extension CanvasViewModel {
 
     private func appendCurvePoints(_ screenTouchPoints: [TouchPoint]) {
         guard
-            let drawingToolRenderer,
+            let drawingRenderer,
             let drawableSize = canvasRenderer.drawableSize
         else { return }
 
         drawingCurve?.append(
-            points: drawingToolRenderer.curvePoints(
+            points: drawingRenderer.curvePoints(
                 screenTouchPoints,
                 matrix: transforming.matrix.inverted(flipY: true),
                 drawableSize: drawableSize,
@@ -494,7 +494,7 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        drawingToolRenderer?.drawCurve(
+        drawingRenderer?.drawCurve(
             drawingCurve,
             using: selectedLayerTexture,
             onDrawing: { [weak self] resultTexture in
@@ -576,7 +576,7 @@ extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
 
-        drawingToolRenderer?.clearTextures()
+        drawingRenderer?.clearTextures()
 
         fingerStroke.reset()
 

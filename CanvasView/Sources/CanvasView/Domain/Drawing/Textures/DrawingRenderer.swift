@@ -1,5 +1,5 @@
 //
-//  DrawingToolRenderer.swift
+//  DrawingRenderer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/12/10.
@@ -10,7 +10,7 @@ import MetalKit
 
 /// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
-public protocol DrawingToolRenderer {
+public protocol DrawingRenderer {
 
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize)
