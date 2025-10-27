@@ -15,8 +15,6 @@ public protocol DrawingRenderer {
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize)
 
-    func setDiameter(_ diameter: Int)
-
     /// Injects external dependencies `CanvasDisplayable` and `MTLRendering`
     func initialize(displayView: CanvasDisplayable, renderer: MTLRendering)
 
