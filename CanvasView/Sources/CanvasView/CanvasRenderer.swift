@@ -206,10 +206,10 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
-    /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
-    public func updateCanvasView(
+    /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
+    public func commitAndRefreshDisplay(
         realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel
+        selectedLayer: TextureLayerItem
     ) {
         guard
             let renderer,
@@ -244,10 +244,11 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView()
+        commitAndRefreshDisplay()
     }
 
-    public func updateCanvasView() {
+    /// Commits the command buffer and refreshes the entire screen
+    public func commitAndRefreshDisplay() {
         guard
             let renderer,
             let commandBuffer = displayView?.commandBuffer,

@@ -354,7 +354,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        canvasRenderer.updateCanvasView()
+        canvasRenderer.commitAndRefreshDisplay()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
@@ -573,7 +573,7 @@ extension CanvasViewModel {
             transforming.endTransformation()
         }
 
-        canvasRenderer.updateCanvasView()
+        canvasRenderer.commitAndRefreshDisplay()
     }
 
     private func cancelFingerDrawing() {
@@ -587,18 +587,7 @@ extension CanvasViewModel {
 
         canvasRenderer.resetCommandBuffer()
 
-        canvasRenderer.updateCanvasView()
-    }
-
-    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else { return }
-
-        canvasRenderer.updateCanvasView(
-            realtimeDrawingTexture: realtimeDrawingTexture,
-            selectedLayer: .init(item: selectedLayer)
-        )
+        canvasRenderer.commitAndRefreshDisplay()
     }
 
     func updateCanvasByMergingAllLayers() {
@@ -611,5 +600,16 @@ extension CanvasViewModel {
 
             updateCanvasView()
         }
+    }
+
+    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
+        guard
+            let selectedLayer = textureLayers.selectedLayer
+        else { return }
+
+        canvasRenderer.commitAndRefreshDisplay(
+            realtimeDrawingTexture: realtimeDrawingTexture,
+            selectedLayer: selectedLayer
+        )
     }
 }
