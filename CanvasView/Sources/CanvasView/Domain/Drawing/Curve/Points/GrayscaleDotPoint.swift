@@ -7,7 +7,6 @@
 
 import UIKit
 
-@MainActor
 public struct GrayscaleDotPoint: DotPoint {
 
     let location: CGPoint
@@ -33,7 +32,6 @@ public struct GrayscaleDotPoint: DotPoint {
 
 public extension GrayscaleDotPoint {
 
-    @MainActor
     init(
         touchPoint: TouchPoint,
         diameter: CGFloat,
@@ -45,7 +43,6 @@ public extension GrayscaleDotPoint {
         self.blurSize = blurSize
     }
 
-    @MainActor
     init(
         matrix: CGAffineTransform,
         touchPoint: TouchPoint,
