@@ -11,9 +11,11 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
+    /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {
         didSet {
             canvasRenderer.frameSize = frameSize
+            drawingRenderers.forEach { $0.setFrameSize(frameSize) }
         }
     }
 
@@ -131,14 +133,14 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
+        self.dependencies = dependencies
+
         drawingRenderers.forEach {
-            $0.initialize(displayView: dependencies.displayView, renderer: dependencies.renderer)
+            $0.initialize(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
         self.drawingRenderers = drawingRenderers
 
         self.drawingRenderer = self.drawingRenderers[0]
-
-        self.dependencies = dependencies
 
         self.canvasRenderer.initialize(
             displayView: dependencies.displayView,
@@ -254,6 +256,11 @@ public final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    /// Called when the display texture size changes, such as when the device orientation changes.
+    func didChangeDisplayTextureSize(_ displayTextureSize: CGSize) {
+        updateCanvasView()
+    }
 
     func onFingerGestureDetected(
         touches: Set<UITouch>,
@@ -472,17 +479,12 @@ public extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func appendCurvePoints(_ screenTouchPoints: [TouchPoint]) {
-        guard
-            let drawingRenderer,
-            let drawableSize = canvasRenderer.drawableSize
-        else { return }
+        guard let drawingRenderer else { return }
 
         drawingCurve?.append(
             points: drawingRenderer.curvePoints(
                 screenTouchPoints,
-                matrix: transforming.matrix.inverted(flipY: true),
-                drawableSize: drawableSize,
-                frameSize: canvasRenderer.frameSize
+                matrix: transforming.matrix.inverted(flipY: true)
             ),
             touchPhase: screenTouchPoints.lastTouchPhase
         )

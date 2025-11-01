@@ -16,6 +16,8 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var diameter: Int = 8
 
+    private var frameSize: CGSize = .zero
+
     private var textureSize: CGSize!
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
@@ -33,11 +35,13 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
 public extension EraserDrawingRenderer {
 
-    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
         self.renderer = renderer
+
+        self.frameSize = frameSize
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -79,6 +83,10 @@ public extension EraserDrawingRenderer {
         temporaryRenderCommandBuffer.commit()
     }
 
+    func setFrameSize(_ frameSize: CGSize) {
+        self.frameSize = frameSize
+    }
+
     func getDiameter() -> Int {
         diameter
     }
@@ -93,15 +101,14 @@ public extension EraserDrawingRenderer {
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        frameSize: CGSize
     ) -> [GrayscaleDotPoint] {
-        screenTouchPoints.map {
+        guard let displayTextureSize = displayView?.displayTexture?.size else { return [] }
+        return screenTouchPoints.map {
             .init(
                 matrix: matrix,
                 touchPoint: $0,
                 textureSize: textureSize,
-                drawableSize: drawableSize,
+                drawableSize: displayTextureSize,
                 frameSize: frameSize,
                 diameter: CGFloat(diameter)
             )

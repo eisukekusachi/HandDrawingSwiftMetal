@@ -147,8 +147,8 @@ import UIKit
 extension CanvasView {
     private func bindData() {
         displayView.displayTextureSizeChanged
-            .sink { [weak self] _ in
-                self?.canvasViewModel.updateCanvasView()
+            .sink { [weak self] displayTextureSize in
+                self?.canvasViewModel.didChangeDisplayTextureSize(displayTextureSize)
             }
             .store(in: &cancellables)
 

@@ -117,9 +117,6 @@ public final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-    public var drawableSize: CGSize? {
-        displayView?.displayTexture?.size
-    }
 
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()

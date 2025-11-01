@@ -16,6 +16,8 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var diameter: Int = 8
 
+    private var frameSize: CGSize = .zero
+
     private var textureSize: CGSize!
     private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
@@ -32,11 +34,13 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
 public extension BrushDrawingRenderer {
 
-    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
-        guard let device = renderer.device else { return }
+    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
+        guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
         self.renderer = renderer
+
+        self.frameSize = frameSize
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -72,6 +76,10 @@ public extension BrushDrawingRenderer {
         temporaryRenderCommandBuffer.commit()
     }
 
+    func setFrameSize(_ frameSize: CGSize) {
+        self.frameSize = frameSize
+    }
+
     func getDiameter() -> Int {
         diameter
     }
@@ -85,16 +93,15 @@ public extension BrushDrawingRenderer {
 
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        frameSize: CGSize
+        matrix: CGAffineTransform
     ) -> [GrayscaleDotPoint] {
-        screenTouchPoints.map {
+        guard let displayTextureSize = displayView?.displayTexture?.size else { return [] }
+        return screenTouchPoints.map {
             .init(
                 matrix: matrix,
                 touchPoint: $0,
                 textureSize: textureSize,
-                drawableSize: drawableSize,
+                drawableSize: displayTextureSize,
                 frameSize: frameSize,
                 diameter: CGFloat(diameter)
             )

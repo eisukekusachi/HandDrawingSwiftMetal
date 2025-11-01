@@ -16,13 +16,14 @@ public protocol DrawingRenderer {
     func initializeTextures(_ textureSize: CGSize)
 
     /// Injects external dependencies `CanvasDisplayable` and `MTLRendering`
-    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering)
+    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering)
+
+    /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
+    func setFrameSize(_ frameSize: CGSize)
 
     func curvePoints(
         _ screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        frameSize: CGSize
     ) -> [GrayscaleDotPoint]
 
     /// Updates the realtime drawing texture by curve points from the given iterator
