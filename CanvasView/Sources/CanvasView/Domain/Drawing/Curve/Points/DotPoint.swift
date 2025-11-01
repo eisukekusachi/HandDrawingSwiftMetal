@@ -12,4 +12,5 @@ protocol DotPoint: Equatable {
     var location: CGPoint { get }
     var diameter: CGFloat { get }
 
+    static func average(_ left: Self, _ right: Self) -> Self
 }

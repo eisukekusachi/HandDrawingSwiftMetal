@@ -7,12 +7,13 @@
 
 import UIKit
 
+/// A point that has a brightness value
 public struct GrayscaleDotPoint: DotPoint {
 
     let location: CGPoint
     let diameter: CGFloat
 
-    /// Grayscale brightness (0.0 ~ 1.0)
+    /// brightness (0.0 ~ 1.0)
     let brightness: CGFloat
 
     let blurSize: CGFloat
@@ -26,56 +27,6 @@ public struct GrayscaleDotPoint: DotPoint {
         self.location = location
         self.diameter = diameter
         self.brightness = brightness
-        self.blurSize = blurSize
-    }
-}
-
-public extension GrayscaleDotPoint {
-
-    init(
-        touchPoint: TouchPoint,
-        diameter: CGFloat,
-        blurSize: CGFloat = 2.0
-    ) {
-        self.location = touchPoint.location
-        self.diameter = diameter
-        self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
-        self.blurSize = blurSize
-    }
-
-    init(
-        matrix: CGAffineTransform,
-        touchPoint: TouchPoint,
-        textureSize: CGSize,
-        drawableSize: CGSize,
-        frameSize: CGSize,
-        diameter: CGFloat,
-        blurSize: CGFloat = 2.0
-    ) {
-        let textureMatrix = ViewSize.convertScreenMatrixToTextureMatrix(
-            matrix: matrix,
-            drawableSize: drawableSize,
-            textureSize: textureSize,
-            frameSize: frameSize
-        )
-        let textureLocation = ViewSize.convertScreenLocationToTextureLocation(
-            touchLocation: touchPoint.location,
-            frameSize: frameSize,
-            drawableSize: drawableSize,
-            textureSize: textureSize
-        )
-
-        let touchPoint: TouchPoint = .init(
-            location: textureLocation.apply(
-                with: textureMatrix,
-                textureSize: textureSize
-            ),
-            touch: touchPoint
-        )
-
-        self.location = touchPoint.location
-        self.diameter = diameter
-        self.brightness = touchPoint.maximumPossibleForce != 0 ? min(touchPoint.force, 1.0) : 1.0
         self.blurSize = blurSize
     }
 }

@@ -105,12 +105,15 @@ public extension EraserDrawingRenderer {
         guard let displayTextureSize = displayView?.displayTexture?.size else { return [] }
         return screenTouchPoints.map {
             .init(
-                matrix: matrix,
-                touchPoint: $0,
-                textureSize: textureSize,
-                drawableSize: displayTextureSize,
-                frameSize: frameSize,
-                diameter: CGFloat(diameter)
+                location: CGAffineTransform.texturePoint(
+                    screenPoint: $0.location,
+                    matrix: matrix,
+                    textureSize: textureSize,
+                    drawableSize: displayTextureSize,
+                    frameSize: frameSize
+                ),
+                diameter: CGFloat(diameter),
+                brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0
             )
         }
     }

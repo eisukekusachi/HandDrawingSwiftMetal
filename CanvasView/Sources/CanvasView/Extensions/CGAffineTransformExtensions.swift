@@ -70,6 +70,34 @@ extension CGAffineTransform {
         )
     }
 
+    /// Converts a screen point to a texture point.
+    static func texturePoint(
+        screenPoint: CGPoint,
+        matrix: CGAffineTransform,
+        textureSize: CGSize,
+        drawableSize: CGSize,
+        frameSize: CGSize
+    ) -> CGPoint {
+        let textureMatrix = ViewSize.convertScreenMatrixToTextureMatrix(
+            matrix: matrix,
+            drawableSize: drawableSize,
+            textureSize: textureSize,
+            frameSize: frameSize
+        )
+
+        let textureLocation = ViewSize.convertScreenLocationToTextureLocation(
+            touchLocation: screenPoint,
+            frameSize: frameSize,
+            drawableSize: drawableSize,
+            textureSize: textureSize
+        )
+
+        return  textureLocation.apply(
+            with: textureMatrix,
+            textureSize: textureSize
+        )
+    }
+
     func inverted(
         flipY: Bool = false
     ) -> Self {
@@ -94,5 +122,4 @@ extension CGAffineTransform {
             tx: newTx, ty: newTy
         )
     }
-
 }
