@@ -23,9 +23,9 @@ public protocol DrawingRenderer {
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)
 
-    func setSmoothDrawingCurve()
+    func startFingerDrawing()
 
-    func setDefaultDrawingCurve()
+    func startPencilDrawing()
 
     func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform)
 

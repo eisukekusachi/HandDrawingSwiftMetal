@@ -267,6 +267,8 @@ extension CanvasViewModel {
         guard let drawingRenderer else { return }
 
         inputDevice.update(.finger)
+
+        // Return if a pen input is in progress
         guard inputDevice.isNotPencil else { return }
 
         fingerStroke.appendTouchPointToDictionary(
@@ -278,16 +280,18 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
-            if !drawingRenderer.isCurrentlyDrawing {
-                drawingRenderer.setSmoothDrawingCurve()
+            // Execute if finger drawing has not yet started
+            if fingerStroke.isFingerDrawingInactive {
+                fingerStroke.startFingerDrawing()
+
+                drawingRenderer.startFingerDrawing()
+
                 Task {
                     await textureLayers.setUndoDrawing(
                         texture: canvasRenderer.selectedLayerTexture
                     )
                 }
             }
-
-            fingerStroke.setActiveDictionaryKeyIfNil()
 
             drawingRenderer.appendPoints(
                 screenTouchPoints: fingerStroke.latestTouchPoints,
@@ -300,8 +304,10 @@ extension CanvasViewModel {
         default: break
         }
 
+        // Remove unused finger arrays from the dictionary
         fingerStroke.removeEndedTouchArrayFromDictionary()
 
+        // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
             resetAllInputParameters()
         }
@@ -312,9 +318,9 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        // Cancel finger drawing and switch to pen drawing if present
+        // Reset parameters if a finger drawing is in progress
         if inputDevice.isFinger {
-            cancelFingerDrawing()
+            resetTouchRelatedParameters()
         }
         inputDevice.update(.pencil)
 
@@ -333,8 +339,11 @@ extension CanvasViewModel {
     ) {
         guard let drawingRenderer else { return }
 
-        if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
-            drawingRenderer.setDefaultDrawingCurve()
+        /// Execute if it’s the beginning of a touch
+        if actualTouches.contains(where: { $0.phase == .began }) {
+
+            drawingRenderer.startPencilDrawing()
+
             Task {
                 await textureLayers.setUndoDrawing(
                     texture: canvasRenderer.selectedLayerTexture
@@ -568,16 +577,15 @@ extension CanvasViewModel {
         canvasRenderer.commitAndRefreshDisplay()
     }
 
-    private func cancelFingerDrawing() {
-
-        drawingRenderer?.prepareNextStroke()
+    private func resetTouchRelatedParameters() {
 
         fingerStroke.reset()
 
         transforming.resetMatrix()
 
-        canvasRenderer.resetCommandBuffer()
+        drawingRenderer?.prepareNextStroke()
 
+        canvasRenderer.resetCommandBuffer()
         canvasRenderer.commitAndRefreshDisplay()
     }
 

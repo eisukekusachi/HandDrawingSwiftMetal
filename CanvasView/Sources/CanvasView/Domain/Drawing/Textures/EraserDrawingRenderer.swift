@@ -106,11 +106,11 @@ public extension EraserDrawingRenderer {
         self.alpha = alpha
     }
 
-    func setSmoothDrawingCurve() {
+    func startFingerDrawing() {
         drawingCurve = SmoothDrawingCurve()
     }
 
-    func setDefaultDrawingCurve() {
+    func startPencilDrawing() {
         drawingCurve = DefaultDrawingCurve()
     }
 

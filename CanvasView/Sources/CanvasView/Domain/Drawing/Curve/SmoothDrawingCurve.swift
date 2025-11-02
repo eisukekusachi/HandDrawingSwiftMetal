@@ -34,11 +34,6 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
 
     private var hasFirstCurveBeenCreated: Bool = false
 
-    /// Returns true if `singleCurveIterator` is nil
-    public static func shouldCreateInstance(drawingCurve: DrawingCurve?) -> Bool {
-        drawingCurve == nil
-    }
-
     @MainActor
     public func append(
         points: [GrayscaleDotPoint],

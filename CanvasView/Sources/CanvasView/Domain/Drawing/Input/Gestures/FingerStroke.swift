@@ -13,20 +13,18 @@ import UIKit
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchHistories: TouchHistoriesOnScreen = [:]
 
-    /// A ID currently in use in the finger touch dictionary
-    private(set) var activeTouchID: TouchID?
+    /// A ID currently in use in the finger drawing
+    private(set) var drawingTouchID: TouchID?
 
     /// A variable used to get elements from the array starting from the next element after this point
     private(set) var activeLatestTouchPoint: TouchPoint?
 
     convenience init(
         touchHistories: TouchHistoriesOnScreen,
-        activeTouchID: TouchID? = nil,
         activeLatestTouchPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchHistories = touchHistories
-        self.activeTouchID = activeTouchID
         self.activeLatestTouchPoint = activeLatestTouchPoint
     }
 }
@@ -40,10 +38,14 @@ extension FingerStroke {
         }
     }
 
+    var isFingerDrawingInactive: Bool {
+        drawingTouchID == nil
+    }
+
     var latestTouchPoints: [TouchPoint] {
         guard
-            let activeTouchID,
-            let touchArray = touchHistories[activeTouchID]
+            let drawingTouchID,
+            let touchArray = touchHistories[drawingTouchID]
         else { return [] }
 
         var latestTouchArray: [TouchPoint] = []
@@ -61,16 +63,9 @@ extension FingerStroke {
         return latestTouchArray
     }
 
-    func setActiveDictionaryKeyIfNil() {
-        // If the gesture is determined to be drawing and `setActiveDictionaryKeyIfNil()` is called,
-        // `touchArrayDictionary` should contain only one element, so the first key is simply set.
-        guard
-            // The first element of the sorted key array in the Dictionary is set as the active key.
-            let firstKey = touchHistories.keys.sorted().first,
-            activeTouchID == nil
-        else { return }
-
-        activeTouchID = firstKey
+    func startFingerDrawing() {
+        // `touchHistories` should contain only one element, so the first key is simply set.
+        drawingTouchID = touchHistories.keys.first
     }
 
     func appendTouchPointToDictionary(_ touches: TouchesOnScreen) {
@@ -96,7 +91,7 @@ extension FingerStroke {
 
     func reset() {
         touchHistories = [:]
-        activeTouchID = nil
+        drawingTouchID = nil
         activeLatestTouchPoint = nil
     }
 }
