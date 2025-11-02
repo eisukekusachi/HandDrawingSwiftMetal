@@ -44,9 +44,6 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies!
 
-    /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
-
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
@@ -63,6 +60,9 @@ public final class CanvasViewModel {
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
     private var drawingRenderers: [DrawingRenderer] = []
+
+    /// A class that manages rendering to the canvas
+    private var canvasRenderer: CanvasRenderer
 
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -132,10 +132,10 @@ public final class CanvasViewModel {
     ) async throws {
         self.dependencies = dependencies
 
-        drawingRenderers.forEach {
+        self.drawingRenderers = drawingRenderers
+        self.drawingRenderers.forEach {
             $0.initialize(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
-        self.drawingRenderers = drawingRenderers
 
         self.drawingRenderer = self.drawingRenderers[0]
 
