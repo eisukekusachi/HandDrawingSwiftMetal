@@ -12,6 +12,8 @@ import MetalKit
 @MainActor
 public protocol DrawingRenderer {
 
+    var isCurrentlyDrawing: Bool { get }
+
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize)
 
@@ -21,18 +23,18 @@ public protocol DrawingRenderer {
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)
 
-    func curvePoints(
-        _ screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform,
-    ) -> [GrayscaleDotPoint]
+    func setSmoothDrawingCurve()
+
+    func setDefaultDrawingCurve()
+
+    func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform)
 
     /// Updates the realtime drawing texture by curve points from the given iterator
     func drawCurve(
-        _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
         onCommandBufferCompleted: (@MainActor () -> Void)?
     )
 
-    func clearTextures()
+    func prepareNextStroke()
 }

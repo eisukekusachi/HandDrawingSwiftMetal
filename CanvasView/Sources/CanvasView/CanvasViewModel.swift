@@ -55,9 +55,6 @@ public final class CanvasViewModel {
 
     private let persistenceController: PersistenceController
 
-    /// An iterator that manages a single curve being drawn in realtime
-    private var drawingCurve: DrawingCurve?
-
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
@@ -267,6 +264,8 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
+        guard let drawingRenderer else { return }
+
         inputDevice.update(.finger)
         guard inputDevice.isNotPencil else { return }
 
@@ -279,8 +278,8 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
-            if SmoothDrawingCurve.shouldCreateInstance(drawingCurve: drawingCurve) {
-                drawingCurve = SmoothDrawingCurve()
+            if !drawingRenderer.isCurrentlyDrawing {
+                drawingRenderer.setSmoothDrawingCurve()
                 Task {
                     await textureLayers.setUndoDrawing(
                         texture: canvasRenderer.selectedLayerTexture
@@ -290,9 +289,12 @@ extension CanvasViewModel {
 
             fingerStroke.setActiveDictionaryKeyIfNil()
 
-            appendCurvePoints(fingerStroke.latestTouchPoints)
+            drawingRenderer.appendPoints(
+                screenTouchPoints: fingerStroke.latestTouchPoints,
+                matrix: transforming.matrix.inverted(flipY: true)
+            )
 
-            drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
+            drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
 
         case .transforming: transformCanvas()
         default: break
@@ -329,8 +331,10 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
+        guard let drawingRenderer else { return }
+
         if DefaultDrawingCurve.shouldCreateInstance(actualTouches: actualTouches) {
-            drawingCurve = DefaultDrawingCurve()
+            drawingRenderer.setDefaultDrawingCurve()
             Task {
                 await textureLayers.setUndoDrawing(
                     texture: canvasRenderer.selectedLayerTexture
@@ -344,9 +348,12 @@ extension CanvasViewModel {
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
-        appendCurvePoints(pencilStroke.latestActualTouchPoints)
+        drawingRenderer.appendPoints(
+            screenTouchPoints: pencilStroke.latestActualTouchPoints,
+            matrix: transforming.matrix.inverted(flipY: true)
+        )
 
-        drawingDisplayLink.run(drawingCurve?.isCurrentlyDrawing ?? false)
+        drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
     }
 }
 
@@ -478,26 +485,12 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private func appendCurvePoints(_ screenTouchPoints: [TouchPoint]) {
-        guard let drawingRenderer else { return }
-
-        drawingCurve?.append(
-            points: drawingRenderer.curvePoints(
-                screenTouchPoints,
-                matrix: transforming.matrix.inverted(flipY: true)
-            ),
-            touchPhase: screenTouchPoints.lastTouchPhase
-        )
-    }
-
     private func drawCurvePointsOnCanvas() {
         guard
-            let drawingCurve,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
         drawingRenderer?.drawCurve(
-            drawingCurve,
             using: selectedLayerTexture,
             onDrawing: { [weak self] resultTexture in
                 self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
@@ -518,7 +511,6 @@ extension CanvasViewModel {
         fingerStroke.reset()
         pencilStroke.reset()
 
-        drawingCurve = nil
         transforming.resetMatrix()
     }
 
@@ -578,11 +570,10 @@ extension CanvasViewModel {
 
     private func cancelFingerDrawing() {
 
-        drawingRenderer?.clearTextures()
+        drawingRenderer?.prepareNextStroke()
 
         fingerStroke.reset()
 
-        drawingCurve = nil
         transforming.resetMatrix()
 
         canvasRenderer.resetCommandBuffer()

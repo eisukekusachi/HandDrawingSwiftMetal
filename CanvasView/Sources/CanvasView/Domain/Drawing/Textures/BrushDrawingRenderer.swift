@@ -29,10 +29,17 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var renderer: MTLRendering?
 
+    /// An iterator that manages a single curve being drawn in realtime
+    private var drawingCurve: DrawingCurve?
+
     public init() {}
 }
 
 public extension BrushDrawingRenderer {
+
+    var isCurrentlyDrawing: Bool {
+        drawingCurve != nil
+    }
 
     func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
@@ -52,6 +59,7 @@ public extension BrushDrawingRenderer {
         guard let device = renderer?.device else { return }
 
         self.textureSize = textureSize
+
         self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
@@ -91,33 +99,43 @@ public extension BrushDrawingRenderer {
         self.color = color
     }
 
-    func curvePoints(
-        _ screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
-    ) -> [GrayscaleDotPoint] {
-        guard let displayTextureSize = displayView?.displayTexture?.size else { return [] }
-        return screenTouchPoints.map {
-            .init(
-                location: CGAffineTransform.texturePoint(
-                    screenPoint: $0.location,
-                    matrix: matrix,
-                    textureSize: textureSize,
-                    drawableSize: displayTextureSize,
-                    frameSize: frameSize
-                ),
-                diameter: CGFloat(diameter),
-                brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0
-            )
-        }
+    func setSmoothDrawingCurve() {
+        drawingCurve = SmoothDrawingCurve()
+    }
+
+    func setDefaultDrawingCurve() {
+        drawingCurve = DefaultDrawingCurve()
+    }
+
+    func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform) {
+        guard let displayTextureSize = displayView?.displayTexture?.size else { return }
+        drawingCurve?.append(
+            points: screenTouchPoints.map {
+                .init(
+                    location: CGAffineTransform.texturePoint(
+                        screenPoint: $0.location,
+                        matrix: matrix,
+                        textureSize: textureSize,
+                        drawableSize: displayTextureSize,
+                        frameSize: frameSize
+                    ),
+                    diameter: CGFloat(diameter),
+                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0
+                )
+            },
+            touchPhase: screenTouchPoints.lastTouchPhase
+        )
     }
 
     func drawCurve(
-        _ drawingCurve: DrawingCurve,
         using baseTexture: MTLTexture,
         onDrawing: ((MTLTexture) -> Void)?,
         onCommandBufferCompleted: (@MainActor () -> Void)?
     ) {
-        guard let commandBuffer = displayView?.commandBuffer else { return }
+        guard
+            let drawingCurve,
+            let commandBuffer = displayView?.commandBuffer
+        else { return }
 
         drawCurveOnDrawingTexture(
             drawingCurve: drawingCurve,
@@ -138,6 +156,8 @@ public extension BrushDrawingRenderer {
                 with: commandBuffer
             )
 
+            prepareNextStroke()
+            
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor in
                     onCommandBufferCompleted?()
@@ -146,12 +166,15 @@ public extension BrushDrawingRenderer {
         }
     }
 
-    func clearTextures() {
-        guard let device = renderer?.device else { return }
+    func prepareNextStroke() {
+        guard
+            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+        else { return }
 
-        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTextures(with: temporaryRenderCommandBuffer)
-        temporaryRenderCommandBuffer.commit()
+        clearTextures(with: commandBuffer)
+        commandBuffer.commit()
+
+        drawingCurve = nil
     }
 }
 
