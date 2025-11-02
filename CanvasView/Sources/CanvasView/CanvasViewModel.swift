@@ -399,99 +399,6 @@ public extension CanvasViewModel {
     }
 }
 
-public extension CanvasViewModel {
-
-    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
-        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
-        )
-    }
-
-    func loadFiles(
-        in workingDirectoryURL: URL
-    ) async throws {
-
-        // Load texture layer data from the JSON file
-        let textureLayersModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-
-        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
-            from: workingDirectoryURL,
-            configuration: .init(
-                textureSize: textureLayersModel.textureSize,
-                layerIndex: textureLayersModel.layerIndex,
-                layers: textureLayersModel.layers
-            ),
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
-        )
-
-        // Restore the textures
-        try await initializeTextures(resolvedTextureLayersConfiguration)
-
-        // Load project metadata, falling back if it is missing
-        let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
-            in: workingDirectoryURL
-        )
-
-        // Update metadata
-        projectMetaDataStorage.update(
-            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
-            createdAt: projectMetaData?.createdAt ?? Date(),
-            updatedAt: projectMetaData?.updatedAt ?? Date()
-        )
-    }
-
-    func exportFiles(
-        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
-        to workingDirectoryURL: URL
-    ) async throws {
-
-        let device = canvasRenderer.device
-
-        // Save the thumbnail image into the working directory
-        try thumbnail(length: thumbnailLength)?.pngData()?.write(
-            to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
-        )
-
-        // Copy all textures from the textureRepository
-        let textures = try await dependencies.textureRepository.duplicatedTextures(
-            textureLayers.layers.map { $0.id }
-        )
-
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for texture in textures {
-                group.addTask {
-                    try await texture.write(
-                        in: workingDirectoryURL,
-                        device: device
-                    )
-                }
-            }
-            try await group.waitForAll()
-        }
-
-        // Save the texture layers as JSON
-        try TextureLayersArchiveModel(
-            textureSize: textureLayers.textureSize,
-            layerIndex: textureLayers.selectedIndex ?? 0,
-            layers: textureLayers.layers.map { .init(item: $0) }
-        ).write(
-            in: workingDirectoryURL
-        )
-
-        // Save the project metadata as JSON
-       try ProjectMetaDataArchiveModel(
-            projectName: projectMetaDataStorage.projectName,
-            createdAt: projectMetaDataStorage.createdAt,
-            updatedAt: projectMetaDataStorage.updatedAt
-        ).write(
-            in: workingDirectoryURL
-        )
-    }
-}
-
 extension CanvasViewModel {
 
     private func drawCurvePointsOnCanvas() {
@@ -609,6 +516,99 @@ extension CanvasViewModel {
         canvasRenderer.commitAndRefreshDisplay(
             realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer
+        )
+    }
+}
+
+public extension CanvasViewModel {
+
+    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
+        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: length,
+            scale: 1.0
+        )
+    }
+
+    func loadFiles(
+        in workingDirectoryURL: URL
+    ) async throws {
+
+        // Load texture layer data from the JSON file
+        let textureLayersModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+
+        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
+            from: workingDirectoryURL,
+            configuration: .init(
+                textureSize: textureLayersModel.textureSize,
+                layerIndex: textureLayersModel.layerIndex,
+                layers: textureLayersModel.layers
+            ),
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+        )
+
+        // Restore the textures
+        try await initializeTextures(resolvedTextureLayersConfiguration)
+
+        // Load project metadata, falling back if it is missing
+        let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
+            in: workingDirectoryURL
+        )
+
+        // Update metadata
+        projectMetaDataStorage.update(
+            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
+            createdAt: projectMetaData?.createdAt ?? Date(),
+            updatedAt: projectMetaData?.updatedAt ?? Date()
+        )
+    }
+
+    func exportFiles(
+        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
+        to workingDirectoryURL: URL
+    ) async throws {
+
+        let device = canvasRenderer.device
+
+        // Save the thumbnail image into the working directory
+        try thumbnail(length: thumbnailLength)?.pngData()?.write(
+            to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
+        )
+
+        // Copy all textures from the textureRepository
+        let textures = try await dependencies.textureRepository.duplicatedTextures(
+            textureLayers.layers.map { $0.id }
+        )
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for texture in textures {
+                group.addTask {
+                    try await texture.write(
+                        in: workingDirectoryURL,
+                        device: device
+                    )
+                }
+            }
+            try await group.waitForAll()
+        }
+
+        // Save the texture layers as JSON
+        try TextureLayersArchiveModel(
+            textureSize: textureLayers.textureSize,
+            layerIndex: textureLayers.selectedIndex ?? 0,
+            layers: textureLayers.layers.map { .init(item: $0) }
+        ).write(
+            in: workingDirectoryURL
+        )
+
+        // Save the project metadata as JSON
+       try ProjectMetaDataArchiveModel(
+            projectName: projectMetaDataStorage.projectName,
+            createdAt: projectMetaDataStorage.createdAt,
+            updatedAt: projectMetaDataStorage.updatedAt
+        ).write(
+            in: workingDirectoryURL
         )
     }
 }
