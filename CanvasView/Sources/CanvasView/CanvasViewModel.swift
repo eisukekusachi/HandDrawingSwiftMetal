@@ -400,6 +400,7 @@ public extension CanvasViewModel {
     func setDrawingTool(_ drawingToolIndex: Int) {
         guard drawingToolIndex < drawingRenderers.count else { return }
         drawingRenderer = drawingRenderers[drawingToolIndex]
+        drawingRenderer?.prepareNextStroke()
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
