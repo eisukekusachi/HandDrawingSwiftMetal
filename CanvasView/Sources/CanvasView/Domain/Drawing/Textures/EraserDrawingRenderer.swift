@@ -12,9 +12,10 @@ import MetalKit
 @MainActor
 public final class EraserDrawingRenderer: DrawingRenderer {
 
-    public var realtimeDrawingTexture: MTLTexture? {
+    public var realtimeDrawingTexture: RealtimeDrawingTexture? {
         _realtimeDrawingTexture
     }
+    private var _realtimeDrawingTexture: RealtimeDrawingTexture!
 
     private var alpha: Int = 255
 
@@ -23,7 +24,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     private var frameSize: CGSize = .zero
 
     private var textureSize: CGSize!
-    private var _realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     private var lineDrawnTexture: MTLTexture!

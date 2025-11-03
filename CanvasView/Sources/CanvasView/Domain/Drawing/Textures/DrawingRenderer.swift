@@ -14,7 +14,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer {
 
-    var realtimeDrawingTexture: MTLTexture? { get }
+    var realtimeDrawingTexture: RealtimeDrawingTexture? { get }
 
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize)
