@@ -183,7 +183,7 @@ public final class CanvasViewModel {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.updatePublisher
             .sink { [weak self] in
-                self?.drawCurvePointsOnCanvas()
+                self?.drawPointsOnDisplayLink()
             }
             .store(in: &cancellables)
 
@@ -452,7 +452,7 @@ extension CanvasViewModel {
         return nil
     }
 
-    private func drawCurvePointsOnCanvas() {
+    private func drawPointsOnDisplayLink() {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
