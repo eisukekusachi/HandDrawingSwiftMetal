@@ -327,7 +327,7 @@ extension CanvasViewModel {
 
         // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
-            resetAllInputParameters()
+            prepareNextStroke()
         }
     }
 
@@ -464,6 +464,9 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
+        if isCancelledDrawing {
+            prepareNextStroke()
+        }
         if isFinishedDrawing {
             drawingRenderer.finishDrawing(
                 targetTexture: selectedLayerTexture,
@@ -473,7 +476,7 @@ extension CanvasViewModel {
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
                     // Reset parameters on drawing completion
-                    self?.resetAllInputParameters()
+                    self?.prepareNextStroke()
 
                     self?.completeDrawing()
                 }
@@ -485,7 +488,7 @@ extension CanvasViewModel {
         )
     }
 
-    private func resetAllInputParameters() {
+    private func prepareNextStroke() {
         inputDevice.reset()
         touchGesture.reset()
 
@@ -494,11 +497,11 @@ extension CanvasViewModel {
 
         transforming.resetMatrix()
 
+        drawingDisplayLink.stop()
+
         drawingTouchPhase = nil
 
         drawingRenderer?.prepareNextStroke()
-
-        drawingDisplayLink.stop()
     }
 
     private func completeDrawing() {
