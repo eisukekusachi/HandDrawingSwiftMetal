@@ -15,8 +15,8 @@ import UIKit
     /// The values sent from the Apple Pencil include both estimated values and real values, but only the real values are used.
     private(set) var actualTouchPointArray: [TouchPoint] = []
 
-    /// A variable that stores the latest real value, used to retrieve the latest values array from `actualTouchPointArray`
-    private(set) var latestActualTouchPoint: TouchPoint?
+    /// End point of the drawing line
+    private(set) var drawingLineEndPoint: TouchPoint?
 
     /// A variable that stores the latest estimated value, used for determining touch end
     private(set) var latestEstimatedTouchPoint: TouchPoint?
@@ -27,22 +27,26 @@ import UIKit
     init(
         actualTouchPointArray: [TouchPoint] = [],
         latestEstimatedTouchPoint: TouchPoint? = nil,
-        latestActualTouchPoint: TouchPoint? = nil
+        drawingLineEndPoint: TouchPoint? = nil
     ) {
         self.actualTouchPointArray = actualTouchPointArray.sorted { $0.timestamp < $1.timestamp }
         self.latestEstimatedTouchPoint = latestEstimatedTouchPoint
-        self.latestActualTouchPoint = latestActualTouchPoint
+        self.drawingLineEndPoint = drawingLineEndPoint
     }
-
 }
 
 extension PencilStroke {
 
-    /// Uses the elements of `actualTouchPointArray` after `latestActualTouchPoint` for line drawing.
-    var latestActualTouchPoints: [TouchPoint] {
-        let touchPoints = actualTouchPointArray.elements(after: latestActualTouchPoint) ?? actualTouchPointArray
-        latestActualTouchPoint = actualTouchPointArray.last
-        return touchPoints
+    /// Gets points from the specified start element to the end
+    func drawingPoints(after touchPoint: TouchPoint?) -> [TouchPoint] {
+        actualTouchPointArray.elements(after: drawingLineEndPoint) ?? actualTouchPointArray
+    }
+
+    /// Stores the line endpoint
+    func updateDrawingLineEndPoint() {
+        if let touchPoint = actualTouchPointArray.last {
+            drawingLineEndPoint = touchPoint
+        }
     }
 
     func isPenOffScreen(actualTouches: [TouchPoint]) -> Bool {
@@ -68,8 +72,9 @@ extension PencilStroke {
     }
 
     func reset() {
+        drawingLineEndPoint = nil
+
         actualTouchPointArray = []
-        latestActualTouchPoint = nil
         latestEstimatedTouchPoint = nil
         latestEstimationUpdateIndex = nil
     }

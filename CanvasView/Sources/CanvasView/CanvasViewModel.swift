@@ -293,10 +293,13 @@ extension CanvasViewModel {
                 }
             }
 
+            let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
+
             drawingRenderer.appendPoints(
-                screenTouchPoints: fingerStroke.latestTouchPoints,
+                screenTouchPoints: pointArray,
                 matrix: transforming.matrix.inverted(flipY: true)
             )
+            fingerStroke.updateDrawingLineEndPoint()
 
             drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
 
@@ -357,10 +360,13 @@ extension CanvasViewModel {
                 .map { TouchPoint(touch: $0, view: view) }
         )
 
+        let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
+
         drawingRenderer.appendPoints(
-            screenTouchPoints: pencilStroke.latestActualTouchPoints,
+            screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )
+        pencilStroke.updateDrawingLineEndPoint()
 
         drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
     }

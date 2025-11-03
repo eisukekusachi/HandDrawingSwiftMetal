@@ -16,16 +16,16 @@ import UIKit
     /// A ID currently in use in the finger drawing
     private(set) var drawingTouchID: TouchID?
 
-    /// A variable used to get elements from the array starting from the next element after this point
-    private(set) var activeLatestTouchPoint: TouchPoint?
+    /// End point of the drawing line
+    private(set) var drawingLineEndPoint: TouchPoint?
 
     convenience init(
         touchHistories: TouchHistoriesOnScreen,
-        activeLatestTouchPoint: TouchPoint? = nil
+        drawingLineEndPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchHistories = touchHistories
-        self.activeLatestTouchPoint = activeLatestTouchPoint
+        self.drawingLineEndPoint = drawingLineEndPoint
     }
 }
 
@@ -42,25 +42,34 @@ extension FingerStroke {
         drawingTouchID == nil
     }
 
-    var latestTouchPoints: [TouchPoint] {
+    /// Gets points from the specified start element to the end
+    func drawingPoints(after touchPoint: TouchPoint?) -> [TouchPoint] {
         guard
             let drawingTouchID,
             let touchArray = touchHistories[drawingTouchID]
         else { return [] }
 
-        var latestTouchArray: [TouchPoint] = []
+        var result: [TouchPoint] = []
 
-        if let activeLatestTouchPoint {
-            latestTouchArray = touchArray.elements(after: activeLatestTouchPoint) ?? []
+        if let touchPoint {
+            result = touchArray.elements(after: touchPoint) ?? []
         } else {
-            latestTouchArray = touchArray
+            result = touchArray
         }
 
-        if let lastLatestTouchArray = latestTouchArray.last {
-            activeLatestTouchPoint = lastLatestTouchArray
-        }
+        return result
+    }
 
-        return latestTouchArray
+    /// Stores the line endpoint
+    func updateDrawingLineEndPoint() {
+        guard
+            let drawingTouchID,
+            let touchPointArray = touchHistories[drawingTouchID]
+        else { return }
+
+        if let touchPoint = touchPointArray.last {
+            drawingLineEndPoint = touchPoint
+        }
     }
 
     func startFingerDrawing() {
@@ -92,6 +101,6 @@ extension FingerStroke {
     func reset() {
         touchHistories = [:]
         drawingTouchID = nil
-        activeLatestTouchPoint = nil
+        drawingLineEndPoint = nil
     }
 }
