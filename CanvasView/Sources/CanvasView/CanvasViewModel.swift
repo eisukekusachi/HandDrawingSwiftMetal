@@ -128,7 +128,7 @@ public final class CanvasViewModel {
         }
     }
 
-    func initialize(
+    func setup(
         drawingRenderers: [DrawingRenderer],
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration

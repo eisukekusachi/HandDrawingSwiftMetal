@@ -52,7 +52,7 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                try await contentView.canvasView.initialize(
+                try await contentView.canvasView.setup(
                     drawingRenderers: [
                         brushDrawingRenderer,
                         eraserDrawingRenderer

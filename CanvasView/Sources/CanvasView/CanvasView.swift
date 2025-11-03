@@ -66,20 +66,20 @@ import UIKit
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(frame: .zero)
-        initialize()
+        commonInitialize()
     }
     public required init?(coder: NSCoder) {
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(coder: coder)
-        initialize()
+        commonInitialize()
     }
 
     public override func layoutSubviews() {
         canvasViewModel.frameSize = frame.size
     }
 
-    private func initialize() {
+    private func commonInitialize() {
         layoutView()
         bindData()
 
@@ -91,13 +91,13 @@ import UIKit
         )
     }
 
-    public func initialize(
+    public func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
         displayView.initialize(renderer: renderer)
 
-        try await canvasViewModel.initialize(
+        try await canvasViewModel.setup(
             drawingRenderers: drawingRenderers,
             dependencies: .init(
                 renderer: renderer,
