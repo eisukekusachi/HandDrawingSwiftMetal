@@ -91,7 +91,7 @@ public final class CanvasViewModel {
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
-    private let persistanceDrawingDebouncer = Debouncer(delay: 0.1)
+    private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
 
     private var cancellables = Set<AnyCancellable>()
 
