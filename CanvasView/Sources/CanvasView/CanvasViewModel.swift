@@ -321,7 +321,9 @@ extension CanvasViewModel {
 
             drawingDisplayLink.run(isDrawing)
 
-        case .transforming: transformCanvas()
+        case .transforming:
+            transformCanvas()
+
         default: break
         }
 
@@ -330,7 +332,7 @@ extension CanvasViewModel {
 
         // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
-            prepareNextStroke()
+            resetFingerGestureParameters()
         }
     }
 
@@ -508,6 +510,13 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
     }
 
+    private func resetFingerGestureParameters() {
+
+        touchGesture.reset()
+
+        fingerStroke.reset()
+        drawingDisplayLink.stop()
+    }
     private func resetTouchRelatedParameters() {
 
         fingerStroke.reset()
