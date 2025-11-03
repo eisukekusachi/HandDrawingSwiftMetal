@@ -426,16 +426,16 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    var isDrawing: Bool {
+    private var isDrawing: Bool {
         switch drawingTouchPhase {
         case .began, .moved: return true
         default: return false
         }
     }
-    var isFinishedDrawing: Bool {
+    private var isFinishedDrawing: Bool {
         drawingTouchPhase == .ended
     }
-    var isCancelledDrawing: Bool {
+    private var isCancelledDrawing: Bool {
         drawingTouchPhase == .cancelled
     }
 
@@ -505,6 +505,18 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
     }
 
+    private func resetTouchRelatedParameters() {
+
+        fingerStroke.reset()
+
+        transforming.resetMatrix()
+
+        drawingRenderer?.prepareNextStroke()
+
+        canvasRenderer.resetCommandBuffer()
+        canvasRenderer.commitAndRefreshDisplay()
+    }
+
     private func completeDrawing() {
         guard
             let layerId = textureLayers.selectedLayer?.id,
@@ -559,19 +571,7 @@ extension CanvasViewModel {
         canvasRenderer.commitAndRefreshDisplay()
     }
 
-    private func resetTouchRelatedParameters() {
-
-        fingerStroke.reset()
-
-        transforming.resetMatrix()
-
-        drawingRenderer?.prepareNextStroke()
-
-        canvasRenderer.resetCommandBuffer()
-        canvasRenderer.commitAndRefreshDisplay()
-    }
-
-    func commitAndRefreshDisplay(
+    private func commitAndRefreshDisplay(
         displayedLayer: RealtimeDrawingTexture? = nil
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
