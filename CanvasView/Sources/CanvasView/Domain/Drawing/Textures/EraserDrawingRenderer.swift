@@ -12,6 +12,10 @@ import MetalKit
 @MainActor
 public final class EraserDrawingRenderer: DrawingRenderer {
 
+    public var realtimeDrawingTexture: MTLTexture? {
+        _realtimeDrawingTexture
+    }
+
     private var alpha: Int = 255
 
     private var diameter: Int = 8
@@ -19,7 +23,7 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     private var frameSize: CGSize = .zero
 
     private var textureSize: CGSize!
-    private var realtimeDrawingTexture: MTLTexture!
+    private var _realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
     private var lineDrawnTexture: MTLTexture!
@@ -37,10 +41,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 }
 
 public extension EraserDrawingRenderer {
-
-    var isCurrentlyDrawing: Bool {
-        drawingCurve != nil
-    }
 
     func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
@@ -61,7 +61,7 @@ public extension EraserDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
+        self._realtimeDrawingTexture = MTLTextureCreator.makeTexture(
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
@@ -114,7 +114,10 @@ public extension EraserDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform) {
+    func appendPoints(
+        screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform
+    ) {
         guard let displayTextureSize = displayView?.displayTexture?.size else { return }
         drawingCurve?.append(
             points: screenTouchPoints.map {
@@ -134,39 +137,28 @@ public extension EraserDrawingRenderer {
         )
     }
 
-    func drawCurve(
+    func drawPointsOnRealtimeDrawingTexture(
         using baseTexture: MTLTexture,
-        onDrawing: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@MainActor () -> Void)?
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let drawingCurve,
-            let commandBuffer = displayView?.commandBuffer
-        else { return }
+        guard let drawingCurve else { return }
 
         updateRealTimeDrawingTexture(
             baseTexture: baseTexture,
             drawingCurve: drawingCurve,
             with: commandBuffer
         )
+    }
 
-        onDrawing?(realtimeDrawingTexture)
-
-        if drawingCurve.isDrawingFinished {
-            drawCurrentTexture(
-                texture: realtimeDrawingTexture,
-                on: baseTexture,
-                with: commandBuffer
-            )
-
-            prepareNextStroke()
-            
-            commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor in
-                    onCommandBufferCompleted?()
-                }
-            }
-        }
+    func finishDrawing(
+        targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        drawCurrentTexture(
+            texture: _realtimeDrawingTexture,
+            on: targetTexture,
+            with: commandBuffer
+        )
     }
 
     func prepareNextStroke() {
@@ -231,7 +223,7 @@ private extension EraserDrawingRenderer {
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: realtimeDrawingTexture,
+            on: _realtimeDrawingTexture,
             with: commandBuffer
         )
     }

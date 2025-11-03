@@ -23,7 +23,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
         array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
 
-        if isDrawingFinished {
+        if UITouch.isTouchCompleted(touchPhase.value) {
             array.append(contentsOf: makeLastCurvePoints())
         }
 

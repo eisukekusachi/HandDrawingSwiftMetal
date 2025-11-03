@@ -444,20 +444,34 @@ extension CanvasViewModel {
 
     private func drawCurvePointsOnCanvas() {
         guard
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+            let drawingRenderer,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
+            let commandBuffer = canvasRenderer.commandBuffer
         else { return }
 
-        drawingRenderer?.drawCurve(
+        drawingRenderer.drawPointsOnRealtimeDrawingTexture(
             using: selectedLayerTexture,
-            onDrawing: { [weak self] resultTexture in
-                self?.updateCanvasView(realtimeDrawingTexture: resultTexture)
-            },
-            onCommandBufferCompleted: { [weak self] in
-                // Reset parameters on drawing completion
-                self?.resetAllInputParameters()
+            with: commandBuffer
+        )
 
-                self?.completeDrawing()
+        if isFinishedDrawing {
+            drawingRenderer.finishDrawing(
+                targetTexture: selectedLayerTexture,
+                with: commandBuffer
+            )
+
+            commandBuffer.addCompletedHandler { @Sendable _ in
+                Task { @MainActor [weak self] in
+                    // Reset parameters on drawing completion
+                    self?.resetAllInputParameters()
+
+                    self?.completeDrawing()
+                }
             }
+        }
+
+        updateCanvasView(
+            realtimeDrawingTexture: isDrawing ? drawingRenderer.realtimeDrawingTexture : nil
         )
     }
 
@@ -469,6 +483,8 @@ extension CanvasViewModel {
         pencilStroke.reset()
 
         transforming.resetMatrix()
+
+        drawingRenderer?.prepareNextStroke()
 
         drawingDisplayLink.stop()
     }

@@ -12,7 +12,7 @@ import MetalKit
 @MainActor
 public protocol DrawingRenderer {
 
-    var isCurrentlyDrawing: Bool { get }
+    var realtimeDrawingTexture: MTLTexture? { get }
 
     /// Initializes the textures for realtime drawing with the specified texture size.
     func initializeTextures(_ textureSize: CGSize)
@@ -27,13 +27,19 @@ public protocol DrawingRenderer {
 
     func startPencilDrawing()
 
-    func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform)
+    func appendPoints(
+        screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform
+    )
 
-    /// Updates the realtime drawing texture by curve points from the given iterator
-    func drawCurve(
+    func drawPointsOnRealtimeDrawingTexture(
         using baseTexture: MTLTexture,
-        onDrawing: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@MainActor () -> Void)?
+        with commandBuffer: MTLCommandBuffer
+    )
+
+    func finishDrawing(
+        targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
     )
 
     func prepareNextStroke()

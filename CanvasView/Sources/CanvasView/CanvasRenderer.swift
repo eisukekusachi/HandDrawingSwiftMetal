@@ -16,6 +16,10 @@ public final class CanvasRenderer: ObservableObject {
         renderer?.device
     }
 
+    public var commandBuffer: MTLCommandBuffer? {
+        displayView?.commandBuffer
+    }
+
     public var frameSize: CGSize = .zero
 
     public var matrix: CGAffineTransform = .identity

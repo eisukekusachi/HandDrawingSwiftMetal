@@ -12,6 +12,10 @@ import MetalKit
 @MainActor
 public final class BrushDrawingRenderer: DrawingRenderer {
 
+    public var realtimeDrawingTexture: MTLTexture? {
+        _realtimeDrawingTexture
+    }
+
     private var color: UIColor = .black
 
     private var diameter: Int = 8
@@ -19,7 +23,7 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     private var frameSize: CGSize = .zero
 
     private var textureSize: CGSize!
-    private var realtimeDrawingTexture: MTLTexture!
+    private var _realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
 
@@ -36,10 +40,6 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 }
 
 public extension BrushDrawingRenderer {
-
-    var isCurrentlyDrawing: Bool {
-        drawingCurve != nil
-    }
 
     func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
@@ -60,7 +60,7 @@ public extension BrushDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
+        self._realtimeDrawingTexture = MTLTextureCreator.makeTexture(
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
@@ -107,7 +107,10 @@ public extension BrushDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func appendPoints(screenTouchPoints: [TouchPoint], matrix: CGAffineTransform) {
+    func appendPoints(
+        screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform
+    ) {
         guard let displayTextureSize = displayView?.displayTexture?.size else { return }
         drawingCurve?.append(
             points: screenTouchPoints.map {
@@ -127,15 +130,11 @@ public extension BrushDrawingRenderer {
         )
     }
 
-    func drawCurve(
+    func drawPointsOnRealtimeDrawingTexture(
         using baseTexture: MTLTexture,
-        onDrawing: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@MainActor () -> Void)?
+        with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let drawingCurve,
-            let commandBuffer = displayView?.commandBuffer
-        else { return }
+        guard let drawingCurve else { return }
 
         drawCurveOnDrawingTexture(
             drawingCurve: drawingCurve,
@@ -146,24 +145,17 @@ public extension BrushDrawingRenderer {
             baseTexture: baseTexture,
             with: commandBuffer
         )
+    }
 
-        onDrawing?(realtimeDrawingTexture)
-
-        if drawingCurve.isDrawingFinished {
-            drawCurrentTexture(
-                texture: realtimeDrawingTexture,
-                on: baseTexture,
-                with: commandBuffer
-            )
-
-            prepareNextStroke()
-            
-            commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor in
-                    onCommandBufferCompleted?()
-                }
-            }
-        }
+    func finishDrawing(
+        targetTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        drawCurrentTexture(
+            texture: _realtimeDrawingTexture,
+            on: targetTexture,
+            with: commandBuffer
+        )
     }
 
     func prepareNextStroke() {
@@ -221,13 +213,13 @@ extension BrushDrawingRenderer {
             texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: realtimeDrawingTexture,
+            on: _realtimeDrawingTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: realtimeDrawingTexture,
+            into: _realtimeDrawingTexture,
             with: commandBuffer
         )
     }
