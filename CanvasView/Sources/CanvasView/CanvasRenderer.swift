@@ -16,6 +16,10 @@ public final class CanvasRenderer: ObservableObject {
         renderer?.device
     }
 
+    public var commandBuffer: MTLCommandBuffer? {
+        displayView?.commandBuffer
+    }
+
     public var frameSize: CGSize = .zero
 
     public var matrix: CGAffineTransform = .identity
@@ -117,9 +121,6 @@ public final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-    public var drawableSize: CGSize? {
-        displayView?.displayTexture?.size
-    }
 
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
@@ -209,10 +210,10 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
-    /// Updates the canvas using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
-    public func updateCanvasView(
-        realtimeDrawingTexture: MTLTexture? = nil,
-        selectedLayer: TextureLayerModel
+    /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
+    public func commitAndRefreshDisplay(
+        displayedLayer: RealtimeDrawingTexture? = nil,
+        selectedLayer: TextureLayerItem
     ) {
         guard
             let renderer,
@@ -234,7 +235,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedLayerTexture,
+                texture: displayedLayer ?? selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
@@ -247,10 +248,11 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        updateCanvasView()
+        commitAndRefreshDisplay()
     }
 
-    public func updateCanvasView() {
+    /// Commits the command buffer and refreshes the entire screen
+    public func commitAndRefreshDisplay() {
         guard
             let renderer,
             let commandBuffer = displayView?.commandBuffer,

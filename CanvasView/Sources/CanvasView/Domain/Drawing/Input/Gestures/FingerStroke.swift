@@ -13,21 +13,19 @@ import UIKit
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchHistories: TouchHistoriesOnScreen = [:]
 
-    /// A ID currently in use in the finger touch dictionary
-    private(set) var activeTouchID: TouchID?
+    /// A ID currently in use in the finger drawing
+    private(set) var drawingTouchID: TouchID?
 
-    /// A variable used to get elements from the array starting from the next element after this point
-    private(set) var activeLatestTouchPoint: TouchPoint?
+    /// End point of the drawing line
+    private(set) var drawingLineEndPoint: TouchPoint?
 
     convenience init(
         touchHistories: TouchHistoriesOnScreen,
-        activeTouchID: TouchID? = nil,
-        activeLatestTouchPoint: TouchPoint? = nil
+        drawingLineEndPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchHistories = touchHistories
-        self.activeTouchID = activeTouchID
-        self.activeLatestTouchPoint = activeLatestTouchPoint
+        self.drawingLineEndPoint = drawingLineEndPoint
     }
 }
 
@@ -40,37 +38,43 @@ extension FingerStroke {
         }
     }
 
-    var latestTouchPoints: [TouchPoint] {
-        guard
-            let activeTouchID,
-            let touchArray = touchHistories[activeTouchID]
-        else { return [] }
-
-        var latestTouchArray: [TouchPoint] = []
-
-        if let activeLatestTouchPoint {
-            latestTouchArray = touchArray.elements(after: activeLatestTouchPoint) ?? []
-        } else {
-            latestTouchArray = touchArray
-        }
-
-        if let lastLatestTouchArray = latestTouchArray.last {
-            activeLatestTouchPoint = lastLatestTouchArray
-        }
-
-        return latestTouchArray
+    var isFingerDrawingInactive: Bool {
+        drawingTouchID == nil
     }
 
-    func setActiveDictionaryKeyIfNil() {
-        // If the gesture is determined to be drawing and `setActiveDictionaryKeyIfNil()` is called,
-        // `touchArrayDictionary` should contain only one element, so the first key is simply set.
+    /// Gets points from the specified start element to the end
+    func drawingPoints(after touchPoint: TouchPoint?) -> [TouchPoint] {
         guard
-            // The first element of the sorted key array in the Dictionary is set as the active key.
-            let firstKey = touchHistories.keys.sorted().first,
-            activeTouchID == nil
+            let drawingTouchID,
+            let touchArray = touchHistories[drawingTouchID]
+        else { return [] }
+
+        var result: [TouchPoint] = []
+
+        if let touchPoint {
+            result = touchArray.elements(after: touchPoint) ?? []
+        } else {
+            result = touchArray
+        }
+
+        return result
+    }
+
+    /// Stores the line endpoint
+    func updateDrawingLineEndPoint() {
+        guard
+            let drawingTouchID,
+            let touchPointArray = touchHistories[drawingTouchID]
         else { return }
 
-        activeTouchID = firstKey
+        if let touchPoint = touchPointArray.last {
+            drawingLineEndPoint = touchPoint
+        }
+    }
+
+    func beginFingerStroke() {
+        // `touchHistories` should contain only one element, so the first key is simply set.
+        drawingTouchID = touchHistories.keys.first
     }
 
     func appendTouchPointToDictionary(_ touches: TouchesOnScreen) {
@@ -96,7 +100,7 @@ extension FingerStroke {
 
     func reset() {
         touchHistories = [:]
-        activeTouchID = nil
-        activeLatestTouchPoint = nil
+        drawingTouchID = nil
+        drawingLineEndPoint = nil
     }
 }

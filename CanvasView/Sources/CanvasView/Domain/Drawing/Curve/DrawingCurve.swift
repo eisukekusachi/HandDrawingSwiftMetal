@@ -28,16 +28,6 @@ public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
 public extension DrawingCurve {
 
-    /// True if the current drawing operation has been completed
-    var isDrawingFinished: Bool {
-        UITouch.isTouchCompleted(touchPhase.value)
-    }
-
-    /// True if a drawing operation is currently in progress
-    var isCurrentlyDrawing: Bool {
-        !isDrawingFinished
-    }
-
     /// Makes an array of first curve points from an iterator
     @MainActor
     func makeFirstCurvePoints() -> [GrayscaleDotPoint] {

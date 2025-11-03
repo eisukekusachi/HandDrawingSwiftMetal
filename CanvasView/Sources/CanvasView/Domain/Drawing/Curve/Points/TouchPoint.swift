@@ -50,7 +50,6 @@ public extension TouchPoint {
         self.timestamp = touch.timestamp
     }
 
-    @MainActor
     init(
         location: CGPoint,
         touch: TouchPoint

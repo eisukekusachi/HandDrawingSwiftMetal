@@ -23,7 +23,7 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
 
         array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
 
-        if isDrawingFinished {
+        if UITouch.isTouchCompleted(touchPhase.value) {
             array.append(contentsOf: makeLastCurvePoints())
         }
 
@@ -33,11 +33,6 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
     private(set) var tmpIterator = Iterator<GrayscaleDotPoint>()
 
     private var hasFirstCurveBeenCreated: Bool = false
-
-    /// Returns true if `singleCurveIterator` is nil
-    public static func shouldCreateInstance(drawingCurve: DrawingCurve?) -> Bool {
-        drawingCurve == nil
-    }
 
     @MainActor
     public func append(

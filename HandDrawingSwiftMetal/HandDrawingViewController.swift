@@ -27,8 +27,8 @@ class HandDrawingViewController: UIViewController {
 
     private let paletteHeight: CGFloat = 44
 
-    private let brushDrawingToolRenderer = BrushDrawingToolRenderer()
-    private let eraserDrawingToolRenderer = EraserDrawingToolRenderer()
+    private let brushDrawingRenderer = BrushDrawingRenderer()
+    private let eraserDrawingRenderer = EraserDrawingRenderer()
 
     private let viewModel = HandDrawingContentViewModel()
 
@@ -41,8 +41,8 @@ class HandDrawingViewController: UIViewController {
         addBrushPalette()
         addEraserPalette()
 
-        brushDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-        eraserDrawingToolRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
+        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
 
         initializeNewCanvasDialogPresenter()
 
@@ -52,10 +52,10 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                try await contentView.canvasView.initialize(
-                    drawingToolRenderers: [
-                        brushDrawingToolRenderer,
-                        eraserDrawingToolRenderer
+                try await contentView.canvasView.setup(
+                    drawingRenderers: [
+                        brushDrawingRenderer,
+                        eraserDrawingRenderer
                     ],
                     configuration: canvasConfiguration ?? .init()
                 )
@@ -127,7 +127,7 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
                 let newColor = viewModel.brushPaletteStorage.palette.colors[index]
-                self.brushDrawingToolRenderer.setColor(newColor)
+                self.brushDrawingRenderer.setColor(newColor)
             }
             .store(in: &cancellables)
 
@@ -135,19 +135,19 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
-                self.eraserDrawingToolRenderer.setAlpha(newAlpha)
+                self.eraserDrawingRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
         viewModel.drawingToolStorage.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
-                self?.brushDrawingToolRenderer.setDiameter(diameter)
+                self?.brushDrawingRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
         viewModel.drawingToolStorage.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
-                self?.eraserDrawingToolRenderer.setDiameter(diameter)
+                self?.eraserDrawingRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
     }
@@ -185,12 +185,12 @@ extension HandDrawingViewController {
 
         contentView.dragBrushSlider = { [weak self] value in
             self?.viewModel.drawingToolStorage.setBrushDiameter(
-                BrushDrawingToolRenderer.diameterIntValue(value)
+                BrushDrawingRenderer.diameterIntValue(value)
             )
         }
         contentView.dragEraserSlider = { [weak self] value in
             self?.viewModel.drawingToolStorage.setEraserDiameter(
-                EraserDrawingToolRenderer.diameterIntValue(value)
+                EraserDrawingRenderer.diameterIntValue(value)
             )
         }
     }

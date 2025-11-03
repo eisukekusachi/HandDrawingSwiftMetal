@@ -1,5 +1,5 @@
 //
-//  EraserDrawingToolRenderer.swift
+//  BrushDrawingRenderer.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2023/04/01.
@@ -8,19 +8,24 @@
 import Combine
 import MetalKit
 
-/// A set of textures for realtime eraser drawing
+/// A set of textures for realtime brush drawing
 @MainActor
-public final class EraserDrawingToolRenderer: DrawingToolRenderer {
+public final class BrushDrawingRenderer: DrawingRenderer {
 
-    private var alpha: Int = 255
+    public var realtimeDrawingTexture: RealtimeDrawingTexture? {
+        _realtimeDrawingTexture
+    }
+    private var _realtimeDrawingTexture: RealtimeDrawingTexture!
+
+    private var color: UIColor = .black
 
     private var diameter: Int = 8
 
+    private var frameSize: CGSize = .zero
+
     private var textureSize: CGSize!
-    private var realtimeDrawingTexture: MTLTexture!
     private var drawingTexture: MTLTexture!
     private var grayscaleTexture: MTLTexture!
-    private var lineDrawnTexture: MTLTexture!
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -28,16 +33,21 @@ public final class EraserDrawingToolRenderer: DrawingToolRenderer {
 
     private var renderer: MTLRendering?
 
+    /// An iterator that manages a single curve being drawn in realtime
+    private var drawingCurve: DrawingCurve?
+
     public init() {}
 }
 
-public extension EraserDrawingToolRenderer {
+public extension BrushDrawingRenderer {
 
-    func initialize(displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
         self.renderer = renderer
+
+        self.frameSize = frameSize
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -49,7 +59,8 @@ public extension EraserDrawingToolRenderer {
         guard let device = renderer?.device else { return }
 
         self.textureSize = textureSize
-        self.realtimeDrawingTexture = MTLTextureCreator.makeTexture(
+
+        self._realtimeDrawingTexture = MTLTextureCreator.makeTexture(
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
@@ -67,16 +78,14 @@ public extension EraserDrawingToolRenderer {
             height: Int(textureSize.height),
             with: device
         )
-        self.lineDrawnTexture = MTLTextureCreator.makeTexture(
-            label: "lineDrawnTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: device
-        )
 
         let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
         clearTextures(with: temporaryRenderCommandBuffer)
         temporaryRenderCommandBuffer.commit()
+    }
+
+    func setFrameSize(_ frameSize: CGSize) {
+        self.frameSize = frameSize
     }
 
     func getDiameter() -> Int {
@@ -86,72 +95,82 @@ public extension EraserDrawingToolRenderer {
         self.diameter = diameter
     }
 
-    func setAlpha(_ alpha: Int) {
-        self.alpha = alpha
+    func setColor(_ color: UIColor) {
+        self.color = color
     }
 
-    func curvePoints(
-        _ screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform,
-        drawableSize: CGSize,
-        frameSize: CGSize
-    ) -> [GrayscaleDotPoint] {
-        screenTouchPoints.map {
-            .init(
-                matrix: matrix,
-                touchPoint: $0,
-                textureSize: textureSize,
-                drawableSize: drawableSize,
-                frameSize: frameSize,
-                diameter: CGFloat(diameter)
-            )
-        }
+    func beginFingerStroke() {
+        drawingCurve = SmoothDrawingCurve()
     }
 
-    func drawCurve(
-        _ drawingCurve: DrawingCurve,
-        using baseTexture: MTLTexture,
-        onDrawing: ((MTLTexture) -> Void)?,
-        onCommandBufferCompleted: (@MainActor () -> Void)?
+    func beginPencilStroke() {
+        drawingCurve = DefaultDrawingCurve()
+    }
+
+    func appendPoints(
+        screenTouchPoints: [TouchPoint],
+        matrix: CGAffineTransform
     ) {
-        guard let commandBuffer = displayView?.commandBuffer else { return }
+        guard let displayTextureSize = displayView?.displayTexture?.size else { return }
+        drawingCurve?.append(
+            points: screenTouchPoints.map {
+                .init(
+                    location: CGAffineTransform.texturePoint(
+                        screenPoint: $0.location,
+                        matrix: matrix,
+                        textureSize: textureSize,
+                        drawableSize: displayTextureSize,
+                        frameSize: frameSize
+                    ),
+                    diameter: CGFloat(diameter),
+                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0
+                )
+            },
+            touchPhase: screenTouchPoints.lastTouchPhase
+        )
+    }
 
-        updateRealTimeDrawingTexture(
-            baseTexture: baseTexture,
+    func drawStroke(
+        selectedLayerTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard let drawingCurve else { return }
+
+        drawCurveOnDrawingTexture(
             drawingCurve: drawingCurve,
             with: commandBuffer
         )
 
-        onDrawing?(realtimeDrawingTexture)
-
-        if drawingCurve.isDrawingFinished {
-            drawCurrentTexture(
-                texture: realtimeDrawingTexture,
-                on: baseTexture,
-                with: commandBuffer
-            )
-
-            commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor in
-                    onCommandBufferCompleted?()
-                }
-            }
-        }
+        drawDrawingTextureOnRealTimeDrawingTexture(
+            baseTexture: selectedLayerTexture,
+            with: commandBuffer
+        )
     }
 
-    func clearTextures() {
-        guard let device = renderer?.device else { return }
+    func endStroke(
+        selectedLayerTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        drawCurrentTexture(
+            texture: _realtimeDrawingTexture,
+            on: selectedLayerTexture,
+            with: commandBuffer
+        )
+    }
 
-        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTextures(with: temporaryRenderCommandBuffer)
-        temporaryRenderCommandBuffer.commit()
+    func prepareNextStroke() {
+        guard let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer() else { return }
+
+        clearTextures(with: commandBuffer)
+        commandBuffer.commit()
+
+        drawingCurve = nil
     }
 }
 
-private extension EraserDrawingToolRenderer {
+extension BrushDrawingRenderer {
 
-    func updateRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
+    private func drawCurveOnDrawingTexture(
         drawingCurve: DrawingCurve,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -160,8 +179,8 @@ private extension EraserDrawingToolRenderer {
             let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.currentCurvePoints,
-                alpha: alpha,
-                textureSize: lineDrawnTexture.size,
+                alpha: color.alpha,
+                textureSize: drawingTexture.size,
                 with: device
             )
         else { return }
@@ -174,36 +193,36 @@ private extension EraserDrawingToolRenderer {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: .init(0, 0, 0),
-            on: lineDrawnTexture,
+            color: color.rgb,
+            on: drawingTexture,
             with: commandBuffer
         )
+    }
+
+    private func drawDrawingTextureOnRealTimeDrawingTexture(
+        baseTexture: MTLTexture,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer
+        else { return }
 
         renderer.drawTexture(
             texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: drawingTexture,
+            on: _realtimeDrawingTexture,
             with: commandBuffer
         )
 
-        renderer.subtractTextureWithEraseBlendMode(
-            texture: lineDrawnTexture,
-            buffers: flippedTextureBuffers,
-            from: drawingTexture,
-            with: commandBuffer
-        )
-
-        renderer.drawTexture(
+        renderer.mergeTexture(
             texture: drawingTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: realtimeDrawingTexture,
+            into: _realtimeDrawingTexture,
             with: commandBuffer
         )
     }
 
-    func drawCurrentTexture(
+    private func drawCurrentTexture(
         texture sourceTexture: MTLTexture,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
@@ -227,24 +246,23 @@ private extension EraserDrawingToolRenderer {
         renderer.clearTextures(
             textures: [
                 drawingTexture,
-                grayscaleTexture,
-                lineDrawnTexture
+                grayscaleTexture
             ],
             with: commandBuffer
         )
     }
 }
 
-public extension EraserDrawingToolRenderer {
+extension BrushDrawingRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 
-    static private let initEraserSize: Int = 8
+    static private let initBrushSize: Int = 8
 
-    static func diameterIntValue(_ value: Float) -> Int {
+    public static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter
     }
-    static func diameterFloatValue(_ value: Int) -> Float {
+    public static func diameterFloatValue(_ value: Int) -> Float {
         Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

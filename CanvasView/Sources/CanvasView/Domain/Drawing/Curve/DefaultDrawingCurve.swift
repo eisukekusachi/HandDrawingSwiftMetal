@@ -23,7 +23,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
         array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
 
-        if isDrawingFinished {
+        if UITouch.isTouchCompleted(touchPhase.value) {
             array.append(contentsOf: makeLastCurvePoints())
         }
 
@@ -31,12 +31,6 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
     }
 
     private var hasFirstCurveBeenCreated: Bool
-
-    // Even if `singleCurveIterator` already exists, it will be replaced with a new `PencilSingleCurveIterator`
-    // whenever a touch with `.began` phase is detected, since pencil input takes precedence.
-    public static func shouldCreateInstance(actualTouches: Set<UITouch>) -> Bool {
-        actualTouches.contains(where: { $0.phase == .began })
-    }
 
     public init(hasFirstCurveBeenCreated: Bool = false) {
         self.hasFirstCurveBeenCreated = hasFirstCurveBeenCreated

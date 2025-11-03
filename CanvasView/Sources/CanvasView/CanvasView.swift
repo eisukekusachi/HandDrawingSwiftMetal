@@ -10,7 +10,7 @@ import UIKit
 
 @objc public class CanvasView: UIView {
 
-    private var drawingRenderers: [DrawingToolRenderer] = []
+    private var drawingRenderers: [DrawingRenderer] = []
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
@@ -66,20 +66,20 @@ import UIKit
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(frame: .zero)
-        initialize()
+        commonInitialize()
     }
     public required init?(coder: NSCoder) {
         renderer = MTLRenderer(device: displayView.device)
 
         super.init(coder: coder)
-        initialize()
+        commonInitialize()
     }
 
     public override func layoutSubviews() {
         canvasViewModel.frameSize = frame.size
     }
 
-    private func initialize() {
+    private func commonInitialize() {
         layoutView()
         bindData()
 
@@ -91,14 +91,14 @@ import UIKit
         )
     }
 
-    public func initialize(
-        drawingToolRenderers: [DrawingToolRenderer],
+    public func setup(
+        drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
         displayView.initialize(renderer: renderer)
 
-        try await canvasViewModel.initialize(
-            drawingToolRenderers: drawingToolRenderers,
+        try await canvasViewModel.setup(
+            drawingRenderers: drawingRenderers,
             dependencies: .init(
                 renderer: renderer,
                 displayView: displayView
@@ -147,8 +147,8 @@ import UIKit
 extension CanvasView {
     private func bindData() {
         displayView.displayTextureSizeChanged
-            .sink { [weak self] _ in
-                self?.canvasViewModel.updateCanvasView()
+            .sink { [weak self] displayTextureSize in
+                self?.canvasViewModel.didChangeDisplayTextureSize(displayTextureSize)
             }
             .store(in: &cancellables)
 
