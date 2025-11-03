@@ -136,6 +136,9 @@ public final class CanvasViewModel {
         self.dependencies = dependencies
 
         self.drawingRenderers = drawingRenderers
+        if self.drawingRenderers.isEmpty {
+            self.drawingRenderers = [BrushDrawingRenderer()]
+        }
         self.drawingRenderers.forEach {
             $0.setup(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
