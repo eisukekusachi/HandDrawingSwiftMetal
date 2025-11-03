@@ -137,7 +137,7 @@ public final class CanvasViewModel {
 
         self.drawingRenderers = drawingRenderers
         self.drawingRenderers.forEach {
-            $0.initialize(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
+            $0.setup(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
         }
 
         self.drawingRenderer = self.drawingRenderers[0]
@@ -294,9 +294,9 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
-                fingerStroke.startFingerDrawing()
+                fingerStroke.beginFingerStroke()
 
-                drawingRenderer.startFingerDrawing()
+                drawingRenderer.beginFingerStroke()
 
                 Task {
                     await textureLayers.setUndoDrawing(
@@ -360,7 +360,7 @@ extension CanvasViewModel {
         /// Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
 
-            drawingRenderer.startPencilDrawing()
+            drawingRenderer.beginPencilStroke()
 
             Task {
                 await textureLayers.setUndoDrawing(
@@ -464,11 +464,9 @@ extension CanvasViewModel {
             with: commandBuffer
         )
 
-        if isCancelledDrawing {
-            prepareNextStroke()
-        }
+        // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            drawingRenderer.finishDrawing(
+            drawingRenderer.endStroke(
                 targetTexture: selectedLayerTexture,
                 with: commandBuffer
             )
@@ -481,6 +479,9 @@ extension CanvasViewModel {
                     self?.completeDrawing()
                 }
             }
+        } else if isCancelledDrawing {
+            // Prepare for the next drawing when the drawing is cancelled.
+            prepareNextStroke()
         }
 
         commitAndRefreshDisplay(

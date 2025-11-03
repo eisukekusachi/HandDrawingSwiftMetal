@@ -14,35 +14,42 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer {
 
+    /// Texture used during drawing
     var realtimeDrawingTexture: RealtimeDrawingTexture? { get }
 
-    /// Initializes the textures for realtime drawing with the specified texture size.
-    func initializeTextures(_ textureSize: CGSize)
+    /// Configures external dependencies
+    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering)
 
-    /// Injects external dependencies `CanvasDisplayable` and `MTLRendering`
-    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering)
+    /// Initializes the textures for realtime drawing
+    func initializeTextures(_ textureSize: CGSize)
 
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)
 
-    func startFingerDrawing()
+    /// Finger drawing has started
+    func beginFingerStroke()
 
-    func startPencilDrawing()
+    /// Pen drawing has started
+    func beginPencilStroke()
 
+    /// Called on every drag event
     func appendPoints(
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     )
 
+    /// Drawn onto the real-time drawing texture
     func drawPointsOnRealtimeDrawingTexture(
         using baseTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
-    func finishDrawing(
+    /// Called when drawing ends
+    func endStroke(
         targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
+    /// Prepare for the next stroke
     func prepareNextStroke()
 }

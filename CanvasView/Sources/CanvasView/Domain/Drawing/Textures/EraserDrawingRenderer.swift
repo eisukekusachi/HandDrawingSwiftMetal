@@ -42,7 +42,7 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
 public extension EraserDrawingRenderer {
 
-    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
@@ -106,11 +106,11 @@ public extension EraserDrawingRenderer {
         self.alpha = alpha
     }
 
-    func startFingerDrawing() {
+    func beginFingerStroke() {
         drawingCurve = SmoothDrawingCurve()
     }
 
-    func startPencilDrawing() {
+    func beginPencilStroke() {
         drawingCurve = DefaultDrawingCurve()
     }
 
@@ -150,7 +150,7 @@ public extension EraserDrawingRenderer {
         )
     }
 
-    func finishDrawing(
+    func endStroke(
         targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {

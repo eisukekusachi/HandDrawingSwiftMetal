@@ -41,7 +41,7 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
 public extension BrushDrawingRenderer {
 
-    func initialize(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
@@ -99,11 +99,11 @@ public extension BrushDrawingRenderer {
         self.color = color
     }
 
-    func startFingerDrawing() {
+    func beginFingerStroke() {
         drawingCurve = SmoothDrawingCurve()
     }
 
-    func startPencilDrawing() {
+    func beginPencilStroke() {
         drawingCurve = DefaultDrawingCurve()
     }
 
@@ -147,7 +147,7 @@ public extension BrushDrawingRenderer {
         )
     }
 
-    func finishDrawing(
+    func endStroke(
         targetTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
