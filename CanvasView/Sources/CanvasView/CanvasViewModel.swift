@@ -91,7 +91,7 @@ public final class CanvasViewModel {
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
-    private let undoDrawingDebouncer = Debouncer(delay: 0.1)
+    private let persistanceDrawingDebouncer = Debouncer(delay: 0.1)
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -507,7 +507,7 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        undoDrawingDebouncer.scheduleAsync { [weak self] in
+        persistanceDrawingDebouncer.scheduleAsync { [weak self] in
             do {
                 try await self?.dependencies.textureRepository.updateTexture(
                     texture: selectedLayerTexture,
