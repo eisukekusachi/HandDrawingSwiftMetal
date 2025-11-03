@@ -8,6 +8,8 @@
 import Combine
 import MetalKit
 
+public typealias RealtimeDrawingTexture = MTLTexture
+
 /// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
 public protocol DrawingRenderer {

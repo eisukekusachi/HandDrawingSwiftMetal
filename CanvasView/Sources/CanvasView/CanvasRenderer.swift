@@ -212,7 +212,7 @@ extension CanvasRenderer {
 
     /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     public func commitAndRefreshDisplay(
-        realtimeDrawingTexture: MTLTexture? = nil,
+        displayedLayer: RealtimeDrawingTexture? = nil,
         selectedLayer: TextureLayerItem
     ) {
         guard
@@ -235,7 +235,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedLayerTexture,
+                texture: displayedLayer ?? selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer

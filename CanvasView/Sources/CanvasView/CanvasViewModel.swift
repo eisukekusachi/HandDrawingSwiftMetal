@@ -190,14 +190,23 @@ public final class CanvasViewModel {
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.updateCanvasView()
+                self?.commitAndRefreshDisplay()
             }
             .store(in: &cancellables)
 
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.updateCanvasByMergingAllLayers()
+                guard let `self` else { return }
+                Task {
+                    // Set the texture of the selected texture layer to the renderer
+                    try await self.canvasRenderer.updateSelectedLayerTexture(
+                        textureLayers: self.textureLayers,
+                        textureRepository: self.dependencies.textureRepository
+                    )
+
+                    self.commitAndRefreshDisplay()
+                }
             }
             .store(in: &cancellables)
 
@@ -251,7 +260,7 @@ public final class CanvasViewModel {
         // Update to the latest date
         projectMetaDataStorage.updateUpdatedAt()
 
-        updateCanvasView()
+        commitAndRefreshDisplay()
     }
 }
 
@@ -259,7 +268,7 @@ extension CanvasViewModel {
 
     /// Called when the display texture size changes, such as when the device orientation changes.
     func didChangeDisplayTextureSize(_ displayTextureSize: CGSize) {
-        updateCanvasView()
+        commitAndRefreshDisplay()
     }
 
     func onFingerGestureDetected(
@@ -470,8 +479,8 @@ extension CanvasViewModel {
             }
         }
 
-        updateCanvasView(
-            realtimeDrawingTexture: isDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+        commitAndRefreshDisplay(
+            displayedLayer: isDrawing ? drawingRenderer.realtimeDrawingTexture : nil
         )
     }
 
@@ -555,25 +564,13 @@ extension CanvasViewModel {
         canvasRenderer.commitAndRefreshDisplay()
     }
 
-    func updateCanvasByMergingAllLayers() {
-        Task {
-            // Set the texture of the selected texture layer to the renderer
-            try await canvasRenderer.updateSelectedLayerTexture(
-                textureLayers: textureLayers,
-                textureRepository: dependencies.textureRepository
-            )
-
-            updateCanvasView()
-        }
-    }
-
-    func updateCanvasView(realtimeDrawingTexture: MTLTexture? = nil) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else { return }
+    func commitAndRefreshDisplay(
+        displayedLayer: RealtimeDrawingTexture? = nil
+    ) {
+        guard let selectedLayer = textureLayers.selectedLayer else { return }
 
         canvasRenderer.commitAndRefreshDisplay(
-            realtimeDrawingTexture: realtimeDrawingTexture,
+            displayedLayer: displayedLayer,
             selectedLayer: selectedLayer
         )
     }
