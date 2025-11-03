@@ -61,6 +61,9 @@ public final class CanvasViewModel {
     private var drawingRenderer: DrawingRenderer?
     private var drawingRenderers: [DrawingRenderer] = []
 
+    /// Touch phase for drawing
+    private var drawingTouchPhase: UITouch.Phase?
+
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
 
@@ -295,13 +298,16 @@ extension CanvasViewModel {
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
 
+            // Update the touch phase for drawing
+            drawingTouchPhase = touchPhase(pointArray)
+
             drawingRenderer.appendPoints(
                 screenTouchPoints: pointArray,
                 matrix: transforming.matrix.inverted(flipY: true)
             )
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
+            drawingDisplayLink.run(isDrawing)
 
         case .transforming: transformCanvas()
         default: break
@@ -362,13 +368,16 @@ extension CanvasViewModel {
 
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
 
+        // Update the touch phase for drawing
+        drawingTouchPhase = touchPhase(pointArray)
+
         drawingRenderer.appendPoints(
             screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )
         pencilStroke.updateDrawingLineEndPoint()
 
-        drawingDisplayLink.run(drawingRenderer.isCurrentlyDrawing)
+        drawingDisplayLink.run(isDrawing)
     }
 }
 
@@ -406,6 +415,32 @@ public extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    var isDrawing: Bool {
+        switch drawingTouchPhase {
+        case .began, .moved: return true
+        default: return false
+        }
+    }
+    var isFinishedDrawing: Bool {
+        drawingTouchPhase == .ended
+    }
+    var isCancelledDrawing: Bool {
+        drawingTouchPhase == .cancelled
+    }
+
+    private func touchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
+        if points.contains(where: { $0.phase == .cancelled }) {
+            return .cancelled
+        } else if points.contains(where: { $0.phase == .ended }) {
+            return .ended
+        } else if points.contains(where: { $0.phase == .began }) {
+            return .began
+        } else if points.contains(where: { $0.phase == .moved }) {
+            return .moved
+        }
+        return nil
+    }
 
     private func drawCurvePointsOnCanvas() {
         guard
