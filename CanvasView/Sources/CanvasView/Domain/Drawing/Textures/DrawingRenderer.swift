@@ -38,7 +38,7 @@ public protocol DrawingRenderer {
         matrix: CGAffineTransform
     )
 
-    /// Drawn onto the real-time drawing texture
+    /// Called during drawing
     func drawStroke(
         selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
