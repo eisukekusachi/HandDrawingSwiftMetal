@@ -276,8 +276,6 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard let drawingRenderer else { return }
-
         inputDevice.update(.finger)
 
         // Return if a pen input is in progress
@@ -292,6 +290,8 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
+            guard let drawingRenderer else { return }
+
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
                 fingerStroke.startFingerDrawing()
@@ -493,6 +493,8 @@ extension CanvasViewModel {
         pencilStroke.reset()
 
         transforming.resetMatrix()
+
+        drawingTouchPhase = nil
 
         drawingRenderer?.prepareNextStroke()
 
