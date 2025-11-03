@@ -64,11 +64,11 @@ public final class CanvasViewModel {
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
 
-    /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
-
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
+
+    /// A class that manages rendering to the canvas
+    private var canvasRenderer: CanvasRenderer
 
     private let transforming = Transforming()
 
@@ -469,6 +469,8 @@ extension CanvasViewModel {
         pencilStroke.reset()
 
         transforming.resetMatrix()
+
+        drawingDisplayLink.stop()
     }
 
     private func completeDrawing() {

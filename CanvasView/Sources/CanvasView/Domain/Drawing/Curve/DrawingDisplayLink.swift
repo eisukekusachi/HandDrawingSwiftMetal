@@ -37,6 +37,10 @@ public final class DrawingDisplayLink {
             updateCanvasWhileDrawing()
         }
     }
+
+    public func stop() {
+        displayLink?.isPaused = true
+    }
 }
 
 extension DrawingDisplayLink {
