@@ -459,15 +459,15 @@ extension CanvasViewModel {
             let commandBuffer = canvasRenderer.commandBuffer
         else { return }
 
-        drawingRenderer.drawPointsOnRealtimeDrawingTexture(
-            using: selectedLayerTexture,
+        drawingRenderer.drawStroke(
+            selectedLayerTexture: selectedLayerTexture,
             with: commandBuffer
         )
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
             drawingRenderer.endStroke(
-                targetTexture: selectedLayerTexture,
+                selectedLayerTexture: selectedLayerTexture,
                 with: commandBuffer
             )
 

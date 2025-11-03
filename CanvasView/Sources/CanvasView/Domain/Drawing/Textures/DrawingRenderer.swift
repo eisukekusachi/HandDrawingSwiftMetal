@@ -39,14 +39,14 @@ public protocol DrawingRenderer {
     )
 
     /// Drawn onto the real-time drawing texture
-    func drawPointsOnRealtimeDrawingTexture(
-        using baseTexture: MTLTexture,
+    func drawStroke(
+        selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 
     /// Called when drawing ends
     func endStroke(
-        targetTexture: MTLTexture,
+        selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
 

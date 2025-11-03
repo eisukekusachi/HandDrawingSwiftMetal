@@ -137,35 +137,32 @@ public extension EraserDrawingRenderer {
         )
     }
 
-    func drawPointsOnRealtimeDrawingTexture(
-        using baseTexture: MTLTexture,
+    func drawStroke(
+        selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard let drawingCurve else { return }
 
         updateRealTimeDrawingTexture(
-            baseTexture: baseTexture,
+            baseTexture: selectedLayerTexture,
             drawingCurve: drawingCurve,
             with: commandBuffer
         )
     }
 
     func endStroke(
-        targetTexture: MTLTexture,
+        selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         drawCurrentTexture(
             texture: _realtimeDrawingTexture,
-            on: targetTexture,
+            on: selectedLayerTexture,
             with: commandBuffer
         )
     }
 
     func prepareNextStroke() {
-        guard
-            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
-        else { return }
-
+        guard let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer() else { return }
         clearTextures(with: commandBuffer)
         commandBuffer.commit()
 
