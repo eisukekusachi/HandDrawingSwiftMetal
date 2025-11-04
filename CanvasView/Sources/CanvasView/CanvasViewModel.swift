@@ -313,7 +313,7 @@ extension CanvasViewModel {
             // Update the touch phase for drawing
             drawingTouchPhase = touchPhase(pointArray)
 
-            drawingRenderer.appendPoints(
+            drawingRenderer.onStroke(
                 screenTouchPoints: pointArray,
                 matrix: transforming.matrix.inverted(flipY: true)
             )
@@ -385,7 +385,7 @@ extension CanvasViewModel {
         // Update the touch phase for drawing
         drawingTouchPhase = touchPhase(pointArray)
 
-        drawingRenderer.appendPoints(
+        drawingRenderer.onStroke(
             screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )

@@ -33,7 +33,7 @@ public protocol DrawingRenderer {
     func beginPencilStroke()
 
     /// Called on every drag event
-    func appendPoints(
+    func onStroke(
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     )

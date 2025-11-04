@@ -107,7 +107,7 @@ public extension BrushDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func appendPoints(
+    func onStroke(
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     ) {

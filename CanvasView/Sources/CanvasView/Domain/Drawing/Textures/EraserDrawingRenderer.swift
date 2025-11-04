@@ -114,7 +114,7 @@ public extension EraserDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func appendPoints(
+    func onStroke(
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     ) {
