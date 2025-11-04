@@ -9,12 +9,12 @@ import UIKit
 
 extension UITouch {
 
+    /// Determines whether all fingers have been released from the screen
     static func isAllFingersReleasedFromScreen(
-        touches: Set<UITouch>,
-        with event: UIEvent?
+        event: UIEvent?
     ) -> Bool {
-        touches.count == event?.allTouches?.count &&
-        touches.contains { $0.phase == .ended || $0.phase == .cancelled }
+        guard let allTouches = event?.allTouches else { return false }
+        return allTouches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
     }
 
     static func isTouchCompleted(_ touchPhase: UITouch.Phase) -> Bool {

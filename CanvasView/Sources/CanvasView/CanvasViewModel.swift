@@ -331,7 +331,7 @@ extension CanvasViewModel {
         fingerStroke.removeEndedTouchArrayFromDictionary()
 
         // Reset all parameters when all fingers are lifted off the screen
-        if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if UITouch.isAllFingersReleasedFromScreen(event: event) {
             resetFingerGestureParameters()
         }
     }
