@@ -123,7 +123,7 @@ public extension EraserDrawingRenderer {
             points: screenTouchPoints.map {
                 .init(
                     location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.location,
+                        screenPoint: $0.preciseLocation,
                         matrix: matrix,
                         textureSize: textureSize,
                         drawableSize: displayTextureSize,
