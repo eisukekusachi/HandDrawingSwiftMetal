@@ -50,7 +50,7 @@ extension PencilStroke {
     }
 
     func isPenOffScreen(actualTouches: [TouchPoint]) -> Bool {
-        UITouch.isTouchCompleted(latestEstimatedTouchPoint?.phase ?? .cancelled) &&
+        latestEstimatedTouchPoint?.phase == .ended &&
         actualTouches.contains(where: { $0.estimationUpdateIndex == latestEstimationUpdateIndex })
     }
 
@@ -78,5 +78,4 @@ extension PencilStroke {
         latestEstimatedTouchPoint = nil
         latestEstimationUpdateIndex = nil
     }
-
 }

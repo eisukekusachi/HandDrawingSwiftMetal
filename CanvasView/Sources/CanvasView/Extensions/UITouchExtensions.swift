@@ -17,10 +17,6 @@ extension UITouch {
         return allTouches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
     }
 
-    static func isTouchCompleted(_ touchPhase: UITouch.Phase) -> Bool {
-        [UITouch.Phase.ended, UITouch.Phase.cancelled].contains(touchPhase)
-    }
-
     static func getFingerTouches(event: UIEvent?) -> [UITouch] {
         var touches: [UITouch] = []
         event?.allTouches?.forEach { touch in
@@ -29,5 +25,4 @@ extension UITouch {
         }
         return touches
     }
-
 }
