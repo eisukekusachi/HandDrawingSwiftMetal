@@ -377,7 +377,7 @@ extension CanvasViewModel {
         pencilStroke.appendActualTouches(
             actualTouches: actualTouches
                 .sorted { $0.timestamp < $1.timestamp }
-                .map { TouchPoint(touch: $0, view: view) }
+                .map { .init(touch: $0, view: view) }
         )
 
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)

@@ -7,32 +7,65 @@
 
 import UIKit
 
+/// A `Sendable` snapshot that captures the state of a single `UITouch`
 public struct TouchPoint: Equatable, Sendable {
 
-    let location: CGPoint
-    let phase: UITouch.Phase
-    let force: CGFloat
-    let maximumPossibleForce: CGFloat
-    /// Index for identifying the estimated value
-    let estimationUpdateIndex: NSNumber?
+    // MARK: - Touch Basics
 
-    let timestamp: TimeInterval
+    public let location: CGPoint
 
-    public init(
-        location: CGPoint,
-        phase: UITouch.Phase,
-        force: CGFloat,
-        maximumPossibleForce: CGFloat,
-        estimationUpdateIndex: NSNumber? = nil,
-        timestamp: TimeInterval
-    ) {
-        self.location = location
-        self.phase = phase
-        self.force = force
-        self.maximumPossibleForce = maximumPossibleForce
-        self.estimationUpdateIndex = estimationUpdateIndex
-        self.timestamp = timestamp
-    }
+    public let previousLocation: CGPoint
+
+    public let preciseLocation: CGPoint
+
+    public let precisePreviousLocation: CGPoint
+
+    /// The current phase of the touch
+    public let phase: UITouch.Phase
+
+    /// The time at which the touch event occurred, relative to system uptime
+    public let timestamp: TimeInterval
+
+    /// The number of taps associated with the touch
+    public let tapCount: Int
+
+    /// The general type of input that generated the touch, such as direct or pencil
+    public let type: UITouch.TouchType
+
+    // MARK: - Force and Pressure
+
+    /// The force of the touch, where `1.0` represents the average touch pressure
+    public let force: CGFloat
+
+    /// The maximum possible force value that can be reported by the device
+    public let maximumPossibleForce: CGFloat
+
+    // MARK: - Touch Estimation
+
+    /// The index used to identify estimated touch properties, if available
+    public let estimationUpdateIndex: NSNumber?
+
+    /// The currently estimated properties for this touch
+    public let estimatedProperties: UITouch.Properties
+
+    /// The properties expected to receive future updates
+    public let estimatedPropertiesExpectingUpdates: UITouch.Properties
+
+    // MARK: - Size and Shape
+
+    /// The radius (in points) of the touch area
+    public let majorRadius: CGFloat
+
+    /// The tolerance (± points) for the reported `majorRadius`
+    public let majorRadiusTolerance: CGFloat
+
+    // MARK: - Orientation
+
+    /// The altitude angle of the touch, in radians
+    public let altitudeAngle: CGFloat
+
+    /// The roll angle of the touch, in radians
+    public let rollAngle: CGFloat
 }
 
 public extension TouchPoint {
@@ -42,30 +75,45 @@ public extension TouchPoint {
         touch: UITouch,
         view: UIView
     ) {
-        self.location = touch.preciseLocation(in: view)
-        self.phase = touch.phase
-        self.force = touch.force
-        self.maximumPossibleForce = touch.maximumPossibleForce
-        self.estimationUpdateIndex = touch.estimationUpdateIndex
-        self.timestamp = touch.timestamp
-    }
+        self.location = touch.location(in: view)
 
-    init(
-        location: CGPoint,
-        touch: TouchPoint
-    ) {
-        self.location = location
+        self.previousLocation = touch.previousLocation(in: view)
+
+        self.preciseLocation = touch.preciseLocation(in: view)
+
+        self.precisePreviousLocation = touch.precisePreviousLocation(in: view)
+
         self.phase = touch.phase
-        self.force = touch.force
-        self.maximumPossibleForce = touch.maximumPossibleForce
-        self.estimationUpdateIndex = touch.estimationUpdateIndex
+
         self.timestamp = touch.timestamp
+
+        self.tapCount = touch.tapCount
+
+        self.type = touch.type
+
+        self.force = touch.force
+
+        self.maximumPossibleForce = touch.maximumPossibleForce
+
+        self.estimationUpdateIndex = touch.estimationUpdateIndex
+
+        self.estimatedProperties = touch.estimatedProperties
+
+        self.estimatedPropertiesExpectingUpdates = touch.estimatedPropertiesExpectingUpdates
+
+        self.majorRadius = touch.majorRadius
+
+        self.majorRadiusTolerance = touch.majorRadiusTolerance
+
+        self.altitudeAngle = touch.altitudeAngle
+
+        if #available(iOS 17.5, *) { self.rollAngle = touch.rollAngle } else { self.rollAngle = 0 }
     }
 }
 
 extension Array where Element == TouchPoint {
 
-    var lastTouchPhase: UITouch.Phase {
+    var currentTouchPhase: UITouch.Phase {
         if self.last?.phase == .cancelled {
             .cancelled
         } else if self.last?.phase == .ended {

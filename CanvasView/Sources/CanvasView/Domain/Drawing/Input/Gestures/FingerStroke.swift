@@ -91,8 +91,8 @@ extension FingerStroke {
     func removeEndedTouchArrayFromDictionary() {
         touchHistories.keys
             .filter {
-                touchHistories[$0]?.lastTouchPhase == .ended ||
-                touchHistories[$0]?.lastTouchPhase == .cancelled
+                touchHistories[$0]?.currentTouchPhase == .ended ||
+                touchHistories[$0]?.currentTouchPhase == .cancelled
             }
             .forEach {
                 touchHistories.removeValue(forKey: $0)
