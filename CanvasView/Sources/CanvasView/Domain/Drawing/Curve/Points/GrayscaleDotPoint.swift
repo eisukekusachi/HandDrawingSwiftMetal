@@ -8,7 +8,7 @@
 import UIKit
 
 /// A point that has a brightness value
-public struct GrayscaleDotPoint: DotPoint {
+public struct GrayscaleDotPoint: Equatable, Sendable {
 
     let location: CGPoint
     let diameter: CGFloat
