@@ -313,7 +313,7 @@ extension CanvasViewModel {
             // Update the touch phase for drawing
             drawingTouchPhase = touchPhase(pointArray)
 
-            drawingRenderer.appendPoints(
+            drawingRenderer.onStroke(
                 screenTouchPoints: pointArray,
                 matrix: transforming.matrix.inverted(flipY: true)
             )
@@ -331,7 +331,7 @@ extension CanvasViewModel {
         fingerStroke.removeEndedTouchArrayFromDictionary()
 
         // Reset all parameters when all fingers are lifted off the screen
-        if UITouch.isAllFingersReleasedFromScreen(touches: touches, with: event) {
+        if UITouch.isAllFingersReleasedFromScreen(event: event) {
             resetFingerGestureParameters()
         }
     }
@@ -377,7 +377,7 @@ extension CanvasViewModel {
         pencilStroke.appendActualTouches(
             actualTouches: actualTouches
                 .sorted { $0.timestamp < $1.timestamp }
-                .map { TouchPoint(touch: $0, view: view) }
+                .map { .init(touch: $0, view: view) }
         )
 
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
@@ -385,7 +385,7 @@ extension CanvasViewModel {
         // Update the touch phase for drawing
         drawingTouchPhase = touchPhase(pointArray)
 
-        drawingRenderer.appendPoints(
+        drawingRenderer.onStroke(
             screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )

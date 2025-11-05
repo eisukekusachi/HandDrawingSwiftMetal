@@ -33,8 +33,8 @@ extension FingerStroke {
 
     var isAllFingersOnScreen: Bool {
         !touchHistories.keys.contains { key in
-            // If the last element of the array is `ended` or `cancelled`, it means that a finger has been lifted.
-            UITouch.isTouchCompleted(touchHistories[key]?.last?.phase ?? .cancelled)
+            // If the last element of the array is `ended`, it means that a finger has been lifted.
+            touchHistories[key]?.last?.phase == .ended
         }
     }
 
@@ -91,7 +91,8 @@ extension FingerStroke {
     func removeEndedTouchArrayFromDictionary() {
         touchHistories.keys
             .filter {
-                UITouch.isTouchCompleted(touchHistories[$0]?.lastTouchPhase ?? .cancelled)
+                touchHistories[$0]?.currentTouchPhase == .ended ||
+                touchHistories[$0]?.currentTouchPhase == .cancelled
             }
             .forEach {
                 touchHistories.removeValue(forKey: $0)

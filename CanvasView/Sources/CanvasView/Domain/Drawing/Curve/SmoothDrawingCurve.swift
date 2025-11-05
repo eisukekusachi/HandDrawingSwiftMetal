@@ -23,7 +23,7 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
 
         array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
 
-        if UITouch.isTouchCompleted(touchPhase.value) {
+        if touchPhase.value == .ended {
             array.append(contentsOf: makeLastCurvePoints())
         }
 
