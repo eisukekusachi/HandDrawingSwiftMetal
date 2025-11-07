@@ -12,9 +12,14 @@ import Testing
 
 struct FileManagerExtensionsTests {
 
-    @Test
-    func testContainsAll_allFilesExist() {
-        let fileNames = ["a.txt", "b.txt"]
+    @Test(
+        arguments: [
+            ["a.txt"],
+            ["a.txt", "b.txt"],
+            ["a.txt", "b.txt", "c.txt"]
+        ]
+    )
+    func testContainsAll_allFilesExist(fileNames: [String]) {
         let fileURLs = [
             URL(fileURLWithPath: "/tmp/a.txt"),
             URL(fileURLWithPath: "/tmp/b.txt"),
