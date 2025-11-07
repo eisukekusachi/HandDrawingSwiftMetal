@@ -31,9 +31,8 @@ import UIKit
 
 extension FingerStroke {
 
-    var isAllFingersOnScreen: Bool {
-        !touchHistories.keys.contains { key in
-            // If the last element of the array is `ended`, it means that a finger has been lifted.
+    var hasEndedTouches: Bool {
+        touchHistories.keys.contains { key in
             touchHistories[key]?.last?.phase == .ended
         }
     }
