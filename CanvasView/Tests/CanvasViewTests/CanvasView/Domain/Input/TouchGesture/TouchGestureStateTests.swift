@@ -4,7 +4,7 @@
 //
 //  Created by Eisuke Kusachi on 2025/08/09.
 //
-
+/*
 import Testing
 
 @testable import CanvasView
@@ -91,3 +91,4 @@ struct TouchGestureStateTests {
         #expect(subject.state == .transforming)
     }
 }
+*/

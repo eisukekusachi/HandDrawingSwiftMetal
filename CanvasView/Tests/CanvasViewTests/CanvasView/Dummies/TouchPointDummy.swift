@@ -4,7 +4,7 @@
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
 //
-
+/*
 import CanvasView
 import UIKit
 
@@ -29,3 +29,4 @@ public extension TouchPoint {
     }
 
 }
+*/

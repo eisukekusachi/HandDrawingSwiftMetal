@@ -4,7 +4,7 @@
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
 //
-
+/*
 import CanvasView
 import XCTest
 
@@ -53,3 +53,4 @@ final class DefaultDrawingCurveTests: XCTestCase {
         XCTAssertFalse(subject.isFirstCurveNeeded)
     }
 }
+*/

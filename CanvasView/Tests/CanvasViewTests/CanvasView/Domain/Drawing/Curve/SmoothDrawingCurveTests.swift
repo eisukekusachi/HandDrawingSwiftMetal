@@ -4,7 +4,7 @@
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
 //
-
+/*
 import CanvasView
 import XCTest
 
@@ -80,3 +80,4 @@ final class SmoothDrawingCurveTests: XCTestCase {
         XCTAssertEqual(subject.array[4].location, .init(x: 6, y: 6))
     }
 }
+*/

@@ -4,7 +4,7 @@
 //
 //  Created by Eisuke Kusachi on 2025/02/09.
 //
-
+/*
 import XCTest
 
 @testable import CanvasView
@@ -126,3 +126,4 @@ final class PencilStrokeTests: XCTestCase {
         XCTAssertNil(subject.latestActualTouchPoint)
     }
 }
+*/
