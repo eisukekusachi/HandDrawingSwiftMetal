@@ -64,12 +64,52 @@ public struct TouchPoint: Equatable, Sendable {
 
     /// An index number that lets you correlate an updated touch with the original touch
     public let estimationUpdateIndex: NSNumber?
+
+    public init(
+        location: CGPoint,
+        previousLocation: CGPoint,
+        majorRadius: CGFloat,
+        majorRadiusTolerance: CGFloat,
+        preciseLocation: CGPoint,
+        precisePreviousLocation: CGPoint,
+        tapCount: Int,
+        timestamp: TimeInterval,
+        type: UITouch.TouchType,
+        phase: UITouch.Phase,
+        force: CGFloat,
+        maximumPossibleForce: CGFloat,
+        altitudeAngle: CGFloat,
+        azimuthUnitVector: CGVector,
+        rollAngle: CGFloat,
+        estimatedProperties: UITouch.Properties,
+        estimatedPropertiesExpectingUpdates: UITouch.Properties,
+        estimationUpdateIndex: NSNumber?
+    ) {
+        self.location = location
+        self.previousLocation = previousLocation
+        self.majorRadius = majorRadius
+        self.majorRadiusTolerance = majorRadiusTolerance
+        self.preciseLocation = preciseLocation
+        self.precisePreviousLocation = precisePreviousLocation
+        self.tapCount = tapCount
+        self.timestamp = timestamp
+        self.type = type
+        self.phase = phase
+        self.force = force
+        self.maximumPossibleForce = maximumPossibleForce
+        self.altitudeAngle = altitudeAngle
+        self.azimuthUnitVector = azimuthUnitVector
+        self.rollAngle = rollAngle
+        self.estimatedProperties = estimatedProperties
+        self.estimatedPropertiesExpectingUpdates = estimatedPropertiesExpectingUpdates
+        self.estimationUpdateIndex = estimationUpdateIndex
+    }
 }
 
-public extension TouchPoint {
+extension TouchPoint {
 
     @MainActor
-    init(
+    public init(
         touch: UITouch,
         view: UIView
     ) {
@@ -112,7 +152,6 @@ public extension TouchPoint {
 }
 
 extension Array where Element == TouchPoint {
-
     var currentTouchPhase: UITouch.Phase {
         if self.last?.phase == .cancelled {
             .cancelled
