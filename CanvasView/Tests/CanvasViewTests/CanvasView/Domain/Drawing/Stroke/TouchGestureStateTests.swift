@@ -13,6 +13,7 @@ struct TouchGestureStateTests {
 
     private typealias Subject = TouchGestureState
 
+    @Test
     func `Verifies that the initial state is .undetermined`() {
         let subject = Subject()
 
