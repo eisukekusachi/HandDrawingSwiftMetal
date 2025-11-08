@@ -251,7 +251,15 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             return
         }
 
-        self._layers[index].thumbnail = texture.makeThumbnail()
+        let layer = _layers[index]
+
+        self._layers[index] = .init(
+           id: layer.id,
+           title: layer.title,
+           alpha: layer.alpha,
+           isVisible: layer.isVisible,
+           thumbnail: texture.makeThumbnail()
+       )
     }
 
     public func updateTitle(_ id: LayerId, title: String) {
