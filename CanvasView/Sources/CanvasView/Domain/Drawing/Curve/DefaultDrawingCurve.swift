@@ -11,9 +11,8 @@ import UIKit
 /// An iterator for creating a curve in real-time using touch phases
 public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    public let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
+    public let touchPhase = CurrentValueSubject<TouchPhase, Never>(.cancelled)
 
-    @MainActor
     public var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
@@ -38,7 +37,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
     public func append(
         points: [GrayscaleDotPoint],
-        touchPhase: UITouch.Phase
+        touchPhase: TouchPhase
     ) {
         self.append(points)
         self.touchPhase.send(touchPhase)

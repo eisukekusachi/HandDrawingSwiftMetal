@@ -6,21 +6,19 @@
 //
 
 import Combine
-import UIKit
+import Foundation
 
 /// An iterator for realtime drawing with `UITouch.Phase`
-@MainActor
 public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
+
+    var touchPhase: CurrentValueSubject<TouchPhase, Never> { get }
 
     /// Points that have not yet been drawn
     var currentCurvePoints: [GrayscaleDotPoint] { get }
 
-    /// The touch phases for drawing a single curve
-    var touchPhase: CurrentValueSubject<UITouch.Phase, Never> { get }
-
     func append(
         points: [GrayscaleDotPoint],
-        touchPhase: UITouch.Phase
+        touchPhase: TouchPhase
     )
 
     func reset()
@@ -29,7 +27,6 @@ public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 public extension DrawingCurve {
 
     /// Makes an array of first curve points from an iterator
-    @MainActor
     func makeFirstCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
@@ -55,7 +52,6 @@ public extension DrawingCurve {
     }
 
     /// Makes an array of intermediate curve points from an iterator, setting the range to 4
-    @MainActor
     func makeIntermediateCurvePoints(
         shouldIncludeEndPoint: Bool
     ) -> [GrayscaleDotPoint] {
@@ -86,7 +82,6 @@ public extension DrawingCurve {
     }
 
     /// Makes an array of last curve points from an iterator
-    @MainActor
     func makeLastCurvePoints() -> [GrayscaleDotPoint] {
         var curve: [GrayscaleDotPoint] = []
 
@@ -146,5 +141,4 @@ extension Iterator<GrayscaleDotPoint> {
             endPoint: array[array.count - 1]
         )
     }
-
 }

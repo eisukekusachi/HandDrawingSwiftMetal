@@ -11,9 +11,8 @@ import UIKit
 /// An iterator for creating a smooth curve in real-time using touch phases
 public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    public let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
+    public let touchPhase = CurrentValueSubject<TouchPhase, Never>(.cancelled)
 
-    @MainActor
     public var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
@@ -34,10 +33,9 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
 
     private var hasFirstCurveBeenCreated: Bool = false
 
-    @MainActor
     public func append(
         points: [GrayscaleDotPoint],
-        touchPhase: UITouch.Phase
+        touchPhase: TouchPhase
     ) {
         self.tmpIterator.append(points)
         self.touchPhase.send(touchPhase)
@@ -67,7 +65,6 @@ public extension SmoothDrawingCurve {
         return isFirstCurveToBeCreated
     }
 
-    @MainActor
     private func makeSmoothCurve() {
         if (tmpIterator.array.count != 0 && self.array.count == 0),
            let firstElement = tmpIterator.array.first {

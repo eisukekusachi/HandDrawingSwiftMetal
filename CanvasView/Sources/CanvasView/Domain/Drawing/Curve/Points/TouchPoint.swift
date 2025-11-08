@@ -39,7 +39,7 @@ public struct TouchPoint: Equatable, Sendable {
     public let type: UITouch.TouchType
 
     /// The phase of the touch
-    public let phase: UITouch.Phase
+    public let phase: TouchPhase
 
     /// The force of the touch, where a value of 1.0 represents the force of an average touch (predetermined by the system, not user-specific)
     public let force: CGFloat
@@ -94,7 +94,7 @@ public struct TouchPoint: Equatable, Sendable {
         self.tapCount = tapCount
         self.timestamp = timestamp
         self.type = type
-        self.phase = phase
+        self.phase = .init(phase)
         self.force = force
         self.maximumPossibleForce = maximumPossibleForce
         self.altitudeAngle = altitudeAngle
@@ -131,7 +131,7 @@ extension TouchPoint {
 
         self.type = touch.type
 
-        self.phase = touch.phase
+        self.phase = .init(touch.phase)
 
         self.force = touch.force
 
@@ -152,7 +152,7 @@ extension TouchPoint {
 }
 
 extension Array where Element == TouchPoint {
-    var currentTouchPhase: UITouch.Phase {
+    var currentTouchPhase: TouchPhase {
         if self.last?.phase == .cancelled {
             .cancelled
         } else if self.last?.phase == .ended {
