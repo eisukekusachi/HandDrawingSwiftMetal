@@ -11,24 +11,24 @@ import UIKit
 public extension TouchPoint {
 
     static func generate(
-        location: CGPoint,
-        previousLocation: CGPoint,
-        majorRadius: CGFloat,
-        majorRadiusTolerance: CGFloat,
-        preciseLocation: CGPoint,
-        precisePreviousLocation: CGPoint,
-        tapCount: Int,
-        timestamp: TimeInterval,
-        type: UITouch.TouchType,
-        phase: UITouch.Phase,
-        force: CGFloat,
-        maximumPossibleForce: CGFloat,
-        altitudeAngle: CGFloat,
-        azimuthUnitVector: CGVector,
-        rollAngle: CGFloat,
-        estimatedProperties: UITouch.Properties,
-        estimatedPropertiesExpectingUpdates: UITouch.Properties,
-        estimationUpdateIndex: NSNumber?
+        location: CGPoint = .zero,
+        previousLocation: CGPoint = .zero,
+        majorRadius: CGFloat = 0,
+        majorRadiusTolerance: CGFloat = 0,
+        preciseLocation: CGPoint = .zero,
+        precisePreviousLocation: CGPoint = .zero,
+        tapCount: Int = 0,
+        timestamp: TimeInterval = .zero,
+        type: UITouch.TouchType = .direct,
+        phase: UITouch.Phase = .cancelled,
+        force: CGFloat = 0,
+        maximumPossibleForce: CGFloat = 0,
+        altitudeAngle: CGFloat = 0,
+        azimuthUnitVector: CGVector = .zero,
+        rollAngle: CGFloat = 0,
+        estimatedProperties: UITouch.Properties = .force,
+        estimatedPropertiesExpectingUpdates: UITouch.Properties = .force,
+        estimationUpdateIndex: NSNumber = 0
     ) -> Self {
         .init(
             location: location,
