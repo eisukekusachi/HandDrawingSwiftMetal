@@ -86,7 +86,7 @@ public class TextureInMemoryRepository: TextureRepository {
         configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
-        guard FileManager.containsAll(
+        guard FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {

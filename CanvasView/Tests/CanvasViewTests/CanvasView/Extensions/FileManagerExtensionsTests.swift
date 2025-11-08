@@ -19,23 +19,28 @@ struct FileManagerExtensionsTests {
             ["a.txt", "b.txt", "c.txt"]
         ]
     )
-    func testContainsAll_allFilesExist(fileNames: [String]) {
+    func `returns true if all file names are present`(fileNames: [String]) {
         let fileURLs = [
             URL(fileURLWithPath: "/tmp/a.txt"),
             URL(fileURLWithPath: "/tmp/b.txt"),
             URL(fileURLWithPath: "/tmp/c.txt")
         ]
-        #expect(FileManager.containsAll(fileNames: fileNames, in: fileURLs) == true)
+        #expect(FileManager.containsAllFileNames(fileNames: fileNames, in: fileURLs) == true)
     }
 
-    @Test
-    func testContainsAll_noFilesExist() {
-        let fileNames = ["x.txt", "y.txt"]
+    @Test(
+        arguments: [
+            [""],
+            ["x.txt", "y.txt"],
+            ["a.txt", "b.txt", "c.txt", "d.txt"]
+        ]
+    )
+    func `returns false if any file name does not exist`(fileNames: [String]) {
         let fileURLs = [
             URL(fileURLWithPath: "/tmp/a.txt"),
             URL(fileURLWithPath: "/tmp/b.txt"),
             URL(fileURLWithPath: "/tmp/c.txt")
         ]
-        #expect(FileManager.containsAll(fileNames: fileNames, in: fileURLs) == false)
+        #expect(FileManager.containsAllFileNames(fileNames: fileNames, in: fileURLs) == false)
     }
 }

@@ -30,7 +30,8 @@ public extension FileManager {
         (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
     }
 
-    static func containsAll(fileNames: [String], in fileURLs: [URL]) -> Bool {
+    /// Checks whether all specified file names are present in the given list of URLs
+    static func containsAllFileNames(fileNames: [String], in fileURLs: [URL]) -> Bool {
         guard !fileNames.isEmpty else { return false }
         return Set(fileNames).isSubset(of: Set(fileURLs.map { $0.lastPathComponent }))
     }
