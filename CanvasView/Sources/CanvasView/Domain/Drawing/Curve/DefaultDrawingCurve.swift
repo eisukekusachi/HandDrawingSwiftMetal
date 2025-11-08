@@ -13,6 +13,8 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
     public let touchPhase = CurrentValueSubject<TouchPhase, Never>(.cancelled)
 
+    private var hasFirstCurveBeenCreated: Bool = false
+
     public var currentCurvePoints: [GrayscaleDotPoint] {
         var array: [GrayscaleDotPoint] = []
 
@@ -27,12 +29,6 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
         }
 
         return array
-    }
-
-    private var hasFirstCurveBeenCreated: Bool
-
-    public init(hasFirstCurveBeenCreated: Bool = false) {
-        self.hasFirstCurveBeenCreated = hasFirstCurveBeenCreated
     }
 
     public func append(
@@ -53,7 +49,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
 public extension DefaultDrawingCurve {
 
-    var isFirstCurveNeeded: Bool {
+    private var isFirstCurveNeeded: Bool {
         let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
 
         if isFirstCurveToBeCreated {

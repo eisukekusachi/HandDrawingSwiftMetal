@@ -4,21 +4,23 @@
 //
 //  Created by Eisuke Kusachi on 2024/09/07.
 //
-/*
-import CanvasView
-import XCTest
+
+import Testing
 
 @testable import CanvasView
 
-@MainActor
-final class DefaultDrawingCurveTests: XCTestCase {
+struct DefaultDrawingCurveTests {
+
+    private typealias Subject = DefaultDrawingCurve
 
     func testIsDrawingFinished() {
-        let subject = DefaultDrawingCurve()
+        let subject = Subject()
 
         subject.touchPhase.send(.began)
-        XCTAssertFalse(subject.isDrawingFinished)
-        XCTAssertTrue(subject.isCurrentlyDrawing)
+        #expect(subject.isDrawingFinished == false)
+        #expect(subject.isCurrentlyDrawing == true)
+        //XCTAssertFalse(subject.isDrawingFinished)
+        //XCTAssertTrue(subject.isCurrentlyDrawing)
 
         subject.touchPhase.send(.moved)
         XCTAssertFalse(subject.isDrawingFinished)
@@ -34,7 +36,7 @@ final class DefaultDrawingCurveTests: XCTestCase {
     }
 
     func testIsFirstCurveNeeded() {
-        let subject = DefaultDrawingCurve()
+        let subject = Subject()
 
         subject.append([
             .generate(),
@@ -53,4 +55,3 @@ final class DefaultDrawingCurveTests: XCTestCase {
         XCTAssertFalse(subject.isFirstCurveNeeded)
     }
 }
-*/
