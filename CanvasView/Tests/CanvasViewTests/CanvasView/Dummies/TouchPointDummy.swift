@@ -29,7 +29,7 @@ public extension TouchPoint {
         estimatedProperties: UITouch.Properties,
         estimatedPropertiesExpectingUpdates: UITouch.Properties,
         estimationUpdateIndex: NSNumber?
-    ) -> TouchPoint {
+    ) -> Self {
         .init(
             location: location,
             previousLocation: previousLocation,

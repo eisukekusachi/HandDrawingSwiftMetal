@@ -15,7 +15,7 @@ public extension TextureLayerModel {
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true
-    ) -> TextureLayerModel {
+    ) -> Self {
         .init(
             id: id,
             title: title,

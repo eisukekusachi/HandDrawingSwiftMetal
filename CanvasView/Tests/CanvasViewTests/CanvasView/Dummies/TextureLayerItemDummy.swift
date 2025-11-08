@@ -16,7 +16,7 @@ public extension TextureLayerItem {
         alpha: Int = 255,
         isVisible: Bool = true,
         thumbnail: UIImage? = nil
-    ) -> TextureLayerItem {
+    ) -> Self {
         .init(
             id: id,
             title: title,
