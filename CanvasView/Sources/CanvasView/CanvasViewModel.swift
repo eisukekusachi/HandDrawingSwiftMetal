@@ -146,8 +146,8 @@ public final class CanvasViewModel {
         self.drawingRenderer = self.drawingRenderers[0]
 
         self.canvasRenderer.initialize(
-            displayView: dependencies.displayView,
             renderer: dependencies.renderer,
+            displayView: dependencies.displayView,
             environmentConfiguration: configuration.environmentConfiguration
         )
 

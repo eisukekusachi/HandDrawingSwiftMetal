@@ -53,11 +53,11 @@ public final class CanvasRenderer: ObservableObject {
     public init() {}
 
     public func initialize(
-        displayView: CanvasDisplayable,
         renderer: MTLRendering,
-        environmentConfiguration: EnvironmentConfiguration
+        displayView: CanvasDisplayable?,
+        environmentConfiguration: EnvironmentConfiguration?
     ) {
-        guard let device = renderer.device else { return }
+        guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.renderer = renderer
 
@@ -68,8 +68,12 @@ public final class CanvasRenderer: ObservableObject {
 
         self.displayView = displayView
 
-        self.backgroundColor = environmentConfiguration.backgroundColor
-        self.baseBackgroundColor = environmentConfiguration.baseBackgroundColor
+        if let backgroundColor = environmentConfiguration?.backgroundColor {
+            self.backgroundColor = backgroundColor
+        }
+        if let baseBackgroundColor = environmentConfiguration?.baseBackgroundColor {
+            self.baseBackgroundColor = baseBackgroundColor
+        }
     }
 
     public func initializeTextures(textureSize: CGSize) {

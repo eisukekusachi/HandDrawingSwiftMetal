@@ -81,7 +81,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     private var oldAlpha: Int?
 
     public init(
-        canvasRenderer: CanvasRenderer?
+        canvasRenderer: CanvasRenderer? = nil
     ) {
         self.canvasRenderer = canvasRenderer
     }
@@ -138,17 +138,21 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
-            let textureRepository,
-            let device = canvasRenderer?.device
+            let textureRepository
         else { return }
 
         // If a texture is provided as an argument, use it. otherwise create a new one.
-        guard let newTexture: MTLTexture = texture ?? MTLTextureCreator.makeTexture(
-            width: Int(_textureSize.width),
-            height: Int(_textureSize.height),
-            with: device
-        )
-        else { return }
+        var newTexture: MTLTexture? = texture
+
+        if newTexture == nil, let device = canvasRenderer?.device {
+            newTexture = MTLTextureCreator.makeTexture(
+                width: Int(_textureSize.width),
+                height: Int(_textureSize.height),
+                with: device
+            )
+        }
+
+        guard let newTexture else { return }
 
         self._layers.insert(
             .init(
