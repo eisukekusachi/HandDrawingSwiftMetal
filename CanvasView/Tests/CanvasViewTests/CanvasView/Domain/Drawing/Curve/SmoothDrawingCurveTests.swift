@@ -4,80 +4,103 @@
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
 //
-/*
-import CanvasView
-import XCTest
+
+import Testing
 
 @testable import CanvasView
 
-final class SmoothDrawingCurveTests: XCTestCase {
+struct SmoothDrawingCurveTests {
 
-    @MainActor
-    func testIsDrawingFinished() {
-        let subject = SmoothDrawingCurve()
+    private typealias Subject = SmoothDrawingCurve
 
-        subject.touchPhase.send(.began)
-        XCTAssertFalse(subject.isDrawingFinished)
-        XCTAssertTrue(subject.isCurrentlyDrawing)
+    @Suite
+    struct IsFirstCurveNeededTests {
+        @Test
+        func `Verify that it becomes true only once when there are more than three points`() {
+            let subject = Subject()
 
-        subject.touchPhase.send(.moved)
-        XCTAssertFalse(subject.isDrawingFinished)
-        XCTAssertTrue(subject.isCurrentlyDrawing)
+            subject.append(points: [
+                .generate(),
+                .generate(),
+                .generate(),
+                .generate()
+            ], touchPhase: .moved)
 
-        subject.touchPhase.send(.ended)
-        XCTAssertTrue(subject.isDrawingFinished)
-        XCTAssertFalse(subject.isCurrentlyDrawing)
+            #expect(subject.isFirstCurveNeeded() == true)
 
-        subject.touchPhase.send(.cancelled)
-        XCTAssertTrue(subject.isDrawingFinished)
-        XCTAssertFalse(subject.isCurrentlyDrawing)
+            subject.append(points: [.generate()], touchPhase: .moved)
+            #expect(subject.isFirstCurveNeeded() == false)
+        }
+
+        @Test
+        func `Verify that it becomes true only once when there are three points`() async throws {
+            let subject = Subject()
+
+            subject.append(points: [.generate()], touchPhase: .began)
+            #expect(subject.isFirstCurveNeeded() == false)
+
+            subject.append(points: [.generate()], touchPhase: .moved)
+            #expect(subject.isFirstCurveNeeded() == false)
+
+            subject.append(points: [.generate()], touchPhase: .moved)
+            #expect(subject.isFirstCurveNeeded() == true)
+
+            subject.append(points: [.generate()], touchPhase: .moved)
+            #expect(subject.isFirstCurveNeeded() == false)
+        }
     }
 
-    @MainActor
-    func testIsFirstCurveNeeded() {
-        let subject = SmoothDrawingCurve()
+    @Suite
+    struct SmoothPointsTests {
+        @Test
+        func `Verify that the average values are added`() async throws {
+            let subject = Subject()
 
-        subject.append([
-            .generate(),
-            .generate()
-        ])
-        XCTAssertFalse(subject.isFirstCurveNeeded)
+            subject.append(points: [
+                .generate(location: .init(x: 0, y: 0)),
+                .generate(location: .init(x: 10, y: 10)),
+                .generate(location: .init(x: 20, y: 20)),
+                .generate(location: .init(x: 30, y: 30))
+            ], touchPhase: .ended)
 
-        // After creating the instance, it becomes `true` when three elements are stored in the array.
-        subject.append([
-            .generate()
-        ])
-        XCTAssertTrue(subject.isFirstCurveNeeded)
+            #expect(subject.array[0].location == .init(x: 0, y: 0))
+            #expect(subject.array[1].location == .init(x: 5, y: 5))
+            #expect(subject.array[2].location == .init(x: 15, y: 15))
+            #expect(subject.array[3].location == .init(x: 25, y: 25))
+            #expect(subject.array[4].location == .init(x: 30, y: 30))
+        }
 
-        // The value of the first curve is retrieved only once
-        _ = subject.currentCurvePoints
-        XCTAssertFalse(subject.isFirstCurveNeeded)
-    }
+        @Test
+        func `Verify that the average value is added`() async throws {
+            let subject = Subject()
 
-    @MainActor
-    func testAppendToIterator() {
-        let subject = SmoothDrawingCurve()
+            let points: [GrayscaleDotPoint] = [
+                .generate(location: .init(x: 0, y: 0)),
+                .generate(location: .init(x: 10, y: 10)),
+                .generate(location: .init(x: 20, y: 20)),
+                .generate(location: .init(x: 30, y: 30)),
+                .generate(location: .init(x: 40, y: 40))
+            ]
 
-        subject.append(points: [.generate(location: .init(x: 0, y: 0))], touchPhase: .began)
-        subject.append(points: [.generate(location: .init(x: 2, y: 2))], touchPhase: .moved)
-        subject.append(points: [.generate(location: .init(x: 4, y: 4))], touchPhase: .moved)
-        subject.append(points: [.generate(location: .init(x: 6, y: 6))], touchPhase: .ended)
+            // At least two points are required to obtain the average value.
+            subject.append(points: [points[0]], touchPhase: .began)
+            #expect(subject.array.isEmpty == true)
 
-        XCTAssertEqual(subject.tmpIterator.array[0].location, .init(x: 0, y: 0))
-        XCTAssertEqual(subject.tmpIterator.array[1].location, .init(x: 2, y: 2))
-        XCTAssertEqual(subject.tmpIterator.array[2].location, .init(x: 4, y: 4))
-        XCTAssertEqual(subject.tmpIterator.array[3].location, .init(x: 6, y: 6))
+            subject.append(points: [points[1]], touchPhase: .moved)
+            // Add the first point during the initial process.
+            #expect(subject.array[0].location == .init(x: 0, y: 0))
+            #expect(subject.array[1].location == .init(x: 5, y: 5))
 
-        /// The first point is added as it is
-        XCTAssertEqual(subject.array[0].location, .init(x: 0, y: 0))
+            subject.append(points: [points[2]], touchPhase: .moved)
+            #expect(subject.array[2].location == .init(x: 15, y: 15))
 
-        /// The average of the two points is added for all other points
-        XCTAssertEqual(subject.array[1].location, .init(x: 1, y: 1))
-        XCTAssertEqual(subject.array[2].location, .init(x: 3, y: 3))
-        XCTAssertEqual(subject.array[3].location, .init(x: 5, y: 5))
+            subject.append(points: [points[3]], touchPhase: .moved)
+            #expect(subject.array[3].location == .init(x: 25, y: 25))
 
-        /// The last point is added as it is
-        XCTAssertEqual(subject.array[4].location, .init(x: 6, y: 6))
+            subject.append(points: [points[4]], touchPhase: .ended)
+            #expect(subject.array[4].location == .init(x: 35, y: 35))
+            // Add the last point during the final process.
+            #expect(subject.array[5].location == .init(x: 40, y: 40))
+        }
     }
 }
-*/

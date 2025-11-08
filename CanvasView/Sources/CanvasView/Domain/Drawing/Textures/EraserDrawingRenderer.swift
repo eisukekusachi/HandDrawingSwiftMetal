@@ -181,7 +181,7 @@ private extension EraserDrawingRenderer {
             let renderer,
             let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: drawingCurve.currentCurvePoints,
+                points: drawingCurve.curvePoints(),
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
                 with: device

@@ -15,7 +15,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool
+        shouldIncludeEndPoint: Bool,
+        duration: Int? = nil
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -30,7 +31,7 @@ enum BezierCurve {
             handleLengthRatio: handleLengthAdjustmentRatio * approachStraightValue
         )
 
-        let duration = Int(round(
+        let duration = duration ?? Int(round(
             Calculate.getTotalLength(points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB])
         ))
 
@@ -49,7 +50,8 @@ enum BezierCurve {
         startPoint: CGPoint,
         endPoint: CGPoint,
         nextPoint: CGPoint,
-        shouldIncludeEndPoint: Bool
+        shouldIncludeEndPoint: Bool,
+        duration: Int? = nil
     ) -> [CGPoint] {
         // They are used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValueA = handleLengthRatioBasedOnRadian(
@@ -72,7 +74,7 @@ enum BezierCurve {
             handleLengthRatioB: handleLengthAdjustmentRatio * approachStraightValueB
         )
 
-        let duration = Int(round(
+        let duration = duration ?? Int(round(
             Calculate.getTotalLength(points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint])
         ))
 
@@ -90,7 +92,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool
+        shouldIncludeEndPoint: Bool,
+        duration: Int? = nil
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -105,7 +108,7 @@ enum BezierCurve {
             handleLengthRatio: handleLengthAdjustmentRatio * approachStraightValue
         )
 
-        let duration = Int(round(
+        let duration = duration ?? Int(round(
             Calculate.getTotalLength(points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC])
         ))
 
