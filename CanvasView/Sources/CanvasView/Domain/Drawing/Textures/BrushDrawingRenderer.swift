@@ -15,7 +15,7 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     public var realtimeDrawingTexture: RealtimeDrawingTexture? {
         _realtimeDrawingTexture
     }
-    private var _realtimeDrawingTexture: RealtimeDrawingTexture!
+    private var _realtimeDrawingTexture: RealtimeDrawingTexture?
 
     private var color: UIColor = .black
 
@@ -23,9 +23,9 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var frameSize: CGSize = .zero
 
-    private var textureSize: CGSize!
-    private var drawingTexture: MTLTexture!
-    private var grayscaleTexture: MTLTexture!
+    private var textureSize: CGSize?
+    private var drawingTexture: MTLTexture?
+    private var grayscaleTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -41,7 +41,7 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
 public extension BrushDrawingRenderer {
 
-    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
@@ -55,8 +55,19 @@ public extension BrushDrawingRenderer {
         )
     }
 
-    func initializeTextures(_ textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) throws {
         guard let device = renderer?.device else { return }
+        guard
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
+            )
+            Logger.error(error)
+            throw error
+        }
 
         self.textureSize = textureSize
 
@@ -111,7 +122,18 @@ public extension BrushDrawingRenderer {
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     ) {
-        guard let displayTextureSize = displayView?.displayTexture?.size else { return }
+        guard
+            let textureSize,
+            let displayTextureSize = displayView?.displayTexture?.size
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Failed to unwrap optional value", bundle: .main)
+            )
+            Logger.error(error)
+            return
+        }
+
         drawingCurve?.append(
             points: screenTouchPoints.map {
                 .init(
@@ -151,6 +173,8 @@ public extension BrushDrawingRenderer {
         selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let _realtimeDrawingTexture else { return }
+
         drawCurrentTexture(
             texture: _realtimeDrawingTexture,
             on: selectedLayerTexture,
@@ -177,6 +201,8 @@ extension BrushDrawingRenderer {
         guard
             let renderer,
             let device = renderer.device,
+            let drawingTexture,
+            let grayscaleTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: color.alpha,
@@ -204,7 +230,9 @@ extension BrushDrawingRenderer {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let renderer
+            let renderer,
+            let drawingTexture,
+            let _realtimeDrawingTexture
         else { return }
 
         renderer.drawTexture(

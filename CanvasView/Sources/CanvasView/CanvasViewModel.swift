@@ -140,7 +140,7 @@ public final class CanvasViewModel {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
         self.drawingRenderers.forEach {
-            $0.setup(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
+            $0.setup(frameSize: frameSize, renderer: dependencies.renderer, displayView: dependencies.displayView)
         }
 
         self.drawingRenderer = self.drawingRenderers[0]
@@ -243,7 +243,7 @@ public final class CanvasViewModel {
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initializeTextures(configuration.textureSize)
+            try drawingRenderers[i].initializeTextures(configuration.textureSize)
         }
 
         // Initialize the textures used in the renderer

@@ -162,8 +162,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         textureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard
-            Int(textureSize.width) > canvasMinimumTextureLength &&
-            Int(textureSize.height) > canvasMinimumTextureLength,
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength,
             let newTexture = try await newTexture(textureSize)
         else {
             let error = NSError(

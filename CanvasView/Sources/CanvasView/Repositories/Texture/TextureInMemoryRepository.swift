@@ -45,8 +45,8 @@ public class TextureInMemoryRepository: TextureRepository {
         let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
-            Int(textureSize.width) > canvasMinimumTextureLength &&
-            Int(textureSize.height) > canvasMinimumTextureLength
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
