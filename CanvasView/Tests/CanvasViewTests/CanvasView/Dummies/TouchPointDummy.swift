@@ -28,7 +28,7 @@ public extension TouchPoint {
         rollAngle: CGFloat = 0,
         estimatedProperties: UITouch.Properties = .force,
         estimatedPropertiesExpectingUpdates: UITouch.Properties = .force,
-        estimationUpdateIndex: NSNumber = 0
+        estimationUpdateIndex: NSNumber? = 0
     ) -> Self {
         .init(
             location: location,
