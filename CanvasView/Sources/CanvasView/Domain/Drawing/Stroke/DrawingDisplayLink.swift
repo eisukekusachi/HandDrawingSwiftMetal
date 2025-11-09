@@ -11,11 +11,10 @@ import Combine
 /// A class that manages the displayLink for realtime drawing
 public final class DrawingDisplayLink {
 
-    // Requesting to draw a curve on the canvas emits `Void`
+    // Requesting to update the canvas emits `Void`
     public var updatePublisher: AnyPublisher<Void, Never> {
         updateSubject.eraseToAnyPublisher()
     }
-
     private let updateSubject = PassthroughSubject<Void, Never>()
 
     public var displayLink: CADisplayLink?
@@ -32,8 +31,8 @@ public final class DrawingDisplayLink {
         } else {
             displayLink?.isPaused = true
 
-            // When stopping the displayLink upon finger release,
-            // the rendering process does not complete, so `updateCanvasWhileDrawing()` is executed once.
+            // Since the touchEnded process remains,
+            // `updateCanvasWhileDrawing()` is executed once to handle the final update.
             updateCanvasWhileDrawing()
         }
     }

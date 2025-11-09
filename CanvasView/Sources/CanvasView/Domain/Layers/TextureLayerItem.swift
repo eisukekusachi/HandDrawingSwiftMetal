@@ -7,17 +7,17 @@
 
 import UIKit
 
-public class TextureLayerItem: ObservableObject {
+public struct TextureLayerItem: Identifiable {
     /// The unique identifier for the layer
     public let id: LayerId
     /// The name of the layer
-    @Published public var title: String
+    public let title: String
     /// The opacity of the layer
-    @Published public var alpha: Int
+    public let alpha: Int
     /// Whether the layer is visible or not
-    @Published public var isVisible: Bool
+    public let isVisible: Bool
 
-    @Published public var thumbnail: UIImage?
+    public let thumbnail: UIImage?
 
     public var fileName: String {
         id.uuidString
@@ -39,7 +39,7 @@ public class TextureLayerItem: ObservableObject {
 }
 
 extension TextureLayerItem {
-    public convenience init(
+    public init(
         model: TextureLayerModel,
         thumbnail: UIImage?
     ) {

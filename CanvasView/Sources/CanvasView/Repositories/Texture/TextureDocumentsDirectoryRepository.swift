@@ -66,7 +66,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
 
-        if FileManager.containsAll(
+        if FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
            ),
@@ -99,7 +99,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
-        guard FileManager.containsAll(
+        guard FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
@@ -162,8 +162,8 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         textureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
         guard
-            Int(textureSize.width) > canvasMinimumTextureLength &&
-            Int(textureSize.height) > canvasMinimumTextureLength,
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength,
             let newTexture = try await newTexture(textureSize)
         else {
             let error = NSError(

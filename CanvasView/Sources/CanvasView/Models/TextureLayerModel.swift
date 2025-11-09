@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
+public struct TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
 
     /// The unique identifier for the layer
     public let id: LayerId
@@ -25,6 +25,21 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         id.uuidString
     }
 
+    public init(
+        id: LayerId,
+        title: String,
+        alpha: Int,
+        isVisible: Bool
+    ) {
+        self.id = id
+        self.title = title
+        self.alpha = alpha
+        self.isVisible = isVisible
+    }
+}
+
+extension TextureLayerModel {
+
     private enum CodingKeys: String, CodingKey {
         case id
         case title
@@ -34,7 +49,16 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         case textureName
     }
 
-    public convenience init(from decoder: Decoder) throws {
+    public init(item: TextureLayerItem) {
+        self.init(
+            id: item.id,
+            title: item.title,
+            alpha: item.alpha,
+            isVisible: item.isVisible
+        )
+    }
+
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let id: LayerId
@@ -68,13 +92,6 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
         try container.encode(isVisible, forKey: .isVisible)
     }
 
-    public init(id: LayerId, title: String, alpha: Int, isVisible: Bool) {
-        self.id = id
-        self.title = title
-        self.alpha = alpha
-        self.isVisible = isVisible
-    }
-
     public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
         lhs.id == rhs.id &&
         lhs.title == rhs.title &&
@@ -85,17 +102,6 @@ public final class TextureLayerModel: Identifiable, Codable, Equatable, Sendable
     /// Retrieve the '`LayerId` from the file name since it uses a `LayerId`
     static func id(fromFileName string: String?) -> LayerId {
         LayerId.init(uuidString: string ?? "") ?? LayerId()
-    }
-}
-
-extension TextureLayerModel {
-    public convenience init(item: TextureLayerItem) {
-        self.init(
-            id: item.id,
-            title: item.title,
-            alpha: item.alpha,
-            isVisible: item.isVisible
-        )
     }
 }
 

@@ -18,10 +18,10 @@ public protocol DrawingRenderer {
     var realtimeDrawingTexture: RealtimeDrawingTexture? { get }
 
     /// Configures external dependencies
-    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering)
+    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?)
 
     /// Initializes the textures for realtime drawing
-    func initializeTextures(_ textureSize: CGSize)
+    func initializeTextures(_ textureSize: CGSize) throws
 
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)

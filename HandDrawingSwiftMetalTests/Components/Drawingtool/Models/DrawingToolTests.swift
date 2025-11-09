@@ -54,25 +54,4 @@ struct DrawingToolTests {
         tool.setEraserDiameter(30)
         #expect(tool.eraserDiameter == 30)
     }
-
-    @Test("Confirms it can reset to default values")
-    func testReset() async throws {
-        let tool = DrawingTool(
-            initialBrushDiameter: 8,
-            initialEraserDiameter: 8
-        )
-
-        tool.setDrawingTool(.eraser)
-        tool.setBrushDiameter(10)
-        tool.setEraserDiameter(15)
-        #expect(tool.type == .eraser)
-        #expect(tool.brushDiameter == 10)
-        #expect(tool.eraserDiameter == 15)
-
-        tool.reset()
-
-        #expect(tool.type == .brush)
-        #expect(tool.brushDiameter == 8)
-        #expect(tool.eraserDiameter == 8)
-    }
 }

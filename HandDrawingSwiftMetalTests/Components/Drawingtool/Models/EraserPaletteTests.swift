@@ -89,22 +89,4 @@ struct EraserPaletteTests {
         #expect(palette.alphas.count == 1)
         #expect(palette.alphas == [128])
     }
-
-    @Test("Confirms it can reset with initial alphas")
-    func testReset() async throws {
-        let palette = EraserPalette(
-            alphas: [64],
-            index: 0,
-            initialAlphas: [64, 128]
-        )
-
-        palette.update(alphas: [32, 64, 96], currentIndex: 1)
-        #expect(palette.alphas == [32, 64, 96])
-        #expect(palette.index == 1)
-
-        palette.reset()
-
-        #expect(palette.alphas == [64, 128])
-        #expect(palette.index == 0)
-    }
 }

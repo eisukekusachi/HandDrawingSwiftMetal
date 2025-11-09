@@ -45,8 +45,8 @@ public class TextureInMemoryRepository: TextureRepository {
         let textureSize = configuration.textureSize ?? fallbackTextureSize
 
         guard
-            Int(textureSize.width) > canvasMinimumTextureLength &&
-            Int(textureSize.height) > canvasMinimumTextureLength
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -86,7 +86,7 @@ public class TextureInMemoryRepository: TextureRepository {
         configuration: TextureLayerArrayConfiguration,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayerArrayConfiguration {
-        guard FileManager.containsAll(
+        guard FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {

@@ -140,14 +140,14 @@ public final class CanvasViewModel {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
         self.drawingRenderers.forEach {
-            $0.setup(frameSize: frameSize, displayView: dependencies.displayView, renderer: dependencies.renderer)
+            $0.setup(frameSize: frameSize, renderer: dependencies.renderer, displayView: dependencies.displayView)
         }
 
         self.drawingRenderer = self.drawingRenderers[0]
 
         self.canvasRenderer.initialize(
-            displayView: dependencies.displayView,
             renderer: dependencies.renderer,
+            displayView: dependencies.displayView,
             environmentConfiguration: configuration.environmentConfiguration
         )
 
@@ -243,7 +243,7 @@ public final class CanvasViewModel {
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initializeTextures(configuration.textureSize)
+            try drawingRenderers[i].initializeTextures(configuration.textureSize)
         }
 
         // Initialize the textures used in the renderer
@@ -661,7 +661,9 @@ extension CanvasViewModel {
             )
         }
 
-        if fingerStroke.isAllFingersOnScreen {
+        if !fingerStroke.hasEndedTouches {
+            transforming.endTransformation()
+        } else {
             transforming.transformCanvas(
                 screenCenter: .init(
                     x: canvasRenderer.frameSize.width * 0.5,
@@ -669,8 +671,6 @@ extension CanvasViewModel {
                 ),
                 touchHistories: fingerStroke.touchHistories
             )
-        } else {
-            transforming.endTransformation()
         }
 
         canvasRenderer.commitAndRefreshDisplay()

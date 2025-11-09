@@ -10,7 +10,7 @@ import SwiftUI
 
 public struct TextureLayerRowView: View {
 
-    @ObservedObject var layer: TextureLayerItem
+    var layer: TextureLayerItem
 
     private let isSelected: Bool
     private let didTapRow: (TextureLayerItem) -> Void

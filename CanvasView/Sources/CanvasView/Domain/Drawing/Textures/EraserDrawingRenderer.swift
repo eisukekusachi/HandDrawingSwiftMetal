@@ -15,7 +15,7 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     public var realtimeDrawingTexture: RealtimeDrawingTexture? {
         _realtimeDrawingTexture
     }
-    private var _realtimeDrawingTexture: RealtimeDrawingTexture!
+    private var _realtimeDrawingTexture: RealtimeDrawingTexture?
 
     private var alpha: Int = 255
 
@@ -23,10 +23,10 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var frameSize: CGSize = .zero
 
-    private var textureSize: CGSize!
-    private var drawingTexture: MTLTexture!
-    private var grayscaleTexture: MTLTexture!
-    private var lineDrawnTexture: MTLTexture!
+    private var textureSize: CGSize?
+    private var drawingTexture: MTLTexture?
+    private var grayscaleTexture: MTLTexture?
+    private var lineDrawnTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
@@ -42,7 +42,7 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
 public extension EraserDrawingRenderer {
 
-    func setup(frameSize: CGSize, displayView: CanvasDisplayable, renderer: MTLRendering) {
+    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
         guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
@@ -56,8 +56,19 @@ public extension EraserDrawingRenderer {
         )
     }
 
-    func initializeTextures(_ textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) throws {
         guard let device = renderer?.device else { return }
+        guard
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
+            )
+            Logger.error(error)
+            throw error
+        }
 
         self.textureSize = textureSize
 
@@ -118,7 +129,11 @@ public extension EraserDrawingRenderer {
         screenTouchPoints: [TouchPoint],
         matrix: CGAffineTransform
     ) {
-        guard let displayTextureSize = displayView?.displayTexture?.size else { return }
+        guard
+            let textureSize,
+            let displayTextureSize = displayView?.displayTexture?.size
+        else { return }
+
         drawingCurve?.append(
             points: screenTouchPoints.map {
                 .init(
@@ -154,6 +169,8 @@ public extension EraserDrawingRenderer {
         selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        guard let _realtimeDrawingTexture else { return }
+
         drawCurrentTexture(
             texture: _realtimeDrawingTexture,
             on: selectedLayerTexture,
@@ -162,7 +179,10 @@ public extension EraserDrawingRenderer {
     }
 
     func prepareNextStroke() {
-        guard let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer() else { return }
+        guard
+            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+        else { return }
+
         clearTextures(with: commandBuffer)
         commandBuffer.commit()
 
@@ -179,9 +199,13 @@ private extension EraserDrawingRenderer {
     ) {
         guard
             let renderer,
+            let lineDrawnTexture,
+            let grayscaleTexture,
+            let drawingTexture,
+            let _realtimeDrawingTexture,
             let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: drawingCurve.currentCurvePoints,
+                points: drawingCurve.curvePoints(),
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
                 with: device

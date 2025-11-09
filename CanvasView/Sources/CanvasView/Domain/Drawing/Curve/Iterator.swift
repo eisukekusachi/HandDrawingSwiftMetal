@@ -67,7 +67,6 @@ public class Iterator<T: Equatable>: IteratorProtocol {
         array[index] = element
     }
 
-    @MainActor
     public func reset() {
         index = 0
         array = []

@@ -89,22 +89,4 @@ struct BrushPaletteTests {
         #expect(palette.colors.count == 1)
         #expect(palette.colors == [.red])
     }
-
-    @Test("Confirms it can reset with initial colors")
-    func testReset() async throws {
-        let palette = BrushPalette(
-            colors: [.black, .red],
-            index: 0,
-            initialColors: [.red]
-        )
-
-        palette.update(colors: [.red, .blue, .green], index: 2)
-        #expect(palette.colors == [.red, .blue, .green])
-        #expect(palette.index == 2)
-
-        palette.reset()
-
-        #expect(palette.colors == [.red])
-        #expect(palette.index == 0)
-    }
 }

@@ -7,6 +7,9 @@
     "Failed to create new texture" : {
       "extractionState" : "manual"
     },
+    "Failed to unwrap optional value" : {
+      "extractionState" : "manual"
+    },
     "Failed to update texture" : {
       "extractionState" : "manual"
     },

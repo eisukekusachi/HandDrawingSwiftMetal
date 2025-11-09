@@ -8,7 +8,7 @@
 import UIKit
 
 /// A class that manages the finger position information sent from the device
-@MainActor final class FingerStroke {
+final class FingerStroke {
 
     /// A dictionary that manages points input from multiple fingers
     private(set) var touchHistories: TouchHistoriesOnScreen = [:]
@@ -20,7 +20,7 @@ import UIKit
     private(set) var drawingLineEndPoint: TouchPoint?
 
     convenience init(
-        touchHistories: TouchHistoriesOnScreen,
+        touchHistories: TouchHistoriesOnScreen = [:],
         drawingLineEndPoint: TouchPoint? = nil
     ) {
         self.init()
@@ -31,9 +31,8 @@ import UIKit
 
 extension FingerStroke {
 
-    var isAllFingersOnScreen: Bool {
-        !touchHistories.keys.contains { key in
-            // If the last element of the array is `ended`, it means that a finger has been lifted.
+    var hasEndedTouches: Bool {
+        touchHistories.keys.contains { key in
             touchHistories[key]?.last?.phase == .ended
         }
     }

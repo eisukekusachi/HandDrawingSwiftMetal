@@ -10,12 +10,13 @@ import Foundation
 import UIKit
 
 final class MockDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
+    var touchPhase: TouchPhase = .cancelled
 
-    let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
+    func isFirstCurveNeeded() -> Bool {
+        return false
+    }
 
-    var currentCurvePoints: [GrayscaleDotPoint] = []
-
-    func append(points: [GrayscaleDotPoint], touchPhase: UITouch.Phase) {}
+    func append(points: [GrayscaleDotPoint], touchPhase: TouchPhase) {}
 
     override func reset() {}
 }

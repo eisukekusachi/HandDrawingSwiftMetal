@@ -4,10 +4,11 @@
 //
 //  Created by Eisuke Kusachi on 2025/09/21.
 //
+
 import Foundation
 import Combine
 import CoreGraphics
-import MetalKit
+@preconcurrency import MetalKit
 import Testing
 
 @testable import CanvasView
@@ -15,7 +16,7 @@ import Testing
 @MainActor
 struct TextureLayersTests {
 
-    typealias Subject = TextureLayers
+    private typealias Subject = TextureLayers
 
     // Reusable texture for all tests
     static let texture: MTLTexture = {
@@ -32,10 +33,13 @@ struct TextureLayersTests {
         return texture
     }()
 
-    @Test("Confirms that adding a layer increases the count and selects the new layer")
-    func testAddLayer() async throws {
+    @Test
+    func `Verify that adding a layer increases the count and selects the new layer`() async throws {
 
         let subject = Subject()
+
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
 
         await subject.initialize(
             configuration: .init(textureSize: .init(width: 16, height: 16), layerIndex: 0, layers: []),
@@ -43,9 +47,7 @@ struct TextureLayersTests {
         )
 
         #expect(subject.layers.count == 0)
-        #expect(subject.selectedLayerId == nil)
-
-        let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
+        #expect(subject.selectedIndex == nil)
 
         try await subject.addLayer(
             layer: layer0,
@@ -55,10 +57,8 @@ struct TextureLayersTests {
 
         // The layer count increases by one, and the newly added layer is selected
         #expect(subject.layers.count == 1)
-        #expect(subject.layers[0].id == layer0.id)
-        #expect(subject.selectedLayerId == layer0.id)
-
-        let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
+        #expect(subject.selectedLayer?.id == layer0.id)
+        #expect(subject.selectedIndex == 0)
 
         try await subject.addLayer(
             layer: layer1,
@@ -68,12 +68,12 @@ struct TextureLayersTests {
 
         // The layer count increases by one, and the newly added layer is selected
         #expect(subject.layers.count == 2)
-        #expect(subject.layers[1].id == layer1.id)
-        #expect(subject.selectedLayerId == layer1.id)
+        #expect(subject.selectedLayer?.id == layer1.id)
+        #expect(subject.selectedIndex == 1)
     }
 
-    @Test("Confirms that deleting a layer works but at least one layer always remains")
-    func testRemoveLayer() async throws {
+    @Test
+    func `Verify that deleting a layer works but at least one layer always remains`() async throws {
 
         let subject = Subject()
 
@@ -98,18 +98,18 @@ struct TextureLayersTests {
         try await subject.removeLayer(layerIndexToDelete: 1)
 
         #expect(subject.layers.count == 1)
-        #expect(subject.selectedLayerId == layer0.id)
+        #expect(subject.selectedLayer?.id == layer0.id)
 
         // At least one layer always remains.
         // If only one layer exists, it cannot be deleted.
         try await subject.removeLayer(layerIndexToDelete: 0)
 
         #expect(subject.layers.count == 1)
-        #expect(subject.selectedLayerId == layer0.id)
+        #expect(subject.selectedLayer?.id == layer0.id)
     }
 
-    @Test("Confirms that moving a layer changes the order as expected")
-    func testMoveLayer() async {
+    @Test
+    func `Verify that moving a layer changes the order as expected`() async {
 
         let subject = Subject()
 
@@ -148,8 +148,8 @@ struct TextureLayersTests {
         #expect(subject.layers.map { $0.title } == ["layer2", "layer1", "layer0"])
     }
 
-    @Test("Confirms that selectLayer updates selectedLayerId to the given layer's id")
-    func testSelectLayer() async {
+    @Test
+    func `Verify that selectLayer updates selectedLayerId to the given layer's id`() async {
 
         let subject = Subject()
 
@@ -169,15 +169,15 @@ struct TextureLayersTests {
             )
         )
 
-        #expect(subject.selectedLayerId == layer2.id)
+        #expect(subject.selectedLayer?.id == layer2.id)
 
         subject.selectLayer(layer0.id)
 
-        #expect(subject.selectedLayerId == layer0.id)
+        #expect(subject.selectedLayer?.id == layer0.id)
     }
 
-    @Test("Confirms that updateTitle updates the layer's title")
-    func testUpdateTitle() async {
+    @Test
+    func `Verify that updateTitle updates the layer's title`() async {
 
         let subject = Subject()
 
@@ -199,8 +199,8 @@ struct TextureLayersTests {
         #expect(subject.layers.first?.title == "newLayer")
     }
 
-    @Test("Confirms that updateAlpha updates the layer's alpha")
-    func testUpdateAlpha() async {
+    @Test
+    func `Verify that updateAlpha updates the layer's alpha`() async {
 
         let subject = Subject()
 
@@ -222,8 +222,8 @@ struct TextureLayersTests {
         #expect(subject.layers.first?.alpha == 100)
     }
 
-    @Test("Confirms that updateVisibility updates the layer's visibility")
-    func testUpdateVisibility() async {
+    @Test
+    func `Verify that updateVisibility updates the layer's visibility`() async {
 
         let subject = Subject()
 

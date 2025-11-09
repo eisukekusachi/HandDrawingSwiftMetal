@@ -11,56 +11,36 @@ import UIKit
 /// An iterator for creating a curve in real-time using touch phases
 public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    public let touchPhase = CurrentValueSubject<UITouch.Phase, Never>(.cancelled)
-
-    @MainActor
-    public var currentCurvePoints: [GrayscaleDotPoint] {
-        var array: [GrayscaleDotPoint] = []
-
-        if isFirstCurveNeeded {
-            array.append(contentsOf: makeFirstCurvePoints())
-        }
-
-        array.append(contentsOf: makeIntermediateCurvePoints(shouldIncludeEndPoint: false))
-
-        if touchPhase.value == .ended {
-            array.append(contentsOf: makeLastCurvePoints())
-        }
-
-        return array
+    public var touchPhase: TouchPhase {
+        _touchPhase
     }
 
-    private var hasFirstCurveBeenCreated: Bool
+    public func isFirstCurveNeeded() -> Bool {
+        let isFirstCurveToBeCreated = array.count >= 3 && !hasFirstCurveBeenDrawn
 
-    public init(hasFirstCurveBeenCreated: Bool = false) {
-        self.hasFirstCurveBeenCreated = hasFirstCurveBeenCreated
+        if isFirstCurveToBeCreated {
+            hasFirstCurveBeenDrawn = true
+        }
+
+        return isFirstCurveToBeCreated
     }
+
+    private var _touchPhase: TouchPhase = .cancelled
+
+    private var hasFirstCurveBeenDrawn: Bool = false
 
     public func append(
         points: [GrayscaleDotPoint],
-        touchPhase: UITouch.Phase
+        touchPhase: TouchPhase
     ) {
         self.append(points)
-        self.touchPhase.send(touchPhase)
+        self._touchPhase = touchPhase
     }
 
     override public func reset() {
         super.reset()
 
-        touchPhase.send(.cancelled)
-        hasFirstCurveBeenCreated = false
-    }
-}
-
-public extension DefaultDrawingCurve {
-
-    var isFirstCurveNeeded: Bool {
-        let isFirstCurveToBeCreated = self.array.count >= 3 && !hasFirstCurveBeenCreated
-
-        if isFirstCurveToBeCreated {
-            hasFirstCurveBeenCreated = true
-        }
-
-        return isFirstCurveToBeCreated
+        _touchPhase = .cancelled
+        hasFirstCurveBeenDrawn = false
     }
 }
