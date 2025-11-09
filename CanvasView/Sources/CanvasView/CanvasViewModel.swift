@@ -661,7 +661,7 @@ extension CanvasViewModel {
             )
         }
 
-        if !fingerStroke.hasEndedTouches {
+        if fingerStroke.hasEndedTouches {
             transforming.endTransformation()
         } else {
             transforming.transformCanvas(
