@@ -125,14 +125,7 @@ public extension BrushDrawingRenderer {
         guard
             let textureSize,
             let displayTextureSize = displayView?.displayTexture?.size
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Failed to unwrap optional value", bundle: .main)
-            )
-            Logger.error(error)
-            return
-        }
+        else { return }
 
         drawingCurve?.append(
             points: screenTouchPoints.map {
@@ -156,53 +149,13 @@ public extension BrushDrawingRenderer {
         selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let drawingCurve else { return }
-
-        drawCurveOnDrawingTexture(
-            drawingCurve: drawingCurve,
-            with: commandBuffer
-        )
-
-        drawDrawingTextureOnRealTimeDrawingTexture(
-            baseTexture: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
-    func endStroke(
-        selectedLayerTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard let _realtimeDrawingTexture else { return }
-
-        drawCurrentTexture(
-            texture: _realtimeDrawingTexture,
-            on: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
-    func prepareNextStroke() {
-        guard let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer() else { return }
-
-        clearTextures(with: commandBuffer)
-        commandBuffer.commit()
-
-        drawingCurve = nil
-    }
-}
-
-extension BrushDrawingRenderer {
-
-    private func drawCurveOnDrawingTexture(
-        drawingCurve: DrawingCurve,
-        with commandBuffer: MTLCommandBuffer
-    ) {
         guard
             let renderer,
-            let device = renderer.device,
+            let drawingCurve,
             let drawingTexture,
             let grayscaleTexture,
+            let _realtimeDrawingTexture,
+            let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: color.alpha,
@@ -223,20 +176,9 @@ extension BrushDrawingRenderer {
             on: drawingTexture,
             with: commandBuffer
         )
-    }
-
-    private func drawDrawingTextureOnRealTimeDrawingTexture(
-        baseTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let renderer,
-            let drawingTexture,
-            let _realtimeDrawingTexture
-        else { return }
 
         renderer.drawTexture(
-            texture: baseTexture,
+            texture: selectedLayerTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: _realtimeDrawingTexture,
@@ -250,24 +192,39 @@ extension BrushDrawingRenderer {
         )
     }
 
-    private func drawCurrentTexture(
-        texture sourceTexture: MTLTexture,
-        on destinationTexture: MTLTexture,
+    func endStroke(
+        selectedLayerTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard let renderer else { return }
+        guard
+            let renderer,
+            let _realtimeDrawingTexture
+        else { return }
 
         renderer.drawTexture(
-            texture: sourceTexture,
+            texture: _realtimeDrawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: destinationTexture,
+            on: selectedLayerTexture,
             with: commandBuffer
         )
 
         clearTextures(with: commandBuffer)
     }
 
+    func prepareNextStroke() {
+        guard
+            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+        else { return }
+
+        clearTextures(with: commandBuffer)
+        commandBuffer.commit()
+
+        drawingCurve = nil
+    }
+}
+
+private extension BrushDrawingRenderer {
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
         guard let renderer else { return }
 
