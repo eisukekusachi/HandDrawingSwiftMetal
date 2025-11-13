@@ -235,6 +235,11 @@ extension BezierCurve {
     }
 }
 
+struct BezierCurveHandlePoints {
+    let startHandle: CGPoint
+    let endHandle: CGPoint
+}
+
 private extension CGVector {
 
     init(origin: CGPoint, to destination: CGPoint) {
