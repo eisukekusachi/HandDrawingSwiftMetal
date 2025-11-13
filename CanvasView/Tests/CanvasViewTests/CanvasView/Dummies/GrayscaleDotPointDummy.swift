@@ -12,14 +12,14 @@ public extension GrayscaleDotPoint {
 
     static func generate(
         location: CGPoint = .zero,
-        diameter: CGFloat = 0.0,
         brightness: CGFloat = 0.0,
+        diameter: CGFloat = 0.0,
         blurSize: CGFloat = 0.0
     ) -> Self {
         .init(
             location: location,
-            diameter: diameter,
             brightness: brightness,
+            diameter: diameter,
             blurSize: blurSize
         )
     }
