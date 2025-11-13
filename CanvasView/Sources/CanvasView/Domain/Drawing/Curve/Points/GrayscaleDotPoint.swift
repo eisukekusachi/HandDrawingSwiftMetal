@@ -11,22 +11,24 @@ import UIKit
 public struct GrayscaleDotPoint: Equatable, Sendable {
 
     let location: CGPoint
-    let diameter: CGFloat
 
     /// brightness (0.0 ~ 1.0)
     let brightness: CGFloat
 
+    let diameter: CGFloat
+
+    /// The size of the blur on one side
     let blurSize: CGFloat
 
     public init(
         location: CGPoint,
-        diameter: CGFloat,
         brightness: CGFloat,
+        diameter: CGFloat,
         blurSize: CGFloat = 2.0
     ) {
         self.location = location
-        self.diameter = diameter
         self.brightness = brightness
+        self.diameter = diameter
         self.blurSize = blurSize
     }
 }
@@ -39,8 +41,8 @@ public extension GrayscaleDotPoint {
                 x: (left.location.x + right.location.x) * 0.5,
                 y: (left.location.y + right.location.y) * 0.5
             ),
-            diameter: left.diameter == right.diameter ? left.diameter : (left.diameter + right.diameter) * 0.5,
             brightness: left.brightness == right.brightness ? left.brightness : (left.brightness + right.brightness) * 0.5,
+            diameter: left.diameter == right.diameter ? left.diameter : (left.diameter + right.diameter) * 0.5,
             blurSize: left.blurSize == right.blurSize ? left.blurSize : (left.blurSize + right.blurSize) * 0.5
         )
     }
@@ -86,8 +88,8 @@ public extension GrayscaleDotPoint {
             curve.append(
                 .init(
                     location: targetPoints[i],
-                    diameter: diameterArray[i],
                     brightness: brightnessArray[i],
+                    diameter: diameterArray[i],
                     blurSize: blurArray[i]
                 )
             )

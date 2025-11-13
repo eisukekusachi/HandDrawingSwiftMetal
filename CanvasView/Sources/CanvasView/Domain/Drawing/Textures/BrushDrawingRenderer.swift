@@ -137,8 +137,8 @@ public extension BrushDrawingRenderer {
                         drawableSize: displayTextureSize,
                         frameSize: frameSize
                     ),
-                    diameter: CGFloat(diameter),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0
+                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                    diameter: CGFloat(diameter)
                 )
             },
             touchPhase: screenTouchPoints.currentTouchPhase
