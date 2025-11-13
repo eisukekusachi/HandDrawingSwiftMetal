@@ -183,3 +183,25 @@ private extension Iterator<GrayscaleDotPoint> {
         )
     }
 }
+
+/// A struct that defines the points needed to create a first Bézier curve
+private struct BezierCurveFirstPoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
+}
+
+/// A struct that defines the points needed to create a Bézier curve
+private struct BezierCurveIntermediatePoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
+    let nextPoint: GrayscaleDotPoint
+}
+
+/// A struct that defines the points needed to create a last Bézier curve
+private struct BezierCurveLastPoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
+}
