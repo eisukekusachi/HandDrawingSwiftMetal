@@ -15,6 +15,7 @@ public struct GrayscaleDotPoint: Equatable, Sendable {
     /// brightness (0.0 ~ 1.0)
     let brightness: CGFloat
 
+    /// The diameter without blur
     let diameter: CGFloat
 
     /// The size of the blur on one side
