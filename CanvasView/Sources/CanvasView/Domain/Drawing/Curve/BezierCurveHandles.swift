@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// A struct that contains the Bézier curve handles
 struct BezierCurveHandles {
     let startHandle: CGPoint
     let endHandle: CGPoint
