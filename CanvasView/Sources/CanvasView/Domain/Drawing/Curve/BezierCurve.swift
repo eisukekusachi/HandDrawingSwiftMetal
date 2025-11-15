@@ -35,7 +35,7 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: pointA,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
@@ -78,7 +78,7 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: startPoint,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
@@ -112,7 +112,7 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: pointB,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
