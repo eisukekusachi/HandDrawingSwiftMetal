@@ -123,7 +123,7 @@ enum BezierCurve {
     }
 }
 
-extension BezierCurve {
+private extension BezierCurve {
     /// Returns a ratio between 0.0 and 1.0 that represents how the handle shortens as the angle approaches 0.
     static func handleLengthRatioBasedOnRadian(
         pointA: CGPoint,
