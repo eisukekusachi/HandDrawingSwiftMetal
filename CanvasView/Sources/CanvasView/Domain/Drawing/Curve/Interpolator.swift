@@ -15,7 +15,7 @@ enum Interpolator {
         controlPoint2: CGPoint,
         endPoint: CGPoint,
         duration: Int,
-        shouldIncludeEndPoint: Bool
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
 
         var result: [CGPoint] = []
@@ -46,37 +46,32 @@ enum Interpolator {
             t += step
         }
 
-        if shouldIncludeEndPoint {
+        if shouldAddEndPoint {
             result.append(endPoint)
         }
 
         return result
     }
 
-    static func makeLinearInterpolationValues(
+    static func createLinearInterpolationValues(
         begin: CGFloat,
         end: CGFloat,
-        shouldIncludeEndPoint: Bool,
-        duration: Int
+        duration: Int,
+        shouldAddEndPoint: Bool
     ) -> [CGFloat] {
 
         var result: [CGFloat] = []
 
         let difference = (end - begin)
 
-        var duration = max(duration, 1)
-
-        if shouldIncludeEndPoint {
-            // Subtract 1 from `duration` because the last point will be added to the arrays
-            duration -= 1
-        }
+        let duration = max(duration, 1)
 
         for t in 0 ..< duration {
             let normalizedValue = CGFloat(Float(t) / Float(duration))
             result.append(difference * normalizedValue + begin)
         }
 
-        if shouldIncludeEndPoint {
+        if shouldAddEndPoint {
             result.append(end)
         }
 

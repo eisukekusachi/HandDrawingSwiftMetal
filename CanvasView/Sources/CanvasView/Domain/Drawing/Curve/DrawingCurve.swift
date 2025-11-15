@@ -75,26 +75,26 @@ public extension DrawingCurve {
                 pointA: points.previousPoint.location,
                 pointB: points.startPoint.location,
                 pointC: points.endPoint.location,
-                shouldIncludeEndPoint: false,
-                duration: duration
+                duration: duration,
+                shouldAddEndPoint: false
             )
-            let brightnessArray = Interpolator.makeLinearInterpolationValues(
+            let brightnessArray = Interpolator.createLinearInterpolationValues(
                 begin: points.previousPoint.brightness,
                 end: points.startPoint.brightness,
-                shouldIncludeEndPoint: false,
-                duration: bezierCurvePoints.count
+                duration: bezierCurvePoints.count,
+                shouldAddEndPoint: false
             )
-            let diameterArray = Interpolator.makeLinearInterpolationValues(
+            let diameterArray = Interpolator.createLinearInterpolationValues(
                 begin: points.previousPoint.diameter,
                 end: points.startPoint.diameter,
-                shouldIncludeEndPoint: false,
-                duration: bezierCurvePoints.count
+                duration: bezierCurvePoints.count,
+                shouldAddEndPoint: false
             )
-            let blurArray = Interpolator.makeLinearInterpolationValues(
+            let blurArray = Interpolator.createLinearInterpolationValues(
                 begin: points.previousPoint.blurSize,
                 end: points.startPoint.blurSize,
-                shouldIncludeEndPoint: false,
-                duration: bezierCurvePoints.count
+                duration: bezierCurvePoints.count,
+                shouldAddEndPoint: false
             )
 
             for i in 0 ..< bezierCurvePoints.count {
@@ -124,26 +124,26 @@ public extension DrawingCurve {
                     startPoint: points.startPoint.location,
                     endPoint: points.endPoint.location,
                     nextPoint: points.nextPoint.location,
-                    shouldIncludeEndPoint: false,
-                    duration: duration
+                    duration: duration,
+                    shouldAddEndPoint: false
                 )
-                let brightnessArray = Interpolator.makeLinearInterpolationValues(
+                let brightnessArray = Interpolator.createLinearInterpolationValues(
                     begin: points.startPoint.brightness,
                     end: points.endPoint.brightness,
-                    shouldIncludeEndPoint: false,
-                    duration: bezierCurvePoints.count
+                    duration: bezierCurvePoints.count,
+                    shouldAddEndPoint: false
                 )
-                let diameterArray = Interpolator.makeLinearInterpolationValues(
+                let diameterArray = Interpolator.createLinearInterpolationValues(
                     begin: points.startPoint.diameter,
                     end: points.endPoint.diameter,
-                    shouldIncludeEndPoint: false,
-                    duration: bezierCurvePoints.count
+                    duration: bezierCurvePoints.count,
+                    shouldAddEndPoint: false
                 )
-                let blurArray = Interpolator.makeLinearInterpolationValues(
+                let blurArray = Interpolator.createLinearInterpolationValues(
                     begin: points.startPoint.blurSize,
                     end: points.endPoint.blurSize,
-                    shouldIncludeEndPoint: false,
-                    duration: bezierCurvePoints.count
+                    duration: bezierCurvePoints.count,
+                    shouldAddEndPoint: false
                 )
 
                 for i in 0 ..< bezierCurvePoints.count {
@@ -170,26 +170,31 @@ public extension DrawingCurve {
                 pointA: points.previousPoint.location,
                 pointB: points.startPoint.location,
                 pointC: points.endPoint.location,
-                shouldIncludeEndPoint: true,
-                duration: duration
+                duration: duration,
+                shouldAddEndPoint: true
             )
-            let brightnessArray = Interpolator.makeLinearInterpolationValues(
+
+            // Create a linearly interpolated parameter array matching the number of curve points.
+            // Because the parameter array includes the end value, use the curve point count minus 1.”
+            let duration: Int = bezierCurvePoints.count - 1
+
+            let brightnessArray = Interpolator.createLinearInterpolationValues(
                 begin: points.startPoint.brightness,
                 end: points.endPoint.brightness,
-                shouldIncludeEndPoint: true,
-                duration: bezierCurvePoints.count
+                duration: duration,
+                shouldAddEndPoint: true
             )
-            let diameterArray = Interpolator.makeLinearInterpolationValues(
+            let diameterArray = Interpolator.createLinearInterpolationValues(
                 begin: points.startPoint.diameter,
                 end: points.endPoint.diameter,
-                shouldIncludeEndPoint: true,
-                duration: bezierCurvePoints.count
+                duration: duration,
+                shouldAddEndPoint: true
             )
-            let blurArray = Interpolator.makeLinearInterpolationValues(
+            let blurArray = Interpolator.createLinearInterpolationValues(
                 begin: points.startPoint.blurSize,
                 end: points.endPoint.blurSize,
-                shouldIncludeEndPoint: true,
-                duration: bezierCurvePoints.count
+                duration: duration,
+                shouldAddEndPoint: true
             )
 
             for i in 0 ..< bezierCurvePoints.count {

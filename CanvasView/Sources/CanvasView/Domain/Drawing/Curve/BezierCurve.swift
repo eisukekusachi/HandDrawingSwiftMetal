@@ -15,8 +15,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -40,8 +40,8 @@ enum BezierCurve {
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: pointB,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 
@@ -50,8 +50,8 @@ enum BezierCurve {
         startPoint: CGPoint,
         endPoint: CGPoint,
         nextPoint: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // They are used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValueA = handleLengthRatioBasedOnRadian(
@@ -83,8 +83,8 @@ enum BezierCurve {
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: endPoint,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 
@@ -92,8 +92,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -117,8 +117,8 @@ enum BezierCurve {
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: pointC,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 }
