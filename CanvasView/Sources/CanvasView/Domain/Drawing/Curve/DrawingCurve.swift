@@ -15,6 +15,8 @@ public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
     func isFirstCurveNeeded() -> Bool
 
+    func markFirstCurveAsDrawn()
+
     func curvePoints() -> [GrayscaleDotPoint]
 
     func append(
@@ -40,6 +42,7 @@ public extension DrawingCurve {
             result.append(
                 contentsOf: makeFirstCurvePoints(duration: firstDuration)
             )
+            markFirstCurveAsDrawn()
         }
 
         result.append(
@@ -68,22 +71,45 @@ public extension DrawingCurve {
         var curve: [GrayscaleDotPoint] = []
 
         if let points = self.getBezierCurveFirstPoints() {
-
             let bezierCurvePoints = BezierCurve.makeFirstCurvePoints(
                 pointA: points.previousPoint.location,
                 pointB: points.startPoint.location,
                 pointC: points.endPoint.location,
-                shouldIncludeEndPoint: false,
-                duration: duration
+                duration: duration,
+                shouldAddEndPoint: false
             )
-            curve.append(
-                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                    targetPoints: bezierCurvePoints,
-                    interpolationStart: points.previousPoint,
-                    interpolationEnd: points.startPoint,
-                    shouldIncludeEndPoint: false
+
+            let duration: Int = bezierCurvePoints.count
+
+            let brightnessArray = Interpolator.createLinearInterpolationValues(
+                begin: points.previousPoint.brightness,
+                end: points.startPoint.brightness,
+                duration: duration,
+                shouldAddEndPoint: false
+            )
+            let diameterArray = Interpolator.createLinearInterpolationValues(
+                begin: points.previousPoint.diameter,
+                end: points.startPoint.diameter,
+                duration: duration,
+                shouldAddEndPoint: false
+            )
+            let blurArray = Interpolator.createLinearInterpolationValues(
+                begin: points.previousPoint.blurSize,
+                end: points.startPoint.blurSize,
+                duration: duration,
+                shouldAddEndPoint: false
+            )
+
+            for i in 0 ..< bezierCurvePoints.count {
+                curve.append(
+                    .init(
+                        location: bezierCurvePoints[i],
+                        brightness: brightnessArray[i],
+                        diameter: diameterArray[i],
+                        blurSize: blurArray[i]
+                    )
                 )
-            )
+            }
         }
         return curve
     }
@@ -101,17 +127,41 @@ public extension DrawingCurve {
                     startPoint: points.startPoint.location,
                     endPoint: points.endPoint.location,
                     nextPoint: points.nextPoint.location,
-                    shouldIncludeEndPoint: false,
-                    duration: duration
+                    duration: duration,
+                    shouldAddEndPoint: false
                 )
-                curve.append(
-                    contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                        targetPoints: bezierCurvePoints,
-                        interpolationStart: points.startPoint,
-                        interpolationEnd: points.endPoint,
-                        shouldIncludeEndPoint: false
+
+                let duration: Int = bezierCurvePoints.count
+
+                let brightnessArray = Interpolator.createLinearInterpolationValues(
+                    begin: points.startPoint.brightness,
+                    end: points.endPoint.brightness,
+                    duration: duration,
+                    shouldAddEndPoint: false
+                )
+                let diameterArray = Interpolator.createLinearInterpolationValues(
+                    begin: points.startPoint.diameter,
+                    end: points.endPoint.diameter,
+                    duration: duration,
+                    shouldAddEndPoint: false
+                )
+                let blurArray = Interpolator.createLinearInterpolationValues(
+                    begin: points.startPoint.blurSize,
+                    end: points.endPoint.blurSize,
+                    duration: duration,
+                    shouldAddEndPoint: false
+                )
+
+                for i in 0 ..< bezierCurvePoints.count {
+                    curve.append(
+                        .init(
+                            location: bezierCurvePoints[i],
+                            brightness: brightnessArray[i],
+                            diameter: diameterArray[i],
+                            blurSize: blurArray[i]
+                        )
                     )
-                )
+                }
             }
         }
         return curve
@@ -122,22 +172,47 @@ public extension DrawingCurve {
         var curve: [GrayscaleDotPoint] = []
 
         if let points = self.getBezierCurveLastPoints() {
-
             let bezierCurvePoints = BezierCurve.makeLastCurvePoints(
                 pointA: points.previousPoint.location,
                 pointB: points.startPoint.location,
                 pointC: points.endPoint.location,
-                shouldIncludeEndPoint: true,
-                duration: duration
+                duration: duration,
+                shouldAddEndPoint: true
             )
-            curve.append(
-                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                    targetPoints: bezierCurvePoints,
-                    interpolationStart: points.startPoint,
-                    interpolationEnd: points.endPoint,
-                    shouldIncludeEndPoint: true
+
+            // Create a linearly interpolated parameter array matching the number of curve points.
+            // Because the parameter array includes the end value, use the curve point count minus 1.”
+            let duration: Int = bezierCurvePoints.count - 1
+
+            let brightnessArray = Interpolator.createLinearInterpolationValues(
+                begin: points.startPoint.brightness,
+                end: points.endPoint.brightness,
+                duration: duration,
+                shouldAddEndPoint: true
+            )
+            let diameterArray = Interpolator.createLinearInterpolationValues(
+                begin: points.startPoint.diameter,
+                end: points.endPoint.diameter,
+                duration: duration,
+                shouldAddEndPoint: true
+            )
+            let blurArray = Interpolator.createLinearInterpolationValues(
+                begin: points.startPoint.blurSize,
+                end: points.endPoint.blurSize,
+                duration: duration,
+                shouldAddEndPoint: true
+            )
+
+            for i in 0 ..< bezierCurvePoints.count {
+                curve.append(
+                    .init(
+                        location: bezierCurvePoints[i],
+                        brightness: brightnessArray[i],
+                        diameter: diameterArray[i],
+                        blurSize: blurArray[i]
+                    )
                 )
-            )
+            }
         }
         return curve
     }
@@ -182,4 +257,26 @@ private extension Iterator<GrayscaleDotPoint> {
             endPoint: array[array.count - 1]
         )
     }
+}
+
+/// A struct that defines the points needed to create a first Bézier curve
+private struct BezierCurveFirstPoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
+}
+
+/// A struct that defines the points needed to create a Bézier curve
+private struct BezierCurveIntermediatePoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
+    let nextPoint: GrayscaleDotPoint
+}
+
+/// A struct that defines the points needed to create a last Bézier curve
+private struct BezierCurveLastPoints {
+    let previousPoint: GrayscaleDotPoint
+    let startPoint: GrayscaleDotPoint
+    let endPoint: GrayscaleDotPoint
 }

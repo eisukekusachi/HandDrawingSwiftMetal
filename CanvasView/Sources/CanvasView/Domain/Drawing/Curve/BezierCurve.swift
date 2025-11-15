@@ -15,8 +15,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -35,13 +35,13 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: pointA,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: pointB,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 
@@ -50,8 +50,8 @@ enum BezierCurve {
         startPoint: CGPoint,
         endPoint: CGPoint,
         nextPoint: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // They are used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValueA = handleLengthRatioBasedOnRadian(
@@ -78,13 +78,13 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: startPoint,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: endPoint,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 
@@ -92,8 +92,8 @@ enum BezierCurve {
         pointA: CGPoint,
         pointB: CGPoint,
         pointC: CGPoint,
-        shouldIncludeEndPoint: Bool,
-        duration: Int? = nil
+        duration: Int? = nil,
+        shouldAddEndPoint: Bool
     ) -> [CGPoint] {
         // This is used to reduce the effect of the curve when the angle becomes narrower.
         let approachStraightValue = handleLengthRatioBasedOnRadian(
@@ -112,18 +112,18 @@ enum BezierCurve {
             Calculate.getTotalLength(points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC])
         ))
 
-        return Interpolator.makeCubicCurvePoints(
+        return Interpolator.createCubicCurvePoints(
             movePoint: pointB,
             controlPoint1: handlePoints.startHandle,
             controlPoint2: handlePoints.endHandle,
             endPoint: pointC,
-            duration: max(1, duration),
-            shouldIncludeEndPoint: shouldIncludeEndPoint
+            duration: duration,
+            shouldAddEndPoint: shouldAddEndPoint
         )
     }
 }
 
-extension BezierCurve {
+private extension BezierCurve {
     /// Returns a ratio between 0.0 and 1.0 that represents how the handle shortens as the angle approaches 0.
     static func handleLengthRatioBasedOnRadian(
         pointA: CGPoint,
@@ -142,7 +142,7 @@ extension BezierCurve {
         pointB: CGPoint,
         pointC: CGPoint,
         handleLengthRatio: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `pointA`, and `handleB` is the handle extending from `pointB`.
         // The direction of `handleA` from `pointA` aligns with the direction from `pointA` to `pointB`, as the start point does not need to curve.
         // The direction of `handleB` from `pointB` aligns with the direction from `pointC` to `pointA`, allowing for a smooth connection with the next curve.
@@ -173,7 +173,7 @@ extension BezierCurve {
         pointB: CGPoint,
         pointC: CGPoint,
         handleLengthRatio: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `pointB`, and `handleB` is the handle extending from `pointC`.
         // The direction of `handleA` from `pointB` aligns with the direction from `pointA` to `pointC`, allowing for a smooth connection with the previous curve.
         // The direction of `handleB` from `pointC` aligns with the direction from `pointC` to `pointB`, as the end point does not need to curve.
@@ -206,7 +206,7 @@ extension BezierCurve {
         nextPoint: CGPoint,
         handleLengthRatioA: CGFloat,
         handleLengthRatioB: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `startPoint`, and `handleB` is the handle extending from `endPoint`.
         // The direction of `handleA` from `startPoint` is aligned with the direction from `previousPoint` to `endPoint`,
         // while the direction of `handleB` from `endPoint` is aligned with the direction from `nextPoint` to `startPoint`.
