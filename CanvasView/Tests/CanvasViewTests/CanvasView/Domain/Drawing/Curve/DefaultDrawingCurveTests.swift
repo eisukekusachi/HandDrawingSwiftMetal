@@ -166,7 +166,7 @@ struct DefaultDrawingCurveTests {
     }
 
     @Suite
-    struct emptyTest {
+    struct EmptyTest {
         @Test
         func `Verify that nothing is produced when the array is empty.`() {
             let subject = Subject()
@@ -185,7 +185,7 @@ struct DefaultDrawingCurveTests {
     }
 
     @Suite
-    struct resetTest {
+    struct ResetTest {
         @Test
         func `Verify that the values are reset by reset()`() {
             let subject = Subject()

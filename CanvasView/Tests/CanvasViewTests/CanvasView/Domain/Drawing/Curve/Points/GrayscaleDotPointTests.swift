@@ -14,7 +14,7 @@ struct GrayscaleDotPointTests {
     private typealias Subject = GrayscaleDotPoint
 
     @Test
-    func `the average of the two points`() {
+    func `The average of the two points`() {
         #expect(
             Subject.average(
                 .init(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
