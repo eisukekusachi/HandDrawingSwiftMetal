@@ -214,26 +214,29 @@ enum Interpolator {
 
     static func getLinearInterpolationValues(
         begin: CGFloat,
-        change: CGFloat,
-        duration: Int,
-        shouldIncludeEndPoint: Bool
+        end: CGFloat,
+        shouldIncludeEndPoint: Bool,
+        duration: Int
     ) -> [CGFloat] {
 
         var result: [CGFloat] = []
 
-        for t in 0 ..< duration {
-            if begin == change {
-                result.append(begin)
-            } else {
-                let difference = (change - begin)
-                let normalizedValue = CGFloat(Float(t) / Float(duration))
+        let difference = (end - begin)
 
-                result.append(difference * normalizedValue + begin)
-            }
+        var duration = max(duration, 1)
+
+        if shouldIncludeEndPoint {
+            // Subtract 1 from `duration` because the last point will be added to the arrays
+            duration -= 1
+        }
+
+        for t in 0 ..< duration {
+            let normalizedValue = CGFloat(Float(t) / Float(duration))
+            result.append(difference * normalizedValue + begin)
         }
 
         if shouldIncludeEndPoint {
-            result.append(change)
+            result.append(end)
         }
 
         return result

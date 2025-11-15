@@ -21,11 +21,11 @@ struct DefaultDrawingCurveTests {
             let subject = Subject()
 
             let points: [GrayscaleDotPoint] = [
-                .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 10, y: 10)),
-                .generate(location: .init(x: 20, y: 20)),
-                .generate(location: .init(x: 30, y: 30)),
-                .generate(location: .init(x: 40, y: 40))
+                .generate(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
+                .generate(location: .init(x: 10, y: 10), brightness: 10, diameter: 10, blurSize: 10),
+                .generate(location: .init(x: 20, y: 20), brightness: 20, diameter: 20, blurSize: 20),
+                .generate(location: .init(x: 30, y: 30), brightness: 30, diameter: 30, blurSize: 30),
+                .generate(location: .init(x: 40, y: 40), brightness: 40, diameter: 40, blurSize: 40)
             ]
 
             subject.append(points: points, touchPhase: .ended)
@@ -35,17 +35,16 @@ struct DefaultDrawingCurveTests {
                     firstDuration: 2,
                     intermediateDuration: 2,
                     lastDuration: 2
-                ).map { $0.location } ==
-                [
-                    .init(x: 0, y: 0),
-                    .init(x: 5, y: 5),
-                    .init(x: 10, y: 10),
-                    .init(x: 15, y: 15),
-                    .init(x: 20, y: 20),
-                    .init(x: 25, y: 25),
-                    .init(x: 30, y: 30),
-                    .init(x: 35, y: 35),
-                    .init(x: 40, y: 40)
+                ) == [
+                    .generate(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
+                    .generate(location: .init(x: 5, y: 5), brightness: 5, diameter: 5, blurSize: 5),
+                    .generate(location: .init(x: 10, y: 10), brightness: 10, diameter: 10, blurSize: 10),
+                    .generate(location: .init(x: 15, y: 15), brightness: 15, diameter: 15, blurSize: 15),
+                    .generate(location: .init(x: 20, y: 20), brightness: 20, diameter: 20, blurSize: 20),
+                    .generate(location: .init(x: 25, y: 25), brightness: 25, diameter: 25, blurSize: 25),
+                    .generate(location: .init(x: 30, y: 30), brightness: 30, diameter: 30, blurSize: 30),
+                    .generate(location: .init(x: 35, y: 35), brightness: 35, diameter: 35, blurSize: 35),
+                    .generate(location: .init(x: 40, y: 40), brightness: 40, diameter: 40, blurSize: 40)
                 ]
             )
 
@@ -64,20 +63,21 @@ struct DefaultDrawingCurveTests {
         func `Verify the creation of the first curve points`() {
             let subject = Subject()
 
-            let points: [GrayscaleDotPoint] = [
-                .generate(location: .init(x: 0, y: 0)),
-                .generate(location: .init(x: 10, y: 10)),
-                .generate(location: .init(x: 20, y: 20)),
-                .generate(location: .init(x: 30, y: 30))
-            ]
-
-            subject.append(points: points, touchPhase: .began)
+            subject.append(
+                points: [
+                    .generate(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
+                    .generate(location: .init(x: 10, y: 10), brightness: 10, diameter: 10, blurSize: 10),
+                    .generate(location: .init(x: 20, y: 20), brightness: 20, diameter: 20, blurSize: 20),
+                    .generate(location: .init(x: 30, y: 30), brightness: 30, diameter: 30, blurSize: 30),
+                ],
+                touchPhase: .began
+            )
 
             #expect(
-                subject.makeFirstCurvePoints(duration: 2).map { $0.location } ==
+                subject.makeFirstCurvePoints(duration: 2) ==
                 [
-                    .init(x: 0, y: 0),
-                    .init(x: 5, y: 5)
+                    .generate(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
+                    .generate(location: .init(x: 5, y: 5), brightness: 5, diameter: 5, blurSize: 5),
                 ]
             )
         }

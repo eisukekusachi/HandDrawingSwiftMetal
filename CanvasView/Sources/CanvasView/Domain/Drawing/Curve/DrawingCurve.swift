@@ -76,14 +76,38 @@ public extension DrawingCurve {
                 shouldIncludeEndPoint: false,
                 duration: duration
             )
-            curve.append(
-                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                    targetPoints: bezierCurvePoints,
-                    interpolationStart: points.previousPoint,
-                    interpolationEnd: points.startPoint,
-                    shouldIncludeEndPoint: false
-                )
+
+            let brightnessArray = Interpolator.getLinearInterpolationValues(
+                begin: points.previousPoint.brightness,
+                end: points.startPoint.brightness,
+                shouldIncludeEndPoint: false,
+                duration: bezierCurvePoints.count
             )
+
+            let diameterArray = Interpolator.getLinearInterpolationValues(
+                begin: points.previousPoint.diameter,
+                end: points.startPoint.diameter,
+                shouldIncludeEndPoint: false,
+                duration: bezierCurvePoints.count
+            )
+
+            let blurArray = Interpolator.getLinearInterpolationValues(
+                begin: points.previousPoint.blurSize,
+                end: points.startPoint.blurSize,
+                shouldIncludeEndPoint: false,
+                duration: bezierCurvePoints.count
+            )
+
+            for i in 0 ..< bezierCurvePoints.count {
+                curve.append(
+                    .init(
+                        location: bezierCurvePoints[i],
+                        brightness: brightnessArray[i],
+                        diameter: diameterArray[i],
+                        blurSize: blurArray[i]
+                    )
+                )
+            }
         }
         return curve
     }
@@ -104,14 +128,38 @@ public extension DrawingCurve {
                     shouldIncludeEndPoint: false,
                     duration: duration
                 )
-                curve.append(
-                    contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                        targetPoints: bezierCurvePoints,
-                        interpolationStart: points.startPoint,
-                        interpolationEnd: points.endPoint,
-                        shouldIncludeEndPoint: false
-                    )
+
+                let brightnessArray = Interpolator.getLinearInterpolationValues(
+                    begin: points.startPoint.brightness,
+                    end: points.endPoint.brightness,
+                    shouldIncludeEndPoint: false,
+                    duration: bezierCurvePoints.count
                 )
+
+                let diameterArray = Interpolator.getLinearInterpolationValues(
+                    begin: points.startPoint.diameter,
+                    end: points.endPoint.diameter,
+                    shouldIncludeEndPoint: false,
+                    duration: bezierCurvePoints.count
+                )
+
+                let blurArray = Interpolator.getLinearInterpolationValues(
+                    begin: points.startPoint.blurSize,
+                    end: points.endPoint.blurSize,
+                    shouldIncludeEndPoint: false,
+                    duration: bezierCurvePoints.count
+                )
+
+                for i in 0 ..< bezierCurvePoints.count {
+                    curve.append(
+                        .init(
+                            location: bezierCurvePoints[i],
+                            brightness: brightnessArray[i],
+                            diameter: diameterArray[i],
+                            blurSize: blurArray[i]
+                        )
+                    )
+                }
             }
         }
         return curve
@@ -130,14 +178,38 @@ public extension DrawingCurve {
                 shouldIncludeEndPoint: true,
                 duration: duration
             )
-            curve.append(
-                contentsOf: GrayscaleDotPoint.interpolateToMatchPointCount(
-                    targetPoints: bezierCurvePoints,
-                    interpolationStart: points.startPoint,
-                    interpolationEnd: points.endPoint,
-                    shouldIncludeEndPoint: true
-                )
+
+            let brightnessArray = Interpolator.getLinearInterpolationValues(
+                begin: points.startPoint.brightness,
+                end: points.endPoint.brightness,
+                shouldIncludeEndPoint: true,
+                duration: bezierCurvePoints.count
             )
+
+            let diameterArray = Interpolator.getLinearInterpolationValues(
+                begin: points.startPoint.diameter,
+                end: points.endPoint.diameter,
+                shouldIncludeEndPoint: true,
+                duration: bezierCurvePoints.count
+            )
+
+            let blurArray = Interpolator.getLinearInterpolationValues(
+                begin: points.startPoint.blurSize,
+                end: points.endPoint.blurSize,
+                shouldIncludeEndPoint: true,
+                duration: bezierCurvePoints.count
+            )
+
+            for i in 0 ..< bezierCurvePoints.count {
+                curve.append(
+                    .init(
+                        location: bezierCurvePoints[i],
+                        brightness: brightnessArray[i],
+                        diameter: diameterArray[i],
+                        blurSize: blurArray[i]
+                    )
+                )
+            }
         }
         return curve
     }
