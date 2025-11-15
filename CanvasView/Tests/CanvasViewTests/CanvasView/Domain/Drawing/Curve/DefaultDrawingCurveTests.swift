@@ -93,8 +93,10 @@ struct DefaultDrawingCurveTests {
                 touchPhase: .began
             )
 
+            let result = subject.makeFirstCurvePoints(duration: 2)
+            #expect(result.count == 2)
             #expect(
-                subject.makeFirstCurvePoints(duration: 2) ==
+                result ==
                 [
                     .init(location: .init(x: 0, y: 0), brightness: 0, diameter: 0, blurSize: 0),
                     .init(location: .init(x: 5, y: 5), brightness: 5, diameter: 5, blurSize: 5),
@@ -116,8 +118,14 @@ struct DefaultDrawingCurveTests {
                 touchPhase: .moved
             )
 
+            let result1 = subject.makeIntermediateCurvePoints(duration: 2)
+
+            #expect(result1.count == 2)
+
+            // The results are between the second and third points,
+            // and the first and fourth points are used to create the Bézier curve handles
             #expect(
-                subject.makeIntermediateCurvePoints(duration: 2) ==
+                result1 ==
                 [
                     .init(location: .init(x: 10, y: 10), brightness: 10, diameter: 10, blurSize: 10),
                     .init(location: .init(x: 15, y: 15), brightness: 15, diameter: 15, blurSize: 15),
@@ -131,8 +139,14 @@ struct DefaultDrawingCurveTests {
                 touchPhase: .moved
             )
 
+            let result2 = subject.makeIntermediateCurvePoints(duration: 2)
+
+            #expect(result2.count == 2)
+
+            // The results are between the second and third points,
+            // and the first and fourth points are used to create the Bézier curve handles
             #expect(
-                subject.makeIntermediateCurvePoints(duration: 2) ==
+                result2 ==
                 [
                     .init(location: .init(x: 20, y: 20), brightness: 20, diameter: 20, blurSize: 20),
                     .init(location: .init(x: 25, y: 25), brightness: 25, diameter: 25, blurSize: 25)
@@ -154,8 +168,12 @@ struct DefaultDrawingCurveTests {
 
             subject.append(points: points, touchPhase: .moved)
 
+            let result = subject.makeLastCurvePoints(duration: 2)
+
+            // Because the end point is added, the result count becomes the duration plus 1
+            #expect(result.count == 3)
             #expect(
-                subject.makeLastCurvePoints(duration: 2) ==
+                result ==
                 [
                     .init(location: .init(x: 30, y: 30), brightness: 30, diameter: 30, blurSize: 30),
                     .init(location: .init(x: 35, y: 35), brightness: 35, diameter: 35, blurSize: 35),
