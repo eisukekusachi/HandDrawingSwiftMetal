@@ -16,6 +16,8 @@ final class MockDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
         return false
     }
 
+    func markFirstCurveAsDrawn() {}
+
     func append(points: [GrayscaleDotPoint], touchPhase: TouchPhase) {}
 
     override func reset() {}

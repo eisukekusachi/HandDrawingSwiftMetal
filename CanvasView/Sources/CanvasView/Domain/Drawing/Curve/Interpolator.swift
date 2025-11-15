@@ -169,7 +169,9 @@ enum Interpolator {
 
         return result
     }
+}
 
+extension Interpolator {
     static func makeCubicCurvePoints(
         movePoint: CGPoint,
         controlPoint1: CGPoint,
@@ -212,7 +214,7 @@ enum Interpolator {
         return result
     }
 
-    static func getLinearInterpolationValues(
+    static func makeLinearInterpolationValues(
         begin: CGFloat,
         end: CGFloat,
         shouldIncludeEndPoint: Bool,
@@ -241,7 +243,6 @@ enum Interpolator {
 
         return result
     }
-
 }
 
 private extension CGVector {
@@ -252,5 +253,4 @@ private extension CGVector {
             dy: leftHandSide.y - rightHandSide.y
         )
     }
-
 }

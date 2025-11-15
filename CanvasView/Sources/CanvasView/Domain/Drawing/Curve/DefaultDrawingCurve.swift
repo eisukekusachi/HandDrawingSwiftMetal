@@ -15,19 +15,18 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
         _touchPhase
     }
 
+    /// Checks whether the first curve has ever been drawn during the drawing process
     public func isFirstCurveNeeded() -> Bool {
-        let isFirstCurveToBeCreated = array.count >= 3 && !hasFirstCurveBeenDrawn
+        return array.count >= 3 && !hasFirstCurveBeenDrawn
+    }
 
-        if isFirstCurveToBeCreated {
-            hasFirstCurveBeenDrawn = true
-        }
-
-        return isFirstCurveToBeCreated
+    public func markFirstCurveAsDrawn() {
+        hasFirstCurveBeenDrawn = true
     }
 
     private var _touchPhase: TouchPhase = .cancelled
 
-    private var hasFirstCurveBeenDrawn: Bool = false
+    private(set) var hasFirstCurveBeenDrawn: Bool = false
 
     public func append(
         points: [GrayscaleDotPoint],
