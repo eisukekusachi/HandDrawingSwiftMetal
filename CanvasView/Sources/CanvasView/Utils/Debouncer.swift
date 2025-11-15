@@ -7,7 +7,6 @@
 
 import Foundation
 
-@MainActor
 final class Debouncer {
     private var workItem: DispatchWorkItem?
     private let delay: TimeInterval
@@ -16,7 +15,7 @@ final class Debouncer {
         self.delay = delay
     }
 
-    func schedule(_ block: @MainActor @escaping () -> Void) {
+    func schedule(_ block: @escaping () -> Void) {
         workItem?.cancel()
         let item = DispatchWorkItem { block() }
         workItem = item
