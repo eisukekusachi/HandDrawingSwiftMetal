@@ -142,7 +142,7 @@ extension BezierCurve {
         pointB: CGPoint,
         pointC: CGPoint,
         handleLengthRatio: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `pointA`, and `handleB` is the handle extending from `pointB`.
         // The direction of `handleA` from `pointA` aligns with the direction from `pointA` to `pointB`, as the start point does not need to curve.
         // The direction of `handleB` from `pointB` aligns with the direction from `pointC` to `pointA`, allowing for a smooth connection with the next curve.
@@ -173,7 +173,7 @@ extension BezierCurve {
         pointB: CGPoint,
         pointC: CGPoint,
         handleLengthRatio: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `pointB`, and `handleB` is the handle extending from `pointC`.
         // The direction of `handleA` from `pointB` aligns with the direction from `pointA` to `pointC`, allowing for a smooth connection with the previous curve.
         // The direction of `handleB` from `pointC` aligns with the direction from `pointC` to `pointB`, as the end point does not need to curve.
@@ -206,7 +206,7 @@ extension BezierCurve {
         nextPoint: CGPoint,
         handleLengthRatioA: CGFloat,
         handleLengthRatioB: CGFloat
-    ) -> BezierCurveHandlePoints {
+    ) -> BezierCurveHandles {
         // `handleA` is the handle extending from `startPoint`, and `handleB` is the handle extending from `endPoint`.
         // The direction of `handleA` from `startPoint` is aligned with the direction from `previousPoint` to `endPoint`,
         // while the direction of `handleB` from `endPoint` is aligned with the direction from `nextPoint` to `startPoint`.
@@ -233,11 +233,6 @@ extension BezierCurve {
             )
         )
     }
-}
-
-struct BezierCurveHandlePoints {
-    let startHandle: CGPoint
-    let endHandle: CGPoint
 }
 
 private extension CGVector {
