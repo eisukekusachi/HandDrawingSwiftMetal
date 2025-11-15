@@ -166,6 +166,25 @@ struct DefaultDrawingCurveTests {
     }
 
     @Suite
+    struct emptyTest {
+        @Test
+        func `Verify that nothing is produced when the array is empty.`() {
+            let subject = Subject()
+
+            subject.append(points: [], touchPhase: .began)
+            #expect(subject.makeFirstCurvePoints(duration: 2) == [])
+
+            subject.append(points: [], touchPhase: .moved)
+            #expect(subject.makeIntermediateCurvePoints(duration: 2) == [])
+
+            subject.append(points: [], touchPhase: .ended)
+            #expect(subject.makeLastCurvePoints(duration: 2) == [])
+
+            #expect(subject.curvePoints(firstDuration: 2, intermediateDuration: 2, lastDuration: 2) == [])
+        }
+    }
+
+    @Suite
     struct resetTest {
         @Test
         func `Verify that the values are reset by reset()`() {

@@ -20,10 +20,10 @@ enum Interpolator {
 
         var result: [CGPoint] = []
 
-        let duration = max(duration, 1)
+        let duration = max(duration, 0)
 
         var t: Float = 0.0
-        let step: Float = 1.0 / Float(duration)
+        let step: Float = duration != 0 ? (1.0 / Float(duration)) : 0.0
 
         for _ in 0 ..< duration {
             let moveX = movePoint.x * CGFloat(powf(1.0 - t, 3.0))
@@ -64,7 +64,7 @@ enum Interpolator {
 
         let difference = (end - begin)
 
-        let duration = max(duration, 1)
+        let duration = max(duration, 0)
 
         for t in 0 ..< duration {
             let normalizedValue = CGFloat(Float(t) / Float(duration))

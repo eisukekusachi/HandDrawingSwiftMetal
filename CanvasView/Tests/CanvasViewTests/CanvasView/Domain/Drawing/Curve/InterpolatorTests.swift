@@ -58,6 +58,79 @@ struct InterpolatorTests {
                 .init(x: 20.0, y: 0.0)
             ])
         }
+
+        @Test
+        func `When the duration is 1 and shouldAddEndPoint is false”`() {
+            let result = Subject.createCubicCurvePoints(
+                movePoint: .init(x: 0, y: 0),
+                controlPoint1: .init(x: 10, y: 10),
+                controlPoint2: .init(x: 20, y: 20),
+                endPoint: .init(x: 20, y: 0),
+                duration: 1,
+                shouldAddEndPoint: false
+            )
+
+            #expect(result.count == 1)
+
+            #expect(result == [
+                .init(x: 0.0, y: 0.0)
+            ])
+        }
+
+        @Test
+        func `When the duration is 1 and shouldAddEndPoint is true”`() {
+            let result = Subject.createCubicCurvePoints(
+                movePoint: .init(x: 0, y: 0),
+                controlPoint1: .init(x: 10, y: 10),
+                controlPoint2: .init(x: 20, y: 20),
+                endPoint: .init(x: 20, y: 0),
+                duration: 1,
+                shouldAddEndPoint: true
+            )
+
+            // Because the end point is added, the result is the duration plus 1
+            #expect(result.count == 2)
+
+            #expect(result == [
+                .init(x: 0, y: 0),
+                .init(x: 20, y: 0)
+            ])
+        }
+
+        @Test
+        func `When the duration is 0 and shouldAddEndPoint is false”`() {
+            let result = Subject.createCubicCurvePoints(
+                movePoint: .init(x: 0, y: 0),
+                controlPoint1: .init(x: 10, y: 10),
+                controlPoint2: .init(x: 20, y: 20),
+                endPoint: .init(x: 20, y: 0),
+                duration: 0,
+                shouldAddEndPoint: false
+            )
+
+            #expect(result.isEmpty)
+
+            #expect(result == [])
+        }
+
+        @Test
+        func `When the duration is 0 and shouldAddEndPoint is true”`() {
+            let result = Subject.createCubicCurvePoints(
+                movePoint: .init(x: 0, y: 0),
+                controlPoint1: .init(x: 10, y: 10),
+                controlPoint2: .init(x: 20, y: 20),
+                endPoint: .init(x: 20, y: 0),
+                duration: 0,
+                shouldAddEndPoint: true
+            )
+
+            // Because the end point is added, the result is the duration plus 1
+            #expect(result.count == 1)
+
+            #expect(result == [
+                .init(x: 20, y: 0)
+            ])
+        }
     }
 
     @Suite
@@ -99,6 +172,69 @@ struct InterpolatorTests {
                 2.5,
                 5.0,
                 7.5,
+                10.0
+            ])
+        }
+
+        @Test
+        func `When the duration is 1 and shouldAddEndPoint is false”`() {
+            let result = Subject.createLinearInterpolationValues(
+                begin: 0,
+                end: 10,
+                duration: 1,
+                shouldAddEndPoint: false
+            )
+
+            #expect(result.count == 1)
+
+            #expect(result == [
+                0.0
+            ])
+        }
+
+        @Test
+        func `When the duration is 1 and shouldAddEndPoint is true”`() {
+            let result = Subject.createLinearInterpolationValues(
+                begin: 0,
+                end: 10,
+                duration: 1,
+                shouldAddEndPoint: true
+            )
+
+            #expect(result.count == 2)
+
+            #expect(result == [
+                0.0,
+                10.0
+            ])
+        }
+
+        @Test
+        func `When the duration is 0 and shouldAddEndPoint is false”`() {
+            let result = Subject.createLinearInterpolationValues(
+                begin: 0,
+                end: 10,
+                duration: 0,
+                shouldAddEndPoint: false
+            )
+
+            #expect(result.isEmpty)
+
+            #expect(result == [])
+        }
+
+        @Test
+        func `When the duration is 0 and shouldAddEndPoint is true”`() {
+            let result = Subject.createLinearInterpolationValues(
+                begin: 0,
+                end: 10,
+                duration: 0,
+                shouldAddEndPoint: true
+            )
+
+            #expect(result.count == 1)
+
+            #expect(result == [
                 10.0
             ])
         }
