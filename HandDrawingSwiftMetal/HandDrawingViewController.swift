@@ -376,13 +376,9 @@ extension HandDrawingViewController {
         }
     }
     @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if let _ = error {
-            showToast(
-                .init(
-                    title: "Failed",
-                    icon: UIImage(systemName: "exclamationmark.circle")
-                )
-            )
+        if let error {
+            Logger.error(error)
+            showAlert(error)
         } else {
             showToast(
                 .init(
