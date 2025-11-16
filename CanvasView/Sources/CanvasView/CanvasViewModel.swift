@@ -27,6 +27,13 @@ public final class CanvasViewModel {
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
+
+    /// A publisher that sends messages
+    var message: AnyPublisher<String, Never> {
+        messageSubject.eraseToAnyPublisher()
+    }
+    private let messageSubject = PassthroughSubject<String, Never>()
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
@@ -67,6 +74,9 @@ public final class CanvasViewModel {
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
 
+    /// A debouncer used to prevent continuous input during drawing
+    private let drawingDebouncer: DrawingDebouncer
+
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
 
@@ -80,8 +90,6 @@ public final class CanvasViewModel {
 
     //private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
     /// Emit `TextureLayersProtocol` when the texture update is completed
     private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
@@ -89,9 +97,6 @@ public final class CanvasViewModel {
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
-
-    /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
-    private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -101,6 +106,8 @@ public final class CanvasViewModel {
 
     init() {
         canvasRenderer = CanvasRenderer()
+
+        drawingDebouncer = DrawingDebouncer(delay: 0.5)
 
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
@@ -190,6 +197,13 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // The debouncer currently is processing
+        drawingDebouncer.isProcessingPublisher
+            .sink { [weak self] isProcessing in
+                self?.textureLayers.setEnabled(!isProcessing)
+            }
+            .store(in: &cancellables)
+
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
@@ -213,9 +227,9 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        transforming.matrixPublisher
-            .sink { [weak self] matrix in
-                self?.canvasRenderer.matrix = matrix
+        textureLayers.messagePublisher
+            .sink { [weak self] message in
+                self?.messageSubject.send(message)
             }
             .store(in: &cancellables)
 
@@ -223,6 +237,12 @@ public final class CanvasViewModel {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.didUndoSubject.send(state)
+            }
+            .store(in: &cancellables)
+
+        transforming.matrixPublisher
+            .sink { [weak self] matrix in
+                self?.canvasRenderer.matrix = matrix
             }
             .store(in: &cancellables)
     }
@@ -422,9 +442,17 @@ public extension CanvasViewModel {
     }
 
     func undo() {
+        guard textureLayers.isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
         textureLayers.undo()
     }
     func redo() {
+        guard textureLayers.isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
         textureLayers.redo()
     }
 }
@@ -628,23 +656,19 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        persistanceDrawingDebouncer.scheduleAsync { [weak self] in
-            do {
-                try await self?.dependencies.textureRepository.updateTexture(
-                    texture: selectedLayerTexture,
-                    for: layerId
-                )
+        drawingDebouncer.perform { [weak self] in
+            try await self?.dependencies.textureRepository.updateTexture(
+                texture: selectedLayerTexture,
+                for: layerId
+            )
 
-                // Update `updatedAt` when drawing completes
-                self?.projectMetaDataStorage.updateUpdatedAt()
+            // Update `updatedAt` when drawing completes
+            self?.projectMetaDataStorage.updateUpdatedAt()
 
-                self?.textureLayers.updateThumbnail(
-                    layerId,
-                    texture: selectedLayerTexture
-                )
-            } catch {
-                Logger.error(error)
-            }
+            self?.textureLayers.updateThumbnail(
+                layerId,
+                texture: selectedLayerTexture
+            )
         }
 
         Task {

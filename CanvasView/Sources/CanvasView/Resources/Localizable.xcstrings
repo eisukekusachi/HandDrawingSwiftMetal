@@ -40,6 +40,9 @@
     "Texture size mismatch" : {
       "extractionState" : "manual"
     },
+    "The operation failed. Please try again." : {
+      "extractionState" : "manual"
+    },
     "Unable to find %@" : {
       "extractionState" : "manual"
     },

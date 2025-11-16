@@ -11,6 +11,11 @@ import UIKit
 /// A class that manages texture layers
 public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
+    public var isEnabled: Bool {
+        _isEnabled
+    }
+    private var _isEnabled: Bool = false
+
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         canvasUpdateRequestedSubject.eraseToAnyPublisher()
@@ -42,6 +47,12 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public var textureSizePublisher: AnyPublisher<CGSize, Never> {
         $_textureSize.eraseToAnyPublisher()
     }
+
+    /// Emits when a message needs to be sent
+    public var messagePublisher: AnyPublisher<String, Never> {
+        messageSubject.eraseToAnyPublisher()
+    }
+    private let messageSubject: PassthroughSubject<String, Never> = .init()
 
     public var selectedLayer: TextureLayerItem? {
         guard let _selectedLayerId else { return nil }
@@ -115,6 +126,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func addNewLayer(at index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let device = canvasRenderer?.device,
             let texture = MTLTextureCreator.makeTexture(
@@ -137,6 +153,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let textureRepository
         else { return }
@@ -172,6 +193,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             layerCount > 1,
             let textureRepository,
@@ -195,6 +221,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
@@ -207,14 +238,35 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
+    public func selectLayer(_ id: LayerId) {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
+        _selectedLayerId = id
+    }
+
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
         // Do nothing
     }
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
         // Do nothing
+    }
+
+    public func setEnabled(_ enabled: Bool) {
+        _isEnabled = enabled
     }
 
     /// Copies a texture for the given `LayerId`
@@ -228,22 +280,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        _selectedLayerId = id
-    }
-
-    public func updateLayer(_ layer: TextureLayerItem) {
-        guard
-            let index = index(for: layer.id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
-            return
-        }
-
-        _layers[index] = layer
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {

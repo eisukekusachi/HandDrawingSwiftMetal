@@ -41,7 +41,7 @@ public extension TouchGestureState {
         .undetermined
     }
 
-    /// Update the status if the status is not yet determined
+    /// Update the state if the state is not yet determined
     @discardableResult
     func update(
         _ touchHistories: TouchHistoriesOnScreen

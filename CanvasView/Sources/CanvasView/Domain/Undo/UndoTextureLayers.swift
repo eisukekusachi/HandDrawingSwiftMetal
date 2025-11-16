@@ -12,6 +12,10 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
+    public var isEnabled: Bool  {
+        textureLayers.isEnabled
+    }
+
     public var isUndoEnabled: Bool {
         undoTextureRepository != nil
     }
@@ -21,6 +25,12 @@ public final class UndoTextureLayers: ObservableObject {
         didUndoSubject.eraseToAnyPublisher()
     }
     private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
+
+    /// Emits when a message needs to be sent
+    public var messagePublisher: AnyPublisher<String, Never> {
+        messageSubject.eraseToAnyPublisher()
+    }
+    private let messageSubject: PassthroughSubject<String, Never> = .init()
 
     @Published private(set) var textureLayers: any TextureLayersProtocol
 
@@ -322,6 +332,11 @@ private extension UndoTextureLayers {
 extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let device = canvasRenderer?.device,
             let texture = MTLTextureCreator.makeTexture(
@@ -344,6 +359,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -374,6 +394,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let selectedLayer = textureLayers.selectedLayer,
             let identifiedTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)
@@ -406,6 +431,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -431,8 +461,22 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
     }
 
+    public func selectLayer(_ id: LayerId) {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
+        textureLayers.selectLayer(id)
+    }
+
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard let _ = undoTextureRepository else { return }
 
         guard let alpha = textureLayers.selectedLayer?.alpha else { return }
@@ -441,6 +485,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
+        guard isEnabled else {
+            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            return
+        }
+
         guard
             let _ = undoTextureRepository,
             let selectedLayer = textureLayers.selectedLayer
@@ -470,6 +519,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
 
         self.previousAlphaForUndo = nil
+    }
+
+    public func setEnabled(_ enabled: Bool) {
+        textureLayers.setEnabled(enabled)
     }
 
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -536,14 +589,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         textureLayers.layer(id)
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        textureLayers.selectLayer(id)
-    }
-
-    public func updateLayer(_ layer: TextureLayerItem) {
-        textureLayers.updateLayer(layer)
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {

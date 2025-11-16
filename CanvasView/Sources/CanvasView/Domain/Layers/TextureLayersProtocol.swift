@@ -30,6 +30,9 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Emits whenever `textureSize` change
     var textureSizePublisher: AnyPublisher<CGSize, Never> { get }
 
+    /// Emits when a message needs to be sent
+    var messagePublisher: AnyPublisher<String, Never> { get }
+
     var selectedLayer: TextureLayerItem? { get }
 
     var selectedIndex: Int? { get }
@@ -37,6 +40,8 @@ public protocol TextureLayersProtocol: ObservableObject {
     var layers: [TextureLayerItem] { get }
 
     var layerCount: Int { get }
+
+    var isEnabled: Bool { get }
 
     var textureSize: CGSize { get }
 
@@ -59,6 +64,8 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     func endAlphaChange()
 
+    func setEnabled(_ enabled: Bool)
+
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
 
     func index(for id: LayerId) -> Int?
@@ -66,8 +73,6 @@ public protocol TextureLayersProtocol: ObservableObject {
     func layer(_ id: LayerId) -> TextureLayerItem?
 
     func selectLayer(_ id: LayerId)
-
-    func updateLayer(_ layer: TextureLayerItem)
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture)
 

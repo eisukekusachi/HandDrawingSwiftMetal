@@ -25,6 +25,13 @@ import UIKit
     public var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
+
+    /// A publisher that sends messages
+    public var message: AnyPublisher<String, Never> {
+        messageSubject.eraseToAnyPublisher()
+    }
+    private let messageSubject = PassthroughSubject<String, Never>()
 
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
@@ -49,8 +56,6 @@ import UIKit
     private let displayView = CanvasDisplayView()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
-
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
@@ -168,6 +173,13 @@ extension CanvasView {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
+            }
+            .store(in: &cancellables)
+
+        canvasViewModel.message
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.messageSubject.send(message)
             }
             .store(in: &cancellables)
 

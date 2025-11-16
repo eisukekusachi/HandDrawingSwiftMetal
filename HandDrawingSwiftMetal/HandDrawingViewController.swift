@@ -97,6 +97,13 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        contentView.canvasView.message
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.showToast(.init(title: message, icon: .init(systemName: "info.triangle")))
+            }
+            .store(in: &cancellables)
+
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
