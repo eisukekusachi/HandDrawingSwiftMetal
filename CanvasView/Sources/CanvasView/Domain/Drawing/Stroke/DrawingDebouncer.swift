@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-/// A  debouncer to prevent heavy processing from running continuously during drawing
+/// A debouncer to prevent heavy processing from running continuously during drawing
 public final class DrawingDebouncer {
 
     private let delay: TimeInterval
