@@ -100,7 +100,7 @@ extension HandDrawingViewController {
         contentView.canvasView.message
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
-                self?.showToast(.init(title: message, icon: .init(systemName: "info.triangle")))
+                self?.showToast(message)
             }
             .store(in: &cancellables)
 

@@ -30,10 +30,10 @@ public final class CanvasViewModel {
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     /// A publisher that sends messages
-    var message: AnyPublisher<String, Never> {
+    var message: AnyPublisher<ToastMessage, Never> {
         messageSubject.eraseToAnyPublisher()
     }
-    private let messageSubject = PassthroughSubject<String, Never>()
+    private let messageSubject = PassthroughSubject<ToastMessage, Never>()
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
@@ -229,7 +229,7 @@ public final class CanvasViewModel {
 
         textureLayers.messagePublisher
             .sink { [weak self] message in
-                self?.messageSubject.send(message)
+                self?.messageSubject.send(.init(title: message, icon: .init(systemName: "info.triangle")))
             }
             .store(in: &cancellables)
 
@@ -443,14 +443,24 @@ public extension CanvasViewModel {
 
     func undo() {
         guard textureLayers.isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(
+                .init(
+                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    icon: .init(systemName: "info.triangle")
+                )
+            )
             return
         }
         textureLayers.undo()
     }
     func redo() {
         guard textureLayers.isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(
+                .init(
+                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    icon: .init(systemName: "info.triangle")
+                )
+            )
             return
         }
         textureLayers.redo()

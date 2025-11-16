@@ -28,10 +28,10 @@ import UIKit
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     /// A publisher that sends messages
-    public var message: AnyPublisher<String, Never> {
+    public var message: AnyPublisher<ToastMessage, Never> {
         messageSubject.eraseToAnyPublisher()
     }
-    private let messageSubject = PassthroughSubject<String, Never>()
+    private let messageSubject = PassthroughSubject<ToastMessage, Never>()
 
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
