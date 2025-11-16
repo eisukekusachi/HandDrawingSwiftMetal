@@ -14,7 +14,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public var isEnabled: Bool {
         _isEnabled
     }
-    private var _isEnabled: Bool = false
+    private var _isEnabled: Bool = true
 
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
