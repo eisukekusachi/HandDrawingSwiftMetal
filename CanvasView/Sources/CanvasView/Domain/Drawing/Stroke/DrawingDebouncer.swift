@@ -31,7 +31,7 @@ public final class DrawingDebouncer {
     public func perform(_ block: @escaping () async throws -> Void) {
         isProcessingSubject.send(true)
 
-        persistanceDrawingDebouncer.schedule {
+        persistanceDrawingDebouncer.perform {
             Task { @MainActor [weak self] in
                 guard let self else { return }
 

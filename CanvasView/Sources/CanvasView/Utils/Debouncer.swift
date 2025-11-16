@@ -19,7 +19,7 @@ final class Debouncer {
 
     /// Schedules an async throwing block to run after `delay` seconds.
     /// Previous scheduled work is cancelled.
-    func schedule(_ block: @escaping () -> Void) {
+    func perform(_ block: @escaping () -> Void) {
         workItem?.cancel()
         let item = DispatchWorkItem { block() }
         workItem = item
