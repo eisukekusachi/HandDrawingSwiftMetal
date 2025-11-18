@@ -142,25 +142,15 @@ import UIKit
     }
 
     public func undo() {
-        guard !canvasViewModel.isDrawing  else {
-            messageSubject.send(
-                .init(
-                    title: String(localized: "Components are unavailable while drawing", bundle: .module),
-                    icon: .init(systemName: "info.triangle")
-                )
-            )
+        guard !canvasViewModel.isDrawing else {
+            sendUnavailableMessage()
             return
         }
         canvasViewModel.undo()
     }
     public func redo() {
-        guard !canvasViewModel.isDrawing  else {
-            messageSubject.send(
-                .init(
-                    title: String(localized: "Components are unavailable while drawing", bundle: .module),
-                    icon: .init(systemName: "info.triangle")
-                )
-            )
+        guard !canvasViewModel.isDrawing else {
+            sendUnavailableMessage()
             return
         }
         canvasViewModel.redo()
@@ -218,6 +208,15 @@ extension CanvasView {
             displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
             displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
+    }
+
+    private func sendUnavailableMessage() {
+        messageSubject.send(
+            .init(
+                title: String(localized: "Components are unavailable while drawing", bundle: .module),
+                icon: .init(systemName: "info.triangle")
+            )
+        )
     }
 }
 
