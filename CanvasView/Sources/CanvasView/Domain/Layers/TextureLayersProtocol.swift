@@ -90,4 +90,6 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     /// Requests a full canvas update (all layers composited)
     func requestFullCanvasUpdate()
+
+    func sendMessage(_ message: String)
 }

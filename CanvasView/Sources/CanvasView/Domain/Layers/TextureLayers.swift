@@ -126,11 +126,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func addNewLayer(at index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let device = canvasRenderer?.device,
             let texture = MTLTextureCreator.makeTexture(
@@ -153,11 +148,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let textureRepository
         else { return }
@@ -193,11 +183,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             layerCount > 1,
             let textureRepository,
@@ -221,11 +206,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
@@ -239,29 +219,16 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func selectLayer(_ id: LayerId) {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         _selectedLayerId = id
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
         // Do nothing
     }
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
         // Do nothing
     }
 
@@ -374,6 +341,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             throw error
         }
         try await textureRepository.updateTexture(texture: texture, for: id)
+    }
+
+    public func sendMessage(_ message: String) {
+        messageSubject.send(message)
     }
 
     /// Requests a partial canvas update

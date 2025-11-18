@@ -332,11 +332,6 @@ private extension UndoTextureLayers {
 extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let device = canvasRenderer?.device,
             let texture = MTLTextureCreator.makeTexture(
@@ -359,11 +354,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -394,11 +384,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let selectedLayer = textureLayers.selectedLayer,
             let identifiedTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)
@@ -431,11 +416,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
@@ -462,21 +442,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func selectLayer(_ id: LayerId) {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         textureLayers.selectLayer(id)
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard let _ = undoTextureRepository else { return }
 
         guard let alpha = textureLayers.selectedLayer?.alpha else { return }
@@ -485,11 +455,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
-        guard isEnabled else {
-            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
-            return
-        }
-
         guard
             let _ = undoTextureRepository,
             let selectedLayer = textureLayers.selectedLayer
@@ -609,6 +574,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
+    }
+
+    public func sendMessage(_ message: String) {
+        messageSubject.send(message)
     }
 
     public func requestCanvasUpdate() {
