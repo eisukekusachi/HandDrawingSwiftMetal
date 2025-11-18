@@ -200,7 +200,9 @@ public final class CanvasViewModel {
         // The debouncer currently is processing
         drawingDebouncer.isProcessingPublisher
             .sink { [weak self] isProcessing in
-                self?.textureLayers.setEnabled(!isProcessing)
+                if !isProcessing {
+                    self?.textureLayers.setIsEnabled(true)
+                }
             }
             .store(in: &cancellables)
 

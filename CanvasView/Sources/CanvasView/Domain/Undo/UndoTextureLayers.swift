@@ -521,8 +521,8 @@ extension UndoTextureLayers: TextureLayersProtocol {
         self.previousAlphaForUndo = nil
     }
 
-    public func setEnabled(_ enabled: Bool) {
-        textureLayers.setEnabled(enabled)
+    public func setIsEnabled(_ isEnabled: Bool) {
+        textureLayers.setIsEnabled(isEnabled)
     }
 
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {

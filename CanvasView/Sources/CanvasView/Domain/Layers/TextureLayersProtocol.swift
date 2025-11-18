@@ -12,6 +12,8 @@ import MetalKit
 @MainActor
 public protocol TextureLayersProtocol: ObservableObject {
 
+    var isEnabled: Bool { get }
+
     /// Emits when a canvas update is requested
     var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
 
@@ -41,8 +43,6 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var layerCount: Int { get }
 
-    var isEnabled: Bool { get }
-
     var textureSize: CGSize { get }
 
     func initialize(
@@ -64,7 +64,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     func endAlphaChange()
 
-    func setEnabled(_ enabled: Bool)
+    func setIsEnabled(_ isEnabled: Bool)
 
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture?
 

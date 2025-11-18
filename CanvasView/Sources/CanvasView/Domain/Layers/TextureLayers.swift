@@ -265,8 +265,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         // Do nothing
     }
 
-    public func setEnabled(_ enabled: Bool) {
-        _isEnabled = enabled
+    public func setIsEnabled(_ isEnabled: Bool) {
+        _isEnabled = isEnabled
     }
 
     /// Copies a texture for the given `LayerId`
