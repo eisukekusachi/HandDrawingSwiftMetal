@@ -142,9 +142,27 @@ import UIKit
     }
 
     public func undo() {
+        guard !canvasViewModel.isDrawing  else {
+            messageSubject.send(
+                .init(
+                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    icon: .init(systemName: "info.triangle")
+                )
+            )
+            return
+        }
         canvasViewModel.undo()
     }
     public func redo() {
+        guard !canvasViewModel.isDrawing  else {
+            messageSubject.send(
+                .init(
+                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    icon: .init(systemName: "info.triangle")
+                )
+            )
+            return
+        }
         canvasViewModel.redo()
     }
 }

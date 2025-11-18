@@ -49,6 +49,12 @@ public final class CanvasViewModel {
         didInitializeCanvasViewSubject.eraseToAnyPublisher()
     }
 
+    private(set) var isDrawing: Bool = false {
+        didSet {
+            textureLayers.setIsEnabled(!isDrawing)
+        }
+    }
+
     private var dependencies: CanvasViewDependencies!
 
     /// Metadata stored in Core Data
@@ -201,7 +207,7 @@ public final class CanvasViewModel {
         drawingDebouncer.isProcessingPublisher
             .sink { [weak self] isProcessing in
                 if !isProcessing {
-                    self?.textureLayers.setIsEnabled(true)
+                    self?.isDrawing = false
                 }
             }
             .store(in: &cancellables)
@@ -319,6 +325,8 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
+
+                isDrawing = true
                 fingerStroke.beginFingerStroke()
 
                 drawingRenderer.beginFingerStroke()
@@ -341,7 +349,7 @@ extension CanvasViewModel {
             )
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(isDrawing)
+            drawingDisplayLink.run(isCurrentlyDrawing)
 
         case .transforming:
             transformCanvas()
@@ -387,6 +395,7 @@ extension CanvasViewModel {
         /// Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
 
+            isDrawing = true
             drawingRenderer.beginPencilStroke()
 
             Task {
@@ -413,7 +422,7 @@ extension CanvasViewModel {
         )
         pencilStroke.updateDrawingLineEndPoint()
 
-        drawingDisplayLink.run(isDrawing)
+        drawingDisplayLink.run(isCurrentlyDrawing)
     }
 }
 
@@ -444,27 +453,9 @@ public extension CanvasViewModel {
     }
 
     func undo() {
-        guard textureLayers.isEnabled else {
-            messageSubject.send(
-                .init(
-                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
-                    icon: .init(systemName: "info.triangle")
-                )
-            )
-            return
-        }
         textureLayers.undo()
     }
     func redo() {
-        guard textureLayers.isEnabled else {
-            messageSubject.send(
-                .init(
-                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
-                    icon: .init(systemName: "info.triangle")
-                )
-            )
-            return
-        }
         textureLayers.redo()
     }
 }
@@ -564,7 +555,7 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private var isDrawing: Bool {
+    private var isCurrentlyDrawing: Bool {
         switch drawingTouchPhase {
         case .began, .moved: return true
         default: return false
@@ -623,7 +614,7 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            displayedLayer: isDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+            displayedLayer: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
         )
     }
 
