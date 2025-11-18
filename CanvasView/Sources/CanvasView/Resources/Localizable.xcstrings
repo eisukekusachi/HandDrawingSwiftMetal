@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Components are unavailable while drawing" : {
+      "extractionState" : "manual"
+    },
     "Error" : {
       "extractionState" : "manual"
     },
@@ -38,9 +41,6 @@
       "extractionState" : "manual"
     },
     "Texture size mismatch" : {
-      "extractionState" : "manual"
-    },
-    "The operation failed. Please try again." : {
       "extractionState" : "manual"
     },
     "Unable to find %@" : {

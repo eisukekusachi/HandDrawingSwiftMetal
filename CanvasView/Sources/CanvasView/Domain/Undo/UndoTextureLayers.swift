@@ -333,7 +333,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -360,7 +360,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -395,7 +395,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -432,7 +432,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func moveLayer(indices: MoveLayerIndices) {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -463,7 +463,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func selectLayer(_ id: LayerId) {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -473,7 +473,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -486,7 +486,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 

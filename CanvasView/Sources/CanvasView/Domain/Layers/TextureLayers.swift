@@ -127,7 +127,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addNewLayer(at index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -154,7 +154,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -194,7 +194,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -222,7 +222,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func moveLayer(indices: MoveLayerIndices) {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -240,7 +240,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func selectLayer(_ id: LayerId) {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
 
@@ -250,7 +250,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
         // Do nothing
@@ -259,7 +259,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         guard isEnabled else {
-            messageSubject.send(String(localized: "The operation failed. Please try again.", bundle: .module))
+            messageSubject.send(String(localized: "Components are unavailable while drawing", bundle: .module))
             return
         }
         // Do nothing

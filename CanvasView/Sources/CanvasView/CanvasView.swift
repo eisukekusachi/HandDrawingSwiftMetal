@@ -145,7 +145,7 @@ import UIKit
         guard !canvasViewModel.isDrawing  else {
             messageSubject.send(
                 .init(
-                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    title: String(localized: "Components are unavailable while drawing", bundle: .module),
                     icon: .init(systemName: "info.triangle")
                 )
             )
@@ -157,7 +157,7 @@ import UIKit
         guard !canvasViewModel.isDrawing  else {
             messageSubject.send(
                 .init(
-                    title: String(localized: "The operation failed. Please try again.", bundle: .module),
+                    title: String(localized: "Components are unavailable while drawing", bundle: .module),
                     icon: .init(systemName: "info.triangle")
                 )
             )
