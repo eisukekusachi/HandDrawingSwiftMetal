@@ -309,7 +309,8 @@ extension CanvasViewModel {
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
 
-                fingerStroke.beginFingerStroke()
+                // Store the drawing-specific key in the dictionary
+                fingerStroke.storeKeyForDrawing()
 
                 drawingRenderer.beginFingerStroke()
 
