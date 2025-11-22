@@ -11,11 +11,6 @@ import UIKit
 /// A class that manages texture layers
 public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
-    public var isEnabled: Bool {
-        _isEnabled
-    }
-    private var _isEnabled: Bool = true
-
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         canvasUpdateRequestedSubject.eraseToAnyPublisher()
@@ -224,10 +219,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         // Do nothing
-    }
-
-    public func setIsEnabled(_ isEnabled: Bool) {
-        _isEnabled = isEnabled
     }
 
     /// Copies a texture for the given `LayerId`

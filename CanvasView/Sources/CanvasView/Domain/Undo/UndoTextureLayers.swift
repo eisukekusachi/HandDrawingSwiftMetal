@@ -12,10 +12,6 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
-    public var isEnabled: Bool  {
-        textureLayers.isEnabled
-    }
-
     public var isUndoEnabled: Bool {
         undoTextureRepository != nil
     }
@@ -478,10 +474,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
 
         self.previousAlphaForUndo = nil
-    }
-
-    public func setIsEnabled(_ isEnabled: Bool) {
-        textureLayers.setIsEnabled(isEnabled)
     }
 
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
