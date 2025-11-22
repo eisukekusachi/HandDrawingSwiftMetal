@@ -202,6 +202,16 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Execute when the drawing is complete
+        drawingDebouncer.isProcessing
+            .sink { [weak self] isProcessing in
+                if !isProcessing {
+                    // Set isDrawingSubject to false when drawing is complete
+                    self?.isDrawingSubject.send(false)
+                }
+            }
+            .store(in: &cancellables)
+
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
@@ -661,9 +671,6 @@ extension CanvasViewModel {
                     layerId,
                     texture: selectedLayerTexture
                 )
-
-                // The drawing is completed
-                self?.isDrawingSubject.send(false)
 
             } catch {
                 Logger.error(error)
