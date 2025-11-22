@@ -589,6 +589,9 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
+                    // Reset parameters on drawing completion
+                    self?.prepareNextStroke()
+
                     self?.completeDrawing()
                 }
             }
@@ -603,7 +606,6 @@ extension CanvasViewModel {
     }
 
     private func prepareNextStroke() {
-        isDrawingSubject.send(false)
 
         inputDevice.reset()
         touchGesture.reset()
@@ -660,8 +662,8 @@ extension CanvasViewModel {
                     texture: selectedLayerTexture
                 )
 
-                // Reset parameters on drawing completion
-                self?.prepareNextStroke()
+                // The drawing is completed
+                self?.isDrawingSubject.send(false)
 
             } catch {
                 Logger.error(error)
