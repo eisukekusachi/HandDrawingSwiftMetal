@@ -79,7 +79,8 @@ extension HandDrawingViewController {
         contentView.canvasView.isDrawing
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isDrawing in
-                print("isDrawing \(isDrawing)")
+                // Disable the components during the drawing
+                self?.enableComponentsInteraction(!isDrawing)
             }
             .store(in: &cancellables)
 
@@ -348,6 +349,11 @@ extension HandDrawingViewController {
 
     private func showContentView(_ isShown: Bool) {
         contentView.isHidden = !isShown
+    }
+
+    private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
+        contentView.enableComponentsInteraction(isUserInteractionEnabled)
+        textureLayerViewPresenter.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 

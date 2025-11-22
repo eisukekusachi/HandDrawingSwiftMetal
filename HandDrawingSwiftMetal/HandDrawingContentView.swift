@@ -117,6 +117,27 @@ final class HandDrawingContentView: UIView {
         undoButton.isEnabled = state.isUndoEnabled
         redoButton.isEnabled = state.isRedoEnabled
     }
+
+    func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
+        resetTransformButton.isUserInteractionEnabled = isUserInteractionEnabled
+        saveButton.isUserInteractionEnabled = isUserInteractionEnabled
+        loadButton.isUserInteractionEnabled = isUserInteractionEnabled
+        newButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        brushDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
+        eraserDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
+
+        exportImageButton.isUserInteractionEnabled = isUserInteractionEnabled
+        layerButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        drawingToolButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        brushPaletteView.isUserInteractionEnabled = isUserInteractionEnabled
+        eraserPaletteView.isUserInteractionEnabled = isUserInteractionEnabled
+
+        undoButton.isUserInteractionEnabled = isUserInteractionEnabled
+        redoButton.isUserInteractionEnabled = isUserInteractionEnabled
+    }
 }
 
 private extension HandDrawingContentView {
