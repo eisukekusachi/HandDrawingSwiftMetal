@@ -23,6 +23,7 @@ public final class CanvasViewModel {
         projectMetaDataStorage.zipFileURL
     }
 
+    /// Emits `true` while drawing is in progress
     var isDrawing: AnyPublisher<Bool, Never> {
         isDrawingSubject.eraseToAnyPublisher()
     }
