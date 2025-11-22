@@ -196,10 +196,11 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // The debouncer currently is processing
-        drawingDebouncer.isProcessingPublisher
+        // Execute it when the drawing is finished
+        drawingDebouncer.isProcessing
             .sink { [weak self] isProcessing in
                 if !isProcessing {
+                    // Set it to false when the drawing is completed
                     self?.isDrawingSubject.send(false)
                 }
             }
