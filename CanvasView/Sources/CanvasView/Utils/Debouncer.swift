@@ -7,7 +7,6 @@
 
 import Foundation
 
-@MainActor
 final class Debouncer {
     private var workItem: DispatchWorkItem?
     private let delay: TimeInterval
@@ -16,22 +15,12 @@ final class Debouncer {
         self.delay = delay
     }
 
-    func schedule(_ block: @MainActor @escaping () -> Void) {
+    /// Schedules an async throwing block to run after `delay` seconds.
+    /// Previous scheduled work is cancelled.
+    func perform(_ block: @escaping () -> Void) {
         workItem?.cancel()
         let item = DispatchWorkItem { block() }
         workItem = item
         DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
-    }
-
-    func scheduleAsync(_ block: @MainActor @escaping () async throws -> Void) {
-        workItem?.cancel()
-        let item = DispatchWorkItem { Task { try await block() } }
-        workItem = item
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
-    }
-
-    func cancel() {
-        workItem?.cancel()
-        workItem = nil
     }
 }

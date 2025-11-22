@@ -12,6 +12,10 @@ import UIKit
 
     private var drawingRenderers: [DrawingRenderer] = []
 
+    public var isDrawing: AnyPublisher<Bool, Never> {
+        canvasViewModel.isDrawing
+    }
+
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }

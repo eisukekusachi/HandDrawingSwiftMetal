@@ -32,6 +32,10 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = true
     }
 
+    func enableComponentInteraction(_ isUserInteractionEnabled: Bool) {
+        layerViewController.view.isUserInteractionEnabled = isUserInteractionEnabled
+    }
+
     init() {
         let layerView = TextureLayerView(
             viewModel: viewModel
