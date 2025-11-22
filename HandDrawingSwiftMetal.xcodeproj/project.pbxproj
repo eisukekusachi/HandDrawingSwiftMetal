@@ -41,6 +41,7 @@
 		D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
+		D4B140892ED158F10003D5BD /* ToastMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B140882ED158F10003D5BD /* ToastMessage.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingContentViewModel.swift */; };
 		D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
@@ -110,6 +111,7 @@
 		D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackViewExtensions.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
+		D4B140882ED158F10003D5BD /* ToastMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastMessage.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentViewModel.swift; sourceTree = "<group>"; };
 		D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */,
+				D4B140882ED158F10003D5BD /* ToastMessage.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 				D4DF37732E914492009B8F2A /* Throttle.swift */,
@@ -537,6 +540,7 @@
 				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
 				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,
+				D4B140892ED158F10003D5BD /* ToastMessage.swift in Sources */,
 				D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */,
 				D4168F1C2E59EFE7007F7904 /* BrushPaletteView.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
