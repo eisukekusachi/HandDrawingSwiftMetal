@@ -14,7 +14,7 @@ public final class DrawingDebouncer {
     private let delay: TimeInterval
 
     /// A publisher that emits a Bool to indicate processing and completion states
-    var isProcessingPublisher: AnyPublisher<Bool, Never> {
+    var isProcessing: AnyPublisher<Bool, Never> {
         isProcessingSubject.eraseToAnyPublisher()
     }
     private let isProcessingSubject: PassthroughSubject<Bool, Never> = .init()
