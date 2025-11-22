@@ -23,6 +23,11 @@ public final class CanvasViewModel {
         projectMetaDataStorage.zipFileURL
     }
 
+    var isDrawing: AnyPublisher<Bool, Never> {
+        isDrawingSubject.eraseToAnyPublisher()
+    }
+    private let isDrawingSubject = PassthroughSubject<Bool, Never>()
+
     /// A publisher that emits a request to show the alert
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
@@ -67,6 +72,9 @@ public final class CanvasViewModel {
     /// A display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
 
+    /// A debouncer used to prevent continuous input during drawing
+    private let drawingDebouncer: DrawingDebouncer
+
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
 
@@ -101,6 +109,8 @@ public final class CanvasViewModel {
 
     init() {
         canvasRenderer = CanvasRenderer()
+
+        drawingDebouncer = DrawingDebouncer(delay: 0.25)
 
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
@@ -183,6 +193,7 @@ public final class CanvasViewModel {
     }
 
     private func bindData() {
+
         // The canvas is updated every frame during drawing
         drawingDisplayLink.updatePublisher
             .sink { [weak self] in
@@ -297,9 +308,12 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
+
                 fingerStroke.beginFingerStroke()
 
                 drawingRenderer.beginFingerStroke()
+
+                isDrawingSubject.send(true)
 
                 Task {
                     await textureLayers.setUndoDrawing(
@@ -319,7 +333,7 @@ extension CanvasViewModel {
             )
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(isDrawing)
+            drawingDisplayLink.run(isCurrentlyDrawing)
 
         case .transforming:
             transformCanvas()
@@ -367,6 +381,8 @@ extension CanvasViewModel {
 
             drawingRenderer.beginPencilStroke()
 
+            isDrawingSubject.send(true)
+
             Task {
                 await textureLayers.setUndoDrawing(
                     texture: canvasRenderer.selectedLayerTexture
@@ -391,7 +407,7 @@ extension CanvasViewModel {
         )
         pencilStroke.updateDrawingLineEndPoint()
 
-        drawingDisplayLink.run(isDrawing)
+        drawingDisplayLink.run(isCurrentlyDrawing)
     }
 }
 
@@ -524,7 +540,7 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private var isDrawing: Bool {
+    private var isCurrentlyDrawing: Bool {
         switch drawingTouchPhase {
         case .began, .moved: return true
         default: return false
@@ -571,9 +587,6 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    // Reset parameters on drawing completion
-                    self?.prepareNextStroke()
-
                     self?.completeDrawing()
                 }
             }
@@ -583,11 +596,13 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            displayedLayer: isDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+            displayedLayer: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
         )
     }
 
     private func prepareNextStroke() {
+        isDrawingSubject.send(false)
+
         inputDevice.reset()
         touchGesture.reset()
 
@@ -628,7 +643,7 @@ extension CanvasViewModel {
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
-        persistanceDrawingDebouncer.scheduleAsync { [weak self] in
+        drawingDebouncer.perform { [weak self] in
             do {
                 try await self?.dependencies.textureRepository.updateTexture(
                     texture: selectedLayerTexture,
@@ -642,6 +657,10 @@ extension CanvasViewModel {
                     layerId,
                     texture: selectedLayerTexture
                 )
+
+                // Reset parameters on drawing completion
+                self?.prepareNextStroke()
+
             } catch {
                 Logger.error(error)
             }

@@ -76,6 +76,13 @@ extension HandDrawingViewController {
 
     private func bindData() {
 
+        contentView.canvasView.isDrawing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isDrawing in
+                print("isDrawing \(isDrawing)")
+            }
+            .store(in: &cancellables)
+
         contentView.canvasView.didInitializeCanvasView
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
