@@ -76,6 +76,13 @@ extension HandDrawingViewController {
 
     private func bindData() {
 
+        contentView.canvasView.isDrawing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isDrawing in
+                self?.enableComponentsInteraction(!isDrawing)
+            }
+            .store(in: &cancellables)
+
         contentView.canvasView.didInitializeCanvasView
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -348,6 +355,11 @@ extension HandDrawingViewController {
 
     private func showContentView(_ isShown: Bool) {
         contentView.isHidden = !isShown
+    }
+
+    private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
+        contentView.enableComponentsInteraction(isUserInteractionEnabled)
+        textureLayerViewPresenter.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 

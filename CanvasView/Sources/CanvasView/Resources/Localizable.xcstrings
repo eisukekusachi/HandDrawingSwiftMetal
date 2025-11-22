@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Components are unavailable while drawing" : {
-      "extractionState" : "manual"
-    },
     "Error" : {
       "extractionState" : "manual"
     },

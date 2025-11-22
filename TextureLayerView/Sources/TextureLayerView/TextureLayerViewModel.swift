@@ -114,10 +114,6 @@ public extension TextureLayerViewModel {
             let textureLayers,
             let selectedIndex = textureLayers.selectedIndex
         else { return }
-        guard textureLayers.isEnabled else {
-            textureLayers.sendMessage(String(localized: "Components are unavailable while drawing"))
-            return
-        }
 
         Task {
             do {
@@ -137,10 +133,6 @@ public extension TextureLayerViewModel {
             let selectedIndex = textureLayers.selectedIndex,
             textureLayers.layerCount > 1
         else { return }
-        guard textureLayers.isEnabled else {
-            textureLayers.sendMessage(String(localized: "Components are unavailable while drawing"))
-            return
-        }
 
         Task {
             try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
@@ -154,10 +146,6 @@ public extension TextureLayerViewModel {
 
     func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
         guard let textureLayers else { return }
-        guard textureLayers.isEnabled else {
-            textureLayers.sendMessage(String(localized: "Components are unavailable while drawing"))
-            return
-        }
 
         textureLayers.updateVisibility(id, isVisible: isVisible)
 
@@ -167,10 +155,6 @@ public extension TextureLayerViewModel {
 
     func onTapCell(_ id: UUID) {
         guard let textureLayers else { return }
-        guard textureLayers.isEnabled else {
-            textureLayers.sendMessage(String(localized: "Components are unavailable while drawing"))
-            return
-        }
 
         textureLayers.selectLayer(id)
         textureLayers.requestFullCanvasUpdate()
@@ -178,10 +162,6 @@ public extension TextureLayerViewModel {
 
     func onMoveLayer(source: IndexSet, destination: Int) {
         guard let textureLayers else { return }
-        guard textureLayers.isEnabled else {
-            textureLayers.sendMessage(String(localized: "Components are unavailable while drawing"))
-            return
-        }
 
         Task {
             textureLayers.moveLayer(

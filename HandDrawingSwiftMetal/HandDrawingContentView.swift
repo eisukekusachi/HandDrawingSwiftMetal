@@ -117,24 +117,50 @@ final class HandDrawingContentView: UIView {
         undoButton.isEnabled = state.isUndoEnabled
         redoButton.isEnabled = state.isRedoEnabled
     }
+
+    func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
+        resetTransformButton.isUserInteractionEnabled = isUserInteractionEnabled
+        saveButton.isUserInteractionEnabled = isUserInteractionEnabled
+        loadButton.isUserInteractionEnabled = isUserInteractionEnabled
+        newButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        brushDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
+        eraserDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
+
+        exportImageButton.isUserInteractionEnabled = isUserInteractionEnabled
+        layerButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        drawingToolButton.isUserInteractionEnabled = isUserInteractionEnabled
+
+        brushPaletteView.isUserInteractionEnabled = isUserInteractionEnabled
+        eraserPaletteView.isUserInteractionEnabled = isUserInteractionEnabled
+
+        undoButton.isUserInteractionEnabled = isUserInteractionEnabled
+        redoButton.isUserInteractionEnabled = isUserInteractionEnabled
+    }
 }
 
 private extension HandDrawingContentView {
+
     func addEvents() {
         resetTransformButton.addAction(.init { [weak self] _ in
-            self?.canvasView.resetTransforming()
+            guard let `self` else { return }
+            self.canvasView.resetTransforming()
         }, for: .touchUpInside)
 
         saveButton.addAction(.init { [weak self] _ in
-            self?.tapSaveButton?()
+            guard let `self` else { return }
+            self.tapSaveButton?()
         }, for: .touchUpInside)
 
         layerButton.addAction(.init { [weak self] _ in
-            self?.tapLayerButton?()
+            guard let `self` else { return }
+            self.tapLayerButton?()
         }, for: .touchUpInside)
 
         loadButton.addAction(.init { [weak self] _ in
-            self?.tapLoadButton?()
+            guard let `self` else { return }
+            self.tapLoadButton?()
         }, for: .touchUpInside)
 
         exportImageButton.addAction(.init { [weak self] _ in
@@ -142,11 +168,13 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         newButton.addAction(.init { [weak self] _ in
-            self?.tapNewButton?()
+            guard let `self` else { return }
+            self.tapNewButton?()
         }, for: .touchUpInside)
 
         drawingToolButton.addAction(.init { [weak self] _ in
-            self?.tapDrawingToolButton?()
+            guard let `self` else { return }
+            self.tapDrawingToolButton?()
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
@@ -169,7 +197,7 @@ private extension HandDrawingContentView {
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
-            guard let `self`,  let slider = action.sender as? UISlider else { return }
+            guard let `self`, let slider = action.sender as? UISlider else { return }
             dragEraserSlider?(slider.value)
         }, for: .valueChanged)
     }

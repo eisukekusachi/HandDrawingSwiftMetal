@@ -11,6 +11,11 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
+    public var isDrawing: AnyPublisher<Bool, Never> {
+        isDrawingSubject.eraseToAnyPublisher()
+    }
+    private let isDrawingSubject = PassthroughSubject<Bool, Never>()
+
     /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {
         didSet {
@@ -47,12 +52,6 @@ public final class CanvasViewModel {
     /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         didInitializeCanvasViewSubject.eraseToAnyPublisher()
-    }
-
-    private(set) var isDrawing: Bool = false {
-        didSet {
-            textureLayers.setIsEnabled(!isDrawing)
-        }
     }
 
     private var dependencies: CanvasViewDependencies!
@@ -207,7 +206,7 @@ public final class CanvasViewModel {
         drawingDebouncer.isProcessingPublisher
             .sink { [weak self] isProcessing in
                 if !isProcessing {
-                    self?.isDrawing = false
+                    self?.isDrawingSubject.send(false)
                 }
             }
             .store(in: &cancellables)
@@ -326,9 +325,8 @@ extension CanvasViewModel {
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
 
-                isDrawing = true
+                isDrawingSubject.send(true)
                 fingerStroke.beginFingerStroke()
-
                 drawingRenderer.beginFingerStroke()
 
                 Task {
@@ -395,7 +393,7 @@ extension CanvasViewModel {
         /// Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
 
-            isDrawing = true
+            isDrawingSubject.send(true)
             drawingRenderer.beginPencilStroke()
 
             Task {
