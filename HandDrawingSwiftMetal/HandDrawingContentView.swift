@@ -144,23 +144,19 @@ private extension HandDrawingContentView {
 
     func addEvents() {
         resetTransformButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.canvasView.resetTransforming()
+            self?.canvasView.resetTransforming()
         }, for: .touchUpInside)
 
         saveButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.tapSaveButton?()
+            self?.tapSaveButton?()
         }, for: .touchUpInside)
 
         layerButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.tapLayerButton?()
+            self?.tapLayerButton?()
         }, for: .touchUpInside)
 
         loadButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.tapLoadButton?()
+            self?.tapLoadButton?()
         }, for: .touchUpInside)
 
         exportImageButton.addAction(.init { [weak self] _ in
@@ -168,13 +164,11 @@ private extension HandDrawingContentView {
         }, for: .touchUpInside)
 
         newButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.tapNewButton?()
+            self?.tapNewButton?()
         }, for: .touchUpInside)
 
         drawingToolButton.addAction(.init { [weak self] _ in
-            guard let `self` else { return }
-            self.tapDrawingToolButton?()
+            self?.tapDrawingToolButton?()
         }, for: .touchUpInside)
 
         undoButton.addAction(.init { [weak self] _ in
@@ -193,12 +187,12 @@ private extension HandDrawingContentView {
 
         brushDiameterSlider.addAction(UIAction { [weak self] action in
             guard let `self`, let slider = action.sender as? UISlider else { return }
-            dragBrushSlider?(slider.value)
+            self.dragBrushSlider?(slider.value)
         }, for: .valueChanged)
 
         eraserDiameterSlider.addAction(UIAction { [weak self] action in
             guard let `self`, let slider = action.sender as? UISlider else { return }
-            dragEraserSlider?(slider.value)
+            self.dragEraserSlider?(slider.value)
         }, for: .valueChanged)
     }
 }
