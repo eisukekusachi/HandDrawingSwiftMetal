@@ -26,12 +26,6 @@ public final class UndoTextureLayers: ObservableObject {
     }
     private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
-    /// Emits when a message needs to be sent
-    public var messagePublisher: AnyPublisher<String, Never> {
-        messageSubject.eraseToAnyPublisher()
-    }
-    private let messageSubject: PassthroughSubject<String, Never> = .init()
-
     @Published private(set) var textureLayers: any TextureLayersProtocol
 
     private let undoManager = UndoManager()
@@ -574,10 +568,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         try await textureLayers.updateTexture(texture: texture, for: id)
-    }
-
-    public func sendMessage(_ message: String) {
-        messageSubject.send(message)
     }
 
     public func requestCanvasUpdate() {

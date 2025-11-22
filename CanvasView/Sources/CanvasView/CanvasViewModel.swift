@@ -34,12 +34,6 @@ public final class CanvasViewModel {
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    /// A publisher that sends messages
-    var message: AnyPublisher<ToastMessage, Never> {
-        messageSubject.eraseToAnyPublisher()
-    }
-    private let messageSubject = PassthroughSubject<ToastMessage, Never>()
-
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -231,12 +225,6 @@ public final class CanvasViewModel {
 
                     self.commitAndRefreshDisplay()
                 }
-            }
-            .store(in: &cancellables)
-
-        textureLayers.messagePublisher
-            .sink { [weak self] message in
-                self?.messageSubject.send(.init(title: message, icon: .init(systemName: "info.triangle")))
             }
             .store(in: &cancellables)
 

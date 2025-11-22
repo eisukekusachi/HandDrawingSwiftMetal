@@ -31,12 +31,6 @@ import UIKit
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    /// A publisher that sends messages
-    public var message: AnyPublisher<ToastMessage, Never> {
-        messageSubject.eraseToAnyPublisher()
-    }
-    private let messageSubject = PassthroughSubject<ToastMessage, Never>()
-
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -177,13 +171,6 @@ extension CanvasView {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        canvasViewModel.message
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
-                self?.messageSubject.send(message)
             }
             .store(in: &cancellables)
 

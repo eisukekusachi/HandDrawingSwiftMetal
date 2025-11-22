@@ -32,9 +32,6 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Emits whenever `textureSize` change
     var textureSizePublisher: AnyPublisher<CGSize, Never> { get }
 
-    /// Emits when a message needs to be sent
-    var messagePublisher: AnyPublisher<String, Never> { get }
-
     var selectedLayer: TextureLayerItem? { get }
 
     var selectedIndex: Int? { get }
@@ -90,6 +87,4 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     /// Requests a full canvas update (all layers composited)
     func requestFullCanvasUpdate()
-
-    func sendMessage(_ message: String)
 }

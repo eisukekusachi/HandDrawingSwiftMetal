@@ -48,12 +48,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         $_textureSize.eraseToAnyPublisher()
     }
 
-    /// Emits when a message needs to be sent
-    public var messagePublisher: AnyPublisher<String, Never> {
-        messageSubject.eraseToAnyPublisher()
-    }
-    private let messageSubject: PassthroughSubject<String, Never> = .init()
-
     public var selectedLayer: TextureLayerItem? {
         guard let _selectedLayerId else { return nil }
         return _layers.first(where: { $0.id == _selectedLayerId })
@@ -341,10 +335,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             throw error
         }
         try await textureRepository.updateTexture(texture: texture, for: id)
-    }
-
-    public func sendMessage(_ message: String) {
-        messageSubject.send(message)
     }
 
     /// Requests a partial canvas update
