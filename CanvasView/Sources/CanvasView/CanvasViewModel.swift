@@ -222,13 +222,20 @@ public final class CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                guard let `self` else { return }
+                guard
+                    let `self`,
+                    let selectedLayerId = textureLayers.selectedLayer?.id
+                else { return }
+
                 Task {
                     // Set the texture of the selected texture layer to the renderer
                     try await self.canvasRenderer.updateSelectedLayerTexture(
                         textureLayers: self.textureLayers,
                         textureRepository: self.dependencies.textureRepository
                     )
+
+                    let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+                    self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
                     self.commitAndRefreshDisplay()
                 }
@@ -263,6 +270,9 @@ public final class CanvasViewModel {
             )
         }
 
+        // selectedLayer.id will never be null at this point
+        let selectedLayerId = textureLayers.selectedLayer?.id ?? UUID()
+
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
             try drawingRenderers[i].initializeTextures(configuration.textureSize)
@@ -278,6 +288,9 @@ public final class CanvasViewModel {
             textureLayers: textureLayers,
             textureRepository: dependencies.textureRepository
         )
+
+        let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+        self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
         didInitializeTexturesSubject.send(textureLayers)
         didInitializeCanvasViewSubject.send(configuration)
@@ -431,9 +444,18 @@ public extension CanvasViewModel {
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
-        guard drawingToolIndex < drawingRenderers.count else { return }
+        guard
+            drawingToolIndex < drawingRenderers.count,
+            let selectedLayerId = textureLayers.selectedLayer?.id
+        else { return }
+
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
+
+        Task {
+            let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+            self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
+        }
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {

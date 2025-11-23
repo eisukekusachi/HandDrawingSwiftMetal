@@ -52,4 +52,7 @@ public protocol DrawingRenderer {
 
     /// Prepare for the next stroke
     func prepareNextStroke()
+
+    /// Update `realtimeDrawingTexture` whenever a tool is switched or a different layer is selected
+    func updateRealtimeDrawingTexture(_ texture: MTLTexture)
 }
