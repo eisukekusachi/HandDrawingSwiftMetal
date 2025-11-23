@@ -239,6 +239,22 @@ public extension EraserDrawingRenderer {
 
         drawingCurve = nil
     }
+
+    func updateRealtimeDrawingTexture(_ texture: MTLTexture) {
+        guard
+            let _realtimeDrawingTexture,
+            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+        else { return }
+
+        renderer?.drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: _realtimeDrawingTexture,
+            with: commandBuffer
+        )
+        commandBuffer.commit()
+    }
 }
 
 private extension EraserDrawingRenderer {
