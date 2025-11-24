@@ -18,7 +18,7 @@ import UIKit
     private var drawingRenderers: [DrawingRenderer] = []
 
     public var isDrawing: AnyPublisher<Bool, Never> {
-        canvasViewModel.isDrawing
+        viewModel.isDrawing
     }
 
     public var displayTexture: MTLTexture? {
@@ -50,12 +50,14 @@ import UIKit
     }
 
     public var zipFileURL: URL {
-        canvasViewModel.zipFileURL
+        viewModel.zipFileURL
     }
 
     private let renderer: MTLRendering
 
     private let displayView = CanvasDisplayView()
+
+    private let viewModel = CanvasViewModel()
 
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
@@ -66,8 +68,6 @@ import UIKit
     private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
-
-    private let canvasViewModel = CanvasViewModel()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -97,7 +97,7 @@ import UIKit
     }
 
     public override func layoutSubviews() {
-        canvasViewModel.frameSize = frame.size
+        viewModel.frameSize = frame.size
     }
 
     private func commonInitialize() {
@@ -118,7 +118,7 @@ import UIKit
     ) async throws {
         displayView.initialize(renderer: renderer)
 
-        try await canvasViewModel.setup(
+        try await viewModel.setup(
             drawingRenderers: drawingRenderers,
             dependencies: .init(
                 renderer: renderer,
@@ -129,13 +129,13 @@ import UIKit
     }
 
     public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
-        try await canvasViewModel.newCanvas(configuration: configuration)
+        try await viewModel.newCanvas(configuration: configuration)
     }
 
     public func loadFiles(
         in workingDirectoryURL: URL
     ) async throws {
-        try await canvasViewModel.loadFiles(
+        try await viewModel.loadFiles(
             in: workingDirectoryURL
         )
     }
@@ -143,25 +143,25 @@ import UIKit
         thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
         to workingDirectoryURL: URL
     ) async throws {
-        try await canvasViewModel.exportFiles(
+        try await viewModel.exportFiles(
             thumbnailLength: thumbnailLength,
             to: workingDirectoryURL
         )
     }
 
     public func resetTransforming() {
-        canvasViewModel.resetTransforming()
+        viewModel.resetTransforming()
     }
 
     public func setDrawingTool(_ drawingToolType: Int) {
-        canvasViewModel.setDrawingTool(drawingToolType)
+        viewModel.setDrawingTool(drawingToolType)
     }
 
     public func undo() {
-        canvasViewModel.undo()
+        viewModel.undo()
     }
     public func redo() {
-        canvasViewModel.redo()
+        viewModel.redo()
     }
 }
 
@@ -169,30 +169,30 @@ extension CanvasView {
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] displayTextureSize in
-                self?.canvasViewModel.didChangeDisplayTextureSize(displayTextureSize)
+                self?.viewModel.didChangeDisplayTextureSize(displayTextureSize)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.didInitializeCanvasView
+        viewModel.didInitializeCanvasView
             .sink { [weak self] value in
                 self?.didInitializeCanvasViewSubject.send(value)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.didInitializeTextures
+        viewModel.didInitializeTextures
             .sink { [weak self] value in
                 self?.didInitializeTexturesSubject.send(value)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.alert
+        viewModel.alert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
 
-        canvasViewModel.didUndo
+        viewModel.didUndo
             .sink { [weak self] value in
                 self?.didUndoSubject.send(value)
             }
@@ -215,7 +215,7 @@ extension CanvasView {
 extension CanvasView: FingerInputGestureRecognizerSender {
 
     func sendFingerTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.onFingerGestureDetected(
+        viewModel.onFingerGestureDetected(
             touches: touches,
             with: event,
             view: view
@@ -226,7 +226,7 @@ extension CanvasView: FingerInputGestureRecognizerSender {
 extension CanvasView: PencilInputGestureRecognizerSender {
 
     func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView) {
-        canvasViewModel.onPencilGestureDetected(
+        viewModel.onPencilGestureDetected(
             estimatedTouches: touches,
             with: event,
             view: view
@@ -234,7 +234,7 @@ extension CanvasView: PencilInputGestureRecognizerSender {
     }
 
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView) {
-        canvasViewModel.onPencilGestureDetected(
+        viewModel.onPencilGestureDetected(
             actualTouches: touches,
             view: view
         )
