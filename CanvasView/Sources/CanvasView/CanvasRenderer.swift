@@ -134,18 +134,15 @@ extension CanvasRenderer {
         srcTexture: MTLTexture,
         dstTexture: MTLTexture
     ) async throws {
-        guard
-            let commandBuffer = renderer?.newCommandBuffer else {
-            return
-        }
+        guard let newCommandBuffer = renderer?.newCommandBuffer else { return }
 
         renderer?.copyTexture(
             srcTexture: srcTexture,
             dstTexture: dstTexture,
-            with: commandBuffer
+            with: newCommandBuffer
         )
 
-        try await commandBuffer.commitAndWaitAsync()
+        try await newCommandBuffer.commitAndWaitAsync()
     }
 
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.

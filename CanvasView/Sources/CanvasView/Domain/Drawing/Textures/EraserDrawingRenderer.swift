@@ -230,12 +230,10 @@ public extension EraserDrawingRenderer {
     }
 
     func prepareNextStroke() {
-        guard
-            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
-        else { return }
+        guard let newCommandBuffer = renderer?.newCommandBuffer else { return }
 
-        clearTextures(with: commandBuffer)
-        commandBuffer.commit()
+        clearTextures(with: newCommandBuffer)
+        newCommandBuffer.commit()
 
         drawingCurve = nil
     }
@@ -243,7 +241,7 @@ public extension EraserDrawingRenderer {
     func updateRealtimeDrawingTexture(_ texture: MTLTexture) {
         guard
             let _realtimeDrawingTexture,
-            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+            let newCommandBuffer = renderer?.newCommandBuffer
         else { return }
 
         renderer?.drawTexture(
@@ -251,9 +249,9 @@ public extension EraserDrawingRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: _realtimeDrawingTexture,
-            with: commandBuffer
+            with: newCommandBuffer
         )
-        commandBuffer.commit()
+        newCommandBuffer.commit()
     }
 }
 

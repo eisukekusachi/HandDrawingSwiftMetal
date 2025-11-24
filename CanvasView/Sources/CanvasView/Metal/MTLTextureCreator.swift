@@ -96,7 +96,7 @@ public enum MTLTextureCreator {
     ) async throws -> MTLTexture? {
         guard
             let device = renderer.device,
-            let commandBuffer = renderer.newCommandBuffer,
+            let newCommandBuffer = renderer.newCommandBuffer,
             let resultTexture = MTLTextureCreator.makeTexture(
                 label: texture.label,
                 width: texture.width,
@@ -121,10 +121,10 @@ public enum MTLTextureCreator {
         renderer.copyTexture(
             srcTexture: texture,
             dstTexture: resultTexture,
-            with: commandBuffer
+            with: newCommandBuffer
         )
 
-        try await commandBuffer.commitAndWaitAsync()
+        try await newCommandBuffer.commitAndWaitAsync()
 
         return resultTexture
     }
