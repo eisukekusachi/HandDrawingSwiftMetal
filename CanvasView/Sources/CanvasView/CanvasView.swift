@@ -8,7 +8,12 @@
 import Combine
 import UIKit
 
+@preconcurrency import MetalKit
+
 @objc public class CanvasView: UIView {
+
+    /// The single Metal device instance used throughout the app
+    private let sharedDevice: MTLDevice
 
     private var drawingRenderers: [DrawingRenderer] = []
 
@@ -67,13 +72,25 @@ import UIKit
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
-        renderer = MTLRenderer(device: displayView.device)
+        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        self.sharedDevice = sharedDevice
+
+        renderer = MTLRenderer(device: sharedDevice)
+        displayView.setDevice(sharedDevice)
 
         super.init(frame: .zero)
         commonInitialize()
     }
     public required init?(coder: NSCoder) {
-        renderer = MTLRenderer(device: displayView.device)
+        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        self.sharedDevice = sharedDevice
+
+        renderer = MTLRenderer(device: sharedDevice)
+        displayView.setDevice(sharedDevice)
 
         super.init(coder: coder)
         commonInitialize()
