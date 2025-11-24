@@ -12,6 +12,9 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
+    @Published private(set) var textureLayers: any TextureLayersProtocol
+
+    /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
         undoTextureRepository != nil
     }
@@ -21,8 +24,6 @@ public final class UndoTextureLayers: ObservableObject {
         didUndoSubject.eraseToAnyPublisher()
     }
     private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
-
-    @Published private(set) var textureLayers: any TextureLayersProtocol
 
     private let undoManager = UndoManager()
 
