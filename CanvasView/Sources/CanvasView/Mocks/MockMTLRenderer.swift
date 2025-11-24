@@ -11,8 +11,7 @@ import UIKit
 final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     var callHistory: [String] = []
-    let device: MTLDevice?
-
+    let device: MTLDevice
 
     var newCommandBuffer: MTLCommandBuffer? {
         commandQueue?.makeCommandBuffer()
@@ -22,7 +21,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     init() {
         device = MTLCreateSystemDefaultDevice()!
-        commandQueue = device!.makeCommandQueue()
+        commandQueue = device.makeCommandQueue()
     }
 
     private func recordCall(_ function: StaticString = #function) {
@@ -68,10 +67,16 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     }
 
     func copyTexture(
-        srctexture: any MTLTexture,
+        srcTexture: any MTLTexture,
         dstTexture: any MTLTexture,
         with commandBuffer: any MTLCommandBuffer
     ) {
+        recordCall()
+    }
+    func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws {
         recordCall()
     }
 

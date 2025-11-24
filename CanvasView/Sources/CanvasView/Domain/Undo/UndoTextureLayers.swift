@@ -12,6 +12,9 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
+    @Published private(set) var textureLayers: any TextureLayersProtocol
+
+    /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
         undoTextureRepository != nil
     }
@@ -22,14 +25,12 @@ public final class UndoTextureLayers: ObservableObject {
     }
     private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
 
-    @Published private(set) var textureLayers: any TextureLayersProtocol
-
     private let undoManager = UndoManager()
 
     /// A repository that stores textures for undo operations
     private var undoTextureRepository: TextureInMemoryRepository? = nil
 
-    private var canvasRenderer: CanvasRenderer?
+    private var renderer: MTLRendering?
 
     /// Holds the previous texture to support undoing drawings
     private var previousDrawingTextureForUndo: MTLTexture?
@@ -41,10 +42,10 @@ public final class UndoTextureLayers: ObservableObject {
 
     public init(
         textureLayers: any TextureLayersProtocol,
-        canvasRenderer: CanvasRenderer
+        renderer: MTLRendering?
     ) {
         self.textureLayers = textureLayers
-        self.canvasRenderer = canvasRenderer
+        self.renderer = renderer
     }
 
     public func setupUndoManager(
@@ -65,7 +66,7 @@ public final class UndoTextureLayers: ObservableObject {
     ) {
         guard
             let _ = undoTextureRepository,
-            let device = canvasRenderer?.device
+            let renderer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "device"))
             return
@@ -83,7 +84,7 @@ public final class UndoTextureLayers: ObservableObject {
                     previousDrawingTextureForUndo = MTLTextureCreator.makeTexture(
                         width: Int(resolvedTextureLayersConfiguration.textureSize.width),
                         height: Int(resolvedTextureLayersConfiguration.textureSize.height),
-                        with: device
+                        with: renderer.device
                     )
                 }
             } catch {
@@ -137,7 +138,7 @@ private extension UndoTextureLayers {
         }
 
         do {
-            try await canvasRenderer?.copyTexture(
+            try await renderer?.copyTexture(
                 srcTexture: texture,
                 dstTexture: previousDrawingTextureForUndo,
             )
@@ -323,11 +324,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
         guard
-            let device = canvasRenderer?.device,
+            let renderer,
             let texture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
-                with: device
+                with: renderer.device
             )
             else { return }
 

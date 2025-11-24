@@ -15,8 +15,10 @@ struct CanvasViewDependencies {
     /// Repository that manages textures used for undo in memory
     let undoTextureRepository: TextureInMemoryRepository?
 
+    /// Used to render or copy textures
     let renderer: MTLRendering
 
+    /// A view for displaying the texture
     let displayView: CanvasDisplayable
 }
 

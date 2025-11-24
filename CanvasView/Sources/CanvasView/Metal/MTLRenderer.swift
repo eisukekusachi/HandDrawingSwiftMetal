@@ -12,10 +12,10 @@ let canvasMinimumTextureLength: Int = 16
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public var device: MTLDevice? {
+    public var device: MTLDevice {
         _device
     }
-    private var _device: MTLDevice?
+    private var _device: MTLDevice
 
     public var newCommandBuffer: MTLCommandBuffer? {
         commandQueue?.makeCommandBuffer()
@@ -62,7 +62,6 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         guard
             let texture,
-            let device,
             let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 matrix: matrix,
                 frameSize: frameSize,
@@ -287,20 +286,20 @@ public final class MTLRenderer: Sendable, MTLRendering {
     }
 
     public func copyTexture(
-        srctexture: MTLTexture,
+        srcTexture: MTLTexture,
         dstTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let encoder = commandBuffer.makeBlitCommandEncoder(),
-            srctexture.pixelFormat == dstTexture.pixelFormat && srctexture.sampleCount == dstTexture.sampleCount
+            srcTexture.pixelFormat == dstTexture.pixelFormat && srcTexture.sampleCount == dstTexture.sampleCount
         else { return }
 
         let origin = MTLOrigin(x: 0, y: 0, z: 0)
-        let size = MTLSize(width: srctexture.width, height: srctexture.height, depth: 1)
+        let size = MTLSize(width: srcTexture.width, height: srcTexture.height, depth: 1)
 
         encoder.copy(
-            from: srctexture,
+            from: srcTexture,
             sourceSlice: 0,
             sourceLevel: 0,
             sourceOrigin: origin,
@@ -311,5 +310,20 @@ public final class MTLRenderer: Sendable, MTLRendering {
             destinationOrigin: origin
         )
         encoder.endEncoding()
+    }
+
+    public func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws {
+        guard let newCommandBuffer else { return }
+
+        copyTexture(
+            srcTexture: srcTexture,
+            dstTexture: dstTexture,
+            with: newCommandBuffer
+        )
+
+        try await newCommandBuffer.commitAndWaitAsync()
     }
 }

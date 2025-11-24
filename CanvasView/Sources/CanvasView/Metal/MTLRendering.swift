@@ -10,7 +10,7 @@ import MetalKit
 @MainActor
 public protocol MTLRendering {
 
-    var device: MTLDevice? { get }
+    var device: MTLDevice { get }
 
     var newCommandBuffer: MTLCommandBuffer? { get }
 
@@ -77,10 +77,15 @@ public protocol MTLRendering {
     )
 
     func copyTexture(
-        srctexture: MTLTexture,
+        srcTexture: MTLTexture,
         dstTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
+
+    func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws
 
     func clearTextures(
         textures: [MTLTexture?],

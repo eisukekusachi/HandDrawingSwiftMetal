@@ -42,7 +42,6 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 public extension BrushDrawingRenderer {
 
     func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
-        guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
         self.renderer = renderer
@@ -51,12 +50,16 @@ public extension BrushDrawingRenderer {
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
     }
 
     func initializeTextures(_ textureSize: CGSize) throws {
-        guard let device = renderer?.device else { return }
+        guard
+            let renderer,
+            let newCommandBuffer = renderer.newCommandBuffer
+        else { return }
+
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
@@ -75,24 +78,23 @@ public extension BrushDrawingRenderer {
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
         self.drawingTexture = MTLTextureCreator.makeTexture(
             label: "drawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
         self.grayscaleTexture = MTLTextureCreator.makeTexture(
             label: "grayscaleTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
 
-        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTextures(with: temporaryRenderCommandBuffer)
-        temporaryRenderCommandBuffer.commit()
+        clearTextures(with: newCommandBuffer)
+        newCommandBuffer.commit()
     }
 
     func setFrameSize(_ frameSize: CGSize) {
@@ -155,12 +157,11 @@ public extension BrushDrawingRenderer {
             let drawingTexture,
             let grayscaleTexture,
             let _realtimeDrawingTexture,
-            let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
-                with: device
+                with: renderer.device
             )
         else { return }
 
@@ -214,11 +215,11 @@ public extension BrushDrawingRenderer {
 
     func prepareNextStroke() {
         guard
-            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+            let newCommandBuffer = renderer?.newCommandBuffer
         else { return }
 
-        clearTextures(with: commandBuffer)
-        commandBuffer.commit()
+        clearTextures(with: newCommandBuffer)
+        newCommandBuffer.commit()
 
         drawingCurve = nil
     }
@@ -226,7 +227,7 @@ public extension BrushDrawingRenderer {
     func updateRealtimeDrawingTexture(_ texture: MTLTexture) {
         guard
             let _realtimeDrawingTexture,
-            let commandBuffer = renderer?.device?.makeCommandQueue()?.makeCommandBuffer()
+            let newCommandBuffer = renderer?.newCommandBuffer
         else { return }
 
         renderer?.drawTexture(
@@ -234,9 +235,9 @@ public extension BrushDrawingRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: _realtimeDrawingTexture,
-            with: commandBuffer
+            with: newCommandBuffer
         )
-        commandBuffer.commit()
+        newCommandBuffer.commit()
     }
 }
 

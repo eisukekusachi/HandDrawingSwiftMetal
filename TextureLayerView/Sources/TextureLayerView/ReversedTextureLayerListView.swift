@@ -53,7 +53,7 @@ private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers(
-        canvasRenderer: nil
+        renderer: nil
     )
 
     private let configuration: ResolvedTextureLayerArrayConfiguration = .init(

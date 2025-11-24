@@ -24,7 +24,7 @@ public final class CanvasRenderer: ObservableObject {
 
     public var matrix: CGAffineTransform = .identity
 
-    private(set) var renderer: MTLRendering?
+    private var renderer: MTLRendering?
 
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
@@ -50,20 +50,21 @@ public final class CanvasRenderer: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init() {}
+    public init(
+        renderer: MTLRendering
+    ) {
+        self.renderer = renderer
+    }
 
     public func initialize(
-        renderer: MTLRendering,
         displayView: CanvasDisplayable?,
         environmentConfiguration: EnvironmentConfiguration?
     ) {
-        guard let device = renderer.device else { fatalError("Device is nil") }
-
-        self.renderer = renderer
+        guard let renderer else { return }
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
 
         self.displayView = displayView
@@ -128,24 +129,6 @@ extension CanvasRenderer {
 
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
-    }
-
-    public func copyTexture(
-        srcTexture: MTLTexture,
-        dstTexture: MTLTexture
-    ) async throws {
-        guard
-            let commandBuffer = renderer?.newCommandBuffer else {
-            return
-        }
-
-        renderer?.copyTexture(
-            srctexture: srcTexture,
-            dstTexture: dstTexture,
-            with: commandBuffer
-        )
-
-        try await commandBuffer.commitAndWaitAsync()
     }
 
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.
