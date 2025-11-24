@@ -62,8 +62,6 @@ import UIKit
 
     private let viewModel: CanvasViewModel
 
-    private var drawingRenderers: [DrawingRenderer] = []
-
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
