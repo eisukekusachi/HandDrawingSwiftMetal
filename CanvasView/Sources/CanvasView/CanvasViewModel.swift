@@ -114,10 +114,10 @@ public final class CanvasViewModel {
         // Initialize texture layers that supports undo and stores its data in Core Data
         textureLayers = UndoTextureLayers(
             textureLayers: CoreDataTextureLayers(
-                canvasRenderer: canvasRenderer,
+                renderer: renderer,
                 context: persistenceController.viewContext
             ),
-            canvasRenderer: canvasRenderer
+            renderer: renderer
         )
 
         projectMetaDataStorage = CoreDataProjectMetaDataStorage(
@@ -137,7 +137,6 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
-        guard let renderer = canvasRenderer.renderer else { return }
 
         self.dependencies = dependencies
 
@@ -148,7 +147,7 @@ public final class CanvasViewModel {
         self.drawingRenderers.forEach {
             $0.setup(
                 frameSize: frameSize,
-                renderer: renderer,
+                renderer: dependencies.renderer,
                 displayView: dependencies.displayView
             )
         }

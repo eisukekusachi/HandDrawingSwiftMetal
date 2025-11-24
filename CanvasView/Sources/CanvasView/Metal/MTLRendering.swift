@@ -82,6 +82,11 @@ public protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
+    func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws
+
     func clearTextures(
         textures: [MTLTexture?],
         with commandBuffer: MTLCommandBuffer

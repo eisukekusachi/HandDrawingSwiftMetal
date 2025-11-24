@@ -22,12 +22,12 @@ public final class CoreDataTextureLayers: TextureLayers {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        canvasRenderer: CanvasRenderer?,
+        renderer: MTLRendering?,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
 
-        super.init(canvasRenderer: canvasRenderer)
+        super.init(renderer: renderer)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(

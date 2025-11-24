@@ -24,7 +24,7 @@ public final class CanvasRenderer: ObservableObject {
 
     public var matrix: CGAffineTransform = .identity
 
-    private(set) var renderer: MTLRendering?
+    private var renderer: MTLRendering?
 
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
@@ -129,21 +129,6 @@ extension CanvasRenderer {
 
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
-    }
-
-    public func copyTexture(
-        srcTexture: MTLTexture,
-        dstTexture: MTLTexture
-    ) async throws {
-        guard let newCommandBuffer = renderer?.newCommandBuffer else { return }
-
-        renderer?.copyTexture(
-            srcTexture: srcTexture,
-            dstTexture: dstTexture,
-            with: newCommandBuffer
-        )
-
-        try await newCommandBuffer.commitAndWaitAsync()
     }
 
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.

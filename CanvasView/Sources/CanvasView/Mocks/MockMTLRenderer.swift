@@ -73,6 +73,12 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     ) {
         recordCall()
     }
+    func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws {
+        recordCall()
+    }
 
     func subtractTextureWithEraseBlendMode(
         texture: any MTLTexture,

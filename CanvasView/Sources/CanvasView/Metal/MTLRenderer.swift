@@ -311,4 +311,19 @@ public final class MTLRenderer: Sendable, MTLRendering {
         )
         encoder.endEncoding()
     }
+
+    public func copyTexture(
+        srcTexture: MTLTexture,
+        dstTexture: MTLTexture
+    ) async throws {
+        guard let newCommandBuffer else { return }
+
+        copyTexture(
+            srcTexture: srcTexture,
+            dstTexture: dstTexture,
+            with: newCommandBuffer
+        )
+
+        try await newCommandBuffer.commitAndWaitAsync()
+    }
 }
