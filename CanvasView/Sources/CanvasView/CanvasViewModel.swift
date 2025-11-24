@@ -87,8 +87,6 @@ public final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
 
-    //private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
-
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     /// Emit `TextureLayersProtocol` when the texture update is completed
