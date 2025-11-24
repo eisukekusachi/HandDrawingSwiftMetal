@@ -8,6 +8,9 @@
 import Combine
 import UIKit
 
+/// A view model that manages canvas rendering and texture layers.
+/// `TextureLayers` holds multiple layers, `DrawingRenderer` manages real-time drawing,
+/// and `CanvasRenderer` combines them to output to DisplayTexture.
 @MainActor
 public final class CanvasViewModel {
 
