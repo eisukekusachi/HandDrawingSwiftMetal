@@ -12,11 +12,6 @@ import UIKit
 
 @objc public class CanvasView: UIView {
 
-    /// The single Metal device instance used throughout the app
-    private let sharedDevice: MTLDevice
-
-    private var drawingRenderers: [DrawingRenderer] = []
-
     public var isDrawing: AnyPublisher<Bool, Never> {
         viewModel.isDrawing
     }
@@ -29,29 +24,37 @@ import UIKit
     public var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
     }
+    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     /// A publisher that emits a request to show the alert
     public var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     public var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         didInitializeCanvasViewSubject.eraseToAnyPublisher()
     }
+    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
     public var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
         didInitializeTexturesSubject.eraseToAnyPublisher()
     }
+    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     public var zipFileURL: URL {
         viewModel.zipFileURL
     }
+
+    /// The single Metal device instance used throughout the app
+    private let sharedDevice: MTLDevice
 
     private let renderer: MTLRendering
 
@@ -59,15 +62,7 @@ import UIKit
 
     private let viewModel = CanvasViewModel()
 
-    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
-
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
-
-    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
-
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var drawingRenderers: [DrawingRenderer] = []
 
     private var cancellables = Set<AnyCancellable>()
 
