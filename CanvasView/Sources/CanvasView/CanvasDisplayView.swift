@@ -39,42 +39,34 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
     private var commandQueue: MTLCommandQueue!
 
-    override init(frame frameRect: CGRect, device: MTLDevice?) {
-        super.init(frame: frameRect, device: device)
-        commonInit()
-    }
-    required init(coder: NSCoder) {
-        super.init(coder: coder)
-        commonInit()
-    }
 
-    public func setDevice(_ device: MTLDevice) {
-        self.device = device
-        commandQueue = device.makeCommandQueue()
-    }
+    init(frame: CGRect = .zero, renderer: MTLRendering) {
 
-    private func commonInit() {
+        self.renderer = renderer
+
+        // MTKView designated init
+        super.init(frame: frame, device: renderer.device)
+
         self.delegate = self
         self.enableSetNeedsDisplay = true
         self.autoResizeDrawable = true
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
-    }
 
-    func initialize(renderer: MTLRendering) {
-        guard let device else {
-            fatalError("Device is nil. Setting the device using setDevice(: MTLDevice).")
-        }
-
-        self.renderer = renderer
-
-        resetCommandBuffer()
+        commandQueue = renderer.device.makeCommandQueue()
 
         flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
+
+        resetCommandBuffer()
     }
+
+    required init(coder: NSCoder) {
+        fatalError("Use init(frame:device:) instead.")
+    }
+
 
     // MARK: - DrawTexture
     func draw(in view: MTKView) {

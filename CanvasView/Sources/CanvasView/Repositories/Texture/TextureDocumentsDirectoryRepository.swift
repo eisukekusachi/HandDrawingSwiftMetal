@@ -72,11 +72,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
            ),
            // Check if the texture can be created before proceeding
            let textureSize = configuration.textureSize,
-           let device = renderer.device,
            let _ = MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),
                height: Int(textureSize.height),
-               with: device
+               with: renderer.device
            )
         {
             // Retain the texture size
@@ -119,13 +118,12 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             )
             // Check if the data can be converted into a texture
             guard
-                let device = renderer.device,
                 let hexadecimalData = textureData.encodedHexadecimals,
                 let _ = try MTLTextureCreator.makeTexture(
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
-                    with: device
+                    with: renderer.device
                 )
             else {
                 let error = NSError(
@@ -196,12 +194,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
     }
 
     func newTexture(_ textureSize: CGSize) async throws -> MTLTexture? {
-        guard let device = renderer.device else { return nil }
-
-        return MTLTextureCreator.makeTexture(
+        MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
     }
 
@@ -219,11 +215,10 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let device = renderer.device,
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 textureSize: self.textureSize,
-                with: device
+                with: renderer.device
             )
         else {
             let error = NSError(

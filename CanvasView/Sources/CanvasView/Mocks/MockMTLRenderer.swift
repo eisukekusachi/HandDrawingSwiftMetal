@@ -11,8 +11,7 @@ import UIKit
 final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     var callHistory: [String] = []
-    let device: MTLDevice?
-
+    let device: MTLDevice
 
     var newCommandBuffer: MTLCommandBuffer? {
         commandQueue?.makeCommandBuffer()
@@ -22,7 +21,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
 
     init() {
         device = MTLCreateSystemDefaultDevice()!
-        commandQueue = device!.makeCommandQueue()
+        commandQueue = device.makeCommandQueue()
     }
 
     private func recordCall(_ function: StaticString = #function) {

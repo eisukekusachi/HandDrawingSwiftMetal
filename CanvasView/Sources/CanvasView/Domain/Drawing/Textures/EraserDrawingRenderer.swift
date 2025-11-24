@@ -43,7 +43,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 public extension EraserDrawingRenderer {
 
     func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
-        guard let device = renderer.device else { fatalError("Device is nil") }
 
         self.displayView = displayView
         self.renderer = renderer
@@ -52,12 +51,16 @@ public extension EraserDrawingRenderer {
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
     }
 
     func initializeTextures(_ textureSize: CGSize) throws {
-        guard let device = renderer?.device else { return }
+        guard
+            let renderer,
+            let newCommandBuffer = renderer.newCommandBuffer
+        else { return }
+
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
@@ -76,30 +79,29 @@ public extension EraserDrawingRenderer {
             label: "realtimeDrawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
         self.drawingTexture = MTLTextureCreator.makeTexture(
             label: "drawingTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
         self.grayscaleTexture = MTLTextureCreator.makeTexture(
             label: "grayscaleTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
         self.lineDrawnTexture = MTLTextureCreator.makeTexture(
             label: "lineDrawnTexture",
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
 
-        let temporaryRenderCommandBuffer = device.makeCommandQueue()!.makeCommandBuffer()!
-        clearTextures(with: temporaryRenderCommandBuffer)
-        temporaryRenderCommandBuffer.commit()
+        clearTextures(with: newCommandBuffer)
+        newCommandBuffer.commit()
     }
 
     func setFrameSize(_ frameSize: CGSize) {
@@ -163,12 +165,11 @@ public extension EraserDrawingRenderer {
             let grayscaleTexture,
             let drawingTexture,
             let _realtimeDrawingTexture,
-            let device = renderer.device,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
-                with: device
+                with: renderer.device
             )
         else { return }
 

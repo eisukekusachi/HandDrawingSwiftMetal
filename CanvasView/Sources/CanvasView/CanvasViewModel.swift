@@ -108,8 +108,9 @@ public final class CanvasViewModel {
 
     public static let thumbnailLength: CGFloat = 500
 
-    init() {
-        canvasRenderer = CanvasRenderer()
+    init(renderer: MTLRendering) {
+
+        canvasRenderer = CanvasRenderer(renderer: renderer)
 
         drawingDebouncer = DrawingDebouncer(delay: 0.25)
 
@@ -144,6 +145,8 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
+        guard let renderer = canvasRenderer.renderer else { return }
+
         self.dependencies = dependencies
 
         self.drawingRenderers = drawingRenderers
@@ -151,13 +154,16 @@ public final class CanvasViewModel {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
         self.drawingRenderers.forEach {
-            $0.setup(frameSize: frameSize, renderer: dependencies.renderer, displayView: dependencies.displayView)
+            $0.setup(
+                frameSize: frameSize,
+                renderer: renderer,
+                displayView: dependencies.displayView
+            )
         }
 
         self.drawingRenderer = self.drawingRenderers[0]
 
         self.canvasRenderer.initialize(
-            renderer: dependencies.renderer,
             displayView: dependencies.displayView,
             environmentConfiguration: configuration.environmentConfiguration
         )

@@ -12,10 +12,10 @@ let canvasMinimumTextureLength: Int = 16
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public var device: MTLDevice? {
+    public var device: MTLDevice {
         _device
     }
-    private var _device: MTLDevice?
+    private var _device: MTLDevice
 
     public var newCommandBuffer: MTLCommandBuffer? {
         commandQueue?.makeCommandBuffer()
@@ -62,7 +62,6 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         guard
             let texture,
-            let device,
             let textureBuffers = MTLBuffers.makeCanvasTextureBuffers(
                 matrix: matrix,
                 frameSize: frameSize,

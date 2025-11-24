@@ -50,20 +50,21 @@ public final class CanvasRenderer: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init() {}
+    public init(
+        renderer: MTLRendering
+    ) {
+        self.renderer = renderer
+    }
 
     public func initialize(
-        renderer: MTLRendering,
         displayView: CanvasDisplayable?,
         environmentConfiguration: EnvironmentConfiguration?
     ) {
-        guard let device = renderer.device else { fatalError("Device is nil") }
-
-        self.renderer = renderer
+        guard let renderer else { return }
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: device
+            with: renderer.device
         )
 
         self.displayView = displayView

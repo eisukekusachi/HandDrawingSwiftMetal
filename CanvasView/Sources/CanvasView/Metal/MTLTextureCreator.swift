@@ -95,13 +95,12 @@ public enum MTLTextureCreator {
         renderer: MTLRendering
     ) async throws -> MTLTexture? {
         guard
-            let device = renderer.device,
             let newCommandBuffer = renderer.newCommandBuffer,
             let resultTexture = MTLTextureCreator.makeTexture(
                 label: texture.label,
                 width: texture.width,
                 height: texture.height,
-                with: device
+                with: renderer.device
             )
         else {
             return nil

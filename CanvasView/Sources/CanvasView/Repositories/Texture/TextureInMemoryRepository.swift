@@ -118,13 +118,13 @@ public class TextureInMemoryRepository: TextureRepository {
             }
 
             guard
-                let device = renderer.device,
                 let newTexture = try MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                from: hexadecimalData,
-                with: device
-            ) else {
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
+                    from: hexadecimalData,
+                    with: renderer.device
+                )
+            else {
                 let error = NSError(
                     title: String(localized: "Error", bundle: .module),
                     message: String(localized: "Unable to load required data", bundle: .module)
@@ -148,12 +148,10 @@ public class TextureInMemoryRepository: TextureRepository {
     }
 
     func createTexture(_ id: LayerId, textureSize: CGSize) async throws {
-        guard let device = renderer.device else { return }
-
         textures[id] = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
     }
 

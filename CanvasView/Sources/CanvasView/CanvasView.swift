@@ -58,9 +58,9 @@ import UIKit
 
     private let renderer: MTLRendering
 
-    private let displayView = CanvasDisplayView()
+    private let displayView: CanvasDisplayView
 
-    private let viewModel = CanvasViewModel()
+    private let viewModel: CanvasViewModel
 
     private var drawingRenderers: [DrawingRenderer] = []
 
@@ -73,7 +73,8 @@ import UIKit
         self.sharedDevice = sharedDevice
 
         renderer = MTLRenderer(device: sharedDevice)
-        displayView.setDevice(sharedDevice)
+        displayView = CanvasDisplayView(renderer: renderer)
+        viewModel = CanvasViewModel(renderer: renderer)
 
         super.init(frame: .zero)
         commonInitialize()
@@ -85,7 +86,8 @@ import UIKit
         self.sharedDevice = sharedDevice
 
         renderer = MTLRenderer(device: sharedDevice)
-        displayView.setDevice(sharedDevice)
+        displayView = CanvasDisplayView(renderer: renderer)
+        viewModel = CanvasViewModel(renderer: renderer)
 
         super.init(coder: coder)
         commonInitialize()
@@ -111,8 +113,6 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        displayView.initialize(renderer: renderer)
-
         try await viewModel.setup(
             drawingRenderers: drawingRenderers,
             dependencies: .init(
