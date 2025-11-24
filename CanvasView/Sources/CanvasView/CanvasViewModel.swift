@@ -33,20 +33,24 @@ public final class CanvasViewModel {
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
     }
+    private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
     var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
+    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
     var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
         didInitializeTexturesSubject.eraseToAnyPublisher()
     }
+    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
         didInitializeCanvasViewSubject.eraseToAnyPublisher()
     }
+    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     private var dependencies: CanvasViewDependencies!
 
@@ -55,8 +59,6 @@ public final class CanvasViewModel {
 
     /// Undoable texture layers
     private let textureLayers: UndoTextureLayers
-
-    private let persistenceController: PersistenceController
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
@@ -87,18 +89,10 @@ public final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
 
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    /// Emit `TextureLayersProtocol` when the texture update is completed
-    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
-
-    /// Emit `ResolvedTextureLayerArrayConfiguration` when the canvas view update is completed
-    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
-
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
-
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
     private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
+
+    private let persistenceController: PersistenceController
 
     private var cancellables = Set<AnyCancellable>()
 
