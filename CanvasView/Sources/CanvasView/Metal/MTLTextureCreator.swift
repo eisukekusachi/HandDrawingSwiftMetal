@@ -119,7 +119,7 @@ public enum MTLTextureCreator {
         }
 
         renderer.copyTexture(
-            srctexture: texture,
+            srcTexture: texture,
             dstTexture: resultTexture,
             with: commandBuffer
         )

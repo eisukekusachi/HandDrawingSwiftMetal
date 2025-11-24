@@ -68,7 +68,7 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     }
 
     func copyTexture(
-        srctexture: any MTLTexture,
+        srcTexture: any MTLTexture,
         dstTexture: any MTLTexture,
         with commandBuffer: any MTLCommandBuffer
     ) {

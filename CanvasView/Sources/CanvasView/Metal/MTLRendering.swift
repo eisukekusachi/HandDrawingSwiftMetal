@@ -77,7 +77,7 @@ public protocol MTLRendering {
     )
 
     func copyTexture(
-        srctexture: MTLTexture,
+        srcTexture: MTLTexture,
         dstTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )

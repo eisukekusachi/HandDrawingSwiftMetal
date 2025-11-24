@@ -140,7 +140,7 @@ extension CanvasRenderer {
         }
 
         renderer?.copyTexture(
-            srctexture: srcTexture,
+            srcTexture: srcTexture,
             dstTexture: dstTexture,
             with: commandBuffer
         )

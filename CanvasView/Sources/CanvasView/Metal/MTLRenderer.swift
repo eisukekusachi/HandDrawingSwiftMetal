@@ -287,20 +287,20 @@ public final class MTLRenderer: Sendable, MTLRendering {
     }
 
     public func copyTexture(
-        srctexture: MTLTexture,
+        srcTexture: MTLTexture,
         dstTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let encoder = commandBuffer.makeBlitCommandEncoder(),
-            srctexture.pixelFormat == dstTexture.pixelFormat && srctexture.sampleCount == dstTexture.sampleCount
+            srcTexture.pixelFormat == dstTexture.pixelFormat && srcTexture.sampleCount == dstTexture.sampleCount
         else { return }
 
         let origin = MTLOrigin(x: 0, y: 0, z: 0)
-        let size = MTLSize(width: srctexture.width, height: srctexture.height, depth: 1)
+        let size = MTLSize(width: srcTexture.width, height: srcTexture.height, depth: 1)
 
         encoder.copy(
-            from: srctexture,
+            from: srcTexture,
             sourceSlice: 0,
             sourceLevel: 0,
             sourceOrigin: origin,
