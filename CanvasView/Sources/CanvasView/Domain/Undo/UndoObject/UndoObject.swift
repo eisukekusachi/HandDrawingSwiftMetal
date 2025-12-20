@@ -10,7 +10,7 @@ import Foundation
 
 public protocol UndoObject {
     /// The texture ID used for the undo operation
-    var undoTextureId: UndoTextureId { get }
+    var undoTextureId: UndoTextureId? { get }
 
     /// The texture layer targeted by the undo operation
     var textureLayer: TextureLayerModel { get }

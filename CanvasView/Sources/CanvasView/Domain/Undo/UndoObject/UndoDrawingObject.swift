@@ -12,7 +12,7 @@ import MetalKit
 /// An undo object for drawing
 final class UndoDrawingObject: UndoObject {
 
-    let undoTextureId: UndoTextureId
+    let undoTextureId: UndoTextureId? = UndoTextureId()
 
     let textureLayer: TextureLayerModel
 
@@ -28,7 +28,6 @@ final class UndoDrawingObject: UndoObject {
         layer: TextureLayerModel,
         renderer: MTLRendering
     ) {
-        self.undoTextureId = UndoTextureId()
         self.textureLayer = layer
         self.renderer = renderer
     }
@@ -37,6 +36,7 @@ final class UndoDrawingObject: UndoObject {
     public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
         guard
             let renderer,
+            let undoTextureId,
             let newTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: repository.texture(id: undoTextureId),
                 renderer: renderer

@@ -173,7 +173,7 @@ public final class CanvasViewModel {
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
             self.textureLayers.setUndoTextureRepository(
-                undoTextureRepository: undoTextureRepository
+                undoTextureInMemoryRepository: undoTextureRepository
             )
         }
 
@@ -186,7 +186,7 @@ public final class CanvasViewModel {
         ) ?? configuration.textureLayerArrayConfiguration
 
         // Initialize the texture repository
-        let resolvedTextureLayersConfiguration = try await dependencies.textureRepository.initializeStorage(
+        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             configuration: textureLayersConfiguration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
@@ -231,10 +231,10 @@ public final class CanvasViewModel {
                     // Set the texture of the selected texture layer to the renderer
                     try await self.canvasRenderer.updateSelectedLayerTexture(
                         textureLayers: self.textureLayers,
-                        textureRepository: self.dependencies.textureRepository
+                        textureRepository: self.dependencies.textureDocumentsDirectoryRepository
                     )
 
-                    let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+                    let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
                     self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
                     self.commitAndRefreshDisplay()
@@ -260,7 +260,7 @@ public final class CanvasViewModel {
         // Initialize the textures used in the texture layers
         await textureLayers.initialize(
             configuration: configuration,
-            textureRepository: dependencies.textureRepository
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
 
         // Initialize the repository used for Undo
@@ -286,10 +286,10 @@ public final class CanvasViewModel {
         // Set the texture of the selected texture layer to the renderer
         try await canvasRenderer.updateSelectedLayerTexture(
             textureLayers: textureLayers,
-            textureRepository: dependencies.textureRepository
+            textureRepository: dependencies.textureDocumentsDirectoryRepository
         )
 
-        let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+        let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
         self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
         didInitializeTexturesSubject.send(textureLayers)
@@ -453,14 +453,14 @@ public extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         Task {
-            let selectedTexture = try await self.dependencies.textureRepository.duplicatedTexture(selectedLayerId)
+            let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
             self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
         }
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
         // Initialize the texture repository
-        let resolvedConfiguration = try await dependencies.textureRepository.initializeStorage(
+        let resolvedConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             configuration: configuration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
@@ -497,7 +497,7 @@ public extension CanvasViewModel {
             in: workingDirectoryURL
         )
 
-        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureRepository.restoreStorage(
+        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             configuration: .init(
                 textureSize: textureLayersModel.textureSize,
@@ -536,7 +536,7 @@ public extension CanvasViewModel {
         )
 
         // Copy all textures from the textureRepository
-        let textures = try await dependencies.textureRepository.duplicatedTextures(
+        let textures = try await dependencies.textureDocumentsDirectoryRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
@@ -681,7 +681,7 @@ extension CanvasViewModel {
 
         drawingDebouncer.perform { [weak self] in
             do {
-                try await self?.dependencies.textureRepository.updateTexture(
+                try await self?.dependencies.textureDocumentsDirectoryRepository.updateTexture(
                     texture: selectedLayerTexture,
                     for: layerId
                 )

@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoMoveObject: UndoObject {
 
     /// Not used
-    public let undoTextureId = UndoTextureId()
+    public let undoTextureId: UndoTextureId? = nil
 
     public let textureLayer: TextureLayerModel
 
@@ -66,7 +66,6 @@ public final class UndoMoveObject: UndoObject {
         layers.moveLayer(
             indices: indices
         )
-
         layers.requestFullCanvasUpdate()
     }
 }
