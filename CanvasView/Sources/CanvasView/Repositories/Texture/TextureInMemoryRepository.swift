@@ -17,10 +17,6 @@ public final class TextureInMemoryRepository {
         _textureSize
     }
 
-    public var isInitialized: Bool {
-        _textureSize != .zero
-    }
-
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]
 
@@ -72,7 +68,7 @@ public final class TextureInMemoryRepository {
         )
 
         // Set the texture size after the initialization of this repository is completed
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         let configuration: TextureLayerArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
 
@@ -137,10 +133,8 @@ public final class TextureInMemoryRepository {
             newTextures[layer.id] = newTexture
         }
 
-        removeAll()
-
         textures = newTextures
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         return try await .init(
             configuration: configuration,
@@ -210,9 +204,5 @@ public final class TextureInMemoryRepository {
             throw error
         }
         textures[id] = newTexture
-    }
-
-    private func setTextureSize(_ size: CGSize) {
-        _textureSize = size
     }
 }
