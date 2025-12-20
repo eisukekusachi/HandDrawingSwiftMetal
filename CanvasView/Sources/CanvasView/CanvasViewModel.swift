@@ -173,7 +173,7 @@ public final class CanvasViewModel {
         // If `undoTextureRepository` is used, undo functionality is enabled
         if let undoTextureRepository = self.dependencies.undoTextureRepository {
             self.textureLayers.setUndoTextureRepository(
-                undoTextureRepository: undoTextureRepository
+                undoTextureInMemoryRepository: undoTextureRepository
             )
         }
 
