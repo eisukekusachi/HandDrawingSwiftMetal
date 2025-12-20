@@ -142,6 +142,10 @@ public final class TextureInMemoryRepository {
         )
     }
 
+    public func texture(id: LayerId) -> MTLTexture? {
+        textures[id] as? MTLTexture
+    }
+
     /// Removes all textures
     public func removeAll() {
         textures = [:]
@@ -158,27 +162,6 @@ public final class TextureInMemoryRepository {
             throw error
         }
         textures.removeValue(forKey: id)
-    }
-
-    /// Copies a texture for the given `LayerId`
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
-        guard
-            let texture = textures[id],
-            let texture,
-            let newTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                renderer: renderer
-            )
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        return .init(id: id, texture: newTexture)
     }
 
     public func addTexture(newTexture: MTLTexture, id: LayerId) throws {
