@@ -118,8 +118,8 @@ public extension UndoTextureLayers {
     }
     func pushUndoDrawingObjectToUndoStack(
         texture: MTLTexture?
-    ) async {
-        await pushUndoDrawingObject(texture: texture)
+    ) async throws {
+        try await pushUndoDrawingObject(texture: texture)
     }
 }
 
@@ -150,34 +150,43 @@ private extension UndoTextureLayers {
 
     func pushUndoDrawingObject(
         texture: MTLTexture?
-    ) async {
+    ) async throws {
         guard
-            let texture,
-            let previousDrawingTextureForUndo,
+            let renderer,
             let undoTextureRepository,
-            let selectedLayer = textureLayers.selectedLayer
+            let selectedLayer = textureLayers.selectedLayer,
+            let undoTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: previousDrawingTextureForUndo,
+                renderer: renderer
+            ),
+            let redoTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                renderer: renderer
+            )
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
             return
         }
         let undoObject = UndoDrawingObject(
-            from: .init(item: selectedLayer)
+            layer: .init(item: selectedLayer),
+            renderer: renderer
         )
 
         let redoObject = UndoDrawingObject(
-            from: .init(item: selectedLayer)
+            layer: .init(item: selectedLayer),
+            renderer: renderer
         )
 
         do {
-            try await undoTextureRepository
+            try undoTextureRepository
                 .addTexture(
-                    previousDrawingTextureForUndo,
+                    newTexture: undoTexture,
                     id: undoObject.undoTextureId
                 )
 
-            try await undoTextureRepository
+            try undoTextureRepository
                 .addTexture(
-                    texture,
+                    newTexture: redoTexture,
                     id: redoObject.undoTextureId
                 )
 
@@ -207,9 +216,9 @@ private extension UndoTextureLayers {
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try await undoTextureRepository
+            try undoTextureRepository
                 .addTexture(
-                    undoTexture,
+                    newTexture: undoTexture,
                     id: undoRedoObject.redoObject.undoTextureId
                 )
 
@@ -223,9 +232,13 @@ private extension UndoTextureLayers {
 
     func pushUndoDeletionObject(
         _ undoRedoObject: UndoStackModel<UndoObject>
-    ) async {
+    ) async throws {
         guard
-            let undoTexture = undoRedoObject.texture,
+            let renderer,
+            let undoTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: undoRedoObject.texture,
+                renderer: renderer
+            ),
             let undoTextureRepository
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
@@ -234,9 +247,9 @@ private extension UndoTextureLayers {
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try await undoTextureRepository
+            try undoTextureRepository
                 .addTexture(
-                    undoTexture,
+                    newTexture: undoTexture,
                     id: undoRedoObject.undoObject.undoTextureId
                 )
 
@@ -346,6 +359,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
+            let renderer,
             let selectedLayer = textureLayers.selectedLayer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
@@ -354,7 +368,8 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
         let redoObject = UndoAdditionObject(
             layerToBeAdded: layer,
-            at: index
+            at: index,
+            renderer: renderer
         )
 
         // Create a deletion undo object to cancel the addition
@@ -376,6 +391,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
+            let renderer,
             let selectedLayer = textureLayers.selectedLayer,
             let identifiedTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)
         else {
@@ -392,12 +408,13 @@ extension UndoTextureLayers: TextureLayersProtocol {
         // Create a addition undo object to cancel the deletion
         let undoObject = UndoAdditionObject(
             layerToBeAdded: redoObject.textureLayer,
-            at: index
+            at: index,
+            renderer: renderer
         )
 
         try await textureLayers.removeLayer(layerIndexToDelete: index)
 
-        await pushUndoDeletionObject(
+        try await pushUndoDeletionObject(
             .init(
                 undoObject: undoObject,
                 redoObject: redoObject,
@@ -519,7 +536,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: (any TextureRepository)?
+        textureRepository: TextureDocumentsDirectoryRepository?
     ) async {
         await textureLayers.initialize(
             configuration: configuration,

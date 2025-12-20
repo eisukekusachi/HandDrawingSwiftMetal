@@ -5,12 +5,12 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import Combine
+import Foundation
 @preconcurrency import MetalKit
-import SwiftUI
 
 /// A repository that manages on-disk textures
-class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendable {
+@MainActor
+public final class TextureDocumentsDirectoryRepository {
     /// The directory name where texture files are stored
     let directoryName: String
 
@@ -21,13 +21,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         _textureSize
     }
 
-    var isInitialized: Bool {
-        _textureSize != .zero
-    }
-
     private let renderer: MTLRendering
-
-    private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
 
@@ -79,7 +73,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
            )
         {
             // Retain the texture size
-            setTextureSize(configuration.textureSize ?? .zero)
+            _textureSize = textureSize
 
             return try await .init(
                 configuration: configuration,
@@ -147,7 +141,7 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         }
 
         // Set the texture size after the initialization of this repository is completed
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         return try await .init(
             configuration: configuration,
@@ -162,7 +156,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength,
-            let newTexture = try await newTexture(textureSize)
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: renderer.device
+            )
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -185,19 +183,11 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
         try await addTexture(newTexture, id: layer.id)
 
         // Set the texture size after the initialization of this repository is completed
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         return try await .init(
             configuration: .init(configuration, layers: [layer]),
             resolvedTextureSize: textureSize
-        )
-    }
-
-    func newTexture(_ textureSize: CGSize) async throws -> MTLTexture? {
-        MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
         )
     }
 
@@ -326,9 +316,5 @@ class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendabl
             Logger.error(error)
             throw error
         }
-    }
-
-    private func setTextureSize(_ size: CGSize) {
-        _textureSize = size
     }
 }

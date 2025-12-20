@@ -135,19 +135,4 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     ) {
         recordCall()
     }
-
-    func duplicateTexture(
-        texture: MTLTexture
-    ) -> MTLTexture? {
-        recordCall()
-        return texture
-    }
-
-    func duplicateTexture(
-        texture: MTLTexture,
-        with commandBuffer: any MTLCommandBuffer
-    ) -> MTLTexture? {
-        recordCall()
-        return texture
-    }
 }

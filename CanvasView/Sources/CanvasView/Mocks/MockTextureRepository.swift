@@ -9,7 +9,8 @@ import Combine
 import Metal
 import UIKit
 
-final class MockTextureRepository: TextureRepository, @unchecked Sendable {
+@MainActor
+final class MockTextureRepository: @unchecked Sendable {
 
     var textures: [LayerId: MTLTexture] = [:]
     var callHistory: [String] = []

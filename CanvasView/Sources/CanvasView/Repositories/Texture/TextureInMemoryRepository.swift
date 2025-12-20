@@ -5,28 +5,21 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
-import Combine
-import MetalKit
-import SwiftUI
+import Foundation
+@preconcurrency import MetalKit
 
 /// A repository that manages in-memory textures
 @MainActor
-public class TextureInMemoryRepository: TextureRepository {
-
-    /// A dictionary with `LayerId` as the key and MTLTexture as the value
-    public var textures: [LayerId: MTLTexture?] = [:]
+public final class TextureInMemoryRepository {
 
     public var textureSize: CGSize {
         _textureSize
     }
 
-    public var isInitialized: Bool {
-        _textureSize != .zero
-    }
+    /// A dictionary with `LayerId` as the key and MTLTexture as the value
+    private(set) var textures: [LayerId: MTLTexture?] = [:]
 
     private let renderer: MTLRendering
-
-    private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
 
@@ -65,13 +58,14 @@ public class TextureInMemoryRepository: TextureRepository {
             isVisible: true
         )
 
-        try await createTexture(
-            layer.id,
-            textureSize: textureSize
+        textures[layer.id] = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: renderer.device
         )
 
         // Set the texture size after the initialization of this repository is completed
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         let configuration: TextureLayerArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
 
@@ -136,10 +130,8 @@ public class TextureInMemoryRepository: TextureRepository {
             newTextures[layer.id] = newTexture
         }
 
-        removeAll()
-
         textures = newTextures
-        setTextureSize(textureSize)
+        _textureSize = textureSize
 
         return try await .init(
             configuration: configuration,
@@ -147,12 +139,9 @@ public class TextureInMemoryRepository: TextureRepository {
         )
     }
 
-    func createTexture(_ id: LayerId, textureSize: CGSize) async throws {
-        textures[id] = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
+    /// Returns the texture associated with the specified `LayerId`
+    public func texture(id: LayerId) -> MTLTexture? {
+        textures[id] as? MTLTexture
     }
 
     /// Removes all textures
@@ -160,7 +149,7 @@ public class TextureInMemoryRepository: TextureRepository {
         textures = [:]
     }
 
-    /// Removes a texture with `LayerId`
+    /// Removes the texture for the specified `LayerId`
     public func removeTexture(_ id: LayerId) throws {
         // If the file exists, delete it
         guard textures.keys.contains(id) else {
@@ -173,43 +162,8 @@ public class TextureInMemoryRepository: TextureRepository {
         textures.removeValue(forKey: id)
     }
 
-    /// Copies a texture for the given `LayerId`
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
-        guard
-            let texture = textures[id],
-            let texture,
-            let newTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                renderer: renderer
-            )
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to load required data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        return .init(id: id, texture: newTexture)
-    }
-
-    /// Copies multiple textures for the given `LayerId`s
-    public func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
-        try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
-            for id in ids {
-                group.addTask { try await self.duplicatedTexture(id) }
-            }
-
-            var results: [IdentifiedTexture] = []
-            for try await result in group {
-                results.append(result)
-            }
-            return results
-        }
-    }
-
-    public func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
+    /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
+    public func addTexture(newTexture: MTLTexture, id: LayerId) throws {
         // If it doesn’t exist, add it
         guard textures[id] == nil else {
             let error = NSError(
@@ -219,16 +173,11 @@ public class TextureInMemoryRepository: TextureRepository {
             Logger.error(error)
             throw error
         }
-
-        // MTLTexture is a class type, so a new instance needs to be created
-        let newTexture = try await MTLTextureCreator.duplicateTexture(
-            texture: texture,
-            renderer: renderer
-        )
         textures[id] = newTexture
     }
 
-    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
+    /// Updates the texture. Since `MTLTexture` is a reference type, this texture must be a new instance
+    public func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -237,16 +186,6 @@ public class TextureInMemoryRepository: TextureRepository {
             Logger.error(error)
             throw error
         }
-
-        // MTLTexture is a class type, so a new instance needs to be created
-        let newTexture = try await MTLTextureCreator.duplicateTexture(
-            texture: texture,
-            renderer: renderer
-        )
         textures[id] = newTexture
-    }
-
-    private func setTextureSize(_ size: CGSize) {
-        _textureSize = size
     }
 }

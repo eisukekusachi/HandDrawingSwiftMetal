@@ -67,7 +67,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var renderer: MTLRendering?
 
-    private var textureRepository: TextureRepository?
+    private var textureRepository: TextureDocumentsDirectoryRepository?
 
     @Published private var _layers: [TextureLayerItem] = []
 
@@ -88,7 +88,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureRepository? = nil
+        textureRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
         self._textureSize = configuration.textureSize
 

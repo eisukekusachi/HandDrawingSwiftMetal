@@ -700,7 +700,7 @@ extension CanvasViewModel {
         }
 
         Task {
-            await textureLayers.pushUndoDrawingObjectToUndoStack(
+            try await textureLayers.pushUndoDrawingObjectToUndoStack(
                 texture: selectedLayerTexture
             )
         }

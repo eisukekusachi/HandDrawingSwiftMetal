@@ -22,26 +22,36 @@ public final class UndoAdditionObject: UndoObject {
     /// The insertion index for the undo-added layer
     public let insertIndex: Int
 
+    private let renderer: MTLRendering?
+
     deinit {
         deinitSubject.send(self)
     }
 
     public init(
         layerToBeAdded textureLayer: TextureLayerModel,
-        at index: Int
+        at index: Int,
+        renderer: MTLRendering
     ) {
         self.undoTextureId = UndoTextureId()
         self.textureLayer = textureLayer
         self.insertIndex = index
+        self.renderer = renderer
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureRepository) async throws {
-        let result = try await repository.duplicatedTexture(undoTextureId)
+    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
+        guard
+            let renderer,
+            let newTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: repository.texture(id: undoTextureId),
+                renderer: renderer
+            )
+        else { return }
 
         try await layers.addLayer(
             layer: textureLayer,
-            texture: result.texture,
+            texture: newTexture,
             at: insertIndex
         )
 

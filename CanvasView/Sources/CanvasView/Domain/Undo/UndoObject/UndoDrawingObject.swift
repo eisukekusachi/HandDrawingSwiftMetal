@@ -18,25 +18,36 @@ final class UndoDrawingObject: UndoObject {
 
     let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
+    private let renderer: MTLRendering?
+
     deinit {
         deinitSubject.send(self)
     }
 
     init(
-        from layer: TextureLayerModel
+        layer: TextureLayerModel,
+        renderer: MTLRendering
     ) {
         self.undoTextureId = UndoTextureId()
         self.textureLayer = layer
+        self.renderer = renderer
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureRepository) async throws {
-        let result = try await repository.duplicatedTexture(undoTextureId)
+    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
+        guard
+            let renderer,
+            let newTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: repository.texture(id: undoTextureId),
+                renderer: renderer
+            )
+        else { return }
+
         let textureLayerId = textureLayer.id
 
-        try await layers.updateTexture(texture: result.texture, for: textureLayerId)
+        try await layers.updateTexture(texture: newTexture, for: textureLayerId)
         layers.selectLayer(textureLayerId)
-        layers.updateThumbnail(textureLayerId, texture: result.texture)
+        layers.updateThumbnail(textureLayerId, texture: newTexture)
         layers.requestFullCanvasUpdate()
     }
 }
