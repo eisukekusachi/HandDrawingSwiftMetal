@@ -5,9 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
-import Combine
-import MetalKit
-import SwiftUI
+import Foundation
+@preconcurrency import MetalKit
 
 /// A repository that manages in-memory textures
 @MainActor
@@ -21,8 +20,6 @@ public final class TextureInMemoryRepository {
     private(set) var textures: [LayerId: MTLTexture?] = [:]
 
     private let renderer: MTLRendering
-
-    private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
 

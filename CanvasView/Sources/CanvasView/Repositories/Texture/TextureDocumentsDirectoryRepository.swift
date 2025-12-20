@@ -5,13 +5,12 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import Combine
+import Foundation
 @preconcurrency import MetalKit
-import SwiftUI
 
 /// A repository that manages on-disk textures
 @MainActor
-public final class TextureDocumentsDirectoryRepository: @unchecked Sendable {
+public final class TextureDocumentsDirectoryRepository {
     /// The directory name where texture files are stored
     let directoryName: String
 
@@ -23,8 +22,6 @@ public final class TextureDocumentsDirectoryRepository: @unchecked Sendable {
     }
 
     private let renderer: MTLRendering
-
-    private var cancellables = Set<AnyCancellable>()
 
     private var _textureSize: CGSize = .zero
 
