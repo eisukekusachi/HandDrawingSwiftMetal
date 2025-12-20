@@ -526,6 +526,35 @@ extension UndoTextureLayers: TextureLayersProtocol {
         self.previousAlphaForUndo = nil
     }
 
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
+        guard
+            let undoSelectdLayer = textureLayers.layer(id)
+        else { return }
+
+        textureLayers.updateVisibility(id, isVisible: isVisible)
+
+        pushUndoObject(
+            .init(
+                undoObject: UndoVisibilityObject(
+                    layer: .init(
+                        id: undoSelectdLayer.id,
+                        title: undoSelectdLayer.title,
+                        alpha: undoSelectdLayer.alpha,
+                        isVisible: undoSelectdLayer.isVisible
+                    )
+                ),
+                redoObject: UndoVisibilityObject(
+                    layer: .init(
+                        id: undoSelectdLayer.id,
+                        title: undoSelectdLayer.title,
+                        alpha: undoSelectdLayer.alpha,
+                        isVisible: isVisible
+                    )
+                )
+            )
+        )
+    }
+
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         textureLayers.canvasUpdateRequestedPublisher
     }
@@ -602,10 +631,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func updateTitle(_ id: LayerId, title: String) {
         textureLayers.updateTitle(id, title: title)
-    }
-
-    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
-        textureLayers.updateVisibility(id, isVisible: isVisible)
     }
 
     public func updateAlpha(_ id: LayerId, alpha: Int) {
