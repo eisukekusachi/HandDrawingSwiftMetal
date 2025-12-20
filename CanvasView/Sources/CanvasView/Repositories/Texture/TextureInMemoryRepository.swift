@@ -11,7 +11,7 @@ import SwiftUI
 
 /// A repository that manages in-memory textures
 @MainActor
-public class TextureInMemoryRepository: TextureRepository {
+public class TextureInMemoryRepository {
 
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     public var textures: [LayerId: MTLTexture?] = [:]

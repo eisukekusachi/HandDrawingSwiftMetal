@@ -136,7 +136,7 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func updateSelectedLayerTexture(
         textureLayers: any TextureLayersProtocol,
-        textureRepository: TextureRepository
+        textureRepository: TextureDocumentsDirectoryRepository
     ) async throws {
         guard
             let renderer,

@@ -36,8 +36,6 @@ public final class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    private var textureRepository: TextureRepository!
-
     private var cancellables = Set<AnyCancellable>()
 
     public init() {}

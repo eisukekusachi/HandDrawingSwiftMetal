@@ -10,7 +10,8 @@ import Combine
 import SwiftUI
 
 /// A repository that manages on-disk textures
-class TextureDocumentsDirectoryRepository: TextureRepository, @unchecked Sendable {
+@MainActor
+public class TextureDocumentsDirectoryRepository: @unchecked Sendable {
     /// The directory name where texture files are stored
     let directoryName: String
 

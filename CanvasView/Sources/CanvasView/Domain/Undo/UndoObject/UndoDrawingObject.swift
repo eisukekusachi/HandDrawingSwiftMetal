@@ -30,7 +30,7 @@ final class UndoDrawingObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureRepository) async throws {
+    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
         let result = try await repository.duplicatedTexture(undoTextureId)
         let textureLayerId = textureLayer.id
 
