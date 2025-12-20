@@ -132,8 +132,7 @@ private extension UndoTextureLayers {
     ) async {
         guard
             let texture,
-            let previousDrawingTextureForUndo,
-            let undoTextureInMemoryRepository
+            let previousDrawingTextureForUndo
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
             return
@@ -243,7 +242,6 @@ private extension UndoTextureLayers {
         undoRedoObject: UndoRedoObjectPair
     ) async throws {
         guard
-            let renderer,
             let undoTextureId = undoRedoObject.undoObject.undoTextureId,
             let undoTextureInMemoryRepository
         else {
@@ -309,8 +307,6 @@ private extension UndoTextureLayers {
     func registerUndo(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
-        guard let undoTextureInMemoryRepository else { return }
-
         undoManager.beginUndoGrouping()
         undoManager.registerUndo(withTarget: self) { [weak self] _ in
             self?.performUndo(undoRedoObject.undoObject)
@@ -487,7 +483,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
-        guard let undoTextureInMemoryRepository else { return }
+        guard let _ = undoTextureInMemoryRepository else { return }
 
         guard let alpha = textureLayers.selectedLayer?.alpha else { return }
         self.previousAlphaForUndo = alpha
@@ -496,7 +492,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         guard
-            let undoTextureInMemoryRepository,
+            let _ = undoTextureInMemoryRepository,
             let selectedLayer = textureLayers.selectedLayer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
