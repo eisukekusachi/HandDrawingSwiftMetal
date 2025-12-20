@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoAlphaChangedObject: UndoObject {
 
     /// Not used
-    public let undoTextureId: UndoTextureId = UndoTextureId()
+    public let undoTextureId: UndoTextureId? = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 
@@ -41,7 +41,6 @@ public final class UndoAlphaChangedObject: UndoObject {
             textureLayer.id,
             alpha: textureLayer.alpha
         )
-
         layers.requestFullCanvasUpdate()
     }
 }

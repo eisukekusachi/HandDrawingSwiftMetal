@@ -13,7 +13,7 @@ import MetalKit
 public final class UndoDeletionObject: UndoObject {
 
     /// Not used
-    public let undoTextureId: UndoTextureId = UndoTextureId()
+    public let undoTextureId: UndoTextureId? = UndoTextureId()
 
     public let textureLayer: TextureLayerModel
 
@@ -46,7 +46,6 @@ public final class UndoDeletionObject: UndoObject {
         try await layers.removeLayer(
             layerIndexToDelete: index
         )
-
         layers.requestFullCanvasUpdate()
     }
 }

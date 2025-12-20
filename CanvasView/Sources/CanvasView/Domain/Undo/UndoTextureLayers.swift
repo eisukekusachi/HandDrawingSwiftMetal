@@ -179,17 +179,22 @@ private extension UndoTextureLayers {
             renderer: renderer
         )
 
+        guard
+            let undoTextureId = undoObject.undoTextureId,
+            let redoTextureId = redoObject.undoTextureId
+        else { return }
+
         do {
             try undoTextureInMemoryRepository
                 .addTexture(
                     newTexture: undoTexture,
-                    id: undoObject.undoTextureId
+                    id: undoTextureId
                 )
 
             try undoTextureInMemoryRepository
                 .addTexture(
                     newTexture: redoTexture,
-                    id: redoObject.undoTextureId
+                    id: redoTextureId
                 )
 
             pushUndoObject(
@@ -211,6 +216,7 @@ private extension UndoTextureLayers {
     ) async {
         guard
             let newTexture,
+            let undoTextureId = undoRedoObject.redoObject.undoTextureId,
             let undoTextureInMemoryRepository
         else {
             return
@@ -221,7 +227,7 @@ private extension UndoTextureLayers {
             try undoTextureInMemoryRepository
                 .addTexture(
                     newTexture: newTexture,
-                    id: undoRedoObject.redoObject.undoTextureId
+                    id: undoTextureId
                 )
 
             pushUndoObject(undoRedoObject)
@@ -238,6 +244,7 @@ private extension UndoTextureLayers {
     ) async throws {
         guard
             let renderer,
+            let undoTextureId = undoRedoObject.undoObject.undoTextureId,
             let undoTextureInMemoryRepository
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
@@ -249,7 +256,7 @@ private extension UndoTextureLayers {
             try undoTextureInMemoryRepository
                 .addTexture(
                     newTexture: restorationNewTexture,
-                    id: undoRedoObject.undoObject.undoTextureId
+                    id: undoTextureId
                 )
 
             pushUndoObject(undoRedoObject)
@@ -270,18 +277,20 @@ private extension UndoTextureLayers {
 
         undoObject.deinitSubject
             .sink(receiveValue: { result in
+                guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
                 try? undoTextureInMemoryRepository.removeTexture(
-                    result.undoTextureId
+                    undoTextureId
                 )
             })
             .store(in: &cancellables)
 
         redoObject.deinitSubject
             .sink(receiveValue: { result in
+                guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
                 try? undoTextureInMemoryRepository.removeTexture(
-                    result.undoTextureId
+                    undoTextureId
                 )
             })
             .store(in: &cancellables)
