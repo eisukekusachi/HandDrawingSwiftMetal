@@ -11,7 +11,7 @@ import SwiftUI
 
 /// A repository that manages on-disk textures
 @MainActor
-public class TextureDocumentsDirectoryRepository: @unchecked Sendable {
+public final class TextureDocumentsDirectoryRepository: @unchecked Sendable {
     /// The directory name where texture files are stored
     let directoryName: String
 
