@@ -536,11 +536,11 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureDocumentsDirectoryRepository?
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
     ) async {
         await textureLayers.initialize(
             configuration: configuration,
-            textureRepository: textureRepository
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
         )
     }
 

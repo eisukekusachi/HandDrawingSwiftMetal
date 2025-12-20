@@ -67,7 +67,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var renderer: MTLRendering?
 
-    private var textureRepository: TextureDocumentsDirectoryRepository?
+    private var textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
 
     @Published private var _layers: [TextureLayerItem] = []
 
@@ -88,7 +88,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func initialize(
         configuration: ResolvedTextureLayerArrayConfiguration,
-        textureRepository: TextureDocumentsDirectoryRepository? = nil
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
         self._textureSize = configuration.textureSize
 
@@ -104,10 +104,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         self._selectedLayerId = configuration.selectedLayerId
 
-        self.textureRepository = textureRepository
+        self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
 
         Task {
-            let textures = try await textureRepository?.duplicatedTextures(_layers.map { $0.id })
+            let textures = try await textureDocumentsDirectoryRepository?.duplicatedTextures(_layers.map { $0.id })
             textures?.forEach { [weak self] identifiedTexture in
                 self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
@@ -138,7 +138,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
         guard
-            let textureRepository
+            let textureDocumentsDirectoryRepository
         else { return }
 
         // If a texture is provided as an argument, use it. otherwise create a new one.
@@ -165,18 +165,18 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         _selectedLayerId = layer.id
 
-        try await textureRepository
+        try await textureDocumentsDirectoryRepository
             .addTexture(
-                newTexture,
+                texture: newTexture,
                 id: layer.id
             )
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            layerCount > 1,
-            let textureRepository,
-            let selectedLayerId = selectedLayer?.id
+            let textureDocumentsDirectoryRepository,
+            let selectedLayerId = selectedLayer?.id,
+            layerCount > 1
         else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
@@ -191,8 +191,12 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         _selectedLayerId = newLayerId
 
-        try textureRepository
+        try textureDocumentsDirectoryRepository
             .removeTexture(selectedLayerId)
+    }
+
+    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
+        try await textureDocumentsDirectoryRepository?.updateTexture(texture: texture, for: id)
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
@@ -220,7 +224,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Copies a texture for the given `LayerId`
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureRepository?.duplicatedTexture(id)
+        try await textureDocumentsDirectoryRepository?.duplicatedTexture(id)
     }
 
     public func index(for id: LayerId) -> Int? {
@@ -327,18 +331,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
 
         _alpha = alpha
-    }
-
-    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
-        guard let textureRepository else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to find \("textureRepository")", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-        try await textureRepository.updateTexture(texture: texture, for: id)
     }
 
     /// Requests a partial canvas update

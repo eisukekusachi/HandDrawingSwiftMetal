@@ -180,7 +180,7 @@ public final class TextureDocumentsDirectoryRepository {
             isVisible: true
         )
 
-        try await addTexture(newTexture, id: layer.id)
+        try await addTexture(texture: newTexture, id: layer.id)
 
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
@@ -237,7 +237,7 @@ public final class TextureDocumentsDirectoryRepository {
         }
     }
 
-    /// Recreate the directory and removes textures and thumbnails
+    /// Recreate the directory
     func removeAll() {
         do {
             // Create a new folder
@@ -248,6 +248,7 @@ public final class TextureDocumentsDirectoryRepository {
         }
     }
 
+    /// Removes the texture for the specified `LayerId` from the Documents directory
     func removeTexture(_ id: LayerId) throws {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
@@ -265,7 +266,9 @@ public final class TextureDocumentsDirectoryRepository {
         try FileManager.default.removeItem(at: fileURL)
     }
 
-    func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
+    /// Adds a texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
+    /// so the instance passed as an argument does not need to be a new one
+    func addTexture(texture: MTLTexture, id: LayerId) async throws {
         // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
@@ -287,6 +290,8 @@ public final class TextureDocumentsDirectoryRepository {
         )
     }
 
+    /// Updates the texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
+    /// so the instance passed as an argument does not need to be a new one
     func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
         // If the file exists, update it
         guard
