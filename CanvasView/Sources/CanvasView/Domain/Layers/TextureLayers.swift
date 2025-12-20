@@ -205,6 +205,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
+    public func selectLayer(_ id: LayerId) {
+        _selectedLayerId = id
+    }
+
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
         // Do nothing
@@ -226,10 +230,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        _selectedLayerId = id
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {

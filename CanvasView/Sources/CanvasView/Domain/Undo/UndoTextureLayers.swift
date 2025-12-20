@@ -464,6 +464,27 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
     }
 
+    public func selectLayer(_ id: LayerId) {
+        guard let undoSelectdLayer = textureLayers.selectedLayer else { return }
+        let undoObject = UndoSelectionObject(
+            layer: .init(item: undoSelectdLayer)
+        )
+
+        textureLayers.selectLayer(id)
+
+        guard let redoSelectdLayer = textureLayers.selectedLayer else { return }
+        let redoObject = UndoSelectionObject(
+            layer: .init(item: redoSelectdLayer)
+        )
+
+        pushUndoObject(
+            .init(
+                undoObject: undoObject,
+                redoObject: redoObject
+            )
+        )
+    }
+
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
         guard let undoTextureInMemoryRepository else { return }
@@ -569,10 +590,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         textureLayers.layer(id)
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        textureLayers.selectLayer(id)
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {
