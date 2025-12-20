@@ -91,10 +91,11 @@ public enum MTLTextureCreator {
 
     @MainActor
     public static func duplicateTexture(
-        texture: MTLTexture,
+        texture: MTLTexture?,
         renderer: MTLRendering
     ) async throws -> MTLTexture? {
         guard
+            let texture,
             let newCommandBuffer = renderer.newCommandBuffer,
             let resultTexture = MTLTextureCreator.makeTexture(
                 label: texture.label,

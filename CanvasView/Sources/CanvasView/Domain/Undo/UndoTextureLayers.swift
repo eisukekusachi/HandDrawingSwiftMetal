@@ -152,9 +152,7 @@ private extension UndoTextureLayers {
         texture: MTLTexture?
     ) async throws {
         guard
-            let texture,
             let renderer,
-            let previousDrawingTextureForUndo,
             let undoTextureRepository,
             let selectedLayer = textureLayers.selectedLayer,
             let undoTexture = try await MTLTextureCreator.duplicateTexture(
@@ -237,9 +235,8 @@ private extension UndoTextureLayers {
     ) async throws {
         guard
             let renderer,
-            let undoTexture = undoRedoObject.texture,
             let undoTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: undoTexture,
+                texture: undoRedoObject.texture,
                 renderer: renderer
             ),
             let undoTextureRepository
