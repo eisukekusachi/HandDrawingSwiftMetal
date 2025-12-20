@@ -139,6 +139,7 @@ public final class TextureInMemoryRepository {
         )
     }
 
+    /// Returns the texture associated with the specified `LayerId`
     public func texture(id: LayerId) -> MTLTexture? {
         textures[id] as? MTLTexture
     }
@@ -148,7 +149,7 @@ public final class TextureInMemoryRepository {
         textures = [:]
     }
 
-    /// Removes a texture with `LayerId`
+    /// Removes the texture for the specified `LayerId`
     public func removeTexture(_ id: LayerId) throws {
         // If the file exists, delete it
         guard textures.keys.contains(id) else {
@@ -161,6 +162,7 @@ public final class TextureInMemoryRepository {
         textures.removeValue(forKey: id)
     }
 
+    /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
     public func addTexture(newTexture: MTLTexture, id: LayerId) throws {
         // If it doesn’t exist, add it
         guard textures[id] == nil else {
@@ -174,6 +176,7 @@ public final class TextureInMemoryRepository {
         textures[id] = newTexture
     }
 
+    /// Updates the texture. Since `MTLTexture` is a reference type, this texture must be a new instance
     public func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
