@@ -117,7 +117,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public func addNewLayer(at index: Int) async throws {
         guard
             let renderer,
-            let texture = MTLTextureCreator.makeTexture(
+            let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
                 with: renderer.device
@@ -131,29 +131,22 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
                 alpha: 255,
                 isVisible: true
             ),
-            texture: texture,
+            newTexture: newTexture,
             at: index
         )
     }
 
-    public func addLayer(layer: TextureLayerModel, texture: MTLTexture?, at index: Int) async throws {
+    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let textureDocumentsDirectoryRepository
-        else { return }
-
-        // If a texture is provided as an argument, use it. otherwise create a new one.
-        var newTexture: MTLTexture? = texture
-
-        if newTexture == nil,
-           let renderer {
-            newTexture = MTLTextureCreator.makeTexture(
+            let renderer,
+            let textureDocumentsDirectoryRepository,
+            // If a texture is provided as an argument, use it. otherwise create a new one.
+            let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
                 width: Int(_textureSize.width),
                 height: Int(_textureSize.height),
                 with: renderer.device
             )
-        }
-
-        guard let newTexture else { return }
+        else { return }
 
         self._layers.insert(
             .init(

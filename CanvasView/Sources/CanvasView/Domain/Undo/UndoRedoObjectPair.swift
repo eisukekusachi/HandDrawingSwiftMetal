@@ -1,32 +1,28 @@
 //
-//  UndoStackModel.swift
+//  UndoRedoObjectPair.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/12/31.
 //
 
 import Foundation
-import MetalKit
 
 /// A structure that holds both `undo` and `redo` objects
-public struct UndoStackModel<T> {
+public struct UndoRedoObjectPair {
 
-    let undoObject: T
-    let redoObject: T
-
-    var texture: MTLTexture?
+    let undoObject: UndoObject
+    let redoObject: UndoObject
 
     /// Alternate swapping between `undoObject` and `redoObject`
-    var reversedObject: Self {
+    func reversed() -> Self{
         .init(
             undoObject: redoObject,
             redoObject: undoObject
         )
     }
 
-    public init(undoObject: T, redoObject: T, texture: MTLTexture? = nil) {
+    public init(undoObject: UndoObject, redoObject: UndoObject) {
         self.undoObject = undoObject
         self.redoObject = redoObject
-        self.texture = texture
     }
 }

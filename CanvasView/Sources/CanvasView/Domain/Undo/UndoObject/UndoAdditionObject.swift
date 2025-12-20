@@ -51,7 +51,7 @@ public final class UndoAdditionObject: UndoObject {
 
         try await layers.addLayer(
             layer: textureLayer,
-            texture: newTexture,
+            newTexture: newTexture,
             at: insertIndex
         )
 
