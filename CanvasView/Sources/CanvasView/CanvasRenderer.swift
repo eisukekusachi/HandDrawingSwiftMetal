@@ -24,6 +24,15 @@ public final class CanvasRenderer: ObservableObject {
 
     public var matrix: CGAffineTransform = .identity
 
+    /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
+    private(set) var canvasTexture: MTLTexture?
+
+    /// The texture of the selected layer
+    private(set) var selectedLayerTexture: MTLTexture?
+
+    /// Texture used during drawing
+    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
+
     private var renderer: MTLRendering?
 
     /// The background color of the canvas
@@ -35,12 +44,6 @@ public final class CanvasRenderer: ObservableObject {
     private var displayView: CanvasDisplayable?
 
     private var flippedTextureBuffers: MTLTextureBuffers?
-
-    /// The texture of the selected layer
-    private(set) var selectedLayerTexture: MTLTexture?
-
-    /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
-    private(set) var canvasTexture: MTLTexture?
 
     /// A texture that combines the textures of all layers below the selected layer.
     private var unselectedBottomTexture: MTLTexture?
@@ -91,7 +94,8 @@ public final class CanvasRenderer: ObservableObject {
             let unselectedBottomTexture = makeTexture(textureSize),
             let selectedLayerTexture = makeTexture(textureSize),
             let unselectedTopTexture = makeTexture(textureSize),
-            let canvasTexture = makeTexture(textureSize)
+            let canvasTexture = makeTexture(textureSize),
+            let realtimeDrawingTexture = makeTexture(textureSize)
         else {
             assert(false, "Failed to generate texture")
             return
@@ -101,11 +105,13 @@ public final class CanvasRenderer: ObservableObject {
         self.selectedLayerTexture = selectedLayerTexture
         self.unselectedTopTexture = unselectedTopTexture
         self.canvasTexture = canvasTexture
+        self.realtimeDrawingTexture = realtimeDrawingTexture
 
         self.unselectedBottomTexture?.label = "unselectedBottomTexture"
         self.selectedLayerTexture?.label = "selectedLayerTexture"
         self.unselectedTopTexture?.label = "unselectedTopTexture"
         self.canvasTexture?.label = "canvasTexture"
+        self.realtimeDrawingTexture?.label = "realtimeDrawingTexture"
     }
 }
 
@@ -126,6 +132,7 @@ extension CanvasRenderer {
             let renderer,
             let unselectedBottomTexture,
             let selectedLayerTexture,
+            let realtimeDrawingTexture,
             let unselectedTopTexture,
             let selectedLayer = textureLayers.selectedLayer,
             let selectedIndex = textureLayers.selectedIndex,
@@ -154,6 +161,7 @@ extension CanvasRenderer {
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: selectedLayerTexture, with: newCommandBuffer)
+        renderer.clearTexture(texture: realtimeDrawingTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         let textures = try await textureRepository.duplicatedTextures(
@@ -178,6 +186,12 @@ extension CanvasRenderer {
             textures: textures,
             layers: topLayers,
             on: unselectedTopTexture,
+            with: newCommandBuffer
+        )
+
+        renderer.copyTexture(
+            srcTexture: selectedLayerTexture,
+            dstTexture: realtimeDrawingTexture,
             with: newCommandBuffer
         )
 
