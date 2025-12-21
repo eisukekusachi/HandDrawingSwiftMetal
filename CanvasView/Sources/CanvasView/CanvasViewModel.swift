@@ -228,10 +228,10 @@ public final class CanvasViewModel {
                 else { return }
 
                 Task {
-                    // Set the texture of the selected texture layer to the renderer
-                    try await self.canvasRenderer.updateSelectedLayerTexture(
+                    // Update textures in `CanvasRenderer`
+                    try await self.canvasRenderer.updateTextures(
                         textureLayers: self.textureLayers,
-                        textureRepository: self.dependencies.textureDocumentsDirectoryRepository
+                        textureDocumentsDirectoryRepository: self.dependencies.textureDocumentsDirectoryRepository
                     )
 
                     let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
@@ -283,10 +283,10 @@ public final class CanvasViewModel {
             textureSize: configuration.textureSize
         )
 
-        // Set the texture of the selected texture layer to the renderer
-        try await canvasRenderer.updateSelectedLayerTexture(
+        // Update textures in `CanvasRenderer`
+        try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
-            textureRepository: dependencies.textureDocumentsDirectoryRepository
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
 
         let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)

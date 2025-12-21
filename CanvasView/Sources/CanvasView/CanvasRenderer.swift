@@ -121,12 +121,12 @@ extension CanvasRenderer {
         displayView?.resetCommandBuffer()
     }
 
-    /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`.
+    /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`, `realtimeDrawingTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func updateSelectedLayerTexture(
+    public func updateTextures(
         textureLayers: any TextureLayersProtocol,
-        textureRepository: TextureDocumentsDirectoryRepository
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async throws {
         guard
             let renderer,
@@ -164,27 +164,29 @@ extension CanvasRenderer {
         renderer.clearTexture(texture: realtimeDrawingTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
-        let textures = try await textureRepository.duplicatedTextures(
+        // Get textures from the Documents directory
+        let textures = try await textureDocumentsDirectoryRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
-        try await drawLayerTextures(
-            textures: textures,
-            layers: bottomLayers,
+        // Update the class’s textures with the retrieved textures
+        try await drawTextures(
+            repositoryTextures: textures,
+            using: bottomLayers,
             on: unselectedBottomTexture,
             with: newCommandBuffer
         )
 
-        try await drawLayerTextures(
-            textures: textures,
-            layers: [opaqueLayer],
+        try await drawTextures(
+            repositoryTextures: textures,
+            using: [opaqueLayer],
             on: selectedLayerTexture,
             with: newCommandBuffer
         )
 
-        try await drawLayerTextures(
-            textures: textures,
-            layers: topLayers,
+        try await drawTextures(
+            repositoryTextures: textures,
+            using: topLayers,
             on: unselectedTopTexture,
             with: newCommandBuffer
         )
@@ -270,15 +272,17 @@ extension CanvasRenderer {
         layers.safeSlice(lower: selectedIndex + 1, upper: layers.count - 1).filter { $0.isVisible }
     }
 
-    private func drawLayerTextures(
-        textures: [IdentifiedTexture],
-        layers: [TextureLayerModel],
+    private func drawTextures(
+        repositoryTextures: [IdentifiedTexture],
+        using layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
         guard let renderer else { return }
 
-        let textureDictionary = IdentifiedTexture.dictionary(from: Set(textures))
+        let textureDictionary = IdentifiedTexture.dictionary(
+            from: Set(repositoryTextures)
+        )
 
         for layer in layers {
             if let resultTexture = textureDictionary[layer.id] {
