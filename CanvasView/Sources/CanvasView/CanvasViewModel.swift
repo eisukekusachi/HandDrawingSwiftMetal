@@ -224,14 +224,11 @@ public final class CanvasViewModel {
             .sink { [weak self] texture in
                 guard
                     let `self`,
-                    let commandBuffer = canvasRenderer.commandBuffer
+                    let commandBuffer = self.canvasRenderer.commandBuffer
                 else { return }
 
-                self.canvasRenderer.renderToSelectedLayer(
+                self.canvasRenderer.updateSelectedLayerTextures(
                     texture: texture,
-                    with: commandBuffer
-                )
-                self.canvasRenderer.syncSelectedLayerTextureAndRealtimeDrawingTexture(
                     with: commandBuffer
                 )
                 self.commitAndRefreshDisplay()

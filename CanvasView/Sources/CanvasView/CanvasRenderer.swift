@@ -124,7 +124,7 @@ extension CanvasRenderer {
         self.matrix = matrix
     }
 
-    /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`, `realtimeDrawingTexture`.
+    /// Updates `selectedTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func updateTextures(
@@ -194,11 +194,43 @@ extension CanvasRenderer {
             with: newCommandBuffer
         )
 
-        syncSelectedLayerTextureAndRealtimeDrawingTexture(
+        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
+        renderer.copyTexture(
+            srcTexture: selectedLayerTexture,
+            dstTexture: realtimeDrawingTexture,
             with: newCommandBuffer
         )
 
         try await newCommandBuffer.commitAndWaitAsync()
+    }
+
+    /// Updates `selectedLayerTexture` and `realtimeDrawingTexture`
+    public func updateSelectedLayerTextures(
+        texture: RealtimeDrawingTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer,
+            let texture,
+            let flippedTextureBuffers,
+            let selectedLayerTexture,
+            let realtimeDrawingTexture
+        else { return }
+
+        renderer.drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: selectedLayerTexture,
+            with: commandBuffer
+        )
+
+        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
+        renderer.copyTexture(
+            srcTexture: selectedLayerTexture,
+            dstTexture: realtimeDrawingTexture,
+            with: commandBuffer
+        )
     }
 
     func renderToSelectedLayer(
@@ -217,27 +249,6 @@ extension CanvasRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
-    /// Make `selectedLayerTexture` and `realtimeDrawingTexture` have the same pixel content
-    func syncSelectedLayerTextureAndRealtimeDrawingTexture(
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let renderer,
-            let flippedTextureBuffers,
-            let selectedLayerTexture,
-            let realtimeDrawingTexture
-        else { return }
-
-        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
-        renderer.drawTexture(
-            texture: selectedLayerTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: realtimeDrawingTexture,
             with: commandBuffer
         )
     }
