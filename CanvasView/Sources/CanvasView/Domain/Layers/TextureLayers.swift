@@ -17,6 +17,12 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
     private let canvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
 
+    /// Emits when a canvas update is requested with `RealtimeDrawingTexture`
+    public var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> {
+        canvasDrawingUpdateRequestedSubject.eraseToAnyPublisher()
+    }
+    private let canvasDrawingUpdateRequestedSubject = PassthroughSubject<RealtimeDrawingTexture, Never>()
+
     /// Emits when a full canvas update is requested
     public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         fullCanvasUpdateRequestedSubject.eraseToAnyPublisher()
@@ -329,6 +335,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     /// Requests a partial canvas update
     public func requestCanvasUpdate() {
         canvasUpdateRequestedSubject.send(())
+    }
+
+    /// Requests a partial canvas update with `RealtimeDrawingTexture`
+    public func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture) {
+        canvasDrawingUpdateRequestedSubject.send(texture)
     }
 
     /// Requests a full canvas update (all layers composited)

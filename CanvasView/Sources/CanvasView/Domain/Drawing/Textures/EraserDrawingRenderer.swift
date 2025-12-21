@@ -11,11 +11,10 @@ import MetalKit
 /// A set of textures for realtime eraser drawing
 @MainActor
 public final class EraserDrawingRenderer: DrawingRenderer {
-
-    public var realtimeDrawingTexture: RealtimeDrawingTexture? {
-        _realtimeDrawingTexture
+    public var displayRealtimeDrawingTexture: Bool {
+        _displayRealtimeDrawingTexture
     }
-    private var _realtimeDrawingTexture: RealtimeDrawingTexture?
+    private var _displayRealtimeDrawingTexture: Bool = false
 
     private var alpha: Int = 255
 
@@ -75,12 +74,6 @@ public extension EraserDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self._realtimeDrawingTexture = MTLTextureCreator.makeTexture(
-            label: "realtimeDrawingTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
         self.drawingTexture = MTLTextureCreator.makeTexture(
             label: "drawingTexture",
             width: Int(textureSize.width),
@@ -155,7 +148,8 @@ public extension EraserDrawingRenderer {
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture,
+        selectedLayerTexture: MTLTexture?,
+        on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -164,7 +158,8 @@ public extension EraserDrawingRenderer {
             let lineDrawnTexture,
             let grayscaleTexture,
             let drawingTexture,
-            let _realtimeDrawingTexture,
+            let selectedLayerTexture,
+            let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: alpha,
@@ -205,29 +200,11 @@ public extension EraserDrawingRenderer {
             texture: drawingTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: _realtimeDrawingTexture,
-            with: commandBuffer
-        )
-    }
-
-    func endStroke(
-        selectedLayerTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let renderer,
-            let _realtimeDrawingTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: _realtimeDrawingTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
-        clearTextures(with: commandBuffer)
+        _displayRealtimeDrawingTexture = true
     }
 
     func prepareNextStroke() {
@@ -237,22 +214,8 @@ public extension EraserDrawingRenderer {
         newCommandBuffer.commit()
 
         drawingCurve = nil
-    }
 
-    func updateRealtimeDrawingTexture(_ texture: MTLTexture) {
-        guard
-            let _realtimeDrawingTexture,
-            let newCommandBuffer = renderer?.newCommandBuffer
-        else { return }
-
-        renderer?.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: _realtimeDrawingTexture,
-            with: newCommandBuffer
-        )
-        newCommandBuffer.commit()
+        _displayRealtimeDrawingTexture = false
     }
 }
 

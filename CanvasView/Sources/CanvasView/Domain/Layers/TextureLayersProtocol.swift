@@ -15,6 +15,9 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Emits when a canvas update is requested
     var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
 
+    /// Emits when a canvas update is requested with `RealtimeDrawingTexture`
+    var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> { get }
+
     /// Emits when a full canvas update is requested
     var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
 
@@ -82,6 +85,9 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     /// Requests a partial canvas update
     func requestCanvasUpdate()
+
+    /// Requests a partial canvas update with `RealtimeDrawingTexture`
+    func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture)
 
     /// Requests a full canvas update (all layers composited)
     func requestFullCanvasUpdate()

@@ -555,6 +555,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
         textureLayers.canvasUpdateRequestedPublisher
     }
 
+    public var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> {
+        textureLayers.canvasDrawingUpdateRequested
+    }
+
     public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         textureLayers.fullCanvasUpdateRequestedPublisher
     }
@@ -639,6 +643,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func requestCanvasUpdate() {
         textureLayers.requestCanvasUpdate()
+    }
+
+    public func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture) {
+        textureLayers.requestCanvasDrawingUpdate(texture)
     }
 
     public func requestFullCanvasUpdate() {

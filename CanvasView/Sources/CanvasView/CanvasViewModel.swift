@@ -17,7 +17,7 @@ public final class CanvasViewModel {
     /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {
         didSet {
-            canvasRenderer.frameSize = frameSize
+            canvasRenderer.setFrameSize(frameSize)
             drawingRenderers.forEach { $0.setFrameSize(frameSize) }
         }
     }
@@ -219,23 +219,31 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the canvas with `RealtimeDrawingTexture`
+        textureLayers.canvasDrawingUpdateRequested
+            .sink { [weak self] texture in
+                guard
+                    let `self`,
+                    let commandBuffer = self.canvasRenderer.commandBuffer
+                else { return }
+
+                self.canvasRenderer.updateSelectedLayerTextures(
+                    texture: texture,
+                    with: commandBuffer
+                )
+                self.commitAndRefreshDisplay()
+            }
+            .store(in: &cancellables)
+
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                guard
-                    let `self`,
-                    let selectedLayerId = textureLayers.selectedLayer?.id
-                else { return }
-
+                guard let `self` else { return }
                 Task {
-                    // Set the texture of the selected texture layer to the renderer
-                    try await self.canvasRenderer.updateSelectedLayerTexture(
+                    try await self.canvasRenderer.updateTextures(
                         textureLayers: self.textureLayers,
-                        textureRepository: self.dependencies.textureDocumentsDirectoryRepository
+                        textureDocumentsDirectoryRepository: self.dependencies.textureDocumentsDirectoryRepository
                     )
-
-                    let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-                    self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
                     self.commitAndRefreshDisplay()
                 }
@@ -244,7 +252,7 @@ public final class CanvasViewModel {
 
         transforming.matrixPublisher
             .sink { [weak self] matrix in
-                self?.canvasRenderer.matrix = matrix
+                self?.canvasRenderer.setMatrix(matrix)
             }
             .store(in: &cancellables)
 
@@ -270,9 +278,6 @@ public final class CanvasViewModel {
             )
         }
 
-        // selectedLayer.id will never be null at this point
-        let selectedLayerId = textureLayers.selectedLayer?.id ?? UUID()
-
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
             try drawingRenderers[i].initializeTextures(configuration.textureSize)
@@ -283,14 +288,10 @@ public final class CanvasViewModel {
             textureSize: configuration.textureSize
         )
 
-        // Set the texture of the selected texture layer to the renderer
-        try await canvasRenderer.updateSelectedLayerTexture(
+        try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
-            textureRepository: dependencies.textureDocumentsDirectoryRepository
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
-
-        let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-        self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
         didInitializeTexturesSubject.send(textureLayers)
         didInitializeCanvasViewSubject.send(configuration)
@@ -445,17 +446,11 @@ public extension CanvasViewModel {
 
     func setDrawingTool(_ drawingToolIndex: Int) {
         guard
-            drawingToolIndex < drawingRenderers.count,
-            let selectedLayerId = textureLayers.selectedLayer?.id
+            drawingToolIndex < drawingRenderers.count
         else { return }
 
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
-
-        Task {
-            let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-            self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
-        }
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
@@ -604,18 +599,20 @@ extension CanvasViewModel {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
+            let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
             let commandBuffer = canvasRenderer.commandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
             selectedLayerTexture: selectedLayerTexture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            drawingRenderer.endStroke(
-                selectedLayerTexture: selectedLayerTexture,
+            canvasRenderer.renderToSelectedLayer(
+                texture: canvasRenderer.realtimeDrawingTexture,
                 with: commandBuffer
             )
 
@@ -633,7 +630,7 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            displayedLayer: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+            displayRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
@@ -718,8 +715,8 @@ extension CanvasViewModel {
         } else {
             transforming.transformCanvas(
                 screenCenter: .init(
-                    x: canvasRenderer.frameSize.width * 0.5,
-                    y: canvasRenderer.frameSize.height * 0.5
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
                 ),
                 touchHistories: fingerStroke.touchHistories
             )
@@ -729,12 +726,12 @@ extension CanvasViewModel {
     }
 
     private func commitAndRefreshDisplay(
-        displayedLayer: RealtimeDrawingTexture? = nil
+        displayRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
         canvasRenderer.commitAndRefreshDisplay(
-            displayedLayer: displayedLayer,
+            displayRealtimeDrawingTexture: displayRealtimeDrawingTexture,
             selectedLayer: selectedLayer
         )
     }
