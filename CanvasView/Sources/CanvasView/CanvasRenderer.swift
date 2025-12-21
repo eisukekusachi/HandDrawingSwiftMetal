@@ -203,18 +203,19 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
-    func renderRealtimeDrawingTextureToSelectedLayer(
+    func renderToSelectedLayer(
+        texture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
             let renderer,
             let flippedTextureBuffers,
-            let realtimeDrawingTexture,
+            let texture,
             let selectedLayerTexture
         else { return }
 
         renderer.drawTexture(
-            texture: realtimeDrawingTexture,
+            texture: texture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: selectedLayerTexture,
