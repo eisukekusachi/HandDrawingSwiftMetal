@@ -219,6 +219,25 @@ public final class CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Update the canvas with `RealtimeDrawingTexture`
+        textureLayers.canvasDrawingUpdateRequested
+            .sink { [weak self] texture in
+                guard
+                    let `self`,
+                    let commandBuffer = canvasRenderer.commandBuffer
+                else { return }
+
+                self.canvasRenderer.renderToSelectedLayer(
+                    texture: texture,
+                    with: commandBuffer
+                )
+                self.canvasRenderer.syncSelectedLayerTextureAndRealtimeDrawingTexture(
+                    with: commandBuffer
+                )
+                self.commitAndRefreshDisplay()
+            }
+            .store(in: &cancellables)
+
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in

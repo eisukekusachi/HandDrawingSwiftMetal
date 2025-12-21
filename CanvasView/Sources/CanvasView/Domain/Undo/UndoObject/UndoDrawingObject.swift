@@ -48,6 +48,6 @@ final class UndoDrawingObject: UndoObject {
         try await layers.updateTexture(texture: newTexture, for: textureLayerId)
         layers.selectLayer(textureLayerId)
         layers.updateThumbnail(textureLayerId, texture: newTexture)
-        layers.requestFullCanvasUpdate()
+        layers.requestCanvasDrawingUpdate(newTexture)
     }
 }
