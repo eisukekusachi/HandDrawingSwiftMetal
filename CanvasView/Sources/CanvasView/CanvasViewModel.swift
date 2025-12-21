@@ -17,7 +17,7 @@ public final class CanvasViewModel {
     /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {
         didSet {
-            canvasRenderer.frameSize = frameSize
+            canvasRenderer.setFrameSize(frameSize)
             drawingRenderers.forEach { $0.setFrameSize(frameSize) }
         }
     }
@@ -241,7 +241,7 @@ public final class CanvasViewModel {
 
         transforming.matrixPublisher
             .sink { [weak self] matrix in
-                self?.canvasRenderer.matrix = matrix
+                self?.canvasRenderer.setMatrix(matrix)
             }
             .store(in: &cancellables)
 
@@ -707,8 +707,8 @@ extension CanvasViewModel {
         } else {
             transforming.transformCanvas(
                 screenCenter: .init(
-                    x: canvasRenderer.frameSize.width * 0.5,
-                    y: canvasRenderer.frameSize.height * 0.5
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
                 ),
                 touchHistories: fingerStroke.touchHistories
             )

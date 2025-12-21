@@ -20,10 +20,6 @@ public final class CanvasRenderer: ObservableObject {
         displayView?.commandBuffer
     }
 
-    public var frameSize: CGSize = .zero
-
-    public var matrix: CGAffineTransform = .identity
-
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
@@ -32,6 +28,10 @@ public final class CanvasRenderer: ObservableObject {
 
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
+
+    private var frameSize: CGSize = .zero
+
+    private var matrix: CGAffineTransform = .identity
 
     private var renderer: MTLRendering?
 
@@ -90,7 +90,6 @@ public final class CanvasRenderer: ObservableObject {
         }
 
         guard
-            let device = renderer?.device,
             let unselectedBottomTexture = makeTexture(textureSize),
             let selectedLayerTexture = makeTexture(textureSize),
             let unselectedTopTexture = makeTexture(textureSize),
@@ -119,6 +118,14 @@ extension CanvasRenderer {
 
     public func resetCommandBuffer() {
         displayView?.resetCommandBuffer()
+    }
+
+    public func setFrameSize(_ size: CGSize) {
+        self.frameSize = size
+    }
+
+    public func setMatrix(_ matrix: CGAffineTransform) {
+        self.matrix = matrix
     }
 
     /// Updates `selectedTexture` and `unselectedBottomTexture`, `unselectedTopTexture`, `realtimeDrawingTexture`.
