@@ -222,13 +222,8 @@ public final class CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                guard
-                    let `self`,
-                    let selectedLayerId = textureLayers.selectedLayer?.id
-                else { return }
-
+                guard let `self` else { return }
                 Task {
-                    // Update textures in `CanvasRenderer`
                     try await self.canvasRenderer.updateTextures(
                         textureLayers: self.textureLayers,
                         textureDocumentsDirectoryRepository: self.dependencies.textureDocumentsDirectoryRepository
@@ -267,9 +262,6 @@ public final class CanvasViewModel {
             )
         }
 
-        // selectedLayer.id will never be null at this point
-        let selectedLayerId = textureLayers.selectedLayer?.id ?? UUID()
-
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
             try drawingRenderers[i].initializeTextures(configuration.textureSize)
@@ -280,7 +272,6 @@ public final class CanvasViewModel {
             textureSize: configuration.textureSize
         )
 
-        // Update textures in `CanvasRenderer`
         try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository

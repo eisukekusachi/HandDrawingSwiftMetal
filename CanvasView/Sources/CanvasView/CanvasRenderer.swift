@@ -116,10 +116,6 @@ public final class CanvasRenderer: ObservableObject {
 
 extension CanvasRenderer {
 
-    public func resetCommandBuffer() {
-        displayView?.resetCommandBuffer()
-    }
-
     public func setFrameSize(_ size: CGSize) {
         self.frameSize = size
     }
@@ -233,12 +229,12 @@ extension CanvasRenderer {
     ) {
         guard
             let renderer,
+            let canvasTexture,
             let unselectedBottomTexture,
             let selectedLayerTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
-            let commandBuffer = displayView?.commandBuffer,
-            let canvasTexture
+            let commandBuffer = displayView?.commandBuffer
         else { return }
 
         renderer.fillColor(
@@ -275,8 +271,8 @@ extension CanvasRenderer {
     public func commitAndRefreshDisplay() {
         guard
             let renderer,
-            let commandBuffer = displayView?.commandBuffer,
-            let displayTexture = displayView?.displayTexture
+            let displayTexture = displayView?.displayTexture,
+            let commandBuffer = displayView?.commandBuffer
         else { return }
 
         renderer.drawTexture(
@@ -288,6 +284,10 @@ extension CanvasRenderer {
             with: commandBuffer
         )
         displayView?.setNeedsDisplay()
+    }
+
+    public func resetCommandBuffer() {
+        displayView?.resetCommandBuffer()
     }
 }
 
