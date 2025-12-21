@@ -11,11 +11,10 @@ import MetalKit
 /// A set of textures for realtime brush drawing
 @MainActor
 public final class BrushDrawingRenderer: DrawingRenderer {
-
-    public var realtimeDrawingTexture: RealtimeDrawingTexture? {
-        _realtimeDrawingTexture
+    public var displayRealtimeDrawingTexture: Bool {
+        _displayRealtimeDrawingTexture
     }
-    private var _realtimeDrawingTexture: RealtimeDrawingTexture?
+    private var _displayRealtimeDrawingTexture: Bool = false
 
     private var color: UIColor = .black
 
@@ -74,12 +73,6 @@ public extension BrushDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self._realtimeDrawingTexture = MTLTextureCreator.makeTexture(
-            label: "realtimeDrawingTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
         self.drawingTexture = MTLTextureCreator.makeTexture(
             label: "drawingTexture",
             width: Int(textureSize.width),
@@ -148,7 +141,8 @@ public extension BrushDrawingRenderer {
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture,
+        selectedLayerTexture: MTLTexture?,
+        on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
@@ -156,7 +150,8 @@ public extension BrushDrawingRenderer {
             let drawingCurve,
             let drawingTexture,
             let grayscaleTexture,
-            let _realtimeDrawingTexture,
+            let selectedLayerTexture,
+            let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
                 alpha: color.alpha,
@@ -182,35 +177,17 @@ public extension BrushDrawingRenderer {
             texture: selectedLayerTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: _realtimeDrawingTexture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: drawingTexture,
-            into: _realtimeDrawingTexture,
-            with: commandBuffer
-        )
-    }
-
-    func endStroke(
-        selectedLayerTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let renderer,
-            let _realtimeDrawingTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: _realtimeDrawingTexture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
+            into: realtimeDrawingTexture,
             with: commandBuffer
         )
 
-        clearTextures(with: commandBuffer)
+        _displayRealtimeDrawingTexture = true
     }
 
     func prepareNextStroke() {
@@ -222,22 +199,8 @@ public extension BrushDrawingRenderer {
         newCommandBuffer.commit()
 
         drawingCurve = nil
-    }
 
-    func updateRealtimeDrawingTexture(_ texture: MTLTexture) {
-        guard
-            let _realtimeDrawingTexture,
-            let newCommandBuffer = renderer?.newCommandBuffer
-        else { return }
-
-        renderer?.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: _realtimeDrawingTexture,
-            with: newCommandBuffer
-        )
-        newCommandBuffer.commit()
+        _displayRealtimeDrawingTexture = false
     }
 }
 

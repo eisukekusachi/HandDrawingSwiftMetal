@@ -14,8 +14,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer {
 
-    /// Texture used during drawing
-    var realtimeDrawingTexture: RealtimeDrawingTexture? { get }
+    var displayRealtimeDrawingTexture: Bool { get }
 
     /// Configures external dependencies
     func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?)
@@ -40,19 +39,11 @@ public protocol DrawingRenderer {
 
     /// Called during drawing
     func drawStroke(
-        selectedLayerTexture: MTLTexture,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    /// Called when drawing ends
-    func endStroke(
-        selectedLayerTexture: MTLTexture,
+        selectedLayerTexture: MTLTexture?,
+        on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     )
 
     /// Prepare for the next stroke
     func prepareNextStroke()
-
-    /// Update `realtimeDrawingTexture` whenever a tool is switched or a different layer is selected
-    func updateRealtimeDrawingTexture(_ texture: MTLTexture)
 }

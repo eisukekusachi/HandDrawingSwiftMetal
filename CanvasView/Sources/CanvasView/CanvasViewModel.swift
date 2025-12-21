@@ -234,9 +234,6 @@ public final class CanvasViewModel {
                         textureDocumentsDirectoryRepository: self.dependencies.textureDocumentsDirectoryRepository
                     )
 
-                    let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-                    self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
-
                     self.commitAndRefreshDisplay()
                 }
             }
@@ -288,9 +285,6 @@ public final class CanvasViewModel {
             textureLayers: textureLayers,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
-
-        let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-        self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
 
         didInitializeTexturesSubject.send(textureLayers)
         didInitializeCanvasViewSubject.send(configuration)
@@ -445,17 +439,11 @@ public extension CanvasViewModel {
 
     func setDrawingTool(_ drawingToolIndex: Int) {
         guard
-            drawingToolIndex < drawingRenderers.count,
-            let selectedLayerId = textureLayers.selectedLayer?.id
+            drawingToolIndex < drawingRenderers.count
         else { return }
 
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
-
-        Task {
-            let selectedTexture = try await self.dependencies.textureDocumentsDirectoryRepository.duplicatedTexture(selectedLayerId)
-            self.drawingRenderer?.updateRealtimeDrawingTexture(selectedTexture.texture)
-        }
     }
 
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
@@ -604,18 +592,19 @@ extension CanvasViewModel {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
+            let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
             let commandBuffer = canvasRenderer.commandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
             selectedLayerTexture: selectedLayerTexture,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            drawingRenderer.endStroke(
-                selectedLayerTexture: selectedLayerTexture,
+            canvasRenderer.renderRealtimeDrawingTextureToSelectedLayer(
                 with: commandBuffer
             )
 
@@ -633,7 +622,7 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            realtimeDrawingTexture: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+            displayRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
@@ -729,12 +718,12 @@ extension CanvasViewModel {
     }
 
     private func commitAndRefreshDisplay(
-        realtimeDrawingTexture: RealtimeDrawingTexture? = nil
+        displayRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
         canvasRenderer.commitAndRefreshDisplay(
-            realtimeDrawingTexture: realtimeDrawingTexture,
+            displayRealtimeDrawingTexture: displayRealtimeDrawingTexture,
             selectedLayer: selectedLayer
         )
     }

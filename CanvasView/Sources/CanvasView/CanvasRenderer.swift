@@ -200,15 +200,35 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
+    func renderRealtimeDrawingTextureToSelectedLayer(
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer,
+            let flippedTextureBuffers,
+            let realtimeDrawingTexture,
+            let selectedLayerTexture
+        else { return }
+
+        renderer.drawTexture(
+            texture: realtimeDrawingTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: selectedLayerTexture,
+            with: commandBuffer
+        )
+    }
+
     /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     public func commitAndRefreshDisplay(
-        realtimeDrawingTexture: RealtimeDrawingTexture? = nil,
+        displayRealtimeDrawingTexture: Bool,
         selectedLayer: TextureLayerItem
     ) {
         guard
             let renderer,
             let unselectedBottomTexture,
             let selectedLayerTexture,
+            let realtimeDrawingTexture,
             let unselectedTopTexture,
             let commandBuffer = displayView?.commandBuffer,
             let canvasTexture
@@ -228,7 +248,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: realtimeDrawingTexture ?? selectedLayerTexture,
+                texture: displayRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
