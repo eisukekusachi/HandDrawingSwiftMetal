@@ -88,26 +88,10 @@ public final class CanvasRenderer: ObservableObject {
 
         guard
             let device = renderer?.device,
-            let unselectedBottomTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            ),
-            let selectedLayerTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            ),
-            let unselectedTopTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            ),
-            let canvasTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            )
+            let unselectedBottomTexture = makeTexture(textureSize),
+            let selectedLayerTexture = makeTexture(textureSize),
+            let unselectedTopTexture = makeTexture(textureSize),
+            let canvasTexture = makeTexture(textureSize)
         else {
             assert(false, "Failed to generate texture")
             return
@@ -292,5 +276,14 @@ extension CanvasRenderer {
                 )
             }
         }
+    }
+
+    private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
+        guard let device else { return nil }
+        return MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
     }
 }
