@@ -633,7 +633,7 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            displayedLayer: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
+            realtimeDrawingTexture: isCurrentlyDrawing ? drawingRenderer.realtimeDrawingTexture : nil
         )
     }
 
@@ -729,12 +729,12 @@ extension CanvasViewModel {
     }
 
     private func commitAndRefreshDisplay(
-        displayedLayer: RealtimeDrawingTexture? = nil
+        realtimeDrawingTexture: RealtimeDrawingTexture? = nil
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
         canvasRenderer.commitAndRefreshDisplay(
-            displayedLayer: displayedLayer,
+            realtimeDrawingTexture: realtimeDrawingTexture,
             selectedLayer: selectedLayer
         )
     }

@@ -37,16 +37,16 @@ public final class CanvasRenderer: ObservableObject {
     private var flippedTextureBuffers: MTLTextureBuffers?
 
     /// The texture of the selected layer
-    private(set) var selectedLayerTexture: MTLTexture!
+    private(set) var selectedLayerTexture: MTLTexture?
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
     /// A texture that combines the textures of all layers below the selected layer.
-    private var unselectedBottomTexture: MTLTexture!
+    private var unselectedBottomTexture: MTLTexture?
 
     /// A texture that combines the textures of all layers above the selected layer.
-    private var unselectedTopTexture: MTLTexture!
+    private var unselectedTopTexture: MTLTexture?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -140,6 +140,9 @@ extension CanvasRenderer {
     ) async throws {
         guard
             let renderer,
+            let unselectedBottomTexture,
+            let selectedLayerTexture,
+            let unselectedTopTexture,
             let selectedLayer = textureLayers.selectedLayer,
             let selectedIndex = textureLayers.selectedIndex,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -199,11 +202,14 @@ extension CanvasRenderer {
 
     /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     public func commitAndRefreshDisplay(
-        displayedLayer: RealtimeDrawingTexture? = nil,
+        realtimeDrawingTexture: RealtimeDrawingTexture? = nil,
         selectedLayer: TextureLayerItem
     ) {
         guard
             let renderer,
+            let unselectedBottomTexture,
+            let selectedLayerTexture,
+            let unselectedTopTexture,
             let commandBuffer = displayView?.commandBuffer,
             let canvasTexture
         else { return }
@@ -222,7 +228,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: displayedLayer ?? selectedLayerTexture,
+                texture: realtimeDrawingTexture ?? selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
