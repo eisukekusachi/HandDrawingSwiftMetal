@@ -194,9 +194,7 @@ extension CanvasRenderer {
             with: newCommandBuffer
         )
 
-        renderer.copyTexture(
-            srcTexture: selectedLayerTexture,
-            dstTexture: realtimeDrawingTexture,
+        syncSelectedLayerTextureAndRealtimeDrawingTexture(
             with: newCommandBuffer
         )
 
@@ -219,6 +217,27 @@ extension CanvasRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: selectedLayerTexture,
+            with: commandBuffer
+        )
+    }
+
+    /// Make `selectedLayerTexture` and `realtimeDrawingTexture` have the same pixel content
+    func syncSelectedLayerTextureAndRealtimeDrawingTexture(
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let renderer,
+            let flippedTextureBuffers,
+            let selectedLayerTexture,
+            let realtimeDrawingTexture
+        else { return }
+
+        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
+        renderer.drawTexture(
+            texture: selectedLayerTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: realtimeDrawingTexture,
             with: commandBuffer
         )
     }
