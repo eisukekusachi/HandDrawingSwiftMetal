@@ -43,7 +43,7 @@ final class HandDrawingContentView: UIView {
     var dragBrushSlider: ((Float) -> Void)?
     var dragEraserSlider: ((Float) -> Void)?
 
-    private let throttle = Throttle(delay: 0.2)
+    private let throttle = Throttle(delay: 0.05)
 
     private var cancellables = Set<AnyCancellable>()
 
