@@ -685,6 +685,11 @@ extension CanvasViewModel {
                         for: layerId
                     )
 
+                    self.textureLayers.updateThumbnail(
+                        layerId,
+                        texture: selectedLayerTexture
+                    )
+
                     // Update `updatedAt` when drawing completes
                     self.projectMetaDataStorage.updateUpdatedAt()
 
@@ -692,11 +697,6 @@ extension CanvasViewModel {
                     Logger.error(error)
                 }
             }
-
-            self?.textureLayers.updateThumbnail(
-                layerId,
-                texture: selectedLayerTexture
-            )
         }
 
         Task {
