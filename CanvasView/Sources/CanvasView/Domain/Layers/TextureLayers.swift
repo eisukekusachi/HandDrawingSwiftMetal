@@ -194,8 +194,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             .removeTexture(selectedLayerId)
     }
 
-    public func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
-        try await textureDocumentsDirectoryRepository?.updateTexture(texture: texture, for: id)
+    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
+        try await textureDocumentsDirectoryRepository?.writeTextureToDisk(texture: texture, for: id)
     }
 
     public func moveLayer(indices: MoveLayerIndices) {

@@ -677,22 +677,25 @@ extension CanvasViewModel {
         else { return }
 
         drawingDebouncer.perform { [weak self] in
-            do {
-                try await self?.dependencies.textureDocumentsDirectoryRepository.updateTexture(
-                    texture: selectedLayerTexture,
-                    for: layerId
-                )
+            Task(priority: .utility) { [weak self] in
+                guard let self else { return }
+                do {
+                    try await self.dependencies.textureDocumentsDirectoryRepository.writeTextureToDisk(
+                        texture: selectedLayerTexture,
+                        for: layerId
+                    )
 
-                // Update `updatedAt` when drawing completes
-                self?.projectMetaDataStorage.updateUpdatedAt()
+                    self.textureLayers.updateThumbnail(
+                        layerId,
+                        texture: selectedLayerTexture
+                    )
 
-                self?.textureLayers.updateThumbnail(
-                    layerId,
-                    texture: selectedLayerTexture
-                )
+                    // Update `updatedAt` when drawing completes
+                    self.projectMetaDataStorage.updateUpdatedAt()
 
-            } catch {
-                Logger.error(error)
+                } catch {
+                    Logger.error(error)
+                }
             }
         }
 

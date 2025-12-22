@@ -80,8 +80,8 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func updateAlpha(_ id: LayerId, alpha: Int)
 
-    /// Updates an existing texture for LayerId
-    func updateTexture(texture: MTLTexture, for id: LayerId) async throws
+    /// Writes the texture to disk
+    func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws
 
     /// Requests a partial canvas update
     func requestCanvasUpdate()
