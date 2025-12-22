@@ -45,9 +45,12 @@ final class UndoDrawingObject: UndoObject {
 
         let textureLayerId = textureLayer.id
 
-        try await layers.writeTextureToDisk(texture: newTexture, for: textureLayerId)
+        Task {
+            try await layers.writeTextureToDisk(texture: newTexture, for: textureLayerId)
+            layers.updateThumbnail(textureLayerId, texture: newTexture)
+        }
+
         layers.selectLayer(textureLayerId)
-        layers.updateThumbnail(textureLayerId, texture: newTexture)
         layers.requestCanvasDrawingUpdate(newTexture)
     }
 }
