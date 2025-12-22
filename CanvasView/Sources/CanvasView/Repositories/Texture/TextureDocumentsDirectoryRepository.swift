@@ -290,9 +290,9 @@ public final class TextureDocumentsDirectoryRepository {
         )
     }
 
-    /// Updates the texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
-    /// so the instance passed as an argument does not need to be a new one
-    func updateTexture(texture: MTLTexture, for id: LayerId) async throws {
+    /// Writes the texture to disk by duplicating it into the Documents directory.
+    /// Since `MTLTexture` is a reference type, the passed instance does not need to be newly created.
+    func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
         // If the file exists, update it
         guard
             FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
