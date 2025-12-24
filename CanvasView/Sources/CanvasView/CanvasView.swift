@@ -69,11 +69,9 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-
         renderer = MTLRenderer(device: sharedDevice)
         displayView = CanvasDisplayView(renderer: renderer)
         viewModel = CanvasViewModel(renderer: renderer)
-
         super.init(frame: .zero)
         commonInitialize()
     }
@@ -82,23 +80,15 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-
         renderer = MTLRenderer(device: sharedDevice)
         displayView = CanvasDisplayView(renderer: renderer)
         viewModel = CanvasViewModel(renderer: renderer)
-
         super.init(coder: coder)
         commonInitialize()
     }
-
-    public override func layoutSubviews() {
-        viewModel.frameSize = frame.size
-    }
-
     private func commonInitialize() {
         layoutView()
         bindData()
-
         addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
@@ -119,6 +109,10 @@ import UIKit
             ),
             configuration: configuration
         )
+    }
+
+    public override func layoutSubviews() {
+        viewModel.frameSize = frame.size
     }
 
     public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
@@ -159,6 +153,16 @@ import UIKit
 }
 
 extension CanvasView {
+    private func layoutView() {
+        addSubview(displayView)
+        displayView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            displayView.topAnchor.constraint(equalTo: topAnchor),
+            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] displayTextureSize in
@@ -190,18 +194,6 @@ extension CanvasView {
                 self?.didUndoSubject.send(value)
             }
             .store(in: &cancellables)
-    }
-
-    private func layoutView() {
-        addSubview(displayView)
-        displayView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            displayView.topAnchor.constraint(equalTo: topAnchor),
-            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
     }
 }
 

@@ -104,16 +104,16 @@ public final class CanvasViewModel {
     public static let thumbnailLength: CGFloat = 500
 
     init(renderer: MTLRendering) {
-
         canvasRenderer = CanvasRenderer(renderer: renderer)
-
         drawingDebouncer = DrawingDebouncer(delay: 0.25)
-
         persistenceController = PersistenceController(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
         )
-
+        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
+            project: ProjectMetaData(),
+            context: persistenceController.viewContext
+        )
         // Initialize texture layers that supports undo and stores its data in Core Data
         textureLayers = UndoTextureLayers(
             textureLayers: CoreDataTextureLayers(
@@ -122,12 +122,6 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
-
-        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
-            project: ProjectMetaData(),
-            context: persistenceController.viewContext
-        )
-
         Task {
             if let entity = try projectMetaDataStorage.fetch() {
                 projectMetaDataStorage.update(entity)

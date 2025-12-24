@@ -29,6 +29,14 @@ public final class CanvasRenderer: ObservableObject {
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
+    /// A texture that combines the textures of all layers below the selected layer.
+    private var unselectedBottomTexture: MTLTexture?
+
+    /// A texture that combines the textures of all layers above the selected layer.
+    private var unselectedTopTexture: MTLTexture?
+
+    private var flippedTextureBuffers: MTLTextureBuffers?
+
     private var frameSize: CGSize = .zero
 
     private var matrix: CGAffineTransform = .identity
@@ -42,14 +50,6 @@ public final class CanvasRenderer: ObservableObject {
     private var baseBackgroundColor: UIColor = .lightGray
 
     private var displayView: CanvasDisplayable?
-
-    private var flippedTextureBuffers: MTLTextureBuffers?
-
-    /// A texture that combines the textures of all layers below the selected layer.
-    private var unselectedBottomTexture: MTLTexture?
-
-    /// A texture that combines the textures of all layers above the selected layer.
-    private var unselectedTopTexture: MTLTexture?
 
     private var cancellables = Set<AnyCancellable>()
 
