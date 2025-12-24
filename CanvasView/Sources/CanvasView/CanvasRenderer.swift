@@ -12,8 +12,8 @@ import Combine
 @MainActor
 public final class CanvasRenderer: ObservableObject {
 
-    public var device: MTLDevice? {
-        renderer?.device
+    public var device: MTLDevice {
+        renderer.device
     }
 
     public var commandBuffer: MTLCommandBuffer? {
@@ -33,7 +33,7 @@ public final class CanvasRenderer: ObservableObject {
 
     private var matrix: CGAffineTransform = .identity
 
-    private var renderer: MTLRendering?
+    private let renderer: MTLRendering
 
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
@@ -63,8 +63,6 @@ public final class CanvasRenderer: ObservableObject {
         displayView: CanvasDisplayable?,
         environmentConfiguration: EnvironmentConfiguration?
     ) {
-        guard let renderer else { return }
-
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: renderer.device
@@ -132,7 +130,6 @@ extension CanvasRenderer {
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async throws {
         guard
-            let renderer,
             let unselectedBottomTexture,
             let selectedLayerTexture,
             let realtimeDrawingTexture,
@@ -210,7 +207,6 @@ extension CanvasRenderer {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let renderer,
             let texture,
             let flippedTextureBuffers,
             let selectedLayerTexture,
@@ -238,7 +234,6 @@ extension CanvasRenderer {
         with commandBuffer: MTLCommandBuffer
     ) {
         guard
-            let renderer,
             let flippedTextureBuffers,
             let texture,
             let selectedLayerTexture
@@ -259,7 +254,6 @@ extension CanvasRenderer {
         selectedLayer: TextureLayerItem
     ) {
         guard
-            let renderer,
             let canvasTexture,
             let unselectedBottomTexture,
             let selectedLayerTexture,
@@ -301,7 +295,6 @@ extension CanvasRenderer {
     /// Commits the command buffer and refreshes the entire screen
     public func commitAndRefreshDisplay() {
         guard
-            let renderer,
             let displayTexture = displayView?.displayTexture,
             let commandBuffer = displayView?.commandBuffer
         else { return }
@@ -336,8 +329,6 @@ extension CanvasRenderer {
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let renderer else { return }
-
         let textureDictionary = IdentifiedTexture.dictionary(
             from: Set(repositoryTextures)
         )
@@ -355,8 +346,7 @@ extension CanvasRenderer {
     }
 
     private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
-        guard let device else { return nil }
-        return MTLTextureCreator.makeTexture(
+        MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
             with: device
