@@ -182,7 +182,7 @@ extension CanvasViewModel {
         // Initialize the texture repository
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             configuration: configuration,
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+            fallbackTextureSize: CanvasView.defaultTextureSize
         )
         try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
 
@@ -210,7 +210,7 @@ extension CanvasViewModel {
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             configuration: configuration,
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+            fallbackTextureSize: CanvasView.defaultTextureSize
         )
         try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
 
@@ -392,12 +392,12 @@ extension CanvasViewModel {
         // if not, use the size from the configuration
         let textureLayersConfiguration: TextureLayersConfiguration = .init(
             entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        ) ?? configuration.textureLayersConfiguration
+        ) ?? .init()
 
         // Initialize the texture repository
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             configuration: textureLayersConfiguration,
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+            fallbackTextureSize: CanvasView.defaultTextureSize
         )
 
         return resolvedTextureLayersConfiguration

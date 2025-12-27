@@ -47,6 +47,15 @@ import UIKit
         viewModel.zipFileURL
     }
 
+    static var defaultTextureSize: CGSize {
+        let scale = UIScreen.main.scale
+        let size = UIScreen.main.bounds.size
+        return .init(
+            width: size.width * scale,
+            height: size.height * scale
+        )
+    }
+
     /// The single Metal device instance used throughout the app
     private let sharedDevice: MTLDevice
 

@@ -6,19 +6,21 @@
 //
 
 import Foundation
+import UIKit
 
+@MainActor
 public struct CanvasConfiguration {
+    let textureSize: CGSize
     let projectConfiguration: ProjectConfiguration
-    let textureLayersConfiguration: TextureLayersConfiguration
     let environmentConfiguration: EnvironmentConfiguration
 
     public init(
+        textureSize: CGSize? = nil,
         projectConfiguration: ProjectConfiguration = .init(),
-        textureLayersConfiguration: TextureLayersConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
+        self.textureSize = textureSize ?? CanvasView.defaultTextureSize
         self.projectConfiguration = projectConfiguration
-        self.textureLayersConfiguration = textureLayersConfiguration
         self.environmentConfiguration = environmentConfiguration
     }
 }

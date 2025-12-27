@@ -104,16 +104,3 @@ extension TextureLayerModel {
         LayerId.init(uuidString: string ?? "") ?? LayerId()
     }
 }
-
-@MainActor
-extension TextureLayerModel {
-    static func defaultTextureSize() -> CGSize {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-
-        return .init(
-            width: size.width * scale,
-            height: size.height * scale
-        )
-    }
-}
