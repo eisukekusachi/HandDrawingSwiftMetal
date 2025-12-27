@@ -53,7 +53,7 @@ class HandDrawingViewController: UIViewController {
         Task {
             do {
                 try await contentView.canvasView.setup(
-                    configuration: canvasConfiguration,
+                    configuration: canvasConfiguration ?? .init(),
                     drawingRenderers: [
                         brushDrawingRenderer,
                         eraserDrawingRenderer
@@ -399,7 +399,7 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        canvasConfiguration: CanvasConfiguration? = nil
+        canvasConfiguration: CanvasConfiguration
     ) -> Self {
         let viewController = Self()
         viewController.canvasConfiguration = canvasConfiguration

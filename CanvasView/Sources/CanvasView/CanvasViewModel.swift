@@ -121,11 +121,10 @@ public final class CanvasViewModel {
     }
 
     func setup(
-        configuration: CanvasConfiguration?,
+        configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies,
         drawingRenderers: [DrawingRenderer]
     ) async throws {
-        let configuration = configuration ?? .init()
         self.dependencies = dependencies
         self.drawingRenderers = drawingRenderers
 
@@ -392,12 +391,14 @@ extension CanvasViewModel {
         // if not, use the size from the configuration
         let textureLayersConfiguration: TextureLayersConfiguration = .init(
             entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        ) ?? .init()
+        ) ?? .init(
+            textureSize: configuration.textureSize
+        )
 
         // Initialize the texture repository
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             configuration: textureLayersConfiguration,
-            fallbackTextureSize: CanvasView.defaultTextureSize
+            fallbackTextureSize: configuration.textureSize
         )
 
         return resolvedTextureLayersConfiguration
