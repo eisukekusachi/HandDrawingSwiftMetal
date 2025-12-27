@@ -84,17 +84,11 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.didInitializeCanvasView
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.contentView.initialize()
-            }
-            .store(in: &cancellables)
-
-        contentView.canvasView.didInitializeTextureLayers
+        contentView.canvasView.didInitialize
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureLayers in
                 self?.initializeTextureLayerView(textureLayers)
+                self?.contentView.initialize()
             }
             .store(in: &cancellables)
 

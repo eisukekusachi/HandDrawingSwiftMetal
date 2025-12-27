@@ -43,17 +43,11 @@ public final class CanvasViewModel {
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    var didInitializeTextureLayers: AnyPublisher<any TextureLayersProtocol, Never> {
-        didInitializeTextureLayersSubject.eraseToAnyPublisher()
+    /// A publisher that emits `TextureLayersProtocol` when `CanvasViewModel` setup completes
+    var didInitialize: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeTextureLayersSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
-
-    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
-    var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
-        didInitializeCanvasViewSubject.eraseToAnyPublisher()
-    }
-    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
+    private let didInitializeSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     private var dependencies: CanvasViewDependencies!
 
@@ -149,8 +143,7 @@ public final class CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeTextureLayersSubject.send(textureLayers)
-        didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
+        didInitializeSubject.send(textureLayers)
 
         self.drawingRenderer = self.drawingRenderers[0]
 
@@ -483,8 +476,7 @@ public extension CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeTextureLayersSubject.send(textureLayers)
-        didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
+        didInitializeSubject.send(textureLayers)
 
         projectMetaDataStorage.update()
 
@@ -532,8 +524,7 @@ public extension CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeTextureLayersSubject.send(textureLayers)
-        didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
+        didInitializeSubject.send(textureLayers)
 
         // Load project metadata, falling back if it is missing
         let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(

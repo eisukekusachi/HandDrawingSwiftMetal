@@ -37,17 +37,11 @@ import UIKit
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
-    public var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
-        didInitializeCanvasViewSubject.eraseToAnyPublisher()
+    /// A publisher that emits `TextureLayersProtocol` when `CanvasView` setup completes
+    public var didInitialize: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
-
-    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    public var didInitializeTextureLayers: AnyPublisher<any TextureLayersProtocol, Never> {
-        didInitializeTextureLayersSubject.eraseToAnyPublisher()
-    }
-    private let didInitializeTextureLayersSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     public var zipFileURL: URL {
         viewModel.zipFileURL
@@ -170,15 +164,9 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        viewModel.didInitializeCanvasView
+        viewModel.didInitialize
             .sink { [weak self] value in
-                self?.didInitializeCanvasViewSubject.send(value)
-            }
-            .store(in: &cancellables)
-
-        viewModel.didInitializeTextureLayers
-            .sink { [weak self] value in
-                self?.didInitializeTextureLayersSubject.send(value)
+                self?.didInitializeSubject.send(value)
             }
             .store(in: &cancellables)
 
