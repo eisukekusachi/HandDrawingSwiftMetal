@@ -122,11 +122,6 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
-        Task {
-            if let entity = try projectMetaDataStorage.fetch() {
-                projectMetaDataStorage.update(entity)
-            }
-        }
     }
 
     func setup(
@@ -185,6 +180,13 @@ public final class CanvasViewModel {
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
         try await initializeTextures(resolvedTextureLayersConfiguration)
+
+        // Use metadata from Core Data if available
+        Task {
+            if let entity = try projectMetaDataStorage.fetch() {
+                projectMetaDataStorage.update(entity)
+            }
+        }
     }
 
     private func bindData() {
