@@ -114,7 +114,7 @@ public final class CanvasViewModel {
             project: ProjectMetaData(),
             context: persistenceController.viewContext
         )
-        // Initialize texture layers that supports undo and stores its data in Core Data
+        // Initialize texture layers that support undo and persist their data in Core Data
         textureLayers = UndoTextureLayers(
             textureLayers: CoreDataTextureLayers(
                 renderer: renderer,
