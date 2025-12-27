@@ -153,10 +153,9 @@ extension CanvasViewModel {
             configuration: configuration,
             dependencies: dependencies
         )
-
         try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
-        // Update to the latest date
+        // Update only the updatedAt field, since the metadata may be loaded from Core Data
         projectMetaDataStorage.updateUpdatedAt()
 
         commitAndRefreshDisplay()
@@ -176,6 +175,7 @@ extension CanvasViewModel {
         )
         try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
+        // Update the metadata with a new name
         projectMetaDataStorage.update(
             newProjectName: newProjectName
         )
@@ -188,7 +188,7 @@ extension CanvasViewModel {
     func restoreCanvas(
         workingDirectoryURL: URL,
         configuration: TextureLayerArrayConfiguration,
-        projectMetaData: ProjectMetaDataArchiveModel?,
+        projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {
         let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
@@ -196,14 +196,13 @@ extension CanvasViewModel {
             configuration: configuration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
-
         try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
         // Update metadata
         projectMetaDataStorage.update(
-            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
-            createdAt: projectMetaData?.createdAt ?? Date(),
-            updatedAt: projectMetaData?.updatedAt ?? Date()
+            projectName: projectMetaData.projectName,
+            createdAt: projectMetaData.createdAt,
+            updatedAt: projectMetaData.updatedAt
         )
 
         commitAndRefreshDisplay()
@@ -583,9 +582,14 @@ public extension CanvasViewModel {
                 layerIndex: textureLayersModel.layerIndex,
                 textureSize: textureLayersModel.textureSize
             ),
-            projectMetaData: projectMetaData,
+            projectMetaData: .init(
+                projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
+                createdAt: projectMetaData?.createdAt ?? Date(),
+                updatedAt: projectMetaData?.updatedAt ?? Date()
+            ),
             dependencies: dependencies
         )
+
     }
 
     func exportFiles(
