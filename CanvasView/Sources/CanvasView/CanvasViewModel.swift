@@ -43,11 +43,11 @@ public final class CanvasViewModel {
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `TextureLayersProtocol` when `CanvasViewModel` setup completes
-    var didInitialize: AnyPublisher<any TextureLayersProtocol, Never> {
+    /// A publisher that emits `ResultConfiguration` when `CanvasViewModel` setup completes
+    var didInitialize: AnyPublisher<ResultConfiguration, Never> {
         didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeSubject = PassthroughSubject<ResultConfiguration, Never>()
 
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
@@ -160,7 +160,12 @@ extension CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeSubject.send(textureLayers)
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers,
+                resolvedTextureLayerArrayConfiguration: resolvedTextureLayersConfiguration
+            )
+        )
     }
 
     func newCanvas(
@@ -182,7 +187,12 @@ extension CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeSubject.send(textureLayers)
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers,
+                resolvedTextureLayerArrayConfiguration: resolvedTextureLayersConfiguration
+            )
+        )
     }
 
     func restoreCanvas(
@@ -207,7 +217,12 @@ extension CanvasViewModel {
 
         commitAndRefreshDisplay()
 
-        didInitializeSubject.send(textureLayers)
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers,
+                resolvedTextureLayerArrayConfiguration: resolvedTextureLayersConfiguration
+            )
+        )
     }
 }
 
