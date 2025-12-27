@@ -98,16 +98,16 @@ import UIKit
     }
 
     public func setup(
-        drawingRenderers: [DrawingRenderer],
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration?,
+        drawingRenderers: [DrawingRenderer]
     ) async throws {
         try await viewModel.setup(
-            drawingRenderers: drawingRenderers,
+            configuration: configuration,
             dependencies: .init(
                 renderer: renderer,
                 displayView: displayView
             ),
-            configuration: configuration
+            drawingRenderers: drawingRenderers
         )
     }
 

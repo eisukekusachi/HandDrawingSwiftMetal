@@ -127,10 +127,11 @@ public final class CanvasViewModel {
     }
 
     func setup(
-        drawingRenderers: [DrawingRenderer],
+        configuration: CanvasConfiguration?,
         dependencies: CanvasViewDependencies,
-        configuration: CanvasConfiguration
+        drawingRenderers: [DrawingRenderer]
     ) async throws {
+        let configuration = configuration ?? .init()
 
         self.dependencies = dependencies
 
@@ -168,6 +169,13 @@ public final class CanvasViewModel {
             )
         }
 
+        // Use metadata from Core Data if available
+        Task {
+            if let entity = try projectMetaDataStorage.fetch() {
+                projectMetaDataStorage.update(entity)
+            }
+        }
+
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
         let textureLayersConfiguration: TextureLayerArrayConfiguration = .init(
@@ -180,13 +188,6 @@ public final class CanvasViewModel {
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
         try await initializeTextures(resolvedTextureLayersConfiguration)
-
-        // Use metadata from Core Data if available
-        Task {
-            if let entity = try projectMetaDataStorage.fetch() {
-                projectMetaDataStorage.update(entity)
-            }
-        }
     }
 
     private func bindData() {
