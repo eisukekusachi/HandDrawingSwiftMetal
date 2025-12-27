@@ -56,9 +56,9 @@ public final class TextureDocumentsDirectoryRepository {
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
-        configuration: TextureLayerArrayConfiguration,
+        configuration: TextureLayersConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+    ) async throws -> ResolvedTextureLayersConfiguration {
 
         if FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
@@ -89,9 +89,9 @@ public final class TextureDocumentsDirectoryRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayerArrayConfiguration,
+        configuration: TextureLayersConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+    ) async throws -> ResolvedTextureLayersConfiguration {
         guard FileManager.containsAllFileNames(
             fileNames: configuration.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -150,9 +150,9 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     private func initializeStorageWithNewTexture(
-        configuration: TextureLayerArrayConfiguration,
+        configuration: TextureLayersConfiguration,
         textureSize: CGSize
-    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+    ) async throws -> ResolvedTextureLayersConfiguration {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength,

@@ -44,7 +44,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     var textureSize: CGSize { get }
 
     func initialize(
-        configuration: ResolvedTextureLayerArrayConfiguration,
+        configuration: ResolvedTextureLayersConfiguration,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
     ) async
 

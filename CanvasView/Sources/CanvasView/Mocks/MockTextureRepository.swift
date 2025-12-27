@@ -34,9 +34,9 @@ final class MockTextureRepository: @unchecked Sendable {
     }
 
     func initializeStorage(
-        configuration: TextureLayerArrayConfiguration,
+        configuration: TextureLayersConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+    ) async throws -> ResolvedTextureLayersConfiguration {
         recordCall()
         return try await .init(
             configuration: configuration,
@@ -46,9 +46,9 @@ final class MockTextureRepository: @unchecked Sendable {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayerArrayConfiguration,
+        configuration: TextureLayersConfiguration,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayerArrayConfiguration {
+    ) async throws -> ResolvedTextureLayersConfiguration {
         recordCall()
         return try await .init(
             configuration: configuration,

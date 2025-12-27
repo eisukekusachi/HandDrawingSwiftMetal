@@ -1,5 +1,5 @@
 //
-//  TextureLayerArrayConfiguration.swift
+//  TextureLayersConfiguration.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct TextureLayerArrayConfiguration: Sendable {
+public struct TextureLayersConfiguration: Sendable {
 
     /// An array of layer models
     public let layers: [TextureLayerModel]
@@ -30,7 +30,7 @@ public struct TextureLayerArrayConfiguration: Sendable {
     }
 }
 
-extension TextureLayerArrayConfiguration {
+extension TextureLayersConfiguration {
 
     public init(
         _ configuration: Self,

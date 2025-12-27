@@ -9,16 +9,16 @@ import Foundation
 
 public struct CanvasConfiguration {
     let projectConfiguration: ProjectConfiguration
-    let textureLayerArrayConfiguration: TextureLayerArrayConfiguration
+    let textureLayersConfiguration: TextureLayersConfiguration
     let environmentConfiguration: EnvironmentConfiguration
 
     public init(
         projectConfiguration: ProjectConfiguration = .init(),
-        textureLayerArrayConfiguration: TextureLayerArrayConfiguration = .init(),
+        textureLayersConfiguration: TextureLayersConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
         self.projectConfiguration = projectConfiguration
-        self.textureLayerArrayConfiguration = textureLayerArrayConfiguration
+        self.textureLayersConfiguration = textureLayersConfiguration
         self.environmentConfiguration = environmentConfiguration
     }
 }
