@@ -44,10 +44,10 @@ import UIKit
     private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
 
     /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    public var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
-        didInitializeTexturesSubject.eraseToAnyPublisher()
+    public var didInitializeTextureLayers: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeTextureLayersSubject.eraseToAnyPublisher()
     }
-    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeTextureLayersSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     public var zipFileURL: URL {
         viewModel.zipFileURL
@@ -176,9 +176,9 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        viewModel.didInitializeTextures
+        viewModel.didInitializeTextureLayers
             .sink { [weak self] value in
-                self?.didInitializeTexturesSubject.send(value)
+                self?.didInitializeTextureLayersSubject.send(value)
             }
             .store(in: &cancellables)
 

@@ -44,10 +44,10 @@ public final class CanvasViewModel {
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
-        didInitializeTexturesSubject.eraseToAnyPublisher()
+    var didInitializeTextureLayers: AnyPublisher<any TextureLayersProtocol, Never> {
+        didInitializeTextureLayersSubject.eraseToAnyPublisher()
     }
-    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeTextureLayersSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
 
     /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
     var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
@@ -126,8 +126,41 @@ public final class CanvasViewModel {
         bindData()
     }
 
-    private func bindData() {
+    func setup(
+        configuration: CanvasConfiguration?,
+        dependencies: CanvasViewDependencies,
+        drawingRenderers: [DrawingRenderer]
+    ) async throws {
+        let configuration = configuration ?? .init()
+        self.dependencies = dependencies
+        self.drawingRenderers = drawingRenderers
 
+        setupCanvasRenderer(configuration: configuration)
+        setupTouchGesture(configuration: configuration)
+        setupDrawingRenderers()
+        setupMetaData()
+        setupUndoTextureLayersIfAvailable()
+
+        let resolvedTextureLayersConfiguration = try await getTextureLayerConfiguration(
+            configuration: configuration,
+            dependencies: dependencies
+        )
+        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
+
+        commitAndRefreshDisplay()
+
+        didInitializeTextureLayersSubject.send(textureLayers)
+        didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
+
+        self.drawingRenderer = self.drawingRenderers[0]
+
+        // Update to the latest date
+        projectMetaDataStorage.updateUpdatedAt()
+    }
+}
+
+extension CanvasViewModel {
+    private func bindData() {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.updatePublisher
             .sink { [weak self] in
@@ -197,6 +230,36 @@ public final class CanvasViewModel {
             .store(in: &cancellables)
     }
 
+    private func initializeTextureLayers(from configuration: ResolvedTextureLayerArrayConfiguration) async throws {
+        // Initialize the textures used in the texture layers
+        await textureLayers.initialize(
+            configuration: configuration,
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+        )
+
+        // Initialize the repository used for Undo
+        if textureLayers.isUndoEnabled {
+            textureLayers.initializeUndoTextureRepository(
+                configuration.textureSize
+            )
+        }
+
+        // Initialize the textures used in the drawing tool
+        for i in 0 ..< drawingRenderers.count {
+            try drawingRenderers[i].initializeTextures(configuration.textureSize)
+        }
+
+        // Initialize the textures used in the renderer
+        canvasRenderer.initializeTextures(
+            textureSize: configuration.textureSize
+        )
+
+        try await canvasRenderer.updateTextures(
+            textureLayers: textureLayers,
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+        )
+    }
+
     private func setupDrawingRenderers() {
         if self.drawingRenderers.isEmpty {
             self.drawingRenderers = [BrushDrawingRenderer()]
@@ -258,67 +321,6 @@ public final class CanvasViewModel {
         return resolvedTextureLayersConfiguration
     }
 
-    func setup(
-        configuration: CanvasConfiguration?,
-        dependencies: CanvasViewDependencies,
-        drawingRenderers: [DrawingRenderer]
-    ) async throws {
-        let configuration = configuration ?? .init()
-        self.dependencies = dependencies
-        self.drawingRenderers = drawingRenderers
-
-        setupCanvasRenderer(configuration: configuration)
-        setupTouchGesture(configuration: configuration)
-        setupDrawingRenderers()
-        setupMetaData()
-        setupUndoTextureLayersIfAvailable()
-
-        let resolvedTextureLayersConfiguration = try await getTextureLayerConfiguration(
-            configuration: configuration,
-            dependencies: dependencies
-        )
-        try await initializeTextures(configuration: resolvedTextureLayersConfiguration)
-
-        commitAndRefreshDisplay()
-
-        didInitializeTexturesSubject.send(textureLayers)
-        didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
-
-        self.drawingRenderer = self.drawingRenderers[0]
-
-        // Update to the latest date
-        projectMetaDataStorage.updateUpdatedAt()
-    }
-
-    private func initializeTextures(configuration: ResolvedTextureLayerArrayConfiguration) async throws {
-        // Initialize the textures used in the texture layers
-        await textureLayers.initialize(
-            configuration: configuration,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
-        )
-
-        // Initialize the repository used for Undo
-        if textureLayers.isUndoEnabled {
-            textureLayers.initializeUndoTextureRepository(
-                configuration.textureSize
-            )
-        }
-
-        // Initialize the textures used in the drawing tool
-        for i in 0 ..< drawingRenderers.count {
-            try drawingRenderers[i].initializeTextures(configuration.textureSize)
-        }
-
-        // Initialize the textures used in the renderer
-        canvasRenderer.initializeTextures(
-            textureSize: configuration.textureSize
-        )
-
-        try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
-        )
-    }
 }
 
 extension CanvasViewModel {
@@ -477,11 +479,11 @@ public extension CanvasViewModel {
             configuration: configuration,
             fallbackTextureSize: TextureLayerModel.defaultTextureSize()
         )
-        try await initializeTextures(configuration: resolvedTextureLayersConfiguration)
+        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
         commitAndRefreshDisplay()
 
-        didInitializeTexturesSubject.send(textureLayers)
+        didInitializeTextureLayersSubject.send(textureLayers)
         didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
 
         projectMetaDataStorage.update()
@@ -526,11 +528,11 @@ public extension CanvasViewModel {
         )
 
         // Restore the textures
-        try await initializeTextures(configuration: resolvedTextureLayersConfiguration)
+        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
         commitAndRefreshDisplay()
 
-        didInitializeTexturesSubject.send(textureLayers)
+        didInitializeTextureLayersSubject.send(textureLayers)
         didInitializeCanvasViewSubject.send(resolvedTextureLayersConfiguration)
 
         // Load project metadata, falling back if it is missing

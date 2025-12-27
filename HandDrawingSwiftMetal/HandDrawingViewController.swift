@@ -91,10 +91,10 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.didInitializeTextures
+        contentView.canvasView.didInitializeTextureLayers
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureLayers in
-                self?.initializeLayerView(textureLayers)
+                self?.initializeTextureLayerView(textureLayers)
             }
             .store(in: &cancellables)
 
@@ -241,7 +241,7 @@ extension HandDrawingViewController {
         }
     }
 
-    private func initializeLayerView(_ textureLayers: any TextureLayersProtocol) {
+    private func initializeTextureLayerView(_ textureLayers: any TextureLayersProtocol) {
         textureLayerViewPresenter.initialize(
             textureLayers: textureLayers,
             popupConfiguration: .init(
