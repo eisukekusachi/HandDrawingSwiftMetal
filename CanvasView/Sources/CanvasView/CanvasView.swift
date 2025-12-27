@@ -109,8 +109,14 @@ import UIKit
         viewModel.frameSize = frame.size
     }
 
-    public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
-        try await viewModel.newCanvas(configuration: configuration)
+    public func onTapNewCanvas(
+        newProjectName: String,
+        newTextureSize: CGSize
+    ) async throws {
+        try await viewModel.onTapNewCanvas(
+            newProjectName: newProjectName,
+            newTextureSize: newTextureSize
+        )
     }
 
     public func loadFiles(

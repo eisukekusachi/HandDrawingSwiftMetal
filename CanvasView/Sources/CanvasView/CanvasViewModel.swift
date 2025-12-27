@@ -164,7 +164,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(textureLayers)
     }
 
-    func refreshCanvas(
+    func newCanvas(
         newProjectName: String,
         configuration: TextureLayerArrayConfiguration,
         dependencies: CanvasViewDependencies
@@ -509,6 +509,23 @@ extension CanvasViewModel {
 
         drawingDisplayLink.run(isCurrentlyDrawing)
     }
+
+    func onTapNewCanvas(
+        newProjectName: String,
+        newTextureSize: CGSize
+    ) async throws {
+        guard let dependencies else { return }
+
+        try await newCanvas(
+            newProjectName: newProjectName,
+            configuration: TextureLayerArrayConfiguration(
+                textureSize: newTextureSize
+            ),
+            dependencies: dependencies
+        )
+
+        transforming.setMatrix(.identity)
+    }
 }
 
 public extension CanvasViewModel {
@@ -525,18 +542,6 @@ public extension CanvasViewModel {
 
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
-    }
-
-    func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
-        guard let dependencies else { return }
-
-        try await refreshCanvas(
-            newProjectName: Calendar.currentDate,
-            configuration: configuration,
-            dependencies: dependencies
-        )
-
-        transforming.setMatrix(.identity)
     }
 
     func undo() {

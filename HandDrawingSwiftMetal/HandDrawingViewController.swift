@@ -224,10 +224,9 @@ extension HandDrawingViewController {
 
                 let scale = UIScreen.main.scale
                 let size = UIScreen.main.bounds.size
-                try await self.contentView.canvasView.newCanvas(
-                    configuration: TextureLayerArrayConfiguration(
-                        textureSize: .init(width: size.width * scale, height: size.height * scale)
-                    )
+                try await self.contentView.canvasView.onTapNewCanvas(
+                    newProjectName: Calendar.currentDate,
+                    newTextureSize: .init(width: size.width * scale, height: size.height * scale)
                 )
 
                 self.updateComponents()
