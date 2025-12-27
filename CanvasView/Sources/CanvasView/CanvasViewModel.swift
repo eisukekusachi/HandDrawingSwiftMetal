@@ -131,24 +131,84 @@ public final class CanvasViewModel {
 
         setupCanvasRenderer(dependencies: dependencies, configuration: configuration)
         setupDrawingRenderers(dependencies: dependencies)
-        setupUndoTextureLayersIfAvailable(dependencies: dependencies)
         setupTouchGesture(configuration: configuration)
-        setupMetaData()
+        setupUndoTextureLayersIfAvailable(dependencies: dependencies)
+        setupMetaDataIfAvailable()
 
+        try await initCanvas(
+            configuration: configuration,
+            dependencies: dependencies
+        )
+
+        self.drawingRenderer = self.drawingRenderers[0]
+    }
+}
+
+extension CanvasViewModel {
+    func initCanvas(
+        configuration: CanvasConfiguration,
+        dependencies: CanvasViewDependencies
+    ) async throws {
         let resolvedTextureLayersConfiguration = try await getTextureLayerConfiguration(
             configuration: configuration,
             dependencies: dependencies
         )
+
         try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
+
+        // Update to the latest date
+        projectMetaDataStorage.updateUpdatedAt()
 
         commitAndRefreshDisplay()
 
         didInitializeSubject.send(textureLayers)
+    }
 
-        self.drawingRenderer = self.drawingRenderers[0]
+    func refreshCanvas(
+        newProjectName: String,
+        configuration: TextureLayerArrayConfiguration,
+        dependencies: CanvasViewDependencies
+    ) async throws {
+        // Initialize the texture repository
+        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+            configuration: configuration,
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+        )
+        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
 
-        // Update to the latest date
-        projectMetaDataStorage.updateUpdatedAt()
+        projectMetaDataStorage.update(
+            newProjectName: newProjectName
+        )
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(textureLayers)
+    }
+
+    func restoreCanvas(
+        workingDirectoryURL: URL,
+        configuration: TextureLayerArrayConfiguration,
+        projectMetaData: ProjectMetaDataArchiveModel?,
+        dependencies: CanvasViewDependencies
+    ) async throws {
+        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
+            from: workingDirectoryURL,
+            configuration: configuration,
+            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+        )
+
+        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
+
+        // Update metadata
+        projectMetaDataStorage.update(
+            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
+            createdAt: projectMetaData?.createdAt ?? Date(),
+            updatedAt: projectMetaData?.updatedAt ?? Date()
+        )
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(textureLayers)
     }
 }
 
@@ -282,7 +342,7 @@ extension CanvasViewModel {
             configuration.environmentConfiguration.transformingGestureRecognitionSecond
         )
     }
-    private func setupMetaData() {
+    private func setupMetaDataIfAvailable() {
         // Use metadata from Core Data if available
         // Do nothing if it fails
         if let entity = try? projectMetaDataStorage.fetch() {
@@ -315,7 +375,6 @@ extension CanvasViewModel {
 
         return resolvedTextureLayersConfiguration
     }
-
 }
 
 extension CanvasViewModel {
@@ -471,18 +530,11 @@ public extension CanvasViewModel {
     func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
         guard let dependencies else { return }
 
-        // Initialize the texture repository
-        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+        try await refreshCanvas(
+            newProjectName: Calendar.currentDate,
             configuration: configuration,
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
+            dependencies: dependencies
         )
-        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(textureLayers)
-
-        projectMetaDataStorage.update()
 
         transforming.setMatrix(.identity)
     }
@@ -514,33 +566,20 @@ public extension CanvasViewModel {
             in: workingDirectoryURL
         )
 
-        let resolvedTextureLayersConfiguration: ResolvedTextureLayerArrayConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
-            from: workingDirectoryURL,
-            configuration: .init(
-                textureSize: textureLayersModel.textureSize,
-                layerIndex: textureLayersModel.layerIndex,
-                layers: textureLayersModel.layers
-            ),
-            fallbackTextureSize: TextureLayerModel.defaultTextureSize()
-        )
-
-        // Restore the textures
-        try await initializeTextureLayers(from: resolvedTextureLayersConfiguration)
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(textureLayers)
-
         // Load project metadata, falling back if it is missing
         let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
             in: workingDirectoryURL
         )
 
-        // Update metadata
-        projectMetaDataStorage.update(
-            projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
-            createdAt: projectMetaData?.createdAt ?? Date(),
-            updatedAt: projectMetaData?.updatedAt ?? Date()
+        try await restoreCanvas(
+            workingDirectoryURL: workingDirectoryURL,
+            configuration: .init(
+                layers: textureLayersModel.layers,
+                layerIndex: textureLayersModel.layerIndex,
+                textureSize: textureLayersModel.textureSize
+            ),
+            projectMetaData: projectMetaData,
+            dependencies: dependencies
         )
     }
 

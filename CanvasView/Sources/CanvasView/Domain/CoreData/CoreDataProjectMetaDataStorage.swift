@@ -65,8 +65,8 @@ extension CoreDataProjectMetaDataStorage {
         try storage.fetch()
     }
 
-    public func update(_ projectName: String = Calendar.currentDate) {
-        project.update(projectName)
+    public func update(newProjectName: String) {
+        project.update(newProjectName: newProjectName)
     }
 
     public func updateUpdatedAt() {

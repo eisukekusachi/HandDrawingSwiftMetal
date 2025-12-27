@@ -67,7 +67,10 @@ public final class TextureInMemoryRepository {
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
 
-        let configuration: TextureLayerArrayConfiguration = .init(textureSize: textureSize, layers: [layer])
+        let configuration: TextureLayerArrayConfiguration = .init(
+            layers: [layer],
+            textureSize: textureSize
+        )
 
         return try await .init(
             configuration: configuration,
