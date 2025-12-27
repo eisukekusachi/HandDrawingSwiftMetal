@@ -122,6 +122,8 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
+
+        bindData()
     }
 
     func setup(
@@ -165,8 +167,6 @@ public final class CanvasViewModel {
                 undoTextureInMemoryRepository: undoTextureRepository
             )
         }
-
-        bindData()
 
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
