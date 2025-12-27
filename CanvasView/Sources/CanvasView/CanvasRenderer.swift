@@ -61,7 +61,8 @@ public final class CanvasRenderer: ObservableObject {
 
     public func initialize(
         displayView: CanvasDisplayable?,
-        environmentConfiguration: EnvironmentConfiguration?
+        backgroundColor: UIColor?,
+        baseBackgroundColor: UIColor?
     ) {
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -70,10 +71,10 @@ public final class CanvasRenderer: ObservableObject {
 
         self.displayView = displayView
 
-        if let backgroundColor = environmentConfiguration?.backgroundColor {
+        if let backgroundColor {
             self.backgroundColor = backgroundColor
         }
-        if let baseBackgroundColor = environmentConfiguration?.baseBackgroundColor {
+        if let baseBackgroundColor {
             self.baseBackgroundColor = baseBackgroundColor
         }
     }

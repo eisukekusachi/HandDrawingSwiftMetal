@@ -129,10 +129,16 @@ public final class CanvasViewModel {
         self.dependencies = dependencies
         self.drawingRenderers = drawingRenderers
 
-        setupCanvasRenderer(dependencies: dependencies, configuration: configuration)
-        setupDrawingRenderers(dependencies: dependencies)
-        setupTouchGesture(configuration: configuration)
-        setupUndoTextureLayersIfAvailable(dependencies: dependencies)
+        setupCanvasRenderer(
+            displayView: dependencies.displayView,
+            environmentConfiguration: configuration.environmentConfiguration
+        )
+        setupDrawingRenderers(
+            renderer: dependencies.renderer,
+            displayView: dependencies.displayView
+        )
+        setupTouchGesture(environmentConfiguration: configuration.environmentConfiguration)
+        setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
         setupMetaDataIfAvailable()
 
         try await initCanvas(
@@ -329,31 +335,38 @@ extension CanvasViewModel {
         )
     }
 
-    private func setupDrawingRenderers(dependencies: CanvasViewDependencies) {
+    private func setupDrawingRenderers(
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable
+    ) {
         if self.drawingRenderers.isEmpty {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
         self.drawingRenderers.forEach {
             $0.setup(
                 frameSize: frameSize,
-                renderer: dependencies.renderer,
-                displayView: dependencies.displayView
+                renderer: renderer,
+                displayView: displayView
             )
         }
     }
-    private func setupCanvasRenderer(dependencies: CanvasViewDependencies, configuration: CanvasConfiguration) {
+    private func setupCanvasRenderer(
+        displayView: CanvasDisplayable?,
+        environmentConfiguration: EnvironmentConfiguration
+    ) {
         self.canvasRenderer.initialize(
-            displayView: dependencies.displayView,
-            environmentConfiguration: configuration.environmentConfiguration
+            displayView: displayView,
+            backgroundColor: environmentConfiguration.backgroundColor,
+            baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
     }
-    private func setupTouchGesture(configuration: CanvasConfiguration) {
+    private func setupTouchGesture(environmentConfiguration: EnvironmentConfiguration) {
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            configuration.environmentConfiguration.drawingGestureRecognitionSecond
+            environmentConfiguration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            configuration.environmentConfiguration.transformingGestureRecognitionSecond
+            environmentConfiguration.transformingGestureRecognitionSecond
         )
     }
     private func setupMetaDataIfAvailable() {
@@ -363,9 +376,9 @@ extension CanvasViewModel {
             projectMetaDataStorage.update(entity)
         }
     }
-    private func setupUndoTextureLayersIfAvailable(dependencies: CanvasViewDependencies) {
+    private func setupUndoTextureLayersIfAvailable(undoTextureRepository: TextureInMemoryRepository?) {
         // If `undoTextureRepository` is used, undo functionality is available
-        if let undoTextureRepository = dependencies.undoTextureRepository {
+        if let undoTextureRepository {
             self.textureLayers.setUndoTextureRepository(
                 undoTextureInMemoryRepository: undoTextureRepository
             )
