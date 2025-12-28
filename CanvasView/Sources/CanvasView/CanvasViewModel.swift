@@ -162,19 +162,25 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
     ) async throws {
-        // Use the size from CoreData if available,
-        // if not, use the size from the configuration
-        let state: TextureLayersPersistedState = .init(
-            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        ) ?? .init(
-            textureSize: configuration.textureSize
-        )
+        var textureLayersState: ResolvedTextureLayersPersistedState?
 
-        // Initialize the texture repository
-        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            textureLayersPersistedState: state,
-            fallbackTextureSize: configuration.textureSize
-        )
+        // Use the size from CoreData if available,
+        // if not, use the default size
+        if let state: ResolvedTextureLayersPersistedState = .init(
+            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+        ) {
+            // Initialize the texture repository
+            textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+                textureLayersPersistedState: state,
+                fallbackTextureSize: configuration.textureSize
+            )
+        } else {
+            textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+                newTextureSize: CanvasView.defaultTextureSize
+            )
+        }
+
+        guard let textureLayersState else { return }
 
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 

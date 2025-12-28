@@ -57,29 +57,19 @@ public final class TextureDocumentsDirectoryRepository {
     /// If that is invalid, creates a new texture and initializes the repository with it
     @discardableResult
     func initializeStorage(
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
 
         if FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
-           ),
-           // Check if the texture can be created before proceeding
-           let textureSize = textureLayersPersistedState.textureSize,
-           let _ = MTLTextureCreator.makeTexture(
-               width: Int(textureSize.width),
-               height: Int(textureSize.height),
-               with: renderer.device
            )
         {
             // Retain the texture size
-            _textureSize = textureSize
+            _textureSize = textureLayersPersistedState.textureSize
 
-            return .init(
-                textureLayersPersistedState: textureLayersPersistedState,
-                resolvedTextureSize: textureSize
-            )
+            return textureLayersPersistedState
         } else {
             return try await initializeStorage(
                 newTextureSize: fallbackTextureSize
