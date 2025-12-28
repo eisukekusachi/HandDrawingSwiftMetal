@@ -75,7 +75,7 @@ public final class TextureInMemoryRepository {
     @discardableResult
     public func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
@@ -90,7 +90,7 @@ public final class TextureInMemoryRepository {
             throw error
         }
 
-        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
+        let textureSize = textureLayersPersistedState.textureSize
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [LayerId: MTLTexture] = [:]
@@ -131,10 +131,7 @@ public final class TextureInMemoryRepository {
         textures = newTextures
         _textureSize = textureSize
 
-        return .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: textureSize
-        )
+        return textureLayersPersistedState
     }
 
     /// Returns the texture associated with the specified `LayerId`

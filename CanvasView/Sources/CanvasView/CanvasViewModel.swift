@@ -224,7 +224,7 @@ extension CanvasViewModel {
 
     func restoreCanvas(
         workingDirectoryURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {

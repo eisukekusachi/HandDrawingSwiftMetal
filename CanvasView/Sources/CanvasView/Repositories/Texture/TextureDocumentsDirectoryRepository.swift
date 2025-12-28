@@ -122,7 +122,7 @@ public final class TextureDocumentsDirectoryRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
@@ -137,7 +137,7 @@ public final class TextureDocumentsDirectoryRepository {
             throw error
         }
 
-        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
+        let textureSize = textureLayersPersistedState.textureSize
 
         try textureLayersPersistedState.layers.forEach { layer in
             let textureData = try Data(
@@ -176,10 +176,7 @@ public final class TextureDocumentsDirectoryRepository {
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
 
-        return .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: textureSize
-        )
+        return textureLayersPersistedState
     }
 
     /// Copies a texture for the given `LayerId`

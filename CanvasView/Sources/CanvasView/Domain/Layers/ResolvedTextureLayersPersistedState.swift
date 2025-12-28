@@ -7,7 +7,6 @@
 
 import UIKit
 
-/// `TextureLayersPersistedState` with a determined texture size
 public struct ResolvedTextureLayersPersistedState: Sendable {
 
     public let textureSize: CGSize
@@ -27,24 +26,6 @@ public struct ResolvedTextureLayersPersistedState: Sendable {
 }
 
 public extension ResolvedTextureLayersPersistedState {
-
-    init(
-        textureLayersPersistedState: TextureLayersPersistedState,
-        resolvedTextureSize: CGSize
-    ) {
-        self.textureSize = resolvedTextureSize
-        self.layerIndex = textureLayersPersistedState.layerIndex
-        self.layers = textureLayersPersistedState.layers
-    }
-
-    init(
-        _ model: TextureLayersArchiveModel
-    ) {
-        self.layers = model.layers
-        self.layerIndex = model.layerIndex
-        self.textureSize = model.textureSize
-    }
-
     init?(entity: TextureLayerArrayStorageEntity?) {
         guard let entity else { return nil }
 
@@ -66,6 +47,14 @@ public extension ResolvedTextureLayersPersistedState {
         if layers.isEmpty || textureSize == .zero {
             return nil
         }
+    }
+
+    init(
+        _ model: TextureLayersArchiveModel
+    ) {
+        self.layers = model.layers
+        self.layerIndex = model.layerIndex
+        self.textureSize = model.textureSize
     }
 
     var selectedLayerId: LayerId? {

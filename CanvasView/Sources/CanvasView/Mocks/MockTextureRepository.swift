@@ -34,26 +34,20 @@ final class MockTextureRepository: @unchecked Sendable {
     }
 
     func initializeStorage(
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
         recordCall()
-        return try await .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: textureLayersPersistedState.textureSize ?? fallbackTextureSize
-        )
+        return textureLayersPersistedState
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
         recordCall()
-        return try await .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: textureLayersPersistedState.textureSize ?? fallbackTextureSize
-        )
+        return textureLayersPersistedState
     }
 
     func addTexture(_ texture: MTLTexture, id: LayerId) async throws {
