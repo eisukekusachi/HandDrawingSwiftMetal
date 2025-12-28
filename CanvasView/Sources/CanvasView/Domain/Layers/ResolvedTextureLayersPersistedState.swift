@@ -1,5 +1,5 @@
 //
-//  ResolvedTextureLayersConfiguration.swift
+//  ResolvedTextureLayersPersistedState.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-/// `TextureLayersConfiguration` with a determined texture size
-public struct ResolvedTextureLayersConfiguration: Sendable {
+/// `TextureLayersPersistedState` with a determined texture size
+public struct ResolvedTextureLayersPersistedState: Sendable {
 
     public let textureSize: CGSize
 
@@ -26,7 +26,7 @@ public struct ResolvedTextureLayersConfiguration: Sendable {
     }
 }
 
-public extension ResolvedTextureLayersConfiguration {
+public extension ResolvedTextureLayersPersistedState {
 
     init(
         textureLayersPersistedState: TextureLayersPersistedState,

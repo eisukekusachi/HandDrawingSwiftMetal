@@ -595,7 +595,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func initialize(
-        configuration: ResolvedTextureLayersConfiguration,
+        configuration: ResolvedTextureLayersPersistedState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
     ) async {
         await textureLayers.initialize(

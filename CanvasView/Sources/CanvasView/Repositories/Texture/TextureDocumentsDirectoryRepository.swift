@@ -58,7 +58,7 @@ public final class TextureDocumentsDirectoryRepository {
     func initializeStorage(
         textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
 
         if FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
@@ -91,7 +91,7 @@ public final class TextureDocumentsDirectoryRepository {
         from sourceFolderURL: URL,
         textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -152,7 +152,7 @@ public final class TextureDocumentsDirectoryRepository {
     private func initializeStorageWithNewTexture(
         textureLayersPersistedState: TextureLayersPersistedState,
         textureSize: CGSize
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength,

@@ -101,7 +101,7 @@ private struct PreviewView: View {
         renderer: nil
     )
 
-    private let previewConfig: ResolvedTextureLayersConfiguration = .init(
+    private let previewConfig: ResolvedTextureLayersPersistedState = .init(
         textureSize: .zero,
         layerIndex: 0,
         layers: [

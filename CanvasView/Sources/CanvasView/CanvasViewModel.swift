@@ -154,11 +154,11 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
     ) async throws {
-        let resolvedTextureLayersConfiguration = try await getTextureLayerConfiguration(
+        let textureLayersState = try await getTextureLayerState(
             configuration: configuration,
             dependencies: dependencies
         )
-        try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
         projectMetaDataStorage.updateUpdatedAt()
@@ -168,7 +168,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersConfiguration: resolvedTextureLayersConfiguration
+                resolvedTextureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -179,11 +179,11 @@ extension CanvasViewModel {
         dependencies: CanvasViewDependencies
     ) async throws {
         // Initialize the texture repository
-        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
-        try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update the metadata with a new name
         projectMetaDataStorage.update(
@@ -195,7 +195,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersConfiguration: resolvedTextureLayersConfiguration
+                resolvedTextureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -206,12 +206,12 @@ extension CanvasViewModel {
         projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {
-        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
+        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
-        try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update metadata
         projectMetaDataStorage.update(
@@ -225,7 +225,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersConfiguration: resolvedTextureLayersConfiguration
+                resolvedTextureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -302,30 +302,30 @@ extension CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    private func initializeTextureLayers(configuration: ResolvedTextureLayersConfiguration) async throws {
+    private func initializeTextureLayers(textureLayersState: ResolvedTextureLayersPersistedState) async throws {
         guard let dependencies else { return }
 
         // Initialize the textures used in the texture layers
         await textureLayers.initialize(
-            configuration: configuration,
+            configuration: textureLayersState,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
 
         // Initialize the repository used for Undo
         if textureLayers.isUndoEnabled {
             textureLayers.initializeUndoTextureRepository(
-                configuration.textureSize
+                textureLayersState.textureSize
             )
         }
 
         // Initialize the textures used in the drawing tool
         for i in 0 ..< drawingRenderers.count {
-            try drawingRenderers[i].initializeTextures(configuration.textureSize)
+            try drawingRenderers[i].initializeTextures(textureLayersState.textureSize)
         }
 
         // Initialize the textures used in the renderer
         canvasRenderer.initializeTextures(
-            textureSize: configuration.textureSize
+            textureSize: textureLayersState.textureSize
         )
 
         try await canvasRenderer.updateTextures(
@@ -383,25 +383,25 @@ extension CanvasViewModel {
             )
         }
     }
-    private func getTextureLayerConfiguration(
+    private func getTextureLayerState(
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
-        let textureLayersConfiguration: TextureLayersPersistedState = .init(
+        let textureLayersState: TextureLayersPersistedState = .init(
             entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
         ) ?? .init(
             textureSize: configuration.textureSize
         )
 
         // Initialize the texture repository
-        let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            textureLayersPersistedState: textureLayersConfiguration,
+        let resolvedTextureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+            textureLayersPersistedState: textureLayersState,
             fallbackTextureSize: configuration.textureSize
         )
 
-        return resolvedTextureLayersConfiguration
+        return resolvedTextureLayersState
     }
 }
 

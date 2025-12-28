@@ -93,7 +93,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func initialize(
-        configuration: ResolvedTextureLayersConfiguration,
+        configuration: ResolvedTextureLayersPersistedState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
         self._textureSize = configuration.textureSize

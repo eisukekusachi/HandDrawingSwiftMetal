@@ -34,7 +34,7 @@ public final class TextureInMemoryRepository {
     public func initializeStorage(
         textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
         let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
 
         guard
@@ -82,7 +82,7 @@ public final class TextureInMemoryRepository {
         from sourceFolderURL: URL,
         textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersConfiguration {
+    ) async throws -> ResolvedTextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
