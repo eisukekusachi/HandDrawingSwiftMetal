@@ -118,11 +118,11 @@ import UIKit
         viewModel.frameSize = frame.size
     }
 
-    public func onTapNewCanvas(
+    public func newCanvas(
         newProjectName: String,
         newTextureSize: CGSize
     ) async throws {
-        try await viewModel.onTapNewCanvas(
+        try await viewModel.newCanvas(
             newProjectName: newProjectName,
             newTextureSize: newTextureSize
         )

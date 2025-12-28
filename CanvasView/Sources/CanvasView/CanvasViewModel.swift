@@ -132,9 +132,10 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         drawingRenderers: [DrawingRenderer]
     ) async throws {
+        self.currentTextureSize = configuration.textureSize
         self.dependencies = dependencies
         self.drawingRenderers = drawingRenderers
-        self.currentTextureSize = configuration.textureSize
+        self.drawingRenderer = drawingRenderers[0]
 
         setupCanvasRenderer(
             displayView: dependencies.displayView,
@@ -150,10 +151,8 @@ public final class CanvasViewModel {
 
         await initCanvas(
             configuration: configuration,
-            dependencies: dependencies
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
-
-        self.drawingRenderer = self.drawingRenderers[0]
     }
 }
 
@@ -161,14 +160,14 @@ extension CanvasViewModel {
     
     func initCanvas(
         configuration: CanvasConfiguration,
-        dependencies: CanvasViewDependencies
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async {
         do {
             if let coreDataTextureLayers: CoreDataTextureLayers = (textureLayers.textureLayers as? CoreDataTextureLayers),
                let textureLayersEntity = try coreDataTextureLayers.fetch() {
                 try await initializeCanvasFromCoreData(
                     textureLayersEntity: textureLayersEntity,
-                    textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+                    textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
                 )
                 return
             }
@@ -179,7 +178,7 @@ extension CanvasViewModel {
         do {
             try await initializeCanvas(
                 projectName: configuration.projectConfiguration.projectName,
-                textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+                textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
             )
         } catch {
             fatalError("Failed to initialize the canvas")
@@ -318,16 +317,16 @@ extension CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        transforming.matrixPublisher
-            .sink { [weak self] matrix in
-                self?.canvasRenderer.setMatrix(matrix)
-            }
-            .store(in: &cancellables)
-
         textureLayers.didUndo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.didUndoSubject.send(state)
+            }
+            .store(in: &cancellables)
+
+        transforming.matrixPublisher
+            .sink { [weak self] matrix in
+                self?.canvasRenderer.setMatrix(matrix)
             }
             .store(in: &cancellables)
     }
@@ -547,8 +546,10 @@ extension CanvasViewModel {
 
         drawingDisplayLink.run(isCurrentlyDrawing)
     }
+}
 
-    func onTapNewCanvas(
+public extension CanvasViewModel {
+    func newCanvas(
         newProjectName: String,
         newTextureSize: CGSize
     ) async throws {
@@ -561,9 +562,6 @@ extension CanvasViewModel {
 
         transforming.setMatrix(.identity)
     }
-}
-
-public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
@@ -584,16 +582,6 @@ public extension CanvasViewModel {
     }
     func redo() {
         textureLayers.redo()
-    }
-}
-
-public extension CanvasViewModel {
-
-    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
-        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
-        )
     }
 
     func loadFiles(
@@ -839,6 +827,13 @@ extension CanvasViewModel {
         canvasRenderer.commitAndRefreshDisplay(
             displayRealtimeDrawingTexture: displayRealtimeDrawingTexture,
             selectedLayer: selectedLayer
+        )
+    }
+
+    private func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
+        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: length,
+            scale: 1.0
         )
     }
 }
