@@ -97,7 +97,14 @@ public final class CanvasViewModel {
 
     public static let thumbnailLength: CGFloat = 500
 
-    init(renderer: MTLRendering) {
+    private var currentTextureSize: CGSize
+
+    init(
+        currentTextureSize: CGSize = .init(width: 768, height: 1024),
+        renderer: MTLRendering
+    ) {
+        self.currentTextureSize = currentTextureSize
+
         canvasRenderer = CanvasRenderer(renderer: renderer)
         drawingDebouncer = DrawingDebouncer(delay: 0.25)
         persistenceController = PersistenceController(
@@ -127,6 +134,7 @@ public final class CanvasViewModel {
     ) async throws {
         self.dependencies = dependencies
         self.drawingRenderers = drawingRenderers
+        self.currentTextureSize = configuration.textureSize
 
         setupCanvasRenderer(
             displayView: dependencies.displayView,
@@ -179,11 +187,17 @@ extension CanvasViewModel {
         dependencies: CanvasViewDependencies
     ) async throws {
         // Initialize the texture repository
-        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+        let _ = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
             textureLayersPersistedState: textureLayersPersistedState,
-            fallbackTextureSize: CanvasView.defaultTextureSize
+            fallbackTextureSize: currentTextureSize
         )
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        let resolvedTextureLayers: ResolvedTextureLayersPersistedState = .init(
+            textureLayersPersistedState: textureLayersPersistedState,
+            resolvedTextureSize: currentTextureSize
+        )
+
+        try await initializeTextureLayers(textureLayersState: resolvedTextureLayers)
 
         // Update the metadata with a new name
         projectMetaDataStorage.update(
@@ -195,7 +209,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: textureLayersState
+                resolvedTextureLayersPersistedState: resolvedTextureLayers
             )
         )
     }

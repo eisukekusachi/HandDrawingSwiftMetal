@@ -31,7 +31,7 @@ public extension ResolvedTextureLayersPersistedState {
     init(
         textureLayersPersistedState: TextureLayersPersistedState,
         resolvedTextureSize: CGSize
-    ) async throws {
+    ) {
         self.textureSize = resolvedTextureSize
         self.layerIndex = textureLayersPersistedState.layerIndex
         self.layers = textureLayersPersistedState.layers
