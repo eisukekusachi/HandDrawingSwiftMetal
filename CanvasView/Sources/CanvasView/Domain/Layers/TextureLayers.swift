@@ -96,6 +96,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         textureLayersPersistedState: TextureLayersPersistedState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
+        guard let textureDocumentsDirectoryRepository else { return }
+
+        self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
+
         self._textureSize = textureLayersPersistedState.textureSize
 
         self._layers = textureLayersPersistedState.layers.map {
@@ -110,10 +114,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         self._selectedLayerId = textureLayersPersistedState.selectedLayerId
 
-        self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
-
         Task {
-            let textures = try await textureDocumentsDirectoryRepository?.duplicatedTextures(_layers.map { $0.id })
+            let textures = try await self.textureDocumentsDirectoryRepository?.duplicatedTextures(_layers.map { $0.id })
             textures?.forEach { [weak self] identifiedTexture in
                 self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
