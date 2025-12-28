@@ -190,7 +190,7 @@ extension CanvasViewModel {
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async throws {
         let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
-            newTextureSize: CanvasView.defaultTextureSize
+            newTextureSize: currentTextureSize
         )
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 

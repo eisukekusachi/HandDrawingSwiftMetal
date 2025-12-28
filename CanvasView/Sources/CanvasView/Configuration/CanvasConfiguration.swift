@@ -19,7 +19,7 @@ public struct CanvasConfiguration {
         projectConfiguration: ProjectConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
-        self.textureSize = textureSize ?? CanvasView.defaultTextureSize
+        self.textureSize = textureSize ?? CanvasView.screenSize
         self.projectConfiguration = projectConfiguration
         self.environmentConfiguration = environmentConfiguration
     }
