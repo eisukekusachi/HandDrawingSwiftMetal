@@ -162,11 +162,11 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
     ) async throws {
-        var textureLayersState: ResolvedTextureLayersPersistedState?
+        var textureLayersState: TextureLayersPersistedState?
 
         // Use the size from CoreData if available,
         // if not, use the default size
-        if let state: ResolvedTextureLayersPersistedState = .init(
+        if let state: TextureLayersPersistedState = .init(
             entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
         ) {
             // Initialize the texture repository
@@ -192,7 +192,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: textureLayersState
+                textureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -217,24 +217,24 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: textureLayersState
+                textureLayersPersistedState: textureLayersState
             )
         )
     }
 
     func restoreCanvas(
         workingDirectoryURL: URL,
-        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
+        textureLayersPersistedState: TextureLayersPersistedState,
         projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {
-        let resolvedTextureLayers = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
+        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
 
-        try await initializeTextureLayers(textureLayersState: resolvedTextureLayers)
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update metadata
         projectMetaDataStorage.update(
@@ -248,7 +248,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: resolvedTextureLayers
+                textureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -325,12 +325,12 @@ extension CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    private func initializeTextureLayers(textureLayersState: ResolvedTextureLayersPersistedState) async throws {
+    private func initializeTextureLayers(textureLayersState: TextureLayersPersistedState) async throws {
         guard let dependencies else { return }
 
         // Initialize the textures used in the texture layers
         await textureLayers.initialize(
-            configuration: textureLayersState,
+            textureLayersPersistedState: textureLayersState,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
 

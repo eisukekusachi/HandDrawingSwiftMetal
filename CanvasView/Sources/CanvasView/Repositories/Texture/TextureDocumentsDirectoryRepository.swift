@@ -57,9 +57,9 @@ public final class TextureDocumentsDirectoryRepository {
     /// If that is invalid, creates a new texture and initializes the repository with it
     @discardableResult
     func initializeStorage(
-        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersPersistedState {
+    ) async throws -> TextureLayersPersistedState {
 
         if FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
@@ -80,7 +80,7 @@ public final class TextureDocumentsDirectoryRepository {
     @discardableResult
     func initializeStorage(
         newTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersPersistedState {
+    ) async throws -> TextureLayersPersistedState {
         guard
             Int(newTextureSize.width) >= canvasMinimumTextureLength &&
             Int(newTextureSize.height) >= canvasMinimumTextureLength,
@@ -122,9 +122,9 @@ public final class TextureDocumentsDirectoryRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersPersistedState {
+    ) async throws -> TextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)

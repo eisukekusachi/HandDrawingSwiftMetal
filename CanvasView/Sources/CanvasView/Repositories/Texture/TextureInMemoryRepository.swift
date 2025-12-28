@@ -34,7 +34,7 @@ public final class TextureInMemoryRepository {
     @discardableResult
     public func initializeStorage(
         newTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersPersistedState {
+    ) async throws -> TextureLayersPersistedState {
         guard
             Int(newTextureSize.width) >= canvasMinimumTextureLength &&
             Int(newTextureSize.height) >= canvasMinimumTextureLength
@@ -75,9 +75,9 @@ public final class TextureInMemoryRepository {
     @discardableResult
     public func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: ResolvedTextureLayersPersistedState,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
-    ) async throws -> ResolvedTextureLayersPersistedState {
+    ) async throws -> TextureLayersPersistedState {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)

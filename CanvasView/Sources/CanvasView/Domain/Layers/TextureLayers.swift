@@ -93,12 +93,12 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func initialize(
-        configuration: ResolvedTextureLayersPersistedState,
+        textureLayersPersistedState: TextureLayersPersistedState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
-        self._textureSize = configuration.textureSize
+        self._textureSize = textureLayersPersistedState.textureSize
 
-        self._layers = configuration.layers.map {
+        self._layers = textureLayersPersistedState.layers.map {
             .init(
                 id: $0.id,
                 title: $0.title,
@@ -108,7 +108,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             )
         }
 
-        self._selectedLayerId = configuration.selectedLayerId
+        self._selectedLayerId = textureLayersPersistedState.selectedLayerId
 
         self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
 

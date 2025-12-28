@@ -1,5 +1,5 @@
 //
-//  ResolvedTextureLayersPersistedState.swift
+//  TextureLayersPersistedState.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct ResolvedTextureLayersPersistedState: Sendable {
+public struct TextureLayersPersistedState: Sendable {
 
     public let textureSize: CGSize
 
@@ -25,7 +25,7 @@ public struct ResolvedTextureLayersPersistedState: Sendable {
     }
 }
 
-public extension ResolvedTextureLayersPersistedState {
+public extension TextureLayersPersistedState {
     init?(entity: TextureLayerArrayStorageEntity?) {
         guard let entity else { return nil }
 

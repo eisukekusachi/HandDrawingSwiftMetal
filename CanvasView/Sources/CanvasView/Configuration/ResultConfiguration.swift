@@ -10,5 +10,5 @@ import Foundation
 /// A struct created when `CanvasViewModel` setup is complete
 public struct ResultConfiguration {
     public let textureLayers: any TextureLayersProtocol
-    public let resolvedTextureLayersPersistedState: ResolvedTextureLayersPersistedState
+    public let textureLayersPersistedState: TextureLayersPersistedState
 }

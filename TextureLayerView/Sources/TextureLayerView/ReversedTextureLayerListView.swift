@@ -56,43 +56,6 @@ private struct PreviewView: View {
         renderer: nil
     )
 
-    private let configuration: ResolvedTextureLayersPersistedState = .init(
-        textureSize: .zero,
-        layerIndex: 0,
-        layers: [
-            .init(
-                id: LayerId(),
-                title: "Layer0",
-                alpha: 255,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer1",
-                alpha: 200,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer2",
-                alpha: 150,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer3",
-                alpha: 100,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer4",
-                alpha: 50,
-                isVisible: true
-            )
-        ]
-    )
-
     var body: some View {
         ReversedTextureLayerListView(
             viewModel: viewModel
