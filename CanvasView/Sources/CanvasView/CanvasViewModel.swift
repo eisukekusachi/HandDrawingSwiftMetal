@@ -162,10 +162,20 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
     ) async throws {
-        let textureLayersState = try await getTextureLayerState(
-            configuration: configuration,
-            dependencies: dependencies
+        // Use the size from CoreData if available,
+        // if not, use the size from the configuration
+        let state: TextureLayersPersistedState = .init(
+            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+        ) ?? .init(
+            textureSize: configuration.textureSize
         )
+
+        // Initialize the texture repository
+        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+            textureLayersPersistedState: state,
+            fallbackTextureSize: configuration.textureSize
+        )
+
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
@@ -389,26 +399,6 @@ extension CanvasViewModel {
                 undoTextureInMemoryRepository: undoTextureRepository
             )
         }
-    }
-    private func getTextureLayerState(
-        configuration: CanvasConfiguration,
-        dependencies: CanvasViewDependencies
-    ) async throws -> ResolvedTextureLayersPersistedState {
-        // Use the size from CoreData if available,
-        // if not, use the size from the configuration
-        let textureLayersState: TextureLayersPersistedState = .init(
-            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        ) ?? .init(
-            textureSize: configuration.textureSize
-        )
-
-        // Initialize the texture repository
-        let resolvedTextureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            textureLayersPersistedState: textureLayersState,
-            fallbackTextureSize: configuration.textureSize
-        )
-
-        return resolvedTextureLayersState
     }
 }
 
