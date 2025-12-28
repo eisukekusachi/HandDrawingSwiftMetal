@@ -30,7 +30,7 @@ public final class UndoTextureLayers: ObservableObject {
     /// A repository that stores textures for undo operations
     private var undoTextureInMemoryRepository: TextureInMemoryRepository? = nil
 
-    private var renderer: MTLRendering?
+    private var renderer: MTLRendering
 
     /// Holds the previous texture to support undoing drawings
     private var previousDrawingTextureForUndo: MTLTexture?
@@ -42,7 +42,7 @@ public final class UndoTextureLayers: ObservableObject {
 
     public init(
         textureLayers: any TextureLayersProtocol,
-        renderer: MTLRendering?
+        renderer: MTLRendering
     ) {
         self.textureLayers = textureLayers
         self.renderer = renderer
@@ -65,8 +65,7 @@ public final class UndoTextureLayers: ObservableObject {
         _ size: CGSize
     ) {
         guard
-            let undoTextureInMemoryRepository,
-            let renderer
+            let undoTextureInMemoryRepository
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "device"))
             return
@@ -139,7 +138,7 @@ private extension UndoTextureLayers {
         }
 
         do {
-            try await renderer?.copyTexture(
+            try await renderer.copyTexture(
                 srcTexture: texture,
                 dstTexture: previousDrawingTextureForUndo,
             )
@@ -153,7 +152,6 @@ private extension UndoTextureLayers {
         texture: MTLTexture?
     ) async throws {
         guard
-            let renderer,
             let undoTextureInMemoryRepository,
             let selectedLayer = textureLayers.selectedLayer,
             let undoTexture = try await MTLTextureCreator.duplicateTexture(
@@ -341,7 +339,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
         guard
-            let renderer,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
@@ -363,7 +360,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let renderer,
             let selectedLayer = textureLayers.selectedLayer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
@@ -400,7 +396,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            let renderer,
             let selectedLayer = textureLayers.selectedLayer,
             let newTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)?.texture
         else {

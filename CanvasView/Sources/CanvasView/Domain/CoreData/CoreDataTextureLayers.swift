@@ -22,7 +22,7 @@ public final class CoreDataTextureLayers: TextureLayers {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        renderer: MTLRendering?,
+        renderer: MTLRendering,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)

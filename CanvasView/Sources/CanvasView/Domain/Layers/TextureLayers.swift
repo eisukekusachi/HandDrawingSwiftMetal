@@ -87,7 +87,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     private var oldAlpha: Int?
 
     public init(
-        renderer: MTLRendering? = nil
+        renderer: MTLRendering?
     ) {
         self.renderer = renderer
     }

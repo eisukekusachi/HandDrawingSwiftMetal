@@ -18,7 +18,7 @@ final class UndoDrawingObject: UndoObject {
 
     let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    private let renderer: MTLRendering?
+    private let renderer: MTLRendering
 
     deinit {
         deinitSubject.send(self)
@@ -35,7 +35,6 @@ final class UndoDrawingObject: UndoObject {
     @MainActor
     public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
         guard
-            let renderer,
             let undoTextureId,
             let newTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: repository.texture(id: undoTextureId),
