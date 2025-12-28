@@ -57,19 +57,19 @@ public final class TextureDocumentsDirectoryRepository {
     /// If that is invalid, creates a new texture and initializes the repository with it
     @discardableResult
     func initializeStorage(
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersState: TextureLayersState,
         fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersPersistedState {
+    ) async throws -> TextureLayersState {
 
         if FileManager.containsAllFileNames(
-            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
+            fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
            )
         {
             // Retain the texture size
-            _textureSize = textureLayersPersistedState.textureSize
+            _textureSize = textureLayersState.textureSize
 
-            return textureLayersPersistedState
+            return textureLayersState
         } else {
             return try await initializeStorage(
                 newTextureSize: fallbackTextureSize
@@ -80,7 +80,7 @@ public final class TextureDocumentsDirectoryRepository {
     @discardableResult
     func initializeStorage(
         newTextureSize: CGSize
-    ) async throws -> TextureLayersPersistedState {
+    ) async throws -> TextureLayersState {
         guard
             Int(newTextureSize.width) >= canvasMinimumTextureLength &&
             Int(newTextureSize.height) >= canvasMinimumTextureLength,
@@ -114,19 +114,19 @@ public final class TextureDocumentsDirectoryRepository {
         _textureSize = newTextureSize
 
         return .init(
-            textureSize: newTextureSize,
+            layers: [textureLayer],
             layerIndex: 0,
-            layers: [textureLayer]
+            textureSize: newTextureSize
         )
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersState: TextureLayersState,
         fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersPersistedState {
+    ) async throws -> TextureLayersState {
         guard FileManager.containsAllFileNames(
-            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
+            fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -137,9 +137,9 @@ public final class TextureDocumentsDirectoryRepository {
             throw error
         }
 
-        let textureSize = textureLayersPersistedState.textureSize
+        let textureSize = textureLayersState.textureSize
 
-        try textureLayersPersistedState.layers.forEach { layer in
+        try textureLayersState.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -166,7 +166,7 @@ public final class TextureDocumentsDirectoryRepository {
         self.removeAll()
 
         // Move all files
-        try textureLayersPersistedState.layers.forEach { layer in
+        try textureLayersState.layers.forEach { layer in
             try FileManager.default.moveItem(
                 at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                 to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
@@ -176,7 +176,7 @@ public final class TextureDocumentsDirectoryRepository {
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
 
-        return textureLayersPersistedState
+        return textureLayersState
     }
 
     /// Copies a texture for the given `LayerId`

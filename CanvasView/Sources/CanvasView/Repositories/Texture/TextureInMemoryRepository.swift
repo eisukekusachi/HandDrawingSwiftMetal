@@ -34,7 +34,7 @@ public final class TextureInMemoryRepository {
     @discardableResult
     public func initializeStorage(
         newTextureSize: CGSize
-    ) async throws -> TextureLayersPersistedState {
+    ) async throws -> TextureLayersState {
         guard
             Int(newTextureSize.width) >= canvasMinimumTextureLength &&
             Int(newTextureSize.height) >= canvasMinimumTextureLength
@@ -66,20 +66,20 @@ public final class TextureInMemoryRepository {
         _textureSize = newTextureSize
 
         return .init(
-            textureSize: newTextureSize,
+            layers: [layer],
             layerIndex: 0,
-            layers: [layer]
+            textureSize: newTextureSize
         )
     }
 
     @discardableResult
     public func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersState: TextureLayersState,
         fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersPersistedState {
+    ) async throws -> TextureLayersState {
         guard FileManager.containsAllFileNames(
-            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
+            fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -90,12 +90,12 @@ public final class TextureInMemoryRepository {
             throw error
         }
 
-        let textureSize = textureLayersPersistedState.textureSize
+        let textureSize = textureLayersState.textureSize
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [LayerId: MTLTexture] = [:]
 
-        try textureLayersPersistedState.layers.forEach { layer in
+        try textureLayersState.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -131,7 +131,7 @@ public final class TextureInMemoryRepository {
         textures = newTextures
         _textureSize = textureSize
 
-        return textureLayersPersistedState
+        return textureLayersState
     }
 
     /// Returns the texture associated with the specified `LayerId`

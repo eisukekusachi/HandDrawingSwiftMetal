@@ -93,16 +93,16 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func initialize(
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersState: TextureLayersState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
     ) async {
         guard let textureDocumentsDirectoryRepository else { return }
 
         self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
 
-        self._textureSize = textureLayersPersistedState.textureSize
+        self._textureSize = textureLayersState.textureSize
 
-        self._layers = textureLayersPersistedState.layers.map {
+        self._layers = textureLayersState.layers.map {
             .init(
                 id: $0.id,
                 title: $0.title,
@@ -112,7 +112,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             )
         }
 
-        self._selectedLayerId = textureLayersPersistedState.selectedLayerId
+        self._selectedLayerId = textureLayersState.selectedLayerId
 
         Task {
             let textures = try await self.textureDocumentsDirectoryRepository?.duplicatedTextures(_layers.map { $0.id })

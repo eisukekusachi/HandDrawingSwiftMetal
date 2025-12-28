@@ -44,7 +44,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     var textureSize: CGSize { get }
 
     func initialize(
-        textureLayersPersistedState: TextureLayersPersistedState,
+        textureLayersState: TextureLayersState,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
     ) async
 

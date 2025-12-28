@@ -1,5 +1,5 @@
 //
-//  TextureLayersPersistedState.swift
+//  TextureLayersState.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -7,25 +7,26 @@
 
 import UIKit
 
-public struct TextureLayersPersistedState: Sendable {
+public struct TextureLayersState: Sendable {
+
+    public let layers: [TextureLayerModel]
+
+    public let layerIndex: Int
 
     public let textureSize: CGSize
 
-    public let layerIndex: Int
-    public let layers: [TextureLayerModel]
-
     public init(
-        textureSize: CGSize,
+        layers: [TextureLayerModel],
         layerIndex: Int,
-        layers: [TextureLayerModel]
+        textureSize: CGSize
     ) {
-        self.textureSize = textureSize
-        self.layerIndex = layerIndex
         self.layers = layers
+        self.layerIndex = layerIndex
+        self.textureSize = textureSize
     }
 }
 
-public extension TextureLayersPersistedState {
+public extension TextureLayersState {
     init?(entity: TextureLayerArrayStorageEntity?) {
         guard let entity else { return nil }
 

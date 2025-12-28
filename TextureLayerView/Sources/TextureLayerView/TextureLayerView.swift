@@ -46,9 +46,7 @@ private struct PreviewView: View {
         renderer: nil
     )
 
-    private let state: TextureLayersPersistedState = .init(
-        textureSize: .zero,
-        layerIndex: 3,
+    private let state: TextureLayersState = .init(
         layers: [
             .init(
                 id: LayerId(),
@@ -80,7 +78,9 @@ private struct PreviewView: View {
                 alpha: 50,
                 isVisible: true
             )
-        ]
+        ],
+        layerIndex: 3,
+        textureSize: .zero
     )
 
     var body: some View {
@@ -91,7 +91,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 await textureLayers.initialize(
-                    textureLayersPersistedState: state
+                    textureLayersState: state
                 )
 
                 viewModel.initialize(
