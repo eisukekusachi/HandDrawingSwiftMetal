@@ -27,8 +27,16 @@ public struct TextureLayersState: Sendable {
 }
 
 public extension TextureLayersState {
-    init?(entity: TextureLayerArrayStorageEntity?) {
-        guard let entity else { return nil }
+    init(entity: TextureLayerArrayStorageEntity?) throws {
+        guard
+            let entity else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Failed to unwrap optional value", bundle: .main)
+            )
+            Logger.error(error)
+            throw error
+        }
 
         self.layers = entity.textureLayerArray?
             .compactMap { $0 as? TextureLayerStorageEntity }
@@ -46,7 +54,12 @@ public extension TextureLayersState {
 
         // Return nil if the layers are nil or the texture size is zero
         if layers.isEmpty || textureSize == .zero {
-            return nil
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Unable to find texture layer files", bundle: .main)
+            )
+            Logger.error(error)
+            throw error
         }
     }
 

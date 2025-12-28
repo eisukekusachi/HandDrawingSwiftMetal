@@ -132,7 +132,7 @@ private extension UndoTextureLayers {
             let texture,
             let previousDrawingTextureForUndo
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "previousDrawingTextureForUndo"))
             return
         }
 
@@ -162,7 +162,7 @@ private extension UndoTextureLayers {
                 renderer: renderer
             )
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "textures"))
             return
         }
         let undoObject = UndoDrawingObject(

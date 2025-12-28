@@ -148,7 +148,7 @@ public final class CanvasViewModel {
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
         setupMetaDataIfAvailable()
 
-        try await initCanvas(
+        await initCanvas(
             configuration: configuration,
             dependencies: dependencies
         )
@@ -158,30 +158,64 @@ public final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    
     func initCanvas(
         configuration: CanvasConfiguration,
         dependencies: CanvasViewDependencies
-    ) async throws {
-        var textureLayersState: TextureLayersState?
-
-        // Use the size from CoreData if available,
-        // if not, use the default size
-        if let state: TextureLayersState = .init(
-            entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        ) {
-            // Initialize the texture repository
-            textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-                textureLayersState: state,
-                fallbackTextureSize: configuration.textureSize
-            )
-        } else {
-            textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-                newTextureSize: CanvasView.defaultTextureSize
-            )
+    ) async {
+        do {
+            if let coreDataTextureLayers: CoreDataTextureLayers = (textureLayers.textureLayers as? CoreDataTextureLayers),
+               let textureLayersEntity = try coreDataTextureLayers.fetch() {
+                try await initializeCanvasFromCoreData(
+                    textureLayersEntity: textureLayersEntity,
+                    textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+                )
+                return
+            }
+        } catch {
+            Logger.error(error)
         }
 
-        guard let textureLayersState else { return }
+        do {
+            try await initializeCanvas(
+                projectName: configuration.projectConfiguration.projectName,
+                textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
+    }
 
+    func initializeCanvas(
+        projectName: String,
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+    ) async throws {
+        let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
+            newTextureSize: CanvasView.defaultTextureSize
+        )
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        projectMetaDataStorage.update(newProjectName: projectName)
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers,
+                textureLayersState: textureLayersState
+            )
+        )
+    }
+
+    func initializeCanvasFromCoreData(
+        textureLayersEntity: TextureLayerArrayStorageEntity,
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+    ) async throws {
+        let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
+
+        try textureDocumentsDirectoryRepository.initializeStorage(
+            textureLayersState: textureLayersState
+        )
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
@@ -197,43 +231,16 @@ extension CanvasViewModel {
         )
     }
 
-    func newCanvas(
-        newProjectName: String,
-        dependencies: CanvasViewDependencies
-    ) async throws {
-        // Initialize the texture repository
-        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            newTextureSize: currentTextureSize
-        )
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
-
-        // Update the metadata with a new name
-        projectMetaDataStorage.update(
-            newProjectName: newProjectName
-        )
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(
-            .init(
-                textureLayers: textureLayers,
-                textureLayersState: textureLayersState
-            )
-        )
-    }
-
-    func restoreCanvas(
+    func initializeCanvasFromDocumentsFolder(
         workingDirectoryURL: URL,
         textureLayersState: TextureLayersState,
         projectMetaData: ProjectMetaData,
-        dependencies: CanvasViewDependencies
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async throws {
-        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
+        try await textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
-            textureLayersState: textureLayersState,
-            fallbackTextureSize: CanvasView.defaultTextureSize
+            textureLayersState: textureLayersState
         )
-
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update metadata
@@ -547,9 +554,9 @@ extension CanvasViewModel {
     ) async throws {
         guard let dependencies else { return }
 
-        try await newCanvas(
-            newProjectName: newProjectName,
-            dependencies: dependencies
+        try await initializeCanvas(
+            projectName: newProjectName,
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
 
         transforming.setMatrix(.identity)
@@ -604,11 +611,11 @@ public extension CanvasViewModel {
             in: workingDirectoryURL
         )
 
-        try await restoreCanvas(
+        try await initializeCanvasFromDocumentsFolder(
             workingDirectoryURL: workingDirectoryURL,
             textureLayersState: .init(textureLayersArchiveModel),
             projectMetaData: .init(projectMetaData: projectMetaData, fallbacName: workingDirectoryURL.fileName),
-            dependencies: dependencies
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
     }
 

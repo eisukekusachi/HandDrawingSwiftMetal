@@ -55,12 +55,9 @@ public final class TextureDocumentsDirectoryRepository {
 
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
-    @discardableResult
     func initializeStorage(
-        textureLayersState: TextureLayersState,
-        fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersState {
-
+        textureLayersState: TextureLayersState
+    ) throws {
         if FileManager.containsAllFileNames(
             fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
@@ -69,12 +66,15 @@ public final class TextureDocumentsDirectoryRepository {
             // Retain the texture size
             _textureSize = textureLayersState.textureSize
 
-            return textureLayersState
-        } else {
-            return try await initializeStorage(
-                newTextureSize: fallbackTextureSize
-            )
+            return
         }
+
+        let error = NSError(
+            title: String(localized: "Error", bundle: .main),
+            message: String(localized: "Unable to find texture layer files", bundle: .main)
+        )
+        Logger.error(error)
+        throw error
     }
 
     @discardableResult
@@ -122,9 +122,8 @@ public final class TextureDocumentsDirectoryRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersState: TextureLayersState,
-        fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersState {
+        textureLayersState: TextureLayersState
+    ) async throws {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
@@ -175,8 +174,6 @@ public final class TextureDocumentsDirectoryRepository {
 
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
-
-        return textureLayersState
     }
 
     /// Copies a texture for the given `LayerId`
