@@ -29,14 +29,12 @@ public struct ResolvedTextureLayersConfiguration: Sendable {
 public extension ResolvedTextureLayersConfiguration {
 
     init(
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         resolvedTextureSize: CGSize
     ) async throws {
-
         self.textureSize = resolvedTextureSize
-
-        self.layerIndex = configuration.layerIndex
-        self.layers = configuration.layers
+        self.layerIndex = textureLayersPersistedState.layerIndex
+        self.layers = textureLayersPersistedState.layers
     }
 
     var selectedLayerId: LayerId? {

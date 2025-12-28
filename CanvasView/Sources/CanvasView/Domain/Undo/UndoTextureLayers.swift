@@ -77,7 +77,7 @@ public final class UndoTextureLayers: ObservableObject {
         Task {
             do {
                 let resolvedConfiguration = try await undoTextureInMemoryRepository.initializeStorage(
-                    configuration: .init(textureSize: size),
+                    textureLayersPersistedState: .init(textureSize: size),
                     fallbackTextureSize: size
                 )
 

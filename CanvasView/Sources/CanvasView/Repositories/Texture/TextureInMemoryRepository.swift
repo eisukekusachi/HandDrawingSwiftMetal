@@ -32,10 +32,10 @@ public final class TextureInMemoryRepository {
     }
 
     public func initializeStorage(
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersConfiguration {
-        let textureSize = configuration.textureSize ?? fallbackTextureSize
+        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
 
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
@@ -67,24 +67,24 @@ public final class TextureInMemoryRepository {
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
 
-        let configuration: TextureLayersConfiguration = .init(
+        let configuration: TextureLayersPersistedState = .init(
             layers: [layer],
             textureSize: textureSize
         )
 
         return try await .init(
-            configuration: configuration,
+            textureLayersPersistedState: textureLayersPersistedState,
             resolvedTextureSize: textureSize
         )
     }
 
     public func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersConfiguration {
         guard FileManager.containsAllFileNames(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -95,12 +95,12 @@ public final class TextureInMemoryRepository {
             throw error
         }
 
-        let textureSize = configuration.textureSize ?? fallbackTextureSize
+        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
 
         // Temporary dictionary to hold new textures before applying
         var newTextures: [LayerId: MTLTexture] = [:]
 
-        try configuration.layers.forEach { layer in
+        try textureLayersPersistedState.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -137,7 +137,7 @@ public final class TextureInMemoryRepository {
         _textureSize = textureSize
 
         return try await .init(
-            configuration: configuration,
+            textureLayersPersistedState: textureLayersPersistedState,
             resolvedTextureSize: textureSize
         )
     }

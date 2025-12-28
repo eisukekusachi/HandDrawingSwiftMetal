@@ -1,5 +1,5 @@
 //
-//  TextureLayersConfiguration.swift
+//  TextureLayersPersistedState.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/10.
@@ -7,7 +7,8 @@
 
 import UIKit
 
-public struct TextureLayersConfiguration: Sendable {
+/// A struct that represents the persisted state of texture layers
+public struct TextureLayersPersistedState: Sendable {
 
     /// An array of layer models
     public let layers: [TextureLayerModel]
@@ -30,7 +31,7 @@ public struct TextureLayersConfiguration: Sendable {
     }
 }
 
-extension TextureLayersConfiguration {
+extension TextureLayersPersistedState {
 
     public init(
         _ configuration: Self,

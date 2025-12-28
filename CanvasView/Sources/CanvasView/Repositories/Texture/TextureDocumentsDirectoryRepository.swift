@@ -56,16 +56,16 @@ public final class TextureDocumentsDirectoryRepository {
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
     func initializeStorage(
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersConfiguration {
 
         if FileManager.containsAllFileNames(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
            ),
            // Check if the texture can be created before proceeding
-           let textureSize = configuration.textureSize,
+           let textureSize = textureLayersPersistedState.textureSize,
            let _ = MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),
                height: Int(textureSize.height),
@@ -76,12 +76,12 @@ public final class TextureDocumentsDirectoryRepository {
             _textureSize = textureSize
 
             return try await .init(
-                configuration: configuration,
+                textureLayersPersistedState: textureLayersPersistedState,
                 resolvedTextureSize: textureSize
             )
         } else {
             return try await initializeStorageWithNewTexture(
-                configuration: configuration,
+                textureLayersPersistedState: textureLayersPersistedState,
                 textureSize: fallbackTextureSize
             )
         }
@@ -89,11 +89,11 @@ public final class TextureDocumentsDirectoryRepository {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         fallbackTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersConfiguration {
         guard FileManager.containsAllFileNames(
-            fileNames: configuration.layers.map { $0.fileName },
+            fileNames: textureLayersPersistedState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -104,9 +104,9 @@ public final class TextureDocumentsDirectoryRepository {
             throw error
         }
 
-        let textureSize = configuration.textureSize ?? fallbackTextureSize
+        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
 
-        try configuration.layers.forEach { layer in
+        try textureLayersPersistedState.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -133,7 +133,7 @@ public final class TextureDocumentsDirectoryRepository {
         self.removeAll()
 
         // Move all files
-        try configuration.layers.forEach { layer in
+        try textureLayersPersistedState.layers.forEach { layer in
             try FileManager.default.moveItem(
                 at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                 to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
@@ -144,13 +144,13 @@ public final class TextureDocumentsDirectoryRepository {
         _textureSize = textureSize
 
         return try await .init(
-            configuration: configuration,
+            textureLayersPersistedState: textureLayersPersistedState,
             resolvedTextureSize: textureSize
         )
     }
 
     private func initializeStorageWithNewTexture(
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         textureSize: CGSize
     ) async throws -> ResolvedTextureLayersConfiguration {
         guard
@@ -186,7 +186,7 @@ public final class TextureDocumentsDirectoryRepository {
         _textureSize = textureSize
 
         return try await .init(
-            configuration: .init(configuration, layers: [layer]),
+            textureLayersPersistedState: .init(textureLayersPersistedState, layers: [layer]),
             resolvedTextureSize: textureSize
         )
     }

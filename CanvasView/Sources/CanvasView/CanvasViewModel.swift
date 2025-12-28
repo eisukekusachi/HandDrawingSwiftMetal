@@ -175,12 +175,12 @@ extension CanvasViewModel {
 
     func newCanvas(
         newProjectName: String,
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         dependencies: CanvasViewDependencies
     ) async throws {
         // Initialize the texture repository
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            configuration: configuration,
+            textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
         try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
@@ -202,13 +202,13 @@ extension CanvasViewModel {
 
     func restoreCanvas(
         workingDirectoryURL: URL,
-        configuration: TextureLayersConfiguration,
+        textureLayersPersistedState: TextureLayersPersistedState,
         projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
-            configuration: configuration,
+            textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
         try await initializeTextureLayers(configuration: resolvedTextureLayersConfiguration)
@@ -389,7 +389,7 @@ extension CanvasViewModel {
     ) async throws -> ResolvedTextureLayersConfiguration {
         // Use the size from CoreData if available,
         // if not, use the size from the configuration
-        let textureLayersConfiguration: TextureLayersConfiguration = .init(
+        let textureLayersConfiguration: TextureLayersPersistedState = .init(
             entity: try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
         ) ?? .init(
             textureSize: configuration.textureSize
@@ -397,7 +397,7 @@ extension CanvasViewModel {
 
         // Initialize the texture repository
         let resolvedTextureLayersConfiguration = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            configuration: textureLayersConfiguration,
+            textureLayersPersistedState: textureLayersConfiguration,
             fallbackTextureSize: configuration.textureSize
         )
 
@@ -546,7 +546,7 @@ extension CanvasViewModel {
 
         try await newCanvas(
             newProjectName: newProjectName,
-            configuration: .init(
+            textureLayersPersistedState: .init(
                 textureSize: newTextureSize
             ),
             dependencies: dependencies
@@ -595,7 +595,7 @@ public extension CanvasViewModel {
         guard let dependencies else { return }
 
         // Load texture layer data from the JSON file
-        let textureLayersModel: TextureLayersArchiveModel = try .init(
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
 
@@ -606,19 +606,10 @@ public extension CanvasViewModel {
 
         try await restoreCanvas(
             workingDirectoryURL: workingDirectoryURL,
-            configuration: .init(
-                layers: textureLayersModel.layers,
-                layerIndex: textureLayersModel.layerIndex,
-                textureSize: textureLayersModel.textureSize
-            ),
-            projectMetaData: .init(
-                projectName: projectMetaData?.projectName ?? workingDirectoryURL.fileName,
-                createdAt: projectMetaData?.createdAt ?? Date(),
-                updatedAt: projectMetaData?.updatedAt ?? Date()
-            ),
+            textureLayersPersistedState: .init(textureLayersArchiveModel),
+            projectMetaData: .init(projectMetaData: projectMetaData, fallbacName: workingDirectoryURL.fileName),
             dependencies: dependencies
         )
-
     }
 
     func exportFiles(
