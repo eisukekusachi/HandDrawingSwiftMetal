@@ -62,12 +62,12 @@ public final class UndoTextureLayers: ObservableObject {
     }
 
     public func initializeUndoTextureRepository(
-        _ size: CGSize
+        textureSize: CGSize
     ) {
         guard
             let undoTextureInMemoryRepository
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "device"))
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoTextureInMemoryRepository"))
             return
         }
 
@@ -75,15 +75,14 @@ public final class UndoTextureLayers: ObservableObject {
 
         Task {
             do {
-                let resolvedConfiguration = try await undoTextureInMemoryRepository.initializeStorage(
-                    textureLayersPersistedState: .init(textureSize: size),
-                    fallbackTextureSize: size
+                try await undoTextureInMemoryRepository.initializeStorage(
+                    newTextureSize: textureSize
                 )
 
                 // Create a texture for use in drawing undo operations
                 previousDrawingTextureForUndo = MTLTextureCreator.makeTexture(
-                    width: Int(resolvedConfiguration.textureSize.width),
-                    height: Int(resolvedConfiguration.textureSize.height),
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
                     with: renderer.device
                 )
             } catch {

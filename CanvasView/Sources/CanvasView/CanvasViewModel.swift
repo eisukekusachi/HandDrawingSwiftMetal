@@ -183,21 +183,13 @@ extension CanvasViewModel {
 
     func newCanvas(
         newProjectName: String,
-        textureLayersPersistedState: TextureLayersPersistedState,
         dependencies: CanvasViewDependencies
     ) async throws {
         // Initialize the texture repository
-        let _ = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
-            textureLayersPersistedState: textureLayersPersistedState,
-            fallbackTextureSize: currentTextureSize
+        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.initializeStorage(
+            newTextureSize: currentTextureSize
         )
-
-        let resolvedTextureLayers: ResolvedTextureLayersPersistedState = .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: currentTextureSize
-        )
-
-        try await initializeTextureLayers(textureLayersState: resolvedTextureLayers)
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update the metadata with a new name
         projectMetaDataStorage.update(
@@ -209,7 +201,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: resolvedTextureLayers
+                resolvedTextureLayersPersistedState: textureLayersState
             )
         )
     }
@@ -220,12 +212,13 @@ extension CanvasViewModel {
         projectMetaData: ProjectMetaData,
         dependencies: CanvasViewDependencies
     ) async throws {
-        let textureLayersState = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
+        let resolvedTextureLayers = try await dependencies.textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             textureLayersPersistedState: textureLayersPersistedState,
             fallbackTextureSize: CanvasView.defaultTextureSize
         )
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        try await initializeTextureLayers(textureLayersState: resolvedTextureLayers)
 
         // Update metadata
         projectMetaDataStorage.update(
@@ -239,7 +232,7 @@ extension CanvasViewModel {
         didInitializeSubject.send(
             .init(
                 textureLayers: textureLayers,
-                resolvedTextureLayersPersistedState: textureLayersState
+                resolvedTextureLayersPersistedState: resolvedTextureLayers
             )
         )
     }
@@ -328,7 +321,7 @@ extension CanvasViewModel {
         // Initialize the repository used for Undo
         if textureLayers.isUndoEnabled {
             textureLayers.initializeUndoTextureRepository(
-                textureLayersState.textureSize
+                textureSize: textureLayersState.textureSize
             )
         }
 
@@ -560,9 +553,6 @@ extension CanvasViewModel {
 
         try await newCanvas(
             newProjectName: newProjectName,
-            textureLayersPersistedState: .init(
-                textureSize: newTextureSize
-            ),
             dependencies: dependencies
         )
 

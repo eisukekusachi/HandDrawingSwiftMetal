@@ -75,14 +75,13 @@ public final class TextureDocumentsDirectoryRepository {
             // Retain the texture size
             _textureSize = textureSize
 
-            return try await .init(
+            return .init(
                 textureLayersPersistedState: textureLayersPersistedState,
                 resolvedTextureSize: textureSize
             )
         } else {
-            return try await initializeStorageWithNewTexture(
-                textureLayersPersistedState: textureLayersPersistedState,
-                textureSize: fallbackTextureSize
+            return try await initializeStorage(
+                newTextureSize: fallbackTextureSize
             )
         }
     }
@@ -143,28 +142,28 @@ public final class TextureDocumentsDirectoryRepository {
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
 
-        return try await .init(
+        return .init(
             textureLayersPersistedState: textureLayersPersistedState,
             resolvedTextureSize: textureSize
         )
     }
 
-    private func initializeStorageWithNewTexture(
-        textureLayersPersistedState: TextureLayersPersistedState,
-        textureSize: CGSize
+    @discardableResult
+    func initializeStorage(
+        newTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
         guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength,
+            Int(newTextureSize.width) >= canvasMinimumTextureLength &&
+            Int(newTextureSize.height) >= canvasMinimumTextureLength,
             let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
+                width: Int(newTextureSize.width),
+                height: Int(newTextureSize.height),
                 with: renderer.device
             )
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(newTextureSize.width) \(newTextureSize.height)"
             )
             Logger.error(error)
             throw error
@@ -173,21 +172,22 @@ public final class TextureDocumentsDirectoryRepository {
         // Delete all textures in the repository
         removeAll()
 
-        let layer = TextureLayerModel(
+        let textureLayer = TextureLayerModel(
             id: LayerId(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
         )
 
-        try await addTexture(texture: newTexture, id: layer.id)
+        try await addTexture(texture: newTexture, id: textureLayer.id)
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        _textureSize = newTextureSize
 
-        return try await .init(
-            textureLayersPersistedState: .init(textureLayersPersistedState, layers: [layer]),
-            resolvedTextureSize: textureSize
+        return .init(
+            textureSize: newTextureSize,
+            layerIndex: 0,
+            layers: [textureLayer]
         )
     }
 

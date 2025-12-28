@@ -31,19 +31,17 @@ public final class TextureInMemoryRepository {
         self.renderer = renderer
     }
 
+    @discardableResult
     public func initializeStorage(
-        textureLayersPersistedState: TextureLayersPersistedState,
-        fallbackTextureSize: CGSize
+        newTextureSize: CGSize
     ) async throws -> ResolvedTextureLayersPersistedState {
-        let textureSize = textureLayersPersistedState.textureSize ?? fallbackTextureSize
-
         guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength
+            Int(newTextureSize.width) >= canvasMinimumTextureLength &&
+            Int(newTextureSize.height) >= canvasMinimumTextureLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(newTextureSize.width) \(newTextureSize.height)"
             )
             Logger.error(error)
             throw error
@@ -59,22 +57,18 @@ public final class TextureInMemoryRepository {
         )
 
         textures[layer.id] = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
+            width: Int(newTextureSize.width),
+            height: Int(newTextureSize.height),
             with: renderer.device
         )
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        _textureSize = newTextureSize
 
-        let configuration: TextureLayersPersistedState = .init(
-            layers: [layer],
-            textureSize: textureSize
-        )
-
-        return try await .init(
-            textureLayersPersistedState: textureLayersPersistedState,
-            resolvedTextureSize: textureSize
+        return .init(
+            textureSize: newTextureSize,
+            layerIndex: 0,
+            layers: [layer]
         )
     }
 
