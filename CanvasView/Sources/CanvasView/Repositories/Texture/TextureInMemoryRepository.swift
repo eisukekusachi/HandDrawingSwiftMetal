@@ -72,6 +72,7 @@ public final class TextureInMemoryRepository {
         )
     }
 
+    @discardableResult
     public func restoreStorage(
         from sourceFolderURL: URL,
         textureLayersPersistedState: TextureLayersPersistedState,
@@ -130,7 +131,7 @@ public final class TextureInMemoryRepository {
         textures = newTextures
         _textureSize = textureSize
 
-        return try await .init(
+        return .init(
             textureLayersPersistedState: textureLayersPersistedState,
             resolvedTextureSize: textureSize
         )
