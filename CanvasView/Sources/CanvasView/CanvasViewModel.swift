@@ -581,9 +581,14 @@ extension CanvasViewModel {
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
+        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
+            newTextureSize: currentTextureSize
+        )
+
         let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
             newTextureSize: currentTextureSize
         )
+
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         projectMetaDataStorage.update(newProjectName: projectName)
@@ -606,6 +611,9 @@ extension CanvasViewModel {
 
         let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
 
+        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
+            newTextureSize: currentTextureSize
+        )
         try textureDocumentsDirectoryRepository.initializeStorage(
             textureLayersState: textureLayersState
         )
@@ -631,6 +639,10 @@ extension CanvasViewModel {
         guard
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
+
+        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
+            newTextureSize: currentTextureSize
+        )
 
         try await textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
