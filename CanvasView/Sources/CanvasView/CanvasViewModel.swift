@@ -147,6 +147,7 @@ extension CanvasViewModel {
             environmentConfiguration: configuration.environmentConfiguration
         )
         setupDrawingRenderers(
+            drawingRenderers: drawingRenderers,
             renderer: dependencies.renderer,
             displayView: dependencies.displayView
         )
@@ -290,13 +291,14 @@ extension CanvasViewModel {
     }
 
     private func setupDrawingRenderers(
+        drawingRenderers: [DrawingRenderer],
         renderer: MTLRendering,
         displayView: CanvasDisplayable
     ) {
-        if self.drawingRenderers.isEmpty {
+        if drawingRenderers.isEmpty {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
-        self.drawingRenderers.forEach {
+        drawingRenderers.forEach {
             $0.setup(
                 frameSize: frameSize,
                 renderer: renderer,
