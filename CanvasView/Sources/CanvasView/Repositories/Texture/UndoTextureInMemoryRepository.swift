@@ -1,5 +1,5 @@
 //
-//  TextureInMemoryRepository.swift
+//  UndoTextureInMemoryRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
@@ -8,9 +8,10 @@
 import Foundation
 @preconcurrency import MetalKit
 
-/// A repository that manages in-memory textures
+/// A repository that manages textures for undo operations.
+/// The textures are stored in memory to avoid blocking the main thread.
 @MainActor
-public final class TextureInMemoryRepository {
+public final class UndoTextureInMemoryRepository {
 
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]

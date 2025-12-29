@@ -155,7 +155,7 @@ extension CanvasViewModel {
             displayView: dependencies.displayView
         )
         setupTouchGesture(environmentConfiguration: environmentConfiguration)
-        setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
+        setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
 
         textureLayers.setup(
             textureLayersDocumentsRepository: dependencies.textureLayersDocumentsRepository
@@ -326,11 +326,11 @@ extension CanvasViewModel {
         )
     }
 
-    private func setupUndoTextureLayersIfAvailable(undoTextureRepository: TextureInMemoryRepository?) {
+    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
         // If `undoTextureRepository` is used, undo functionality is available
-        if let undoTextureRepository {
+        if let repository {
             self.textureLayers.setUndoTextureRepository(
-                undoTextureInMemoryRepository: undoTextureRepository
+                repository: repository
             )
         }
     }

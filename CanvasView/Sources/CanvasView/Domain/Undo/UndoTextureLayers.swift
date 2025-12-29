@@ -28,7 +28,7 @@ public final class UndoTextureLayers: ObservableObject {
     private let undoManager = UndoManager()
 
     /// A repository that stores textures for undo operations
-    private(set) var undoTextureInMemoryRepository: TextureInMemoryRepository? = nil
+    private(set) var undoTextureInMemoryRepository: UndoTextureInMemoryRepository? = nil
 
     private var renderer: MTLRendering
 
@@ -56,9 +56,9 @@ public final class UndoTextureLayers: ObservableObject {
     }
 
     public func setUndoTextureRepository(
-        undoTextureInMemoryRepository: TextureInMemoryRepository
+        repository: UndoTextureInMemoryRepository
     ) {
-        self.undoTextureInMemoryRepository = undoTextureInMemoryRepository
+        self.undoTextureInMemoryRepository = repository
     }
 
     public func initializeUndoTextureRepository(

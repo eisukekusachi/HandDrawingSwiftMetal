@@ -62,7 +62,7 @@ public final class UndoMoveObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
+    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
         layers.moveLayer(
             indices: indices
         )

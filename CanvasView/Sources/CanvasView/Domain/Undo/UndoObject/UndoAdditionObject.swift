@@ -39,7 +39,7 @@ public final class UndoAdditionObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
+    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
         guard
             let undoTextureId,
             let newTexture = try await MTLTextureCreator.duplicateTexture(

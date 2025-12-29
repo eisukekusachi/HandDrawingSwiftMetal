@@ -27,7 +27,7 @@ public final class UndoSelectionObject: UndoObject {
         self.textureLayer = layer
     }
 
-    public func applyUndo(layers: any TextureLayersProtocol, repository: TextureInMemoryRepository) async throws {
+    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
         layers.selectLayer(
             textureLayer.id
         )

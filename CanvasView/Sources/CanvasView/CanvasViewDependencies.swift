@@ -13,7 +13,7 @@ struct CanvasViewDependencies {
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepository
 
     /// Repository that manages textures used for undo in memory
-    let undoTextureRepository: TextureInMemoryRepository?
+    let undoTextureRepository: UndoTextureInMemoryRepository?
 
     /// Used to render or copy textures
     let renderer: MTLRendering
@@ -33,7 +33,7 @@ extension CanvasViewDependencies {
             renderer: renderer
         )
 
-        self.undoTextureRepository = TextureInMemoryRepository(
+        self.undoTextureRepository = .init(
             renderer: renderer
         )
 
