@@ -614,7 +614,7 @@ extension CanvasViewModel {
         try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
             newTextureSize: currentTextureSize
         )
-        try textureDocumentsDirectoryRepository.initializeStorageFromDocumentsFolderFiles(
+        try textureDocumentsDirectoryRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
         try await initializeTextureLayers(textureLayersState: textureLayersState)

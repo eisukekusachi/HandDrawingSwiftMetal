@@ -59,7 +59,7 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
     ) async throws -> TextureLayersState {
         guard
             Int(newTextureSize.width) >= canvasMinimumTextureLength &&
-            Int(newTextureSize.height) >= canvasMinimumTextureLength,
+                Int(newTextureSize.height) >= canvasMinimumTextureLength,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(newTextureSize.width),
                 height: Int(newTextureSize.height),
@@ -96,30 +96,55 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         )
     }
 
-    /// Restore using the textures in the Documents folder.
-    /// Restoration is possible if the layer IDs in the given `TextureLayersState` match all the image filenames in the Documents folder
-    public func initializeStorageFromDocumentsFolderFiles(
+    /// Restore the storage from Core Data.
+    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersState`
+    public func restoreStorageFromCoreData(
         textureLayersState: TextureLayersState
     ) throws {
-        if FileManager.containsAllFileNames(
+        guard FileManager.containsAllFileNames(
             fileNames: textureLayersState.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
-           )
-        {
-            // Retain the texture size
-            _textureSize = textureLayersState.textureSize
-
-            return
+        ) else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Unable to find texture layer files", bundle: .main)
+            )
+            Logger.error(error)
+            throw error
         }
 
-        let error = NSError(
-            title: String(localized: "Error", bundle: .main),
-            message: String(localized: "Unable to find texture layer files", bundle: .main)
-        )
-        Logger.error(error)
-        throw error
+        let textureSize = textureLayersState.textureSize
+
+        try textureLayersState.layers.forEach { layer in
+            let textureData = try Data(
+                contentsOf: workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
+            )
+            // Check if the data can be converted into a texture
+            guard
+                let hexadecimalData = textureData.encodedHexadecimals,
+                let _ = try MTLTextureCreator.makeTexture(
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
+                    from: hexadecimalData,
+                    with: renderer.device
+                )
+            else {
+                let error = NSError(
+                    title: String(localized: "Error", bundle: .module),
+                    message: String(localized: "Unable to load required data", bundle: .module)
+                )
+                Logger.error(error)
+                throw error
+            }
+        }
+
+        // Retain the texture size
+        _textureSize = textureLayersState.textureSize
     }
 
+    /// Restore the storage from the saved data.
+    /// Verify that the textures in `sourceFolderURL` match `TextureLayersState`,
+    /// and if they do, move them to `workingDirectory`
     public func restoreStorageFromSavedData(
         url sourceFolderURL: URL,
         textureLayersState: TextureLayersState
@@ -129,8 +154,8 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Invalid value", bundle: .module)
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Unable to find texture layer files", bundle: .main)
             )
             Logger.error(error)
             throw error
@@ -175,7 +200,9 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         // Set the texture size after the initialization of this repository is completed
         _textureSize = textureSize
     }
+}
 
+extension TextureDocumentsDirectoryRepository {
     /// Copies a texture for the given `LayerId`
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         if textureSize == .zero {

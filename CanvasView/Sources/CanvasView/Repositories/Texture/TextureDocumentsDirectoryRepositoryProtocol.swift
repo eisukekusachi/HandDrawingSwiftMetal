@@ -14,10 +14,12 @@ public protocol TextureDocumentsDirectoryRepositoryProtocol: AnyObject {
     var directoryName: String { get }
     var workingDirectoryURL: URL { get }
 
-    func initializeStorageFromDocumentsFolderFiles(textureLayersState: TextureLayersState) throws
-
     @discardableResult
     func initializeStorage(newTextureSize: CGSize) async throws -> TextureLayersState
+
+    func restoreStorageFromCoreData(
+        textureLayersState: TextureLayersState
+    ) throws
 
     func restoreStorageFromSavedData(
         url sourceFolderURL: URL,
