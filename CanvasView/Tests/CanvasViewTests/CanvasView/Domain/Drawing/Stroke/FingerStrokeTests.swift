@@ -34,7 +34,7 @@ struct FingerStrokeTests {
 
         // The first key of touchHistories is assigned to drawingTouchID.
         // It is assumed that touchHistories contains only one element when this method is called.
-        subject.beginFingerStroke()
+        subject.setStoreKeyForDrawing()
         #expect(subject.drawingTouchID == touchID)
 
         // Gets the elements from the end point to the last element.
@@ -114,7 +114,7 @@ struct FingerStrokeTests {
             ]
         )
 
-        subject.beginFingerStroke()
+        subject.setStoreKeyForDrawing()
         subject.updateDrawingLineEndPoint()
 
         #expect(subject.touchHistories.isEmpty == false)

@@ -32,16 +32,21 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
 
     private var project: ProjectMetaData
 
-    private let storage: CoreDataStorage<ProjectMetaDataEntity>
+    private let storage: CoreDataStorage<ProjectMetaDataEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         project: ProjectMetaData,
-        context: NSManagedObjectContext
+        context: NSManagedObjectContext? = nil
     ) {
         self.project = project
-        self.storage = .init(context: context)
+
+        if let context {
+            self.storage = .init(context: context)
+        } else {
+            self.storage = nil
+        }
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -62,11 +67,11 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
 
 extension CoreDataProjectMetaDataStorage {
     public func fetch() throws -> ProjectMetaDataEntity? {
-        try storage.fetch()
+        try storage?.fetch()
     }
 
-    public func update(_ projectName: String = Calendar.currentDate) {
-        project.update(projectName)
+    public func update(newProjectName: String) {
+        project.update(newProjectName: newProjectName)
     }
 
     public func updateUpdatedAt() {
@@ -99,13 +104,14 @@ extension CoreDataProjectMetaDataStorage {
 
 private extension CoreDataProjectMetaDataStorage {
     func save(_ target: ProjectMetaData) async {
+        guard let storage else { return }
 
         let projectName = target.projectName
         let createdAt = target.createdAt
         let updatedAt = target.updatedAt
 
-        let context = self.storage.context
-        let request = self.storage.fetchRequest()
+        let context = storage.context
+        let request = storage.fetchRequest()
 
         await context.perform { [context] in
             do {

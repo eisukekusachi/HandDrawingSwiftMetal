@@ -37,20 +37,29 @@ import UIKit
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `ResolvedTextureLayerArrayConfiguration` when the canvas view setup is completed
-    public var didInitializeCanvasView: AnyPublisher<ResolvedTextureLayerArrayConfiguration, Never> {
-        didInitializeCanvasViewSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
+    public var didInitialize: AnyPublisher<CanvasConfigurationResult, Never> {
+        didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeCanvasViewSubject = PassthroughSubject<ResolvedTextureLayerArrayConfiguration, Never>()
-
-    /// A publisher that emits `TextureLayersProtocol` when `TextureLayers` setup is prepared
-    public var didInitializeTextures: AnyPublisher<any TextureLayersProtocol, Never> {
-        didInitializeTexturesSubject.eraseToAnyPublisher()
-    }
-    private let didInitializeTexturesSubject = PassthroughSubject<any TextureLayersProtocol, Never>()
+    private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
     public var zipFileURL: URL {
         viewModel.zipFileURL
+    }
+
+    /// The size of the texture currently set on the canvas
+    public var currentTextureSize: CGSize {
+        viewModel.currentTextureSize
+    }
+
+    /// The size of the screen
+    static var screenSize: CGSize {
+        let scale = UIScreen.main.scale
+        let size = UIScreen.main.bounds.size
+        return .init(
+            width: size.width * scale,
+            height: size.height * scale
+        )
     }
 
     /// The single Metal device instance used throughout the app
@@ -69,11 +78,9 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-
         renderer = MTLRenderer(device: sharedDevice)
         displayView = CanvasDisplayView(renderer: renderer)
         viewModel = CanvasViewModel(renderer: renderer)
-
         super.init(frame: .zero)
         commonInitialize()
     }
@@ -82,23 +89,15 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-
         renderer = MTLRenderer(device: sharedDevice)
         displayView = CanvasDisplayView(renderer: renderer)
         viewModel = CanvasViewModel(renderer: renderer)
-
         super.init(coder: coder)
         commonInitialize()
     }
-
-    public override func layoutSubviews() {
-        viewModel.frameSize = frame.size
-    }
-
     private func commonInitialize() {
         layoutView()
         bindData()
-
         addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
@@ -111,18 +110,33 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        try await viewModel.setup(
+        viewModel.setup(
             drawingRenderers: drawingRenderers,
+            configuration: configuration,
             dependencies: .init(
                 renderer: renderer,
                 displayView: displayView
-            ),
+            )
+        )
+
+        await viewModel.initializeCanvas(
+            textureLayersEntity: try viewModel.fetchTextureLayersEntity(),
             configuration: configuration
         )
     }
 
-    public func newCanvas(configuration: TextureLayerArrayConfiguration) async throws {
-        try await viewModel.newCanvas(configuration: configuration)
+    public override func layoutSubviews() {
+        viewModel.frameSize = frame.size
+    }
+
+    public func newCanvas(
+        newProjectName: String,
+        newTextureSize: CGSize
+    ) async throws {
+        try await viewModel.newCanvas(
+            newProjectName: newProjectName,
+            newTextureSize: newTextureSize
+        )
     }
 
     public func loadFiles(
@@ -159,6 +173,16 @@ import UIKit
 }
 
 extension CanvasView {
+    private func layoutView() {
+        addSubview(displayView)
+        displayView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            displayView.topAnchor.constraint(equalTo: topAnchor),
+            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] displayTextureSize in
@@ -166,15 +190,9 @@ extension CanvasView {
             }
             .store(in: &cancellables)
 
-        viewModel.didInitializeCanvasView
+        viewModel.didInitialize
             .sink { [weak self] value in
-                self?.didInitializeCanvasViewSubject.send(value)
-            }
-            .store(in: &cancellables)
-
-        viewModel.didInitializeTextures
-            .sink { [weak self] value in
-                self?.didInitializeTexturesSubject.send(value)
+                self?.didInitializeSubject.send(value)
             }
             .store(in: &cancellables)
 
@@ -190,18 +208,6 @@ extension CanvasView {
                 self?.didUndoSubject.send(value)
             }
             .store(in: &cancellables)
-    }
-
-    private func layoutView() {
-        addSubview(displayView)
-        displayView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            displayView.topAnchor.constraint(equalTo: topAnchor),
-            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
     }
 }
 

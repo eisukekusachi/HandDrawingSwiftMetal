@@ -34,8 +34,16 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
         self.updatedAt = updatedAt
     }
 
-    public func update(_ projectName: String = Calendar.currentDate) {
-        self.projectName = projectName
+    public init(
+        _ model: ProjectMetaDataArchiveModel
+    ) {
+        self.projectName = model.projectName
+        self.createdAt = model.createdAt
+        self.updatedAt = model.updatedAt
+    }
+
+    public func update(newProjectName: String) {
+        self.projectName = newProjectName
         self.createdAt = Date()
         self.updatedAt = Date()
     }

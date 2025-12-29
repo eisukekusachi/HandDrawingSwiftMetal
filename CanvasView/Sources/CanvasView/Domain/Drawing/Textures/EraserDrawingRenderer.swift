@@ -54,23 +54,11 @@ public extension EraserDrawingRenderer {
         )
     }
 
-    func initializeTextures(_ textureSize: CGSize) throws {
+    func initializeTextures(textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer
         else { return }
-
-        guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
-            )
-            Logger.error(error)
-            throw error
-        }
 
         self.textureSize = textureSize
 

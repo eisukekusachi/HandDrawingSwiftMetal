@@ -43,10 +43,13 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var textureSize: CGSize { get }
 
-    func initialize(
-        configuration: ResolvedTextureLayerArrayConfiguration,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
-    ) async
+    func setup(
+        repository: TextureLayersDocumentsRepositoryProtocol?
+    )
+
+    func update(
+        textureLayersState: TextureLayersState
+    ) async throws
 
     func addNewLayer(at index: Int) async throws
 

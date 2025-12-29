@@ -20,7 +20,7 @@ public protocol DrawingRenderer {
     func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?)
 
     /// Initializes the textures for realtime drawing
-    func initializeTextures(_ textureSize: CGSize) throws
+    func initializeTextures(textureSize: CGSize)
 
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)

@@ -46,9 +46,7 @@ private struct PreviewView: View {
         renderer: nil
     )
 
-    private let configuration: ResolvedTextureLayerArrayConfiguration = .init(
-        textureSize: .zero,
-        layerIndex: 3,
+    private let state: TextureLayersState = .init(
         layers: [
             .init(
                 id: LayerId(),
@@ -80,7 +78,9 @@ private struct PreviewView: View {
                 alpha: 50,
                 isVisible: true
             )
-        ]
+        ],
+        layerIndex: 3,
+        textureSize: .zero
     )
 
     var body: some View {
@@ -90,8 +90,8 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                await textureLayers.initialize(
-                    configuration: configuration
+                try await textureLayers.update(
+                    textureLayersState: state
                 )
 
                 viewModel.initialize(
