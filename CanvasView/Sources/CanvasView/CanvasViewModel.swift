@@ -200,8 +200,7 @@ extension CanvasViewModel {
 
         didInitializeSubject.send(
             .init(
-                textureLayers: textureLayers,
-                textureLayersState: textureLayersState
+                textureLayers: textureLayers
             )
         )
     }
@@ -224,8 +223,7 @@ extension CanvasViewModel {
 
         didInitializeSubject.send(
             .init(
-                textureLayers: textureLayers,
-                textureLayersState: textureLayersState
+                textureLayers: textureLayers
             )
         )
     }
@@ -253,8 +251,7 @@ extension CanvasViewModel {
 
         didInitializeSubject.send(
             .init(
-                textureLayers: textureLayers,
-                textureLayersState: textureLayersState
+                textureLayers: textureLayers
             )
         )
     }
