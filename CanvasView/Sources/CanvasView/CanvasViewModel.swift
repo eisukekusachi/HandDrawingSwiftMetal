@@ -180,6 +180,7 @@ extension CanvasViewModel {
             try await initializeCanvasFromCoreData(
                 textureLayersState: textureLayersState
             )
+            return
         } catch {
             Logger.error(error)
         }
