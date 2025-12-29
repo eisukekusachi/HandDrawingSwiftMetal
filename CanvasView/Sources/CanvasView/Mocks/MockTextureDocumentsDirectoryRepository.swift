@@ -114,7 +114,7 @@ public final class MockTextureDocumentsDirectoryRepository: TextureDocumentsDire
         return .init(layers: [layer], layerIndex: 0, textureSize: newTextureSize)
     }
 
-    public func restoreStorage(from sourceFolderURL: URL, textureLayersState: TextureLayersState) async throws {
+    public func restoreStorageFromSavedData(url sourceFolderURL: URL, textureLayersState: TextureLayersState) async throws {
         restoreStorage_callCount += 1
         restoreStorage_lastSourceURL = sourceFolderURL
         restoreStorage_lastState = textureLayersState

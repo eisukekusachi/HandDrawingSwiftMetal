@@ -644,8 +644,8 @@ extension CanvasViewModel {
             newTextureSize: currentTextureSize
         )
 
-        try await textureDocumentsDirectoryRepository.restoreStorage(
-            from: workingDirectoryURL,
+        try await textureDocumentsDirectoryRepository.restoreStorageFromSavedData(
+            url: workingDirectoryURL,
             textureLayersState: textureLayersState
         )
 

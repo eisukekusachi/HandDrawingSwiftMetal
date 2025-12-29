@@ -53,30 +53,6 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         }
     }
 
-    /// Restore using the textures in the Documents folder.
-    /// Restoration is possible if the layer IDs in the given `TextureLayersState` match all the image filenames in the Documents folder
-    public func initializeStorageFromDocumentsFolderFiles(
-        textureLayersState: TextureLayersState
-    ) throws {
-        if FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(workingDirectoryURL)
-           )
-        {
-            // Retain the texture size
-            _textureSize = textureLayersState.textureSize
-
-            return
-        }
-
-        let error = NSError(
-            title: String(localized: "Error", bundle: .main),
-            message: String(localized: "Unable to find texture layer files", bundle: .main)
-        )
-        Logger.error(error)
-        throw error
-    }
-
     @discardableResult
     public func initializeStorage(
         newTextureSize: CGSize
@@ -120,8 +96,32 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         )
     }
 
-    public func restoreStorage(
-        from sourceFolderURL: URL,
+    /// Restore using the textures in the Documents folder.
+    /// Restoration is possible if the layer IDs in the given `TextureLayersState` match all the image filenames in the Documents folder
+    public func initializeStorageFromDocumentsFolderFiles(
+        textureLayersState: TextureLayersState
+    ) throws {
+        if FileManager.containsAllFileNames(
+            fileNames: textureLayersState.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(workingDirectoryURL)
+           )
+        {
+            // Retain the texture size
+            _textureSize = textureLayersState.textureSize
+
+            return
+        }
+
+        let error = NSError(
+            title: String(localized: "Error", bundle: .main),
+            message: String(localized: "Unable to find texture layer files", bundle: .main)
+        )
+        Logger.error(error)
+        throw error
+    }
+
+    public func restoreStorageFromSavedData(
+        url sourceFolderURL: URL,
         textureLayersState: TextureLayersState
     ) async throws {
         guard FileManager.containsAllFileNames(
