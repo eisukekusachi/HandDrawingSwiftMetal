@@ -26,6 +26,8 @@ public final class CanvasViewModel {
         projectMetaDataStorage.zipFileURL
     }
 
+    private(set) var currentTextureSize: CGSize
+
     /// Emits `true` while drawing is in progress
     var isDrawing: AnyPublisher<Bool, Never> {
         isDrawingSubject.eraseToAnyPublisher()
@@ -96,8 +98,6 @@ public final class CanvasViewModel {
     public static let thumbnailName: String = "thumbnail.png"
 
     public static let thumbnailLength: CGFloat = 500
-
-    private var currentTextureSize: CGSize
 
     init(
         currentTextureSize: CGSize = .init(width: 768, height: 1024),

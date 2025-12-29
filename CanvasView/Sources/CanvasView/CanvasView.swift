@@ -47,6 +47,10 @@ import UIKit
         viewModel.zipFileURL
     }
 
+    public var currentTextureSize: CGSize {
+        viewModel.currentTextureSize
+    }
+
     static var screenSize: CGSize {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
