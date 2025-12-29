@@ -9,8 +9,8 @@ import Combine
 import UIKit
 
 /// A view model that manages canvas rendering and texture layers.
-/// `TextureLayers` holds multiple layers, `DrawingRenderer` manages real-time drawing,
-/// and `CanvasRenderer` combines them to output to DisplayTexture.
+/// `DrawingRenderer` draws onto the textures of `TextureLayers`,
+/// `CanvasRenderer` composites those textures and renders the result to the display.
 @MainActor
 public final class CanvasViewModel {
 
@@ -167,6 +167,7 @@ extension CanvasViewModel {
         }
     }
 
+    /// Fetches `textureLayers` data from Core Data
     func fetchTextureLayersEntity() throws -> TextureLayerArrayStorageEntity? {
         try (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
     }
@@ -561,7 +562,7 @@ extension CanvasViewModel {
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
-        // Restore the texture layer repository using TextureLayersState
+        // Initialize the texture layer repository using TextureLayersState
         try await textureLayersDocumentsRepository.initializeStorage(
             newTextureLayersState: textureLayersState
         )
@@ -569,7 +570,8 @@ extension CanvasViewModel {
         initializeRendererTextures(textureSize: textureLayersState.textureSize)
         try await updateRenderer(textureLayersState: textureLayersState)
 
-        projectMetaDataStorage.update(newProjectName: projectName)
+        // Update all data using the new project name
+        projectMetaDataStorage.updateAll(newProjectName: projectName)
 
         commitAndRefreshDisplay()
 
@@ -625,12 +627,8 @@ extension CanvasViewModel {
         initializeRendererTextures(textureSize: textureLayersState.textureSize)
         try await updateRenderer(textureLayersState: textureLayersState)
 
-        // Update metadata
-        projectMetaDataStorage.update(
-            projectName: projectMetaData.projectName,
-            createdAt: projectMetaData.createdAt,
-            updatedAt: projectMetaData.updatedAt
-        )
+        // Overwrite the metadata with the given value
+        projectMetaDataStorage.update(projectMetaData)
 
         commitAndRefreshDisplay()
 
@@ -760,7 +758,6 @@ extension CanvasViewModel {
     }
 
     private func prepareNextStroke() {
-
         inputDevice.reset()
         touchGesture.reset()
 
@@ -777,14 +774,12 @@ extension CanvasViewModel {
     }
 
     private func resetFingerGestureParameters() {
-
         touchGesture.reset()
 
         fingerStroke.reset()
         drawingDisplayLink.stop()
     }
     private func resetTouchRelatedParameters() {
-
         fingerStroke.reset()
 
         transforming.resetMatrix()
