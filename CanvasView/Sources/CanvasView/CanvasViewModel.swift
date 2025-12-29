@@ -150,8 +150,8 @@ public final class CanvasViewModel {
         setupMetaDataIfAvailable()
 
         await initializeCanvas(
-            configuration: configuration,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            textureLayersEntity: try (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch(),
+            configuration: configuration
         )
     }
 }
@@ -159,15 +159,13 @@ public final class CanvasViewModel {
 extension CanvasViewModel {
     
     func initializeCanvas(
-        configuration: CanvasConfiguration,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+        textureLayersEntity: TextureLayerArrayStorageEntity?,
+        configuration: CanvasConfiguration
     ) async {
         do {
-            if let coreDataTextureLayers: CoreDataTextureLayers = (textureLayers.textureLayers as? CoreDataTextureLayers),
-               let textureLayersEntity = try coreDataTextureLayers.fetch() {
+            if let textureLayersEntity {
                 try await initializeCanvasFromCoreData(
-                    textureLayersEntity: textureLayersEntity,
-                    textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+                    textureLayersEntity: textureLayersEntity
                 )
                 return
             }
@@ -177,8 +175,7 @@ extension CanvasViewModel {
 
         do {
             try await initializeDefaultCanvas(
-                projectName: configuration.projectConfiguration.projectName,
-                textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+                projectName: configuration.projectConfiguration.projectName
             )
         } catch {
             fatalError("Failed to initialize the canvas")
@@ -186,9 +183,12 @@ extension CanvasViewModel {
     }
 
     func initializeDefaultCanvas(
-        projectName: String,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+        projectName: String
     ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
+
         let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
             newTextureSize: currentTextureSize
         )
@@ -206,9 +206,12 @@ extension CanvasViewModel {
     }
 
     func initializeCanvasFromCoreData(
-        textureLayersEntity: TextureLayerArrayStorageEntity,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+        textureLayersEntity: TextureLayerArrayStorageEntity
     ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
+
         let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
 
         try textureDocumentsDirectoryRepository.initializeStorage(
@@ -229,15 +232,19 @@ extension CanvasViewModel {
     }
 
     func initializeCanvasFromDocumentsFolder(
-        workingDirectoryURL: URL,
         textureLayersState: TextureLayersState,
-        projectMetaData: ProjectMetaData,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+        workingDirectoryURL: URL,
+        projectMetaData: ProjectMetaData
     ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
+
         try await textureDocumentsDirectoryRepository.restoreStorage(
             from: workingDirectoryURL,
             textureLayersState: textureLayersState
         )
+
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update metadata
@@ -329,12 +336,14 @@ extension CanvasViewModel {
     }
 
     private func initializeTextureLayers(textureLayersState: TextureLayersState) async throws {
-        guard let dependencies else { return }
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
 
         // Initialize the textures used in the texture layers
         await textureLayers.initialize(
             textureLayersState: textureLayersState,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
         )
 
         // Initialize the repository used for Undo
@@ -356,7 +365,7 @@ extension CanvasViewModel {
 
         try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
         )
     }
 
@@ -550,13 +559,9 @@ public extension CanvasViewModel {
         newProjectName: String,
         newTextureSize: CGSize
     ) async throws {
-        guard let dependencies else { return }
-
         try await initializeDefaultCanvas(
-            projectName: newProjectName,
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            projectName: newProjectName
         )
-
         transforming.setMatrix(.identity)
     }
 
@@ -584,8 +589,6 @@ public extension CanvasViewModel {
     func loadFiles(
         in workingDirectoryURL: URL
     ) async throws {
-        guard let dependencies else { return }
-
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
@@ -596,11 +599,12 @@ public extension CanvasViewModel {
             in: workingDirectoryURL
         )
 
+        let textureLayersState: TextureLayersState = .init(textureLayersArchiveModel)
+
         try await initializeCanvasFromDocumentsFolder(
+            textureLayersState: textureLayersState,
             workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: .init(textureLayersArchiveModel),
-            projectMetaData: .init(projectMetaData: projectMetaData, fallbacName: workingDirectoryURL.fileName),
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            projectMetaData: .init(projectMetaData: projectMetaData, fallbacName: workingDirectoryURL.fileName)
         )
     }
 
