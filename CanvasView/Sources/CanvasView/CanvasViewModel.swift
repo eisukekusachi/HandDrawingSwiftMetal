@@ -158,7 +158,7 @@ extension CanvasViewModel {
         setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
 
         textureLayers.setup(
-            textureLayersDocumentsRepository: dependencies.textureLayersDocumentsRepository
+            repository: dependencies.textureLayersDocumentsRepository
         )
 
         // Use metadata from Core Data
@@ -244,7 +244,7 @@ extension CanvasViewModel {
                 Task {
                     try await self.canvasRenderer.updateTextures(
                         textureLayers: self.textureLayers,
-                        textureLayersDocumentsRepository: dependencies.textureLayersDocumentsRepository
+                        repository: dependencies.textureLayersDocumentsRepository
                     )
 
                     self.commitAndRefreshDisplay()
@@ -295,7 +295,7 @@ extension CanvasViewModel {
 
         try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+            repository: textureLayersDocumentsRepository
         )
     }
 

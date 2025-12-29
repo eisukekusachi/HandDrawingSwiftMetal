@@ -93,9 +93,9 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 
     public func setup(
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
+        repository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
-        self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
+        self.textureLayersDocumentsRepository = repository
     }
 
     public func update(

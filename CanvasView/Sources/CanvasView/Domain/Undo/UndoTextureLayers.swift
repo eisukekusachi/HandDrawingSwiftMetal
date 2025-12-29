@@ -577,10 +577,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
     }
 
     public func setup(
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+        repository: TextureLayersDocumentsRepositoryProtocol?
     ) {
         textureLayers.setup(
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+            repository: repository
         )
     }
 

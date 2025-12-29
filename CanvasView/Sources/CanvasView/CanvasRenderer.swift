@@ -128,7 +128,7 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func updateTextures(
         textureLayers: any TextureLayersProtocol,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepository
+        repository: TextureLayersDocumentsRepository
     ) async throws {
         guard
             let unselectedBottomTexture,
@@ -166,7 +166,7 @@ extension CanvasRenderer {
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         // Get textures from the Documents directory
-        let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
+        let textures = try await repository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
