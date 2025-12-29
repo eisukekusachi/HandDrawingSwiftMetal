@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/09/06.
 //
 
-import Foundation
 import UIKit
 
 @MainActor
