@@ -175,16 +175,20 @@ extension CanvasViewModel {
         textureLayersEntity: TextureLayerArrayStorageEntity?,
         configuration: CanvasConfiguration
     ) async {
-        do {
-            let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
-            try await initializeCanvasFromCoreData(
-                textureLayersState: textureLayersState
-            )
-            return
-        } catch {
-            Logger.error(error)
+        // Restore the canvas using the Core Data entity if it exists
+        if let textureLayersEntity {
+            do {
+                let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
+                try await initializeCanvasFromCoreData(
+                    textureLayersState: textureLayersState
+                )
+                return
+            } catch {
+                Logger.error(error)
+            }
         }
 
+        // Initialize the canvas with the default settings
         do {
             try await initializeDefaultCanvas(
                 projectName: configuration.projectConfiguration.projectName,
