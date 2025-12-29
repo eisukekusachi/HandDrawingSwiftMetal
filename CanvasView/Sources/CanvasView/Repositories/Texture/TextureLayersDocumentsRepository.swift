@@ -1,5 +1,5 @@
 //
-//  TextureDocumentsDirectoryRepository.swift
+//  TextureLayersDocumentsRepository.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/05/17.
@@ -8,9 +8,10 @@
 import Foundation
 @preconcurrency import MetalKit
 
-/// A repository that manages on-disk textures
+/// A repository that manages the textures of `TextureLayers`.
+/// The textures are persisted and managed on disk
 @MainActor
-public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol {
+public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     /// The directory name where texture files are stored
     public let directoryName: String
 
@@ -191,7 +192,7 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
     }
 }
 
-extension TextureDocumentsDirectoryRepository {
+extension TextureLayersDocumentsRepository {
     /// Copies a texture for the given `LayerId`
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         if textureSize == .zero {

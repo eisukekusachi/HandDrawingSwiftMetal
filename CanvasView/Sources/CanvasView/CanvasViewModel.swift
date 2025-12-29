@@ -158,7 +158,7 @@ extension CanvasViewModel {
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
 
         textureLayers.setup(
-            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: dependencies.textureLayersDocumentsRepository
         )
 
         // Use metadata from Core Data
@@ -244,7 +244,7 @@ extension CanvasViewModel {
                 Task {
                     try await self.canvasRenderer.updateTextures(
                         textureLayers: self.textureLayers,
-                        textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+                        textureLayersDocumentsRepository: dependencies.textureLayersDocumentsRepository
                     )
 
                     self.commitAndRefreshDisplay()
@@ -268,7 +268,7 @@ extension CanvasViewModel {
 
     private func initializeTextureLayers(textureLayersState: TextureLayersState) async throws {
         guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
         // Initialize the textures used in the texture layers
@@ -295,7 +295,7 @@ extension CanvasViewModel {
 
         try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
     }
 
@@ -537,7 +537,7 @@ public extension CanvasViewModel {
         )
 
         // Copy all textures from the textureRepository
-        let textures = try await dependencies.textureDocumentsDirectoryRepository.duplicatedTextures(
+        let textures = try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
@@ -579,14 +579,14 @@ extension CanvasViewModel {
         textureLayersState: TextureLayersState
     ) async throws {
         guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         // Restore the texture layer repository using TextureLayersState
-        try await textureDocumentsDirectoryRepository.initializeStorage(
+        try await textureLayersDocumentsRepository.initializeStorage(
             newTextureLayersState: textureLayersState
         )
 
@@ -607,14 +607,14 @@ extension CanvasViewModel {
         textureLayersState: TextureLayersState
     ) async throws {
         guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         // Restore the texture layer repository using TextureLayersState
-        try textureDocumentsDirectoryRepository.restoreStorageFromCoreData(
+        try textureLayersDocumentsRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
 
@@ -638,14 +638,14 @@ extension CanvasViewModel {
         projectMetaData: ProjectMetaData
     ) async throws {
         guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         // Restore the texture layer repository using TextureLayersState
-        try await textureDocumentsDirectoryRepository.restoreStorageFromSavedData(
+        try await textureLayersDocumentsRepository.restoreStorageFromSavedData(
             url: workingDirectoryURL,
             textureLayersState: textureLayersState
         )
@@ -797,7 +797,7 @@ extension CanvasViewModel {
             Task(priority: .utility) { [weak self] in
                 guard let self else { return }
                 do {
-                    try await dependencies.textureDocumentsDirectoryRepository.writeTextureToDisk(
+                    try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
                         texture: selectedLayerTexture,
                         for: layerId
                     )

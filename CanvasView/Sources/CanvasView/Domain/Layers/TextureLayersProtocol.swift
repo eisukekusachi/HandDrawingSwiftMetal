@@ -44,7 +44,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     var textureSize: CGSize { get }
 
     func setup(
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol?
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
     )
 
     func update(

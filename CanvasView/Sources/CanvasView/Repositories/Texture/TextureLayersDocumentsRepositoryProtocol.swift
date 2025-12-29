@@ -1,5 +1,5 @@
 //
-//  TextureDocumentsDirectoryRepositoryProtocol.swift
+//  TextureLayersDocumentsRepositoryProtocol.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/12/29.
@@ -8,7 +8,7 @@ import Foundation
 @preconcurrency import MetalKit
 
 @MainActor
-public protocol TextureDocumentsDirectoryRepositoryProtocol: AnyObject {
+public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     var textureSize: CGSize { get }
     var directoryName: String { get }

@@ -21,7 +21,7 @@ struct TextureLayersTests {
 
     private let renderer = MockMTLRenderer()
 
-    private let textureDocumentsDirectoryRepository = MockTextureDocumentsDirectoryRepository()
+    private let textureLayersDocumentsRepository = MockTextureLayersDocumentsRepository()
 
     // Reusable texture for all tests
     static let dummyTexture: MTLTexture = {
@@ -43,7 +43,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
@@ -84,7 +84,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
@@ -122,7 +122,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
@@ -165,7 +165,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
@@ -196,7 +196,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
@@ -223,7 +223,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
@@ -250,7 +250,7 @@ struct TextureLayersTests {
 
         let subject = Subject(renderer: renderer)
         subject.setup(
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)

@@ -1,5 +1,5 @@
 //
-//  MockTextureDocumentsDirectoryRepository.swift
+//  MockTextureLayersDocumentsRepository.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/12/29.
@@ -9,7 +9,7 @@ import Foundation
 @preconcurrency import MetalKit
 
 @MainActor
-public final class MockTextureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol {
+public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
     // MARK: - Stored State
 

@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 struct CanvasViewDependencies {
     /// Repository that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
-    let textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
+    let textureLayersDocumentsRepository: TextureLayersDocumentsRepository
 
     /// Repository that manages textures used for undo in memory
     let undoTextureRepository: TextureInMemoryRepository?
@@ -27,7 +27,7 @@ extension CanvasViewDependencies {
         renderer: MTLRendering,
         displayView: CanvasDisplayable
     ) {
-        self.textureDocumentsDirectoryRepository = TextureDocumentsDirectoryRepository(
+        self.textureLayersDocumentsRepository = .init(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage",
             renderer: renderer
