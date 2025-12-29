@@ -258,7 +258,7 @@ extension HandDrawingViewController {
     }
 
     private func initializeTextureLayerView(_ result: CanvasConfigurationResult) {
-        textureLayerViewPresenter.initialize(
+        textureLayerViewPresenter.update(
             textureLayers: result.textureLayers
         )
     }

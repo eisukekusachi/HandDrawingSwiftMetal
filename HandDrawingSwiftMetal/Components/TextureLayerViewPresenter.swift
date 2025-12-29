@@ -64,7 +64,7 @@ final class TextureLayerViewPresenter {
         controller.arrowX = configuration.arrowX
     }
 
-    func initialize(
+    func update(
         textureLayers: any TextureLayersProtocol
     ) {
         viewModel.initialize(textureLayers: textureLayers)
