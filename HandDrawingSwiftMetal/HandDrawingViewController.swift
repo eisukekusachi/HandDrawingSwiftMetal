@@ -38,6 +38,7 @@ class HandDrawingViewController: UIViewController {
         addEvents()
         bindData()
 
+        layoutTextureLayerViewPresenter()
         addBrushPalette()
         addEraserPalette()
 
@@ -245,7 +246,12 @@ extension HandDrawingViewController {
 
     private func initializeTextureLayerView(_ result: ViewModelInitializationResult) {
         textureLayerViewPresenter.initialize(
-            textureLayers: result.textureLayers,
+            textureLayers: result.textureLayers
+        )
+    }
+
+    private func layoutTextureLayerViewPresenter() {
+        textureLayerViewPresenter.layout(
             popupConfiguration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,

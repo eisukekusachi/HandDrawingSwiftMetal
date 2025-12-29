@@ -55,15 +55,18 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = true
     }
 
-    func initialize(
-        textureLayers: any TextureLayersProtocol,
+    func layout(
         popupConfiguration: PopupWithArrowConfiguration
     ) {
-        viewModel.initialize(textureLayers: textureLayers)
-
         popupConfiguration.initialize(
             sourceView: layerViewController.view
         )
         controller.arrowX = popupConfiguration.arrowX
+    }
+
+    func initialize(
+        textureLayers: any TextureLayersProtocol
+    ) {
+        viewModel.initialize(textureLayers: textureLayers)
     }
 }
