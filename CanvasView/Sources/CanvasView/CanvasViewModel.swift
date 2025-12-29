@@ -274,43 +274,6 @@ extension CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    private func initializeRendererTextures(textureSize: CGSize) {
-        // Initialize the repository used for Undo
-        if textureLayers.isUndoEnabled {
-            textureLayers.initializeTextures(
-                textureSize: textureSize
-            )
-        }
-
-        // Initialize the textures used in the drawing tool
-        for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initializeTextures(
-                textureSize: textureSize
-            )
-        }
-
-        // Initialize the textures used in the renderer
-        canvasRenderer.initializeTextures(
-            textureSize: textureSize
-        )
-    }
-
-    private func updateRenderer(textureLayersState: TextureLayersState) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
-        // Initialize the textures used in the texture layers
-        try await textureLayers.update(
-            textureLayersState: textureLayersState
-        )
-
-        try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers,
-            repository: textureLayersDocumentsRepository
-        )
-    }
-
     private func setupDrawingRenderers(
         drawingRenderers: [DrawingRenderer],
         renderer: MTLRendering,
@@ -695,6 +658,42 @@ extension CanvasViewModel {
             ],
             layerIndex: 0,
             textureSize: currentTextureSize
+        )
+    }
+
+    private func initializeRendererTextures(textureSize: CGSize) {
+        // Initialize the textures used for Undo
+        if textureLayers.isUndoEnabled {
+            textureLayers.initializeTextures(
+                textureSize: textureSize
+            )
+        }
+
+        // Initialize the textures used in the drawing tool
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initializeTextures(
+                textureSize: textureSize
+            )
+        }
+
+        // Initialize the textures used in the renderer
+        canvasRenderer.initializeTextures(
+            textureSize: textureSize
+        )
+    }
+
+    private func updateRenderer(textureLayersState: TextureLayersState) async throws {
+        guard
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
+        else { return }
+
+        try await textureLayers.update(
+            textureLayersState: textureLayersState
+        )
+
+        try await canvasRenderer.updateTextures(
+            textureLayers: textureLayers,
+            repository: textureLayersDocumentsRepository
         )
     }
 }
