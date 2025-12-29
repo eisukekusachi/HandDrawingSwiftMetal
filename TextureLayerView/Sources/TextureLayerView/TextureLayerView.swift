@@ -90,7 +90,7 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                await textureLayers.initialize(
+                try await textureLayers.update(
                     textureLayersState: state
                 )
 

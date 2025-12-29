@@ -593,13 +593,19 @@ extension UndoTextureLayers: TextureLayersProtocol {
         textureLayers.textureSize
     }
 
-    public func initialize(
-        textureLayersState: TextureLayersState,
+    public func setup(
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol?
-    ) async {
-        await textureLayers.initialize(
-            textureLayersState: textureLayersState,
+    ) {
+        textureLayers.setup(
             textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
+    }
+
+    public func update(
+        textureLayersState: TextureLayersState
+    ) async throws {
+        try await textureLayers.update(
+            textureLayersState: textureLayersState
         )
     }
 

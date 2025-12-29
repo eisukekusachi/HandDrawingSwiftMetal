@@ -157,6 +157,10 @@ extension CanvasViewModel {
         setupTouchGesture(environmentConfiguration: environmentConfiguration)
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
 
+        textureLayers.setup(
+            textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
+        )
+
         // Use metadata from Core Data
         if let entity = try? projectMetaDataStorage.fetch() {
             projectMetaDataStorage.update(entity)
@@ -269,9 +273,8 @@ extension CanvasViewModel {
         else { return }
 
         // Initialize the textures used in the texture layers
-        await textureLayers.initialize(
-            textureLayersState: textureLayersState,
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        try await textureLayers.update(
+            textureLayersState: textureLayersState
         )
 
         // Initialize the repository used for Undo

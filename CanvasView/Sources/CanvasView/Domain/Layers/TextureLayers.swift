@@ -92,14 +92,15 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         self.renderer = renderer
     }
 
-    public func initialize(
-        textureLayersState: TextureLayersState,
+    public func setup(
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol? = nil
-    ) async {
-        guard let textureDocumentsDirectoryRepository else { return }
-
+    ) {
         self.textureDocumentsDirectoryRepository = textureDocumentsDirectoryRepository
+    }
 
+    public func update(
+        textureLayersState: TextureLayersState
+    ) async throws {
         self._textureSize = textureLayersState.textureSize
 
         self._layers = textureLayersState.layers.map {
