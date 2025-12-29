@@ -265,6 +265,13 @@ extension CanvasViewModel {
                 self?.canvasRenderer.setMatrix(matrix)
             }
             .store(in: &cancellables)
+
+        didInitializeSubject
+            .sink { [weak self] _ in
+                // Reset undo when the update of CanvasViewModel completes
+                self?.textureLayers.resetUndo()
+            }
+            .store(in: &cancellables)
     }
 
     private func initializeRendererTextures(textureSize: CGSize) {

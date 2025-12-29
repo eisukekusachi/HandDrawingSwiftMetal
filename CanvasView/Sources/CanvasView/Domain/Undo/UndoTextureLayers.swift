@@ -64,8 +64,6 @@ public final class UndoTextureLayers: ObservableObject {
     public func initializeTextures(
         textureSize: CGSize
     ) {
-        resetUndo()
-
         // Create a texture for use in drawing undo operations
         previousDrawingTextureForUndo = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
