@@ -149,7 +149,7 @@ public final class CanvasViewModel {
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
         setupMetaDataIfAvailable()
 
-        await initCanvas(
+        await initializeCanvas(
             configuration: configuration,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
@@ -158,7 +158,7 @@ public final class CanvasViewModel {
 
 extension CanvasViewModel {
     
-    func initCanvas(
+    func initializeCanvas(
         configuration: CanvasConfiguration,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async {
@@ -176,7 +176,7 @@ extension CanvasViewModel {
         }
 
         do {
-            try await initializeCanvas(
+            try await initializeDefaultCanvas(
                 projectName: configuration.projectConfiguration.projectName,
                 textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
             )
@@ -185,7 +185,7 @@ extension CanvasViewModel {
         }
     }
 
-    func initializeCanvas(
+    func initializeDefaultCanvas(
         projectName: String,
         textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository
     ) async throws {
@@ -552,7 +552,7 @@ public extension CanvasViewModel {
     ) async throws {
         guard let dependencies else { return }
 
-        try await initializeCanvas(
+        try await initializeDefaultCanvas(
             projectName: newProjectName,
             textureDocumentsDirectoryRepository: dependencies.textureDocumentsDirectoryRepository
         )
