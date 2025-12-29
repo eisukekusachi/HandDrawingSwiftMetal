@@ -47,10 +47,12 @@ import UIKit
         viewModel.zipFileURL
     }
 
+    /// The size of the texture currently set on the canvas
     public var currentTextureSize: CGSize {
         viewModel.currentTextureSize
     }
 
+    /// The size of the screen
     static var screenSize: CGSize {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size

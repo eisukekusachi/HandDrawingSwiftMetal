@@ -26,6 +26,7 @@ public final class CanvasViewModel {
         projectMetaDataStorage.zipFileURL
     }
 
+    /// The size of the texture currently set on the canvas
     private(set) var currentTextureSize: CGSize
 
     /// Emits `true` while drawing is in progress
