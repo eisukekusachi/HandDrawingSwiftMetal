@@ -105,16 +105,21 @@ import UIKit
     }
 
     public func setup(
-        configuration: CanvasConfiguration,
-        drawingRenderers: [DrawingRenderer]
+        drawingRenderers: [DrawingRenderer],
+        configuration: CanvasConfiguration
     ) async throws {
-        try await viewModel.setup(
+        viewModel.setup(
+            drawingRenderers: drawingRenderers,
             configuration: configuration,
             dependencies: .init(
                 renderer: renderer,
                 displayView: displayView
-            ),
-            drawingRenderers: drawingRenderers
+            )
+        )
+
+        await viewModel.initializeCanvas(
+            textureLayersEntity: try viewModel.fetchTextureLayersEntity(),
+            configuration: configuration
         )
     }
 

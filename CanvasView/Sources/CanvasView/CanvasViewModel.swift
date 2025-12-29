@@ -127,12 +127,15 @@ public final class CanvasViewModel {
 
         bindData()
     }
+}
+
+extension CanvasViewModel {
 
     func setup(
+        drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration,
-        dependencies: CanvasViewDependencies,
-        drawingRenderers: [DrawingRenderer]
-    ) async throws {
+        dependencies: CanvasViewDependencies
+    ) {
         self.currentTextureSize = configuration.textureSize
         self.dependencies = dependencies
         self.drawingRenderers = drawingRenderers
@@ -149,16 +152,12 @@ public final class CanvasViewModel {
         setupTouchGesture(environmentConfiguration: configuration.environmentConfiguration)
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
         setupMetaDataIfAvailable()
-
-        await initializeCanvas(
-            textureLayersEntity: try (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch(),
-            configuration: configuration
-        )
     }
-}
 
-extension CanvasViewModel {
-    
+    func fetchTextureLayersEntity() throws -> TextureLayerArrayStorageEntity? {
+        try (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+    }
+
     func initializeCanvas(
         textureLayersEntity: TextureLayerArrayStorageEntity?,
         configuration: CanvasConfiguration
@@ -181,87 +180,6 @@ extension CanvasViewModel {
         } catch {
             fatalError("Failed to initialize the canvas")
         }
-    }
-
-    func initializeDefaultCanvas(
-        projectName: String
-    ) async throws {
-        guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
-        else { return }
-
-        let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
-            newTextureSize: currentTextureSize
-        )
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
-
-        projectMetaDataStorage.update(newProjectName: projectName)
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(
-            .init(
-                textureLayers: textureLayers
-            )
-        )
-    }
-
-    func initializeCanvasFromCoreData(
-        textureLayersEntity: TextureLayerArrayStorageEntity
-    ) async throws {
-        guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
-        else { return }
-
-        let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
-
-        try textureDocumentsDirectoryRepository.initializeStorage(
-            textureLayersState: textureLayersState
-        )
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
-
-        // Update only the updatedAt field, since the metadata may be loaded from Core Data
-        projectMetaDataStorage.updateUpdatedAt()
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(
-            .init(
-                textureLayers: textureLayers
-            )
-        )
-    }
-
-    func initializeCanvasFromDocumentsFolder(
-        workingDirectoryURL: URL,
-        textureLayersState: TextureLayersState,
-        projectMetaData: ProjectMetaData
-    ) async throws {
-        guard
-            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
-        else { return }
-
-        try await textureDocumentsDirectoryRepository.restoreStorage(
-            from: workingDirectoryURL,
-            textureLayersState: textureLayersState
-        )
-
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
-
-        // Update metadata
-        projectMetaDataStorage.update(
-            projectName: projectMetaData.projectName,
-            createdAt: projectMetaData.createdAt,
-            updatedAt: projectMetaData.updatedAt
-        )
-
-        commitAndRefreshDisplay()
-
-        didInitializeSubject.send(
-            .init(
-                textureLayers: textureLayers
-            )
-        )
     }
 }
 
@@ -658,7 +576,89 @@ public extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    private func initializeDefaultCanvas(
+        projectName: String
+    ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
 
+        let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
+            newTextureSize: currentTextureSize
+        )
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        projectMetaDataStorage.update(newProjectName: projectName)
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers
+            )
+        )
+    }
+
+    private func initializeCanvasFromCoreData(
+        textureLayersEntity: TextureLayerArrayStorageEntity
+    ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
+
+        let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
+
+        try textureDocumentsDirectoryRepository.initializeStorage(
+            textureLayersState: textureLayersState
+        )
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        // Update only the updatedAt field, since the metadata may be loaded from Core Data
+        projectMetaDataStorage.updateUpdatedAt()
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers
+            )
+        )
+    }
+
+    private func initializeCanvasFromDocumentsFolder(
+        workingDirectoryURL: URL,
+        textureLayersState: TextureLayersState,
+        projectMetaData: ProjectMetaData
+    ) async throws {
+        guard
+            let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
+        else { return }
+
+        try await textureDocumentsDirectoryRepository.restoreStorage(
+            from: workingDirectoryURL,
+            textureLayersState: textureLayersState
+        )
+
+        try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        // Update metadata
+        projectMetaDataStorage.update(
+            projectName: projectMetaData.projectName,
+            createdAt: projectMetaData.createdAt,
+            updatedAt: projectMetaData.updatedAt
+        )
+
+        commitAndRefreshDisplay()
+
+        didInitializeSubject.send(
+            .init(
+                textureLayers: textureLayers
+            )
+        )
+    }
+}
+
+extension CanvasViewModel {
     private var isCurrentlyDrawing: Bool {
         switch drawingTouchPhase {
         case .began, .moved: return true
