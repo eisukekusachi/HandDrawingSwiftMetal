@@ -42,13 +42,15 @@ struct TextureLayersTests {
     func `Verify that adding a layer increases the count and selects the new layer`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
 
-        await subject.initialize(
-            textureLayersState: .init(layers: [], layerIndex: 0, textureSize: .init(width: 16, height: 16)),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        try await subject.update(
+            textureLayersState: .init(layers: [], layerIndex: 0, textureSize: .init(width: 16, height: 16))
         )
 
         #expect(subject.layers.count == 0)
@@ -81,11 +83,14 @@ struct TextureLayersTests {
     func `Verify that deleting a layer works but at least one layer always remains`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer0,
@@ -93,8 +98,7 @@ struct TextureLayersTests {
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
 
         #expect(subject.layers.count == 2)
@@ -114,15 +118,18 @@ struct TextureLayersTests {
     }
 
     @Test
-    func `Verify that moving a layer changes the order as expected`() async {
+    func `Verify that moving a layer changes the order as expected`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer2,
@@ -131,8 +138,7 @@ struct TextureLayersTests {
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
 
         #expect(subject.layers.map { $0.title } == ["layer2", "layer1", "layer0"])
@@ -155,15 +161,18 @@ struct TextureLayersTests {
     }
 
     @Test
-    func `Verify that selectLayer updates selectedLayerId to the given layer's id`() async {
+    func `Verify that selectLayer updates selectedLayerId to the given layer's id`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer2,
@@ -172,8 +181,7 @@ struct TextureLayersTests {
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
 
         #expect(subject.selectedLayer?.id == layer2.id)
@@ -184,22 +192,25 @@ struct TextureLayersTests {
     }
 
     @Test
-    func `Verify that updateTitle updates the layer's title`() async {
+    func `Verify that updateTitle updates the layer's title`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
+
         #expect(subject.layers.first?.title == "oldLayer")
 
         subject.updateTitle(layer.id, title: "newLayer")
@@ -208,22 +219,25 @@ struct TextureLayersTests {
     }
 
     @Test
-    func `Verify that updateAlpha updates the layer's alpha`() async {
+    func `Verify that updateAlpha updates the layer's alpha`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
+
         #expect(subject.layers.first?.alpha == 255)
 
         subject.updateAlpha(layer.id, alpha: 100)
@@ -232,22 +246,25 @@ struct TextureLayersTests {
     }
 
     @Test
-    func `Verify that updateVisibility updates the layer's visibility`() async {
+    func `Verify that updateVisibility updates the layer's visibility`() async throws {
 
         let subject = Subject(renderer: renderer)
+        subject.setup(
+            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        await subject.initialize(
+        try await subject.update(
             textureLayersState: .init(
                 layers: [
                     layer
                 ],
                 layerIndex: 0,
                 textureSize: .init(width: 16, height: 16)
-            ),
-            textureDocumentsDirectoryRepository: textureDocumentsDirectoryRepository
+            )
         )
+
         #expect(subject.layers.first?.isVisible == true)
 
         subject.updateVisibility(layer.id, isVisible: false)
