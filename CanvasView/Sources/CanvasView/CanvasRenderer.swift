@@ -59,7 +59,7 @@ public final class CanvasRenderer: ObservableObject {
         self.renderer = renderer
     }
 
-    public func initialize(
+    public func setup(
         displayView: CanvasDisplayable?,
         backgroundColor: UIColor?,
         baseBackgroundColor: UIColor?

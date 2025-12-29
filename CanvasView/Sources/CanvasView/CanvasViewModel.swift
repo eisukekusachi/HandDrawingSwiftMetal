@@ -142,18 +142,25 @@ extension CanvasViewModel {
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = drawingRenderers[0]
 
-        setupCanvasRenderer(
+        let environmentConfiguration = configuration.environmentConfiguration
+
+        canvasRenderer.setup(
             displayView: dependencies.displayView,
-            environmentConfiguration: configuration.environmentConfiguration
+            backgroundColor: environmentConfiguration.backgroundColor,
+            baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
         setupDrawingRenderers(
             drawingRenderers: drawingRenderers,
             renderer: dependencies.renderer,
             displayView: dependencies.displayView
         )
-        setupTouchGesture(environmentConfiguration: configuration.environmentConfiguration)
+        setupTouchGesture(environmentConfiguration: environmentConfiguration)
         setupUndoTextureLayersIfAvailable(undoTextureRepository: dependencies.undoTextureRepository)
-        setupMetaDataIfAvailable()
+
+        // Use metadata from Core Data
+        if let entity = try? projectMetaDataStorage.fetch() {
+            projectMetaDataStorage.update(entity)
+        }
     }
 
     func fetchTextureLayersEntity() throws -> TextureLayerArrayStorageEntity? {
@@ -306,16 +313,7 @@ extension CanvasViewModel {
             )
         }
     }
-    private func setupCanvasRenderer(
-        displayView: CanvasDisplayable?,
-        environmentConfiguration: EnvironmentConfiguration
-    ) {
-        self.canvasRenderer.initialize(
-            displayView: displayView,
-            backgroundColor: environmentConfiguration.backgroundColor,
-            baseBackgroundColor: environmentConfiguration.baseBackgroundColor
-        )
-    }
+
     private func setupTouchGesture(environmentConfiguration: EnvironmentConfiguration) {
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
@@ -325,13 +323,7 @@ extension CanvasViewModel {
             environmentConfiguration.transformingGestureRecognitionSecond
         )
     }
-    private func setupMetaDataIfAvailable() {
-        // Use metadata from Core Data if available
-        // Do nothing if it fails
-        if let entity = try? projectMetaDataStorage.fetch() {
-            projectMetaDataStorage.update(entity)
-        }
-    }
+
     private func setupUndoTextureLayersIfAvailable(undoTextureRepository: TextureInMemoryRepository?) {
         // If `undoTextureRepository` is used, undo functionality is available
         if let undoTextureRepository {
