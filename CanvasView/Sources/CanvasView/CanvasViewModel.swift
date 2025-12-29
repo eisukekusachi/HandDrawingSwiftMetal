@@ -583,15 +583,15 @@ extension CanvasViewModel {
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
-        // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
-
         // Restore the texture layer repository using TextureLayersState
         try await textureLayersDocumentsRepository.initializeStorage(
             newTextureLayersState: textureLayersState
         )
 
         try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         projectMetaDataStorage.update(newProjectName: projectName)
 
@@ -611,15 +611,15 @@ extension CanvasViewModel {
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
-        // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
-
         // Restore the texture layer repository using TextureLayersState
         try textureLayersDocumentsRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
 
         try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
         projectMetaDataStorage.updateUpdatedAt()
@@ -642,9 +642,6 @@ extension CanvasViewModel {
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
 
-        // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
-
         // Restore the texture layer repository using TextureLayersState
         try await textureLayersDocumentsRepository.restoreStorageFromSavedData(
             url: workingDirectoryURL,
@@ -652,6 +649,9 @@ extension CanvasViewModel {
         )
 
         try await initializeTextureLayers(textureLayersState: textureLayersState)
+
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
 
         // Update metadata
         projectMetaDataStorage.update(
