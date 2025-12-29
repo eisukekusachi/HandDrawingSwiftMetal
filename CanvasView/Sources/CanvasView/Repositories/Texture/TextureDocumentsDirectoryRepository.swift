@@ -53,9 +53,9 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         }
     }
 
-    /// Attempts to restore the repository from a given `CanvasConfiguration`
-    /// If that is invalid, creates a new texture and initializes the repository with it
-    public func initializeStorage(
+    /// Restore using the textures in the Documents folder.
+    /// Restoration is possible if the layer IDs in the given `TextureLayersState` match all the image filenames in the Documents folder
+    public func initializeStorageFromDocumentsFolderFiles(
         textureLayersState: TextureLayersState
     ) throws {
         if FileManager.containsAllFileNames(

@@ -81,7 +81,7 @@ public final class MockTextureDocumentsDirectoryRepository: TextureDocumentsDire
 
     // MARK: - API
 
-    public func initializeStorage(textureLayersState: TextureLayersState) throws {
+    public func initializeStorageFromDocumentsFolderFiles(textureLayersState: TextureLayersState) throws {
         initializeStorage_textureLayersState_callCount += 1
         initializeStorage_textureLayersState_lastArg = textureLayersState
 
