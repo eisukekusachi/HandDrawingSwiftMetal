@@ -55,13 +55,13 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isHidden = true
     }
 
-    func layout(
-        popupConfiguration: PopupWithArrowConfiguration
+    func setup(
+        configuration: PopupWithArrowConfiguration
     ) {
-        popupConfiguration.initialize(
+        configuration.initialize(
             sourceView: layerViewController.view
         )
-        controller.arrowX = popupConfiguration.arrowX
+        controller.arrowX = configuration.arrowX
     }
 
     func initialize(

@@ -45,11 +45,11 @@ public final class CanvasViewModel {
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `ResultConfiguration` when `CanvasViewModel` setup completes
-    var didInitialize: AnyPublisher<ViewModelInitializationResult, Never> {
+    /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
+    var didInitialize: AnyPublisher<CanvasConfigurationResult, Never> {
         didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeSubject = PassthroughSubject<ViewModelInitializationResult, Never>()
+    private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage

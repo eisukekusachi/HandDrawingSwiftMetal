@@ -244,15 +244,9 @@ extension HandDrawingViewController {
         }
     }
 
-    private func initializeTextureLayerView(_ result: ViewModelInitializationResult) {
-        textureLayerViewPresenter.initialize(
-            textureLayers: result.textureLayers
-        )
-    }
-
     private func layoutTextureLayerViewPresenter() {
-        textureLayerViewPresenter.layout(
-            popupConfiguration: .init(
+        textureLayerViewPresenter.setup(
+            configuration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
                 size: .init(
@@ -260,6 +254,12 @@ extension HandDrawingViewController {
                     height: 300
                 )
             )
+        )
+    }
+
+    private func initializeTextureLayerView(_ result: CanvasConfigurationResult) {
+        textureLayerViewPresenter.initialize(
+            textureLayers: result.textureLayers
         )
     }
 
