@@ -176,19 +176,18 @@ extension CanvasViewModel {
         configuration: CanvasConfiguration
     ) async {
         do {
-            if let textureLayersEntity {
-                try await initializeCanvasFromCoreData(
-                    textureLayersEntity: textureLayersEntity
-                )
-                return
-            }
+            let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
+            try await initializeCanvasFromCoreData(
+                textureLayersState: textureLayersState
+            )
         } catch {
             Logger.error(error)
         }
 
         do {
             try await initializeDefaultCanvas(
-                projectName: configuration.projectConfiguration.projectName
+                projectName: configuration.projectConfiguration.projectName,
+                textureLayersState: newTextureLayersState()
             )
         } catch {
             fatalError("Failed to initialize the canvas")
@@ -477,7 +476,8 @@ public extension CanvasViewModel {
         newTextureSize: CGSize
     ) async throws {
         try await initializeDefaultCanvas(
-            projectName: newProjectName
+            projectName: newProjectName,
+            textureLayersState: newTextureLayersState()
         )
         transforming.setMatrix(.identity)
     }
@@ -575,18 +575,18 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
     private func initializeDefaultCanvas(
-        projectName: String
+        projectName: String,
+        textureLayersState: TextureLayersState
     ) async throws {
         guard
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
         try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: currentTextureSize
+            newTextureSize: textureLayersState.textureSize
         )
-
-        let textureLayersState = try await textureDocumentsDirectoryRepository.initializeStorage(
-            newTextureSize: currentTextureSize
+        try await textureDocumentsDirectoryRepository.initializeStorage(
+            newTextureLayersState: textureLayersState
         )
 
         try await initializeTextureLayers(textureLayersState: textureLayersState)
@@ -603,16 +603,14 @@ extension CanvasViewModel {
     }
 
     private func initializeCanvasFromCoreData(
-        textureLayersEntity: TextureLayerArrayStorageEntity
+        textureLayersState: TextureLayersState
     ) async throws {
         guard
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
-        let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
-
         try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: currentTextureSize
+            newTextureSize: textureLayersState.textureSize
         )
         try textureDocumentsDirectoryRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
@@ -641,7 +639,7 @@ extension CanvasViewModel {
         else { return }
 
         try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: currentTextureSize
+            newTextureSize: textureLayersState.textureSize
         )
 
         try await textureDocumentsDirectoryRepository.restoreStorageFromSavedData(
@@ -664,6 +662,21 @@ extension CanvasViewModel {
             .init(
                 textureLayers: textureLayers
             )
+        )
+    }
+
+    private func newTextureLayersState() -> TextureLayersState {
+        .init(
+            layers: [
+                .init(
+                    id: LayerId(),
+                    title: TimeStampFormatter.currentDate,
+                    alpha: 255,
+                    isVisible: true
+                )
+            ],
+            layerIndex: 0,
+            textureSize: currentTextureSize
         )
     }
 }

@@ -91,27 +91,13 @@ public final class MockTextureDocumentsDirectoryRepository: TextureDocumentsDire
         self.textureSize = textureLayersState.textureSize
     }
 
-    @discardableResult
-    public func initializeStorage(newTextureSize: CGSize) async throws -> TextureLayersState {
+    public func initializeStorage(
+        newTextureLayersState: TextureLayersState
+    ) async throws {
         initializeStorage_newTextureSize_callCount += 1
-        initializeStorage_newTextureSize_lastArg = newTextureSize
+        initializeStorage_newTextureSize_lastArg = newTextureLayersState.textureSize
 
-        if let error = initializeStorage_newTextureSize_error { throw error }
-
-        self.textureSize = newTextureSize
-
-        if let result = initializeStorage_newTextureSize_result {
-            return result
-        }
-
-        // Default stub: 1 visible layer, selected index 0.
-        let layer = TextureLayerModel(
-            id: LayerId(),
-            title: "Layer 1",
-            alpha: 255,
-            isVisible: true
-        )
-        return .init(layers: [layer], layerIndex: 0, textureSize: newTextureSize)
+        self.textureSize = newTextureLayersState.textureSize
     }
 
     public func restoreStorageFromSavedData(url sourceFolderURL: URL, textureLayersState: TextureLayersState) async throws {

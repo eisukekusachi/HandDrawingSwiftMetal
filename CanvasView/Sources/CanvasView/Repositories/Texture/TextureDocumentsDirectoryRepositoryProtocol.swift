@@ -14,8 +14,9 @@ public protocol TextureDocumentsDirectoryRepositoryProtocol: AnyObject {
     var directoryName: String { get }
     var workingDirectoryURL: URL { get }
 
-    @discardableResult
-    func initializeStorage(newTextureSize: CGSize) async throws -> TextureLayersState
+    func initializeStorage(
+        newTextureLayersState: TextureLayersState
+    ) async throws
 
     func restoreStorageFromCoreData(
         textureLayersState: TextureLayersState

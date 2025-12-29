@@ -53,22 +53,22 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         }
     }
 
-    @discardableResult
     public func initializeStorage(
-        newTextureSize: CGSize
-    ) async throws -> TextureLayersState {
+        newTextureLayersState: TextureLayersState
+    ) async throws {
+        let textureSize = newTextureLayersState.textureSize
         guard
-            Int(newTextureSize.width) >= canvasMinimumTextureLength &&
-                Int(newTextureSize.height) >= canvasMinimumTextureLength,
+            let layerId: LayerId = newTextureLayersState.layers.first?.id,
+            Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
             let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(newTextureSize.width),
-                height: Int(newTextureSize.height),
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
                 with: renderer.device
             )
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(newTextureSize.width) \(newTextureSize.height)"
+                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
             )
             Logger.error(error)
             throw error
@@ -77,23 +77,10 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
         // Delete all textures in the repository
         removeAll()
 
-        let textureLayer = TextureLayerModel(
-            id: LayerId(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true
-        )
-
-        try await addTexture(texture: newTexture, id: textureLayer.id)
+        try await addTexture(texture: newTexture, id: layerId)
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = newTextureSize
-
-        return .init(
-            layers: [textureLayer],
-            layerIndex: 0,
-            textureSize: newTextureSize
-        )
+        _textureSize = textureSize
     }
 
     /// Restore the storage from Core Data.
@@ -137,6 +124,8 @@ public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirector
                 throw error
             }
         }
+
+        // Do nothing since the textures already exist in workingDirectory
 
         // Retain the texture size
         _textureSize = textureLayersState.textureSize
