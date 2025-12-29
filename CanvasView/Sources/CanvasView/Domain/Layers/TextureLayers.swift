@@ -73,7 +73,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var renderer: MTLRendering?
 
-    private var textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
+    private var textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol?
 
     @Published private var _layers: [TextureLayerItem] = []
 
@@ -94,7 +94,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func initialize(
         textureLayersState: TextureLayersState,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository? = nil
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol? = nil
     ) async {
         guard let textureDocumentsDirectoryRepository else { return }
 

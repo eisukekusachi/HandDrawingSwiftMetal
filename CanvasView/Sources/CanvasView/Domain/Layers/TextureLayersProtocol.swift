@@ -45,7 +45,7 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     func initialize(
         textureLayersState: TextureLayersState,
-        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepository?
+        textureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol?
     ) async
 
     func addNewLayer(at index: Int) async throws

@@ -10,14 +10,14 @@ import Foundation
 
 /// A repository that manages on-disk textures
 @MainActor
-public final class TextureDocumentsDirectoryRepository {
+public final class TextureDocumentsDirectoryRepository: TextureDocumentsDirectoryRepositoryProtocol {
     /// The directory name where texture files are stored
-    let directoryName: String
+    public let directoryName: String
 
     /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
-    let workingDirectoryURL: URL
+    public let workingDirectoryURL: URL
 
-    var textureSize: CGSize {
+    public var textureSize: CGSize {
         _textureSize
     }
 
@@ -25,7 +25,7 @@ public final class TextureDocumentsDirectoryRepository {
 
     private var _textureSize: CGSize = .zero
 
-    init(
+    public init(
         storageDirectoryURL: URL,
         directoryName: String,
         renderer: MTLRendering
@@ -55,7 +55,7 @@ public final class TextureDocumentsDirectoryRepository {
 
     /// Attempts to restore the repository from a given `CanvasConfiguration`
     /// If that is invalid, creates a new texture and initializes the repository with it
-    func initializeStorage(
+    public func initializeStorage(
         textureLayersState: TextureLayersState
     ) throws {
         if FileManager.containsAllFileNames(
@@ -78,7 +78,7 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     @discardableResult
-    func initializeStorage(
+    public func initializeStorage(
         newTextureSize: CGSize
     ) async throws -> TextureLayersState {
         guard
@@ -120,7 +120,7 @@ public final class TextureDocumentsDirectoryRepository {
         )
     }
 
-    func restoreStorage(
+    public func restoreStorage(
         from sourceFolderURL: URL,
         textureLayersState: TextureLayersState
     ) async throws {
@@ -177,7 +177,7 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     /// Copies a texture for the given `LayerId`
-    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
+    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         if textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -208,7 +208,7 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     /// Copies multiple textures for the given `LayerId`s
-    func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
+    public func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
         try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
             for id in ids {
                 group.addTask { try await self.duplicatedTexture(id) }
@@ -223,7 +223,7 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     /// Recreate the directory
-    func removeAll() {
+    public func removeAll() {
         do {
             // Create a new folder
             try FileManager.createNewDirectory(workingDirectoryURL)
@@ -234,7 +234,7 @@ public final class TextureDocumentsDirectoryRepository {
     }
 
     /// Removes the texture for the specified `LayerId` from the Documents directory
-    func removeTexture(_ id: LayerId) throws {
+    public func removeTexture(_ id: LayerId) throws {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         // If the file exists, delete it
@@ -253,7 +253,7 @@ public final class TextureDocumentsDirectoryRepository {
 
     /// Adds a texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
     /// so the instance passed as an argument does not need to be a new one
-    func addTexture(texture: MTLTexture, id: LayerId) async throws {
+    public func addTexture(texture: MTLTexture, id: LayerId) async throws {
         // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
@@ -277,7 +277,7 @@ public final class TextureDocumentsDirectoryRepository {
 
     /// Writes the texture to disk by duplicating it into the Documents directory.
     /// Since `MTLTexture` is a reference type, the passed instance does not need to be newly created.
-    func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
+    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
         // If the file exists, update it
         guard
             FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)

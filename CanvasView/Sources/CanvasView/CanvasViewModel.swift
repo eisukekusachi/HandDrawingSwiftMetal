@@ -452,7 +452,7 @@ extension CanvasViewModel {
             if fingerStroke.isFingerDrawingInactive {
 
                 // Store the drawing-specific key in the dictionary
-                fingerStroke.storeKeyForDrawing()
+                fingerStroke.setStoreKeyForDrawing()
 
                 drawingRenderer.beginFingerStroke()
 

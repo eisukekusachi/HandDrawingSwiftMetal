@@ -71,7 +71,7 @@ extension FingerStroke {
         }
     }
 
-    func storeKeyForDrawing() {
+    func setStoreKeyForDrawing() {
         // `touchHistories` should contain only one element, so the first key is simply set.
         drawingTouchID = touchHistories.keys.first
     }
