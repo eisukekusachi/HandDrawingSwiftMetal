@@ -267,7 +267,28 @@ extension CanvasViewModel {
             .store(in: &cancellables)
     }
 
-    private func initializeTextureLayers(textureLayersState: TextureLayersState) async throws {
+    private func initializeRendererTextures(textureSize: CGSize) {
+        // Initialize the repository used for Undo
+        if textureLayers.isUndoEnabled {
+            textureLayers.initializeTextures(
+                textureSize: textureSize
+            )
+        }
+
+        // Initialize the textures used in the drawing tool
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initializeTextures(
+                textureSize: textureSize
+            )
+        }
+
+        // Initialize the textures used in the renderer
+        canvasRenderer.initializeTextures(
+            textureSize: textureSize
+        )
+    }
+
+    private func updateRenderer(textureLayersState: TextureLayersState) async throws {
         guard
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
@@ -275,23 +296,6 @@ extension CanvasViewModel {
         // Initialize the textures used in the texture layers
         try await textureLayers.update(
             textureLayersState: textureLayersState
-        )
-
-        // Initialize the repository used for Undo
-        if textureLayers.isUndoEnabled {
-            textureLayers.initializeUndoTextureRepository(
-                textureSize: textureLayersState.textureSize
-            )
-        }
-
-        // Initialize the textures used in the drawing tool
-        for i in 0 ..< drawingRenderers.count {
-            try drawingRenderers[i].initializeTextures(textureLayersState.textureSize)
-        }
-
-        // Initialize the textures used in the renderer
-        canvasRenderer.initializeTextures(
-            textureSize: textureLayersState.textureSize
         )
 
         try await canvasRenderer.updateTextures(
@@ -588,7 +592,8 @@ extension CanvasViewModel {
             newTextureLayersState: textureLayersState
         )
 
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
+        initializeRendererTextures(textureSize: textureLayersState.textureSize)
+        try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()
@@ -616,7 +621,8 @@ extension CanvasViewModel {
             textureLayersState: textureLayersState
         )
 
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
+        initializeRendererTextures(textureSize: textureLayersState.textureSize)
+        try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()
@@ -648,7 +654,8 @@ extension CanvasViewModel {
             textureLayersState: textureLayersState
         )
 
-        try await initializeTextureLayers(textureLayersState: textureLayersState)
+        initializeRendererTextures(textureSize: textureLayersState.textureSize)
+        try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
         textureLayers.undoTextureInMemoryRepository?.removeAll()

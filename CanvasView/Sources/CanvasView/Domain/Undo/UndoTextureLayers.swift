@@ -61,7 +61,7 @@ public final class UndoTextureLayers: ObservableObject {
         self.undoTextureInMemoryRepository = repository
     }
 
-    public func initializeUndoTextureRepository(
+    public func initializeTextures(
         textureSize: CGSize
     ) {
         resetUndo()
