@@ -101,6 +101,7 @@ public final class CanvasViewModel {
 
     init(
         currentTextureSize: CGSize = .init(width: 768, height: 1024),
+        projectMetaData: ProjectMetaData = ProjectMetaData(),
         renderer: MTLRendering
     ) {
         self.currentTextureSize = currentTextureSize
@@ -112,7 +113,7 @@ public final class CanvasViewModel {
             location: .swiftPackageManager
         )
         projectMetaDataStorage = CoreDataProjectMetaDataStorage(
-            project: ProjectMetaData(),
+            project: projectMetaData,
             context: persistenceController.viewContext
         )
         // Initialize texture layers that support undo and persist their data in Core Data
@@ -232,8 +233,8 @@ extension CanvasViewModel {
     }
 
     func initializeCanvasFromDocumentsFolder(
-        textureLayersState: TextureLayersState,
         workingDirectoryURL: URL,
+        textureLayersState: TextureLayersState,
         projectMetaData: ProjectMetaData
     ) async throws {
         guard
@@ -595,16 +596,14 @@ public extension CanvasViewModel {
         )
 
         // Load project metadata, falling back if it is missing
-        let projectMetaData: ProjectMetaDataArchiveModel? = try? .init(
+        let projectMetaData: ProjectMetaDataArchiveModel = try .init(
             in: workingDirectoryURL
         )
 
-        let textureLayersState: TextureLayersState = .init(textureLayersArchiveModel)
-
         try await initializeCanvasFromDocumentsFolder(
-            textureLayersState: textureLayersState,
             workingDirectoryURL: workingDirectoryURL,
-            projectMetaData: .init(projectMetaData: projectMetaData, fallbacName: workingDirectoryURL.fileName)
+            textureLayersState: .init(textureLayersArchiveModel),
+            projectMetaData: .init(projectMetaData)
         )
     }
 

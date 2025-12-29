@@ -34,10 +34,12 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
         self.updatedAt = updatedAt
     }
 
-    public init(projectMetaData: ProjectMetaDataArchiveModel?, fallbacName: String) {
-        self.projectName = projectMetaData?.projectName ?? fallbacName
-        self.createdAt = projectMetaData?.createdAt ?? Date()
-        self.updatedAt = projectMetaData?.updatedAt ?? Date()
+    public init(
+        _ model: ProjectMetaDataArchiveModel
+    ) {
+        self.projectName = model.projectName
+        self.createdAt = model.createdAt
+        self.updatedAt = model.updatedAt
     }
 
     public func update(newProjectName: String) {
