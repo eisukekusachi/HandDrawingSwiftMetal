@@ -37,11 +37,11 @@ import UIKit
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    /// A publisher that emits `TextureLayersProtocol` when `CanvasView` setup completes
-    public var didInitialize: AnyPublisher<ResultConfiguration, Never> {
+    /// A publisher that emits `TextureLayersProtocol` when `CanvasViewModel` setup completes
+    public var didInitialize: AnyPublisher<ViewModelInitializationResult, Never> {
         didInitializeSubject.eraseToAnyPublisher()
     }
-    private let didInitializeSubject = PassthroughSubject<ResultConfiguration, Never>()
+    private let didInitializeSubject = PassthroughSubject<ViewModelInitializationResult, Never>()
 
     public var zipFileURL: URL {
         viewModel.zipFileURL

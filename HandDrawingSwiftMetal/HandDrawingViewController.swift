@@ -243,9 +243,9 @@ extension HandDrawingViewController {
         }
     }
 
-    private func initializeTextureLayerView(_ configuration: ResultConfiguration) {
+    private func initializeTextureLayerView(_ result: ViewModelInitializationResult) {
         textureLayerViewPresenter.initialize(
-            textureLayers: configuration.textureLayers,
+            textureLayers: result.textureLayers,
             popupConfiguration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
