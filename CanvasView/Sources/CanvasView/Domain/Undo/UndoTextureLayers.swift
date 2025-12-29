@@ -16,7 +16,7 @@ public final class UndoTextureLayers: ObservableObject {
 
     /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
-        undoTextureInMemoryRepository != nil
+        inMemoryRepository != nil
     }
 
     /// Emits `UndoRedoButtonState` when the undo stack changes
@@ -27,8 +27,9 @@ public final class UndoTextureLayers: ObservableObject {
 
     private let undoManager = UndoManager()
 
-    /// A repository that stores textures for undo operations
-    private(set) var undoTextureInMemoryRepository: UndoTextureInMemoryRepository? = nil
+    /// A repository that stores textures for undo operations.
+    /// The textures are stored and managed in memory to avoid blocking the main thread.
+    private(set) var inMemoryRepository: UndoTextureInMemoryRepository? = nil
 
     private var renderer: MTLRendering
 
@@ -58,7 +59,7 @@ public final class UndoTextureLayers: ObservableObject {
     public func setUndoTextureRepository(
         repository: UndoTextureInMemoryRepository
     ) {
-        self.undoTextureInMemoryRepository = repository
+        self.inMemoryRepository = repository
     }
 
     public func initializeTextures(
@@ -84,9 +85,9 @@ public extension UndoTextureLayers {
         didUndoSubject.send(.init(undoManager))
     }
     func resetUndo() {
-        guard let undoTextureInMemoryRepository else { return }
+        guard let inMemoryRepository else { return }
 
-        undoTextureInMemoryRepository.removeAll()
+        inMemoryRepository.removeAll()
         undoManager.removeAllActions()
         didUndoSubject.send(.init(undoManager))
         cancellables = Set<AnyCancellable>()
@@ -132,7 +133,7 @@ private extension UndoTextureLayers {
         texture: MTLTexture?
     ) async throws {
         guard
-            let undoTextureInMemoryRepository,
+            let inMemoryRepository,
             let selectedLayer = textureLayers.selectedLayer,
             let undoTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: previousDrawingTextureForUndo,
@@ -162,13 +163,13 @@ private extension UndoTextureLayers {
         else { return }
 
         do {
-            try undoTextureInMemoryRepository
+            try inMemoryRepository
                 .addTexture(
                     newTexture: undoTexture,
                     id: undoTextureId
                 )
 
-            try undoTextureInMemoryRepository
+            try inMemoryRepository
                 .addTexture(
                     newTexture: redoTexture,
                     id: redoTextureId
@@ -194,14 +195,14 @@ private extension UndoTextureLayers {
         guard
             let newTexture,
             let undoTextureId = undoRedoObject.redoObject.undoTextureId,
-            let undoTextureInMemoryRepository
+            let inMemoryRepository
         else {
             return
         }
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try undoTextureInMemoryRepository
+            try inMemoryRepository
                 .addTexture(
                     newTexture: newTexture,
                     id: undoTextureId
@@ -221,7 +222,7 @@ private extension UndoTextureLayers {
     ) async throws {
         guard
             let undoTextureId = undoRedoObject.undoObject.undoTextureId,
-            let undoTextureInMemoryRepository
+            let inMemoryRepository
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
             return
@@ -229,7 +230,7 @@ private extension UndoTextureLayers {
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try undoTextureInMemoryRepository
+            try inMemoryRepository
                 .addTexture(
                     newTexture: restorationNewTexture,
                     id: undoTextureId
@@ -246,7 +247,7 @@ private extension UndoTextureLayers {
     func pushUndoObject(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
-        guard let undoTextureInMemoryRepository else { return }
+        guard let inMemoryRepository else { return }
 
         let undoObject = undoRedoObject.undoObject
         let redoObject = undoRedoObject.redoObject
@@ -255,7 +256,7 @@ private extension UndoTextureLayers {
             .sink(receiveValue: { result in
                 guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? undoTextureInMemoryRepository.removeTexture(
+                try? inMemoryRepository.removeTexture(
                     undoTextureId
                 )
             })
@@ -265,7 +266,7 @@ private extension UndoTextureLayers {
             .sink(receiveValue: { result in
                 guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? undoTextureInMemoryRepository.removeTexture(
+                try? inMemoryRepository.removeTexture(
                     undoTextureId
                 )
             })
@@ -299,19 +300,23 @@ private extension UndoTextureLayers {
     func performUndo(
         _ undoObject: UndoObject
     ) {
-        guard let undoTextureInMemoryRepository else { return }
+        guard let inMemoryRepository else { return }
 
         Task {
             do {
                 try await undoObject.applyUndo(
                     layers: textureLayers,
-                    repository: undoTextureInMemoryRepository
+                    repository: inMemoryRepository
                 )
 
             } catch {
                 Logger.error(error)
             }
         }
+    }
+
+    public func removeAll() {
+        inMemoryRepository?.removeAll()
     }
 }
 
@@ -458,7 +463,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
-        guard let _ = undoTextureInMemoryRepository else { return }
+        guard let _ = inMemoryRepository else { return }
 
         guard let alpha = textureLayers.selectedLayer?.alpha else { return }
         self.previousAlphaForUndo = alpha
@@ -467,7 +472,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         guard
-            let _ = undoTextureInMemoryRepository,
+            let _ = inMemoryRepository,
             let selectedLayer = textureLayers.selectedLayer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))

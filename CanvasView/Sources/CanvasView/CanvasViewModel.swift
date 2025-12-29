@@ -566,7 +566,7 @@ extension CanvasViewModel {
         try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
+        textureLayers.removeAll()
 
         projectMetaDataStorage.update(newProjectName: projectName)
 
@@ -595,7 +595,7 @@ extension CanvasViewModel {
         try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
+        textureLayers.removeAll()
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
         projectMetaDataStorage.updateUpdatedAt()
@@ -628,7 +628,7 @@ extension CanvasViewModel {
         try await updateRenderer(textureLayersState: textureLayersState)
 
         // Clear all data in the undo repository
-        textureLayers.undoTextureInMemoryRepository?.removeAll()
+        textureLayers.removeAll()
 
         // Update metadata
         projectMetaDataStorage.update(
