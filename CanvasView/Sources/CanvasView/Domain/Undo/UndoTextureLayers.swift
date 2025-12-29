@@ -314,10 +314,6 @@ private extension UndoTextureLayers {
             }
         }
     }
-
-    public func removeAll() {
-        inMemoryRepository?.removeAll()
-    }
 }
 
 extension UndoTextureLayers: TextureLayersProtocol {
