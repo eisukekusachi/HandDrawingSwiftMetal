@@ -27,17 +27,7 @@ public struct TextureLayersState: Sendable {
 }
 
 public extension TextureLayersState {
-    init(entity: TextureLayerArrayStorageEntity?) throws {
-        guard
-            let entity else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Failed to unwrap optional value", bundle: .main)
-            )
-            Logger.error(error)
-            throw error
-        }
-
+    init(entity: TextureLayerArrayStorageEntity) throws {
         self.layers = entity.textureLayerArray?
             .compactMap { $0 as? TextureLayerStorageEntity }
             .sorted { $0.orderIndex < $1.orderIndex }
