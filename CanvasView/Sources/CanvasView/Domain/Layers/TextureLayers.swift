@@ -73,7 +73,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     private var renderer: MTLRendering?
 
-    private var textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+    /// Store and manage texture layer textures in the Documents folder for persistence
+    private var documentsRepository: TextureLayersDocumentsRepositoryProtocol?
 
     @Published private var _layers: [TextureLayerItem] = []
 
@@ -95,7 +96,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public func setup(
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
-        self.textureLayersDocumentsRepository = repository
+        self.documentsRepository = repository
     }
 
     public func update(
@@ -116,7 +117,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         self._selectedLayerId = textureLayersState.selectedLayerId
 
         Task {
-            let textures = try await self.textureLayersDocumentsRepository?.duplicatedTextures(_layers.map { $0.id })
+            let textures = try await self.documentsRepository?.duplicatedTextures(_layers.map { $0.id })
             textures?.forEach { [weak self] identifiedTexture in
                 self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
             }
@@ -148,7 +149,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
             let renderer,
-            let textureLayersDocumentsRepository,
+            let documentsRepository,
             // If a texture is provided as an argument, use it. otherwise create a new one.
             let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
                 width: Int(_textureSize.width),
@@ -167,7 +168,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         _selectedLayerId = layer.id
 
-        try await textureLayersDocumentsRepository
+        try await documentsRepository
             .addTexture(
                 texture: newTexture,
                 id: layer.id
@@ -176,7 +177,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            let textureLayersDocumentsRepository,
+            let documentsRepository,
             let selectedLayerId = selectedLayer?.id,
             layerCount > 1
         else {
@@ -193,12 +194,12 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
         _selectedLayerId = newLayerId
 
-        try textureLayersDocumentsRepository
+        try documentsRepository
             .removeTexture(selectedLayerId)
     }
 
     public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        try await textureLayersDocumentsRepository?.writeTextureToDisk(texture: texture, for: id)
+        try await documentsRepository?.writeTextureToDisk(texture: texture, for: id)
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
@@ -230,7 +231,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Copies a texture for the given `LayerId`
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureLayersDocumentsRepository?.duplicatedTexture(id)
+        try await documentsRepository?.duplicatedTexture(id)
     }
 
     public func index(for id: LayerId) -> Int? {
