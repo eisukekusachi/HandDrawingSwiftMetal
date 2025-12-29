@@ -582,9 +582,10 @@ extension CanvasViewModel {
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
-        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: textureLayersState.textureSize
-        )
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
+
+        // Restore the texture layer repository using TextureLayersState
         try await textureDocumentsDirectoryRepository.initializeStorage(
             newTextureLayersState: textureLayersState
         )
@@ -609,12 +610,14 @@ extension CanvasViewModel {
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
-        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: textureLayersState.textureSize
-        )
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
+
+        // Restore the texture layer repository using TextureLayersState
         try textureDocumentsDirectoryRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
+
         try await initializeTextureLayers(textureLayersState: textureLayersState)
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
@@ -638,10 +641,10 @@ extension CanvasViewModel {
             let textureDocumentsDirectoryRepository = dependencies?.textureDocumentsDirectoryRepository
         else { return }
 
-        try await textureLayers.undoTextureInMemoryRepository?.initializeStorage(
-            newTextureSize: textureLayersState.textureSize
-        )
+        // Clear all data in the undo repository
+        textureLayers.undoTextureInMemoryRepository?.removeAll()
 
+        // Restore the texture layer repository using TextureLayersState
         try await textureDocumentsDirectoryRepository.restoreStorageFromSavedData(
             url: workingDirectoryURL,
             textureLayersState: textureLayersState

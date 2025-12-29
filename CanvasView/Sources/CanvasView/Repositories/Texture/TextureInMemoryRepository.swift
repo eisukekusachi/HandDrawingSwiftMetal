@@ -12,16 +12,10 @@ import Foundation
 @MainActor
 public final class TextureInMemoryRepository {
 
-    public var textureSize: CGSize {
-        _textureSize
-    }
-
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]
 
     private let renderer: MTLRendering
-
-    private var _textureSize: CGSize = .zero
 
     public init(
         textures: [LayerId: MTLTexture?] = [:],
@@ -29,109 +23,6 @@ public final class TextureInMemoryRepository {
     ) {
         self.textures = textures
         self.renderer = renderer
-    }
-
-    @discardableResult
-    public func initializeStorage(
-        newTextureSize: CGSize
-    ) async throws -> TextureLayersState {
-        guard
-            Int(newTextureSize.width) >= canvasMinimumTextureLength &&
-            Int(newTextureSize.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(newTextureSize.width) \(newTextureSize.height)"
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        removeAll()
-
-        let layer = TextureLayerModel(
-            id: LayerId(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true
-        )
-
-        textures[layer.id] = MTLTextureCreator.makeTexture(
-            width: Int(newTextureSize.width),
-            height: Int(newTextureSize.height),
-            with: renderer.device
-        )
-
-        // Set the texture size after the initialization of this repository is completed
-        _textureSize = newTextureSize
-
-        return .init(
-            layers: [layer],
-            layerIndex: 0,
-            textureSize: newTextureSize
-        )
-    }
-
-    @discardableResult
-    public func restoreStorage(
-        from sourceFolderURL: URL,
-        textureLayersState: TextureLayersState,
-        fallbackTextureSize: CGSize
-    ) async throws -> TextureLayersState {
-        guard FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(sourceFolderURL)
-        ) else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Invalid value", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        let textureSize = textureLayersState.textureSize
-
-        // Temporary dictionary to hold new textures before applying
-        var newTextures: [LayerId: MTLTexture] = [:]
-
-        try textureLayersState.layers.forEach { layer in
-            let textureData = try Data(
-                contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
-            )
-
-            guard let hexadecimalData = textureData.encodedHexadecimals else {
-                let error = NSError(
-                    title: String(localized: "Error", bundle: .module),
-                    message: String(localized: "Unable to load required data", bundle: .module)
-                )
-                Logger.error(error)
-                throw error
-            }
-
-            guard
-                let newTexture = try MTLTextureCreator.makeTexture(
-                    width: Int(textureSize.width),
-                    height: Int(textureSize.height),
-                    from: hexadecimalData,
-                    with: renderer.device
-                )
-            else {
-                let error = NSError(
-                    title: String(localized: "Error", bundle: .module),
-                    message: String(localized: "Unable to load required data", bundle: .module)
-                )
-                Logger.error(error)
-                throw error
-            }
-
-            newTextures[layer.id] = newTexture
-        }
-
-        textures = newTextures
-        _textureSize = textureSize
-
-        return textureLayersState
     }
 
     /// Returns the texture associated with the specified `LayerId`
