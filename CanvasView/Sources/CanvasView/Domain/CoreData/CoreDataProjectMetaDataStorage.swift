@@ -70,8 +70,8 @@ extension CoreDataProjectMetaDataStorage {
         try storage?.fetch()
     }
 
-    public func update(newProjectName: String) {
-        project.update(newProjectName: newProjectName)
+    public func updateAll(newProjectName: String) {
+        project.updateAll(newProjectName: newProjectName)
     }
 
     public func updateUpdatedAt() {
@@ -86,6 +86,14 @@ extension CoreDataProjectMetaDataStorage {
         project.projectName = projectName
         project.createdAt = createdAt
         project.updatedAt = updatedAt
+    }
+
+    public func update(_ model: ProjectMetaData) {
+        update(
+            projectName: model.projectName,
+            createdAt: model.createdAt,
+            updatedAt: model.updatedAt
+        )
     }
 
     public func update(_ entity: ProjectMetaDataEntity) {

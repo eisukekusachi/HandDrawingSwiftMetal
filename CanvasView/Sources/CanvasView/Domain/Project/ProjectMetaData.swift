@@ -42,7 +42,7 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
         self.updatedAt = model.updatedAt
     }
 
-    public func update(newProjectName: String) {
+    public func updateAll(newProjectName: String) {
         self.projectName = newProjectName
         self.createdAt = Date()
         self.updatedAt = Date()
