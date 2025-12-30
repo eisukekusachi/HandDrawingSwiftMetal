@@ -11,16 +11,13 @@ import Foundation
 @MainActor
 public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
-    // MARK: - Stored State
-
     public private(set) var textureSize: CGSize = .zero
+
     public let directoryName: String
     public let workingDirectoryURL: URL
 
     /// In-memory textures keyed by LayerId (acts like "disk" for tests)
     public private(set) var storedTextures: [LayerId: MTLTexture] = [:]
-
-    // MARK: - Call Recording
 
     public private(set) var initializeStorage_textureLayersState_callCount = 0
     public private(set) var initializeStorage_textureLayersState_lastArg: TextureLayersState?
@@ -69,14 +66,18 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
     /// If set, this mapping is used to return a specific IdentifiedTexture for `duplicatedTexture`.
     public var duplicatedTexture_stubbedResults: [LayerId: IdentifiedTexture] = [:]
 
+    private let renderer: MTLRendering
+
     // MARK: - Init
 
     public init(
         directoryName: String = "MockTextures",
-        workingDirectoryURL: URL = URL(fileURLWithPath: "/tmp/MockTextures")
+        workingDirectoryURL: URL = URL(fileURLWithPath: "/tmp/MockTextures"),
+        renderer: MTLRendering
     ) {
         self.directoryName = directoryName
         self.workingDirectoryURL = workingDirectoryURL
+        self.renderer = renderer
     }
 
     // MARK: - API
@@ -115,30 +116,20 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
         duplicatedTexture_callCount += 1
         duplicatedTexture_lastId = id
 
-        if let error = duplicatedTexture_error { throw error }
+        let newTexture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: renderer.device
+        )!
 
-        if let stub = duplicatedTexture_stubbedResults[id] {
-            return stub
-        }
-
-        guard let texture = storedTextures[id] else {
-            struct NotFound: Error {}
-            throw NotFound()
-        }
-
-        // NOTE: This does not duplicate GPU memory; it returns the stored reference.
-        // For unit tests focused on flow/logic, this is usually sufficient.
-        return .init(id: id, texture: texture)
+        return .init(id: id, texture: newTexture)
     }
 
     public func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
         duplicatedTextures_callCount += 1
         duplicatedTextures_lastIds = ids
 
-        if let error = duplicatedTextures_error { throw error }
-
         var results: [IdentifiedTexture] = []
-        results.reserveCapacity(ids.count)
         for id in ids {
             results.append(try await duplicatedTexture(id))
         }

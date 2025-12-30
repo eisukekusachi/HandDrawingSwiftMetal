@@ -47,9 +47,9 @@ public protocol TextureLayersProtocol: ObservableObject {
         repository: TextureLayersDocumentsRepositoryProtocol?
     )
 
-    func update(
+    func updateSkippingThumbnail(
         textureLayersState: TextureLayersState
-    ) async throws
+    )
 
     func addNewLayer(at index: Int) async throws
 
@@ -74,6 +74,8 @@ public protocol TextureLayersProtocol: ObservableObject {
     func selectLayer(_ id: LayerId)
 
     func updateLayer(_ layer: TextureLayerItem)
+
+    func updateThumbnail(_ id: LayerId) async throws
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture)
 

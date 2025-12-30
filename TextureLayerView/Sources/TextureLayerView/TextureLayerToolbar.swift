@@ -121,7 +121,7 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                try await textureLayers.update(
+                textureLayers.updateSkippingThumbnail(
                     textureLayersState: state
                 )
 

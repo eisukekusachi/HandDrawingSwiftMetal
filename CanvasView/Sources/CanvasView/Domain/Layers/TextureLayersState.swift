@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// A struct that represents the state of TextureLayers. Its layers property is never empty
 public struct TextureLayersState: Sendable {
 
     public let layers: [TextureLayerModel]
@@ -16,18 +17,31 @@ public struct TextureLayersState: Sendable {
     public let textureSize: CGSize
 
     public init(
-        layers: [TextureLayerModel],
-        layerIndex: Int,
+        layers: [TextureLayerModel] = [],
+        layerIndex: Int = 0,
         textureSize: CGSize
     ) {
-        self.layers = layers
-        self.layerIndex = layerIndex
+        if layers.isEmpty {
+            self.layers = [
+                .init(
+                    id: LayerId(),
+                    title: TimeStampFormatter.currentDate,
+                    alpha: 255,
+                    isVisible: true
+                )
+            ]
+        } else {
+            self.layers = layers
+        }
+        self.layerIndex = min(layerIndex, self.layers.count - 1)
         self.textureSize = textureSize
     }
 }
 
 public extension TextureLayersState {
-    init(entity: TextureLayerArrayStorageEntity) throws {
+    init(
+        entity: TextureLayerArrayStorageEntity
+    ) throws {
         self.layers = entity.textureLayerArray?
             .compactMap { $0 as? TextureLayerStorageEntity }
             .sorted { $0.orderIndex < $1.orderIndex }
@@ -42,7 +56,7 @@ public extension TextureLayersState {
         self.layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
         self.textureSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
 
-        // Return nil if the layers are nil or the texture size is zero
+        // Return an error if the layers are nil or the texture size is zero
         if layers.isEmpty || textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -54,11 +68,21 @@ public extension TextureLayersState {
     }
 
     init(
-        _ model: TextureLayersArchiveModel
-    ) {
+        model: TextureLayersArchiveModel
+    ) throws {
         self.layers = model.layers
         self.layerIndex = model.layerIndex
         self.textureSize = model.textureSize
+
+        // Return an error if the layers are nil or the texture size is zero
+        if layers.isEmpty || textureSize == .zero {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Unable to find texture layer files", bundle: .main)
+            )
+            Logger.error(error)
+            throw error
+        }
     }
 
     var selectedLayerId: LayerId? {

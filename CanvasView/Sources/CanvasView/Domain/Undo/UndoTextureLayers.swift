@@ -62,7 +62,7 @@ public final class UndoTextureLayers: ObservableObject {
         self.inMemoryRepository = repository
     }
 
-    public func initializeTextures(
+    public func initializeUndoTextures(
         textureSize: CGSize
     ) {
         // Create a texture for use in drawing undo operations
@@ -583,10 +583,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
         )
     }
 
-    public func update(
+    public func updateSkippingThumbnail(
         textureLayersState: TextureLayersState
-    ) async throws {
-        try await textureLayers.update(
+    ) {
+        textureLayers.updateSkippingThumbnail(
             textureLayersState: textureLayersState
         )
     }
@@ -605,6 +605,10 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func updateLayer(_ layer: TextureLayerItem) {
         textureLayers.updateLayer(layer)
+    }
+
+    public func updateThumbnail(_ id: LayerId) async throws {
+        try await textureLayers.updateThumbnail(id)
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {

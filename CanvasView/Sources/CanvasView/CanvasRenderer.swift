@@ -79,13 +79,20 @@ public final class CanvasRenderer: ObservableObject {
         }
     }
 
-    public func initializeTextures(textureSize: CGSize) {
+    public func initializeTextures(textureSize: CGSize) throws {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
         else {
-            assert(false, "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)",
+                    bundle: .module
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         guard
@@ -95,8 +102,15 @@ public final class CanvasRenderer: ObservableObject {
             let canvasTexture = makeTexture(textureSize),
             let realtimeDrawingTexture = makeTexture(textureSize)
         else {
-            assert(false, "Failed to generate texture")
-            return
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(
+                    localized: "Failed to create new texture",
+                    bundle: .module
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         self.unselectedBottomTexture = unselectedBottomTexture
@@ -128,7 +142,7 @@ extension CanvasRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func updateTextures(
         textureLayers: any TextureLayersProtocol,
-        repository: TextureLayersDocumentsRepository
+        repository: TextureLayersDocumentsRepositoryProtocol
     ) async throws {
         guard
             let unselectedBottomTexture,
@@ -171,21 +185,21 @@ extension CanvasRenderer {
         )
 
         // Update the class’s textures with the retrieved textures
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: bottomLayers,
             on: unselectedBottomTexture,
             with: newCommandBuffer
         )
 
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: [opaqueLayer],
             on: selectedLayerTexture,
             with: newCommandBuffer
         )
 
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: topLayers,
             on: unselectedTopTexture,
@@ -329,7 +343,7 @@ extension CanvasRenderer {
         using layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
-    ) async throws {
+    ) {
         let textureDictionary = IdentifiedTexture.dictionary(
             from: Set(repositoryTextures)
         )
