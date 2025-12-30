@@ -102,19 +102,9 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public func updateSkippingThumbnail(
         textureLayersState: TextureLayersState
     ) {
-        self._textureSize = textureLayersState.textureSize
-
-        self._layers = textureLayersState.layers.map {
-            .init(
-                id: $0.id,
-                title: $0.title,
-                alpha: $0.alpha,
-                isVisible: $0.isVisible,
-                thumbnail: nil
-            )
-        }
-
+        self._layers = textureLayersState.layers.map { .init(model: $0) }
         self._selectedLayerId = textureLayersState.selectedLayerId
+        self._textureSize = textureLayersState.textureSize
     }
 
     public func addNewLayer(at index: Int) async throws {

@@ -40,8 +40,8 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that adding a layer increases the count and selects the new layer`() async throws {
-
         let subject = Subject(renderer: renderer)
+
         subject.setup(
             repository: textureLayersDocumentsRepository
         )
@@ -49,7 +49,7 @@ struct TextureLayersTests {
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "New1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(layers: [], layerIndex: 0, textureSize: .init(width: 16, height: 16))
         )
 
@@ -81,8 +81,8 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that deleting a layer works but at least one layer always remains`() async throws {
-
         let subject = Subject(renderer: renderer)
+
         subject.setup(
             repository: textureLayersDocumentsRepository
         )
@@ -90,7 +90,7 @@ struct TextureLayersTests {
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer0,
@@ -119,17 +119,13 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that moving a layer changes the order as expected`() async throws {
-
         let subject = Subject(renderer: renderer)
-        subject.setup(
-            repository: textureLayersDocumentsRepository
-        )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer2,
@@ -162,17 +158,13 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that selectLayer updates selectedLayerId to the given layer's id`() async throws {
-
         let subject = Subject(renderer: renderer)
-        subject.setup(
-            repository: textureLayersDocumentsRepository
-        )
 
         let layer2: TextureLayerModel = .init(id: LayerId(), title: "layer2", alpha: 255, isVisible: true)
         let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 255, isVisible: true)
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer2,
@@ -193,15 +185,11 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that updateTitle updates the layer's title`() async throws {
-
         let subject = Subject(renderer: renderer)
-        subject.setup(
-            repository: textureLayersDocumentsRepository
-        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer
@@ -220,15 +208,11 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that updateAlpha updates the layer's alpha`() async throws {
-
         let subject = Subject(renderer: renderer)
-        subject.setup(
-            repository: textureLayersDocumentsRepository
-        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer
@@ -247,15 +231,11 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that updateVisibility updates the layer's visibility`() async throws {
-
         let subject = Subject(renderer: renderer)
-        subject.setup(
-            repository: textureLayersDocumentsRepository
-        )
 
         let layer: TextureLayerModel = .init(id: LayerId(), title: "oldLayer", alpha: 255, isVisible: true)
 
-        try await subject.update(
+        subject.updateSkippingThumbnail(
             textureLayersState: .init(
                 layers: [
                     layer

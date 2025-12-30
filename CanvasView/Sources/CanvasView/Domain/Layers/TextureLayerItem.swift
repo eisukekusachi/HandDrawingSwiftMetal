@@ -41,7 +41,7 @@ public struct TextureLayerItem: Identifiable {
 extension TextureLayerItem {
     public init(
         model: TextureLayerModel,
-        thumbnail: UIImage?
+        thumbnail: UIImage? = nil
     ) {
         self.init(
             id: model.id,
