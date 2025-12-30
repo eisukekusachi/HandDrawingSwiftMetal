@@ -99,9 +99,9 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         self.documentsRepository = repository
     }
 
-    public func update(
+    public func updateSkippingThumbnail(
         textureLayersState: TextureLayersState
-    ) async throws {
+    ) {
         self._textureSize = textureLayersState.textureSize
 
         self._layers = textureLayersState.layers.map {
@@ -115,13 +115,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         }
 
         self._selectedLayerId = textureLayersState.selectedLayerId
-
-        Task {
-            let textures = try await self.documentsRepository?.duplicatedTextures(_layers.map { $0.id })
-            textures?.forEach { [weak self] identifiedTexture in
-                self?.updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
-            }
-        }
     }
 
     public func addNewLayer(at index: Int) async throws {
@@ -252,6 +245,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         }
 
         _layers[index] = layer
+    }
+
+    public func updateThumbnail(_ id: LayerId) async throws {
+        guard let identifiedTexture = try await self.documentsRepository?.duplicatedTexture(id) else { return }
+        updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {

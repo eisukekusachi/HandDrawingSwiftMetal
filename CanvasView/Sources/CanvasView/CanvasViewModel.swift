@@ -310,7 +310,14 @@ extension CanvasViewModel {
             .store(in: &cancellables)
 
         didInitializeSubject
-            .sink { [weak self] _ in
+            .sink { [weak self] result in
+                // Update the thumbnails
+                Task {
+                    for layer in result.textureLayers.layers {
+                        try await self?.textureLayers.updateThumbnail(layer.id)
+                    }
+                }
+
                 // Reset undo when the update of CanvasViewModel completes
                 self?.textureLayers.resetUndo()
 
@@ -676,11 +683,12 @@ extension CanvasViewModel {
             )
         }
 
-        // Update the textures in TextureLayers
-        try await textureLayers.update(
+        // Update textureLayers using textureLayersState
+        textureLayers.updateSkippingThumbnail(
             textureLayersState: textureLayersState
         )
 
+        // Update canvasRenderer using textureLayers
         try await canvasRenderer.updateTextures(
             textureLayers: textureLayers,
             repository: textureLayersDocumentsRepository
