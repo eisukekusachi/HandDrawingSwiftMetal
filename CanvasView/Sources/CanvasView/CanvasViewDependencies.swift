@@ -9,36 +9,15 @@ import Foundation
 
 @MainActor
 struct CanvasViewDependencies {
-    /// Repository that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
+    /// A repository that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepository
 
-    /// Repository that manages textures used for undo in memory
+    /// A repository that manages textures used for undo in memory
     let undoTextureRepository: UndoTextureInMemoryRepository?
 
-    /// Used to render or copy textures
+    /// A protocol responsible for rendering textures to a drawable surface
     let renderer: MTLRendering
 
-    /// A view for displaying the texture
-    let displayView: CanvasDisplayable
-}
-
-extension CanvasViewDependencies {
-    init(
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable
-    ) {
-        self.textureLayersDocumentsRepository = .init(
-            storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage",
-            renderer: renderer
-        )
-
-        self.undoTextureRepository = .init(
-            renderer: renderer
-        )
-
-        self.renderer = renderer
-
-        self.displayView = displayView
-    }
+    /// A protocol representing a drawable surface for the canvas
+    let displayView: CanvasDisplayable?
 }

@@ -110,13 +110,23 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
+        let dependencies: CanvasViewDependencies = .init(
+            textureLayersDocumentsRepository: .init(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            ),
+            undoTextureRepository: .init(
+                renderer: renderer
+            ),
+            renderer: renderer,
+            displayView: displayView
+        )
+
         viewModel.setup(
             drawingRenderers: drawingRenderers,
             configuration: configuration,
-            dependencies: .init(
-                renderer: renderer,
-                displayView: displayView
-            )
+            dependencies: dependencies
         )
 
         await viewModel.initializeCanvas(

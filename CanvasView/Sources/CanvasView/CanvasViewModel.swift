@@ -55,6 +55,13 @@ public final class CanvasViewModel {
     /// Metadata stored in Core Data
     private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
+    /// A class that manages rendering to the canvas
+    private var canvasRenderer: CanvasRenderer
+
+    /// A class that manages drawing lines onto textures
+    private var drawingRenderer: DrawingRenderer?
+    private var drawingRenderers: [DrawingRenderer] = []
+
     /// Undoable texture layers
     private let textureLayers: UndoTextureLayers
 
@@ -62,10 +69,6 @@ public final class CanvasViewModel {
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
     private let pencilStroke = PencilStroke()
-
-    /// A class that manages drawing lines onto textures
-    private var drawingRenderer: DrawingRenderer?
-    private var drawingRenderers: [DrawingRenderer] = []
 
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
@@ -75,9 +78,6 @@ public final class CanvasViewModel {
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer
-
-    /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
 
     private let transforming = Transforming()
 
@@ -164,6 +164,42 @@ extension CanvasViewModel {
         // Use metadata from Core Data
         if let entity = try? projectMetaDataStorage.fetch() {
             projectMetaDataStorage.update(entity)
+        }
+    }
+
+    private func setupDrawingRenderers(
+        drawingRenderers: [DrawingRenderer],
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable?
+    ) {
+        if drawingRenderers.isEmpty {
+            self.drawingRenderers = [BrushDrawingRenderer()]
+        }
+        drawingRenderers.forEach {
+            $0.setup(
+                frameSize: frameSize,
+                renderer: renderer,
+                displayView: displayView
+            )
+        }
+    }
+
+    private func setupTouchGesture(environmentConfiguration: EnvironmentConfiguration) {
+        // Set the gesture recognition durations in seconds
+        self.touchGesture.setDrawingGestureRecognitionSecond(
+            environmentConfiguration.drawingGestureRecognitionSecond
+        )
+        self.touchGesture.setTransformingGestureRecognitionSecond(
+            environmentConfiguration.transformingGestureRecognitionSecond
+        )
+    }
+
+    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
+        // If `undoTextureRepository` is used, undo functionality is available
+        if let repository {
+            self.textureLayers.setUndoTextureRepository(
+                repository: repository
+            )
         }
     }
 
@@ -277,42 +313,6 @@ extension CanvasViewModel {
                 self?.textureLayers.resetUndo()
             }
             .store(in: &cancellables)
-    }
-
-    private func setupDrawingRenderers(
-        drawingRenderers: [DrawingRenderer],
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable
-    ) {
-        if drawingRenderers.isEmpty {
-            self.drawingRenderers = [BrushDrawingRenderer()]
-        }
-        drawingRenderers.forEach {
-            $0.setup(
-                frameSize: frameSize,
-                renderer: renderer,
-                displayView: displayView
-            )
-        }
-    }
-
-    private func setupTouchGesture(environmentConfiguration: EnvironmentConfiguration) {
-        // Set the gesture recognition durations in seconds
-        self.touchGesture.setDrawingGestureRecognitionSecond(
-            environmentConfiguration.drawingGestureRecognitionSecond
-        )
-        self.touchGesture.setTransformingGestureRecognitionSecond(
-            environmentConfiguration.transformingGestureRecognitionSecond
-        )
-    }
-
-    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
-        // If `undoTextureRepository` is used, undo functionality is available
-        if let repository {
-            self.textureLayers.setUndoTextureRepository(
-                repository: repository
-            )
-        }
     }
 }
 
