@@ -18,7 +18,9 @@ public struct CanvasConfiguration {
         projectConfiguration: ProjectConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
+        // The screen size is used when the value is nil
         self.textureSize = textureSize ?? CanvasView.screenSize
+
         self.projectConfiguration = projectConfiguration
         self.environmentConfiguration = environmentConfiguration
     }

@@ -62,7 +62,7 @@ public final class UndoTextureLayers: ObservableObject {
         self.inMemoryRepository = repository
     }
 
-    public func initializeTextures(
+    public func initializeUndoTextures(
         textureSize: CGSize
     ) {
         // Create a texture for use in drawing undo operations
