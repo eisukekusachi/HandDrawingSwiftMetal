@@ -80,10 +80,11 @@ struct CanvasViewModelTests {
             await waitForEmission.value
             cancellable?.cancel()
 
-            // Only updatedAt is updated with the current date
+            // The metadata is overwritten from Core Data.
+            // And only updatedAt is set to the current date
             let metaData = subject.projectMetaDataStorage
-            #expect(metaData.projectName == currentProjectMetaData.projectName)
-            #expect(Int(metaData.createdAt.timeIntervalSince1970) == Int(currentProjectMetaData.createdAt.timeIntervalSince1970))
+            #expect(metaData.projectName != currentProjectMetaData.projectName)
+            #expect(Int(metaData.createdAt.timeIntervalSince1970) != Int(currentProjectMetaData.createdAt.timeIntervalSince1970))
             #expect(Int(metaData.updatedAt.timeIntervalSince1970) == Int(Date().timeIntervalSince1970))
 
             #expect(repository.initializeStorage_textureLayersState_callCount == 1)
