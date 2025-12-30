@@ -111,7 +111,7 @@ import UIKit
         configuration: CanvasConfiguration
     ) async throws {
         let dependencies: CanvasViewDependencies = .init(
-            textureLayersDocumentsRepository: .init(
+            textureLayersDocumentsRepository: TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,
                 directoryName: "TextureStorage",
                 renderer: renderer
@@ -125,14 +125,18 @@ import UIKit
 
         viewModel.setup(
             drawingRenderers: drawingRenderers,
-            configuration: configuration,
-            dependencies: dependencies
+            dependencies: dependencies,
+            environmentConfiguration: configuration.environmentConfiguration,
         )
 
-        await viewModel.initializeCanvas(
-            textureLayersEntity: try viewModel.fetchTextureLayersEntity(),
-            configuration: configuration
-        )
+        do {
+            try await viewModel.initializeCanvas(
+                textureLayersState: viewModel.textureLayersStateFromCoreDataEntity,
+                configuration: configuration
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
     }
 
     public override func layoutSubviews() {
@@ -152,10 +156,25 @@ import UIKit
     public func loadFiles(
         in workingDirectoryURL: URL
     ) async throws {
-        try await viewModel.loadFiles(
+
+        // Load texture layer data from the JSON file
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
+        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
+
+        // Load project metadata, falling back if it is missing
+        let projectMetaData: ProjectMetaDataArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+
+        try await viewModel.restoreCanvasFromDocumentsFolder(
+            workingDirectoryURL: workingDirectoryURL,
+            textureLayersState: textureLayerState,
+            projectMetaData: .init(model: projectMetaData)
+        )
     }
+
     public func exportFiles(
         thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
         to workingDirectoryURL: URL

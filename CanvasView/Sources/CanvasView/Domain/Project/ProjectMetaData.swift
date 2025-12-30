@@ -35,7 +35,7 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
     }
 
     public init(
-        _ model: ProjectMetaDataArchiveModel
+        model: ProjectMetaDataArchiveModel
     ) {
         self.projectName = model.projectName
         self.createdAt = model.createdAt

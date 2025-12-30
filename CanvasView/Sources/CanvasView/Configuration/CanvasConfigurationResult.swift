@@ -9,5 +9,6 @@ import Foundation
 
 /// A struct created when `CanvasView` setup is complete
 public struct CanvasConfigurationResult {
+    public let textureSize: CGSize
     public let textureLayers: any TextureLayersProtocol
 }

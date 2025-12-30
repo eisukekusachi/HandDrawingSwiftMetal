@@ -54,7 +54,7 @@ public final class CanvasViewModel {
     private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
     /// Metadata stored in Core Data
-    private var projectMetaDataStorage: CoreDataProjectMetaDataStorage
+    private(set) var projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
@@ -131,12 +131,10 @@ public final class CanvasViewModel {
 extension CanvasViewModel {
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
-        configuration: CanvasConfiguration,
-        dependencies: CanvasViewDependencies
+        dependencies: CanvasViewDependencies,
+        environmentConfiguration: EnvironmentConfiguration
     ) {
-        self.currentTextureSize = configuration.textureSize
         self.dependencies = dependencies
-        let environmentConfiguration = configuration.environmentConfiguration
 
         canvasRenderer.setup(
             displayView: dependencies.displayView,
@@ -157,11 +155,6 @@ extension CanvasViewModel {
         textureLayers.setup(
             repository: dependencies.textureLayersDocumentsRepository
         )
-
-        // Use metadata from Core Data
-        if let entity = try? projectMetaDataStorage.fetch() {
-            projectMetaDataStorage.update(entity)
-        }
     }
 
     private func setupDrawingRenderers(
@@ -169,18 +162,20 @@ extension CanvasViewModel {
         renderer: MTLRendering,
         displayView: CanvasDisplayable?
     ) {
-        if drawingRenderers.isEmpty {
+        self.drawingRenderers = drawingRenderers
+
+        if self.drawingRenderers.isEmpty {
             self.drawingRenderers = [BrushDrawingRenderer()]
         }
-        drawingRenderers.forEach {
+
+        self.drawingRenderers.forEach {
             $0.setup(
                 frameSize: frameSize,
                 renderer: renderer,
                 displayView: displayView
             )
         }
-        self.drawingRenderers = drawingRenderers
-        self.drawingRenderer = drawingRenderers[0]
+        self.drawingRenderer = self.drawingRenderers[0]
     }
 
     private func setupTouchGesture(
@@ -205,19 +200,27 @@ extension CanvasViewModel {
         }
     }
 
-    /// Fetches `textureLayers` data from Core Data
-    func fetchTextureLayersEntity() throws -> TextureLayerArrayStorageEntity? {
-        try (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+    /// Fetches `textureLayers` data from Core Data.
+    /// Returns nil if an error occurs.
+    var textureLayersStateFromCoreDataEntity: TextureLayersState? {
+        guard
+            let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+        else { return nil }
+        return try? .init(entity: entity)
     }
 
     func initializeCanvas(
-        textureLayersEntity: TextureLayerArrayStorageEntity?,
+        textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
-    ) async {
-        // Restore the canvas using the Core Data entity if it exists
-        if let textureLayersEntity {
+    ) async throws {
+        // Restore the canvas using textureLayersState if it exists
+        if let textureLayersState {
             do {
-                let textureLayersState: TextureLayersState = try .init(entity: textureLayersEntity)
+                // Use metadata from Core Data
+                if let entity = try? projectMetaDataStorage.fetch() {
+                    projectMetaDataStorage.update(entity)
+                }
+
                 try await initializeCanvasFromCoreData(
                     textureLayersState: textureLayersState
                 )
@@ -231,11 +234,44 @@ extension CanvasViewModel {
         do {
             try await initializeDefaultCanvas(
                 projectName: configuration.projectConfiguration.projectName,
-                textureLayersState: TextureLayersState(textureSize: currentTextureSize)
+                textureLayersState: .init(textureSize: configuration.textureSize)
             )
         } catch {
-            fatalError("Failed to initialize the canvas")
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to initialize the canvas", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
         }
+    }
+
+    func restoreCanvasFromDocumentsFolder(
+        workingDirectoryURL: URL,
+        textureLayersState: TextureLayersState,
+        projectMetaData: ProjectMetaData
+    ) async throws {
+        guard
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
+        else { return }
+
+        // Restore the repository using TextureLayersState
+        try await textureLayersDocumentsRepository.restoreStorageFromSavedData(
+            url: workingDirectoryURL,
+            textureLayersState: textureLayersState
+        )
+
+        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+
+        // Overwrite the metadata with the given value
+        projectMetaDataStorage.update(projectMetaData)
+
+        didInitializeSubject.send(
+            .init(
+                textureSize: textureLayersState.textureSize,
+                textureLayers: textureLayers
+            )
+        )
     }
 }
 
@@ -318,6 +354,9 @@ extension CanvasViewModel {
                         try await self?.textureLayers.updateThumbnail(layer.id)
                     }
                 }
+
+                // Update currentTextureSize
+                self?.currentTextureSize = result.textureSize
 
                 // Reset undo when the update of CanvasViewModel completes
                 self?.textureLayers.resetUndo()
@@ -469,7 +508,7 @@ public extension CanvasViewModel {
     ) async throws {
         try await initializeDefaultCanvas(
             projectName: newProjectName,
-            textureLayersState: TextureLayersState(textureSize: currentTextureSize)
+            textureLayersState: TextureLayersState(textureSize: newTextureSize)
         )
         transforming.setMatrix(.identity)
     }
@@ -493,27 +532,6 @@ public extension CanvasViewModel {
     }
     func redo() {
         textureLayers.redo()
-    }
-
-    func loadFiles(
-        in workingDirectoryURL: URL
-    ) async throws {
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
-
-        // Load project metadata, falling back if it is missing
-        let projectMetaData: ProjectMetaDataArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-
-        try await initializeCanvasFromDocumentsFolder(
-            workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: textureLayerState,
-            projectMetaData: .init(projectMetaData)
-        )
     }
 
     func exportFiles(
@@ -587,6 +605,7 @@ extension CanvasViewModel {
 
         didInitializeSubject.send(
             .init(
+                textureSize: textureLayersState.textureSize,
                 textureLayers: textureLayers
             )
         )
@@ -611,33 +630,7 @@ extension CanvasViewModel {
 
         didInitializeSubject.send(
             .init(
-                textureLayers: textureLayers
-            )
-        )
-    }
-
-    private func initializeCanvasFromDocumentsFolder(
-        workingDirectoryURL: URL,
-        textureLayersState: TextureLayersState,
-        projectMetaData: ProjectMetaData
-    ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
-        // Restore the repository using TextureLayersState
-        try await textureLayersDocumentsRepository.restoreStorageFromSavedData(
-            url: workingDirectoryURL,
-            textureLayersState: textureLayersState
-        )
-
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
-
-        // Overwrite the metadata with the given value
-        projectMetaDataStorage.update(projectMetaData)
-
-        didInitializeSubject.send(
-            .init(
+                textureSize: textureLayersState.textureSize,
                 textureLayers: textureLayers
             )
         )
@@ -657,7 +650,7 @@ extension CanvasViewModel {
         )
 
         // Update canvasRenderer using textureLayers
-        canvasRenderer.initializeTextures(
+        try canvasRenderer.initializeTextures(
             textureSize: textureSize
         )
         try await canvasRenderer.updateTextures(

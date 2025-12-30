@@ -21,7 +21,9 @@ struct TextureLayersTests {
 
     private let renderer = MockMTLRenderer()
 
-    private let textureLayersDocumentsRepository = MockTextureLayersDocumentsRepository()
+    private let textureLayersDocumentsRepository = MockTextureLayersDocumentsRepository(
+        renderer: MockMTLRenderer()
+    )
 
     // Reusable texture for all tests
     static let dummyTexture: MTLTexture = {
