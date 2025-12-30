@@ -59,10 +59,6 @@ public final class CanvasViewModel {
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
 
-    /// A class that manages drawing lines onto textures
-    private var drawingRenderer: DrawingRenderer?
-    private var drawingRenderers: [DrawingRenderer] = []
-
     /// Undoable texture layers
     private let textureLayers: UndoTextureLayers
 
@@ -70,6 +66,16 @@ public final class CanvasViewModel {
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
     private let pencilStroke = PencilStroke()
+
+    /// Manages input from pen and finger
+    private let inputDevice = InputDeviceState()
+
+    /// Manages on-screen gestures such as drag and pinch
+    private let touchGesture = TouchGestureState()
+
+    /// A class that manages drawing lines onto textures
+    private var drawingRenderer: DrawingRenderer?
+    private var drawingRenderers: [DrawingRenderer] = []
 
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
@@ -81,12 +87,6 @@ public final class CanvasViewModel {
     private let drawingDebouncer: DrawingDebouncer
 
     private let transforming = Transforming()
-
-    /// Manages input from pen and finger
-    private let inputDevice = InputDeviceState()
-
-    /// Manages on-screen gestures such as drag and pinch
-    private let touchGesture = TouchGestureState()
 
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
     private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
@@ -665,6 +665,20 @@ extension CanvasViewModel {
 
         let textureSize = textureLayersState.textureSize
 
+        // Update textureLayers using textureLayersState
+        textureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayersState
+        )
+
+        // Update canvasRenderer using textureLayers
+        canvasRenderer.initializeTextures(
+            textureSize: textureSize
+        )
+        try await canvasRenderer.updateTextures(
+            textureLayers: textureLayers,
+            repository: textureLayersDocumentsRepository
+        )
+
         // Initialize the textures in DrawingRenderer
         for i in 0 ..< drawingRenderers.count {
             drawingRenderers[i].initializeTextures(
@@ -672,28 +686,12 @@ extension CanvasViewModel {
             )
         }
 
-        // Update the textures in CanvasRenderer
-        canvasRenderer.initializeTextures(
-            textureSize: textureSize
-        )
-
         // Initialize the textures used for Undo
         if textureLayers.isUndoEnabled {
             textureLayers.initializeUndoTextures(
                 textureSize: textureSize
             )
         }
-
-        // Update textureLayers using textureLayersState
-        textureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
-
-        // Update canvasRenderer using textureLayers
-        try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers,
-            repository: textureLayersDocumentsRepository
-        )
     }
 }
 
