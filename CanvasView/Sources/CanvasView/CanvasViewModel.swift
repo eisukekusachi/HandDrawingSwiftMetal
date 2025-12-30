@@ -231,7 +231,7 @@ extension CanvasViewModel {
         do {
             try await initializeDefaultCanvas(
                 projectName: configuration.projectConfiguration.projectName,
-                textureLayersState: newTextureLayersState()
+                textureLayersState: TextureLayersState(textureSize: currentTextureSize)
             )
         } catch {
             fatalError("Failed to initialize the canvas")
@@ -469,7 +469,7 @@ public extension CanvasViewModel {
     ) async throws {
         try await initializeDefaultCanvas(
             projectName: newProjectName,
-            textureLayersState: newTextureLayersState()
+            textureLayersState: TextureLayersState(textureSize: currentTextureSize)
         )
         transforming.setMatrix(.identity)
     }
@@ -548,9 +548,9 @@ public extension CanvasViewModel {
 
         // Save the texture layers as JSON
         try TextureLayersArchiveModel(
-            textureSize: textureLayers.textureSize,
+            layers: textureLayers.layers.map { .init(item: $0) },
             layerIndex: textureLayers.selectedIndex ?? 0,
-            layers: textureLayers.layers.map { .init(item: $0) }
+            textureSize: textureLayers.textureSize
         ).write(
             in: workingDirectoryURL
         )
@@ -640,21 +640,6 @@ extension CanvasViewModel {
             .init(
                 textureLayers: textureLayers
             )
-        )
-    }
-
-    private func newTextureLayersState() -> TextureLayersState {
-        .init(
-            layers: [
-                .init(
-                    id: LayerId(),
-                    title: TimeStampFormatter.currentDate,
-                    alpha: 255,
-                    isVisible: true
-                )
-            ],
-            layerIndex: 0,
-            textureSize: currentTextureSize
         )
     }
 

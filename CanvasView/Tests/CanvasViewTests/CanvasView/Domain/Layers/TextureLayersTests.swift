@@ -50,11 +50,12 @@ struct TextureLayersTests {
         let layer0: TextureLayerModel = .init(id: LayerId(), title: "New0", alpha: 255, isVisible: true)
 
         subject.updateSkippingThumbnail(
-            textureLayersState: .init(layers: [], layerIndex: 0, textureSize: .init(width: 16, height: 16))
+            textureLayersState: .init(
+                textureSize: .init(width: 16, height: 16)
+            )
         )
-
-        #expect(subject.layers.count == 0)
-        #expect(subject.selectedIndex == nil)
+        #expect(subject.layers.count == 1)
+        #expect(subject.selectedIndex == 0)
 
         try await subject.addLayer(
             layer: layer0,
@@ -63,7 +64,7 @@ struct TextureLayersTests {
         )
 
         // The layer count increases by one, and the newly added layer is selected
-        #expect(subject.layers.count == 1)
+        #expect(subject.layers.count == 2)
         #expect(subject.selectedLayer?.id == layer0.id)
         #expect(subject.selectedIndex == 0)
 
@@ -74,7 +75,7 @@ struct TextureLayersTests {
         )
 
         // The layer count increases by one, and the newly added layer is selected
-        #expect(subject.layers.count == 2)
+        #expect(subject.layers.count == 3)
         #expect(subject.selectedLayer?.id == layer1.id)
         #expect(subject.selectedIndex == 1)
     }

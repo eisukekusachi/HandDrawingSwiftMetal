@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// A struct that represents the state of TextureLayers. Its layers property is never empty
 public struct TextureLayersState: Sendable {
 
     public let layers: [TextureLayerModel]
@@ -16,12 +17,23 @@ public struct TextureLayersState: Sendable {
     public let textureSize: CGSize
 
     public init(
-        layers: [TextureLayerModel],
-        layerIndex: Int,
+        layers: [TextureLayerModel] = [],
+        layerIndex: Int = 0,
         textureSize: CGSize
     ) {
-        self.layers = layers
-        self.layerIndex = layerIndex
+        if layers.isEmpty {
+            self.layers = [
+                .init(
+                    id: LayerId(),
+                    title: TimeStampFormatter.currentDate,
+                    alpha: 255,
+                    isVisible: true
+                )
+            ]
+        } else {
+            self.layers = layers
+        }
+        self.layerIndex = min(layerIndex, self.layers.count - 1)
         self.textureSize = textureSize
     }
 }

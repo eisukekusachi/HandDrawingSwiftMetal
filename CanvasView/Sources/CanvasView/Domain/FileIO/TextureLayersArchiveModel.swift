@@ -9,18 +9,18 @@ import Foundation
 
 public struct TextureLayersArchiveModel: Codable, Equatable {
 
-    let textureSize: CGSize
-    let layerIndex: Int
     let layers: [TextureLayerModel]
+    let layerIndex: Int
+    let textureSize: CGSize
 
     public init(
-        textureSize: CGSize,
+        layers: [TextureLayerModel],
         layerIndex: Int,
-        layers: [TextureLayerModel]
+        textureSize: CGSize
     ) {
-        self.textureSize = textureSize
-        self.layerIndex = layerIndex
         self.layers = layers
+        self.layerIndex = layerIndex
+        self.textureSize = textureSize
     }
 }
 
