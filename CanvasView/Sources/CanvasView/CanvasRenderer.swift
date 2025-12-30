@@ -171,21 +171,21 @@ extension CanvasRenderer {
         )
 
         // Update the class’s textures with the retrieved textures
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: bottomLayers,
             on: unselectedBottomTexture,
             with: newCommandBuffer
         )
 
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: [opaqueLayer],
             on: selectedLayerTexture,
             with: newCommandBuffer
         )
 
-        try await drawTextures(
+        drawTextures(
             repositoryTextures: textures,
             using: topLayers,
             on: unselectedTopTexture,
@@ -329,7 +329,7 @@ extension CanvasRenderer {
         using layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
-    ) async throws {
+    ) {
         let textureDictionary = IdentifiedTexture.dictionary(
             from: Set(repositoryTextures)
         )
