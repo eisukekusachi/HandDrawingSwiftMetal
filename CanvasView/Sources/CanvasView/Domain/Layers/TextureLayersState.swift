@@ -27,7 +27,9 @@ public struct TextureLayersState: Sendable {
 }
 
 public extension TextureLayersState {
-    init(entity: TextureLayerArrayStorageEntity) throws {
+    init(
+        entity: TextureLayerArrayStorageEntity
+    ) throws {
         self.layers = entity.textureLayerArray?
             .compactMap { $0 as? TextureLayerStorageEntity }
             .sorted { $0.orderIndex < $1.orderIndex }
@@ -42,7 +44,7 @@ public extension TextureLayersState {
         self.layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
         self.textureSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
 
-        // Return nil if the layers are nil or the texture size is zero
+        // Return an error if the layers are nil or the texture size is zero
         if layers.isEmpty || textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -54,11 +56,21 @@ public extension TextureLayersState {
     }
 
     init(
-        _ model: TextureLayersArchiveModel
-    ) {
+        model: TextureLayersArchiveModel
+    ) throws {
         self.layers = model.layers
         self.layerIndex = model.layerIndex
         self.textureSize = model.textureSize
+
+        // Return an error if the layers are nil or the texture size is zero
+        if layers.isEmpty || textureSize == .zero {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(localized: "Unable to find texture layer files", bundle: .main)
+            )
+            Logger.error(error)
+            throw error
+        }
     }
 
     var selectedLayerId: LayerId? {

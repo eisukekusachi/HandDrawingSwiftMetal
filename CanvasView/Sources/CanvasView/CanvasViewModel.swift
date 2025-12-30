@@ -502,6 +502,7 @@ public extension CanvasViewModel {
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
+        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
 
         // Load project metadata, falling back if it is missing
         let projectMetaData: ProjectMetaDataArchiveModel = try .init(
@@ -510,7 +511,7 @@ public extension CanvasViewModel {
 
         try await initializeCanvasFromDocumentsFolder(
             workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: .init(textureLayersArchiveModel),
+            textureLayersState: textureLayerState,
             projectMetaData: .init(projectMetaData)
         )
     }
