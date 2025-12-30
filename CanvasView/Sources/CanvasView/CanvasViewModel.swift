@@ -309,6 +309,7 @@ extension CanvasViewModel {
             }
             .store(in: &cancellables)
 
+        // Called after the initialization of CanvasViewModel is complete
         didInitializeSubject
             .sink { [weak self] result in
                 // Update the thumbnails
