@@ -14,7 +14,7 @@ struct PencilStrokeTests {
     private typealias Subject = PencilStroke
 
     @Test
-    func `Verify that the values are retrieved in sequence`() {
+    func `Retrieves values in sequence`() {
         let subject = Subject()
 
         let firstActualTouches: [TouchPoint] = [
@@ -37,7 +37,7 @@ struct PencilStrokeTests {
 
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == firstActualTouches)
 
-        subject.updateDrawingLineEndPoint()
+        subject.setDrawingLineEndPoint()
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).isEmpty)
 
         subject.appendActualTouches(
@@ -46,7 +46,7 @@ struct PencilStrokeTests {
 
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == secondActualTouches)
 
-        subject.updateDrawingLineEndPoint()
+        subject.setDrawingLineEndPoint()
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).isEmpty)
 
         subject.setLatestEstimatedTouchPoint(thirdEstimatedTouch)
@@ -56,7 +56,8 @@ struct PencilStrokeTests {
             actualTouches: thirdActualTouches
         )
 
-        // Since an actual touch never arrives with a phase of .ended, a estimated value is used for the final touch
+        // It appears that an actual touch does not include an `.ended` phase,
+        // so an estimated value with the `.ended` phase is added at the end.
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) ==  thirdActualTouches + [fourthEstimatedTouch])
     }
 }

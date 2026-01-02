@@ -495,7 +495,7 @@ extension CanvasViewModel {
             screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )
-        pencilStroke.updateDrawingLineEndPoint()
+        pencilStroke.setDrawingLineEndPoint()
 
         drawingDisplayLink.run(isCurrentlyDrawing)
     }
