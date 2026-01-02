@@ -39,7 +39,6 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
     private var commandQueue: MTLCommandQueue!
 
-
     init(frame: CGRect = .zero, renderer: MTLRendering) {
 
         self.renderer = renderer
