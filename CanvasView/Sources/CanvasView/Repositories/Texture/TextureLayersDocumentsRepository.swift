@@ -209,7 +209,7 @@ extension TextureLayersDocumentsRepository {
         guard
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
-                textureSize: self.textureSize,
+                size: textureSize,
                 with: renderer.device
             )
         else {
