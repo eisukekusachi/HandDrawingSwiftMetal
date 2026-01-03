@@ -278,7 +278,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     private func bindData() {
         // The canvas is updated every frame during drawing
-        drawingDisplayLink.updatePublisher
+        drawingDisplayLink.update
             .sink { [weak self] in
                 self?.drawPointsOnDisplayLink()
             }
