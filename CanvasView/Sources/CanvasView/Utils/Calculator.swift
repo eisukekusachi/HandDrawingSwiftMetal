@@ -1,5 +1,5 @@
 //
-//  Calculate.swift
+//  Calculator.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2022/02/05.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Calculate {
+enum Calculator {
 
     static func getLength(_ leftHandSide: CGPoint, to rightHandSide: CGPoint) -> CGFloat {
         sqrt(pow(rightHandSide.x - leftHandSide.x, 2) + pow(rightHandSide.y - leftHandSide.y, 2))
@@ -28,7 +28,7 @@ enum Calculate {
 
     static func getRadian(_ leftHandSide: CGVector, _ rightHandSide: CGVector) -> CGFloat {
         let dotProduct = leftHandSide.dx * rightHandSide.dx + leftHandSide.dy * rightHandSide.dy
-        let divisor = Calculate.getLength(leftHandSide) * Calculate.getLength(rightHandSide)
+        let divisor = Calculator.getLength(leftHandSide) * Calculator.getLength(rightHandSide)
 
         return divisor != 0 ? acos(dotProduct / divisor) : 0.0
     }
