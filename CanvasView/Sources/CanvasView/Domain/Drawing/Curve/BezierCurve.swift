@@ -32,7 +32,9 @@ enum BezierCurve {
         )
 
         let duration = duration ?? Int(round(
-            Calculate.getTotalLength(points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB])
+            Calculator.getTotalLength(
+                points: [pointA, handlePoints.startHandle, handlePoints.endHandle, pointB]
+            )
         ))
 
         return Interpolator.createCubicCurvePoints(
@@ -75,7 +77,9 @@ enum BezierCurve {
         )
 
         let duration = duration ?? Int(round(
-            Calculate.getTotalLength(points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint])
+            Calculator.getTotalLength(
+                points: [startPoint, handlePoints.startHandle, handlePoints.endHandle, endPoint]
+            )
         ))
 
         return Interpolator.createCubicCurvePoints(
@@ -109,7 +113,9 @@ enum BezierCurve {
         )
 
         let duration = duration ?? Int(round(
-            Calculate.getTotalLength(points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC])
+            Calculator.getTotalLength(
+                points: [pointB, handlePoints.startHandle, handlePoints.endHandle, pointC]
+            )
         ))
 
         return Interpolator.createCubicCurvePoints(
@@ -133,7 +139,7 @@ private extension BezierCurve {
         let vectorAB = CGVector(origin: pointA, to: pointB)
         let vectorBC = CGVector(origin: pointB, to: pointC)
 
-        return max(0.0, min(Calculate.getRadian(vectorAB, Calculate.getReversedVector(vectorBC)) / .pi, 1.0))
+        return max(0.0, min(Calculator.getRadian(vectorAB, Calculator.getReversedVector(vectorBC)) / .pi, 1.0))
     }
 
     /// A method that returns two handle positions for the Bézier curve used in the first curve
@@ -150,10 +156,10 @@ private extension BezierCurve {
         let vectorAB = CGVector(origin: pointA, to: pointB)
         let vectorCA = CGVector(origin: pointC, to: pointA)
 
-        let handleLength = Calculate.getLength(vectorAB) * handleLengthRatio
+        let handleLength = Calculator.getLength(vectorAB) * handleLengthRatio
 
-        let handleA = Calculate.getResizedVector(vectorAB, length: handleLength)
-        let handleB = Calculate.getResizedVector(vectorCA, length: handleLength)
+        let handleA = Calculator.getResizedVector(vectorAB, length: handleLength)
+        let handleB = Calculator.getResizedVector(vectorCA, length: handleLength)
 
         return .init(
             startHandle: .init(
@@ -181,10 +187,10 @@ private extension BezierCurve {
         let vectorAC = CGVector(origin: pointA, to: pointC)
         let vectorCB = CGVector(origin: pointC, to: pointB)
 
-        let handleLength = Calculate.getLength(vectorCB) * handleLengthRatio
+        let handleLength = Calculator.getLength(vectorCB) * handleLengthRatio
 
-        let handleA = Calculate.getResizedVector(vectorAC, length: handleLength)
-        let handleB = Calculate.getResizedVector(vectorCB, length: handleLength)
+        let handleA = Calculator.getResizedVector(vectorAC, length: handleLength)
+        let handleB = Calculator.getResizedVector(vectorCB, length: handleLength)
 
         return .init(
             startHandle: .init(
@@ -216,11 +222,11 @@ private extension BezierCurve {
         let vectorDB = CGVector(origin: nextPoint, to: startPoint)
         let vectorBC = CGVector(origin: startPoint, to: endPoint)
 
-        let handleLengthA = Calculate.getLength(vectorBC) * handleLengthRatioA
-        let handleLengthB = Calculate.getLength(vectorBC) * handleLengthRatioB
+        let handleLengthA = Calculator.getLength(vectorBC) * handleLengthRatioA
+        let handleLengthB = Calculator.getLength(vectorBC) * handleLengthRatioB
 
-        let handleA = Calculate.getResizedVector(vectorAC, length: handleLengthA)
-        let handleB = Calculate.getResizedVector(vectorDB, length: handleLengthB)
+        let handleA = Calculator.getResizedVector(vectorAC, length: handleLengthA)
+        let handleB = Calculator.getResizedVector(vectorDB, length: handleLengthB)
 
         return .init(
             startHandle: .init(
