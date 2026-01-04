@@ -13,16 +13,16 @@ final class PencilStroke {
     /// An array that stores real values.
     /// https://developer.apple.com/documentation/uikit/apple_pencil_interactions/handling_input_from_apple_pencil/
     /// The Apple Pencil provides both estimated and actual values, but drawing is primarily based on the actual values.
-    private var actualTouchPointArray: [TouchPoint] = []
+    private(set) var actualTouchPointArray: [TouchPoint] = []
 
     /// End point of the drawing line
     private(set) var drawingLineEndPoint: TouchPoint?
 
     /// A variable that stores the latest estimated value, used for determining touch end
-    private var latestEstimatedTouchPoint: TouchPoint?
+    private(set) var latestEstimatedTouchPoint: TouchPoint?
 
     /// A variable that stores the latest estimationUpdateIndex, used for determining touch end
-    private var latestEstimationUpdateIndex: NSNumber?
+    private(set) var latestEstimationUpdateIndex: NSNumber?
 
     init(
         actualTouchPointArray: [TouchPoint] = [],
@@ -31,6 +31,7 @@ final class PencilStroke {
     ) {
         self.actualTouchPointArray = actualTouchPointArray.sorted { $0.timestamp < $1.timestamp }
         self.latestEstimatedTouchPoint = latestEstimatedTouchPoint
+        self.latestEstimationUpdateIndex = latestEstimatedTouchPoint?.estimationUpdateIndex
         self.drawingLineEndPoint = drawingLineEndPoint
     }
 }
@@ -38,7 +39,7 @@ final class PencilStroke {
 extension PencilStroke {
     /// Gets points from the specified start element to the end
     func drawingPoints(after touchPoint: TouchPoint?) -> [TouchPoint] {
-        actualTouchPointArray.elements(after: drawingLineEndPoint) ?? actualTouchPointArray
+        actualTouchPointArray.elements(after: touchPoint) ?? actualTouchPointArray
     }
 
     /// Sets the latest estimated value
