@@ -12,17 +12,17 @@ import Combine
 public final class DrawingDisplayLink {
 
     // Requesting to update the canvas emits `Void`
-    public var updatePublisher: AnyPublisher<Void, Never> {
+    public var update: AnyPublisher<Void, Never> {
         updateSubject.eraseToAnyPublisher()
     }
     private let updateSubject = PassthroughSubject<Void, Never>()
 
     public var displayLink: CADisplayLink?
 
-    public init() {
+    public init(isPaused: Bool = true) {
         displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
         displayLink?.add(to: .current, forMode: .common)
-        displayLink?.isPaused = true
+        displayLink?.isPaused = isPaused
     }
 
     public func run(_ running: Bool) {
@@ -33,7 +33,7 @@ public final class DrawingDisplayLink {
 
             // Since the touchEnded process remains,
             // `updateCanvasWhileDrawing()` is executed once to handle the final update.
-            updateCanvasWhileDrawing()
+            updateSubject.send(())
         }
     }
 

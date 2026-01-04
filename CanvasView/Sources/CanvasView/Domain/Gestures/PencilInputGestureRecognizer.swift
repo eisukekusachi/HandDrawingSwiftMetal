@@ -45,5 +45,4 @@ final class PencilInputGestureRecognizer: UIGestureRecognizer {
         guard let view else { return }
         gestureDelegate?.sendPencilActualTouches(touches, on: view)
     }
-
 }

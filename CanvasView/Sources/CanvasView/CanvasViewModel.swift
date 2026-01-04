@@ -278,7 +278,7 @@ extension CanvasViewModel {
 extension CanvasViewModel {
     private func bindData() {
         // The canvas is updated every frame during drawing
-        drawingDisplayLink.updatePublisher
+        drawingDisplayLink.update
             .sink { [weak self] in
                 self?.drawPointsOnDisplayLink()
             }
@@ -495,7 +495,7 @@ extension CanvasViewModel {
             screenTouchPoints: pointArray,
             matrix: transforming.matrix.inverted(flipY: true)
         )
-        pencilStroke.updateDrawingLineEndPoint()
+        pencilStroke.setDrawingLineEndPoint()
 
         drawingDisplayLink.run(isCurrentlyDrawing)
     }

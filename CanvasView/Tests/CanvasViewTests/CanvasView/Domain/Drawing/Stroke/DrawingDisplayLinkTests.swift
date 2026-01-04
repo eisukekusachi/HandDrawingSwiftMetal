@@ -1,72 +1,78 @@
 //
 //  DrawingDisplayLinkTests.swift
-//  HandDrawingSwiftMetalTests
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/02/05.
+//  Created by Eisuke Kusachi on 2026/01/03.
 //
 
-import CanvasView
-import XCTest
 import Combine
+import UIKit
+import Testing
 
 @testable import CanvasView
 
-final class DrawingDisplayLinkTests: XCTestCase {
+@MainActor
+struct DrawingDisplayLinkTests {
 
-    private var cancellables = Set<AnyCancellable>()
+    typealias Subject = DrawingDisplayLink
 
-    private typealias Subject = DrawingDisplayLink
+    @Test
+    func `When run(true) is called while the display link is paused, it starts running`() async throws {
+        let subject = Subject(isPaused: true)
 
-    /// Verifies that the display link starts and `updatePublisher` begins emitting values.
-    func test_updatePublisherEmits_whenDisplayLinkStarts() throws {
-        let subject = Subject()
-
-        let expectation = XCTestExpectation(description: "updatePublisher emits at least once")
-
-        subject.updatePublisher
-            .sink { expectation.fulfill() }
-            .store(in: &cancellables)
+        // When a value flows through the publisher, the canvas is updated
+        var emitCount = 0
+        let cancellable = subject.update.sink { _ in emitCount += 1 }
+        defer { cancellable.cancel() }
 
         subject.run(true)
 
-        XCTAssertEqual(subject.displayLink?.isPaused, false)
+        // The display link runs and the screen continues to update
+        #expect(await TestHelpers.waitUntil { emitCount >= 1 })
+        let countAfterFirst = emitCount
+        #expect(await TestHelpers.waitUntil { emitCount >= countAfterFirst + 1 })
 
-        wait(for: [expectation], timeout: 1.0)
+        // The display link continues running
+        #expect(subject.displayLink?.isPaused == false)
     }
 
-    /// Verifies that the display link stops and `updatePublisher` emits `Void` once.
-    func test_updatePublisherEmitsOnce_whenDisplayLinkStops() throws {
-        let subject = Subject()
+    @Test
+    func `When run(false) is called while the display link is running, it stops after updating once`() async throws {
+        let subject = Subject(isPaused: false)
 
-        let expectation = XCTestExpectation(description: "updatePublisher emits once")
-        expectation.expectedFulfillmentCount = 1
-
-        subject.updatePublisher
-            .sink { expectation.fulfill() }
-            .store(in: &cancellables)
+        // When a value flows through the publisher, the canvas is updated
+        var emitCount = 0
+        let cancellable = subject.update.sink { _ in emitCount += 1 }
+        defer { cancellable.cancel() }
 
         subject.run(false)
 
-        XCTAssertEqual(subject.displayLink?.isPaused, true)
+        // After the display link stops, the screen is updated once and is not updated afterward
+        #expect(await TestHelpers.waitUntil { emitCount >= 1 })
+        let countAfterFirst = emitCount
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        #expect(emitCount == countAfterFirst)
 
-        wait(for: [expectation], timeout: 1.0)
+        // The display link stops
+        #expect(subject.displayLink?.isPaused == true)
     }
 
-    /// Verifies that when `stop()` is called, the display link stops and `updateCanvasWhileDrawing()` is not executed.
-    func test_updateCanvasNotExecuted_whenStopped() {
-        let subject = DrawingDisplayLink()
+    @Test
+    func `When stop() is called while the display link is running, it stops without emitting updates`() async throws {
+        let subject = Subject(isPaused: false)
 
-        let expectation = XCTestExpectation(description: "`updatePublisher` should not emit")
-        expectation.isInverted = true
-
-        subject.updatePublisher
-            .sink { expectation.fulfill() }
-            .store(in: &cancellables)
+        // When a value flows through the publisher, the canvas is updated
+        var emitCount = 0
+        let cancellable = subject.update.sink { _ in emitCount += 1 }
+        defer { cancellable.cancel() }
 
         subject.stop()
 
-        XCTAssertEqual(subject.displayLink?.isPaused, true)
+        // No value flows through the publisher
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        #expect(emitCount == 0)
 
-        wait(for: [expectation], timeout: 1.0)
+        // The display link stops
+        #expect(subject.displayLink?.isPaused == true)
     }
 }

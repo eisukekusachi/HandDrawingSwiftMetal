@@ -86,7 +86,7 @@ public enum MTLBuffers {
     }
 
     static func makeCanvasTextureBuffers(
-        matrix: CGAffineTransform?,
+        matrix: CGAffineTransform? = nil,
         frameSize: CGSize,
         sourceSize: CGSize,
         destinationSize: CGSize,
