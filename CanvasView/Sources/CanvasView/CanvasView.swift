@@ -114,7 +114,6 @@ import UIKit
                     undoTextureRepository: .init(
                         renderer: renderer
                     ),
-                    renderer: renderer,
                     displayView: displayView
                 )
 ,

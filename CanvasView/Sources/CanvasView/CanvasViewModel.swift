@@ -95,6 +95,8 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies?
 
+    private let renderer: MTLRendering
+
     private var cancellables = Set<AnyCancellable>()
 
     public static let thumbnailName: String = "thumbnail.png"
@@ -123,6 +125,7 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
+        self.renderer = renderer
     }
 
     func setup(
@@ -144,8 +147,7 @@ public final class CanvasViewModel {
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
         self.setupDrawingRenderers(
-            drawingRenderers: drawingRenderers,
-            renderer: dependencies.renderer
+            drawingRenderers: drawingRenderers
         )
         self.setupTouchGesture(
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
@@ -153,7 +155,7 @@ public final class CanvasViewModel {
         )
         self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
 
-        try await initializeCanvas(
+        try await setupCanvas(
             textureLayersState: textureLayersStateFromCoreDataEntity,
             configuration: configuration
         )
@@ -161,7 +163,7 @@ public final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    func initializeCanvas(
+    func setupCanvas(
         textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
     ) async throws {
@@ -173,7 +175,7 @@ extension CanvasViewModel {
                     projectMetaDataStorage.update(entity)
                 }
 
-                try await initializeCanvasFromCoreData(
+                try await setupCanvasFromCoreData(
                     textureLayersState: textureLayersState
                 )
                 return
@@ -182,9 +184,9 @@ extension CanvasViewModel {
             }
         }
 
-        // Initialize the canvas with the default settings
+        // Setup the canvas with the default settings
         do {
-            try await initializeDefaultCanvas(
+            try await setupDefaultCanvas(
                 projectName: configuration.projectConfiguration.projectName,
                 textureLayersState: .init(textureSize: configuration.textureSize)
             )
@@ -328,8 +330,7 @@ extension CanvasViewModel {
     }
 
     private func setupDrawingRenderers(
-        drawingRenderers: [DrawingRenderer],
-        renderer: MTLRendering
+        drawingRenderers: [DrawingRenderer]
     ) {
         self.drawingRenderers = drawingRenderers
 
@@ -367,7 +368,7 @@ extension CanvasViewModel {
         }
     }
 
-    private func initializeDefaultCanvas(
+    private func setupDefaultCanvas(
         projectName: String,
         textureLayersState: TextureLayersState
     ) async throws {
@@ -393,7 +394,7 @@ extension CanvasViewModel {
         )
     }
 
-    private func initializeCanvasFromCoreData(
+    private func setupCanvasFromCoreData(
         textureLayersState: TextureLayersState
     ) async throws {
         guard
@@ -667,7 +668,7 @@ public extension CanvasViewModel {
         newProjectName: String,
         newTextureSize: CGSize
     ) async throws {
-        try await initializeDefaultCanvas(
+        try await setupDefaultCanvas(
             projectName: newProjectName,
             textureLayersState: TextureLayersState(textureSize: newTextureSize)
         )
