@@ -123,7 +123,6 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
-        self.bindData()
     }
 
     func setup(
@@ -131,6 +130,8 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
+        self.bindData()
+
         let environmentConfiguration = configuration.environmentConfiguration
         self.dependencies = dependencies
 
@@ -160,55 +161,6 @@ public final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    private func setupDrawingRenderers(
-        drawingRenderers: [DrawingRenderer],
-        renderer: MTLRendering
-    ) {
-        self.drawingRenderers = drawingRenderers
-
-        if self.drawingRenderers.isEmpty {
-            self.drawingRenderers = [BrushDrawingRenderer()]
-        }
-
-        self.drawingRenderers.forEach {
-            $0.setup(
-                renderer: renderer
-            )
-        }
-        self.drawingRenderer = self.drawingRenderers[0]
-    }
-
-    private func setupTouchGesture(
-        drawingGestureRecognitionSecond: TimeInterval,
-        transformingGestureRecognitionSecond: TimeInterval
-    ) {
-        // Set the gesture recognition durations in seconds
-        self.touchGesture.setDrawingGestureRecognitionSecond(
-            drawingGestureRecognitionSecond
-        )
-        self.touchGesture.setTransformingGestureRecognitionSecond(
-            transformingGestureRecognitionSecond
-        )
-    }
-
-    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
-        // If `undoTextureRepository` is used, undo functionality is available
-        if let repository {
-            self.textureLayers.setUndoTextureRepository(
-                repository: repository
-            )
-        }
-    }
-
-    /// Fetches `textureLayers` data from Core Data.
-    /// Returns nil if an error occurs.
-    var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        guard
-            let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        else { return nil }
-        return try? .init(entity: entity)
-    }
-
     func initializeCanvas(
         textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
@@ -276,11 +228,20 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+    /// Fetches `textureLayers` data from Core Data.
+    /// Returns nil if an error occurs.
+    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
+        guard
+            let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
+        else { return nil }
+        return try? .init(entity: entity)
+    }
+
     private func bindData() {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.update
             .sink { [weak self] in
-                self?.drawPointsOnDisplayLink()
+                self?.onDisplayLinkForDrawing()
             }
             .store(in: &cancellables)
 
@@ -365,14 +326,137 @@ extension CanvasViewModel {
             }
             .store(in: &cancellables)
     }
+
+    private func setupDrawingRenderers(
+        drawingRenderers: [DrawingRenderer],
+        renderer: MTLRendering
+    ) {
+        self.drawingRenderers = drawingRenderers
+
+        if self.drawingRenderers.isEmpty {
+            self.drawingRenderers = [BrushDrawingRenderer()]
+        }
+
+        self.drawingRenderers.forEach {
+            $0.setup(
+                renderer: renderer
+            )
+        }
+        self.drawingRenderer = self.drawingRenderers[0]
+    }
+
+    private func setupTouchGesture(
+        drawingGestureRecognitionSecond: TimeInterval,
+        transformingGestureRecognitionSecond: TimeInterval
+    ) {
+        // Set the gesture recognition durations in seconds
+        self.touchGesture.setDrawingGestureRecognitionSecond(
+            drawingGestureRecognitionSecond
+        )
+        self.touchGesture.setTransformingGestureRecognitionSecond(
+            transformingGestureRecognitionSecond
+        )
+    }
+
+    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
+        // If `undoTextureRepository` is used, undo functionality is available
+        if let repository {
+            self.textureLayers.setUndoTextureRepository(
+                repository: repository
+            )
+        }
+    }
+
+    private func initializeDefaultCanvas(
+        projectName: String,
+        textureLayersState: TextureLayersState
+    ) async throws {
+        guard
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
+        else { return }
+
+        // Initialize the repository using TextureLayersState
+        try await textureLayersDocumentsRepository.initializeStorage(
+            newTextureLayersState: textureLayersState
+        )
+
+        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+
+        // Update all data using the new project name
+        projectMetaDataStorage.updateAll(newProjectName: projectName)
+
+        didInitializeSubject.send(
+            .init(
+                textureSize: textureLayersState.textureSize,
+                textureLayers: textureLayers
+            )
+        )
+    }
+
+    private func initializeCanvasFromCoreData(
+        textureLayersState: TextureLayersState
+    ) async throws {
+        guard
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
+        else { return }
+
+        // Restore the repository using TextureLayersState
+        try textureLayersDocumentsRepository.restoreStorageFromCoreData(
+            textureLayersState: textureLayersState
+        )
+
+        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+
+        // Update only the updatedAt field, since the metadata may be loaded from Core Data
+        projectMetaDataStorage.updateUpdatedAt()
+
+        didInitializeSubject.send(
+            .init(
+                textureSize: textureLayersState.textureSize,
+                textureLayers: textureLayers
+            )
+        )
+    }
+
+    /// Updates `CanvasRenderer` with updated `textureLayers`
+    private func updateCanvasRenderer(textureLayersState: TextureLayersState) async throws {
+        guard
+            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
+        else { return }
+
+        let textureSize = textureLayersState.textureSize
+
+        // Update textureLayers using textureLayersState
+        textureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayersState
+        )
+
+        // Update canvasRenderer using textureLayers
+        try canvasRenderer.initializeTextures(
+            textureSize: textureSize
+        )
+        try await canvasRenderer.updateTextures(
+            textureLayers: textureLayers,
+            repository: textureLayersDocumentsRepository
+        )
+
+        // Initialize the textures in DrawingRenderer
+        for i in 0 ..< drawingRenderers.count {
+            drawingRenderers[i].initializeTextures(
+                textureSize: textureSize
+            )
+        }
+
+        // Initialize the textures used for Undo
+        if textureLayers.isUndoEnabled {
+            textureLayers.initializeUndoTextures(
+                textureSize: textureSize
+            )
+        }
+    }
 }
 
 extension CanvasViewModel {
-
-    /// Called when the display texture size changes, such as when the device orientation changes.
-    func didChangeDisplayTextureSize(_ displayTextureSize: CGSize) {
-        commitAndRefreshDisplay()
-    }
 
     func onFingerGestureDetected(
         touches: Set<UITouch>,
@@ -532,6 +616,50 @@ extension CanvasViewModel {
 
         drawingDisplayLink.run(isCurrentlyDrawing)
     }
+
+    private func onDisplayLinkForDrawing() {
+        guard
+            let drawingRenderer,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
+            let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
+            let commandBuffer = canvasRenderer.commandBuffer
+        else { return }
+
+        drawingRenderer.drawStroke(
+            selectedLayerTexture: selectedLayerTexture,
+            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+
+        // The finalization process is performed when drawing is completed.
+        if isFinishedDrawing {
+            canvasRenderer.renderToSelectedLayer(
+                texture: canvasRenderer.realtimeDrawingTexture,
+                with: commandBuffer
+            )
+
+            commandBuffer.addCompletedHandler { @Sendable _ in
+                Task { @MainActor [weak self] in
+                    // Reset parameters on drawing completion
+                    self?.prepareNextStroke()
+
+                    self?.completeDrawing()
+                }
+            }
+        } else if isCancelledDrawing {
+            // Prepare for the next drawing when the drawing is cancelled.
+            prepareNextStroke()
+        }
+
+        commitAndRefreshDisplay(
+            displayRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
+        )
+    }
+
+    /// Called when the display texture size changes, such as when the device orientation changes.
+    func onUpdateDisplayTexture() {
+        commitAndRefreshDisplay()
+    }
 }
 
 public extension CanvasViewModel {
@@ -618,96 +746,6 @@ public extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    private func initializeDefaultCanvas(
-        projectName: String,
-        textureLayersState: TextureLayersState
-    ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
-        // Initialize the repository using TextureLayersState
-        try await textureLayersDocumentsRepository.initializeStorage(
-            newTextureLayersState: textureLayersState
-        )
-
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
-
-        // Update all data using the new project name
-        projectMetaDataStorage.updateAll(newProjectName: projectName)
-
-        didInitializeSubject.send(
-            .init(
-                textureSize: textureLayersState.textureSize,
-                textureLayers: textureLayers
-            )
-        )
-    }
-
-    private func initializeCanvasFromCoreData(
-        textureLayersState: TextureLayersState
-    ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
-        // Restore the repository using TextureLayersState
-        try textureLayersDocumentsRepository.restoreStorageFromCoreData(
-            textureLayersState: textureLayersState
-        )
-
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
-
-        // Update only the updatedAt field, since the metadata may be loaded from Core Data
-        projectMetaDataStorage.updateUpdatedAt()
-
-        didInitializeSubject.send(
-            .init(
-                textureSize: textureLayersState.textureSize,
-                textureLayers: textureLayers
-            )
-        )
-    }
-
-    /// Updates `CanvasRenderer` with updated `textureLayers`
-    private func updateCanvasRenderer(textureLayersState: TextureLayersState) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
-        let textureSize = textureLayersState.textureSize
-
-        // Update textureLayers using textureLayersState
-        textureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
-
-        // Update canvasRenderer using textureLayers
-        try canvasRenderer.initializeTextures(
-            textureSize: textureSize
-        )
-        try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers,
-            repository: textureLayersDocumentsRepository
-        )
-
-        // Initialize the textures in DrawingRenderer
-        for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initializeTextures(
-                textureSize: textureSize
-            )
-        }
-
-        // Initialize the textures used for Undo
-        if textureLayers.isUndoEnabled {
-            textureLayers.initializeUndoTextures(
-                textureSize: textureSize
-            )
-        }
-    }
-}
-
-extension CanvasViewModel {
     private var isCurrentlyDrawing: Bool {
         switch drawingTouchPhase {
         case .began, .moved: return true
@@ -732,45 +770,6 @@ extension CanvasViewModel {
             return .moved
         }
         return nil
-    }
-
-    private func drawPointsOnDisplayLink() {
-        guard
-            let drawingRenderer,
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
-            let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
-            let commandBuffer = canvasRenderer.commandBuffer
-        else { return }
-
-        drawingRenderer.drawStroke(
-            selectedLayerTexture: selectedLayerTexture,
-            on: realtimeDrawingTexture,
-            with: commandBuffer
-        )
-
-        // The finalization process is performed when drawing is completed.
-        if isFinishedDrawing {
-            canvasRenderer.renderToSelectedLayer(
-                texture: canvasRenderer.realtimeDrawingTexture,
-                with: commandBuffer
-            )
-
-            commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor [weak self] in
-                    // Reset parameters on drawing completion
-                    self?.prepareNextStroke()
-
-                    self?.completeDrawing()
-                }
-            }
-        } else if isCancelledDrawing {
-            // Prepare for the next drawing when the drawing is cancelled.
-            prepareNextStroke()
-        }
-
-        commitAndRefreshDisplay(
-            displayRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
-        )
     }
 
     private func prepareNextStroke() {

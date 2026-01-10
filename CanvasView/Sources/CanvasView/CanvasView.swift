@@ -82,7 +82,6 @@ import UIKit
         self.displayView = .init(renderer: renderer)
         self.viewModel = .init(renderer: renderer)
         super.init(frame: .zero)
-        self.commonInitialize()
     }
     public required init?(coder: NSCoder) {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -93,30 +92,32 @@ import UIKit
         self.displayView = .init(renderer: renderer)
         self.viewModel = .init(renderer: renderer)
         super.init(coder: coder)
-        self.commonInitialize()
     }
 
     public func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
-    ) async throws {
-        let dependencies: CanvasViewDependencies = .init(
-            textureLayersDocumentsRepository: TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            ),
-            undoTextureRepository: .init(
-                renderer: renderer
-            ),
-            renderer: renderer,
-            displayView: displayView
-        )
+    ) async {
+        layoutViews()
+        addEvents()
+        bindData()
 
         do {
             try await viewModel.setup(
                 drawingRenderers: drawingRenderers,
-                dependencies: dependencies,
+                dependencies: .init(
+                    textureLayersDocumentsRepository: TextureLayersDocumentsRepository(
+                        storageDirectoryURL: URL.applicationSupport,
+                        directoryName: "TextureStorage",
+                        renderer: renderer
+                    ),
+                    undoTextureRepository: .init(
+                        renderer: renderer
+                    ),
+                    renderer: renderer,
+                    displayView: displayView
+                )
+,
                 configuration: configuration,
             )
         } catch {
@@ -187,12 +188,6 @@ import UIKit
 }
 
 extension CanvasView {
-    private func commonInitialize() {
-        layoutViews()
-        addEvents()
-        bindData()
-    }
-
     private func layoutViews() {
         addSubview(displayView)
         displayView.translatesAutoresizingMaskIntoConstraints = false
@@ -215,8 +210,8 @@ extension CanvasView {
 
     private func bindData() {
         displayView.displayTextureSizeChanged
-            .sink { [weak self] displayTextureSize in
-                self?.viewModel.didChangeDisplayTextureSize(displayTextureSize)
+            .sink { [weak self] _ in
+                self?.viewModel.onUpdateDisplayTexture()
             }
             .store(in: &cancellables)
 
