@@ -219,7 +219,7 @@ extension CanvasViewModel {
             textureLayersState: textureLayersState
         )
 
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+        try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
         // Overwrite the metadata with the given value
         projectMetaDataStorage.update(projectMetaData)
@@ -385,7 +385,7 @@ extension CanvasViewModel {
             newTextureLayersState: textureLayersState
         )
 
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+        try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
         // Update all data using the new project name
         projectMetaDataStorage.updateAll(newProjectName: projectName)
@@ -410,7 +410,7 @@ extension CanvasViewModel {
             textureLayersState: textureLayersState
         )
 
-        try await updateCanvasRenderer(textureLayersState: textureLayersState)
+        try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
         // Update only the updatedAt field, since the metadata may be loaded from Core Data
         projectMetaDataStorage.updateUpdatedAt()
@@ -423,8 +423,8 @@ extension CanvasViewModel {
         )
     }
 
-    /// Updates `CanvasRenderer` with updated `textureLayers`
-    private func updateCanvasRenderer(textureLayersState: TextureLayersState) async throws {
+    /// Sets up `CanvasRenderer` with updated `textureLayers`
+    private func setupCanvasRenderer(textureLayersState: TextureLayersState) async throws {
         guard
             let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
         else { return }
