@@ -129,35 +129,40 @@ public final class CanvasViewModel {
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
         dependencies: CanvasViewDependencies,
-        environmentConfiguration: EnvironmentConfiguration
-    ) {
+        configuration: CanvasConfiguration
+    ) async throws {
+        let environmentConfiguration = configuration.environmentConfiguration
         self.dependencies = dependencies
+
+        self.textureLayers.setup(
+            repository: dependencies.textureLayersDocumentsRepository
+        )
         self.canvasRenderer.setup(
             displayView: dependencies.displayView,
             backgroundColor: environmentConfiguration.backgroundColor,
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
-        self.textureLayers.setup(
-            repository: dependencies.textureLayersDocumentsRepository
-        )
         self.setupDrawingRenderers(
             drawingRenderers: drawingRenderers,
-            renderer: dependencies.renderer,
-            displayView: dependencies.displayView
+            renderer: dependencies.renderer
         )
         self.setupTouchGesture(
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
         self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
+
+        try await initializeCanvas(
+            textureLayersState: textureLayersStateFromCoreDataEntity,
+            configuration: configuration
+        )
     }
 }
 
 extension CanvasViewModel {
     private func setupDrawingRenderers(
         drawingRenderers: [DrawingRenderer],
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable?
+        renderer: MTLRendering
     ) {
         self.drawingRenderers = drawingRenderers
 

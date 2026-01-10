@@ -113,16 +113,11 @@ import UIKit
             displayView: displayView
         )
 
-        viewModel.setup(
-            drawingRenderers: drawingRenderers,
-            dependencies: dependencies,
-            environmentConfiguration: configuration.environmentConfiguration,
-        )
-
         do {
-            try await viewModel.initializeCanvas(
-                textureLayersState: viewModel.textureLayersStateFromCoreDataEntity,
-                configuration: configuration
+            try await viewModel.setup(
+                drawingRenderers: drawingRenderers,
+                dependencies: dependencies,
+                configuration: configuration,
             )
         } catch {
             fatalError("Failed to initialize the canvas")
