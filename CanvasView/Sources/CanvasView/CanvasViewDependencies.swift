@@ -13,13 +13,13 @@ struct CanvasViewDependencies {
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     /// A repository that manages textures used for undo in memory
-    let undoTextureRepository: UndoTextureInMemoryRepository?
+    let undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
     init(
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol,
-        undoTextureRepository: UndoTextureInMemoryRepository? = nil
+        undoTextureInMemoryRepository: UndoTextureInMemoryRepository? = nil
     ) {
         self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
-        self.undoTextureRepository = undoTextureRepository
+        self.undoTextureInMemoryRepository = undoTextureInMemoryRepository
     }
 }

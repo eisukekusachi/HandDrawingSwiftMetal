@@ -129,8 +129,8 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
-        self.displayView = displayView
         self.renderer = renderer
+        self.displayView = displayView
     }
 
     func setup(
@@ -157,7 +157,7 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
+        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureInMemoryRepository)
 
         try await setupCanvas(
             textureLayersState: textureLayersStateFromCoreDataEntity,

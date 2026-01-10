@@ -71,6 +71,10 @@ import UIKit
 
     private let viewModel: CanvasViewModel
 
+    private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+
+    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
@@ -81,6 +85,14 @@ import UIKit
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
         self.viewModel = .init(renderer: renderer, displayView: displayView)
+        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
+            storageDirectoryURL: URL.applicationSupport,
+            directoryName: "TextureStorage",
+            renderer: renderer
+        )
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
         super.init(frame: .zero)
     }
     public required init?(coder: NSCoder) {
@@ -91,6 +103,14 @@ import UIKit
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
         self.viewModel = .init(renderer: renderer, displayView: displayView)
+        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
+            storageDirectoryURL: URL.applicationSupport,
+            directoryName: "TextureStorage",
+            renderer: renderer
+        )
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
         super.init(coder: coder)
     }
 
@@ -101,19 +121,12 @@ import UIKit
         layoutViews()
         addEvents()
         bindData()
-
         do {
             try await viewModel.setup(
                 drawingRenderers: drawingRenderers,
                 dependencies: .init(
-                    textureLayersDocumentsRepository: TextureLayersDocumentsRepository(
-                        storageDirectoryURL: URL.applicationSupport,
-                        directoryName: "TextureStorage",
-                        renderer: renderer
-                    ),
-                    undoTextureRepository: .init(
-                        renderer: renderer
-                    )
+                    textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+                    undoTextureInMemoryRepository: undoTextureInMemoryRepository
                 ),
                 configuration: configuration,
             )
