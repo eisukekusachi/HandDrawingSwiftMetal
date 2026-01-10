@@ -78,32 +78,22 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-        renderer = MTLRenderer(device: sharedDevice)
-        displayView = CanvasDisplayView(renderer: renderer)
-        viewModel = CanvasViewModel(renderer: renderer)
+        self.renderer = MTLRenderer(device: sharedDevice)
+        self.displayView = .init(renderer: renderer)
+        self.viewModel = .init(renderer: renderer)
         super.init(frame: .zero)
-        commonInitialize()
+        self.commonInitialize()
     }
     public required init?(coder: NSCoder) {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-        renderer = MTLRenderer(device: sharedDevice)
-        displayView = CanvasDisplayView(renderer: renderer)
-        viewModel = CanvasViewModel(renderer: renderer)
+        self.renderer = MTLRenderer(device: sharedDevice)
+        self.displayView = .init(renderer: renderer)
+        self.viewModel = .init(renderer: renderer)
         super.init(coder: coder)
-        commonInitialize()
-    }
-    private func commonInitialize() {
-        layoutView()
-        bindData()
-        addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
+        self.commonInitialize()
     }
 
     public func setup(
@@ -202,7 +192,13 @@ import UIKit
 }
 
 extension CanvasView {
-    private func layoutView() {
+    private func commonInitialize() {
+        layoutViews()
+        addEvents()
+        bindData()
+    }
+
+    private func layoutViews() {
         addSubview(displayView)
         displayView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -212,6 +208,16 @@ extension CanvasView {
             displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     }
+
+    private func addEvents() {
+        addGestureRecognizer(
+            FingerInputGestureRecognizer(delegate: self)
+        )
+        addGestureRecognizer(
+            PencilInputGestureRecognizer(delegate: self)
+        )
+    }
+
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] displayTextureSize in

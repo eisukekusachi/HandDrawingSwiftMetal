@@ -105,58 +105,55 @@ public final class CanvasViewModel {
         projectMetaData: ProjectMetaData = ProjectMetaData(),
         renderer: MTLRendering
     ) {
-        canvasRenderer = CanvasRenderer(renderer: renderer)
-        drawingDebouncer = DrawingDebouncer(delay: 0.25)
-        persistenceController = PersistenceController(
+        self.canvasRenderer = .init(renderer: renderer)
+        self.drawingDebouncer = .init(delay: 0.25)
+        self.persistenceController = .init(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
         )
-        projectMetaDataStorage = CoreDataProjectMetaDataStorage(
+        self.projectMetaDataStorage = .init(
             project: projectMetaData,
             context: persistenceController.viewContext
         )
         // Initialize texture layers that support undo and persist their data in Core Data
-        textureLayers = UndoTextureLayers(
+        self.textureLayers = .init(
             textureLayers: CoreDataTextureLayers(
                 renderer: renderer,
                 context: persistenceController.viewContext
             ),
             renderer: renderer
         )
-
-        bindData()
+        self.bindData()
     }
-}
 
-extension CanvasViewModel {
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
         dependencies: CanvasViewDependencies,
         environmentConfiguration: EnvironmentConfiguration
     ) {
         self.dependencies = dependencies
-
-        canvasRenderer.setup(
+        self.canvasRenderer.setup(
             displayView: dependencies.displayView,
             backgroundColor: environmentConfiguration.backgroundColor,
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
-        setupDrawingRenderers(
+        self.textureLayers.setup(
+            repository: dependencies.textureLayersDocumentsRepository
+        )
+        self.setupDrawingRenderers(
             drawingRenderers: drawingRenderers,
             renderer: dependencies.renderer,
             displayView: dependencies.displayView
         )
-        setupTouchGesture(
+        self.setupTouchGesture(
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-        setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
-
-        textureLayers.setup(
-            repository: dependencies.textureLayersDocumentsRepository
-        )
+        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureRepository)
     }
+}
 
+extension CanvasViewModel {
     private func setupDrawingRenderers(
         drawingRenderers: [DrawingRenderer],
         renderer: MTLRendering,
