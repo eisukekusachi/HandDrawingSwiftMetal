@@ -80,7 +80,7 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.viewModel = .init(renderer: renderer)
+        self.viewModel = .init(renderer: renderer, displayView: displayView)
         super.init(frame: .zero)
     }
     public required init?(coder: NSCoder) {
@@ -90,7 +90,7 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.viewModel = .init(renderer: renderer)
+        self.viewModel = .init(renderer: renderer, displayView: displayView)
         super.init(coder: coder)
     }
 
@@ -113,10 +113,8 @@ import UIKit
                     ),
                     undoTextureRepository: .init(
                         renderer: renderer
-                    ),
-                    displayView: displayView
-                )
-,
+                    )
+                ),
                 configuration: configuration,
             )
         } catch {

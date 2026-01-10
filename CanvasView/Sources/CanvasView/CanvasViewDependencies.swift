@@ -15,16 +15,11 @@ struct CanvasViewDependencies {
     /// A repository that manages textures used for undo in memory
     let undoTextureRepository: UndoTextureInMemoryRepository?
 
-    /// A protocol representing a drawable surface for the canvas
-    let displayView: CanvasDisplayable?
-
     init(
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol,
-        undoTextureRepository: UndoTextureInMemoryRepository? = nil,
-        displayView: CanvasDisplayable? = nil
+        undoTextureRepository: UndoTextureInMemoryRepository? = nil
     ) {
         self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
         self.undoTextureRepository = undoTextureRepository
-        self.displayView = displayView
     }
 }

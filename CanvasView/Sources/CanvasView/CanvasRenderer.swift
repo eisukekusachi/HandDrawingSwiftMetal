@@ -17,7 +17,7 @@ public final class CanvasRenderer: ObservableObject {
     }
 
     public var commandBuffer: MTLCommandBuffer? {
-        displayView?.commandBuffer
+        displayView.commandBuffer
     }
 
     var textureSize: CGSize? {
@@ -25,7 +25,7 @@ public final class CanvasRenderer: ObservableObject {
     }
 
     var displayTextureSize: CGSize? {
-        displayView?.displayTexture?.size
+        displayView.displayTexture?.size
     }
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
@@ -51,24 +51,25 @@ public final class CanvasRenderer: ObservableObject {
 
     private let renderer: MTLRendering
 
+    private let displayView: CanvasDisplayable
+
     /// The background color of the canvas
     private var backgroundColor: UIColor = .white
 
     /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
     private var baseBackgroundColor: UIColor = .lightGray
 
-    private var displayView: CanvasDisplayable?
-
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable
     ) {
         self.renderer = renderer
+        self.displayView = displayView
     }
 
     public func setup(
-        displayView: CanvasDisplayable?,
         backgroundColor: UIColor?,
         baseBackgroundColor: UIColor?
     ) {
@@ -76,8 +77,6 @@ public final class CanvasRenderer: ObservableObject {
             nodes: .flippedTextureNodes,
             with: renderer.device
         )
-
-        self.displayView = displayView
 
         if let backgroundColor {
             self.backgroundColor = backgroundColor
@@ -282,7 +281,7 @@ extension CanvasRenderer {
             let selectedLayerTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
-            let commandBuffer = displayView?.commandBuffer
+            let commandBuffer = displayView.commandBuffer
         else { return }
 
         renderer.fillColor(
@@ -318,8 +317,8 @@ extension CanvasRenderer {
     /// Commits the command buffer and refreshes the entire screen
     public func commitAndRefreshDisplay() {
         guard
-            let displayTexture = displayView?.displayTexture,
-            let commandBuffer = displayView?.commandBuffer
+            let displayTexture = displayView.displayTexture,
+            let commandBuffer = displayView.commandBuffer
         else { return }
 
         renderer.drawTexture(
@@ -330,11 +329,11 @@ extension CanvasRenderer {
             on: displayTexture,
             with: commandBuffer
         )
-        displayView?.setNeedsDisplay()
+        displayView.setNeedsDisplay()
     }
 
     public func resetCommandBuffer() {
-        displayView?.resetCommandBuffer()
+        displayView.resetCommandBuffer()
     }
 }
 

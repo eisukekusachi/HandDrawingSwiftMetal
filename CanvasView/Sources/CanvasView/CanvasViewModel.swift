@@ -95,6 +95,9 @@ public final class CanvasViewModel {
 
     private var dependencies: CanvasViewDependencies?
 
+    /// A protocol representing a drawable surface for the canvas
+    private let displayView: CanvasDisplayable
+
     private let renderer: MTLRendering
 
     private var cancellables = Set<AnyCancellable>()
@@ -105,9 +108,10 @@ public final class CanvasViewModel {
 
     init(
         projectMetaData: ProjectMetaData = ProjectMetaData(),
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable
     ) {
-        self.canvasRenderer = .init(renderer: renderer)
+        self.canvasRenderer = .init(renderer: renderer, displayView: displayView)
         self.drawingDebouncer = .init(delay: 0.25)
         self.persistenceController = .init(
             xcdatamodeldName: "CanvasStorage",
@@ -125,6 +129,7 @@ public final class CanvasViewModel {
             ),
             renderer: renderer
         )
+        self.displayView = displayView
         self.renderer = renderer
     }
 
@@ -142,7 +147,6 @@ public final class CanvasViewModel {
             repository: dependencies.textureLayersDocumentsRepository
         )
         self.canvasRenderer.setup(
-            displayView: dependencies.displayView,
             backgroundColor: environmentConfiguration.backgroundColor,
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
