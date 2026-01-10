@@ -15,8 +15,10 @@ public protocol DrawingRenderer {
 
     var displayRealtimeDrawingTexture: Bool { get }
 
+    var diameter: Int { get }
+
     /// Configures external dependencies
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?)
+    func setup(renderer: MTLRendering)
 
     /// Initializes the textures for realtime drawing
     func initializeTextures(textureSize: CGSize)
@@ -30,10 +32,10 @@ public protocol DrawingRenderer {
     /// Pen drawing has started
     func beginPencilStroke()
 
-    /// Called on every drag event
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    /// Appends stroke points
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     )
 
     /// Called during drawing

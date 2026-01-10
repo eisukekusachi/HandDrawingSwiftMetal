@@ -20,6 +20,14 @@ public final class CanvasRenderer: ObservableObject {
         displayView?.commandBuffer
     }
 
+    var textureSize: CGSize? {
+        canvasTexture?.size
+    }
+
+    var displayTextureSize: CGSize? {
+        displayView?.displayTexture?.size
+    }
+
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 

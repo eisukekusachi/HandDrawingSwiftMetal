@@ -167,9 +167,7 @@ extension CanvasViewModel {
 
         self.drawingRenderers.forEach {
             $0.setup(
-                frameSize: frameSize,
-                renderer: renderer,
-                displayView: displayView
+                renderer: renderer
             )
         }
         self.drawingRenderer = self.drawingRenderers[0]
@@ -390,7 +388,11 @@ extension CanvasViewModel {
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
-            guard let drawingRenderer else { return }
+            guard
+                let drawingRenderer,
+                let textureSize = canvasRenderer.textureSize,
+                let displayTextureSize = canvasRenderer.displayTextureSize
+            else { return }
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
@@ -414,10 +416,23 @@ extension CanvasViewModel {
             // Update the touch phase for drawing
             drawingTouchPhase = touchPhase(pointArray)
 
-            drawingRenderer.onStroke(
-                screenTouchPoints: pointArray,
-                matrix: transforming.matrix.inverted(flipY: true)
+            drawingRenderer.appendStrokePoints(
+                strokePoints:  pointArray.map {
+                    .init(
+                        location: CGAffineTransform.texturePoint(
+                            screenPoint: $0.preciseLocation,
+                            matrix: transforming.matrix,
+                            textureSize: textureSize,
+                            drawableSize: displayTextureSize,
+                            frameSize: frameSize
+                        ),
+                        brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                        diameter: CGFloat(drawingRenderer.diameter)
+                    )
+                },
+                touchPhase: pointArray.currentTouchPhase
             )
+
             fingerStroke.updateDrawingLineEndPoint()
 
             drawingDisplayLink.run(isCurrentlyDrawing)
@@ -461,7 +476,11 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
-        guard let drawingRenderer else { return }
+        guard
+            let drawingRenderer,
+            let textureSize = canvasRenderer.textureSize,
+            let displayTextureSize = canvasRenderer.displayTextureSize
+        else { return }
 
         /// Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
@@ -488,9 +507,21 @@ extension CanvasViewModel {
         // Update the touch phase for drawing
         drawingTouchPhase = touchPhase(pointArray)
 
-        drawingRenderer.onStroke(
-            screenTouchPoints: pointArray,
-            matrix: transforming.matrix.inverted(flipY: true)
+        drawingRenderer.appendStrokePoints(
+            strokePoints:  pointArray.map {
+                .init(
+                    location: CGAffineTransform.texturePoint(
+                        screenPoint: $0.preciseLocation,
+                        matrix: transforming.matrix,
+                        textureSize: textureSize,
+                        drawableSize: displayTextureSize,
+                        frameSize: frameSize
+                    ),
+                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                    diameter: CGFloat(drawingRenderer.diameter)
+                )
+            },
+            touchPhase: pointArray.currentTouchPhase
         )
         pencilStroke.setDrawingLineEndPoint()
 

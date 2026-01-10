@@ -15,9 +15,12 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     }
     private var _displayRealtimeDrawingTexture: Bool = false
 
-    private var color: UIColor = .black
+    public var diameter: Int {
+        _diameter
+    }
+    private var _diameter: Int = 8
 
-    private var diameter: Int = 8
+    private var color: UIColor = .black
 
     private var frameSize: CGSize = .zero
 
@@ -26,8 +29,6 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     private var grayscaleTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers!
-
-    private var displayView: CanvasDisplayable?
 
     private var renderer: MTLRendering?
 
@@ -39,12 +40,9 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
 public extension BrushDrawingRenderer {
 
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
+    func setup(renderer: MTLRendering) {
 
-        self.displayView = displayView
         self.renderer = renderer
-
-        self.frameSize = frameSize
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -81,11 +79,8 @@ public extension BrushDrawingRenderer {
         self.frameSize = frameSize
     }
 
-    func getDiameter() -> Int {
-        diameter
-    }
     func setDiameter(_ diameter: Int) {
-        self.diameter = diameter
+        self._diameter = diameter
     }
 
     func setColor(_ color: UIColor) {
@@ -100,30 +95,13 @@ public extension BrushDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     ) {
-        guard
-            let textureSize,
-            let displayTextureSize = displayView?.displayTexture?.size
-        else { return }
-
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.preciseLocation,
-                        matrix: matrix,
-                        textureSize: textureSize,
-                        drawableSize: displayTextureSize,
-                        frameSize: frameSize
-                    ),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                    diameter: CGFloat(diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
+            points: strokePoints,
+            touchPhase: touchPhase
         )
     }
 

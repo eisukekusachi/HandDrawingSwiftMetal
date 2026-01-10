@@ -15,9 +15,12 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     }
     private var _displayRealtimeDrawingTexture: Bool = false
 
-    private var alpha: Int = 255
+    public var diameter: Int {
+        _diameter
+    }
+    private var _diameter: Int = 8
 
-    private var diameter: Int = 8
+    private var alpha: Int = 255
 
     private var frameSize: CGSize = .zero
 
@@ -40,12 +43,9 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
 public extension EraserDrawingRenderer {
 
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
+    func setup(renderer: MTLRendering) {
 
-        self.displayView = displayView
         self.renderer = renderer
-
-        self.frameSize = frameSize
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -88,11 +88,8 @@ public extension EraserDrawingRenderer {
         self.frameSize = frameSize
     }
 
-    func getDiameter() -> Int {
-        diameter
-    }
     func setDiameter(_ diameter: Int) {
-        self.diameter = diameter
+        self._diameter = diameter
     }
 
     func setAlpha(_ alpha: Int) {
@@ -107,30 +104,13 @@ public extension EraserDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     ) {
-        guard
-            let textureSize,
-            let displayTextureSize = displayView?.displayTexture?.size
-        else { return }
-
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.preciseLocation,
-                        matrix: matrix,
-                        textureSize: textureSize,
-                        drawableSize: displayTextureSize,
-                        frameSize: frameSize
-                    ),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                    diameter: CGFloat(diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
+            points: strokePoints,
+            touchPhase: touchPhase
         )
     }
 
