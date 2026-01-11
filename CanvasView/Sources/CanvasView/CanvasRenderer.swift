@@ -20,13 +20,15 @@ public final class CanvasRenderer: ObservableObject {
         displayView.commandBuffer
     }
 
-    var textureSize: CGSize? {
+    public var textureSize: CGSize? {
         canvasTexture?.size
     }
 
-    var displayTextureSize: CGSize? {
+    public var displayTextureSize: CGSize? {
         displayView.displayTexture?.size
     }
+
+    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
@@ -51,8 +53,6 @@ public final class CanvasRenderer: ObservableObject {
 
     private let renderer: MTLRendering
 
-    private let textureLayersRepository: TextureLayersDocumentsRepositoryProtocol
-
     private let displayView: CanvasDisplayable
 
     /// The background color of the canvas
@@ -69,7 +69,7 @@ public final class CanvasRenderer: ObservableObject {
         displayView: CanvasDisplayable
     ) {
         self.renderer = renderer
-        self.textureLayersRepository = repository
+        self.textureLayersDocumentsRepository = repository
         self.displayView = displayView
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -189,7 +189,7 @@ extension CanvasRenderer {
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         // Get textures from the Documents directory
-        let textures = try await textureLayersRepository.duplicatedTextures(
+        let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
