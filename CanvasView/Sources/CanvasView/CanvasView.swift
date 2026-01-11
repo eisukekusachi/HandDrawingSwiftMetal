@@ -112,10 +112,11 @@ import UIKit
                 ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository,
-                persistenceController: persistenceController,
                 projectMetaDataStorage: .init(
                     project: ProjectMetaData(),
-                    context: persistenceController.viewContext
+                    storage: AnyCoreDataStorage(
+                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
+                    )
                 )
             )
         )
@@ -154,10 +155,11 @@ import UIKit
                 ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository,
-                persistenceController: persistenceController,
                 projectMetaDataStorage: .init(
                     project: ProjectMetaData(),
-                    context: persistenceController.viewContext
+                    storage: AnyCoreDataStorage(
+                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
+                    )
                 )
             )
         )

@@ -9,7 +9,7 @@ import CoreData
 
 public protocol CoreDataStorageProtocol {
     associatedtype Entity: NSManagedObject
-    var context: NSManagedObjectContext { get }
+    var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>
     func fetch() throws -> Entity?
 }

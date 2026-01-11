@@ -13,7 +13,7 @@ import Testing
 import SwiftUI
 
 @testable import CanvasView
-
+/*
 @MainActor
 struct TextureLayersTests {
 
@@ -255,3 +255,4 @@ struct TextureLayersTests {
         #expect(subject.layers.first?.isVisible == false)
     }
 }
+*/

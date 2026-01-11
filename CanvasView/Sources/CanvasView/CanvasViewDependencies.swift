@@ -20,8 +20,6 @@ struct CanvasViewDependencies {
     /// A repository that manages textures used for undo in memory
     let undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
-    let persistenceController: PersistenceController
-
     /// Metadata stored in Core Data
     let projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
@@ -30,14 +28,12 @@ struct CanvasViewDependencies {
         textureLayers: UndoTextureLayers,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol,
         undoTextureInMemoryRepository: UndoTextureInMemoryRepository? = nil,
-        persistenceController: PersistenceController,
         projectMetaDataStorage: CoreDataProjectMetaDataStorage
     ) {
         self.canvasRenderer = canvasRenderer
         self.textureLayers = textureLayers
         self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
         self.undoTextureInMemoryRepository = undoTextureInMemoryRepository
-        self.persistenceController = persistenceController
         self.projectMetaDataStorage = projectMetaDataStorage
     }
 }

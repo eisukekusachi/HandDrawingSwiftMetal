@@ -125,11 +125,12 @@ extension CoreDataBrushPaletteStorage {
 
 private extension CoreDataBrushPaletteStorage {
     func save(_ target: BrushPalette) async {
+        guard let context = self.storage.context else { return }
+
         let index  = target.index
         let hexes  = target.colors.map { $0.hex() }
         let id: UUID = target.id
 
-        let context = self.storage.context
         let request = self.storage.fetchRequest()
 
         await context.perform { [context] in

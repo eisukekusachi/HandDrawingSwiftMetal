@@ -123,11 +123,12 @@ extension CoreDataEraserPaletteStorage {
 
 private extension CoreDataEraserPaletteStorage {
     func save(_ target: EraserPalette) async {
+        guard let context = self.storage.context else { return }
+
         let index  = target.index
         let alphas  = target.alphas
         let id: UUID = target.id
 
-        let context = self.storage.context
         let request = self.storage.fetchRequest()
 
         await context.perform { [context] in

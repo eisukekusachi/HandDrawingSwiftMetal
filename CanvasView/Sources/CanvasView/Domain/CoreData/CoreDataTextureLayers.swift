@@ -53,6 +53,7 @@ private extension CoreDataTextureLayers {
     func save() async {
         guard
             let storage,
+            let context = storage.context,
             layers.count != 0,
             textureSize != .zero,
             let selectedLayerId = selectedLayer?.id
@@ -62,7 +63,6 @@ private extension CoreDataTextureLayers {
         let newSelectedLayerId = selectedLayerId
         let newLayers = layers.map { TextureLayerModel(item: $0) }
 
-        let context = storage.context
         let request = storage.fetchRequest()
         request.fetchLimit = 1
 
