@@ -100,7 +100,6 @@ public final class CanvasViewModel {
     public static let thumbnailLength: CGFloat = 500
 
     init(
-        projectMetaData: ProjectMetaData = ProjectMetaData(),
         dependencies: CanvasViewDependencies
     ) {
         self.canvasRenderer = dependencies.canvasRenderer

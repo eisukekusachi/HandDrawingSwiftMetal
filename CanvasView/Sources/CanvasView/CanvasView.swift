@@ -167,19 +167,16 @@ import UIKit
     public func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
-    ) async {
+    ) async throws {
         layoutViews()
         addEvents()
         bindData()
-        do {
-            try await viewModel.setup(
-                drawingRenderers: drawingRenderers,
-                configuration: configuration,
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
+
+        try await viewModel.setup(
+            drawingRenderers: drawingRenderers,
+            configuration: configuration,
+            renderer: renderer
+        )
     }
 
     public override func layoutSubviews() {

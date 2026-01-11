@@ -48,17 +48,12 @@ class HandDrawingViewController: UIViewController {
     private func initializeCanvasView() {
         showActivityIndicator(true)
         showContentView(false)
-
         Task {
             defer {
                 showActivityIndicator(false)
                 showContentView(true)
             }
-
             do {
-                brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-                eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
-
                 try await contentView.canvasView.setup(
                     drawingRenderers: [
                         brushDrawingRenderer,
@@ -302,6 +297,8 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
+        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
         contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
         contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
