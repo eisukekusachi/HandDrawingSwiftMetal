@@ -227,6 +227,7 @@ extension CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas with `RealtimeDrawingTexture`
+        // Used for undoing drawing operations
         textureLayers.canvasDrawingUpdateRequested
             .sink { [weak self] texture in
                 guard
@@ -234,8 +235,8 @@ extension CanvasViewModel {
                     let commandBuffer = self.canvasRenderer.commandBuffer
                 else { return }
 
-                self.canvasRenderer.updateSelectedLayerTextures(
-                    texture: texture,
+                self.canvasRenderer.updateDrawingTexture(
+                    using: texture,
                     with: commandBuffer
                 )
                 self.commitAndRefreshDisplay()
@@ -245,10 +246,13 @@ extension CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                guard let `self` else { return }
+                guard
+                    let `self`,
+                    let context = CanvasTextureLayersContext(textureLayers: self.textureLayers)
+                else { return }
                 Task {
                     try await self.canvasRenderer.updateTextures(
-                        textureLayers: self.textureLayers
+                        context: context
                     )
                     self.commitAndRefreshDisplay()
                 }
@@ -354,12 +358,23 @@ extension CanvasViewModel {
             textureLayersState: textureLayersState
         )
 
+        guard
+            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to initialize the canvas", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
+
         // Update canvasRenderer using textureLayers
         try canvasRenderer.initializeTextures(
             textureSize: textureSize
         )
         try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers
+            context: context
         )
 
         // Initialize the textures in DrawingRenderer
@@ -555,8 +570,8 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            canvasRenderer.renderToSelectedLayer(
-                texture: canvasRenderer.realtimeDrawingTexture,
+            canvasRenderer.updateSelectedLayerTexture(
+                using: canvasRenderer.realtimeDrawingTexture,
                 with: commandBuffer
             )
 
@@ -809,7 +824,7 @@ extension CanvasViewModel {
 
         canvasRenderer.composeAndRefreshCanvas(
             useRealtimeDrawingTexture: useRealtimeDrawingTexture,
-            selectedLayer: selectedLayer
+            selectedLayer: .init(item: selectedLayer)
         )
     }
 
