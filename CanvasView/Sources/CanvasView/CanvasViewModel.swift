@@ -88,9 +88,6 @@ public final class CanvasViewModel {
 
     private let transforming = Transforming()
 
-    /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
-    private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
-
     private var cancellables = Set<AnyCancellable>()
 
     public static let thumbnailName: String = "thumbnail.png"
