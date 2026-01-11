@@ -8,7 +8,7 @@
 import Combine
 @preconcurrency import MetalKit
 
-/// A class that renders textures from `TextureRepository` onto the texture of `displayView`
+/// A class that renders textures from `TextureLayersDocumentsRepository` onto the texture of `displayView`
 @MainActor
 public final class CanvasRenderer: ObservableObject {
 
@@ -51,6 +51,8 @@ public final class CanvasRenderer: ObservableObject {
 
     private let renderer: MTLRendering
 
+    private let textureLayersRepository: TextureLayersDocumentsRepositoryProtocol
+
     private let displayView: CanvasDisplayable
 
     /// The background color of the canvas
@@ -63,9 +65,11 @@ public final class CanvasRenderer: ObservableObject {
 
     public init(
         renderer: MTLRendering,
+        repository: TextureLayersDocumentsRepositoryProtocol,
         displayView: CanvasDisplayable
     ) {
         self.renderer = renderer
+        self.textureLayersRepository = repository
         self.displayView = displayView
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -147,8 +151,7 @@ extension CanvasRenderer {
     /// This textures are pre-merged from `textureRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func updateTextures(
-        textureLayers: any TextureLayersProtocol,
-        repository: TextureLayersDocumentsRepositoryProtocol
+        textureLayers: any TextureLayersProtocol
     ) async throws {
         guard
             let unselectedBottomTexture,
@@ -186,7 +189,7 @@ extension CanvasRenderer {
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         // Get textures from the Documents directory
-        let textures = try await repository.duplicatedTextures(
+        let textures = try await textureLayersRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 

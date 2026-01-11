@@ -255,13 +255,11 @@ extension CanvasViewModel {
         // Update the entire canvas, including all drawing textures
         textureLayers.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                guard let `self`, let dependencies else { return }
+                guard let `self` else { return }
                 Task {
                     try await self.canvasRenderer.updateTextures(
-                        textureLayers: self.textureLayers,
-                        repository: dependencies.textureLayersDocumentsRepository
+                        textureLayers: self.textureLayers
                     )
-
                     self.commitAndRefreshDisplay()
                 }
             }
@@ -367,10 +365,6 @@ extension CanvasViewModel {
 
     /// Sets up `CanvasRenderer` with updated `textureLayers`
     private func setupCanvasRenderer(textureLayersState: TextureLayersState) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
         let textureSize = textureLayersState.textureSize
 
         // Update textureLayers using textureLayersState
@@ -383,8 +377,7 @@ extension CanvasViewModel {
             textureSize: textureSize
         )
         try await canvasRenderer.updateTextures(
-            textureLayers: textureLayers,
-            repository: textureLayersDocumentsRepository
+            textureLayers: textureLayers
         )
 
         // Initialize the textures in DrawingRenderer

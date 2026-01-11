@@ -100,7 +100,11 @@ import UIKit
         )
         self.viewModel = .init(
             dependencies: .init(
-                canvasRenderer: .init(renderer: renderer, displayView: displayView),
+                canvasRenderer: .init(
+                    renderer: renderer,
+                    repository: textureLayersDocumentsRepository,
+                    displayView: displayView
+                ),
                 textureLayers: .init(
                     textureLayers: CoreDataTextureLayers(
                         renderer: renderer,
@@ -142,7 +146,11 @@ import UIKit
         )
         self.viewModel = .init(
             dependencies: .init(
-                canvasRenderer: .init(renderer: renderer, displayView: displayView),
+                canvasRenderer: .init(
+                    renderer: renderer,
+                    repository: textureLayersDocumentsRepository,
+                    displayView: displayView
+                ),
                 textureLayers: .init(
                     textureLayers: CoreDataTextureLayers(
                         renderer: renderer,
