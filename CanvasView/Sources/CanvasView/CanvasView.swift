@@ -84,7 +84,6 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.viewModel = .init(renderer: renderer, displayView: displayView)
         self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage",
@@ -92,6 +91,14 @@ import UIKit
         )
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
+        )
+        self.viewModel = .init(
+            dependencies: .init(
+                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository
+            ),
+            renderer: renderer,
+            displayView: displayView
         )
         super.init(frame: .zero)
     }
@@ -102,7 +109,6 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.viewModel = .init(renderer: renderer, displayView: displayView)
         self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
             storageDirectoryURL: URL.applicationSupport,
             directoryName: "TextureStorage",
@@ -110,6 +116,14 @@ import UIKit
         )
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
+        )
+        self.viewModel = .init(
+            dependencies: .init(
+                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository
+            ),
+            renderer: renderer,
+            displayView: displayView
         )
         super.init(coder: coder)
     }
@@ -124,10 +138,6 @@ import UIKit
         do {
             try await viewModel.setup(
                 drawingRenderers: drawingRenderers,
-                dependencies: .init(
-                    textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                    undoTextureInMemoryRepository: undoTextureInMemoryRepository
-                ),
                 configuration: configuration,
             )
         } catch {

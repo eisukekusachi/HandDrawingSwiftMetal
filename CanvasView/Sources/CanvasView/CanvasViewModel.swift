@@ -108,6 +108,7 @@ public final class CanvasViewModel {
 
     init(
         projectMetaData: ProjectMetaData = ProjectMetaData(),
+        dependencies: CanvasViewDependencies,
         renderer: MTLRendering,
         displayView: CanvasDisplayable
     ) {
@@ -131,21 +132,21 @@ public final class CanvasViewModel {
         )
         self.renderer = renderer
         self.displayView = displayView
+        self.dependencies = dependencies
+        self.textureLayers.setup(
+            repository: dependencies.textureLayersDocumentsRepository
+        )
+        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureInMemoryRepository)
     }
 
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
-        dependencies: CanvasViewDependencies,
         configuration: CanvasConfiguration
     ) async throws {
         self.bindData()
 
         let environmentConfiguration = configuration.environmentConfiguration
-        self.dependencies = dependencies
 
-        self.textureLayers.setup(
-            repository: dependencies.textureLayersDocumentsRepository
-        )
         self.canvasRenderer.setup(
             backgroundColor: environmentConfiguration.backgroundColor,
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
@@ -157,7 +158,6 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureInMemoryRepository)
 
         try await setupCanvas(
             textureLayersState: textureLayersStateFromCoreDataEntity,
