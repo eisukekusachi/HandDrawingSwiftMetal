@@ -273,8 +273,8 @@ extension CanvasRenderer {
     }
 
     /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
-    public func commitAndRefreshDisplay(
-        displayRealtimeDrawingTexture: Bool,
+    public func composeAndRefreshCanvas(
+        useRealtimeDrawingTexture: Bool,
         selectedLayer: TextureLayerItem
     ) {
         guard
@@ -300,7 +300,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: displayRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
+                texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
@@ -313,11 +313,11 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        commitAndRefreshDisplay()
+        refreshCanvas()
     }
 
     /// Commits the command buffer and refreshes the entire screen
-    public func commitAndRefreshDisplay() {
+    public func refreshCanvas() {
         guard
             let displayTexture = displayView.displayTexture,
             let commandBuffer = displayView.commandBuffer

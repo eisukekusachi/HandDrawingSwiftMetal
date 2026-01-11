@@ -574,7 +574,7 @@ extension CanvasViewModel {
         }
 
         commitAndRefreshDisplay(
-            displayRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
+            useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
@@ -598,7 +598,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        canvasRenderer.commitAndRefreshDisplay()
+        canvasRenderer.refreshCanvas()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
@@ -741,7 +741,7 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-        canvasRenderer.commitAndRefreshDisplay()
+        canvasRenderer.refreshCanvas()
     }
 
     private func completeDrawing() {
@@ -799,16 +799,16 @@ extension CanvasViewModel {
             )
         }
 
-        canvasRenderer.commitAndRefreshDisplay()
+        canvasRenderer.refreshCanvas()
     }
 
     private func commitAndRefreshDisplay(
-        displayRealtimeDrawingTexture: Bool = false
+        useRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
-        canvasRenderer.commitAndRefreshDisplay(
-            displayRealtimeDrawingTexture: displayRealtimeDrawingTexture,
+        canvasRenderer.composeAndRefreshCanvas(
+            useRealtimeDrawingTexture: useRealtimeDrawingTexture,
             selectedLayer: selectedLayer
         )
     }
