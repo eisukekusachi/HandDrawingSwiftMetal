@@ -110,9 +110,11 @@ public final class CanvasViewModel {
 
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
-        configuration: CanvasConfiguration,
-        renderer: MTLRendering
+        configuration: CanvasConfiguration
     ) async throws {
+        self.drawingRenderers = drawingRenderers
+        self.drawingRenderer = self.drawingRenderers[0]
+
         self.bindData()
 
         let environmentConfiguration = configuration.environmentConfiguration
@@ -121,15 +123,10 @@ public final class CanvasViewModel {
             backgroundColor: environmentConfiguration.backgroundColor,
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
-        self.setupDrawingRenderers(
-            renderer: renderer,
-            drawingRenderers: drawingRenderers
-        )
         self.setupTouchGesture(
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-
         try await setupCanvas(
             textureLayersState: textureLayersStateFromCoreDataEntity,
             configuration: configuration
@@ -302,24 +299,6 @@ extension CanvasViewModel {
                 self?.commitAndRefreshDisplay()
             }
             .store(in: &cancellables)
-    }
-
-    private func setupDrawingRenderers(
-        renderer: MTLRendering,
-        drawingRenderers: [DrawingRenderer]
-    ) {
-        self.drawingRenderers = drawingRenderers
-
-        if self.drawingRenderers.isEmpty {
-            self.drawingRenderers = [BrushDrawingRenderer()]
-        }
-
-        self.drawingRenderers.forEach {
-            $0.setup(
-                renderer: renderer
-            )
-        }
-        self.drawingRenderer = self.drawingRenderers[0]
     }
 
     private func setupTouchGesture(
@@ -710,6 +689,25 @@ public extension CanvasViewModel {
         ).write(
             in: workingDirectoryURL
         )
+    }
+
+    /// Returns drawing renderers ready for drawing, creating a default renderer if needed.
+    static func resolveDrawingRenderers(
+        renderer: MTLRendering,
+        drawingRenderers: [DrawingRenderer]
+    ) -> [DrawingRenderer] {
+        var resolvedDrawingRenderers: [DrawingRenderer] = drawingRenderers
+
+        if resolvedDrawingRenderers.isEmpty {
+            resolvedDrawingRenderers = [BrushDrawingRenderer()]
+        }
+
+        resolvedDrawingRenderers.forEach {
+            $0.setup(
+                renderer: renderer
+            )
+        }
+        return resolvedDrawingRenderers
     }
 }
 

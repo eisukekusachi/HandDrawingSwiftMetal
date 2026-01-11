@@ -20,6 +20,11 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     }
     private var _diameter: Int = 8
 
+    public var renderer: MTLRendering? {
+        _renderer
+    }
+    private var _renderer: MTLRendering?
+
     private var color: UIColor = .black
 
     private var frameSize: CGSize = .zero
@@ -29,8 +34,6 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     private var grayscaleTexture: MTLTexture?
 
     private var flippedTextureBuffers: MTLTextureBuffers!
-
-    private var renderer: MTLRendering?
 
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
@@ -42,7 +45,7 @@ public extension BrushDrawingRenderer {
 
     func setup(renderer: MTLRendering) {
 
-        self.renderer = renderer
+        self._renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,

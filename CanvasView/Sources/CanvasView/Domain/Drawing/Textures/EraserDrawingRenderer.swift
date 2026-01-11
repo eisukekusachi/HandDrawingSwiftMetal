@@ -20,6 +20,11 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     }
     private var _diameter: Int = 8
 
+    public var renderer: MTLRendering? {
+        _renderer
+    }
+    private var _renderer: MTLRendering?
+
     private var alpha: Int = 255
 
     private var frameSize: CGSize = .zero
@@ -33,7 +38,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var displayView: CanvasDisplayable?
 
-    private var renderer: MTLRendering?
 
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
@@ -45,7 +49,7 @@ public extension EraserDrawingRenderer {
 
     func setup(renderer: MTLRendering) {
 
-        self.renderer = renderer
+        self._renderer = renderer
 
         self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,

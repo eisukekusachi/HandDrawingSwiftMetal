@@ -11,11 +11,13 @@ public typealias RealtimeDrawingTexture = MTLTexture
 
 /// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
-public protocol DrawingRenderer {
+public protocol DrawingRenderer: AnyObject {
 
     var displayRealtimeDrawingTexture: Bool { get }
 
     var diameter: Int { get }
+
+    var renderer: MTLRendering? { get }
 
     /// Configures external dependencies
     func setup(renderer: MTLRendering)

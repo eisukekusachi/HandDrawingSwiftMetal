@@ -172,10 +172,14 @@ import UIKit
         addEvents()
         bindData()
 
+        let renderers = CanvasViewModel.resolveDrawingRenderers(
+            renderer: renderer,
+            drawingRenderers: drawingRenderers
+        )
+
         try await viewModel.setup(
-            drawingRenderers: drawingRenderers,
-            configuration: configuration,
-            renderer: renderer
+            drawingRenderers: renderers,
+            configuration: configuration
         )
     }
 

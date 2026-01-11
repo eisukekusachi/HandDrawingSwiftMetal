@@ -17,8 +17,7 @@ struct CanvasViewModelTests {
     private typealias Subject = CanvasViewModel
 
     @MainActor
-    @Suite("Canvas initialize")
-    struct CanvasInitializeTests {
+    struct CanvasInitialize {
 
         private let dependencies: CanvasViewDependencies
 
@@ -232,6 +231,50 @@ struct CanvasViewModelTests {
             #expect(subject.projectMetaDataStorage.updatedAt == newProjectMetaData.updatedAt)
 
             #expect(textureLayersDocumentsRepository.restoreStorage_callCount == 1)
+        }
+    }
+
+    @MainActor
+    struct ResolveDrawingRenderers {
+
+        @Test
+        func `When drawingRenderers are provided, they are passed through and configured`() {
+            let drawingRenderers: [DrawingRenderer] = [
+                BrushDrawingRenderer(),
+                EraserDrawingRenderer()
+            ]
+
+            #expect(drawingRenderers[0].renderer == nil)
+            #expect(drawingRenderers[1].renderer == nil)
+
+            let resultRenderers = CanvasViewModel.resolveDrawingRenderers(
+                renderer: MockMTLRenderer(),
+                drawingRenderers: drawingRenderers
+            )
+
+            // Then the same instances are returned
+            #expect(resultRenderers.count == 2)
+            #expect(resultRenderers[0] === drawingRenderers[0])
+            #expect(resultRenderers[1] === drawingRenderers[1])
+
+            // Each renderer is configured with the provided renderer
+            #expect(resultRenderers[0].renderer != nil)
+            #expect(resultRenderers[1].renderer != nil)
+        }
+
+        @Test
+        func `When drawingRenderers are not provided, new DrawingRenderer is created and configured`() {
+            let drawingRenderers: [DrawingRenderer] = []
+
+            let resultRenderers = CanvasViewModel.resolveDrawingRenderers(
+                renderer: MockMTLRenderer(),
+                drawingRenderers: drawingRenderers
+            )
+
+            // A default BrushDrawingRenderer is created
+            #expect(resultRenderers.count == 1)
+            #expect(resultRenderers[0] is BrushDrawingRenderer)
+            #expect(resultRenderers[0].renderer != nil)
         }
     }
 }
