@@ -43,10 +43,6 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var textureSize: CGSize { get }
 
-    func setup(
-        repository: TextureLayersDocumentsRepositoryProtocol?
-    )
-
     func updateSkippingThumbnail(
         textureLayersState: TextureLayersState
     )

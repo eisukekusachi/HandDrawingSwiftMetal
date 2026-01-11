@@ -17,17 +17,17 @@ public let saveDebounceMilliseconds: Int = 500
 @MainActor
 public final class CoreDataTextureLayers: TextureLayers {
 
-    private let storage: CoreDataStorage<TextureLayerArrayStorageEntity>
+    private var storage: CoreDataStorage<TextureLayerArrayStorageEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
         renderer: MTLRendering,
+        repository: TextureLayersDocumentsRepositoryProtocol? = nil,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
-
-        super.init(renderer: renderer)
+        super.init(renderer: renderer, repository: repository)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -45,13 +45,14 @@ public final class CoreDataTextureLayers: TextureLayers {
     }
 
     public func fetch() throws -> TextureLayerArrayStorageEntity? {
-        try storage.fetch()
+        try storage?.fetch()
     }
 }
 
 private extension CoreDataTextureLayers {
     func save() async {
         guard
+            let storage,
             layers.count != 0,
             textureSize != .zero,
             let selectedLayerId = selectedLayer?.id
@@ -61,8 +62,8 @@ private extension CoreDataTextureLayers {
         let newSelectedLayerId = selectedLayerId
         let newLayers = layers.map { TextureLayerModel(item: $0) }
 
-        let context = self.storage.context
-        let request = self.storage.fetchRequest()
+        let context = storage.context
+        let request = storage.fetchRequest()
         request.fetchLimit = 1
 
         await context.perform { [context] in

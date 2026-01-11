@@ -43,7 +43,8 @@ private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers(
-        renderer: nil
+        renderer: nil,
+        repository: nil
     )
 
     private let state: TextureLayersState = .init(

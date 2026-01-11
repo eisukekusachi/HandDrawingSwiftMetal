@@ -126,17 +126,15 @@ public final class CanvasViewModel {
         self.textureLayers = .init(
             textureLayers: CoreDataTextureLayers(
                 renderer: renderer,
+                repository: dependencies.textureLayersDocumentsRepository,
                 context: persistenceController.viewContext
             ),
-            renderer: renderer
+            renderer: renderer,
+            inMemoryRepository: dependencies.undoTextureInMemoryRepository
         )
         self.renderer = renderer
         self.displayView = displayView
         self.dependencies = dependencies
-        self.textureLayers.setup(
-            repository: dependencies.textureLayersDocumentsRepository
-        )
-        self.setupUndoTextureLayersIfAvailable(repository: dependencies.undoTextureInMemoryRepository)
     }
 
     func setup(
@@ -361,15 +359,6 @@ extension CanvasViewModel {
         self.touchGesture.setTransformingGestureRecognitionSecond(
             transformingGestureRecognitionSecond
         )
-    }
-
-    private func setupUndoTextureLayersIfAvailable(repository: UndoTextureInMemoryRepository?) {
-        // If `undoTextureRepository` is used, undo functionality is available
-        if let repository {
-            self.textureLayers.setUndoTextureRepository(
-                repository: repository
-            )
-        }
     }
 
     private func setupDefaultCanvas(
