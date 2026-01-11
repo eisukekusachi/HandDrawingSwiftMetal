@@ -75,6 +75,8 @@ import UIKit
 
     private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
 
+    private let persistenceController: PersistenceController
+
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
@@ -92,13 +94,30 @@ import UIKit
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
+        self.persistenceController = .init(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
         self.viewModel = .init(
             dependencies: .init(
+                canvasRenderer: .init(renderer: renderer, displayView: displayView),
+                textureLayers: .init(
+                    textureLayers: CoreDataTextureLayers(
+                        renderer: renderer,
+                        repository: textureLayersDocumentsRepository,
+                        context: persistenceController.viewContext
+                    ),
+                    renderer: renderer,
+                    inMemoryRepository: undoTextureInMemoryRepository
+                ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
-            ),
-            renderer: renderer,
-            displayView: displayView
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
+                persistenceController: persistenceController,
+                projectMetaDataStorage: .init(
+                    project: ProjectMetaData(),
+                    context: persistenceController.viewContext
+                )
+            )
         )
         super.init(frame: .zero)
     }
@@ -117,13 +136,30 @@ import UIKit
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
+        self.persistenceController = .init(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
         self.viewModel = .init(
             dependencies: .init(
+                canvasRenderer: .init(renderer: renderer, displayView: displayView),
+                textureLayers: .init(
+                    textureLayers: CoreDataTextureLayers(
+                        renderer: renderer,
+                        repository: textureLayersDocumentsRepository,
+                        context: persistenceController.viewContext
+                    ),
+                    renderer: renderer,
+                    inMemoryRepository: undoTextureInMemoryRepository
+                ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
-            ),
-            renderer: renderer,
-            displayView: displayView
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
+                persistenceController: persistenceController,
+                projectMetaDataStorage: .init(
+                    project: ProjectMetaData(),
+                    context: persistenceController.viewContext
+                )
+            )
         )
         super.init(coder: coder)
     }
@@ -139,6 +175,7 @@ import UIKit
             try await viewModel.setup(
                 drawingRenderers: drawingRenderers,
                 configuration: configuration,
+                renderer: renderer
             )
         } catch {
             fatalError("Failed to initialize the canvas")

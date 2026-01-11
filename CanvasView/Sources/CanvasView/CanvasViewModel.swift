@@ -84,21 +84,14 @@ public final class CanvasViewModel {
     private var drawingDisplayLink = DrawingDisplayLink()
 
     /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer
+    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
     private let transforming = Transforming()
 
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
     private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
 
-    private let persistenceController: PersistenceController
-
     private var dependencies: CanvasViewDependencies?
-
-    /// A protocol representing a drawable surface for the canvas
-    private let displayView: CanvasDisplayable
-
-    private let renderer: MTLRendering
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -108,38 +101,18 @@ public final class CanvasViewModel {
 
     init(
         projectMetaData: ProjectMetaData = ProjectMetaData(),
-        dependencies: CanvasViewDependencies,
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable
+        dependencies: CanvasViewDependencies
     ) {
-        self.canvasRenderer = .init(renderer: renderer, displayView: displayView)
-        self.drawingDebouncer = .init(delay: 0.25)
-        self.persistenceController = .init(
-            xcdatamodeldName: "CanvasStorage",
-            location: .swiftPackageManager
-        )
-        self.projectMetaDataStorage = .init(
-            project: projectMetaData,
-            context: persistenceController.viewContext
-        )
-        // Initialize texture layers that support undo and persist their data in Core Data
-        self.textureLayers = .init(
-            textureLayers: CoreDataTextureLayers(
-                renderer: renderer,
-                repository: dependencies.textureLayersDocumentsRepository,
-                context: persistenceController.viewContext
-            ),
-            renderer: renderer,
-            inMemoryRepository: dependencies.undoTextureInMemoryRepository
-        )
-        self.renderer = renderer
-        self.displayView = displayView
+        self.canvasRenderer = dependencies.canvasRenderer
+        self.projectMetaDataStorage = dependencies.projectMetaDataStorage
+        self.textureLayers = dependencies.textureLayers
         self.dependencies = dependencies
     }
 
     func setup(
         drawingRenderers: [DrawingRenderer] = [],
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration,
+        renderer: MTLRendering
     ) async throws {
         self.bindData()
 
@@ -150,6 +123,7 @@ public final class CanvasViewModel {
             baseBackgroundColor: environmentConfiguration.baseBackgroundColor
         )
         self.setupDrawingRenderers(
+            renderer: renderer,
             drawingRenderers: drawingRenderers
         )
         self.setupTouchGesture(
@@ -332,6 +306,7 @@ extension CanvasViewModel {
     }
 
     private func setupDrawingRenderers(
+        renderer: MTLRendering,
         drawingRenderers: [DrawingRenderer]
     ) {
         self.drawingRenderers = drawingRenderers
