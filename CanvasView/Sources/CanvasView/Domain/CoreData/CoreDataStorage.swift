@@ -7,7 +7,7 @@
 
 import CoreData
 
-public final class CoreDataStorage<Entity: NSManagedObject> {
+public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
     public let context: NSManagedObjectContext
 
     public init(
