@@ -113,7 +113,6 @@ import UIKit
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository,
                 projectMetaDataStorage: .init(
-                    project: ProjectMetaData(),
                     storage: AnyCoreDataStorage(
                         CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
                     )
@@ -156,7 +155,6 @@ import UIKit
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository,
                 projectMetaDataStorage: .init(
-                    project: ProjectMetaData(),
                     storage: AnyCoreDataStorage(
                         CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
                     )

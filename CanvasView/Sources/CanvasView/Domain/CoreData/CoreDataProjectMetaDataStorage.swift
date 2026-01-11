@@ -30,17 +30,15 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
         project.zipFileURL
     }
 
-    private var project: ProjectMetaData
+    private var project = ProjectMetaData()
 
     private let storage: AnyCoreDataStorage<ProjectMetaDataEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        project: ProjectMetaData,
         storage: AnyCoreDataStorage<ProjectMetaDataEntity>?
     ) {
-        self.project = project
         self.storage = storage
 
         // Save to Core Data when the properties are updated

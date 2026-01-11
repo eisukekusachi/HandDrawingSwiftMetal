@@ -26,6 +26,8 @@ struct CanvasViewModelTests {
 
         private let displayView = MockCanvasDisplayable(texture: nil)
 
+        private let textureLayersDocumentsRepository: MockTextureLayersDocumentsRepository
+
         private let textureSize: CGSize = .init(
             width: canvasMinimumTextureLength,
             height: canvasMinimumTextureLength
@@ -47,6 +49,10 @@ struct CanvasViewModelTests {
         }
 
         init() {
+            self.textureLayersDocumentsRepository = MockTextureLayersDocumentsRepository(
+                renderer: renderer
+            )
+
             let coreDataMetaDataEntity = ProjectMetaDataEntity(context: CoreDataTestHelper.makeInMemoryContext())
 
             self.dependencies = CanvasViewDependencies(
@@ -62,16 +68,11 @@ struct CanvasViewModelTests {
                     renderer: renderer,
                     inMemoryRepository: nil
                 ),
-                textureLayersDocumentsRepository: MockTextureLayersDocumentsRepository(
-                    renderer: renderer
-                ),
+                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: UndoTextureInMemoryRepository(
                     renderer: renderer
                 ),
                 projectMetaDataStorage: CoreDataProjectMetaDataStorage(
-                    project: ProjectMetaData(
-                        projectName: "newName"
-                    ),
                     storage: AnyCoreDataStorage(
                         MockCoreDataStorage<ProjectMetaDataEntity>(
                             context: nil,
@@ -103,7 +104,9 @@ struct CanvasViewModelTests {
                 }
             }
 
-            try? await subject.setupCanvas(
+            let now = Date()
+
+            try await subject.setupCanvas(
                 textureLayersState: .init(textureSize: textureSize),
                 configuration: .init(
                     textureSize: textureSize
@@ -113,36 +116,24 @@ struct CanvasViewModelTests {
             await waitForEmission.value
             cancellable?.cancel()
 
-            // The metadata is overwritten from Core Data.
-            // And only updatedAt is set to the current date
+            // If textureLayersState is provided, the project metadata is overwritten using Core Data,
+            // and only updatedAt is updated to the current date.
             let metaData = subject.projectMetaDataStorage
             #expect(metaData.projectName == currentProjectMetaData.projectName)
             #expect(Int(metaData.createdAt.timeIntervalSince1970) == Int(currentProjectMetaData.createdAt.timeIntervalSince1970))
-            #expect(Int(metaData.updatedAt.timeIntervalSince1970) == Int(Date().timeIntervalSince1970))
+            #expect(Int(metaData.updatedAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
 
-//            #expect(repository.initializeStorage_textureLayersState_callCount == 1)
-            //            #expect(repository.initializeStorage_newTextureSize_callCount == 0)
-            #expect(true)
+            // Restore storage using the provided textureLayersState
+            #expect(textureLayersDocumentsRepository.initializeStorage_textureLayersState_callCount == 1)
+            #expect(textureLayersDocumentsRepository.initializeStorage_newTextureSize_callCount == 0)
         }
-/*
+
         @Test
         func `When textureLayersState is nil and the texture size is above the minimum threshold, the default canvas initialization is performed`() async throws {
             let newProjectName = "newProjectName"
 
             let subject = Subject(
-                projectMetaData: currentProjectMetaData,
-                renderer: renderer
-            )
-
-            let repository = MockTextureLayersDocumentsRepository(
-                renderer: renderer
-            )
-            subject.setup(
-                dependencies: .init(
-                    textureLayersDocumentsRepository: repository,
-                    renderer: renderer
-                ),
-                environmentConfiguration: EnvironmentConfiguration()
+                dependencies: dependencies
             )
 
             var cancellable: AnyCancellable?
@@ -156,7 +147,9 @@ struct CanvasViewModelTests {
                 }
             }
 
-            try? await subject.initializeCanvas(
+            let now = Date()
+
+            try await subject.setupCanvas(
                 textureLayersState: nil,
                 configuration: .init(
                     textureSize: textureSize,
@@ -167,21 +160,21 @@ struct CanvasViewModelTests {
             await waitForEmission.value
             cancellable?.cancel()
 
-            // The project metadata is updated with the new name and the current timestamp
+            // If textureLayersState is nil, the project metadata is updated
+            // with the new project name and the current timestamp.
             #expect(subject.projectMetaDataStorage.projectName == newProjectName)
-            #expect(Int(subject.projectMetaDataStorage.createdAt.timeIntervalSince1970) == Int(Date().timeIntervalSince1970))
-            #expect(Int(subject.projectMetaDataStorage.updatedAt.timeIntervalSince1970) == Int(Date().timeIntervalSince1970))
+            #expect(Int(subject.projectMetaDataStorage.createdAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
+            #expect(Int(subject.projectMetaDataStorage.updatedAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
 
-            #expect(repository.initializeStorage_textureLayersState_callCount == 0)
-            #expect(repository.initializeStorage_newTextureSize_callCount == 1)
-            #expect(true)
+            // Initialize storage with a new texture size
+            #expect(textureLayersDocumentsRepository.initializeStorage_textureLayersState_callCount == 0)
+            #expect(textureLayersDocumentsRepository.initializeStorage_newTextureSize_callCount == 1)
         }
 
         @Test
         func `When textureLayersState is nil and the texture size is below the minimum threshold, an error is thrown`() async {
             let subject = Subject(
-                projectMetaData: currentProjectMetaData,
-                renderer: renderer
+                dependencies: dependencies
             )
 
             var didInitialize = false
@@ -190,20 +183,8 @@ struct CanvasViewModelTests {
             }
             defer { cancellable.cancel() }
 
-
-            let repository = MockTextureLayersDocumentsRepository(
-                renderer: renderer
-            )
-            subject.setup(
-                dependencies: .init(
-                    textureLayersDocumentsRepository: repository,
-                    renderer: renderer
-                ),
-                environmentConfiguration: EnvironmentConfiguration()
-            )
-
             await #expect(throws: Error.self) {
-                try await subject.initializeCanvas(
+                try await subject.setupCanvas(
                     textureLayersState: nil,
                     configuration: .init(textureSize: .zero)
                 )
@@ -216,25 +197,13 @@ struct CanvasViewModelTests {
         @Test
         func `When textureLayersState exists, the canvas is restored from the documents directory`() async throws {
             let subject = Subject(
-                projectMetaData: currentProjectMetaData,
-                renderer: renderer
+                dependencies: dependencies
             )
 
             let newProjectMetaData: ProjectMetaData = .init(
                 projectName: "dummyName",
                 createdAt: formatter.date(from: "2024-1-1 00:00:00")!,
                 updatedAt: formatter.date(from: "2024-12-31 00:00:00")!
-            )
-
-            let repository = MockTextureLayersDocumentsRepository(
-                renderer: renderer
-            )
-            subject.setup(
-                dependencies: .init(
-                    textureLayersDocumentsRepository: repository,
-                    renderer: renderer
-                ),
-                environmentConfiguration: EnvironmentConfiguration()
             )
 
             var cancellable: AnyCancellable?
@@ -248,7 +217,7 @@ struct CanvasViewModelTests {
                 }
             }
 
-            try? await subject.restoreCanvasFromDocumentsFolder(
+            try await subject.restoreCanvasFromDocumentsFolder(
                 workingDirectoryURL: URL(fileURLWithPath: "/tmp/MockTextures"),
                 textureLayersState: .init(textureSize: textureSize),
                 projectMetaData: newProjectMetaData
@@ -257,14 +226,12 @@ struct CanvasViewModelTests {
             await waitForEmission.value
             cancellable?.cancel()
 
-            // The projectMetaDataStorage is overwritten with the new projectMetadata
+            // The project metadata is overwritten with the new projectMetadata
             #expect(subject.projectMetaDataStorage.projectName == newProjectMetaData.projectName)
             #expect(subject.projectMetaDataStorage.createdAt == newProjectMetaData.createdAt)
             #expect(subject.projectMetaDataStorage.updatedAt == newProjectMetaData.updatedAt)
 
-            #expect(repository.restoreStorage_callCount == 1)
-            #expect(true)
+            #expect(textureLayersDocumentsRepository.restoreStorage_callCount == 1)
         }
-    */
     }
 }
