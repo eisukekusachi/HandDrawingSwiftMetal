@@ -13,7 +13,7 @@ import Testing
 import SwiftUI
 
 @testable import CanvasView
-/*
+
 @MainActor
 struct TextureLayersTests {
 
@@ -42,9 +42,8 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that adding a layer increases the count and selects the new layer`() async throws {
-        let subject = Subject(renderer: renderer)
-
-        subject.setup(
+        let subject = Subject(
+            renderer: renderer,
             repository: textureLayersDocumentsRepository
         )
 
@@ -84,9 +83,8 @@ struct TextureLayersTests {
 
     @Test
     func `Verify that deleting a layer works but at least one layer always remains`() async throws {
-        let subject = Subject(renderer: renderer)
-
-        subject.setup(
+        let subject = Subject(
+            renderer: renderer,
             repository: textureLayersDocumentsRepository
         )
 
@@ -255,4 +253,3 @@ struct TextureLayersTests {
         #expect(subject.layers.first?.isVisible == false)
     }
 }
-*/
