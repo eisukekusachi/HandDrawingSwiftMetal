@@ -91,8 +91,6 @@ public final class CanvasViewModel {
     /// A debouncer that ensures only the last operation is executed when drawing occurs rapidly
     private let persistanceDrawingDebouncer = Debouncer(delay: 0.25)
 
-    private var dependencies: CanvasViewDependencies?
-
     private var cancellables = Set<AnyCancellable>()
 
     public static let thumbnailName: String = "thumbnail.png"
@@ -105,7 +103,6 @@ public final class CanvasViewModel {
         self.canvasRenderer = dependencies.canvasRenderer
         self.projectMetaDataStorage = dependencies.projectMetaDataStorage
         self.textureLayers = dependencies.textureLayers
-        self.dependencies = dependencies
     }
 
     func setup(
@@ -177,12 +174,8 @@ extension CanvasViewModel {
         textureLayersState: TextureLayersState,
         projectMetaData: ProjectMetaData
     ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
         // Restore the repository using TextureLayersState
-        try await textureLayersDocumentsRepository.restoreStorageFromSavedData(
+        try await canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromSavedData(
             url: workingDirectoryURL,
             textureLayersState: textureLayersState
         )
@@ -316,12 +309,8 @@ extension CanvasViewModel {
         projectName: String,
         textureLayersState: TextureLayersState
     ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
         // Initialize the repository using TextureLayersState
-        try await textureLayersDocumentsRepository.initializeStorage(
+        try await canvasRenderer.textureLayersDocumentsRepository.initializeStorage(
             newTextureLayersState: textureLayersState
         )
 
@@ -341,12 +330,8 @@ extension CanvasViewModel {
     private func setupCanvasFromCoreData(
         textureLayersState: TextureLayersState
     ) async throws {
-        guard
-            let textureLayersDocumentsRepository = dependencies?.textureLayersDocumentsRepository
-        else { return }
-
         // Restore the repository using TextureLayersState
-        try textureLayersDocumentsRepository.restoreStorageFromCoreData(
+        try canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
 
@@ -639,8 +624,6 @@ public extension CanvasViewModel {
         thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
         to workingDirectoryURL: URL
     ) async throws {
-        guard let dependencies else { return }
-
         let device = canvasRenderer.device
 
         // Save the thumbnail image into the working directory
@@ -649,7 +632,7 @@ public extension CanvasViewModel {
         )
 
         // Copy all textures from the textureRepository
-        let textures = try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+        let textures = try await canvasRenderer.textureLayersDocumentsRepository.duplicatedTextures(
             textureLayers.layers.map { $0.id }
         )
 
@@ -766,7 +749,6 @@ extension CanvasViewModel {
 
     private func completeDrawing() {
         guard
-            let dependencies,
             let layerId = textureLayers.selectedLayer?.id,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
@@ -775,7 +757,7 @@ extension CanvasViewModel {
             Task(priority: .utility) { [weak self] in
                 guard let self else { return }
                 do {
-                    try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
                         texture: selectedLayerTexture,
                         for: layerId
                     )
