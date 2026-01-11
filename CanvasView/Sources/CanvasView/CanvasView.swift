@@ -171,16 +171,60 @@ import UIKit
         layoutViews()
         addEvents()
         bindData()
-
-        let renderers = CanvasViewModel.resolveDrawingRenderers(
-            renderer: renderer,
-            drawingRenderers: drawingRenderers
-        )
-
         try await viewModel.setup(
-            drawingRenderers: renderers,
+            drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
+                renderer: renderer,
+                drawingRenderers: drawingRenderers
+            ),
             configuration: configuration
         )
+    }
+
+    private func layoutViews() {
+        addSubview(displayView)
+        displayView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            displayView.topAnchor.constraint(equalTo: topAnchor),
+            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
+
+    private func addEvents() {
+        addGestureRecognizer(
+            FingerInputGestureRecognizer(delegate: self)
+        )
+        addGestureRecognizer(
+            PencilInputGestureRecognizer(delegate: self)
+        )
+    }
+
+    private func bindData() {
+        displayView.displayTextureSizeChanged
+            .sink { [weak self] _ in
+                self?.viewModel.onUpdateDisplayTexture()
+            }
+            .store(in: &cancellables)
+
+        viewModel.didInitialize
+            .sink { [weak self] value in
+                self?.didInitializeSubject.send(value)
+            }
+            .store(in: &cancellables)
+
+        viewModel.alert
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                self?.alertSubject.send(error)
+            }
+            .store(in: &cancellables)
+
+        viewModel.didUndo
+            .sink { [weak self] value in
+                self?.didUndoSubject.send(value)
+            }
+            .store(in: &cancellables)
     }
 
     public override func layoutSubviews() {
@@ -242,55 +286,6 @@ import UIKit
     }
     public func redo() {
         viewModel.redo()
-    }
-}
-
-extension CanvasView {
-    private func layoutViews() {
-        addSubview(displayView)
-        displayView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            displayView.topAnchor.constraint(equalTo: topAnchor),
-            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-    }
-
-    private func addEvents() {
-        addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
-    }
-
-    private func bindData() {
-        displayView.displayTextureSizeChanged
-            .sink { [weak self] _ in
-                self?.viewModel.onUpdateDisplayTexture()
-            }
-            .store(in: &cancellables)
-
-        viewModel.didInitialize
-            .sink { [weak self] value in
-                self?.didInitializeSubject.send(value)
-            }
-            .store(in: &cancellables)
-
-        viewModel.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        viewModel.didUndo
-            .sink { [weak self] value in
-                self?.didUndoSubject.send(value)
-            }
-            .store(in: &cancellables)
     }
 }
 
