@@ -34,24 +34,25 @@ class HandDrawingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
 
         addEvents()
         bindData()
+        layoutViews()
 
-        layoutTextureLayerViewPresenter()
-        addBrushPalette()
-        addEraserPalette()
+        setupTextureLayerViewPresenter()
+        setupNewCanvasDialogPresenter()
+        setupCanvasView()
+    }
 
-        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
-
-        initializeNewCanvasDialogPresenter()
-
-        view.backgroundColor = .white
+    private func setupCanvasView() {
         showActivityIndicator(true)
         showContentView(false)
-
         Task {
+            defer {
+                showActivityIndicator(false)
+                showContentView(true)
+            }
             do {
                 try await contentView.canvasView.setup(
                     drawingRenderers: [
@@ -60,23 +61,71 @@ class HandDrawingViewController: UIViewController {
                     ],
                     configuration: canvasConfiguration ?? .init()
                 )
-
                 updateComponents()
-
-                showActivityIndicator(false)
-                showContentView(true)
 
             } catch {
                 fatalError("Failed to initialize the canvas")
             }
         }
     }
+
+    private func setupNewCanvasDialogPresenter() {
+        newCanvasDialogPresenter.onTapButton = { [weak self] in
+            guard
+                let `self`,
+                let canvasView = self.contentView.canvasView
+            else { return }
+
+            Task {
+                defer { self.viewModel.showActivityIndicator(false) }
+                self.viewModel.showActivityIndicator(true)
+
+                do {
+                    let projectName = Calendar.currentDate
+                    let textureSize = canvasView.currentTextureSize
+
+                    try await canvasView.newCanvas(
+                        newProjectName: projectName,
+                        newTextureSize: textureSize
+                    )
+
+                    self.viewModel.drawingToolStorage.update(
+                        type: .brush,
+                        brushDiameter: 8,
+                        eraserDiameter: 8
+                    )
+                    self.viewModel.brushPaletteStorage.update(
+                        colors: self.viewModel.initializeColors,
+                        index: 0
+                    )
+                    self.viewModel.eraserPaletteStorage.update(
+                        alphas: self.viewModel.initializeAlphas,
+                        index: 0
+                    )
+                    self.updateComponents()
+                } catch {
+                    self.showAlert(error)
+                }
+            }
+        }
+    }
+
+    private func setupTextureLayerViewPresenter() {
+        textureLayerViewPresenter.setup(
+            configuration: .init(
+                anchorButton: contentView.layerButton,
+                destinationView: contentView,
+                size: .init(
+                    width: 300,
+                    height: 300
+                )
+            )
+        )
+    }
 }
 
 extension HandDrawingViewController {
-
     private func bindData() {
-
         contentView.canvasView.isDrawing
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isDrawing in
@@ -88,7 +137,9 @@ extension HandDrawingViewController {
         contentView.canvasView.didInitialize
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureLayers in
-                self?.initializeTextureLayerView(textureLayers)
+                self?.textureLayerViewPresenter.update(
+                    textureLayers: textureLayers.textureLayers
+                )
                 self?.contentView.initialize()
             }
             .store(in: &cancellables)
@@ -197,70 +248,10 @@ extension HandDrawingViewController {
             )
         }
     }
-}
 
-extension HandDrawingViewController {
-
-    private func initializeNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = { [weak self] in
-            guard
-                let `self`,
-                let canvasView = self.contentView.canvasView
-            else { return }
-
-            Task {
-                defer { self.viewModel.showActivityIndicator(false) }
-                self.viewModel.showActivityIndicator(true)
-
-                do {
-                    let projectName = Calendar.currentDate
-                    let textureSize = canvasView.currentTextureSize
-
-                    try await canvasView.newCanvas(
-                        newProjectName: projectName,
-                        newTextureSize: textureSize
-                    )
-
-                    // Initialize the components after newCanvas succeeds
-
-                    self.viewModel.drawingToolStorage.update(
-                        type: .brush,
-                        brushDiameter: 8,
-                        eraserDiameter: 8
-                    )
-                    self.viewModel.brushPaletteStorage.update(
-                        colors: self.viewModel.initializeColors,
-                        index: 0
-                    )
-                    self.viewModel.eraserPaletteStorage.update(
-                        alphas: self.viewModel.initializeAlphas,
-                        index: 0
-                    )
-                    self.updateComponents()
-                } catch {
-                    self.showAlert(error)
-                }
-            }
-        }
-    }
-
-    private func layoutTextureLayerViewPresenter() {
-        textureLayerViewPresenter.setup(
-            configuration: .init(
-                anchorButton: contentView.layerButton,
-                destinationView: contentView,
-                size: .init(
-                    width: 300,
-                    height: 300
-                )
-            )
-        )
-    }
-
-    private func initializeTextureLayerView(_ result: CanvasConfigurationResult) {
-        textureLayerViewPresenter.update(
-            textureLayers: result.textureLayers
-        )
+    private func layoutViews() {
+        addBrushPalette()
+        addEraserPalette()
     }
 
     private func addBrushPalette() {
@@ -306,11 +297,15 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
+        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
         contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
         contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
     }
+}
 
+extension HandDrawingViewController {
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,

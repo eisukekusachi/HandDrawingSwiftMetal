@@ -7,11 +7,11 @@
 
 import CoreData
 
-public final class CoreDataStorage<Entity: NSManagedObject> {
-    public let context: NSManagedObjectContext
+public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
+    public let context: NSManagedObjectContext?
 
     public init(
-        context: NSManagedObjectContext
+        context: NSManagedObjectContext?
     ) {
         self.context = context
     }
@@ -24,6 +24,6 @@ public final class CoreDataStorage<Entity: NSManagedObject> {
     }
 
     public func fetch() throws -> Entity? {
-        try context.fetch(fetchRequest()).first
+        try context?.fetch(fetchRequest()).first
     }
 }

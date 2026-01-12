@@ -71,6 +71,12 @@ import UIKit
 
     private let viewModel: CanvasViewModel
 
+    private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+
+    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+
+    private let persistenceController: PersistenceController
+
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
@@ -78,26 +84,122 @@ import UIKit
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-        renderer = MTLRenderer(device: sharedDevice)
-        displayView = CanvasDisplayView(renderer: renderer)
-        viewModel = CanvasViewModel(renderer: renderer)
+        self.renderer = MTLRenderer(device: sharedDevice)
+        self.displayView = .init(renderer: renderer)
+        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
+            storageDirectoryURL: URL.applicationSupport,
+            directoryName: "TextureStorage",
+            renderer: renderer
+        )
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
+        self.persistenceController = .init(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
+        self.viewModel = .init(
+            dependencies: .init(
+                canvasRenderer: .init(
+                    renderer: renderer,
+                    repository: textureLayersDocumentsRepository,
+                    displayView: displayView
+                ),
+                textureLayers: .init(
+                    textureLayers: CoreDataTextureLayers(
+                        renderer: renderer,
+                        repository: textureLayersDocumentsRepository,
+                        context: persistenceController.viewContext
+                    ),
+                    renderer: renderer,
+                    inMemoryRepository: undoTextureInMemoryRepository
+                ),
+                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
+                projectMetaDataStorage: .init(
+                    storage: AnyCoreDataStorage(
+                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
+                    )
+                )
+            )
+        )
         super.init(frame: .zero)
-        commonInitialize()
     }
     public required init?(coder: NSCoder) {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
         self.sharedDevice = sharedDevice
-        renderer = MTLRenderer(device: sharedDevice)
-        displayView = CanvasDisplayView(renderer: renderer)
-        viewModel = CanvasViewModel(renderer: renderer)
+        self.renderer = MTLRenderer(device: sharedDevice)
+        self.displayView = .init(renderer: renderer)
+        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
+            storageDirectoryURL: URL.applicationSupport,
+            directoryName: "TextureStorage",
+            renderer: renderer
+        )
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
+        self.persistenceController = .init(
+            xcdatamodeldName: "CanvasStorage",
+            location: .swiftPackageManager
+        )
+        self.viewModel = .init(
+            dependencies: .init(
+                canvasRenderer: .init(
+                    renderer: renderer,
+                    repository: textureLayersDocumentsRepository,
+                    displayView: displayView
+                ),
+                textureLayers: .init(
+                    textureLayers: CoreDataTextureLayers(
+                        renderer: renderer,
+                        repository: textureLayersDocumentsRepository,
+                        context: persistenceController.viewContext
+                    ),
+                    renderer: renderer,
+                    inMemoryRepository: undoTextureInMemoryRepository
+                ),
+                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
+                projectMetaDataStorage: .init(
+                    storage: AnyCoreDataStorage(
+                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
+                    )
+                )
+            )
+        )
         super.init(coder: coder)
-        commonInitialize()
     }
-    private func commonInitialize() {
-        layoutView()
+
+    public func setup(
+        drawingRenderers: [DrawingRenderer],
+        configuration: CanvasConfiguration
+    ) async throws {
+        layoutViews()
+        addEvents()
         bindData()
+        try await viewModel.setup(
+            drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
+                renderer: renderer,
+                drawingRenderers: drawingRenderers
+            ),
+            configuration: configuration
+        )
+    }
+
+    private func layoutViews() {
+        addSubview(displayView)
+        displayView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            displayView.topAnchor.constraint(equalTo: topAnchor),
+            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
+
+    private func addEvents() {
         addGestureRecognizer(
             FingerInputGestureRecognizer(delegate: self)
         )
@@ -106,37 +208,31 @@ import UIKit
         )
     }
 
-    public func setup(
-        drawingRenderers: [DrawingRenderer],
-        configuration: CanvasConfiguration
-    ) async throws {
-        let dependencies: CanvasViewDependencies = .init(
-            textureLayersDocumentsRepository: TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            ),
-            undoTextureRepository: .init(
-                renderer: renderer
-            ),
-            renderer: renderer,
-            displayView: displayView
-        )
+    private func bindData() {
+        displayView.displayTextureSizeChanged
+            .sink { [weak self] _ in
+                self?.viewModel.onUpdateDisplayTexture()
+            }
+            .store(in: &cancellables)
 
-        viewModel.setup(
-            drawingRenderers: drawingRenderers,
-            dependencies: dependencies,
-            environmentConfiguration: configuration.environmentConfiguration,
-        )
+        viewModel.didInitialize
+            .sink { [weak self] value in
+                self?.didInitializeSubject.send(value)
+            }
+            .store(in: &cancellables)
 
-        do {
-            try await viewModel.initializeCanvas(
-                textureLayersState: viewModel.textureLayersStateFromCoreDataEntity,
-                configuration: configuration
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
+        viewModel.alert
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                self?.alertSubject.send(error)
+            }
+            .store(in: &cancellables)
+
+        viewModel.didUndo
+            .sink { [weak self] value in
+                self?.didUndoSubject.send(value)
+            }
+            .store(in: &cancellables)
     }
 
     public override func layoutSubviews() {
@@ -198,45 +294,6 @@ import UIKit
     }
     public func redo() {
         viewModel.redo()
-    }
-}
-
-extension CanvasView {
-    private func layoutView() {
-        addSubview(displayView)
-        displayView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            displayView.topAnchor.constraint(equalTo: topAnchor),
-            displayView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            displayView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            displayView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-    }
-    private func bindData() {
-        displayView.displayTextureSizeChanged
-            .sink { [weak self] displayTextureSize in
-                self?.viewModel.didChangeDisplayTextureSize(displayTextureSize)
-            }
-            .store(in: &cancellables)
-
-        viewModel.didInitialize
-            .sink { [weak self] value in
-                self?.didInitializeSubject.send(value)
-            }
-            .store(in: &cancellables)
-
-        viewModel.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        viewModel.didUndo
-            .sink { [weak self] value in
-                self?.didUndoSubject.send(value)
-            }
-            .store(in: &cancellables)
     }
 }
 

@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
-import Combine
 import MetalKit
 
 /// A set of textures for realtime eraser drawing
@@ -16,9 +15,17 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     }
     private var _displayRealtimeDrawingTexture: Bool = false
 
-    private var alpha: Int = 255
+    public var diameter: Int {
+        _diameter
+    }
+    private var _diameter: Int = 8
 
-    private var diameter: Int = 8
+    public var renderer: MTLRendering? {
+        _renderer
+    }
+    private var _renderer: MTLRendering?
+
+    private var alpha: Int = 255
 
     private var frameSize: CGSize = .zero
 
@@ -31,8 +38,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var displayView: CanvasDisplayable?
 
-    private var renderer: MTLRendering?
-
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
@@ -41,17 +46,23 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
 public extension EraserDrawingRenderer {
 
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
-
-        self.displayView = displayView
-        self.renderer = renderer
-
-        self.frameSize = frameSize
-
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+    func setup(renderer: MTLRendering) {
+        guard let buffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: renderer.device
-        )
+        ) else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(
+                    localized: "Failed to create buffers",
+                    bundle: .main
+                )
+            )
+            Logger.error(error)
+            fatalError("Metal is not supported on this device.")
+        }
+        self._renderer = renderer
+        self.flippedTextureBuffers = buffers
     }
 
     func initializeTextures(textureSize: CGSize) {
@@ -89,11 +100,8 @@ public extension EraserDrawingRenderer {
         self.frameSize = frameSize
     }
 
-    func getDiameter() -> Int {
-        diameter
-    }
     func setDiameter(_ diameter: Int) {
-        self.diameter = diameter
+        self._diameter = diameter
     }
 
     func setAlpha(_ alpha: Int) {
@@ -108,35 +116,18 @@ public extension EraserDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     ) {
-        guard
-            let textureSize,
-            let displayTextureSize = displayView?.displayTexture?.size
-        else { return }
-
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.preciseLocation,
-                        matrix: matrix,
-                        textureSize: textureSize,
-                        drawableSize: displayTextureSize,
-                        frameSize: frameSize
-                    ),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                    diameter: CGFloat(diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
+            points: strokePoints,
+            touchPhase: touchPhase
         )
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -146,7 +137,7 @@ public extension EraserDrawingRenderer {
             let lineDrawnTexture,
             let grayscaleTexture,
             let drawingTexture,
-            let selectedLayerTexture,
+            let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
@@ -170,7 +161,7 @@ public extension EraserDrawingRenderer {
         )
 
         renderer.drawTexture(
-            texture: selectedLayerTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: drawingTexture,

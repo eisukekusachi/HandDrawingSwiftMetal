@@ -88,14 +88,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     private var oldAlpha: Int?
 
     public init(
-        renderer: MTLRendering?
-    ) {
-        self.renderer = renderer
-    }
-
-    public func setup(
+        renderer: MTLRendering?,
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
+        self.renderer = renderer
         self.documentsRepository = repository
     }
 

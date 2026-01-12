@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2023/04/01.
 //
 
-import Combine
 import MetalKit
 
 /// A set of textures for realtime brush drawing
@@ -16,9 +15,17 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     }
     private var _displayRealtimeDrawingTexture: Bool = false
 
-    private var color: UIColor = .black
+    public var diameter: Int {
+        _diameter
+    }
+    private var _diameter: Int = 8
 
-    private var diameter: Int = 8
+    public var renderer: MTLRendering? {
+        _renderer
+    }
+    private var _renderer: MTLRendering?
+
+    private var color: UIColor = .black
 
     private var frameSize: CGSize = .zero
 
@@ -28,10 +35,6 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
     private var flippedTextureBuffers: MTLTextureBuffers!
 
-    private var displayView: CanvasDisplayable?
-
-    private var renderer: MTLRendering?
-
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
@@ -40,17 +43,23 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 
 public extension BrushDrawingRenderer {
 
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?) {
-
-        self.displayView = displayView
-        self.renderer = renderer
-
-        self.frameSize = frameSize
-
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+    func setup(renderer: MTLRendering) {
+        guard let buffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: renderer.device
-        )
+        ) else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(
+                    localized: "Failed to create buffers",
+                    bundle: .main
+                )
+            )
+            Logger.error(error)
+            fatalError("Metal is not supported on this device.")
+        }
+        self._renderer = renderer
+        self.flippedTextureBuffers = buffers
     }
 
     func initializeTextures(textureSize: CGSize) {
@@ -82,11 +91,8 @@ public extension BrushDrawingRenderer {
         self.frameSize = frameSize
     }
 
-    func getDiameter() -> Int {
-        diameter
-    }
     func setDiameter(_ diameter: Int) {
-        self.diameter = diameter
+        self._diameter = diameter
     }
 
     func setColor(_ color: UIColor) {
@@ -101,35 +107,18 @@ public extension BrushDrawingRenderer {
         drawingCurve = DefaultDrawingCurve()
     }
 
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     ) {
-        guard
-            let textureSize,
-            let displayTextureSize = displayView?.displayTexture?.size
-        else { return }
-
         drawingCurve?.append(
-            points: screenTouchPoints.map {
-                .init(
-                    location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.preciseLocation,
-                        matrix: matrix,
-                        textureSize: textureSize,
-                        drawableSize: displayTextureSize,
-                        frameSize: frameSize
-                    ),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                    diameter: CGFloat(diameter)
-                )
-            },
-            touchPhase: screenTouchPoints.currentTouchPhase
+            points: strokePoints,
+            touchPhase: touchPhase
         )
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -138,7 +127,7 @@ public extension BrushDrawingRenderer {
             let drawingCurve,
             let drawingTexture,
             let grayscaleTexture,
-            let selectedLayerTexture,
+            let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
@@ -161,8 +150,10 @@ public extension BrushDrawingRenderer {
             with: commandBuffer
         )
 
+        // Rendering to the realtimeTexture starts by overwriting it with the baseTexture,
+        // then composites the drawingTexture.
         renderer.drawTexture(
-            texture: selectedLayerTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: realtimeDrawingTexture,

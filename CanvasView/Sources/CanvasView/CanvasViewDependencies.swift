@@ -9,27 +9,33 @@ import Foundation
 
 @MainActor
 struct CanvasViewDependencies {
+
+    /// A class that manages drawing on the canvas
+    let canvasRenderer: CanvasRenderer
+
+    /// A class that manages texture layers
+    let textureLayers: UndoTextureLayers
+
     /// A Protocol that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     /// A repository that manages textures used for undo in memory
-    let undoTextureRepository: UndoTextureInMemoryRepository?
+    let undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
-    /// A protocol responsible for rendering textures to a drawable surface
-    let renderer: MTLRendering
-
-    /// A protocol representing a drawable surface for the canvas
-    let displayView: CanvasDisplayable?
+    /// Metadata stored in Core Data
+    let projectMetaDataStorage: CoreDataProjectMetaDataStorage
 
     init(
+        canvasRenderer: CanvasRenderer,
+        textureLayers: UndoTextureLayers,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol,
-        undoTextureRepository: UndoTextureInMemoryRepository? = nil,
-        renderer: MTLRendering,
-        displayView: CanvasDisplayable? = nil
+        undoTextureInMemoryRepository: UndoTextureInMemoryRepository? = nil,
+        projectMetaDataStorage: CoreDataProjectMetaDataStorage
     ) {
+        self.canvasRenderer = canvasRenderer
+        self.textureLayers = textureLayers
         self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
-        self.undoTextureRepository = undoTextureRepository
-        self.renderer = renderer
-        self.displayView = displayView
+        self.undoTextureInMemoryRepository = undoTextureInMemoryRepository
+        self.projectMetaDataStorage = projectMetaDataStorage
     }
 }

@@ -43,10 +43,12 @@ public final class UndoTextureLayers: ObservableObject {
 
     public init(
         textureLayers: any TextureLayersProtocol,
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        inMemoryRepository: UndoTextureInMemoryRepository?
     ) {
         self.textureLayers = textureLayers
         self.renderer = renderer
+        self.inMemoryRepository = inMemoryRepository
     }
 
     public func setupUndoManager(
@@ -573,14 +575,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public var textureSize: CGSize {
         textureLayers.textureSize
-    }
-
-    public func setup(
-        repository: TextureLayersDocumentsRepositoryProtocol?
-    ) {
-        textureLayers.setup(
-            repository: repository
-        )
     }
 
     public func updateSkippingThumbnail(

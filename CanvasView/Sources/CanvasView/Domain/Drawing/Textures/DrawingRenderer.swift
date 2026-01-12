@@ -5,19 +5,21 @@
 //  Created by Eisuke Kusachi on 2023/12/10.
 //
 
-import Combine
 import MetalKit
 
 public typealias RealtimeDrawingTexture = MTLTexture
 
 /// A protocol that defines a renderer for realtime stroke drawing.
 @MainActor
-public protocol DrawingRenderer {
+public protocol DrawingRenderer: AnyObject {
 
     var displayRealtimeDrawingTexture: Bool { get }
 
-    /// Configures external dependencies
-    func setup(frameSize: CGSize, renderer: MTLRendering, displayView: CanvasDisplayable?)
+    var diameter: Int { get }
+
+    var renderer: MTLRendering? { get }
+
+    func setup(renderer: MTLRendering)
 
     /// Initializes the textures for realtime drawing
     func initializeTextures(textureSize: CGSize)
@@ -31,15 +33,15 @@ public protocol DrawingRenderer {
     /// Pen drawing has started
     func beginPencilStroke()
 
-    /// Called on every drag event
-    func onStroke(
-        screenTouchPoints: [TouchPoint],
-        matrix: CGAffineTransform
+    /// Appends stroke points
+    func appendStrokePoints(
+        strokePoints: [GrayscaleDotPoint],
+        touchPhase: TouchPhase
     )
 
     /// Called during drawing
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     )
