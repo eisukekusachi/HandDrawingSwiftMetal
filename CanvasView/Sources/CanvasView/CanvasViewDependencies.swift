@@ -10,8 +10,10 @@ import Foundation
 @MainActor
 struct CanvasViewDependencies {
 
+    /// A class that manages drawing on the canvas
     let canvasRenderer: CanvasRenderer
 
+    /// A class that manages texture layers
     let textureLayers: UndoTextureLayers
 
     /// A Protocol that manages canvas layer textures, persisting them on disk so the canvas can be restored after the app is closed
