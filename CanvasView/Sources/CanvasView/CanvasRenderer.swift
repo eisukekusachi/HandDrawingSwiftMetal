@@ -251,7 +251,7 @@ extension CanvasRenderer {
         )
     }
 
-    func updateCurrentTexture(
+    func updateSelectedLayerTexture(
         using texture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
