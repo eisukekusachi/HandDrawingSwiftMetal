@@ -11,20 +11,10 @@ import Combine
 /// A custom view for displaying textures with Metal support
 class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
+    /// Texture rendered to the screen. Its size changes when the device is rotated
     var displayTexture: MTLTexture? {
         _displayTexture
     }
-
-    var displayTextureSizeChanged: AnyPublisher<CGSize, Never> {
-        displayTextureSizeChangedSubject.eraseToAnyPublisher()
-    }
-
-    private(set) var commandBuffer: MTLCommandBuffer?
-
-    private let renderer: MTLRendering
-
-    /// A texture that is rendered on the screen.
-    /// Its size changes when the device is rotated.
     private var _displayTexture: MTLTexture? {
         didSet {
             if let textureSize = _displayTexture?.size {
@@ -33,45 +23,56 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         }
     }
 
-    private var flippedTextureBuffers: MTLTextureBuffers?
-
+    /// Emits a `CGSize` when the size of `_displayTexture` changes.
+    var displayTextureSizeChanged: AnyPublisher<CGSize, Never> {
+        displayTextureSizeChangedSubject.eraseToAnyPublisher()
+    }
     private let displayTextureSizeChangedSubject = PassthroughSubject<CGSize, Never>()
 
-    private var commandQueue: MTLCommandQueue!
+    /// Command buffer that stores commands for rendering a single frame
+    var commandBuffer: MTLCommandBuffer? {
+        _commandBuffer
+    }
+    private var _commandBuffer: MTLCommandBuffer?
+
+    /// Renderer used for drawing textures
+    private let renderer: MTLRendering
+
+    /// Buffer used to flip a texture
+    private let flippedTextureBuffers: MTLTextureBuffers
+
+    /// Queue that stores command buffers
+    private let commandQueue: MTLCommandQueue
 
     init(frame: CGRect = .zero, renderer: MTLRendering) {
-
+        guard
+            let flippedTextureBuffer = MTLBuffers.makeTextureBuffers(
+                nodes: .flippedTextureNodes,
+                with: renderer.device
+            ),
+            let commandQueue = renderer.device.makeCommandQueue()
+        else {
+            fatalError("Metal is not supported on this device.")
+        }
         self.renderer = renderer
-
-        // MTKView designated init
+        self.flippedTextureBuffers = flippedTextureBuffer
+        self.commandQueue = commandQueue
         super.init(frame: frame, device: renderer.device)
-
         self.delegate = self
         self.enableSetNeedsDisplay = true
         self.autoResizeDrawable = true
         self.isMultipleTouchEnabled = true
         self.backgroundColor = .white
-
-        commandQueue = renderer.device.makeCommandQueue()
-
-        flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
-            nodes: .flippedTextureNodes,
-            with: renderer.device
-        )
-
-        resetCommandBuffer()
+        self.resetCommandBuffer()
     }
 
     required init(coder: NSCoder) {
         fatalError("Use init(frame:device:) instead.")
     }
 
-
-    // MARK: - DrawTexture
     func draw(in view: MTKView) {
         guard
             let commandBuffer,
-            let flippedTextureBuffers,
             let displayTexture,
             let drawable = view.currentDrawable
         else { return }
@@ -104,6 +105,6 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     }
 
     func resetCommandBuffer() {
-        commandBuffer = commandQueue?.makeCommandBuffer()
+        _commandBuffer = commandQueue.makeCommandBuffer()
     }
 }
