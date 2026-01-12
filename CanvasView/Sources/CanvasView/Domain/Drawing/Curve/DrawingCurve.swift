@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-/// An iterator for realtime drawing with `UITouch.Phase`
+/// iterator for realtime drawing with `UITouch.Phase`
 public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
     var touchPhase: TouchPhase { get }

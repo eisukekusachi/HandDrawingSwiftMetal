@@ -129,6 +129,7 @@ public final class CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
     func setupCanvas(
         textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
@@ -370,7 +371,7 @@ extension CanvasViewModel {
         }
 
         // Update canvasRenderer using textureLayers
-        try canvasRenderer.initializeTextures(
+        try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
         try await canvasRenderer.updateTextures(
@@ -379,7 +380,7 @@ extension CanvasViewModel {
 
         // Initialize the textures in DrawingRenderer
         for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].initializeTextures(
+            drawingRenderers[i].setupTextures(
                 textureSize: textureSize
             )
         }
@@ -581,7 +582,7 @@ extension CanvasViewModel {
         )
     }
 
-    /// Called when the display texture size changes, such as when the device orientation changes
+    /// Called when the display texture size changes, such as when the device orientation changes.
     func onUpdateDisplayTexture() {
         composeAndRefreshCanvas()
     }

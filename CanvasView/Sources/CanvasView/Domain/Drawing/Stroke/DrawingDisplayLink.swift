@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-/// A class that manages the displayLink for realtime drawing
+/// Manages the displayLink for realtime drawing
 public final class DrawingDisplayLink {
 
     // Requesting to update the canvas emits `Void`

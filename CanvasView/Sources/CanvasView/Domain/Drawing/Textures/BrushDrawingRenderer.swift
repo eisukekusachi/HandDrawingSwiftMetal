@@ -7,7 +7,7 @@
 
 import MetalKit
 
-/// A set of textures for realtime brush drawing
+/// Renderer for drawing lines
 @MainActor
 public final class BrushDrawingRenderer: DrawingRenderer {
     public var displayRealtimeDrawingTexture: Bool {
@@ -62,7 +62,7 @@ public extension BrushDrawingRenderer {
         self.flippedTextureBuffers = buffers
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    func setupTextures(textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer

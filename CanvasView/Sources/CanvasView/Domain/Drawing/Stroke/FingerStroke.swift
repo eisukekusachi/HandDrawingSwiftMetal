@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// A class that manages the finger position information sent from the device
+/// Manages the finger position information sent from the device
 final class FingerStroke {
 
     /// A dictionary that manages points input from multiple fingers
