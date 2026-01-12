@@ -443,19 +443,13 @@ extension CanvasViewModel {
             drawingTouchPhase = touchPhase(pointArray)
 
             drawingRenderer.appendStrokePoints(
-                strokePoints:  pointArray.map {
-                    .init(
-                        location: CGAffineTransform.texturePoint(
-                            screenPoint: $0.preciseLocation,
-                            matrix: transforming.matrix.inverted(flipY: true),
-                            textureSize: textureSize,
-                            drawableSize: displayTextureSize,
-                            frameSize: frameSize
-                        ),
-                        brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                        diameter: CGFloat(drawingRenderer.diameter)
-                    )
-                },
+                strokePoints: makeStrokePoints(
+                    from: pointArray,
+                    textureSize: textureSize,
+                    displayTextureSize: displayTextureSize,
+                    frameSize: frameSize,
+                    diameter: CGFloat(drawingRenderer.diameter)
+                ),
                 touchPhase: pointArray.currentTouchPhase
             )
 
@@ -534,19 +528,13 @@ extension CanvasViewModel {
         drawingTouchPhase = touchPhase(pointArray)
 
         drawingRenderer.appendStrokePoints(
-            strokePoints:  pointArray.map {
-                .init(
-                    location: CGAffineTransform.texturePoint(
-                        screenPoint: $0.preciseLocation,
-                        matrix: transforming.matrix.inverted(flipY: true),
-                        textureSize: textureSize,
-                        drawableSize: displayTextureSize,
-                        frameSize: frameSize
-                    ),
-                    brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                    diameter: CGFloat(drawingRenderer.diameter)
-                )
-            },
+            strokePoints: makeStrokePoints(
+                from: pointArray,
+                textureSize: textureSize,
+                displayTextureSize: displayTextureSize,
+                frameSize: frameSize,
+                diameter: CGFloat(drawingRenderer.diameter)
+            ),
             touchPhase: pointArray.currentTouchPhase
         )
         pencilStroke.setDrawingLineEndPoint()
@@ -724,6 +712,28 @@ extension CanvasViewModel {
             return .moved
         }
         return nil
+    }
+
+    private func makeStrokePoints(
+        from pointArray: [TouchPoint],
+        textureSize: CGSize,
+        displayTextureSize: CGSize,
+        frameSize: CGSize,
+        diameter: CGFloat
+    ) -> [GrayscaleDotPoint] {
+        pointArray.map {
+            .init(
+                location: CGAffineTransform.texturePoint(
+                    screenPoint: $0.preciseLocation,
+                    matrix: transforming.matrix.inverted(flipY: true),
+                    textureSize: textureSize,
+                    drawableSize: displayTextureSize,
+                    frameSize: frameSize
+                ),
+                brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                diameter: diameter
+            )
+        }
     }
 
     private func prepareNextStroke() {
