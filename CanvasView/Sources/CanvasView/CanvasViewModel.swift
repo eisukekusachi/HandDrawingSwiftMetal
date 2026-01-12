@@ -222,7 +222,7 @@ extension CanvasViewModel {
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.commitAndRefreshDisplay()
+                self?.composeAndRefreshCanvas()
             }
             .store(in: &cancellables)
 
@@ -239,7 +239,7 @@ extension CanvasViewModel {
                     using: texture,
                     with: commandBuffer
                 )
-                self.commitAndRefreshDisplay()
+                self.composeAndRefreshCanvas()
             }
             .store(in: &cancellables)
 
@@ -254,7 +254,7 @@ extension CanvasViewModel {
                     try await self.canvasRenderer.updateTextures(
                         context: context
                     )
-                    self.commitAndRefreshDisplay()
+                    self.composeAndRefreshCanvas()
                 }
             }
             .store(in: &cancellables)
@@ -288,7 +288,7 @@ extension CanvasViewModel {
                 // Reset undo when the update of CanvasViewModel completes
                 self?.textureLayers.resetUndo()
 
-                self?.commitAndRefreshDisplay()
+                self?.composeAndRefreshCanvas()
             }
             .store(in: &cancellables)
     }
@@ -576,14 +576,14 @@ extension CanvasViewModel {
             prepareNextStroke()
         }
 
-        commitAndRefreshDisplay(
+        composeAndRefreshCanvas(
             useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes.
     func onUpdateDisplayTexture() {
-        commitAndRefreshDisplay()
+        composeAndRefreshCanvas()
     }
 }
 
@@ -827,7 +827,7 @@ extension CanvasViewModel {
         canvasRenderer.refreshCanvas()
     }
 
-    private func commitAndRefreshDisplay(
+    private func composeAndRefreshCanvas(
         useRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
