@@ -447,7 +447,7 @@ extension CanvasViewModel {
                     .init(
                         location: CGAffineTransform.texturePoint(
                             screenPoint: $0.preciseLocation,
-                            matrix: transforming.matrix,
+                            matrix: transforming.matrix.inverted(flipY: true),
                             textureSize: textureSize,
                             drawableSize: displayTextureSize,
                             frameSize: frameSize
@@ -538,7 +538,7 @@ extension CanvasViewModel {
                 .init(
                     location: CGAffineTransform.texturePoint(
                         screenPoint: $0.preciseLocation,
-                        matrix: transforming.matrix,
+                        matrix: transforming.matrix.inverted(flipY: true),
                         textureSize: textureSize,
                         drawableSize: displayTextureSize,
                         frameSize: frameSize
