@@ -313,7 +313,7 @@ extension CanvasRenderer {
         drawCanvasToDisplay()
     }
 
-    /// Draws the canvas texture to the display, applying the current transform and requests a screen update
+    /// Draws the canvasTexture to the display, applying the current transform and requests a screen update
     public func drawCanvasToDisplay() {
         guard
             let displayTexture = displayView.displayTexture,

@@ -23,7 +23,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         }
     }
 
-    /// Emits a `CGSize` when the size of `_displayTexture` changes.
+    /// Emits a `CGSize` when the size of `_displayTexture` changes
     var displayTextureSizeChanged: AnyPublisher<CGSize, Never> {
         displayTextureSizeChangedSubject.eraseToAnyPublisher()
     }

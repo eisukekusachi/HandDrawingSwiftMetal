@@ -57,6 +57,7 @@ struct CanvasViewModelTests {
             self.dependencies = CanvasViewDependencies(
                 canvasRenderer: CanvasRenderer(
                     renderer: renderer,
+                    repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 ),
                 textureLayers: .init(
