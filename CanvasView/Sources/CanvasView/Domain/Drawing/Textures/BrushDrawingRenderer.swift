@@ -44,13 +44,22 @@ public final class BrushDrawingRenderer: DrawingRenderer {
 public extension BrushDrawingRenderer {
 
     func setup(renderer: MTLRendering) {
-
-        self._renderer = renderer
-
-        self.flippedTextureBuffers = MTLBuffers.makeTextureBuffers(
+        guard let buffers = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: renderer.device
-        )
+        ) else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .main),
+                message: String(
+                    localized: "Failed to create buffers",
+                    bundle: .main
+                )
+            )
+            Logger.error(error)
+            fatalError("Metal is not supported on this device.")
+        }
+        self._renderer = renderer
+        self.flippedTextureBuffers = buffers
     }
 
     func initializeTextures(textureSize: CGSize) {

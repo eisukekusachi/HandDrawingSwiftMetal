@@ -19,7 +19,6 @@ public protocol DrawingRenderer: AnyObject {
 
     var renderer: MTLRendering? { get }
 
-    /// Configures external dependencies
     func setup(renderer: MTLRendering)
 
     /// Initializes the textures for realtime drawing
