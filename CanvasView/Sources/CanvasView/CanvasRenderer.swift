@@ -92,7 +92,7 @@ public final class CanvasRenderer: ObservableObject {
         }
     }
 
-    public func initializeTextures(textureSize: CGSize) throws {
+    public func setupTextures(textureSize: CGSize) throws {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
@@ -269,7 +269,7 @@ extension CanvasRenderer {
         )
     }
 
-    /// Commits the command buffer and refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
+    /// Refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     public func composeAndRefreshCanvas(
         useRealtimeDrawingTexture: Bool,
         selectedLayer: TextureLayerModel
@@ -313,7 +313,7 @@ extension CanvasRenderer {
         drawCanvasToDisplay()
     }
 
-    /// Draws the canvasTexture to the display, applying the current transform and requests a screen update
+    /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
     public func drawCanvasToDisplay() {
         guard
             let displayTexture = displayView.displayTexture,
@@ -328,6 +328,7 @@ extension CanvasRenderer {
             on: displayTexture,
             with: commandBuffer
         )
+
         displayView.setNeedsDisplay()
     }
 

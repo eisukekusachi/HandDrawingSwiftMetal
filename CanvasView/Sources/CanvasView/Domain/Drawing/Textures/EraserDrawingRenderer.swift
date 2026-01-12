@@ -7,7 +7,7 @@
 
 import MetalKit
 
-/// A set of textures for realtime eraser drawing
+/// Renderer for erasing lines
 @MainActor
 public final class EraserDrawingRenderer: DrawingRenderer {
     public var displayRealtimeDrawingTexture: Bool {
@@ -65,7 +65,7 @@ public extension EraserDrawingRenderer {
         self.flippedTextureBuffers = buffers
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    func setupTextures(textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer

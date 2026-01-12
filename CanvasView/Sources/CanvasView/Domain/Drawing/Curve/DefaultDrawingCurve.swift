@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-/// An iterator for creating a curve in real-time using touch phases
+/// iterator for creating a curve in real-time using touch phases
 public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
     public var touchPhase: TouchPhase {

@@ -9,7 +9,7 @@ import MetalKit
 
 public typealias RealtimeDrawingTexture = MTLTexture
 
-/// A protocol that defines a renderer for realtime stroke drawing.
+/// A protocol that defines a renderer for realtime stroke drawing
 @MainActor
 public protocol DrawingRenderer: AnyObject {
 
@@ -21,8 +21,8 @@ public protocol DrawingRenderer: AnyObject {
 
     func setup(renderer: MTLRendering)
 
-    /// Initializes the textures for realtime drawing
-    func initializeTextures(textureSize: CGSize)
+    /// Sets up textures for realtime drawing
+    func setupTextures(textureSize: CGSize)
 
     /// Sets the frame size. The frame size changes when the screen rotates or the view layout updates.
     func setFrameSize(_ frameSize: CGSize)
@@ -39,13 +39,13 @@ public protocol DrawingRenderer: AnyObject {
         touchPhase: TouchPhase
     )
 
-    /// Called during drawing
+    /// Draws lines onto a texture
     func drawStroke(
         baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     )
 
-    /// Prepare for the next stroke
+    /// Prepares for the next stroke
     func prepareNextStroke()
 }

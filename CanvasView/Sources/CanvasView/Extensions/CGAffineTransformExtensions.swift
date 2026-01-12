@@ -8,7 +8,7 @@
 import Foundation
 
 extension CGAffineTransform {
-    // Generate a matrix from a center point and two points
+    // Generates a matrix from a center point and two points
     static func makeMatrix(
         center: CGPoint,
         pointsA: (CGPoint?, CGPoint?),
