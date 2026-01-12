@@ -38,7 +38,6 @@ public final class EraserDrawingRenderer: DrawingRenderer {
 
     private var displayView: CanvasDisplayable?
 
-
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
@@ -119,7 +118,7 @@ public extension EraserDrawingRenderer {
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -129,7 +128,7 @@ public extension EraserDrawingRenderer {
             let lineDrawnTexture,
             let grayscaleTexture,
             let drawingTexture,
-            let selectedLayerTexture,
+            let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
@@ -153,7 +152,7 @@ public extension EraserDrawingRenderer {
         )
 
         renderer.drawTexture(
-            texture: selectedLayerTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: drawingTexture,

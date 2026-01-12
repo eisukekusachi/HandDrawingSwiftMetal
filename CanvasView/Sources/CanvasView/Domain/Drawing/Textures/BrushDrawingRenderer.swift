@@ -109,7 +109,7 @@ public extension BrushDrawingRenderer {
     }
 
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -118,7 +118,7 @@ public extension BrushDrawingRenderer {
             let drawingCurve,
             let drawingTexture,
             let grayscaleTexture,
-            let selectedLayerTexture,
+            let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
                 points: drawingCurve.curvePoints(),
@@ -141,8 +141,10 @@ public extension BrushDrawingRenderer {
             with: commandBuffer
         )
 
+        // Rendering to the realtimeTexture starts by overwriting it with the baseTexture,
+        // then composites the drawingTexture.
         renderer.drawTexture(
-            texture: selectedLayerTexture,
+            texture: baseTexture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: realtimeDrawingTexture,

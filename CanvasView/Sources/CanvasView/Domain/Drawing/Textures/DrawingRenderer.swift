@@ -42,7 +42,7 @@ public protocol DrawingRenderer: AnyObject {
 
     /// Called during drawing
     func drawStroke(
-        selectedLayerTexture: MTLTexture?,
+        baseTexture: MTLTexture?,
         on realtimeDrawingTexture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     )

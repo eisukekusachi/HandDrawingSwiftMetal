@@ -551,14 +551,14 @@ extension CanvasViewModel {
         else { return }
 
         drawingRenderer.drawStroke(
-            selectedLayerTexture: selectedLayerTexture,
+            baseTexture: selectedLayerTexture,
             on: realtimeDrawingTexture,
             with: commandBuffer
         )
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            canvasRenderer.updateSelectedLayerTexture(
+            canvasRenderer.updateCurrentTexture(
                 using: canvasRenderer.realtimeDrawingTexture,
                 with: commandBuffer
             )

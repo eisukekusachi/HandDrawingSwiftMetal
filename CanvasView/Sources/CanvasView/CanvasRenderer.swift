@@ -45,13 +45,13 @@ public final class CanvasRenderer: ObservableObject {
     /// A texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture?
 
-    private var flippedTextureBuffers: MTLTextureBuffers
-
     private var frameSize: CGSize = .zero
 
     private var matrix: CGAffineTransform = .identity
 
     private let renderer: MTLRendering
+
+    private let flippedTextureBuffers: MTLTextureBuffers
 
     private let displayView: CanvasDisplayable
 
@@ -125,17 +125,15 @@ public final class CanvasRenderer: ObservableObject {
             Logger.error(error)
             throw error
         }
-
         self.unselectedBottomTexture = unselectedBottomTexture
-        self.selectedLayerTexture = selectedLayerTexture
-        self.unselectedTopTexture = unselectedTopTexture
-        self.canvasTexture = canvasTexture
-        self.realtimeDrawingTexture = realtimeDrawingTexture
-
         self.unselectedBottomTexture?.label = "unselectedBottomTexture"
+        self.selectedLayerTexture = selectedLayerTexture
         self.selectedLayerTexture?.label = "selectedLayerTexture"
+        self.unselectedTopTexture = unselectedTopTexture
         self.unselectedTopTexture?.label = "unselectedTopTexture"
+        self.canvasTexture = canvasTexture
         self.canvasTexture?.label = "canvasTexture"
+        self.realtimeDrawingTexture = realtimeDrawingTexture
         self.realtimeDrawingTexture?.label = "realtimeDrawingTexture"
     }
 }
@@ -253,7 +251,7 @@ extension CanvasRenderer {
         )
     }
 
-    func updateSelectedLayerTexture(
+    func updateCurrentTexture(
         using texture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
@@ -364,6 +362,9 @@ extension CanvasRenderer {
                     into: destination,
                     with: commandBuffer
                 )
+            } else {
+                let message = "id: \(layer.id.uuidString)"
+                Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
             }
         }
     }
