@@ -601,7 +601,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        canvasRenderer.refreshCanvas()
+        canvasRenderer.drawCanvasToDisplay()
     }
 
     func setDrawingTool(_ drawingToolIndex: Int) {
@@ -766,7 +766,7 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-        canvasRenderer.refreshCanvas()
+        canvasRenderer.drawCanvasToDisplay()
     }
 
     private func completeDrawing() {
@@ -824,7 +824,7 @@ extension CanvasViewModel {
             )
         }
 
-        canvasRenderer.refreshCanvas()
+        canvasRenderer.drawCanvasToDisplay()
     }
 
     private func composeAndRefreshCanvas(

@@ -312,11 +312,11 @@ extension CanvasRenderer {
             with: commandBuffer
         )
 
-        refreshCanvas()
+        drawCanvasToDisplay()
     }
 
-    /// Commits the command buffer and refreshes the entire screen
-    public func refreshCanvas() {
+    /// Draws the canvas texture to the display, applying the current transform and requests a screen update
+    public func drawCanvasToDisplay() {
         guard
             let displayTexture = displayView.displayTexture,
             let commandBuffer = displayView.commandBuffer
