@@ -40,12 +40,12 @@ class HandDrawingViewController: UIViewController {
         bindData()
         layoutViews()
 
-        initializeTextureLayerViewPresenter()
-        initializeNewCanvasDialogPresenter()
-        initializeCanvasView()
+        setupTextureLayerViewPresenter()
+        setupNewCanvasDialogPresenter()
+        setupCanvasView()
     }
 
-    private func initializeCanvasView() {
+    private func setupCanvasView() {
         showActivityIndicator(true)
         showContentView(false)
         Task {
@@ -69,7 +69,7 @@ class HandDrawingViewController: UIViewController {
         }
     }
 
-    private func initializeNewCanvasDialogPresenter() {
+    private func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = { [weak self] in
             guard
                 let `self`,
@@ -110,7 +110,7 @@ class HandDrawingViewController: UIViewController {
         }
     }
 
-    private func initializeTextureLayerViewPresenter() {
+    private func setupTextureLayerViewPresenter() {
         textureLayerViewPresenter.setup(
             configuration: .init(
                 anchorButton: contentView.layerButton,

@@ -581,7 +581,7 @@ extension CanvasViewModel {
         )
     }
 
-    /// Called when the display texture size changes, such as when the device orientation changes.
+    /// Called when the display texture size changes, such as when the device orientation changes
     func onUpdateDisplayTexture() {
         composeAndRefreshCanvas()
     }
@@ -667,7 +667,7 @@ public extension CanvasViewModel {
         )
     }
 
-    /// Returns drawing renderers ready for drawing, creating a default renderer if needed.
+    /// Returns drawing renderers ready for drawing, creating a default renderer if needed
     static func resolveDrawingRenderers(
         renderer: MTLRendering,
         drawingRenderers: [DrawingRenderer]
