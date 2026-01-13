@@ -231,8 +231,7 @@ extension CanvasRenderer {
     ) {
         guard
             let texture,
-            let selectedLayerTexture,
-            let realtimeDrawingTexture
+            let selectedLayerTexture
         else { return }
 
         renderer.drawTexture(
@@ -240,13 +239,6 @@ extension CanvasRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: selectedLayerTexture,
-            with: commandBuffer
-        )
-
-        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
-        renderer.copyTexture(
-            srcTexture: selectedLayerTexture,
-            dstTexture: realtimeDrawingTexture,
             with: commandBuffer
         )
     }
