@@ -12,6 +12,12 @@ import Combine
 @MainActor
 public final class CanvasRenderer: ObservableObject {
 
+    // Requesting to update the canvas emits `Void`
+    public var displayLinkFrame: AnyPublisher<Void, Never> {
+        displayLinkFrameSubject.eraseToAnyPublisher()
+    }
+    private let displayLinkFrameSubject = PassthroughSubject<Void, Never>()
+
     public var device: MTLDevice {
         renderer.device
     }
@@ -53,6 +59,9 @@ public final class CanvasRenderer: ObservableObject {
 
     private let flippedTextureBuffers: MTLTextureBuffers
 
+    /// A display link for realtime drawing
+    private var displayLink = DrawingDisplayLink()
+
     private let displayView: CanvasDisplayable
 
     /// The background color of the canvas
@@ -90,6 +99,12 @@ public final class CanvasRenderer: ObservableObject {
         if let baseBackgroundColor {
             self.baseBackgroundColor = baseBackgroundColor
         }
+
+        displayLink.update
+            .sink { [weak self] in
+                self?.displayLinkFrameSubject.send(())
+            }
+            .store(in: &cancellables)
     }
 
     public func setupTextures(textureSize: CGSize) throws {
@@ -326,6 +341,13 @@ extension CanvasRenderer {
 
     public func resetCommandBuffer() {
         displayView.resetCommandBuffer()
+    }
+
+    public func stopDisplayLink() {
+        displayLink.stop()
+    }
+    public func runDisplayLinkWhileTouchingScreen(_ touchPhase: UITouch.Phase) {
+        displayLink.run(touchPhase)
     }
 }
 

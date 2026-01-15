@@ -20,13 +20,13 @@ public final class DrawingDisplayLink {
     public var displayLink: CADisplayLink?
 
     public init(isPaused: Bool = true) {
-        displayLink = CADisplayLink(target: self, selector: #selector(updateCanvasWhileDrawing))
+        displayLink = CADisplayLink(target: self, selector: #selector(displayLinkFrame))
         displayLink?.add(to: .current, forMode: .common)
         displayLink?.isPaused = isPaused
     }
 
-    public func run(_ running: Bool) {
-        if running {
+    public func run(_ touchPhase: UITouch.Phase) {
+        if isCurrentlyDrawing(touchPhase) {
             displayLink?.isPaused = false
         } else {
             displayLink?.isPaused = true
@@ -40,11 +40,18 @@ public final class DrawingDisplayLink {
     public func stop() {
         displayLink?.isPaused = true
     }
+
+    func isCurrentlyDrawing(_ touchPhase: UITouch.Phase) -> Bool {
+        switch touchPhase {
+        case .began, .moved: return true
+        default: return false
+        }
+    }
 }
 
 extension DrawingDisplayLink {
 
-    @objc private func updateCanvasWhileDrawing() {
+    @objc private func displayLinkFrame() {
         updateSubject.send(())
     }
 }

@@ -80,9 +80,6 @@ public final class CanvasViewModel {
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
 
-    /// A display link for realtime drawing
-    private var drawingDisplayLink = DrawingDisplayLink()
-
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
@@ -204,9 +201,9 @@ extension CanvasViewModel {
 
     private func bindData() {
         // The canvas is updated every frame during drawing
-        drawingDisplayLink.update
+        canvasRenderer.displayLinkFrame
             .sink { [weak self] in
-                self?.onDisplayLinkForDrawing()
+                self?.onDisplayLinkFrame()
             }
             .store(in: &cancellables)
 
@@ -456,7 +453,9 @@ extension CanvasViewModel {
 
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(isCurrentlyDrawing)
+            canvasRenderer.runDisplayLinkWhileTouchingScreen(
+                drawingTouchPhase ?? .ended
+            )
 
         case .transforming:
             transformCanvas()
@@ -540,10 +539,12 @@ extension CanvasViewModel {
         )
         pencilStroke.setDrawingLineEndPoint()
 
-        drawingDisplayLink.run(isCurrentlyDrawing)
+        canvasRenderer.runDisplayLinkWhileTouchingScreen(
+            drawingTouchPhase ?? .ended
+        )
     }
 
-    private func onDisplayLinkForDrawing() {
+    private func onDisplayLinkFrame() {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
@@ -689,12 +690,7 @@ public extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    private var isCurrentlyDrawing: Bool {
-        switch drawingTouchPhase {
-        case .began, .moved: return true
-        default: return false
-        }
-    }
+
     private var isFinishedDrawing: Bool {
         drawingTouchPhase == .ended
     }
@@ -746,7 +742,7 @@ extension CanvasViewModel {
 
         transforming.resetMatrix()
 
-        drawingDisplayLink.stop()
+        canvasRenderer.stopDisplayLink()
 
         drawingTouchPhase = nil
 
@@ -757,7 +753,7 @@ extension CanvasViewModel {
         touchGesture.reset()
 
         fingerStroke.reset()
-        drawingDisplayLink.stop()
+        canvasRenderer.stopDisplayLink()
     }
     private func resetFingerDrawingRelatedParameters() {
         fingerStroke.reset()
