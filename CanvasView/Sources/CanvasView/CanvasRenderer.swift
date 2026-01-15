@@ -239,7 +239,7 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
-    /// Updates `selectedLayerTexture` and `realtimeDrawingTexture`
+    /// Updates `selectedLayerTexture`
     public func updateDrawingTexture(
         using texture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer
@@ -346,6 +346,7 @@ extension CanvasRenderer {
     public func stopDisplayLink() {
         displayLink.stop()
     }
+
     public func runDisplayLinkWhileTouchingScreen(_ touchPhase: UITouch.Phase) {
         displayLink.run(touchPhase)
     }
