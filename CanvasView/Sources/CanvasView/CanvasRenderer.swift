@@ -8,9 +8,8 @@
 import Combine
 @preconcurrency import MetalKit
 
-/// A class that renders textures from `TextureLayersDocumentsRepository` onto the texture of `displayView`
-@MainActor
-public final class CanvasRenderer: ObservableObject {
+/// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
+@MainActor public final class CanvasRenderer: ObservableObject {
 
     // Requesting to update the canvas emits `Void`
     public var displayLinkFrame: AnyPublisher<Void, Never> {
@@ -154,14 +153,6 @@ public final class CanvasRenderer: ObservableObject {
 }
 
 extension CanvasRenderer {
-
-    public func setFrameSize(_ size: CGSize) {
-        self.frameSize = size
-    }
-
-    public func setMatrix(_ matrix: CGAffineTransform) {
-        self.matrix = matrix
-    }
 
     /// Refreshes `selectedTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
@@ -320,6 +311,17 @@ extension CanvasRenderer {
 
         displayView.setNeedsDisplay()
     }
+}
+
+extension CanvasRenderer {
+
+    public func setFrameSize(_ size: CGSize) {
+        self.frameSize = size
+    }
+
+    public func setMatrix(_ matrix: CGAffineTransform) {
+        self.matrix = matrix
+    }
 
     public func resetCommandBuffer() {
         displayView.resetCommandBuffer()
@@ -335,6 +337,7 @@ extension CanvasRenderer {
 }
 
 extension CanvasRenderer {
+
     private func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
     }
@@ -376,8 +379,8 @@ extension CanvasRenderer {
     }
 }
 
-@MainActor
-public struct CanvasTextureLayersContext {
+@MainActor public struct CanvasTextureLayersContext {
+
     let selectedLayer: TextureLayerModel
     let selectedIndex: Int
     let layers: [TextureLayerModel]
