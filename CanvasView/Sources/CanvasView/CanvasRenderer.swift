@@ -21,29 +21,32 @@ import Combine
         displayView.commandBuffer
     }
 
+    /// Size of the canvas texture
     public var textureSize: CGSize? {
         canvasTexture?.size
     }
 
+    /// Size of the texture rendered on the screen
     public var displayTextureSize: CGSize? {
         displayView.displayTexture?.size
     }
 
+    /// Repository that manages textures stored in the documents folder
     public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    /// The texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
+    /// Texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
-    /// The texture of the selected layer
+    /// Texture of the selected layer
     private(set) var selectedLayerTexture: MTLTexture?
 
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
-    /// A texture that combines the textures of all layers below the selected layer.
+    /// Texture that combines the textures of all layers below the selected layer.
     private var unselectedBottomTexture: MTLTexture?
 
-    /// A texture that combines the textures of all layers above the selected layer.
+    /// Texture that combines the textures of all layers above the selected layer.
     private var unselectedTopTexture: MTLTexture?
 
     private var frameSize: CGSize = .zero
@@ -52,17 +55,19 @@ import Combine
 
     private let renderer: MTLRendering
 
+    /// Buffers used to draw textures with vertical flipping
     private let flippedTextureBuffers: MTLTextureBuffers
 
-    /// A display link for realtime drawing
+    /// Display link for realtime drawing
     private var displayLink = DrawingDisplayLink()
 
+    /// View for displaying content on the screen
     private let displayView: CanvasDisplayable
 
-    /// The background color of the canvas
+    /// Background color of the canvas
     private var backgroundColor: UIColor = .white
 
-    /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
+    /// Base background color of the canvas. this color that appears when the canvas is rotated or moved.
     private var baseBackgroundColor: UIColor = .lightGray
 
     private var cancellables = Set<AnyCancellable>()
