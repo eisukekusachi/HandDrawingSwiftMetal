@@ -240,24 +240,6 @@ extension CanvasRenderer {
     }
 
     /// Updates `selectedLayerTexture`
-    public func updateDrawingTexture(
-        using texture: RealtimeDrawingTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let selectedLayerTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
     func updateSelectedLayerTexture(
         using texture: RealtimeDrawingTexture?,
         with commandBuffer: MTLCommandBuffer

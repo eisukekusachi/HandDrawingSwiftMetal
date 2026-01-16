@@ -233,7 +233,7 @@ extension CanvasViewModel {
                     let commandBuffer = self.canvasRenderer.commandBuffer
                 else { return }
 
-                self.canvasRenderer.updateDrawingTexture(
+                self.canvasRenderer.updateSelectedLayerTexture(
                     using: texture,
                     with: commandBuffer
                 )
