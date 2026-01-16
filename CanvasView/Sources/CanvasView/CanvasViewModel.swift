@@ -80,6 +80,9 @@ public final class CanvasViewModel {
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
 
+    /// Display link for realtime drawing
+    private var drawingDisplayLink = DrawingDisplayLink()
+
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
@@ -201,7 +204,7 @@ extension CanvasViewModel {
 
     private func bindData() {
         // The canvas is updated every frame during drawing
-        canvasRenderer.displayLinkFrame
+        drawingDisplayLink.update
             .sink { [weak self] in
                 self?.onDisplayLinkFrame()
             }
@@ -220,7 +223,7 @@ extension CanvasViewModel {
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.composeAndRefreshCanvas()
+                self?.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
 
@@ -237,7 +240,7 @@ extension CanvasViewModel {
                     from: texture,
                     with: commandBuffer
                 )
-                self.composeAndRefreshCanvas()
+                self.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
 
@@ -252,7 +255,7 @@ extension CanvasViewModel {
                     try await self.canvasRenderer.refreshTexturesFromRepository(
                         context: context
                     )
-                    self.composeAndRefreshCanvas()
+                    self.refreshCanvasAfterComposition()
                 }
             }
             .store(in: &cancellables)
@@ -286,7 +289,7 @@ extension CanvasViewModel {
                 // Reset undo when the update of CanvasViewModel completes
                 self?.textureLayers.resetUndo()
 
-                self?.composeAndRefreshCanvas()
+                self?.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
     }
@@ -453,7 +456,7 @@ extension CanvasViewModel {
 
             fingerStroke.updateDrawingLineEndPoint()
 
-            canvasRenderer.runDisplayLinkWhileTouchingScreen(
+            drawingDisplayLink.run(
                 drawingTouchPhase ?? .ended
             )
 
@@ -539,7 +542,7 @@ extension CanvasViewModel {
         )
         pencilStroke.setDrawingLineEndPoint()
 
-        canvasRenderer.runDisplayLinkWhileTouchingScreen(
+        drawingDisplayLink.run(
             drawingTouchPhase ?? .ended
         )
     }
@@ -578,14 +581,14 @@ extension CanvasViewModel {
             prepareNextStroke()
         }
 
-        composeAndRefreshCanvas(
+        refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes.
     func onUpdateDisplayTexture() {
-        composeAndRefreshCanvas()
+        refreshCanvasAfterComposition()
     }
 }
 
@@ -743,7 +746,7 @@ extension CanvasViewModel {
 
         transforming.resetMatrix()
 
-        canvasRenderer.stopDisplayLink()
+        drawingDisplayLink.stop()
 
         drawingTouchPhase = nil
 
@@ -754,7 +757,7 @@ extension CanvasViewModel {
         touchGesture.reset()
 
         fingerStroke.reset()
-        canvasRenderer.stopDisplayLink()
+        drawingDisplayLink.stop()
     }
     private func resetFingerDrawingRelatedParameters() {
         fingerStroke.reset()
@@ -825,12 +828,12 @@ extension CanvasViewModel {
         canvasRenderer.drawCanvasToDisplay()
     }
 
-    private func composeAndRefreshCanvas(
+    private func refreshCanvasAfterComposition(
         useRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
-        canvasRenderer.composeAndRefreshCanvas(
+        canvasRenderer.refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: useRealtimeDrawingTexture,
             selectedLayer: .init(item: selectedLayer)
         )

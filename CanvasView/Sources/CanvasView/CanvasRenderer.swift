@@ -11,12 +11,6 @@ import Combine
 /// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
 @MainActor public final class CanvasRenderer: ObservableObject {
 
-    // Requesting to update the canvas emits `Void`
-    public var displayLinkFrame: AnyPublisher<Void, Never> {
-        displayLinkFrameSubject.eraseToAnyPublisher()
-    }
-    private let displayLinkFrameSubject = PassthroughSubject<Void, Never>()
-
     public var commandBuffer: MTLCommandBuffer? {
         displayView.commandBuffer
     }
@@ -58,9 +52,6 @@ import Combine
     /// Buffers used to draw textures with vertical flipping
     private let flippedTextureBuffers: MTLTextureBuffers
 
-    /// Display link for realtime drawing
-    private var displayLink = DrawingDisplayLink()
-
     /// View for displaying content on the screen
     private let displayView: CanvasDisplayable
 
@@ -99,12 +90,6 @@ import Combine
         if let baseBackgroundColor {
             self.baseBackgroundColor = baseBackgroundColor
         }
-
-        displayLink.update
-            .sink { [weak self] in
-                self?.displayLinkFrameSubject.send(())
-            }
-            .store(in: &cancellables)
     }
 
     public func setupTextures(textureSize: CGSize) throws {
@@ -150,6 +135,18 @@ import Combine
         self.canvasTexture?.label = "canvasTexture"
         self.realtimeDrawingTexture = realtimeDrawingTexture
         self.realtimeDrawingTexture?.label = "realtimeDrawingTexture"
+    }
+
+    public func setFrameSize(_ size: CGSize) {
+        self.frameSize = size
+    }
+
+    public func setMatrix(_ matrix: CGAffineTransform) {
+        self.matrix = matrix
+    }
+
+    public func resetCommandBuffer() {
+        displayView.resetCommandBuffer()
     }
 }
 
@@ -232,7 +229,7 @@ extension CanvasRenderer {
     }
 
     /// Refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
-    public func composeAndRefreshCanvas(
+    public func refreshCanvasAfterComposition(
         useRealtimeDrawingTexture: Bool,
         selectedLayer: TextureLayerModel
     ) {
@@ -311,29 +308,6 @@ extension CanvasRenderer {
         )
 
         displayView.setNeedsDisplay()
-    }
-}
-
-extension CanvasRenderer {
-
-    public func setFrameSize(_ size: CGSize) {
-        self.frameSize = size
-    }
-
-    public func setMatrix(_ matrix: CGAffineTransform) {
-        self.matrix = matrix
-    }
-
-    public func resetCommandBuffer() {
-        displayView.resetCommandBuffer()
-    }
-
-    public func stopDisplayLink() {
-        displayLink.stop()
-    }
-
-    public func runDisplayLinkWhileTouchingScreen(_ touchPhase: UITouch.Phase) {
-        displayLink.run(touchPhase)
     }
 }
 
