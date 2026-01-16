@@ -40,18 +40,21 @@ public final class DrawingDisplayLink {
     public func stop() {
         displayLink?.isPaused = true
     }
-
-    func isCurrentlyDrawing(_ touchPhase: UITouch.Phase) -> Bool {
-        switch touchPhase {
-        case .began, .moved: return true
-        default: return false
-        }
-    }
 }
 
 extension DrawingDisplayLink {
 
     @objc private func displayLinkFrame() {
         updateSubject.send(())
+    }
+}
+
+extension DrawingDisplayLink {
+
+    private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase) -> Bool {
+        switch touchPhase {
+        case .began, .moved: return true
+        default: return false
+        }
     }
 }
