@@ -53,7 +53,7 @@ extension DrawingDisplayLink {
 
     private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase) -> Bool {
         switch touchPhase {
-        case .began, .moved: return true
+        case .began, .moved, .stationary: return true
         default: return false
         }
     }

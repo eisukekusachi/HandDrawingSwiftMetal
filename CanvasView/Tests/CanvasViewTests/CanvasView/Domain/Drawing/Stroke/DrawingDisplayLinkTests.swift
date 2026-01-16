@@ -19,10 +19,11 @@ struct DrawingDisplayLinkTests {
     @Test(
         arguments: [
             UITouch.Phase.began,
-            UITouch.Phase.moved
+            UITouch.Phase.moved,
+            UITouch.Phase.stationary
         ]
     )
-    func `When run(true) is called while the display link is paused, it starts running`(touchPhase: UITouch.Phase) async throws {
+    func `When the finger is touching the screen, the display link runs`(touchPhase: UITouch.Phase) async throws {
         let subject = Subject(isPaused: true)
 
         // When a value flows through the publisher, the canvas is updated
@@ -43,7 +44,6 @@ struct DrawingDisplayLinkTests {
 
     @Test(
         arguments: [
-            UITouch.Phase.stationary,
             UITouch.Phase.ended,
             UITouch.Phase.cancelled,
             UITouch.Phase.regionEntered,
@@ -51,7 +51,7 @@ struct DrawingDisplayLinkTests {
             UITouch.Phase.regionExited
         ]
     )
-    func `When run(false) is called while the display link is running, it stops after updating once`(touchPhase: UITouch.Phase) async throws {
+    func `When the finger is lifted from the screen, the display link stops`(touchPhase: UITouch.Phase) async throws {
         let subject = Subject(isPaused: false)
 
         // When a value flows through the publisher, the canvas is updated
