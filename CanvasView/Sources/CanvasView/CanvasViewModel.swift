@@ -624,10 +624,9 @@ public extension CanvasViewModel {
 
     func exportFiles(
         thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
+        device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
-        let device = canvasRenderer.device
-
         // Save the thumbnail image into the working directory
         try thumbnail(length: thumbnailLength)?.pngData()?.write(
             to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
