@@ -706,6 +706,8 @@ extension CanvasViewModel {
             return .began
         } else if points.contains(where: { $0.phase == .moved }) {
             return .moved
+        } else if points.contains(where: { $0.phase == .stationary }) {
+            return .stationary
         }
         return nil
     }
