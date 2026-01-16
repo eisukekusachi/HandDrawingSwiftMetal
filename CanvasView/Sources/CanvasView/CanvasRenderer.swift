@@ -239,25 +239,6 @@ extension CanvasRenderer {
         try await newCommandBuffer.commitAndWaitAsync()
     }
 
-    /// Updates `selectedLayerTexture`
-    func updateSelectedLayerTexture(
-        using texture: RealtimeDrawingTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let selectedLayerTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
     /// Refreshes the entire screen using `unselectedBottomTexture`, `selectedTexture`, `unselectedTopTexture`
     public func composeAndRefreshCanvas(
         useRealtimeDrawingTexture: Bool,
@@ -300,6 +281,25 @@ extension CanvasRenderer {
         )
 
         drawCanvasToDisplay()
+    }
+
+    /// Draws the given texture onto `selectedLayerTexture`
+    func drawSelectedLayerTexture(
+        from texture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let texture,
+            let selectedLayerTexture
+        else { return }
+
+        renderer.drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: selectedLayerTexture,
+            with: commandBuffer
+        )
     }
 
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update

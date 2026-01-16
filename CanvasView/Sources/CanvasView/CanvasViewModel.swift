@@ -224,7 +224,7 @@ extension CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Update the canvas with `RealtimeDrawingTexture`
+        // Update the canvas with the texture
         // Used for undoing drawing operations
         textureLayers.canvasDrawingUpdateRequested
             .sink { [weak self] texture in
@@ -233,8 +233,8 @@ extension CanvasViewModel {
                     let commandBuffer = self.canvasRenderer.commandBuffer
                 else { return }
 
-                self.canvasRenderer.updateSelectedLayerTexture(
-                    using: texture,
+                self.canvasRenderer.drawSelectedLayerTexture(
+                    from: texture,
                     with: commandBuffer
                 )
                 self.composeAndRefreshCanvas()
@@ -560,8 +560,8 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
-            canvasRenderer.updateSelectedLayerTexture(
-                using: canvasRenderer.realtimeDrawingTexture,
+            canvasRenderer.drawSelectedLayerTexture(
+                from: canvasRenderer.realtimeDrawingTexture,
                 with: commandBuffer
             )
 
