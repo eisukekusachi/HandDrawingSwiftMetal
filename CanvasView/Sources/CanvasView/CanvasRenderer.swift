@@ -17,10 +17,6 @@ import Combine
     }
     private let displayLinkFrameSubject = PassthroughSubject<Void, Never>()
 
-    public var device: MTLDevice {
-        renderer.device
-    }
-
     public var commandBuffer: MTLCommandBuffer? {
         displayView.commandBuffer
     }
@@ -374,7 +370,7 @@ extension CanvasRenderer {
         MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            with: device
+            with: renderer.device
         )
     }
 }
