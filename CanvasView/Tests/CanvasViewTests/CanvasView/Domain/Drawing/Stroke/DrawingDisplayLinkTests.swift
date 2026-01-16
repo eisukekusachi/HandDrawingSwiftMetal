@@ -43,8 +43,12 @@ struct DrawingDisplayLinkTests {
 
     @Test(
         arguments: [
+            UITouch.Phase.stationary,
             UITouch.Phase.ended,
-            UITouch.Phase.cancelled
+            UITouch.Phase.cancelled,
+            UITouch.Phase.regionEntered,
+            UITouch.Phase.regionMoved,
+            UITouch.Phase.regionExited
         ]
     )
     func `When run(false) is called while the display link is running, it stops after updating once`(touchPhase: UITouch.Phase) async throws {
