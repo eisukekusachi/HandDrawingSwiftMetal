@@ -6,6 +6,7 @@
 //
 
 import Combine
+import MetalKit
 import UIKit
 
 /// A class that manages texture layers
@@ -17,11 +18,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
     private let canvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
 
-    /// Emits when a canvas update is requested with `RealtimeDrawingTexture`
-    public var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> {
+    /// Emits when a canvas update is requested with `MTLTexture`
+    public var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> {
         canvasDrawingUpdateRequestedSubject.eraseToAnyPublisher()
     }
-    private let canvasDrawingUpdateRequestedSubject = PassthroughSubject<RealtimeDrawingTexture, Never>()
+    private let canvasDrawingUpdateRequestedSubject = PassthroughSubject<MTLTexture, Never>()
 
     /// Emits when a full canvas update is requested
     public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -325,8 +326,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         canvasUpdateRequestedSubject.send(())
     }
 
-    /// Requests a partial canvas update with `RealtimeDrawingTexture`
-    public func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture) {
+    /// Requests a partial canvas update with `MTLTexture`
+    public func requestCanvasDrawingUpdate(_ texture: MTLTexture) {
         canvasDrawingUpdateRequestedSubject.send(texture)
     }
 
