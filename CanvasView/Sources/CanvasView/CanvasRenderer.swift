@@ -163,10 +163,10 @@ extension CanvasRenderer {
         self.matrix = matrix
     }
 
-    /// Updates `selectedTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
+    /// Refreshes `selectedTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func updateTextures(
+    public func refreshTexturesFromRepository(
         context: CanvasTextureLayersContext
     ) async throws {
         guard

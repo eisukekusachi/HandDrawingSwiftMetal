@@ -249,7 +249,7 @@ extension CanvasViewModel {
                     let context = CanvasTextureLayersContext(textureLayers: self.textureLayers)
                 else { return }
                 Task {
-                    try await self.canvasRenderer.updateTextures(
+                    try await self.canvasRenderer.refreshTexturesFromRepository(
                         context: context
                     )
                     self.composeAndRefreshCanvas()
@@ -371,7 +371,7 @@ extension CanvasViewModel {
         try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
-        try await canvasRenderer.updateTextures(
+        try await canvasRenderer.refreshTexturesFromRepository(
             context: context
         )
 
