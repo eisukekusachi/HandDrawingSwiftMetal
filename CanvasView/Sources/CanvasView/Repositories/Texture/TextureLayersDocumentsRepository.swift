@@ -8,14 +8,12 @@
 import Foundation
 @preconcurrency import MetalKit
 
-/// A repository that manages the textures of `TextureLayers`.
-/// The textures are persisted and managed on disk
-@MainActor
-public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
-    /// The directory name where texture files are stored
+/// Manages and persists `TextureLayers` textures on disk.
+@MainActor public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+    /// Directory name where texture files are stored
     public let directoryName: String
 
-    /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
+    /// URL of the texture storage. Define it as `var` to allow modification of its metadata
     public let workingDirectoryURL: URL
 
     public var textureSize: CGSize {
