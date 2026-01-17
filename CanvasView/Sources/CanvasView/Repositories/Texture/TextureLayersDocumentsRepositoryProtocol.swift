@@ -10,7 +10,6 @@ import Foundation
 @MainActor
 public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
-    var textureSize: CGSize { get }
     var directoryName: String { get }
     var workingDirectoryURL: URL { get }
 

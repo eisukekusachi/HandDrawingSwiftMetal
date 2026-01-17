@@ -16,13 +16,9 @@ import Foundation
     /// URL of the texture storage. Define it as `var` to allow modification of its metadata
     public let workingDirectoryURL: URL
 
-    public var textureSize: CGSize {
-        _textureSize
-    }
-
     private let renderer: MTLRendering
 
-    private var _textureSize: CGSize = .zero
+    private var textureSize: CGSize = .zero
 
     public init(
         storageDirectoryURL: URL,
@@ -79,7 +75,7 @@ import Foundation
         try await addTexture(texture: newTexture, id: layerId)
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        self.textureSize = textureSize
     }
 
     /// Restore the storage from Core Data.
@@ -127,7 +123,7 @@ import Foundation
         // Do nothing since the textures already exist in workingDirectory
 
         // Retain the texture size
-        _textureSize = textureLayersState.textureSize
+        self.textureSize = textureLayersState.textureSize
     }
 
     /// Restore the storage from the saved data.
@@ -186,7 +182,7 @@ import Foundation
         }
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        self.textureSize = textureSize
     }
 }
 
