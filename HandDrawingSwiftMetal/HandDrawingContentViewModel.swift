@@ -33,6 +33,11 @@ final class HandDrawingContentViewModel: ObservableObject {
         50
     ]
 
+    var fileList: [LocalFileItem] {
+        _fileList
+    }
+    private var _fileList: [LocalFileItem] = []
+
     private let drawingToolController: PersistenceController
 
     @Published var drawingToolStorage: CoreDataDrawingToolStorage
@@ -98,6 +103,14 @@ final class HandDrawingContentViewModel: ObservableObject {
         }
     }
 
+    func setup(configuration: CanvasConfiguration) {
+        Task {
+            await fileItemList(
+                fileSuffix: configuration.fileSuffix
+            )
+        }
+    }
+
     func toggleDrawingTool() {
         drawingToolStorage.setDrawingTool(
             drawingToolStorage.type == .brush ? .eraser: .brush
@@ -156,6 +169,7 @@ extension HandDrawingContentViewModel {
 
     func saveProject(
         action: ((URL) async throws -> Void)?,
+        completion: (() -> Void)?,
         zipFileURL: URL
     ) {
         Task(priority: .userInitiated) {
@@ -182,6 +196,8 @@ extension HandDrawingContentViewModel {
                     to: zipFileURL
                 )
 
+                completion?()
+
                 toastSubject.send(
                     .init(
                         title: "Success",
@@ -192,5 +208,62 @@ extension HandDrawingContentViewModel {
                 alertSubject.send(error)
             }
         }
+    }
+}
+
+extension HandDrawingContentViewModel {
+    func upsertFileList(fileItem: LocalFileItem) {
+        if let index = _fileList.firstIndex(where: { $0.title == fileItem.title }) {
+            _fileList[index] = fileItem
+        } else {
+            _fileList.append(fileItem)
+        }
+
+        _fileList.sort { $0.updatedAt > $1.updatedAt }
+    }
+
+    private func fileItemList(fileSuffix: String) async {
+
+        var fileNames: [String] = []
+
+        URL.documents.allFileURLs(suffix: fileSuffix).map {
+            $0.lastPathComponent
+        }.forEach {
+            fileNames.append($0)
+        }
+
+        for fileName in fileNames {
+            do {
+                defer { localFileRepository.removeWorkingDirectory() }
+                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+                let zipFileURL = URL.documents.appendingPathComponent(fileName)
+
+                try await localFileRepository.unzipToWorkingDirectory(
+                    from: zipFileURL
+                )
+
+                // Load project metadata
+                let projectMetaData: ProjectMetaDataArchiveModel = try .init(
+                    in: workingDirectoryURL
+                )
+
+                // Load the thubnail
+                let data = try Data(
+                    contentsOf: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
+                )
+
+                _fileList.append(
+                    .init(
+                        metaData: projectMetaData,
+                        image: UIImage(data: data),
+                        fileURL: zipFileURL
+                    )
+                )
+            } catch {
+                Logger.error(error)
+            }
+        }
+
+        _fileList.sort { $0.updatedAt > $1.updatedAt }
     }
 }

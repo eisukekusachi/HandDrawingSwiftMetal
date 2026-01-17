@@ -30,7 +30,7 @@ public extension URL {
                     includingPropertiesForKeys: nil
                 )
                 return urls.filter {
-                    suffix.count == 0 || $0.lastPathComponent.hasSuffix(suffix)
+                    suffix.isEmpty || $0.lastPathComponent.hasSuffix(suffix)
                 }
             } catch {
                 Logger.error(error)

@@ -8,13 +8,13 @@
 import UIKit
 
 @MainActor public struct CanvasConfiguration {
-    let textureSize: CGSize
+    public let textureSize: CGSize
 
     /// File extension used when saving a file
-    let fileSuffix: String
+    public let fileSuffix: String
 
-    let projectConfiguration: ProjectConfiguration
-    let environmentConfiguration: EnvironmentConfiguration
+    public let projectConfiguration: ProjectConfiguration
+    public let environmentConfiguration: EnvironmentConfiguration
 
     public init(
         textureSize: CGSize? = nil,

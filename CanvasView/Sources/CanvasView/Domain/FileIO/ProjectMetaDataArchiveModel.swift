@@ -9,9 +9,9 @@ import Foundation
 
 public struct ProjectMetaDataArchiveModel: Codable, Sendable {
 
-    let projectName: String
-    let createdAt: Date
-    let updatedAt: Date
+    public let projectName: String
+    public let createdAt: Date
+    public let updatedAt: Date
 
     public init(
         projectName: String,

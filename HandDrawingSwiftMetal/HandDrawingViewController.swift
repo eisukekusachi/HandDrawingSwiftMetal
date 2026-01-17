@@ -54,13 +54,16 @@ class HandDrawingViewController: UIViewController {
                 showContentView(true)
             }
             do {
+                let configuration: CanvasConfiguration = canvasConfiguration ?? .init()
                 try await contentView.canvasView.setup(
                     drawingRenderers: [
                         brushDrawingRenderer,
                         eraserDrawingRenderer
                     ],
-                    configuration: canvasConfiguration ?? .init()
+                    configuration: configuration
                 )
+                viewModel.setup(configuration: configuration)
+
                 updateComponents()
 
             } catch {
@@ -308,20 +311,18 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
     private func showFileView() {
         let fileView = FileView(
-            targetURL: URL.documents,
-            suffix: contentView.canvasView.fileSuffix,
+            list: viewModel.fileList,
             onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
                 self.presentedViewController?.dismiss(animated: true)
                 self.textureLayerViewPresenter.hide()
-
                 self.loadProject(zipFileURL: zipFileURL)
             }
         )
-        present(
-            UIHostingController(rootView: fileView),
-            animated: true
-        )
+
+        let vc = UIHostingController(rootView: fileView)
+
+        present(vc, animated: true)
     }
 
     private func showAlert(_ error: CanvasError) {
@@ -380,6 +381,12 @@ extension HandDrawingViewController {
             action: { [weak self] workingDirectoryURL in
                 try await self?.contentView.canvasView.exportFiles(
                     to: workingDirectoryURL
+                )
+            },
+            completion: { [weak self] in
+                guard let `self` else { return }
+                self.viewModel.upsertFileList(
+                    fileItem: self.contentView.canvasView.currentLocalFileItem
                 )
             },
             zipFileURL: self.contentView.canvasView.zipFileURL

@@ -45,7 +45,7 @@ import UIKit
 
     public var zipFileURL: URL {
         FileManager.documentsFileURL(
-            projectName: viewModel.projectName,
+            projectName: viewModel.projectMetaDataStorage.projectName,
             suffix: fileSuffix
         )
     }
@@ -56,13 +56,23 @@ import UIKit
     }
     private var _fileSuffix: String = ""
 
+    public var currentLocalFileItem: LocalFileItem {
+        .init(
+            metaData: viewModel.projectMetaDataStorage.metaData,
+            image: viewModel.thumbnail(),
+            fileURL: URL.documents.appendingPathComponent(
+                viewModel.projectFileName(suffix: _fileSuffix)
+            )
+        )
+    }
+
     /// The size of the texture currently set on the canvas
     public var currentTextureSize: CGSize {
         viewModel.currentTextureSize
     }
 
     /// The size of the screen
-    static var screenSize: CGSize {
+    public static var screenSize: CGSize {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
         return .init(
@@ -70,6 +80,8 @@ import UIKit
             height: size.height * scale
         )
     }
+
+    public static let thumbnailName: String = "thumbnail.png"
 
     /// The single Metal device instance used throughout the app
     private let sharedDevice: MTLDevice
