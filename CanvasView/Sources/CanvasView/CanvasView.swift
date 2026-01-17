@@ -44,8 +44,17 @@ import UIKit
     private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
     public var zipFileURL: URL {
-        viewModel.zipFileURL
+        FileManager.documentsFileURL(
+            projectName: viewModel.projectName,
+            suffix: fileSuffix
+        )
     }
+
+    /// File extension used when saving a file
+    public var fileSuffix: String {
+        _fileSuffix
+    }
+    private var _fileSuffix: String = ""
 
     /// The size of the texture currently set on the canvas
     public var currentTextureSize: CGSize {
@@ -184,6 +193,7 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
+        setVariables(configuration: configuration)
         layoutViews()
         addEvents()
         bindData()
@@ -194,6 +204,10 @@ import UIKit
             ),
             configuration: configuration
         )
+    }
+
+    private func setVariables(configuration: CanvasConfiguration) {
+        self._fileSuffix = configuration.fileSuffix
     }
 
     private func layoutViews() {

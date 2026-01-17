@@ -7,21 +7,61 @@
 
 import UIKit
 
-@MainActor
-public struct CanvasConfiguration {
+@MainActor public struct CanvasConfiguration {
     let textureSize: CGSize
+
+    /// File extension used when saving a file
+    let fileSuffix: String
+
     let projectConfiguration: ProjectConfiguration
     let environmentConfiguration: EnvironmentConfiguration
 
     public init(
         textureSize: CGSize? = nil,
+        fileSuffix: String = "",
         projectConfiguration: ProjectConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
         // The screen size is used when the value is nil
         self.textureSize = textureSize ?? CanvasView.screenSize
-
+        self.fileSuffix = CanvasConfiguration.sanitizedFileExtension(fileSuffix)
         self.projectConfiguration = projectConfiguration
         self.environmentConfiguration = environmentConfiguration
+    }
+
+    /// Returns a sanitized file extension (without a leading dot)
+    static func sanitizedFileExtension(_ input: String?) -> String {
+        guard
+            var ext = input?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !ext.isEmpty
+        else { return "" }
+
+        // Allow ".ext" style input
+        if ext.hasPrefix(".") { ext.removeFirst() }
+
+        ext = ext.lowercased()
+
+        // Reject invalid characters
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789")
+        if ext.unicodeScalars.contains(where: { !allowed.contains($0) }) {
+            return ""
+        }
+
+        // Reject unreasonable length
+        guard (1...16).contains(ext.count) else {
+            return ""
+        }
+
+        // Explicitly disallow common image formats
+        if [
+            "png",
+            "jpg",
+            "jpeg",
+            "bmp"
+        ].contains(ext) {
+            return ""
+        }
+
+        return ext
     }
 }

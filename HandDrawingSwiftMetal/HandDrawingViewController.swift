@@ -309,7 +309,7 @@ extension HandDrawingViewController {
     private func showFileView() {
         let fileView = FileView(
             targetURL: URL.documents,
-            suffix: ProjectMetaData.fileSuffix,
+            suffix: contentView.canvasView.fileSuffix,
             onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
                 self.presentedViewController?.dismiss(animated: true)

@@ -26,10 +26,6 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
         project.updatedAt
     }
 
-    var zipFileURL: URL {
-        project.zipFileURL
-    }
-
     private var project = ProjectMetaData()
 
     private let storage: AnyCoreDataStorage<ProjectMetaDataEntity>?

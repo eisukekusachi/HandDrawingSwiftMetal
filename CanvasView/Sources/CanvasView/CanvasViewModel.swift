@@ -14,16 +14,16 @@ import UIKit
 @MainActor
 public final class CanvasViewModel {
 
+    var projectName: String {
+        projectMetaDataStorage.projectName
+    }
+
     /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {
         didSet {
             canvasRenderer.setFrameSize(frameSize)
             drawingRenderers.forEach { $0.setFrameSize(frameSize) }
         }
-    }
-
-    var zipFileURL: URL {
-        projectMetaDataStorage.zipFileURL
     }
 
     /// The size of the texture currently set on the canvas.
