@@ -36,6 +36,13 @@ public final class CanvasViewModel {
     }
     private let isDrawingSubject = PassthroughSubject<Bool, Never>()
 
+    private var isFinishedDrawing: Bool {
+        drawingTouchPhase == .ended
+    }
+    private var isCancelledDrawing: Bool {
+        drawingTouchPhase == .cancelled
+    }
+
     /// A publisher that emits a request to show the alert
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
@@ -89,13 +96,6 @@ public final class CanvasViewModel {
     private let transforming = Transforming()
 
     private var cancellables = Set<AnyCancellable>()
-
-    private var isFinishedDrawing: Bool {
-        drawingTouchPhase == .ended
-    }
-    private var isCancelledDrawing: Bool {
-        drawingTouchPhase == .cancelled
-    }
 
     public static let thumbnailName: String = "thumbnail.png"
 
@@ -640,6 +640,7 @@ extension CanvasViewModel {
 
 public extension CanvasViewModel {
 
+    /// Touch phase used for drawing
     func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
         if points.contains(where: { $0.phase == .cancelled }) {
             return .cancelled

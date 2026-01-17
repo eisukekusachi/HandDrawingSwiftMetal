@@ -29,7 +29,7 @@ import Combine
     /// Repository that manages textures stored in the documents folder
     public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    /// Texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedTexture` and `unselectedTopTexture`
+    /// Texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedLayerTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
     /// Texture of the selected layer
@@ -53,14 +53,14 @@ import Combine
     /// Buffers used to draw textures with vertical flipping
     private let flippedTextureBuffers: MTLTextureBuffers
 
-    /// View for displaying content on the screen
-    private let displayView: CanvasDisplayable
-
     /// Background color of the canvas
     private var backgroundColor: UIColor = .white
 
     /// Base background color of the canvas. this color that appears when the canvas is rotated or moved.
     private var baseBackgroundColor: UIColor = .lightGray
+
+    /// View for displaying content on the screen
+    private let displayView: CanvasDisplayable
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -273,25 +273,6 @@ extension CanvasRenderer {
         drawCanvasToDisplay()
     }
 
-    /// Draws the given texture onto `selectedLayerTexture`
-    func drawSelectedLayerTexture(
-        from texture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let selectedLayerTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
-            with: commandBuffer
-        )
-    }
-
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
     public func drawCanvasToDisplay() {
         guard
@@ -309,6 +290,25 @@ extension CanvasRenderer {
         )
 
         displayView.setNeedsDisplay()
+    }
+
+    /// Draws the given texture onto `selectedLayerTexture`
+    func drawSelectedLayerTexture(
+        from texture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let texture,
+            let selectedLayerTexture
+        else { return }
+
+        renderer.drawTexture(
+            texture: texture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: selectedLayerTexture,
+            with: commandBuffer
+        )
     }
 }
 
