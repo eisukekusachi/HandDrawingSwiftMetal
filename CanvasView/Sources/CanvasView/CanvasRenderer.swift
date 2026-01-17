@@ -38,10 +38,10 @@ import Combine
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
-    /// Texture that combines the textures of all layers below the selected layer.
+    /// Texture that combines the textures of all layers below the selected layer
     private var unselectedBottomTexture: MTLTexture?
 
-    /// Texture that combines the textures of all layers above the selected layer.
+    /// Texture that combines the textures of all layers above the selected layer
     private var unselectedTopTexture: MTLTexture?
 
     private var frameSize: CGSize = .zero
@@ -56,7 +56,7 @@ import Combine
     /// Background color of the canvas
     private var backgroundColor: UIColor = .white
 
-    /// Base background color of the canvas. this color that appears when the canvas is rotated or moved.
+    /// Base background color of the canvas. this color that appears when the canvas is rotated or moved
     private var baseBackgroundColor: UIColor = .lightGray
 
     /// View for displaying content on the screen

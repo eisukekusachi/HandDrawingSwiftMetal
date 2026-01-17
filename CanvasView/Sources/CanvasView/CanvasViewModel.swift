@@ -570,7 +570,7 @@ extension CanvasViewModel {
             with: currentFrameCommandBuffer
         )
 
-        // The finalization process is performed when drawing is completed.
+        // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
             canvasRenderer.drawSelectedLayerTexture(
                 from: canvasRenderer.realtimeDrawingTexture,
