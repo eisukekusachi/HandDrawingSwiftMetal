@@ -8,10 +8,10 @@
 import Combine
 import Foundation
 
-/// A repository responsible for handling local file operations
+/// Manages local file operations
 public final class LocalFileRepository {
 
-    /// The URL of the directory for storing temporary files
+    /// URL of the directory for storing files
     private let workingDirectoryURL: URL
 
     init(workingDirectoryURL: URL) {
