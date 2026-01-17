@@ -200,8 +200,7 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Fetches `textureLayers` data from Core Data.
-    /// Returns nil if an error occurs.
+    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
     private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
         guard
             let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
@@ -234,8 +233,7 @@ extension CanvasViewModel {
             }
             .store(in: &cancellables)
 
-        // Update the canvas with the texture
-        // Used for undoing drawing operations
+        // Update the canvas with the texture used for undoing drawing operations
         textureLayers.canvasDrawingUpdateRequested
             .sink { [weak self] texture in
                 guard
@@ -515,7 +513,7 @@ extension CanvasViewModel {
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
-        /// Execute if it’s the beginning of a touch
+        // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
 
             drawingRenderer.beginPencilStroke()
