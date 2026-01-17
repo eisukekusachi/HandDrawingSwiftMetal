@@ -90,6 +90,13 @@ public final class CanvasViewModel {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private var isFinishedDrawing: Bool {
+        drawingTouchPhase == .ended
+    }
+    private var isCancelledDrawing: Bool {
+        drawingTouchPhase == .cancelled
+    }
+
     public static let thumbnailName: String = "thumbnail.png"
 
     public static let thumbnailLength: CGFloat = 500
@@ -206,7 +213,7 @@ extension CanvasViewModel {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.update
             .sink { [weak self] in
-                self?.onDisplayLinkFrame()
+                self?.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
 
@@ -396,6 +403,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    /// Processes finger touches and determines whether the gesture is drawing or transforming
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -441,7 +449,7 @@ extension CanvasViewModel {
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
 
             // Update the touch phase for drawing
-            drawingTouchPhase = touchPhase(pointArray)
+            drawingTouchPhase = drawingTouchPhase(pointArray)
 
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
@@ -475,6 +483,7 @@ extension CanvasViewModel {
         }
     }
 
+    /// Processes pencil input using estimated touches
     func onPencilGestureDetected(
         estimatedTouches: Set<UITouch>,
         with event: UIEvent?,
@@ -495,6 +504,7 @@ extension CanvasViewModel {
         )
     }
 
+    /// Processes pencil input using actual touches
     func onPencilGestureDetected(
         actualTouches: Set<UITouch>,
         view: UIView
@@ -528,7 +538,7 @@ extension CanvasViewModel {
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
 
         // Update the touch phase for drawing
-        drawingTouchPhase = touchPhase(pointArray)
+        drawingTouchPhase = drawingTouchPhase(pointArray)
 
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
@@ -547,7 +557,8 @@ extension CanvasViewModel {
         )
     }
 
-    private func onDisplayLinkFrame() {
+    /// Called on every display-link frame while drawing is active
+    private func onDrawingDisplayLinkFrame() {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
@@ -573,7 +584,7 @@ extension CanvasViewModel {
                     // Reset parameters on drawing completion
                     self?.prepareNextStroke()
 
-                    self?.completeDrawing()
+                    self?.onCompleteDrawing()
                 }
             }
         } else if isCancelledDrawing {
@@ -586,13 +597,66 @@ extension CanvasViewModel {
         )
     }
 
-    /// Called when the display texture size changes, such as when the device orientation changes.
+    /// Called when a stroke is completed
+    private func onCompleteDrawing() {
+        guard
+            let layerId = textureLayers.selectedLayer?.id,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+        else { return }
+
+        drawingDebouncer.perform { [weak self] in
+            Task(priority: .utility) { [weak self] in
+                guard let self else { return }
+                do {
+                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
+                        texture: selectedLayerTexture,
+                        for: layerId
+                    )
+
+                    self.textureLayers.updateThumbnail(
+                        layerId,
+                        texture: selectedLayerTexture
+                    )
+
+                    // Update `updatedAt` when drawing completes
+                    self.projectMetaDataStorage.updateUpdatedAt()
+
+                } catch {
+                    Logger.error(error)
+                }
+            }
+        }
+
+        Task {
+            try await textureLayers.pushUndoDrawingObjectToUndoStack(
+                texture: selectedLayerTexture
+            )
+        }
+    }
+
+    /// Called when the display texture size changes, such as when the device orientation changes
     func onUpdateDisplayTexture() {
         refreshCanvasAfterComposition()
     }
 }
 
 public extension CanvasViewModel {
+
+    func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
+        if points.contains(where: { $0.phase == .cancelled }) {
+            return .cancelled
+        } else if points.contains(where: { $0.phase == .ended }) {
+            return .ended
+        } else if points.contains(where: { $0.phase == .began }) {
+            return .began
+        } else if points.contains(where: { $0.phase == .moved }) {
+            return .moved
+        } else if points.contains(where: { $0.phase == .stationary }) {
+            return .stationary
+        }
+        return nil
+    }
+
     func newCanvas(
         newProjectName: String,
         newTextureSize: CGSize
@@ -693,28 +757,6 @@ public extension CanvasViewModel {
 
 extension CanvasViewModel {
 
-    private var isFinishedDrawing: Bool {
-        drawingTouchPhase == .ended
-    }
-    private var isCancelledDrawing: Bool {
-        drawingTouchPhase == .cancelled
-    }
-
-    private func touchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
-        if points.contains(where: { $0.phase == .cancelled }) {
-            return .cancelled
-        } else if points.contains(where: { $0.phase == .ended }) {
-            return .ended
-        } else if points.contains(where: { $0.phase == .began }) {
-            return .began
-        } else if points.contains(where: { $0.phase == .moved }) {
-            return .moved
-        } else if points.contains(where: { $0.phase == .stationary }) {
-            return .stationary
-        }
-        return nil
-    }
-
     private func makeStrokePoints(
         from pointArray: [TouchPoint],
         textureSize: CGSize,
@@ -768,42 +810,6 @@ extension CanvasViewModel {
 
         canvasRenderer.resetCommandBuffer()
         canvasRenderer.drawCanvasToDisplay()
-    }
-
-    private func completeDrawing() {
-        guard
-            let layerId = textureLayers.selectedLayer?.id,
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
-        else { return }
-
-        drawingDebouncer.perform { [weak self] in
-            Task(priority: .utility) { [weak self] in
-                guard let self else { return }
-                do {
-                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
-                        texture: selectedLayerTexture,
-                        for: layerId
-                    )
-
-                    self.textureLayers.updateThumbnail(
-                        layerId,
-                        texture: selectedLayerTexture
-                    )
-
-                    // Update `updatedAt` when drawing completes
-                    self.projectMetaDataStorage.updateUpdatedAt()
-
-                } catch {
-                    Logger.error(error)
-                }
-            }
-        }
-
-        Task {
-            try await textureLayers.pushUndoDrawingObjectToUndoStack(
-                texture: selectedLayerTexture
-            )
-        }
     }
 
     private func transformCanvas() {
