@@ -36,6 +36,13 @@ public final class CanvasViewModel {
     }
     private let isDrawingSubject = PassthroughSubject<Bool, Never>()
 
+    private var isFinishedDrawing: Bool {
+        drawingTouchPhase == .ended
+    }
+    private var isCancelledDrawing: Bool {
+        drawingTouchPhase == .cancelled
+    }
+
     /// A publisher that emits a request to show the alert
     var alert: AnyPublisher<CanvasError, Never> {
         alertSubject.eraseToAnyPublisher()
@@ -80,7 +87,7 @@ public final class CanvasViewModel {
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
 
-    /// A display link for realtime drawing
+    /// Display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
 
     /// A debouncer used to prevent continuous input during drawing
@@ -193,8 +200,7 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Fetches `textureLayers` data from Core Data.
-    /// Returns nil if an error occurs.
+    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
     private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
         guard
             let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
@@ -206,7 +212,7 @@ extension CanvasViewModel {
         // The canvas is updated every frame during drawing
         drawingDisplayLink.update
             .sink { [weak self] in
-                self?.onDisplayLinkForDrawing()
+                self?.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
 
@@ -223,24 +229,23 @@ extension CanvasViewModel {
         // Update the canvas
         textureLayers.canvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.composeAndRefreshCanvas()
+                self?.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
 
-        // Update the canvas with `RealtimeDrawingTexture`
-        // Used for undoing drawing operations
+        // Update the canvas with the texture used for undoing drawing operations
         textureLayers.canvasDrawingUpdateRequested
             .sink { [weak self] texture in
                 guard
                     let `self`,
-                    let commandBuffer = self.canvasRenderer.commandBuffer
+                    let currentFrameCommandBuffer = self.canvasRenderer.currentFrameCommandBuffer
                 else { return }
 
-                self.canvasRenderer.updateDrawingTexture(
-                    using: texture,
-                    with: commandBuffer
+                self.canvasRenderer.drawSelectedLayerTexture(
+                    from: texture,
+                    with: currentFrameCommandBuffer
                 )
-                self.composeAndRefreshCanvas()
+                self.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
 
@@ -252,10 +257,10 @@ extension CanvasViewModel {
                     let context = CanvasTextureLayersContext(textureLayers: self.textureLayers)
                 else { return }
                 Task {
-                    try await self.canvasRenderer.updateTextures(
+                    try await self.canvasRenderer.refreshTexturesFromRepository(
                         context: context
                     )
-                    self.composeAndRefreshCanvas()
+                    self.refreshCanvasAfterComposition()
                 }
             }
             .store(in: &cancellables)
@@ -289,7 +294,7 @@ extension CanvasViewModel {
                 // Reset undo when the update of CanvasViewModel completes
                 self?.textureLayers.resetUndo()
 
-                self?.composeAndRefreshCanvas()
+                self?.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
     }
@@ -374,7 +379,7 @@ extension CanvasViewModel {
         try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
-        try await canvasRenderer.updateTextures(
+        try await canvasRenderer.refreshTexturesFromRepository(
             context: context
         )
 
@@ -396,6 +401,7 @@ extension CanvasViewModel {
 
 extension CanvasViewModel {
 
+    /// Processes finger touches and determines whether the gesture is drawing or transforming
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
@@ -441,7 +447,7 @@ extension CanvasViewModel {
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
 
             // Update the touch phase for drawing
-            drawingTouchPhase = touchPhase(pointArray)
+            drawingTouchPhase = drawingTouchPhase(pointArray)
 
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
@@ -456,7 +462,9 @@ extension CanvasViewModel {
 
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(isCurrentlyDrawing)
+            drawingDisplayLink.run(
+                drawingTouchPhase ?? .ended
+            )
 
         case .transforming:
             transformCanvas()
@@ -473,6 +481,7 @@ extension CanvasViewModel {
         }
     }
 
+    /// Processes pencil input using estimated touches
     func onPencilGestureDetected(
         estimatedTouches: Set<UITouch>,
         with event: UIEvent?,
@@ -493,6 +502,7 @@ extension CanvasViewModel {
         )
     }
 
+    /// Processes pencil input using actual touches
     func onPencilGestureDetected(
         actualTouches: Set<UITouch>,
         view: UIView
@@ -503,7 +513,7 @@ extension CanvasViewModel {
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
-        /// Execute if it’s the beginning of a touch
+        // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
 
             drawingRenderer.beginPencilStroke()
@@ -526,7 +536,7 @@ extension CanvasViewModel {
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
 
         // Update the touch phase for drawing
-        drawingTouchPhase = touchPhase(pointArray)
+        drawingTouchPhase = drawingTouchPhase(pointArray)
 
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
@@ -540,36 +550,39 @@ extension CanvasViewModel {
         )
         pencilStroke.setDrawingLineEndPoint()
 
-        drawingDisplayLink.run(isCurrentlyDrawing)
+        drawingDisplayLink.run(
+            drawingTouchPhase ?? .ended
+        )
     }
 
-    private func onDisplayLinkForDrawing() {
+    /// Called on every display-link frame while drawing is active
+    private func onDrawingDisplayLinkFrame() {
         guard
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
-            let commandBuffer = canvasRenderer.commandBuffer
+            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
             baseTexture: selectedLayerTexture,
             on: realtimeDrawingTexture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
-        // The finalization process is performed when drawing is completed.
+        // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
-            canvasRenderer.updateSelectedLayerTexture(
-                using: canvasRenderer.realtimeDrawingTexture,
-                with: commandBuffer
+            canvasRenderer.drawSelectedLayerTexture(
+                from: canvasRenderer.realtimeDrawingTexture,
+                with: currentFrameCommandBuffer
             )
 
-            commandBuffer.addCompletedHandler { @Sendable _ in
+            currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
                     // Reset parameters on drawing completion
                     self?.prepareNextStroke()
 
-                    self?.completeDrawing()
+                    self?.onCompleteDrawing()
                 }
             }
         } else if isCancelledDrawing {
@@ -577,18 +590,72 @@ extension CanvasViewModel {
             prepareNextStroke()
         }
 
-        composeAndRefreshCanvas(
+        refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
 
-    /// Called when the display texture size changes, such as when the device orientation changes.
+    /// Called when a stroke is completed
+    private func onCompleteDrawing() {
+        guard
+            let layerId = textureLayers.selectedLayer?.id,
+            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+        else { return }
+
+        drawingDebouncer.perform { [weak self] in
+            Task(priority: .utility) { [weak self] in
+                guard let self else { return }
+                do {
+                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
+                        texture: selectedLayerTexture,
+                        for: layerId
+                    )
+
+                    self.textureLayers.updateThumbnail(
+                        layerId,
+                        texture: selectedLayerTexture
+                    )
+
+                    // Update `updatedAt` when drawing completes
+                    self.projectMetaDataStorage.updateUpdatedAt()
+
+                } catch {
+                    Logger.error(error)
+                }
+            }
+        }
+
+        Task {
+            try await textureLayers.pushUndoDrawingObjectToUndoStack(
+                texture: selectedLayerTexture
+            )
+        }
+    }
+
+    /// Called when the display texture size changes, such as when the device orientation changes
     func onUpdateDisplayTexture() {
-        composeAndRefreshCanvas()
+        refreshCanvasAfterComposition()
     }
 }
 
 public extension CanvasViewModel {
+
+    /// Touch phase used for drawing
+    func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
+        if points.contains(where: { $0.phase == .cancelled }) {
+            return .cancelled
+        } else if points.contains(where: { $0.phase == .ended }) {
+            return .ended
+        } else if points.contains(where: { $0.phase == .began }) {
+            return .began
+        } else if points.contains(where: { $0.phase == .moved }) {
+            return .moved
+        } else if points.contains(where: { $0.phase == .stationary }) {
+            return .stationary
+        }
+        return nil
+    }
+
     func newCanvas(
         newProjectName: String,
         newTextureSize: CGSize
@@ -623,10 +690,9 @@ public extension CanvasViewModel {
 
     func exportFiles(
         thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
+        device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
-        let device = canvasRenderer.device
-
         // Save the thumbnail image into the working directory
         try thumbnail(length: thumbnailLength)?.pngData()?.write(
             to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
@@ -689,31 +755,6 @@ public extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    private var isCurrentlyDrawing: Bool {
-        switch drawingTouchPhase {
-        case .began, .moved: return true
-        default: return false
-        }
-    }
-    private var isFinishedDrawing: Bool {
-        drawingTouchPhase == .ended
-    }
-    private var isCancelledDrawing: Bool {
-        drawingTouchPhase == .cancelled
-    }
-
-    private func touchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
-        if points.contains(where: { $0.phase == .cancelled }) {
-            return .cancelled
-        } else if points.contains(where: { $0.phase == .ended }) {
-            return .ended
-        } else if points.contains(where: { $0.phase == .began }) {
-            return .began
-        } else if points.contains(where: { $0.phase == .moved }) {
-            return .moved
-        }
-        return nil
-    }
 
     private func makeStrokePoints(
         from pointArray: [TouchPoint],
@@ -770,42 +811,6 @@ extension CanvasViewModel {
         canvasRenderer.drawCanvasToDisplay()
     }
 
-    private func completeDrawing() {
-        guard
-            let layerId = textureLayers.selectedLayer?.id,
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
-        else { return }
-
-        drawingDebouncer.perform { [weak self] in
-            Task(priority: .utility) { [weak self] in
-                guard let self else { return }
-                do {
-                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
-                        texture: selectedLayerTexture,
-                        for: layerId
-                    )
-
-                    self.textureLayers.updateThumbnail(
-                        layerId,
-                        texture: selectedLayerTexture
-                    )
-
-                    // Update `updatedAt` when drawing completes
-                    self.projectMetaDataStorage.updateUpdatedAt()
-
-                } catch {
-                    Logger.error(error)
-                }
-            }
-        }
-
-        Task {
-            try await textureLayers.pushUndoDrawingObjectToUndoStack(
-                texture: selectedLayerTexture
-            )
-        }
-    }
-
     private func transformCanvas() {
         if transforming.isNotKeysInitialized {
             transforming.initialize(
@@ -828,12 +833,12 @@ extension CanvasViewModel {
         canvasRenderer.drawCanvasToDisplay()
     }
 
-    private func composeAndRefreshCanvas(
+    private func refreshCanvasAfterComposition(
         useRealtimeDrawingTexture: Bool = false
     ) {
         guard let selectedLayer = textureLayers.selectedLayer else { return }
 
-        canvasRenderer.composeAndRefreshCanvas(
+        canvasRenderer.refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: useRealtimeDrawingTexture,
             selectedLayer: .init(item: selectedLayer)
         )

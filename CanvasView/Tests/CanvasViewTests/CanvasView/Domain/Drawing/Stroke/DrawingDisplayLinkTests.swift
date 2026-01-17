@@ -16,8 +16,14 @@ struct DrawingDisplayLinkTests {
 
     typealias Subject = DrawingDisplayLink
 
-    @Test
-    func `When run(true) is called while the display link is paused, it starts running`() async throws {
+    @Test(
+        arguments: [
+            UITouch.Phase.began,
+            UITouch.Phase.moved,
+            UITouch.Phase.stationary
+        ]
+    )
+    func `When the finger is touching the screen, the display link runs`(touchPhase: UITouch.Phase) async throws {
         let subject = Subject(isPaused: true)
 
         // When a value flows through the publisher, the canvas is updated
@@ -25,7 +31,7 @@ struct DrawingDisplayLinkTests {
         let cancellable = subject.update.sink { _ in emitCount += 1 }
         defer { cancellable.cancel() }
 
-        subject.run(true)
+        subject.run(touchPhase)
 
         // The display link runs and the screen continues to update
         #expect(await TestHelpers.waitUntil { emitCount >= 1 })
@@ -36,8 +42,16 @@ struct DrawingDisplayLinkTests {
         #expect(subject.displayLink?.isPaused == false)
     }
 
-    @Test
-    func `When run(false) is called while the display link is running, it stops after updating once`() async throws {
+    @Test(
+        arguments: [
+            UITouch.Phase.ended,
+            UITouch.Phase.cancelled,
+            UITouch.Phase.regionEntered,
+            UITouch.Phase.regionMoved,
+            UITouch.Phase.regionExited
+        ]
+    )
+    func `When the finger is lifted from the screen, the display link stops`(touchPhase: UITouch.Phase) async throws {
         let subject = Subject(isPaused: false)
 
         // When a value flows through the publisher, the canvas is updated
@@ -45,7 +59,7 @@ struct DrawingDisplayLinkTests {
         let cancellable = subject.update.sink { _ in emitCount += 1 }
         defer { cancellable.cancel() }
 
-        subject.run(false)
+        subject.run(touchPhase)
 
         // After the display link stops, the screen is updated once and is not updated afterward
         #expect(await TestHelpers.waitUntil { emitCount >= 1 })

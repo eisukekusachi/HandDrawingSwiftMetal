@@ -277,6 +277,7 @@ import UIKit
     ) async throws {
         try await viewModel.exportFiles(
             thumbnailLength: thumbnailLength,
+            device: sharedDevice,
             to: workingDirectoryURL
         )
     }

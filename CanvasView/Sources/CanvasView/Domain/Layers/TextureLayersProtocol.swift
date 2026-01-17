@@ -15,8 +15,8 @@ public protocol TextureLayersProtocol: ObservableObject {
     /// Emits when a canvas update is requested
     var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
 
-    /// Emits when a canvas update is requested with `RealtimeDrawingTexture`
-    var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> { get }
+    /// Emits when a canvas update is requested with `MTLTexture`
+    var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> { get }
 
     /// Emits when a full canvas update is requested
     var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }

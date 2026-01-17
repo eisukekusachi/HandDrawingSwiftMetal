@@ -533,7 +533,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
         textureLayers.canvasUpdateRequestedPublisher
     }
 
-    public var canvasDrawingUpdateRequested: AnyPublisher<RealtimeDrawingTexture, Never> {
+    public var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> {
         textureLayers.canvasDrawingUpdateRequested
     }
 
