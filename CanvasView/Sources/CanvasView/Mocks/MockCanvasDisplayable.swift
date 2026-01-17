@@ -8,16 +8,11 @@
 import MetalKit
 
 final class MockCanvasDisplayable: CanvasDisplayable {
-    var commandBuffer: MTLCommandBuffer? { nil }
-
+    var currentFrameCommandBuffer: MTLCommandBuffer? { nil }
     var displayTexture: MTLTexture? { _texture }
-
     func resetCommandBuffer() {}
-
     func setNeedsDisplay() {}
-
     private let _texture: MTLTexture?
-
     init(texture: MTLTexture?) {
         self._texture = texture
     }

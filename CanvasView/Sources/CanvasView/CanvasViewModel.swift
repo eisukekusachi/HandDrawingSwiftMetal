@@ -238,12 +238,12 @@ extension CanvasViewModel {
             .sink { [weak self] texture in
                 guard
                     let `self`,
-                    let commandBuffer = self.canvasRenderer.commandBuffer
+                    let currentFrameCommandBuffer = self.canvasRenderer.currentFrameCommandBuffer
                 else { return }
 
                 self.canvasRenderer.drawSelectedLayerTexture(
                     from: texture,
-                    with: commandBuffer
+                    with: currentFrameCommandBuffer
                 )
                 self.refreshCanvasAfterComposition()
             }
@@ -561,23 +561,23 @@ extension CanvasViewModel {
             let drawingRenderer,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
-            let commandBuffer = canvasRenderer.commandBuffer
+            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
             baseTexture: selectedLayerTexture,
             on: realtimeDrawingTexture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
         // The finalization process is performed when drawing is completed.
         if isFinishedDrawing {
             canvasRenderer.drawSelectedLayerTexture(
                 from: canvasRenderer.realtimeDrawingTexture,
-                with: commandBuffer
+                with: currentFrameCommandBuffer
             )
 
-            commandBuffer.addCompletedHandler { @Sendable _ in
+            currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
                     // Reset parameters on drawing completion
                     self?.prepareNextStroke()

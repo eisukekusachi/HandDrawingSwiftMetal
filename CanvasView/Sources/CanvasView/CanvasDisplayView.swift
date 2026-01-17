@@ -30,7 +30,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     private let displayTextureSizeChangedSubject = PassthroughSubject<CGSize, Never>()
 
     /// Command buffer that stores commands for rendering a single frame
-    var commandBuffer: MTLCommandBuffer? {
+    var currentFrameCommandBuffer: MTLCommandBuffer? {
         _commandBuffer
     }
     private var _commandBuffer: MTLCommandBuffer?
@@ -73,8 +73,8 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
     func draw(in view: MTKView) {
         guard
-            let commandBuffer,
             let displayTexture,
+            let currentFrameCommandBuffer,
             let drawable = view.currentDrawable
         else { return }
 
@@ -84,12 +84,12 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
             buffers: flippedTextureBuffers,
             withBackgroundColor: nil,
             on: drawable.texture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+        currentFrameCommandBuffer.present(drawable)
+        currentFrameCommandBuffer.commit()
+        currentFrameCommandBuffer.waitUntilCompleted()
 
         resetCommandBuffer()
     }

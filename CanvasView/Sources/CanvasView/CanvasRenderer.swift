@@ -11,8 +11,9 @@ import Combine
 /// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
 @MainActor public final class CanvasRenderer: ObservableObject {
 
-    public var commandBuffer: MTLCommandBuffer? {
-        displayView.commandBuffer
+    /// Command buffer for a single frame
+    public var currentFrameCommandBuffer: MTLCommandBuffer? {
+        displayView.currentFrameCommandBuffer
     }
 
     /// Size of the canvas texture
@@ -239,19 +240,19 @@ extension CanvasRenderer {
             let selectedLayerTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
-            let commandBuffer = displayView.commandBuffer
+            let currentFrameCommandBuffer
         else { return }
 
         renderer.fillColor(
             texture: canvasTexture,
             withRGB: backgroundColor.rgb,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
         renderer.mergeTexture(
             texture: unselectedBottomTexture,
             into: canvasTexture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
         if selectedLayer.isVisible {
@@ -259,14 +260,14 @@ extension CanvasRenderer {
                 texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
-                with: commandBuffer
+                with: currentFrameCommandBuffer
             )
         }
 
         renderer.mergeTexture(
             texture: unselectedTopTexture,
             into: canvasTexture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
         drawCanvasToDisplay()
@@ -295,7 +296,7 @@ extension CanvasRenderer {
     public func drawCanvasToDisplay() {
         guard
             let displayTexture = displayView.displayTexture,
-            let commandBuffer = displayView.commandBuffer
+            let currentFrameCommandBuffer
         else { return }
 
         renderer.drawTexture(
@@ -304,7 +305,7 @@ extension CanvasRenderer {
             frameSize: frameSize,
             backgroundColor: baseBackgroundColor,
             on: displayTexture,
-            with: commandBuffer
+            with: currentFrameCommandBuffer
         )
 
         displayView.setNeedsDisplay()

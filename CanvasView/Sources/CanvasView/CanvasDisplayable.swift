@@ -9,7 +9,9 @@ import MetalKit
 
 @MainActor
 public protocol CanvasDisplayable {
-    var commandBuffer: MTLCommandBuffer? { get }
+
+    /// Command buffer for a single frame
+    var currentFrameCommandBuffer: MTLCommandBuffer? { get }
 
     var displayTexture: MTLTexture? { get }
 
