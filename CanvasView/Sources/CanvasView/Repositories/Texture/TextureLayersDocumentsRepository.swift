@@ -8,10 +8,10 @@
 import Foundation
 @preconcurrency import MetalKit
 
-/// Manages and persists `TextureLayers` textures on disk.
+/// Manages and persists `TextureLayers` textures on disk
 @MainActor public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
-    /// URL of the texture storage. Define it as `var` to allow modification of its metadata
+    /// URL of the texture storage
     public let workingDirectoryURL: URL
 
     private let renderer: MTLRendering
