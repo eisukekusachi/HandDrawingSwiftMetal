@@ -22,26 +22,18 @@ import Foundation
         storageDirectoryURL: URL,
         directoryName: String,
         renderer: MTLRendering
-    ) {
+    ) throws {
         self.renderer = renderer
 
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        do {
-            try FileManager.createDirectory(workingDirectoryURL)
-        } catch {
-            Logger.error(error)
-        }
+        try FileManager.createDirectory(workingDirectoryURL)
 
         // Do not back up because this is an intermediate directory
-        do {
-            var url = workingDirectoryURL
-            var resourceValues = URLResourceValues()
-            resourceValues.isExcludedFromBackup = true
-            try url.setResourceValues(resourceValues)
-        } catch {
-            Logger.error(error)
-        }
+        var url = workingDirectoryURL
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try url.setResourceValues(resourceValues)
     }
 
     public func initializeStorage(

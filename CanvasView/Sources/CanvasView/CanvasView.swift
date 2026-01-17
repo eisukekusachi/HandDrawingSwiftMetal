@@ -86,11 +86,15 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
-            storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage",
-            renderer: renderer
-        )
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
@@ -132,11 +136,15 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
-            storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage",
-            renderer: renderer
-        )
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
