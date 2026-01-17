@@ -10,8 +10,6 @@ import Foundation
 
 /// Manages and persists `TextureLayers` textures on disk.
 @MainActor public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
-    /// Directory name where texture files are stored
-    public let directoryName: String
 
     /// URL of the texture storage. Define it as `var` to allow modification of its metadata
     public let workingDirectoryURL: URL
@@ -26,8 +24,6 @@ import Foundation
         renderer: MTLRendering
     ) {
         self.renderer = renderer
-
-        self.directoryName = directoryName
 
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
