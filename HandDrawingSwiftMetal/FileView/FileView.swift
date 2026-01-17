@@ -16,19 +16,12 @@ struct FileView: View {
     init(
         targetURL: URL,
         suffix: String,
-        zipFileList: [String] = [],
         onTapItem: @escaping ((URL) -> Void)
     ) {
         self.targetURL = targetURL
-
-        if zipFileList.isEmpty {
-            self.zipFileList = targetURL.allFileURLs(suffix: suffix).map {
-                $0.lastPathComponent
-            }
-        } else {
-            self.zipFileList = zipFileList
+        self.zipFileList = targetURL.allFileURLs(suffix: suffix).map {
+            $0.lastPathComponent
         }
-
         self.onTapItem = onTapItem
     }
 
@@ -48,7 +41,6 @@ struct FileView: View {
     FileView(
         targetURL: URL(fileURLWithPath: NSHomeDirectory() + "/Documents"),
         suffix: "zip",
-        zipFileList: ["test1.zip", "test2.zip"],
         onTapItem: { _ in }
     )
 }
