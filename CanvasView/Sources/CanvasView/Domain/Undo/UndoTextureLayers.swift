@@ -134,19 +134,32 @@ private extension UndoTextureLayers {
     func pushUndoDrawingObject(
         texture: MTLTexture?
     ) async throws {
+        guard let inMemoryRepository else { return }
+
         guard
-            let inMemoryRepository,
-            let selectedLayer = textureLayers.selectedLayer,
+            let selectedLayer = textureLayers.selectedLayer
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+
+        guard
             let undoTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: previousDrawingTextureForUndo,
                 renderer: renderer
-            ),
+            )
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoTexture"))
+            return
+        }
+
+        guard
             let redoTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: texture,
                 renderer: renderer
             )
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "textures"))
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "redoTexture"))
             return
         }
         let undoObject = UndoDrawingObject(
