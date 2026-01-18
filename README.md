@@ -1,8 +1,8 @@
 # [WIP] HandDrawingSwiftMetal
 
-This is a drawing app using [jSignature](https://willowsystems.github.io/jSignature/#/about/linesmoothing/) as a reference. Depending on the strength of the brushstroke, inflections can be added to the lines as well.
+[Here](https://github.com/eisukekusachi/SimpleApplePencilDrawing) is the simple version.
 
-It is used in [Rollcanvas](https://rollcanvas.org) app.
+This is a drawing app using [jSignature](https://willowsystems.github.io/jSignature/#/about/linesmoothing/) as a reference. Depending on the strength of the brushstroke, inflections can be added to the lines as well.
 
 Make sure to choose the run scheme `HandDrawingSwiftMetal` before running or building the project.
 
