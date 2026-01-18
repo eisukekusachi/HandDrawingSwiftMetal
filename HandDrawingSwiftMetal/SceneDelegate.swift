@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: scene)
         window.rootViewController = HandDrawingViewController.create(
-            canvasConfiguration: .init()
+            canvasConfiguration: .init(fileSuffix: "zip")
         )
         self.window = window
         self.window?.makeKeyAndVisible()

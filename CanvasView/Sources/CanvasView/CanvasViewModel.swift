@@ -22,10 +22,6 @@ public final class CanvasViewModel {
         }
     }
 
-    var zipFileURL: URL {
-        projectMetaDataStorage.zipFileURL
-    }
-
     /// The size of the texture currently set on the canvas.
     /// A temporary value is assigned to avoid making it optional.
     private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
@@ -96,8 +92,6 @@ public final class CanvasViewModel {
     private let transforming = Transforming()
 
     private var cancellables = Set<AnyCancellable>()
-
-    public static let thumbnailName: String = "thumbnail.png"
 
     public static let thumbnailLength: CGFloat = 500
 
@@ -695,7 +689,7 @@ public extension CanvasViewModel {
     ) async throws {
         // Save the thumbnail image into the working directory
         try thumbnail(length: thumbnailLength)?.pngData()?.write(
-            to: workingDirectoryURL.appendingPathComponent(CanvasViewModel.thumbnailName)
+            to: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
         )
 
         // Copy all textures from the textureRepository
@@ -731,6 +725,21 @@ public extension CanvasViewModel {
             updatedAt: projectMetaDataStorage.updatedAt
         ).write(
             in: workingDirectoryURL
+        )
+    }
+
+    func projectFileName(suffix: String) -> String {
+        if suffix.isEmpty {
+            return projectMetaDataStorage.projectName
+        } else {
+            return projectMetaDataStorage.projectName + "." + suffix
+        }
+    }
+
+    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
+        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: length,
+            scale: 1.0
         )
     }
 
@@ -841,13 +850,6 @@ extension CanvasViewModel {
         canvasRenderer.refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: useRealtimeDrawingTexture,
             selectedLayer: .init(item: selectedLayer)
-        )
-    }
-
-    private func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
-        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
         )
     }
 }

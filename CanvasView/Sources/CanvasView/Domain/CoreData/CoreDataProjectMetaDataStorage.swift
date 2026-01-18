@@ -26,10 +26,6 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
         project.updatedAt
     }
 
-    var zipFileURL: URL {
-        project.zipFileURL
-    }
-
     private var project = ProjectMetaData()
 
     private let storage: AnyCoreDataStorage<ProjectMetaDataEntity>?
@@ -59,6 +55,15 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
 }
 
 extension CoreDataProjectMetaDataStorage {
+
+    public var metaData: ProjectMetaData {
+        .init(
+            projectName: project.projectName,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt
+        )
+    }
+
     public func fetch() throws -> ProjectMetaDataEntity? {
         try storage?.fetch()
     }

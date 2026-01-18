@@ -5,50 +5,84 @@
 //  Created by Eisuke Kusachi on 2023/11/04.
 //
 
+import CanvasView
 import SwiftUI
 
 struct FileView: View {
 
-    private let targetURL: URL
-    private let zipFileList: [String]
+    private let list: [LocalFileItem]
     private let onTapItem: ((URL) -> Void)
 
     init(
-        targetURL: URL,
-        suffix: String,
-        zipFileList: [String] = [],
+        list: [LocalFileItem],
         onTapItem: @escaping ((URL) -> Void)
     ) {
-        self.targetURL = targetURL
-
-        if zipFileList.isEmpty {
-            self.zipFileList = targetURL.allFileURLs(suffix: suffix).map {
-                $0.lastPathComponent
-            }
-        } else {
-            self.zipFileList = zipFileList
-        }
-
+        self.list = list
         self.onTapItem = onTapItem
     }
 
     var body: some View {
-        ForEach(0 ..< zipFileList.count, id: \.self) { index in
-            Text(zipFileList[index])
-                .onTapGesture {
-                    onTapItem(
-                        targetURL.appendingPathComponent(zipFileList[index])
-                    )
-                }
+        ScrollView {
+            ForEach(0 ..< list.count, id: \.self) { index in
+                itemView(item: list[index])
+                    .onTapGesture {
+                        onTapItem(
+                            list[index].fileURL
+                        )
+                    }
+            }
         }
+        .padding(.vertical, 24)
+    }
+
+    private func itemView(item: LocalFileItem) -> some View {
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .fill(Color(red: 0.92, green: 0.92, blue: 0.92))
+
+            if let image = item.image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                VStack {
+                    Spacer()
+                    Image(systemName: "questionmark.circle.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .opacity(0.5)
+                    Spacer()
+                }
+            }
+
+            Text(item.title)
+                .bold()
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(.white.opacity(0.75))
+        }
+        .frame(width: 300, height: 300)
+        .cornerRadius(12)
+        .padding(.vertical, 4)
     }
 }
 
 #Preview {
     FileView(
-        targetURL: URL(fileURLWithPath: NSHomeDirectory() + "/Documents"),
-        suffix: "zip",
-        zipFileList: ["test1.zip", "test2.zip"],
+        list: [
+            .init(
+                title: "Test",
+                image: nil,
+                fileURL: URL(fileURLWithPath: "")
+            ),
+            .init(
+                title: "Test Test Test Test Test Test Test Test Test Test Test Test",
+                image: nil,
+                fileURL: URL(fileURLWithPath: "")
+            )
+        ],
         onTapItem: { _ in }
     )
 }

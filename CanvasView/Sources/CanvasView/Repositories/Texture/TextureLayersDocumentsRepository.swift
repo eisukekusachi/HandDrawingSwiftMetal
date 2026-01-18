@@ -8,50 +8,32 @@
 import Foundation
 @preconcurrency import MetalKit
 
-/// A repository that manages the textures of `TextureLayers`.
-/// The textures are persisted and managed on disk
-@MainActor
-public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
-    /// The directory name where texture files are stored
-    public let directoryName: String
+/// Manages and persists `TextureLayers` textures on disk
+@MainActor public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
-    /// The URL of the texture storage. Define it as `var` to allow modification of its metadata
+    /// URL of the texture storage
     public let workingDirectoryURL: URL
-
-    public var textureSize: CGSize {
-        _textureSize
-    }
 
     private let renderer: MTLRendering
 
-    private var _textureSize: CGSize = .zero
+    private var textureSize: CGSize = .zero
 
     public init(
         storageDirectoryURL: URL,
         directoryName: String,
         renderer: MTLRendering
-    ) {
+    ) throws {
         self.renderer = renderer
-
-        self.directoryName = directoryName
 
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        do {
-            try FileManager.createDirectory(workingDirectoryURL)
-        } catch {
-            Logger.error(error)
-        }
+        try FileManager.createDirectory(workingDirectoryURL)
 
         // Do not back up because this is an intermediate directory
-        do {
-            var url = workingDirectoryURL
-            var resourceValues = URLResourceValues()
-            resourceValues.isExcludedFromBackup = true
-            try url.setResourceValues(resourceValues)
-        } catch {
-            Logger.error(error)
-        }
+        var url = workingDirectoryURL
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try url.setResourceValues(resourceValues)
     }
 
     public func initializeStorage(
@@ -81,7 +63,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         try await addTexture(texture: newTexture, id: layerId)
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        self.textureSize = textureSize
     }
 
     /// Restore the storage from Core Data.
@@ -129,7 +111,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         // Do nothing since the textures already exist in workingDirectory
 
         // Retain the texture size
-        _textureSize = textureLayersState.textureSize
+        self.textureSize = textureLayersState.textureSize
     }
 
     /// Restore the storage from the saved data.
@@ -188,7 +170,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         }
 
         // Set the texture size after the initialization of this repository is completed
-        _textureSize = textureSize
+        self.textureSize = textureSize
     }
 }
 

@@ -44,7 +44,26 @@ import UIKit
     private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
     public var zipFileURL: URL {
-        viewModel.zipFileURL
+        FileManager.documentsFileURL(
+            projectName: viewModel.projectMetaDataStorage.projectName,
+            suffix: fileSuffix
+        )
+    }
+
+    /// File extension used when saving a file
+    public var fileSuffix: String {
+        _fileSuffix
+    }
+    private var _fileSuffix: String = ""
+
+    public var currentLocalFileItem: LocalFileItem {
+        .init(
+            metaData: viewModel.projectMetaDataStorage.metaData,
+            image: viewModel.thumbnail(),
+            fileURL: URL.documents.appendingPathComponent(
+                viewModel.projectFileName(suffix: _fileSuffix)
+            )
+        )
     }
 
     /// The size of the texture currently set on the canvas
@@ -53,7 +72,7 @@ import UIKit
     }
 
     /// The size of the screen
-    static var screenSize: CGSize {
+    public static var screenSize: CGSize {
         let scale = UIScreen.main.scale
         let size = UIScreen.main.bounds.size
         return .init(
@@ -61,6 +80,8 @@ import UIKit
             height: size.height * scale
         )
     }
+
+    public static let thumbnailName: String = "thumbnail.png"
 
     /// The single Metal device instance used throughout the app
     private let sharedDevice: MTLDevice
@@ -86,11 +107,15 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
-            storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage",
-            renderer: renderer
-        )
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
@@ -132,11 +157,15 @@ import UIKit
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository(
-            storageDirectoryURL: URL.applicationSupport,
-            directoryName: "TextureStorage",
-            renderer: renderer
-        )
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
@@ -176,6 +205,7 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
+        setVariables(configuration: configuration)
         layoutViews()
         addEvents()
         bindData()
@@ -186,6 +216,10 @@ import UIKit
             ),
             configuration: configuration
         )
+    }
+
+    private func setVariables(configuration: CanvasConfiguration) {
+        self._fileSuffix = configuration.fileSuffix
     }
 
     private func layoutViews() {
