@@ -687,45 +687,81 @@ public extension CanvasViewModel {
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
-        // Save the thumbnail image into the working directory
-        try thumbnail(length: thumbnailLength)?.pngData()?.write(
-            to: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
-        )
-
-        // Copy all textures from the textureRepository
-        let textures = try await canvasRenderer.textureLayersDocumentsRepository.duplicatedTextures(
-            textureLayers.layers.map { $0.id }
-        )
-
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for texture in textures {
-                group.addTask {
-                    try await texture.write(
-                        in: workingDirectoryURL,
-                        device: device
-                    )
-                }
-            }
-            try await group.waitForAll()
+        do {
+            // Save the thumbnail image into the working directory
+            try thumbnail(length: thumbnailLength)?.pngData()?.write(
+                to: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
+            )
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to create the thumbnail", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
         }
 
-        // Save the texture layers as JSON
-        try TextureLayersArchiveModel(
-            layers: textureLayers.layers.map { .init(item: $0) },
-            layerIndex: textureLayers.selectedIndex ?? 0,
-            textureSize: textureLayers.textureSize
-        ).write(
-            in: workingDirectoryURL
-        )
+        do {
+            // Copy all textures from the textureRepository
+            let textures = try await canvasRenderer.textureLayersDocumentsRepository.duplicatedTextures(
+                textureLayers.layers.map { $0.id }
+            )
 
-        // Save the project metadata as JSON
-       try ProjectMetaDataArchiveModel(
-            projectName: projectMetaDataStorage.projectName,
-            createdAt: projectMetaDataStorage.createdAt,
-            updatedAt: projectMetaDataStorage.updatedAt
-        ).write(
-            in: workingDirectoryURL
-        )
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for texture in textures {
+                    group.addTask {
+                        try await texture.write(
+                            in: workingDirectoryURL,
+                            device: device
+                        )
+                    }
+                }
+                try await group.waitForAll()
+            }
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to create the textures", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        do {
+            // Save the texture layers as JSON
+            try TextureLayersArchiveModel(
+                layers: textureLayers.layers.map { .init(item: $0) },
+                layerIndex: textureLayers.selectedIndex ?? 0,
+                textureSize: textureLayers.textureSize
+            ).write(
+                in: workingDirectoryURL
+            )
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to save the texture layers", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        do {
+            // Save the project metadata as JSON
+            try ProjectMetaDataArchiveModel(
+                projectName: projectMetaDataStorage.projectName,
+                createdAt: projectMetaDataStorage.createdAt,
+                updatedAt: projectMetaDataStorage.updatedAt
+            ).write(
+                in: workingDirectoryURL
+            )
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to save the project meta data", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
     }
 
     func projectFileName(suffix: String) -> String {
