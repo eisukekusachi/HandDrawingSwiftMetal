@@ -618,12 +618,13 @@ extension CanvasViewModel {
                 }
             }
         }
-
+/*
         Task {
             try await textureLayers.pushUndoDrawingObjectToUndoStack(
                 texture: selectedLayerTexture
             )
         }
+*/
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes
