@@ -13,18 +13,22 @@ import UIKit
     /// File extension used when saving a file
     public let fileSuffix: String
 
+    public let undoCount: Int
+
     public let projectConfiguration: ProjectConfiguration
     public let environmentConfiguration: EnvironmentConfiguration
 
     public init(
         textureSize: CGSize? = nil,
         fileSuffix: String = "",
+        undoCount: Int = 24,
         projectConfiguration: ProjectConfiguration = .init(),
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
         // The screen size is used when the value is nil
         self.textureSize = textureSize ?? CanvasView.screenSize
         self.fileSuffix = CanvasConfiguration.sanitizedFileExtension(fileSuffix)
+        self.undoCount = undoCount
         self.projectConfiguration = projectConfiguration
         self.environmentConfiguration = environmentConfiguration
     }
