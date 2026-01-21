@@ -49,19 +49,14 @@ public final class UndoTextureLayers: ObservableObject {
         self.textureLayers = textureLayers
         self.renderer = renderer
         self.inMemoryRepository = inMemoryRepository
-    }
 
-    public func setupUndoManager(
-        undoCount: Int = 24
-    ) {
-        self.undoManager.levelsOfUndo = undoCount
+        // Set an initial value to prevent out-of-memory errors when no limit is applied
+        self.undoManager.levelsOfUndo = 8
         self.undoManager.groupsByEvent = false
     }
 
-    public func setUndoTextureRepository(
-        repository: UndoTextureInMemoryRepository
-    ) {
-        self.inMemoryRepository = repository
+    public func setLevelsOfUndo(undoCount: Int) {
+        self.undoManager.levelsOfUndo = undoCount
     }
 
     public func initializeUndoTextures(

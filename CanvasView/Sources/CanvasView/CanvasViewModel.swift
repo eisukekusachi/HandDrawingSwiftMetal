@@ -110,6 +110,9 @@ public final class CanvasViewModel {
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
 
+        // Set the undo count
+        self.textureLayers.setLevelsOfUndo(undoCount: configuration.undoCount)
+
         self.bindData()
 
         let environmentConfiguration = configuration.environmentConfiguration
@@ -618,13 +621,12 @@ extension CanvasViewModel {
                 }
             }
         }
-/*
+
         Task {
             try await textureLayers.pushUndoDrawingObjectToUndoStack(
                 texture: selectedLayerTexture
             )
         }
-*/
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes
