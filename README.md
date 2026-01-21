@@ -1,4 +1,4 @@
-# [WIP] HandDrawingSwiftMetal
+# HandDrawingSwiftMetal
 
 [Here](https://github.com/eisukekusachi/SimpleApplePencilDrawing) is the simple version.
 
