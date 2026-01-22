@@ -14,27 +14,19 @@ import UIKit
 @MainActor
 public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, ObservableObject {
 
-    public var projectName: String {
-        project.projectName
-    }
-
-    public var createdAt: Date {
-        project.createdAt
-    }
-
-    public var updatedAt: Date {
-        project.updatedAt
-    }
+    public var projectName: String { project.projectName }
+    public var createdAt: Date { project.createdAt }
+    public var updatedAt: Date { project.updatedAt }
 
     private var project = ProjectMetaData()
-
     private let storage: AnyCoreDataStorage<ProjectMetaDataEntity>?
-
     private var cancellables = Set<AnyCancellable>()
 
-    init(
-        storage: AnyCoreDataStorage<ProjectMetaDataEntity>?
-    ) {
+    /// IMPORTANT:
+    /// This must match the *Entity name* defined in the .xcdatamodeld (not necessarily the class name).
+    private let entityNameInModel = "ProjectMetaDataEntity"
+
+    init(storage: AnyCoreDataStorage<ProjectMetaDataEntity>?) {
         self.storage = storage
 
         // Save to Core Data when the properties are updated
@@ -46,9 +38,7 @@ public final class CoreDataProjectMetaDataStorage: ProjectMetaDataProtocol, Obse
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task {
-                await self.save(self.project)
-            }
+            Task { await self.save(self.project) }
         }
         .store(in: &cancellables)
     }
@@ -65,7 +55,12 @@ extension CoreDataProjectMetaDataStorage {
     }
 
     public func fetch() throws -> ProjectMetaDataEntity? {
-        try storage?.fetch()
+        guard let storage, let context = storage.context else { return nil }
+        guard hasEntityInModel(named: entityNameInModel, context: context) else {
+            // Entity was removed from the model; skip fetch to avoid crash.
+            return nil
+        }
+        return try storage.fetch()
     }
 
     public func updateAll(newProjectName: String) {
@@ -107,13 +102,20 @@ extension CoreDataProjectMetaDataStorage {
     }
 }
 
-
 private extension CoreDataProjectMetaDataStorage {
+
+    func hasEntityInModel(named name: String, context: NSManagedObjectContext) -> Bool {
+        guard !name.isEmpty else { return false }
+        guard let model = context.persistentStoreCoordinator?.managedObjectModel else { return false }
+        return model.entitiesByName[name] != nil
+    }
+
     func save(_ target: ProjectMetaData) async {
-        guard
-            let storage,
-            let context = storage.context
-        else { return }
+        guard let storage, let context = storage.context else { return }
+        guard hasEntityInModel(named: entityNameInModel, context: context) else {
+            // Entity was removed from the model; skip save to avoid crash.
+            return
+        }
 
         let projectName = target.projectName
         let createdAt = target.createdAt
@@ -128,19 +130,15 @@ private extension CoreDataProjectMetaDataStorage {
 
                 // Return if no changes
                 guard
-                    entity.projectName != projectName || entity.createdAt != createdAt || entity.updatedAt != updatedAt
+                    entity.projectName != projectName ||
+                    entity.createdAt != createdAt ||
+                    entity.updatedAt != updatedAt
                 else { return }
 
                 // Update entities only if values have actually changed
-                if entity.projectName != projectName {
-                    entity.projectName = projectName
-                }
-                if entity.createdAt != createdAt {
-                    entity.createdAt = createdAt
-                }
-                if entity.updatedAt != updatedAt {
-                    entity.updatedAt = updatedAt
-                }
+                if entity.projectName != projectName { entity.projectName = projectName }
+                if entity.createdAt != createdAt { entity.createdAt = createdAt }
+                if entity.updatedAt != updatedAt { entity.updatedAt = updatedAt }
 
                 if context.hasChanges {
                     try context.save()
