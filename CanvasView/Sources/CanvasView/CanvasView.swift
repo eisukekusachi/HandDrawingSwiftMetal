@@ -10,7 +10,7 @@ import UIKit
 
 @preconcurrency import MetalKit
 
-@objc public class CanvasView: UIView {
+open class CanvasView: UIView {
 
     public var isDrawing: AnyPublisher<Bool, Never> {
         viewModel.isDrawing
