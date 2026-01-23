@@ -1,5 +1,5 @@
 //
-//  HandDrawingContentViewModel.swift
+//  HandDrawingViewModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/10.
@@ -10,7 +10,7 @@ import CanvasView
 import UIKit
 
 @MainActor
-final class HandDrawingContentViewModel: ObservableObject {
+final class HandDrawingViewModel: ObservableObject {
 
     let initializeColors: [UIColor] = [
         .black.withAlphaComponent(0.8),
@@ -37,6 +37,10 @@ final class HandDrawingContentViewModel: ObservableObject {
         _fileList
     }
     private var _fileList: [LocalFileItem] = []
+
+    let projectStorage: CoreDataProjectStorage
+
+    private let persistenceController: PersistenceController
 
     private let drawingToolController: PersistenceController
 
@@ -66,15 +70,26 @@ final class HandDrawingContentViewModel: ObservableObject {
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     public init() {
+        self.persistenceController = .init(
+            xcdatamodeldName: "ProjectStorage"
+        )
 
-        drawingToolController = PersistenceController(xcdatamodeldName: "DrawingToolStorage", location: .mainApp)
+        self.drawingToolController = PersistenceController(
+            xcdatamodeldName: "DrawingToolStorage"
+        )
 
-        drawingToolStorage = CoreDataDrawingToolStorage(
+        self.projectStorage = .init(
+            storage: AnyCoreDataStorage(
+                CoreDataStorage<ProjectEntity>(context: persistenceController.viewContext)
+            )
+        )
+
+        self.drawingToolStorage = CoreDataDrawingToolStorage(
             drawingTool: DrawingTool(),
             context: drawingToolController.viewContext
         )
 
-        brushPaletteStorage = CoreDataBrushPaletteStorage(
+        self.brushPaletteStorage = CoreDataBrushPaletteStorage(
             palette: BrushPalette(
                 colors: initializeColors,
                 index: 0
@@ -82,7 +97,7 @@ final class HandDrawingContentViewModel: ObservableObject {
             context: drawingToolController.viewContext
         )
 
-        eraserPaletteStorage = CoreDataEraserPaletteStorage(
+        self.eraserPaletteStorage = CoreDataEraserPaletteStorage(
             palette: EraserPalette(
                 alphas: initializeAlphas,
                 index: 0
@@ -111,6 +126,14 @@ final class HandDrawingContentViewModel: ObservableObject {
         }
     }
 
+    func projectFileName(suffix: String) -> String {
+        if suffix.isEmpty {
+            return projectStorage.projectName
+        } else {
+            return projectStorage.projectName + "." + suffix
+        }
+    }
+
     func toggleDrawingTool() {
         drawingToolStorage.setDrawingTool(
             drawingToolStorage.type == .brush ? .eraser: .brush
@@ -122,7 +145,7 @@ final class HandDrawingContentViewModel: ObservableObject {
     }
 }
 
-extension HandDrawingContentViewModel {
+extension HandDrawingViewModel {
     func loadFile(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?,
@@ -211,7 +234,7 @@ extension HandDrawingContentViewModel {
     }
 }
 
-extension HandDrawingContentViewModel {
+extension HandDrawingViewModel {
     func upsertFileList(fileItem: LocalFileItem) {
         if let index = _fileList.firstIndex(where: { $0.title == fileItem.title }) {
             _fileList[index] = fileItem

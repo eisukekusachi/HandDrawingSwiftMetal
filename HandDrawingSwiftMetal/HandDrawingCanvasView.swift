@@ -8,4 +8,13 @@
 import CanvasView
 import UIKit
 
-@objc final class HandDrawingCanvasView: CanvasView {}
+@objc final class HandDrawingCanvasView: CanvasView {
+
+    override init() {
+        super.init()
+    }
+
+    @MainActor required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+}

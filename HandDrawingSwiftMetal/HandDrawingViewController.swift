@@ -30,7 +30,14 @@ class HandDrawingViewController: UIViewController {
     private let brushDrawingRenderer = BrushDrawingRenderer()
     private let eraserDrawingRenderer = EraserDrawingRenderer()
 
-    private let viewModel = HandDrawingContentViewModel()
+    private let viewModel = HandDrawingViewModel()
+
+    public var zipFileURL: URL {
+        FileManager.documentsFileURL(
+            projectName: contentView.canvasView.fileSuffix,
+            suffix: contentView.canvasView.fileSuffix
+        )
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
