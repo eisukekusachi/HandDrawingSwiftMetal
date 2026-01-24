@@ -106,15 +106,14 @@ final class HandDrawingViewModel: ObservableObject {
             ),
             context: drawingToolStorageController.viewContext
         )
-
-        Task {
-            try await fetchDataFromCoreDataIfAvailable()
-        }
     }
 
     func setup(configuration: CanvasConfiguration) {
         _fileSuffix = configuration.fileSuffix
 
+        Task {
+            try await fetchDataFromCoreDataIfAvailable()
+        }
         Task {
             await fileItemList(
                 fileSuffix: _fileSuffix
