@@ -49,6 +49,9 @@
 		D49C692E2F23A79D00B66608 /* AnyCoreDataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C692D2F23A79D00B66608 /* AnyCoreDataStorage.swift */; };
 		D49C69322F23BA1600B66608 /* CoreDataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69312F23BA1600B66608 /* CoreDataStorage.swift */; };
 		D49C69362F23CD7700B66608 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69352F23CD7700B66608 /* FileManager.swift */; };
+		D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69392F246BA800B66608 /* LocalFileItem.swift */; };
+		D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */; };
+		D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
@@ -129,6 +132,9 @@
 		D49C692D2F23A79D00B66608 /* AnyCoreDataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCoreDataStorage.swift; sourceTree = "<group>"; };
 		D49C69312F23BA1600B66608 /* CoreDataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStorage.swift; sourceTree = "<group>"; };
 		D49C69352F23CD7700B66608 /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
+		D49C69392F246BA800B66608 /* LocalFileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileItem.swift; sourceTree = "<group>"; };
+		D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectArchiveModel.swift; sourceTree = "<group>"; };
+		D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
@@ -203,6 +209,7 @@
 				D49C69222F23A64200B66608 /* CoreDataProjectStorage.swift */,
 				D49C69202F23A5A400B66608 /* PersistenceController.swift */,
 				D49C69312F23BA1600B66608 /* CoreDataStorage.swift */,
+				D49C69392F246BA800B66608 /* LocalFileItem.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -237,9 +244,9 @@
 			isa = PBXGroup;
 			children = (
 				D41C72172E6C479500D524DE /* CoreData */,
-				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
-				D49C69242F23A69100B66608 /* ProjectData.swift */,
+				D426FC9E2E5DD90500CC116D /* FileIO */,
+				D49C693F2F24A10100B66608 /* Project */,
 			);
 			path = Domains;
 			sourceTree = "<group>";
@@ -262,6 +269,7 @@
 				D426FC5F2E5C0A8B00CC116D /* DrawingToolArchiveModel.swift */,
 				D426FC5D2E5C08AA00CC116D /* EraserPaletteArchiveModel.swift */,
 				D49C69352F23CD7700B66608 /* FileManager.swift */,
+				D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */,
 			);
 			path = FileIO;
 			sourceTree = "<group>";
@@ -326,6 +334,15 @@
 				D49C692B2F23A76400B66608 /* Logger.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		D49C693F2F24A10100B66608 /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				D49C69242F23A69100B66608 /* ProjectData.swift */,
+				D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */,
+			);
+			path = Project;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -587,6 +604,7 @@
 				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
 				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,
+				D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */,
 				D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */,
 				D4168F1C2E59EFE7007F7904 /* BrushPaletteView.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
@@ -616,6 +634,8 @@
 				D426FC5C2E5C003400CC116D /* BrushPaletteArchiveModel.swift in Sources */,
 				D49C69362F23CD7700B66608 /* FileManager.swift in Sources */,
 				D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */,
+				D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */,
+				D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */,
 				D426FC602E5C0A8B00CC116D /* DrawingToolArchiveModel.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,

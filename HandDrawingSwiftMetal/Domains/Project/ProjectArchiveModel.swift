@@ -1,13 +1,13 @@
 //
-//  ProjectMetaDataArchiveModel.swift
-//  CanvasView
+//  ProjectArchiveModel.swift
+//  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/09/22.
+//  Created by Eisuke Kusachi on 2026/01/24.
 //
 
 import Foundation
 
-public struct ProjectMetaDataArchiveModel: Codable, Sendable {
+struct ProjectArchiveModel: Codable, Sendable {
 
     public let projectName: String
     public let createdAt: Date
@@ -24,6 +24,6 @@ public struct ProjectMetaDataArchiveModel: Codable, Sendable {
     }
 }
 
-extension ProjectMetaDataArchiveModel: LocalFileConvertible {
+extension ProjectArchiveModel: LocalFileConvertible {
     public static var fileName: String { "project" }
 }

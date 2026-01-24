@@ -74,11 +74,15 @@ struct FileView: View {
         list: [
             .init(
                 title: "Test",
+                createdAt: Date(),
+                updatedAt: Date(),
                 image: nil,
                 fileURL: URL(fileURLWithPath: "")
             ),
             .init(
                 title: "Test Test Test Test Test Test Test Test Test Test Test Test",
+                createdAt: Date(),
+                updatedAt: Date(),
                 image: nil,
                 fileURL: URL(fileURLWithPath: "")
             )
