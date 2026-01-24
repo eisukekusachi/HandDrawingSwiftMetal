@@ -30,7 +30,26 @@ class HandDrawingViewController: UIViewController {
     private let brushDrawingRenderer = BrushDrawingRenderer()
     private let eraserDrawingRenderer = EraserDrawingRenderer()
 
-    private let viewModel = HandDrawingContentViewModel()
+    private let viewModel = HandDrawingViewModel()
+
+    public var zipFileURL: URL {
+        FileManager.documentsFileURL(
+            projectName: viewModel.projectStorage.projectName,
+            suffix: viewModel.fileSuffix
+        )
+    }
+
+    var currentLocalFileItem: LocalFileItem {
+        .init(
+            title: viewModel.projectStorage.projectName,
+            createdAt: viewModel.projectStorage.createdAt,
+            updatedAt: viewModel.projectStorage.updatedAt,
+            image: contentView.canvasView.thumbnail(),
+            fileURL: URL.documents.appendingPathComponent(
+                viewModel.projectFileName()
+            )
+        )
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,32 +99,19 @@ class HandDrawingViewController: UIViewController {
             else { return }
 
             Task {
-                defer { self.viewModel.showActivityIndicator(false) }
-                self.viewModel.showActivityIndicator(true)
+                defer { self.showActivityIndicator(false) }
+                self.showActivityIndicator(true)
 
                 do {
-                    let projectName = Calendar.currentDate
                     let textureSize = canvasView.currentTextureSize
 
                     try await canvasView.newCanvas(
-                        newProjectName: projectName,
-                        newTextureSize: textureSize
+                        textureSize: textureSize
                     )
+                    self.viewModel.resetCoreData()
 
-                    self.viewModel.drawingToolStorage.update(
-                        type: .brush,
-                        brushDiameter: 8,
-                        eraserDiameter: 8
-                    )
-                    self.viewModel.brushPaletteStorage.update(
-                        colors: self.viewModel.initializeColors,
-                        index: 0
-                    )
-                    self.viewModel.eraserPaletteStorage.update(
-                        alphas: self.viewModel.initializeAlphas,
-                        index: 0
-                    )
                     self.updateComponents()
+
                 } catch {
                     self.showAlert(error)
                 }
@@ -137,13 +143,23 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.didInitialize
+        contentView.canvasView.setupCompletion
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] textureLayers in
+            .sink { [weak self] result in
                 self?.textureLayerViewPresenter.update(
-                    textureLayers: textureLayers.textureLayers
+                    textureLayers: result.textureLayers
                 )
                 self?.contentView.initialize()
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.drawingCompletion
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                // Update the project's updatedAt value to the current time
+                self?.viewModel.projectStorage.update(
+                    updatedAt: Date()
+                )
             }
             .store(in: &cancellables)
 
@@ -386,10 +402,10 @@ extension HandDrawingViewController {
             completion: { [weak self] in
                 guard let `self` else { return }
                 self.viewModel.upsertFileList(
-                    fileItem: self.contentView.canvasView.currentLocalFileItem
+                    fileItem: currentLocalFileItem
                 )
             },
-            zipFileURL: self.contentView.canvasView.zipFileURL
+            zipFileURL: zipFileURL
         )
     }
 

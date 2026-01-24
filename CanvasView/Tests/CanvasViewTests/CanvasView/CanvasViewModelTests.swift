@@ -39,20 +39,10 @@ struct CanvasViewModelTests {
             return dateFormatter
         }
 
-        private var currentProjectMetaData: ProjectMetaData {
-            .init(
-                projectName: "currentName",
-                createdAt: formatter.date(from: "2000-1-1 00:00:00")!,
-                updatedAt: formatter.date(from: "2000-12-31 00:00:00")!
-            )
-        }
-
         init() {
             self.textureLayersDocumentsRepository = MockTextureLayersDocumentsRepository(
                 renderer: renderer
             )
-
-            let coreDataMetaDataEntity = ProjectMetaDataEntity(context: CoreDataTestHelper.makeInMemoryContext())
 
             self.dependencies = CanvasViewDependencies(
                 canvasRenderer: CanvasRenderer(
@@ -71,20 +61,8 @@ struct CanvasViewModelTests {
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: UndoTextureInMemoryRepository(
                     renderer: renderer
-                ),
-                projectMetaDataStorage: CoreDataProjectMetaDataStorage(
-                    storage: AnyCoreDataStorage(
-                        MockCoreDataStorage<ProjectMetaDataEntity>(
-                            context: nil,
-                            value: coreDataMetaDataEntity
-                        )
-                    )
                 )
             )
-
-            coreDataMetaDataEntity.projectName = currentProjectMetaData.projectName
-            coreDataMetaDataEntity.createdAt = currentProjectMetaData.createdAt
-            coreDataMetaDataEntity.updatedAt = currentProjectMetaData.updatedAt
         }
 
         @Test
@@ -96,15 +74,13 @@ struct CanvasViewModelTests {
             var cancellable: AnyCancellable?
             let waitForEmission = Task { @MainActor in
                 await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    cancellable = subject.didInitialize
+                    cancellable = subject.setupCompletion
                         .prefix(1)
                         .sink { _ in
                             continuation.resume()
                         }
                 }
             }
-
-            let now = Date()
 
             try await subject.setupCanvas(
                 textureLayersState: .init(textureSize: textureSize),
@@ -116,13 +92,6 @@ struct CanvasViewModelTests {
             await waitForEmission.value
             cancellable?.cancel()
 
-            // If textureLayersState is provided, the project metadata is overwritten using Core Data,
-            // and only updatedAt is updated to the current date.
-            let metaData = subject.projectMetaDataStorage
-            #expect(metaData.projectName == currentProjectMetaData.projectName)
-            #expect(Int(metaData.createdAt.timeIntervalSince1970) == Int(currentProjectMetaData.createdAt.timeIntervalSince1970))
-            #expect(Int(metaData.updatedAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
-
             // Restore storage using the provided textureLayersState
             #expect(textureLayersDocumentsRepository.initializeStorage_textureLayersState_callCount == 1)
             #expect(textureLayersDocumentsRepository.initializeStorage_newTextureSize_callCount == 0)
@@ -130,7 +99,6 @@ struct CanvasViewModelTests {
 
         @Test
         func `When textureLayersState is nil and the texture size is above the minimum threshold, the default canvas initialization is performed`() async throws {
-            let newProjectName = "newProjectName"
 
             let subject = Subject(
                 dependencies: dependencies
@@ -139,7 +107,7 @@ struct CanvasViewModelTests {
             var cancellable: AnyCancellable?
             let waitForEmission = Task { @MainActor in
                 await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    cancellable = subject.didInitialize
+                    cancellable = subject.setupCompletion
                         .prefix(1)
                         .sink { _ in
                             continuation.resume()
@@ -147,24 +115,15 @@ struct CanvasViewModelTests {
                 }
             }
 
-            let now = Date()
-
             try await subject.setupCanvas(
                 textureLayersState: nil,
                 configuration: .init(
-                    textureSize: textureSize,
-                    projectConfiguration: .init(projectName: newProjectName)
+                    textureSize: textureSize
                 )
             )
 
             await waitForEmission.value
             cancellable?.cancel()
-
-            // If textureLayersState is nil, the project metadata is updated
-            // with the new project name and the current timestamp.
-            #expect(subject.projectMetaDataStorage.projectName == newProjectName)
-            #expect(Int(subject.projectMetaDataStorage.createdAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
-            #expect(Int(subject.projectMetaDataStorage.updatedAt.timeIntervalSince1970) == Int(now.timeIntervalSince1970))
 
             // Initialize storage with a new texture size
             #expect(textureLayersDocumentsRepository.initializeStorage_textureLayersState_callCount == 0)
@@ -177,9 +136,9 @@ struct CanvasViewModelTests {
                 dependencies: dependencies
             )
 
-            var didInitialize = false
-            let cancellable = subject.didInitialize.sink { _ in
-                didInitialize = true
+            var setupCompletion = false
+            let cancellable = subject.setupCompletion.sink { _ in
+                setupCompletion = true
             }
             defer { cancellable.cancel() }
 
@@ -191,7 +150,7 @@ struct CanvasViewModelTests {
             }
 
             // No value is emitted
-            #expect(didInitialize == false)
+            #expect(setupCompletion == false)
         }
 
         @Test
@@ -200,16 +159,10 @@ struct CanvasViewModelTests {
                 dependencies: dependencies
             )
 
-            let newProjectMetaData: ProjectMetaData = .init(
-                projectName: "dummyName",
-                createdAt: formatter.date(from: "2024-1-1 00:00:00")!,
-                updatedAt: formatter.date(from: "2024-12-31 00:00:00")!
-            )
-
             var cancellable: AnyCancellable?
             let waitForEmission = Task { @MainActor in
                 await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    cancellable = subject.didInitialize
+                    cancellable = subject.setupCompletion
                         .prefix(1)
                         .sink { _ in
                             continuation.resume()
@@ -219,17 +172,11 @@ struct CanvasViewModelTests {
 
             try await subject.restoreCanvasFromDocumentsFolder(
                 workingDirectoryURL: URL(fileURLWithPath: "/tmp/MockTextures"),
-                textureLayersState: .init(textureSize: textureSize),
-                projectMetaData: newProjectMetaData
+                textureLayersState: .init(textureSize: textureSize)
             )
 
             await waitForEmission.value
             cancellable?.cancel()
-
-            // The project metadata is overwritten with the new projectMetadata
-            #expect(subject.projectMetaDataStorage.projectName == newProjectMetaData.projectName)
-            #expect(subject.projectMetaDataStorage.createdAt == newProjectMetaData.createdAt)
-            #expect(subject.projectMetaDataStorage.updatedAt == newProjectMetaData.updatedAt)
 
             #expect(textureLayersDocumentsRepository.restoreStorage_callCount == 1)
         }

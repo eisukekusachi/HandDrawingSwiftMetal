@@ -1,13 +1,13 @@
 //
-//  ProjectMetaData.swift
-//  CanvasView
+//  ProjectData.swift
+//  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/09/21.
+//  Created by Eisuke Kusachi on 2026/01/23.
 //
 
 import Foundation
 
-public final class ProjectMetaData: ProjectMetaDataProtocol {
+public final class ProjectData {
 
     @Published public var projectName: String
     @Published public var createdAt: Date
@@ -21,14 +21,6 @@ public final class ProjectMetaData: ProjectMetaDataProtocol {
         self.projectName = projectName
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-    }
-
-    public init(
-        model: ProjectMetaDataArchiveModel
-    ) {
-        self.projectName = model.projectName
-        self.createdAt = model.createdAt
-        self.updatedAt = model.updatedAt
     }
 
     public func updateAll(newProjectName: String) {

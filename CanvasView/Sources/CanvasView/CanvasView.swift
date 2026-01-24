@@ -10,7 +10,7 @@ import UIKit
 
 @preconcurrency import MetalKit
 
-@objc public class CanvasView: UIView {
+open class CanvasView: UIView {
 
     public var isDrawing: AnyPublisher<Bool, Never> {
         viewModel.isDrawing
@@ -38,32 +38,19 @@ import UIKit
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
-    public var didInitialize: AnyPublisher<CanvasConfigurationResult, Never> {
-        didInitializeSubject.eraseToAnyPublisher()
+    public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
+        setupCompletionSubject.eraseToAnyPublisher()
     }
-    private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+    private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
-    public var zipFileURL: URL {
-        FileManager.documentsFileURL(
-            projectName: viewModel.projectMetaDataStorage.projectName,
-            suffix: fileSuffix
-        )
+    /// A publisher that emits `Void` when drawing completes
+    public var drawingCompletion: AnyPublisher<Void, Never> {
+        drawingCompletionSubject.eraseToAnyPublisher()
     }
+    private let drawingCompletionSubject = PassthroughSubject<Void, Never>()
 
-    /// File extension used when saving a file
-    public var fileSuffix: String {
-        _fileSuffix
-    }
-    private var _fileSuffix: String = ""
-
-    public var currentLocalFileItem: LocalFileItem {
-        .init(
-            metaData: viewModel.projectMetaDataStorage.metaData,
-            image: viewModel.thumbnail(),
-            fileURL: URL.documents.appendingPathComponent(
-                viewModel.projectFileName(suffix: _fileSuffix)
-            )
-        )
+    public func thumbnail() -> UIImage? {
+        viewModel.thumbnail()
     }
 
     /// The size of the texture currently set on the canvas
@@ -140,12 +127,7 @@ import UIKit
                     inMemoryRepository: undoTextureInMemoryRepository
                 ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
-                projectMetaDataStorage: .init(
-                    storage: AnyCoreDataStorage(
-                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
-                    )
-                )
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
         )
         super.init(frame: .zero)
@@ -190,12 +172,7 @@ import UIKit
                     inMemoryRepository: undoTextureInMemoryRepository
                 ),
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository,
-                projectMetaDataStorage: .init(
-                    storage: AnyCoreDataStorage(
-                        CoreDataStorage<ProjectMetaDataEntity>(context: persistenceController.viewContext)
-                    )
-                )
+                undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
         )
         super.init(coder: coder)
@@ -205,7 +182,6 @@ import UIKit
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        setVariables(configuration: configuration)
         layoutViews()
         addEvents()
         bindData()
@@ -216,10 +192,6 @@ import UIKit
             ),
             configuration: configuration
         )
-    }
-
-    private func setVariables(configuration: CanvasConfiguration) {
-        self._fileSuffix = configuration.fileSuffix
     }
 
     private func layoutViews() {
@@ -249,9 +221,16 @@ import UIKit
             }
             .store(in: &cancellables)
 
-        viewModel.didInitialize
-            .sink { [weak self] value in
-                self?.didInitializeSubject.send(value)
+        viewModel.setupCompletion
+            .sink { [weak self] result in
+                self?.viewModel.completeSetup(result: result)
+                self?.setupCompletionSubject.send(result)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingCompletion
+            .sink { [weak self] in
+                self?.drawingCompletionSubject.send(())
             }
             .store(in: &cancellables)
 
@@ -274,34 +253,25 @@ import UIKit
     }
 
     public func newCanvas(
-        newProjectName: String,
-        newTextureSize: CGSize
+        textureSize: CGSize
     ) async throws {
         try await viewModel.newCanvas(
-            newProjectName: newProjectName,
-            newTextureSize: newTextureSize
+            textureSize: textureSize
         )
     }
 
     public func loadFiles(
         in workingDirectoryURL: URL
     ) async throws {
-
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
         let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
 
-        // Load project metadata, falling back if it is missing
-        let projectMetaData: ProjectMetaDataArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-
         try await viewModel.restoreCanvasFromDocumentsFolder(
             workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: textureLayerState,
-            projectMetaData: .init(model: projectMetaData)
+            textureLayersState: textureLayerState
         )
     }
 

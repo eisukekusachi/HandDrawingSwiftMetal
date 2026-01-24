@@ -1,5 +1,5 @@
 //
-//  HandDrawingContentViewModel.swift
+//  HandDrawingViewModel.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/10.
@@ -10,7 +10,7 @@ import CanvasView
 import UIKit
 
 @MainActor
-final class HandDrawingContentViewModel: ObservableObject {
+final class HandDrawingViewModel: ObservableObject {
 
     let initializeColors: [UIColor] = [
         .black.withAlphaComponent(0.8),
@@ -33,12 +33,21 @@ final class HandDrawingContentViewModel: ObservableObject {
         50
     ]
 
+    var fileSuffix: String {
+        _fileSuffix
+    }
+    private var _fileSuffix: String = ""
+
     var fileList: [LocalFileItem] {
         _fileList
     }
     private var _fileList: [LocalFileItem] = []
 
-    private let drawingToolController: PersistenceController
+    let projectStorage: CoreDataProjectStorage
+
+    private let projectStorageController: PersistenceController
+
+    private let drawingToolStorageController: PersistenceController
 
     @Published var drawingToolStorage: CoreDataDrawingToolStorage
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
@@ -66,48 +75,74 @@ final class HandDrawingContentViewModel: ObservableObject {
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     public init() {
-
-        drawingToolController = PersistenceController(xcdatamodeldName: "DrawingToolStorage", location: .mainApp)
-
-        drawingToolStorage = CoreDataDrawingToolStorage(
-            drawingTool: DrawingTool(),
-            context: drawingToolController.viewContext
+        self.projectStorageController = .init(
+            xcdatamodeldName: "ProjectStorage"
         )
-
-        brushPaletteStorage = CoreDataBrushPaletteStorage(
+        self.drawingToolStorageController = PersistenceController(
+            xcdatamodeldName: "DrawingToolStorage"
+        )
+        self.projectStorage = .init(
+            storage: AnyCoreDataStorage(
+                CoreDataStorage<ProjectEntity>(
+                    context: projectStorageController.viewContext
+                )
+            )
+        )
+        self.drawingToolStorage = CoreDataDrawingToolStorage(
+            drawingTool: DrawingTool(),
+            context: drawingToolStorageController.viewContext
+        )
+        self.brushPaletteStorage = CoreDataBrushPaletteStorage(
             palette: BrushPalette(
                 colors: initializeColors,
                 index: 0
             ),
-            context: drawingToolController.viewContext
+            context: drawingToolStorageController.viewContext
         )
-
-        eraserPaletteStorage = CoreDataEraserPaletteStorage(
+        self.eraserPaletteStorage = CoreDataEraserPaletteStorage(
             palette: EraserPalette(
                 alphas: initializeAlphas,
                 index: 0
             ),
-            context: drawingToolController.viewContext
+            context: drawingToolStorageController.viewContext
         )
-
-        Task {
-            if let drawingToolEntity = try drawingToolStorage.fetch() {
-                drawingToolStorage.update(drawingToolEntity)
-            }
-            if let brushEntity = try brushPaletteStorage.fetch() {
-                brushPaletteStorage.update(brushEntity)
-            }
-            if let eraserEntity = try eraserPaletteStorage.fetch() {
-                eraserPaletteStorage.update(eraserEntity)
-            }
-        }
     }
 
     func setup(configuration: CanvasConfiguration) {
+        _fileSuffix = configuration.fileSuffix
+
+        Task {
+            try await fetchDataFromCoreDataIfAvailable()
+        }
         Task {
             await fileItemList(
-                fileSuffix: configuration.fileSuffix
+                fileSuffix: _fileSuffix
             )
+        }
+    }
+
+    private func fetchDataFromCoreDataIfAvailable() async throws {
+        if let projectEntity = try projectStorage.fetch() {
+            projectStorage.update(projectEntity)
+        }
+        if let drawingToolEntity = try drawingToolStorage.fetch() {
+            drawingToolStorage.update(drawingToolEntity)
+        }
+        if let brushEntity = try brushPaletteStorage.fetch() {
+            brushPaletteStorage.update(brushEntity)
+        }
+        if let eraserEntity = try eraserPaletteStorage.fetch() {
+            eraserPaletteStorage.update(eraserEntity)
+        }
+    }
+}
+
+extension HandDrawingViewModel {
+    func projectFileName() -> String {
+        if _fileSuffix.isEmpty {
+            return projectStorage.projectName
+        } else {
+            return projectStorage.projectName + "." + _fileSuffix
         }
     }
 
@@ -117,12 +152,29 @@ final class HandDrawingContentViewModel: ObservableObject {
         )
     }
 
-    func showActivityIndicator(_ shown: Bool) {
-        activityIndicatorSubject.send(shown)
+    func resetCoreData() {
+        drawingToolStorage.update(
+            type: .brush,
+            brushDiameter: 8,
+            eraserDiameter: 8
+        )
+        brushPaletteStorage.update(
+            colors: initializeColors,
+            index: 0
+        )
+        eraserPaletteStorage.update(
+            alphas: initializeAlphas,
+            index: 0
+        )
+        projectStorage.update(
+            projectName: Calendar.currentDate,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
     }
 }
 
-extension HandDrawingContentViewModel {
+extension HandDrawingViewModel {
     func loadFile(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?,
@@ -147,6 +199,9 @@ extension HandDrawingContentViewModel {
                 )
 
                 try await action?(workingDirectoryURL)
+
+                // Throw an error if the project name cannot be retrieved
+                try projectStorage.update(directoryURL: workingDirectoryURL)
 
                 // Since it’s optional, ignore any errors that occur
                 try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
@@ -190,11 +245,10 @@ extension HandDrawingContentViewModel {
                 try DrawingToolArchiveModel(drawingToolStorage.drawingTool).write(in: workingDirectoryURL)
                 try BrushPaletteArchiveModel(brushPaletteStorage.palette).write(in: workingDirectoryURL)
                 try EraserPaletteArchiveModel(eraserPaletteStorage.palette).write(in: workingDirectoryURL)
+                try ProjectArchiveModel(projectStorage).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
-                try localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL
-                )
+                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
 
                 completion?()
 
@@ -211,7 +265,7 @@ extension HandDrawingContentViewModel {
     }
 }
 
-extension HandDrawingContentViewModel {
+extension HandDrawingViewModel {
     func upsertFileList(fileItem: LocalFileItem) {
         if let index = _fileList.firstIndex(where: { $0.title == fileItem.title }) {
             _fileList[index] = fileItem
@@ -243,7 +297,7 @@ extension HandDrawingContentViewModel {
                 )
 
                 // Load project metadata
-                let projectMetaData: ProjectMetaDataArchiveModel = try .init(
+                let projectMetaData: ProjectArchiveModel = try .init(
                     in: workingDirectoryURL
                 )
 
@@ -254,7 +308,9 @@ extension HandDrawingContentViewModel {
 
                 _fileList.append(
                     .init(
-                        metaData: projectMetaData,
+                        title: projectMetaData.projectName,
+                        createdAt: projectMetaData.createdAt,
+                        updatedAt: projectMetaData.updatedAt,
                         image: UIImage(data: data),
                         fileURL: zipFileURL
                     )

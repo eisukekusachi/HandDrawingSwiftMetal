@@ -51,13 +51,16 @@ public final class CanvasViewModel {
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
-    var didInitialize: AnyPublisher<CanvasConfigurationResult, Never> {
-        didInitializeSubject.eraseToAnyPublisher()
+    var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
+        setupCompletionSubject.eraseToAnyPublisher()
     }
-    private let didInitializeSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+    private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
-    /// Metadata stored in Core Data
-    private(set) var projectMetaDataStorage: CoreDataProjectMetaDataStorage
+    /// A publisher that emits `Void` when drawing completes
+    var drawingCompletion: AnyPublisher<Void, Never> {
+        drawingCompletionSubject.eraseToAnyPublisher()
+    }
+    private let drawingCompletionSubject = PassthroughSubject<Void, Never>()
 
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
@@ -99,7 +102,6 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies
     ) {
         self.canvasRenderer = dependencies.canvasRenderer
-        self.projectMetaDataStorage = dependencies.projectMetaDataStorage
         self.textureLayers = dependencies.textureLayers
     }
 
@@ -141,11 +143,6 @@ extension CanvasViewModel {
         // Restore the canvas using textureLayersState if it exists
         if let textureLayersState {
             do {
-                // Use metadata from Core Data
-                if let entity = try? projectMetaDataStorage.fetch() {
-                    projectMetaDataStorage.update(entity)
-                }
-
                 try await setupCanvasFromCoreData(
                     textureLayersState: textureLayersState
                 )
@@ -158,7 +155,6 @@ extension CanvasViewModel {
         // Setup the canvas with the default settings
         do {
             try await setupDefaultCanvas(
-                projectName: configuration.projectConfiguration.projectName,
                 textureLayersState: .init(textureSize: configuration.textureSize)
             )
         } catch {
@@ -173,8 +169,7 @@ extension CanvasViewModel {
 
     func restoreCanvasFromDocumentsFolder(
         workingDirectoryURL: URL,
-        textureLayersState: TextureLayersState,
-        projectMetaData: ProjectMetaData
+        textureLayersState: TextureLayersState
     ) async throws {
         // Restore the repository using TextureLayersState
         try await canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromSavedData(
@@ -184,15 +179,29 @@ extension CanvasViewModel {
 
         try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
-        // Overwrite the metadata with the given value
-        projectMetaDataStorage.update(projectMetaData)
-
-        didInitializeSubject.send(
+        setupCompletionSubject.send(
             .init(
                 textureSize: textureLayersState.textureSize,
                 textureLayers: textureLayers
             )
         )
+    }
+
+    func completeSetup(result: CanvasConfigurationResult) {
+        // Update the thumbnails
+        Task { [weak self] in
+            for layer in result.textureLayers.layers {
+                try await self?.textureLayers.updateThumbnail(layer.id)
+            }
+        }
+
+        // Update currentTextureSize
+        currentTextureSize = result.textureSize
+
+        // Reset undo when the update of CanvasViewModel completes
+        textureLayers.resetUndo()
+
+        refreshCanvasAfterComposition()
     }
 }
 
@@ -274,26 +283,6 @@ extension CanvasViewModel {
                 self?.canvasRenderer.setMatrix(matrix)
             }
             .store(in: &cancellables)
-
-        // Called after the initialization of CanvasViewModel is complete
-        didInitializeSubject
-            .sink { [weak self] result in
-                // Update the thumbnails
-                Task {
-                    for layer in result.textureLayers.layers {
-                        try await self?.textureLayers.updateThumbnail(layer.id)
-                    }
-                }
-
-                // Update currentTextureSize
-                self?.currentTextureSize = result.textureSize
-
-                // Reset undo when the update of CanvasViewModel completes
-                self?.textureLayers.resetUndo()
-
-                self?.refreshCanvasAfterComposition()
-            }
-            .store(in: &cancellables)
     }
 
     private func setupTouchGesture(
@@ -310,7 +299,6 @@ extension CanvasViewModel {
     }
 
     private func setupDefaultCanvas(
-        projectName: String,
         textureLayersState: TextureLayersState
     ) async throws {
         // Initialize the repository using TextureLayersState
@@ -320,10 +308,7 @@ extension CanvasViewModel {
 
         try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
-        // Update all data using the new project name
-        projectMetaDataStorage.updateAll(newProjectName: projectName)
-
-        didInitializeSubject.send(
+        setupCompletionSubject.send(
             .init(
                 textureSize: textureLayersState.textureSize,
                 textureLayers: textureLayers
@@ -341,10 +326,7 @@ extension CanvasViewModel {
 
         try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
-        // Update only the updatedAt field, since the metadata may be loaded from Core Data
-        projectMetaDataStorage.updateUpdatedAt()
-
-        didInitializeSubject.send(
+        setupCompletionSubject.send(
             .init(
                 textureSize: textureLayersState.textureSize,
                 textureLayers: textureLayers
@@ -579,6 +561,7 @@ extension CanvasViewModel {
                     // Reset parameters on drawing completion
                     self?.prepareNextStroke()
 
+                    self?.drawingCompletionSubject.send(())
                     self?.onCompleteDrawing()
                 }
             }
@@ -612,9 +595,6 @@ extension CanvasViewModel {
                         layerId,
                         texture: selectedLayerTexture
                     )
-
-                    // Update `updatedAt` when drawing completes
-                    self.projectMetaDataStorage.updateUpdatedAt()
 
                 } catch {
                     Logger.error(error)
@@ -654,12 +634,10 @@ public extension CanvasViewModel {
     }
 
     func newCanvas(
-        newProjectName: String,
-        newTextureSize: CGSize
+        textureSize: CGSize
     ) async throws {
         try await setupDefaultCanvas(
-            projectName: newProjectName,
-            textureLayersState: TextureLayersState(textureSize: newTextureSize)
+            textureLayersState: TextureLayersState(textureSize: textureSize)
         )
         transforming.setMatrix(.identity)
     }
@@ -746,32 +724,6 @@ public extension CanvasViewModel {
             )
             Logger.error(error)
             throw error
-        }
-
-        do {
-            // Save the project metadata as JSON
-            try ProjectMetaDataArchiveModel(
-                projectName: projectMetaDataStorage.projectName,
-                createdAt: projectMetaDataStorage.createdAt,
-                updatedAt: projectMetaDataStorage.updatedAt
-            ).write(
-                in: workingDirectoryURL
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to save the project meta data", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-    }
-
-    func projectFileName(suffix: String) -> String {
-        if suffix.isEmpty {
-            return projectMetaDataStorage.projectName
-        } else {
-            return projectMetaDataStorage.projectName + "." + suffix
         }
     }
 
