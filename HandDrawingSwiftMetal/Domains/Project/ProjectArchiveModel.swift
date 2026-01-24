@@ -24,6 +24,14 @@ struct ProjectArchiveModel: Codable, Sendable {
     }
 }
 
+extension ProjectArchiveModel {
+    @MainActor init(_ model: CoreDataProjectStorage) throws {
+        self.projectName = model.projectName
+        self.createdAt = model.createdAt
+        self.updatedAt = model.updatedAt
+    }
+}
+
 extension ProjectArchiveModel: LocalFileConvertible {
     public static var fileName: String { "project" }
 }

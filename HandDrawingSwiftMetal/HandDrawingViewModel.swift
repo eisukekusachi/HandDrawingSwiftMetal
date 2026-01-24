@@ -246,20 +246,10 @@ extension HandDrawingViewModel {
                 try DrawingToolArchiveModel(drawingToolStorage.drawingTool).write(in: workingDirectoryURL)
                 try BrushPaletteArchiveModel(brushPaletteStorage.palette).write(in: workingDirectoryURL)
                 try EraserPaletteArchiveModel(eraserPaletteStorage.palette).write(in: workingDirectoryURL)
-
-                // Save the project metadata as JSON
-                try ProjectArchiveModel(
-                    projectName: projectStorage.projectName,
-                    createdAt: projectStorage.createdAt,
-                    updatedAt: projectStorage.updatedAt
-                ).write(
-                    in: workingDirectoryURL
-                )
+                try ProjectArchiveModel(projectStorage).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
-                try localFileRepository.zipWorkingDirectory(
-                    to: zipFileURL
-                )
+                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
 
                 completion?()
 
