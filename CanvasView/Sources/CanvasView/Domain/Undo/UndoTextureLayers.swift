@@ -471,19 +471,16 @@ extension UndoTextureLayers: TextureLayersProtocol {
             oldAlpha != selectedLayer.alpha
         else { return }
 
-        let undoObject = UndoAlphaChangedObject(
-            layer: .init(item: selectedLayer),
-            withNewAlpha: Int(oldAlpha)
-        )
-        let redoObject = UndoAlphaChangedObject(
-            layer: .init(item: selectedLayer),
-            withNewAlpha: selectedLayer.alpha
-        )
-
         pushUndoObject(
             .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoAlphaChangedObject(
+                    layer: .init(item: selectedLayer),
+                    withNewAlpha: Int(oldAlpha)
+                ),
+                redoObject: UndoAlphaChangedObject(
+                    layer: .init(item: selectedLayer),
+                    withNewAlpha: selectedLayer.alpha
+                )
             )
         )
 
