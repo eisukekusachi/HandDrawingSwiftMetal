@@ -68,6 +68,8 @@ open class CanvasView: UIView {
         )
     }
 
+    @Published var textureLayersStorage: CoreDataTextureLayersStorage
+
     public static let thumbnailName: String = "thumbnail.png"
 
     /// The single Metal device instance used throughout the app
@@ -83,9 +85,17 @@ open class CanvasView: UIView {
 
     private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
 
-    private let persistenceController: PersistenceController
+    private let textureLayersStorageController: PersistenceController
 
     private var cancellables = Set<AnyCancellable>()
+
+    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
+    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
+        guard
+            let entity = try? textureLayersStorage.fetch()
+        else { return nil }
+        return try? .init(entity: entity)
+    }
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -106,9 +116,18 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.persistenceController = .init(
+        self.textureLayersStorageController = .init(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
+        )
+        let textureLayers: TextureLayers = TextureLayers(
+            renderer: renderer,
+            repository: textureLayersDocumentsRepository
+        )
+        let undoTextureLayers: UndoTextureLayers = .init(
+            textureLayers: textureLayers,
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
         )
         self.viewModel = .init(
             dependencies: .init(
@@ -117,18 +136,14 @@ open class CanvasView: UIView {
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 ),
-                textureLayers: .init(
-                    textureLayers: CoreDataTextureLayers(
-                        renderer: renderer,
-                        repository: textureLayersDocumentsRepository,
-                        context: persistenceController.viewContext
-                    ),
-                    renderer: renderer,
-                    inMemoryRepository: undoTextureInMemoryRepository
-                ),
+                textureLayers: undoTextureLayers,
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
+        )
+        self.textureLayersStorage = .init(
+            textureLayers: textureLayers,
+            context: textureLayersStorageController.viewContext
         )
         super.init(frame: .zero)
     }
@@ -151,9 +166,18 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.persistenceController = .init(
+        self.textureLayersStorageController = .init(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
+        )
+        let textureLayers: TextureLayers = TextureLayers(
+            renderer: renderer,
+            repository: textureLayersDocumentsRepository
+        )
+        let undoTextureLayers: UndoTextureLayers = .init(
+            textureLayers: textureLayers,
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
         )
         self.viewModel = .init(
             dependencies: .init(
@@ -162,18 +186,14 @@ open class CanvasView: UIView {
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 ),
-                textureLayers: .init(
-                    textureLayers: CoreDataTextureLayers(
-                        renderer: renderer,
-                        repository: textureLayersDocumentsRepository,
-                        context: persistenceController.viewContext
-                    ),
-                    renderer: renderer,
-                    inMemoryRepository: undoTextureInMemoryRepository
-                ),
+                textureLayers: undoTextureLayers,
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
+        )
+        self.textureLayersStorage = .init(
+            textureLayers: textureLayers,
+            context: textureLayersStorageController.viewContext
         )
         super.init(coder: coder)
     }
@@ -186,6 +206,7 @@ open class CanvasView: UIView {
         addEvents()
         bindData()
         try await viewModel.setup(
+            textureLayersState: textureLayersStateFromCoreDataEntity,
             drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
                 renderer: renderer,
                 drawingRenderers: drawingRenderers

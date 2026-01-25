@@ -106,6 +106,7 @@ public final class CanvasViewModel {
     }
 
     func setup(
+        textureLayersState: TextureLayersState?,
         drawingRenderers: [DrawingRenderer] = [],
         configuration: CanvasConfiguration
     ) async throws {
@@ -128,7 +129,7 @@ public final class CanvasViewModel {
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
         try await setupCanvas(
-            textureLayersState: textureLayersStateFromCoreDataEntity,
+            textureLayersState: textureLayersState,
             configuration: configuration
         )
     }
@@ -206,13 +207,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
-    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        guard
-            let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        else { return nil }
-        return try? .init(entity: entity)
-    }
 
     private func bindData() {
         // The canvas is updated every frame during drawing
