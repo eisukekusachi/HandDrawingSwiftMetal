@@ -19,18 +19,14 @@ public final class UndoDeletionObject: UndoObject {
 
     public let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    public let selectedLayerIdAfterDeletion: LayerId
-
     deinit {
         deinitSubject.send(self)
     }
 
     public init(
-        layerToBeDeleted textureLayer: TextureLayerModel,
-        selectedLayerIdAfterDeletion layerId: LayerId
+        layerToBeDeleted textureLayer: TextureLayerModel
     ) {
         self.textureLayer = textureLayer
-        self.selectedLayerIdAfterDeletion = layerId
     }
 
     @MainActor

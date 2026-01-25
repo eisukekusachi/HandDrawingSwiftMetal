@@ -351,7 +351,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let selectedLayer = textureLayers.selectedLayer,
             let undoNewTexture = try await MTLTextureCreator.duplicateTexture(
                 texture: newTexture,
                 renderer: renderer
@@ -368,8 +367,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
             undoRedoObject: .init(
                 // Create a deletion undo object to cancel the addition
                 undoObject: UndoDeletionObject(
-                    layerToBeDeleted: layer,
-                    selectedLayerIdAfterDeletion: selectedLayer.id
+                    layerToBeDeleted: layer
                 ),
                 redoObject: UndoAdditionObject(
                     layerToBeAdded: layer,
@@ -389,17 +387,14 @@ extension UndoTextureLayers: TextureLayersProtocol {
             return
         }
 
-        let selectedLayerModel: TextureLayerModel = .init(item: selectedLayer)
-
         // Add an undo object to the undo stack
         let redoObject = UndoDeletionObject(
-            layerToBeDeleted: selectedLayerModel,
-            selectedLayerIdAfterDeletion: selectedLayer.id
+            layerToBeDeleted: .init(item: selectedLayer)
         )
 
         // Create a addition undo object to cancel the deletion
         let undoObject = UndoAdditionObject(
-            layerToBeAdded: selectedLayerModel,
+            layerToBeAdded: .init(item: selectedLayer),
             at: index,
             renderer: renderer
         )
