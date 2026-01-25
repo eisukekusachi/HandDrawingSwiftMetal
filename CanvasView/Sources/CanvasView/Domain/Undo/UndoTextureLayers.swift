@@ -501,7 +501,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
                         id: undoSelectdLayer.id,
                         title: undoSelectdLayer.title,
                         alpha: undoSelectdLayer.alpha,
-                        isVisible: undoSelectdLayer.isVisible
+                        isVisible: !isVisible
                     )
                 ),
                 redoObject: UndoVisibilityObject(
