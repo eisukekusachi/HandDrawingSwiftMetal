@@ -60,6 +60,8 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
 
+    public let renderer: MTLRendering?
+
     public var layers: [TextureLayerItem] {
         _layers
     }
@@ -71,8 +73,6 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
     public var textureSize: CGSize {
         _textureSize
     }
-
-    private var renderer: MTLRendering?
 
     /// Store and manage texture layer textures in the Documents folder for persistence
     private var documentsRepository: TextureLayersDocumentsRepositoryProtocol?
