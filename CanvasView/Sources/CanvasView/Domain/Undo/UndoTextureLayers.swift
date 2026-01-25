@@ -387,25 +387,20 @@ extension UndoTextureLayers: TextureLayersProtocol {
             return
         }
 
-        // Add an undo object to the undo stack
-        let redoObject = UndoDeletionObject(
-            layerToBeDeleted: .init(item: selectedLayer)
-        )
-
-        // Create a addition undo object to cancel the deletion
-        let undoObject = UndoAdditionObject(
-            layerToBeAdded: .init(item: selectedLayer),
-            at: index,
-            renderer: renderer
-        )
-
         try await textureLayers.removeLayer(layerIndexToDelete: index)
 
         try await pushUndoDeletionObject(
             restorationNewTexture: newTexture,
             undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                // Create a addition undo object to cancel the deletion
+                undoObject: UndoAdditionObject(
+                    layerToBeAdded: .init(item: selectedLayer),
+                    at: index,
+                    renderer: renderer
+                ),
+                redoObject: UndoDeletionObject(
+                    layerToBeDeleted: .init(item: selectedLayer)
+                )
             )
         )
     }
