@@ -351,36 +351,31 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let selectedLayer = textureLayers.selectedLayer
+            let selectedLayer = textureLayers.selectedLayer,
+            let undoNewTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: newTexture,
+                renderer: renderer
+            )
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
             return
         }
 
-        let redoObject = UndoAdditionObject(
-            layerToBeAdded: layer,
-            at: index,
-            renderer: renderer
-        )
-
-        // Create a deletion undo object to cancel the addition
-        let undoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: selectedLayer.id
-        )
-
         try await textureLayers.addLayer(layer: layer, newTexture: newTexture, at: index)
-
-        let undoNewTexture = try await MTLTextureCreator.duplicateTexture(
-            texture: newTexture,
-            renderer: renderer
-        )
 
         await pushUndoAdditionObject(
             newTexture: undoNewTexture,
             undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                // Create a deletion undo object to cancel the addition
+                undoObject: UndoDeletionObject(
+                    layerToBeDeleted: layer,
+                    selectedLayerIdAfterDeletion: selectedLayer.id
+                ),
+                redoObject: UndoAdditionObject(
+                    layerToBeAdded: layer,
+                    at: index,
+                    renderer: renderer
+                )
             )
         )
     }
