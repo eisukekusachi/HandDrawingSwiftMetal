@@ -413,19 +413,16 @@ extension UndoTextureLayers: TextureLayersProtocol {
             return
         }
 
+        textureLayers.moveLayer(indices: indices)
+
         let redoObject = UndoMoveObject(
             indices: indices,
             selectedLayerId: selectedLayer.id,
             layer: .init(item: selectedLayer)
         )
-
-        let undoObject = redoObject.reversedObject
-
-        textureLayers.moveLayer(indices: indices)
-
         pushUndoObject(
             .init(
-                undoObject: undoObject,
+                undoObject: redoObject.reversedObject,
                 redoObject: redoObject
             )
         )
