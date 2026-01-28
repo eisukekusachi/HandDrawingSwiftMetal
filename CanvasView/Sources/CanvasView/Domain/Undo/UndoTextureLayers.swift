@@ -52,7 +52,6 @@ public final class UndoTextureLayers: ObservableObject {
 
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         self.undoManager.levelsOfUndo = 8
-        self.undoManager.groupsByEvent = false
     }
 
     public func setLevelsOfUndo(undoCount: Int) {
@@ -259,10 +258,7 @@ private extension UndoTextureLayers {
     ) {
         guard let inMemoryRepository else { return }
 
-        let undoObject = undoRedoObject.undoObject
-        let redoObject = undoRedoObject.redoObject
-
-        undoObject.deinitSubject
+        undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { result in
                 guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
@@ -272,7 +268,7 @@ private extension UndoTextureLayers {
             })
             .store(in: &cancellables)
 
-        redoObject.deinitSubject
+        undoRedoObject.redoObject.deinitSubject
             .sink(receiveValue: { result in
                 guard let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
@@ -282,47 +278,26 @@ private extension UndoTextureLayers {
             })
             .store(in: &cancellables)
 
-        registerUndo(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-}
+        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, inMemoryRepository] _ in
+            guard let `self` else { return }
 
-private extension UndoTextureLayers {
+            Task {
+                do {
+                    try await undoRedoObject.undoObject.applyUndo(
+                        layers: self.textureLayers,
+                        repository: inMemoryRepository
+                    )
 
-    func registerUndo(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        undoManager.beginUndoGrouping()
-        undoManager.registerUndo(withTarget: self) { [weak self] _ in
-            self?.performUndo(undoRedoObject.undoObject)
+                } catch {
+                    Logger.error(error)
+                }
+            }
 
             // Redo Registration
-            self?.pushUndoObject(undoRedoObject.reversed())
+            self.pushUndoObject(undoRedoObject.reversed())
         }
-        undoManager.endUndoGrouping()
+
         didUndoSubject.send(.init(undoManager))
-    }
-
-    func performUndo(
-        _ undoObject: UndoObject
-    ) {
-        guard let inMemoryRepository else { return }
-
-        Task {
-            do {
-                try await undoObject.applyUndo(
-                    layers: textureLayers,
-                    repository: inMemoryRepository
-                )
-
-            } catch {
-                Logger.error(error)
-            }
-        }
     }
 }
 
