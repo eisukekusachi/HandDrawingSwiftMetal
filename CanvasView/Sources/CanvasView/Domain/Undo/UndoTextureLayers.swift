@@ -12,7 +12,7 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
-    @Published private(set) var textureLayers: any TextureLayersProtocol
+    private var textureLayers: any TextureLayersProtocol
 
     /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
