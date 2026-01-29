@@ -16,15 +16,14 @@ public let saveDebounceMilliseconds: Int = 500
 /// Texture layers managed by Core Data
 @MainActor public final class CoreDataTextureLayersStorage: ObservableObject {
 
-    @Published private(set) var textureLayers: TextureLayers
+    private(set) var textureLayers: any TextureLayersProtocol
 
     private var storage: CoreDataStorage<TextureLayerArrayStorageEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayers,
-        repository: TextureLayersDocumentsRepositoryProtocol? = nil,
+        textureLayers: any TextureLayersProtocol,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
@@ -55,6 +54,7 @@ private extension CoreDataTextureLayersStorage {
         guard
             let storage,
             let context = storage.context,
+            let request = storage.fetchRequest(),
             textureLayers.layers.count != 0,
             textureLayers.textureSize != .zero,
             let selectedLayerId = textureLayers.selectedLayer?.id
@@ -64,7 +64,6 @@ private extension CoreDataTextureLayersStorage {
         let newSelectedLayerId = selectedLayerId
         let newLayers = textureLayers.layers.map { TextureLayerModel(item: $0) }
 
-        let request = storage.fetchRequest()
         request.fetchLimit = 1
 
         await context.perform { [context] in

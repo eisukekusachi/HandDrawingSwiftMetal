@@ -10,7 +10,7 @@ import CoreData
 public struct AnyCoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
     public let context: NSManagedObjectContext?
 
-    private let _fetchRequest: () -> NSFetchRequest<Entity>
+    private let _fetchRequest: () -> NSFetchRequest<Entity>?
     private let _fetch: () throws -> Entity?
 
     public init<S: CoreDataStorageProtocol>(_ storage: S) where S.Entity == Entity {
@@ -19,6 +19,11 @@ public struct AnyCoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtoc
         self._fetch = storage.fetch
     }
 
-    public func fetchRequest() -> NSFetchRequest<Entity> { _fetchRequest() }
-    public func fetch() throws -> Entity? { try _fetch() }
+    public func fetchRequest() -> NSFetchRequest<Entity>? {
+        _fetchRequest()
+    }
+
+    public func fetch() throws -> Entity? {
+        try _fetch()
+    }
 }

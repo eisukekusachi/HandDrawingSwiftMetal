@@ -77,6 +77,8 @@ open class CanvasView: UIView {
 
     private let renderer: MTLRendering
 
+    private let undoTextureLayers: UndoTextureLayers
+
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
@@ -120,12 +122,11 @@ open class CanvasView: UIView {
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
         )
-        let textureLayers: TextureLayers = TextureLayers(
-            renderer: renderer,
-            repository: textureLayersDocumentsRepository
-        )
-        let undoTextureLayers: UndoTextureLayers = .init(
-            textureLayers: textureLayers,
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
@@ -142,7 +143,7 @@ open class CanvasView: UIView {
             )
         )
         self.textureLayersStorage = .init(
-            textureLayers: textureLayers,
+            textureLayers: undoTextureLayers,
             context: textureLayersStorageController.viewContext
         )
         super.init(frame: .zero)
@@ -170,12 +171,11 @@ open class CanvasView: UIView {
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
         )
-        let textureLayers: TextureLayers = TextureLayers(
-            renderer: renderer,
-            repository: textureLayersDocumentsRepository
-        )
-        let undoTextureLayers: UndoTextureLayers = .init(
-            textureLayers: textureLayers,
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
@@ -192,7 +192,7 @@ open class CanvasView: UIView {
             )
         )
         self.textureLayersStorage = .init(
-            textureLayers: textureLayers,
+            textureLayers: undoTextureLayers,
             context: textureLayersStorageController.viewContext
         )
         super.init(coder: coder)

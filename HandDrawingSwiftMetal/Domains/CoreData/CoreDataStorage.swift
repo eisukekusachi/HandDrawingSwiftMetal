@@ -24,6 +24,10 @@ public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProt
     }
 
     public func fetch() throws -> Entity? {
-        try context?.fetch(fetchRequest()).first
+        guard let context else { return nil }
+        let request = fetchRequest()
+        request.fetchLimit = 1
+        request.returnsObjectsAsFaults = false
+        return try context.fetch(request).first
     }
 }
