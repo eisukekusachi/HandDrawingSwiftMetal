@@ -405,29 +405,25 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
     public func selectLayer(_ id: LayerId) {
         guard let undoSelectdLayer = textureLayers.selectedLayer else { return }
-        let undoObject = UndoSelectionObject(
-            layer: .init(item: undoSelectdLayer)
-        )
 
         textureLayers.selectLayer(id)
 
         guard let redoSelectdLayer = textureLayers.selectedLayer else { return }
-        let redoObject = UndoSelectionObject(
-            layer: .init(item: redoSelectdLayer)
-        )
 
         pushUndoObject(
             .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoSelectionObject(
+                    layer: .init(item: undoSelectdLayer)
+                ),
+                redoObject: UndoSelectionObject(
+                    layer: .init(item: redoSelectdLayer)
+                )
             )
         )
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
     public func beginAlphaChange() {
-        guard let _ = inMemoryRepository else { return }
-
         guard let alpha = textureLayers.selectedLayer?.alpha else { return }
         self.previousAlphaForUndo = alpha
     }
@@ -435,7 +431,6 @@ extension UndoTextureLayers: TextureLayersProtocol {
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
     public func endAlphaChange() {
         guard
-            let _ = inMemoryRepository,
             let selectedLayer = textureLayers.selectedLayer
         else {
             Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
