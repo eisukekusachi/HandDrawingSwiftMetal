@@ -10,7 +10,7 @@ import UIKit
 
 /// A class that manages texture layers with undo functionality
 @MainActor
-public final class UndoTextureLayers: ObservableObject {
+public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
 
     var textureLayers: any TextureLayersProtocol
 
@@ -59,224 +59,6 @@ public final class UndoTextureLayers: ObservableObject {
             with: renderer.device
         )
     }
-}
-
-public extension UndoTextureLayers {
-
-    func setUndoDrawing(
-        texture: MTLTexture?
-    ) async {
-        await setDrawingUndoObject(texture: texture)
-    }
-    func pushUndoDrawingObjectToUndoStack(
-        texture: MTLTexture?
-    ) async throws {
-        try await pushUndoDrawingObject(texture: texture)
-    }
-}
-
-private extension UndoTextureLayers {
-
-    func setDrawingUndoObject(
-        texture: MTLTexture?
-    ) async {
-        guard
-            let texture,
-            let previousDrawingTextureForUndo
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "previousDrawingTextureForUndo"))
-            return
-        }
-
-        do {
-            try await renderer.copyTexture(
-                srcTexture: texture,
-                dstTexture: previousDrawingTextureForUndo,
-            )
-        } catch {
-            // No action on error
-            Logger.error(error)
-        }
-    }
-
-    func pushUndoDrawingObject(
-        texture: MTLTexture?
-    ) async throws {
-        guard let inMemoryRepository else { return }
-
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
-            return
-        }
-
-        guard
-            let undoTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: previousDrawingTextureForUndo,
-                renderer: renderer
-            )
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoTexture"))
-            return
-        }
-
-        guard
-            let redoTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                renderer: renderer
-            )
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "redoTexture"))
-            return
-        }
-        let undoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer),
-            renderer: renderer
-        )
-
-        let redoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer),
-            renderer: renderer
-        )
-
-        guard
-            let undoTextureId = undoObject.undoTextureId,
-            let redoTextureId = redoObject.undoTextureId
-        else { return }
-
-        do {
-            try inMemoryRepository
-                .addTexture(
-                    newTexture: undoTexture,
-                    id: undoTextureId
-                )
-
-            try inMemoryRepository
-                .addTexture(
-                    newTexture: redoTexture,
-                    id: redoTextureId
-                )
-
-            didEmitUndoObjectPairSubject.send(
-                .init(
-                    undoObject: undoObject,
-                    redoObject: redoObject
-                )
-            )
-
-        } catch {
-            // No action on error
-            Logger.error(error)
-        }
-    }
-
-    func pushUndoAdditionObject(
-        newTexture: MTLTexture?,
-        undoRedoObject: UndoRedoObjectPair
-    ) async {
-        guard
-            let newTexture,
-            let undoTextureId = undoRedoObject.redoObject.undoTextureId,
-            let inMemoryRepository
-        else {
-            return
-        }
-
-        do {
-            // Add a texture to the UndoTextureRepository for restoration
-            try inMemoryRepository
-                .addTexture(
-                    newTexture: newTexture,
-                    id: undoTextureId
-                )
-
-            didEmitUndoObjectPairSubject.send(undoRedoObject)
-
-        } catch {
-            // No action on error
-            Logger.error(error)
-        }
-    }
-
-    func pushUndoDeletionObject(
-        restorationNewTexture: MTLTexture,
-        undoRedoObject: UndoRedoObjectPair
-    ) async throws {
-        guard
-            let undoTextureId = undoRedoObject.undoObject.undoTextureId,
-            let inMemoryRepository
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
-            return
-        }
-
-        do {
-            // Add a texture to the UndoTextureRepository for restoration
-            try inMemoryRepository
-                .addTexture(
-                    newTexture: restorationNewTexture,
-                    id: undoTextureId
-                )
-
-            didEmitUndoObjectPairSubject.send(undoRedoObject)
-
-        } catch {
-            // No action on error
-            Logger.error(error)
-        }
-    }
-/*
-    func pushUndoObject(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        guard let inMemoryRepository else { return }
-
-        undoRedoObject.undoObject.deinitSubject
-            .sink(receiveValue: { result in
-                guard let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? inMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoRedoObject.redoObject.deinitSubject
-            .sink(receiveValue: { result in
-                guard let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? inMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, inMemoryRepository] _ in
-            guard let `self` else { return }
-
-            Task {
-                do {
-                    try await undoRedoObject.undoObject.applyUndo(
-                        layers: self.textureLayers,
-                        repository: inMemoryRepository
-                    )
-
-                } catch {
-                    Logger.error(error)
-                }
-            }
-
-            // Redo Registration
-            self.pushUndoObject(undoRedoObject.reversed())
-        }
-
-        didUndoSubject.send(.init(undoManager))
-    }
-*/
-}
-
-extension UndoTextureLayers: TextureLayersProtocol {
 
     public func addNewLayer(at index: Int) async throws {
         guard
@@ -460,6 +242,174 @@ extension UndoTextureLayers: TextureLayersProtocol {
             )
         )
     }
+
+    public func setUndoDrawing(
+        texture: MTLTexture?
+    ) async {
+        await setDrawingUndoObject(texture: texture)
+    }
+
+    public func pushUndoDrawingObjectToUndoStack(
+        texture: MTLTexture?
+    ) async throws {
+        try await pushUndoDrawingObject(texture: texture)
+    }
+}
+
+private extension UndoTextureLayers {
+
+    func setDrawingUndoObject(
+        texture: MTLTexture?
+    ) async {
+        guard
+            let texture,
+            let previousDrawingTextureForUndo
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "previousDrawingTextureForUndo"))
+            return
+        }
+
+        do {
+            try await renderer.copyTexture(
+                srcTexture: texture,
+                dstTexture: previousDrawingTextureForUndo,
+            )
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
+    }
+
+    func pushUndoDrawingObject(
+        texture: MTLTexture?
+    ) async throws {
+        guard let inMemoryRepository else { return }
+
+        guard
+            let selectedLayer = textureLayers.selectedLayer
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+
+        guard
+            let undoTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: previousDrawingTextureForUndo,
+                renderer: renderer
+            )
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoTexture"))
+            return
+        }
+
+        guard
+            let redoTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: texture,
+                renderer: renderer
+            )
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "redoTexture"))
+            return
+        }
+        let undoObject = UndoDrawingObject(
+            layer: .init(item: selectedLayer),
+            renderer: renderer
+        )
+
+        let redoObject = UndoDrawingObject(
+            layer: .init(item: selectedLayer),
+            renderer: renderer
+        )
+
+        guard
+            let undoTextureId = undoObject.undoTextureId,
+            let redoTextureId = redoObject.undoTextureId
+        else { return }
+
+        do {
+            try inMemoryRepository
+                .addTexture(
+                    newTexture: undoTexture,
+                    id: undoTextureId
+                )
+
+            try inMemoryRepository
+                .addTexture(
+                    newTexture: redoTexture,
+                    id: redoTextureId
+                )
+
+            didEmitUndoObjectPairSubject.send(
+                .init(
+                    undoObject: undoObject,
+                    redoObject: redoObject
+                )
+            )
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
+    }
+
+    func pushUndoAdditionObject(
+        newTexture: MTLTexture?,
+        undoRedoObject: UndoRedoObjectPair
+    ) async {
+        guard
+            let newTexture,
+            let undoTextureId = undoRedoObject.redoObject.undoTextureId,
+            let inMemoryRepository
+        else {
+            return
+        }
+
+        do {
+            // Add a texture to the UndoTextureRepository for restoration
+            try inMemoryRepository
+                .addTexture(
+                    newTexture: newTexture,
+                    id: undoTextureId
+                )
+
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
+    }
+
+    func pushUndoDeletionObject(
+        restorationNewTexture: MTLTexture,
+        undoRedoObject: UndoRedoObjectPair
+    ) async throws {
+        guard
+            let undoTextureId = undoRedoObject.undoObject.undoTextureId,
+            let inMemoryRepository
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
+            return
+        }
+
+        do {
+            // Add a texture to the UndoTextureRepository for restoration
+            try inMemoryRepository
+                .addTexture(
+                    newTexture: restorationNewTexture,
+                    id: undoTextureId
+                )
+
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
+
+        } catch {
+            // No action on error
+            Logger.error(error)
+        }
+    }
+}
+
+extension UndoTextureLayers {
 
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         textureLayers.canvasUpdateRequestedPublisher
