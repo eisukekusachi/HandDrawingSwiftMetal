@@ -81,8 +81,6 @@ open class CanvasView: UIView {
 
     private let displayView: CanvasDisplayView
 
-    private let drawingUndoManager = UndoManager()
-
     private let viewModel: CanvasViewModel
 
     private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
@@ -206,7 +204,7 @@ open class CanvasView: UIView {
     ) async throws {
 
         // Set an initial value to prevent out-of-memory errors when no limit is applied
-        drawingUndoManager.levelsOfUndo = 8
+        undoManager?.levelsOfUndo = 8
 
         layoutViews()
         addEvents()
@@ -248,14 +246,9 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        undoTextureLayers.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.registerUndoObjectPair(undoObjectPair)
-            }
-            .store(in: &cancellables)
-
         viewModel.setupCompletion
             .sink { [weak self] result in
+                self?.resetUndo()
                 self?.viewModel.completeSetup(result: result)
                 self?.setupCompletionSubject.send(result)
             }
@@ -271,6 +264,12 @@ open class CanvasView: UIView {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
+            }
+            .store(in: &cancellables)
+
+        undoTextureLayers.didEmitUndoObjectPair
+            .sink { [weak self] undoObjectPair in
+                self?.registerUndoObjectPair(undoObjectPair)
             }
             .store(in: &cancellables)
     }
@@ -322,28 +321,33 @@ open class CanvasView: UIView {
     }
 
     public func undo() {
-        drawingUndoManager.undo()
+        guard let undoManager else { return }
+        undoManager.undo()
         didUndoSubject.send(
-            .init(drawingUndoManager)
+            .init(undoManager)
         )
     }
     public func redo() {
-        drawingUndoManager.redo()
+        guard let undoManager else { return }
+        undoManager.redo()
         didUndoSubject.send(
-            .init(drawingUndoManager)
+            .init(undoManager)
         )
     }
     func resetUndo() {
+        guard let undoManager else { return }
         undoTextureInMemoryRepository.removeAll()
-        drawingUndoManager.removeAllActions()
+        undoManager.removeAllActions()
         didUndoSubject.send(
-            .init(drawingUndoManager)
+            .init(undoManager)
         )
     }
 
     func registerUndoObjectPair(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
+        guard let undoManager else { return }
+
         undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
@@ -364,7 +368,7 @@ open class CanvasView: UIView {
             })
             .store(in: &cancellables)
 
-        drawingUndoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
+        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
             guard let `self` else { return }
 
             Task {
@@ -383,7 +387,7 @@ open class CanvasView: UIView {
         }
 
         didUndoSubject.send(
-            .init(drawingUndoManager)
+            .init(undoManager)
         )
     }
 }
