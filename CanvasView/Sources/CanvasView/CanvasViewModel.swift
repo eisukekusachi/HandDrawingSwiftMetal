@@ -45,11 +45,6 @@ public final class CanvasViewModel {
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
-    }
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
-
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
     var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
         setupCompletionSubject.eraseToAnyPublisher()
@@ -112,9 +107,6 @@ public final class CanvasViewModel {
     ) async throws {
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
-
-        // Set the undo count
-        self.textureLayers.setLevelsOfUndo(undoCount: configuration.undoCount)
 
         self.bindData()
 
@@ -200,7 +192,7 @@ extension CanvasViewModel {
         currentTextureSize = result.textureSize
 
         // Reset undo when the update of CanvasViewModel completes
-        textureLayers.resetUndo()
+        //textureLayers.resetUndo()
 
         refreshCanvasAfterComposition()
     }
@@ -262,13 +254,6 @@ extension CanvasViewModel {
                     )
                     self.refreshCanvasAfterComposition()
                 }
-            }
-            .store(in: &cancellables)
-
-        textureLayers.didUndo
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
 
@@ -648,13 +633,6 @@ public extension CanvasViewModel {
 
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
-    }
-
-    func undo() {
-        textureLayers.undo()
-    }
-    func redo() {
-        textureLayers.redo()
     }
 
     func exportFiles(

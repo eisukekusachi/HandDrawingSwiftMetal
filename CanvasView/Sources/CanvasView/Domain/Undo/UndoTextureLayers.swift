@@ -12,24 +12,22 @@ import UIKit
 @MainActor
 public final class UndoTextureLayers: ObservableObject {
 
-    private var textureLayers: any TextureLayersProtocol
+    var textureLayers: any TextureLayersProtocol
 
     /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
         inMemoryRepository != nil
     }
 
-    /// Emits `UndoRedoButtonState` when the undo stack changes
-    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
+    /// Emits an `UndoRedoObjectPair` upon undo registration
+    public var didEmitUndoObjectPair: AnyPublisher<UndoRedoObjectPair, Never> {
+        didEmitUndoObjectPairSubject.eraseToAnyPublisher()
     }
-    private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
-
-    private let undoManager = UndoManager()
+    private let didEmitUndoObjectPairSubject: PassthroughSubject<UndoRedoObjectPair, Never> = .init()
 
     /// A repository that stores textures for undo operations.
     /// The textures are stored and managed in memory to avoid blocking the main thread.
-    private(set) var inMemoryRepository: UndoTextureInMemoryRepository? = nil
+    private var inMemoryRepository: UndoTextureInMemoryRepository? = nil
 
     private var renderer: MTLRendering
 
@@ -49,13 +47,6 @@ public final class UndoTextureLayers: ObservableObject {
         self.textureLayers = textureLayers
         self.renderer = renderer
         self.inMemoryRepository = inMemoryRepository
-
-        // Set an initial value to prevent out-of-memory errors when no limit is applied
-        self.undoManager.levelsOfUndo = 8
-    }
-
-    public func setLevelsOfUndo(undoCount: Int) {
-        self.undoManager.levelsOfUndo = undoCount
     }
 
     public func initializeUndoTextures(
@@ -71,23 +62,6 @@ public final class UndoTextureLayers: ObservableObject {
 }
 
 public extension UndoTextureLayers {
-
-    func undo() {
-        undoManager.undo()
-        didUndoSubject.send(.init(undoManager))
-    }
-    func redo() {
-        undoManager.redo()
-        didUndoSubject.send(.init(undoManager))
-    }
-    func resetUndo() {
-        guard let inMemoryRepository else { return }
-
-        inMemoryRepository.removeAll()
-        undoManager.removeAllActions()
-        didUndoSubject.send(.init(undoManager))
-        cancellables = Set<AnyCancellable>()
-    }
 
     func setUndoDrawing(
         texture: MTLTexture?
@@ -184,7 +158,7 @@ private extension UndoTextureLayers {
                     id: redoTextureId
                 )
 
-            pushUndoObject(
+            didEmitUndoObjectPairSubject.send(
                 .init(
                     undoObject: undoObject,
                     redoObject: redoObject
@@ -217,7 +191,7 @@ private extension UndoTextureLayers {
                     id: undoTextureId
                 )
 
-            pushUndoObject(undoRedoObject)
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
 
         } catch {
             // No action on error
@@ -245,14 +219,14 @@ private extension UndoTextureLayers {
                     id: undoTextureId
                 )
 
-            pushUndoObject(undoRedoObject)
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
 
         } catch {
             // No action on error
             Logger.error(error)
         }
     }
-
+/*
     func pushUndoObject(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
@@ -299,6 +273,7 @@ private extension UndoTextureLayers {
 
         didUndoSubject.send(.init(undoManager))
     }
+*/
 }
 
 extension UndoTextureLayers: TextureLayersProtocol {
@@ -395,7 +370,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
             selectedLayerId: selectedLayer.id,
             layer: .init(item: selectedLayer)
         )
-        pushUndoObject(
+        didEmitUndoObjectPairSubject.send(
             .init(
                 undoObject: redoObject.reversedObject,
                 redoObject: redoObject
@@ -410,7 +385,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
         guard let redoSelectdLayer = textureLayers.selectedLayer else { return }
 
-        pushUndoObject(
+        didEmitUndoObjectPairSubject.send(
             .init(
                 undoObject: UndoSelectionObject(
                     layer: .init(item: undoSelectdLayer)
@@ -441,7 +416,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
             oldAlpha != selectedLayer.alpha
         else { return }
 
-        pushUndoObject(
+        didEmitUndoObjectPairSubject.send(
             .init(
                 undoObject: UndoAlphaChangedObject(
                     layer: .init(item: selectedLayer),
@@ -464,7 +439,7 @@ extension UndoTextureLayers: TextureLayersProtocol {
 
         textureLayers.updateVisibility(id, isVisible: isVisible)
 
-        pushUndoObject(
+        didEmitUndoObjectPairSubject.send(
             .init(
                 undoObject: UndoVisibilityObject(
                     layer: .init(
