@@ -12,6 +12,12 @@ import UIKit
 
 open class CanvasView: UIView {
 
+    public let undoTextureLayers: UndoTextureLayers
+
+    public let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+
+    public var cancellables = Set<AnyCancellable>()
+
     public var isDrawing: AnyPublisher<Bool, Never> {
         viewModel.isDrawing
     }
@@ -31,11 +37,6 @@ open class CanvasView: UIView {
         alertSubject.eraseToAnyPublisher()
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
-    }
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
     public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
@@ -77,19 +78,13 @@ open class CanvasView: UIView {
 
     private let renderer: MTLRendering
 
-    private let undoTextureLayers: UndoTextureLayers
-
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
 
     private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
-
     private let textureLayersStorageController: PersistenceController
-
-    private var cancellables = Set<AnyCancellable>()
 
     /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
     private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
@@ -202,10 +197,6 @@ open class CanvasView: UIView {
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-
-        // Set an initial value to prevent out-of-memory errors when no limit is applied
-        undoManager?.levelsOfUndo = 8
-
         layoutViews()
         addEvents()
         bindData()
@@ -248,7 +239,6 @@ open class CanvasView: UIView {
 
         viewModel.setupCompletion
             .sink { [weak self] result in
-                self?.resetUndo()
                 self?.viewModel.completeSetup(result: result)
                 self?.setupCompletionSubject.send(result)
             }
@@ -264,12 +254,6 @@ open class CanvasView: UIView {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.alertSubject.send(error)
-            }
-            .store(in: &cancellables)
-
-        undoTextureLayers.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.registerUndoObjectPair(undoObjectPair)
             }
             .store(in: &cancellables)
     }
@@ -318,77 +302,6 @@ open class CanvasView: UIView {
 
     public func setDrawingTool(_ drawingToolType: Int) {
         viewModel.setDrawingTool(drawingToolType)
-    }
-
-    public func undo() {
-        guard let undoManager else { return }
-        undoManager.undo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    public func redo() {
-        guard let undoManager else { return }
-        undoManager.redo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    func resetUndo() {
-        guard let undoManager else { return }
-        undoTextureInMemoryRepository.removeAll()
-        undoManager.removeAllActions()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-
-    func registerUndoObjectPair(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        guard let undoManager else { return }
-
-        undoRedoObject.undoObject.deinitSubject
-            .sink(receiveValue: { [weak self] result in
-                guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoRedoObject.redoObject.deinitSubject
-            .sink(receiveValue: { [weak self] result in
-                guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
-            guard let `self` else { return }
-
-            Task {
-                do {
-                    try await undoRedoObject.undoObject.applyUndo(
-                        layers: self.undoTextureLayers.textureLayers,
-                        repository: undoTextureInMemoryRepository
-                    )
-                } catch {
-                    Logger.error(error)
-                }
-            }
-
-            // Redo Registration
-            self.registerUndoObjectPair(undoRedoObject.reversed())
-        }
-
-        didUndoSubject.send(
-            .init(undoManager)
-        )
     }
 }
 

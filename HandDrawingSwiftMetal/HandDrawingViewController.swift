@@ -250,10 +250,10 @@ extension HandDrawingViewController {
             contentView.updateDrawingComponents(viewModel.drawingToolStorage.type)
         }
         contentView.tapUndoButton = { [weak self] in
-            self?.contentView.undo()
+            self?.contentView.canvasView.undo()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.contentView.redo()
+            self?.contentView.canvasView.redo()
         }
 
         contentView.dragBrushSlider = { [weak self] value in
