@@ -13,7 +13,7 @@ import UIKit
 
 /// Alpha palette managed by Core Data
 @MainActor
-public final class CoreDataEraserPaletteStorage: ObservableObject {
+final class CoreDataEraserPaletteStorage {
 
     private var palette: EraserPalette
 
@@ -24,12 +24,6 @@ public final class CoreDataEraserPaletteStorage: ObservableObject {
     init(palette: EraserPalette, context: NSManagedObjectContext) {
         self.palette = palette
         self.storage = .init(context: context)
-
-        // Propagate changes from children to the parent
-        palette.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(

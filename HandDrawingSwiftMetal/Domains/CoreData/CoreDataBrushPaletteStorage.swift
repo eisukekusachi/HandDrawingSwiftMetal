@@ -13,7 +13,7 @@ import UIKit
 
 /// Color palette managed by Core Data
 @MainActor
-public final class CoreDataBrushPaletteStorage: ObservableObject {
+final class CoreDataBrushPaletteStorage {
 
     private var palette: BrushPalette
 

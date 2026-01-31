@@ -11,7 +11,8 @@ import UIKit
 
 @preconcurrency import CoreData
 
-@MainActor final class CoreDataProjectStorage: ObservableObject {
+@MainActor
+final class CoreDataProjectStorage {
 
     private let project: ProjectData
 
