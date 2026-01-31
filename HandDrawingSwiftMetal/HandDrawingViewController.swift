@@ -34,16 +34,16 @@ class HandDrawingViewController: UIViewController {
 
     public var zipFileURL: URL {
         FileManager.documentsFileURL(
-            projectName: viewModel.projectStorage.projectName,
+            projectName: viewModel.project.projectName,
             suffix: viewModel.fileSuffix
         )
     }
 
     var currentLocalFileItem: LocalFileItem {
         .init(
-            title: viewModel.projectStorage.projectName,
-            createdAt: viewModel.projectStorage.createdAt,
-            updatedAt: viewModel.projectStorage.updatedAt,
+            title: viewModel.project.projectName,
+            createdAt: viewModel.project.createdAt,
+            updatedAt: viewModel.project.updatedAt,
             image: contentView.canvasView.thumbnail(),
             fileURL: URL.documents.appendingPathComponent(
                 viewModel.projectFileName()
@@ -163,7 +163,7 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 // Update the project's updatedAt value to the current time
-                self?.viewModel.projectStorage.update(
+                self?.viewModel.project.update(
                     updatedAt: Date()
                 )
             }

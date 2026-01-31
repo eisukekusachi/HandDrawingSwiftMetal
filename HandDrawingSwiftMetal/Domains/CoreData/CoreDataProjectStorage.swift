@@ -13,19 +13,16 @@ import UIKit
 
 @MainActor final class CoreDataProjectStorage: ObservableObject {
 
-    var projectName: String { project.projectName }
-    var createdAt: Date { project.createdAt }
-    var updatedAt: Date { project.updatedAt }
+    private let project: ProjectData
 
-    private var project = ProjectData()
     private let storage: AnyCoreDataStorage<ProjectEntity>?
     private var cancellables = Set<AnyCancellable>()
 
     private let entityNameInModel = "ProjectEntity"
 
-    init(storage: AnyCoreDataStorage<ProjectEntity>?) {
+    init(project: ProjectData, storage: AnyCoreDataStorage<ProjectEntity>?) {
+        self.project = project
         self.storage = storage
-        self.updateAll(newProjectName: Calendar.currentDate)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -56,35 +53,11 @@ extension CoreDataProjectStorage {
         return try storage.fetch()
     }
 
-    func update(
-        projectName: String? = nil,
-        createdAt: Date? = nil,
-        updatedAt: Date? = nil
-    ) {
-        if let projectName {
-            project.projectName = projectName
-        }
-        if let createdAt {
-            project.createdAt = createdAt
-        }
-        if let updatedAt {
-            project.updatedAt = updatedAt
-        }
-    }
-
-    func update(_ model: ProjectData) {
-        update(
-            projectName: model.projectName,
-            createdAt: model.createdAt,
-            updatedAt: model.updatedAt
-        )
-    }
-
     func update(_ entity: ProjectEntity) {
         if let projectName = entity.projectName,
            let createdAt = entity.createdAt,
            let updatedAt = entity.updatedAt {
-            update(
+            project.update(
                 projectName: projectName,
                 createdAt: createdAt,
                 updatedAt: updatedAt
@@ -109,19 +82,11 @@ extension CoreDataProjectStorage {
             throw nsError
         }
 
-        update(
+        project.update(
             projectName: result.projectName,
             createdAt: result.createdAt,
             updatedAt: result.updatedAt
         )
-    }
-
-    func updateAll(newProjectName: String) {
-        project.updateAll(newProjectName: newProjectName)
-    }
-
-    func updateUpdatedAt() {
-        project.updateUpdatedAt()
     }
 }
 

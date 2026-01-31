@@ -43,19 +43,18 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
+    let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
-
     let brushPalette: BrushPalette
-
     let eraserPalette: EraserPalette
 
-    private let projectStorageController: PersistenceController
-    private let drawingToolStorageController: PersistenceController
-
-    let projectStorage: CoreDataProjectStorage
+    private let projectStorage: CoreDataProjectStorage
     private let drawingToolStorage: CoreDataDrawingToolStorage
     private let brushPaletteStorage: CoreDataBrushPaletteStorage
     private let eraserPaletteStorage: CoreDataEraserPaletteStorage
+
+    private let projectStorageController: PersistenceController
+    private let drawingToolStorageController: PersistenceController
 
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
@@ -91,6 +90,7 @@ final class HandDrawingViewModel: ObservableObject {
             xcdatamodeldName: "DrawingToolStorage"
         )
         self.projectStorage = .init(
+            project: project,
             storage: AnyCoreDataStorage(
                 CoreDataStorage<ProjectEntity>(
                     context: projectStorageController.viewContext
@@ -145,9 +145,9 @@ final class HandDrawingViewModel: ObservableObject {
 extension HandDrawingViewModel {
     func projectFileName() -> String {
         if _fileSuffix.isEmpty {
-            return projectStorage.projectName
+            return project.projectName
         } else {
-            return projectStorage.projectName + "." + _fileSuffix
+            return project.projectName + "." + _fileSuffix
         }
     }
 
@@ -169,7 +169,7 @@ extension HandDrawingViewModel {
             alphas: initializeAlphas,
             index: 0
         )
-        projectStorage.update(
+        project.update(
             projectName: Calendar.currentDate,
             createdAt: Date(),
             updatedAt: Date()
@@ -248,7 +248,7 @@ extension HandDrawingViewModel {
                 try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
                 try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
                 try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
-                try ProjectArchiveModel(projectStorage).write(in: workingDirectoryURL)
+                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
                 try localFileRepository.zipWorkingDirectory(to: zipFileURL)
