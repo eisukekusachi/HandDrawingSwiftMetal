@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/08/25.
 //
 
-import CanvasView
 import Foundation
 
 struct DrawingToolArchiveModel: Codable, Sendable {
