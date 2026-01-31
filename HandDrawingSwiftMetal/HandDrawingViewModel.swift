@@ -110,12 +110,11 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    func setup(configuration: CanvasConfiguration) {
+    func setup(configuration: CanvasConfiguration) throws {
         _fileSuffix = configuration.fileSuffix
 
-        Task {
-            try await fetchDataFromCoreDataIfAvailable()
-        }
+        try fetchDataFromCoreDataIfAvailable()
+
         Task {
             await fileItemList(
                 fileSuffix: _fileSuffix
@@ -123,7 +122,7 @@ final class HandDrawingViewModel: ObservableObject {
         }
     }
 
-    private func fetchDataFromCoreDataIfAvailable() async throws {
+    private func fetchDataFromCoreDataIfAvailable() throws {
         if let projectEntity = try projectStorage.fetch() {
             projectStorage.update(projectEntity)
         }

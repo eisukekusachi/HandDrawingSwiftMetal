@@ -84,7 +84,7 @@ class HandDrawingViewController: UIViewController {
                     ],
                     configuration: configuration
                 )
-                self.viewModel.setup(configuration: configuration)
+                try self.viewModel.setup(configuration: configuration)
 
                 // Set the undo limit
                 self.contentView.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
