@@ -152,6 +152,8 @@ extension HandDrawingViewController {
         contentView.canvasView.setupCompletion
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
+                self?.contentView.canvasView.resetUndo()
+
                 self?.textureLayerViewPresenter.update(
                     textureLayers: result.textureLayers
                 )
@@ -179,6 +181,12 @@ extension HandDrawingViewController {
         contentView.canvasView.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.undoTextureLayers.didEmitUndoObjectPair
+            .sink { [weak self] undoObjectPair in
+                self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)
             }
             .store(in: &cancellables)
 

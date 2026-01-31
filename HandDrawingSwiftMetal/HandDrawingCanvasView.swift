@@ -18,30 +18,10 @@ import UIKit
 
     override init() {
         super.init()
-        commonInit()
     }
 
     @MainActor required init?(coder: NSCoder) {
         super.init(coder: coder)
-        commonInit()
-    }
-
-    private func commonInit() {
-        bindData()
-    }
-
-    private func bindData() {
-        undoTextureLayers.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.registerUndoObjectPair(undoObjectPair)
-            }
-            .store(in: &cancellables)
-
-        setupCompletion
-            .sink { [weak self] _ in
-                self?.resetUndo()
-            }
-            .store(in: &cancellables)
     }
 
     override func didMoveToWindow() {
@@ -58,7 +38,7 @@ import UIKit
 }
 
 extension HandDrawingCanvasView {
-    private func registerUndoObjectPair(
+    func registerUndoObjectPair(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
         guard let undoManager else { return }
