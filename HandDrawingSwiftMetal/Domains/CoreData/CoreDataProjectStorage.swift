@@ -17,6 +17,7 @@ final class CoreDataProjectStorage {
     private let project: ProjectData
 
     private let storage: CoreDataStorage<ProjectEntity>
+
     private var cancellables = Set<AnyCancellable>()
 
     init(project: ProjectData, context: NSManagedObjectContext) {
