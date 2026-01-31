@@ -43,6 +43,10 @@ final class CoreDataBrushPaletteStorage {
 
 extension CoreDataBrushPaletteStorage {
 
+    func fetch() throws -> BrushPaletteEntity? {
+        try storage.fetch()
+    }
+
     func update(_ entity: BrushPaletteEntity) {
 
         palette.setId(entity.id ?? UUID())
@@ -76,10 +80,6 @@ extension CoreDataBrushPaletteStorage {
             colors: result.hexColors.map { UIColor(hex: $0) },
             index: result.index
         )
-    }
-
-    func fetch() throws -> BrushPaletteEntity? {
-        try storage.fetch()
     }
 }
 

@@ -41,6 +41,10 @@ final class CoreDataEraserPaletteStorage {
 
 extension CoreDataEraserPaletteStorage {
 
+    func fetch() throws -> EraserPaletteEntity? {
+        try storage.fetch()
+    }
+
     func update(_ entity: EraserPaletteEntity) {
 
         palette.setId(entity.id ?? UUID())
@@ -77,10 +81,6 @@ extension CoreDataEraserPaletteStorage {
             alphas: result.alphas,
             index: result.index
         )
-    }
-
-    func fetch() throws -> EraserPaletteEntity? {
-        try storage.fetch()
     }
 }
 

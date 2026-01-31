@@ -16,14 +16,12 @@ final class CoreDataProjectStorage {
 
     private let project: ProjectData
 
-    private let storage: AnyCoreDataStorage<ProjectEntity>?
+    private let storage: CoreDataStorage<ProjectEntity>
     private var cancellables = Set<AnyCancellable>()
 
-    private let entityNameInModel = "ProjectEntity"
-
-    init(project: ProjectData, storage: AnyCoreDataStorage<ProjectEntity>?) {
+    init(project: ProjectData, context: NSManagedObjectContext) {
         self.project = project
-        self.storage = storage
+        self.storage = .init(context: context)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -45,13 +43,7 @@ final class CoreDataProjectStorage {
 extension CoreDataProjectStorage {
 
     func fetch() throws -> ProjectEntity? {
-        guard
-            let storage,
-            let context = storage.context,
-            // Skip fetch to avoid a crash if an entity was removed from the model
-            hasEntityInModel(named: entityNameInModel, context: context)
-        else { return nil }
-        return try storage.fetch()
+        try storage.fetch()
     }
 
     func update(_ entity: ProjectEntity) {
@@ -92,23 +84,11 @@ extension CoreDataProjectStorage {
 }
 
 private extension CoreDataProjectStorage {
-
-    func hasEntityInModel(named name: String, context: NSManagedObjectContext) -> Bool {
-        guard !name.isEmpty else { return false }
-        guard let model = context.persistentStoreCoordinator?.managedObjectModel else { return false }
-        return model.entitiesByName[name] != nil
-    }
-
     func save(_ target: ProjectData) async {
         guard
-            let storage,
             let context = storage.context,
             let request = storage.fetchRequest()
         else { return }
-
-        guard hasEntityInModel(named: entityNameInModel, context: context) else {
-            return
-        }
 
         let projectName = target.projectName
         let createdAt = target.createdAt

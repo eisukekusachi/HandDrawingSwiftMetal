@@ -91,21 +91,17 @@ final class HandDrawingViewModel: ObservableObject {
         )
         self.projectStorage = .init(
             project: project,
-            storage: AnyCoreDataStorage(
-                CoreDataStorage<ProjectEntity>(
-                    context: projectStorageController.viewContext
-                )
-            )
+            context: projectStorageController.viewContext
         )
-        self.drawingToolStorage = CoreDataDrawingToolStorage(
+        self.drawingToolStorage = .init(
             drawingTool: drawingTool,
             context: drawingToolStorageController.viewContext
         )
-        self.brushPaletteStorage = CoreDataBrushPaletteStorage(
+        self.brushPaletteStorage = .init(
             palette: brushPalette,
             context: drawingToolStorageController.viewContext
         )
-        self.eraserPaletteStorage = CoreDataEraserPaletteStorage(
+        self.eraserPaletteStorage = .init(
             palette: eraserPalette,
             context: drawingToolStorageController.viewContext
         )

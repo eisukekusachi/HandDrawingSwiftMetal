@@ -47,6 +47,10 @@ final class CoreDataDrawingToolStorage {
 
 extension CoreDataDrawingToolStorage {
 
+    func fetch() throws -> DrawingToolEntity? {
+        try storage.fetch()
+    }
+
     func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
         drawingTool.type = type
         drawingTool.brushDiameter = brushDiameter
@@ -86,10 +90,6 @@ extension CoreDataDrawingToolStorage {
             brushDiameter: result.brushDiameter,
             eraserDiameter: result.eraserDiameter
         )
-    }
-
-    func fetch() throws -> DrawingToolEntity? {
-        try storage.fetch()
     }
 }
 
