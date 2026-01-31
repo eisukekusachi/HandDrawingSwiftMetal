@@ -67,23 +67,29 @@ class HandDrawingViewController: UIViewController {
     private func setupCanvasView() {
         showActivityIndicator(true)
         showContentView(false)
-        Task {
+        Task { [weak self] in
+            guard let `self` else { return }
+
             defer {
-                showActivityIndicator(false)
-                showContentView(true)
+                self.showActivityIndicator(false)
+                self.showContentView(true)
             }
             do {
-                let configuration: CanvasConfiguration = canvasConfiguration ?? .init()
+                let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
+
                 try await contentView.canvasView.setup(
                     drawingRenderers: [
-                        brushDrawingRenderer,
-                        eraserDrawingRenderer
+                        self.brushDrawingRenderer,
+                        self.eraserDrawingRenderer
                     ],
                     configuration: configuration
                 )
-                viewModel.setup(configuration: configuration)
+                self.viewModel.setup(configuration: configuration)
 
-                updateComponents()
+                // Set the undo limit
+                self.contentView.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
+
+                self.updateComponents()
 
             } catch {
                 fatalError("Failed to initialize the canvas")

@@ -27,13 +27,7 @@ import UIKit
     }
 
     private func commonInit() {
-        setup()
         bindData()
-    }
-
-    private func setup() {
-        // Set an initial value to prevent out-of-memory errors when no limit is applied
-        undoManager?.levelsOfUndo = 8
     }
 
     private func bindData() {
@@ -50,6 +44,20 @@ import UIKit
             .store(in: &cancellables)
     }
 
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // Configure undoManager here because it may be nil
+        // before the view is attached to a window, causing settings to be ignored.
+        setupInitialUndoManager()
+    }
+
+    private func setupInitialUndoManager() {
+        // Set an initial value to prevent out-of-memory errors when no limit is applied
+        undoManager?.levelsOfUndo = 8
+    }
+}
+
+extension HandDrawingCanvasView {
     private func registerUndoObjectPair(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
