@@ -43,17 +43,19 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
-    let drawingTool = DrawingTool()
+    let drawingTool: DrawingTool = .init()
 
-    let projectStorage: CoreDataProjectStorage
+    let brushPalette: BrushPalette
+
+    let eraserPalette: EraserPalette
 
     private let projectStorageController: PersistenceController
-
     private let drawingToolStorageController: PersistenceController
 
-    private var drawingToolStorage: CoreDataDrawingToolStorage
-    @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
-    @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
+    let projectStorage: CoreDataProjectStorage
+    private let drawingToolStorage: CoreDataDrawingToolStorage
+    private let brushPaletteStorage: CoreDataBrushPaletteStorage
+    private let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
@@ -77,6 +79,11 @@ final class HandDrawingViewModel: ObservableObject {
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     public init() {
+
+        self.brushPalette = .init(colors: initializeColors)
+
+        self.eraserPalette = .init(alphas: initializeAlphas)
+
         self.projectStorageController = .init(
             xcdatamodeldName: "ProjectStorage"
         )
@@ -95,17 +102,11 @@ final class HandDrawingViewModel: ObservableObject {
             context: drawingToolStorageController.viewContext
         )
         self.brushPaletteStorage = CoreDataBrushPaletteStorage(
-            palette: BrushPalette(
-                colors: initializeColors,
-                index: 0
-            ),
+            palette: brushPalette,
             context: drawingToolStorageController.viewContext
         )
         self.eraserPaletteStorage = CoreDataEraserPaletteStorage(
-            palette: EraserPalette(
-                alphas: initializeAlphas,
-                index: 0
-            ),
+            palette: eraserPalette,
             context: drawingToolStorageController.viewContext
         )
     }
@@ -160,11 +161,11 @@ extension HandDrawingViewModel {
             brushDiameter: 8,
             eraserDiameter: 8
         )
-        brushPaletteStorage.update(
+        brushPalette.update(
             colors: initializeColors,
             index: 0
         )
-        eraserPaletteStorage.update(
+        eraserPalette.update(
             alphas: initializeAlphas,
             index: 0
         )
@@ -245,8 +246,8 @@ extension HandDrawingViewModel {
                 try await action?(workingDirectoryURL)
 
                 try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
-                try BrushPaletteArchiveModel(brushPaletteStorage.palette).write(in: workingDirectoryURL)
-                try EraserPaletteArchiveModel(eraserPaletteStorage.palette).write(in: workingDirectoryURL)
+                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
+                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
                 try ProjectArchiveModel(projectStorage).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file

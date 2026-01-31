@@ -13,9 +13,9 @@ import UIKit
 
 /// Alpha palette managed by Core Data
 @MainActor
-public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, ObservableObject {
+public final class CoreDataEraserPaletteStorage: ObservableObject {
 
-    @Published private(set) var palette: EraserPalette
+    private var palette: EraserPalette
 
     private let storage: CoreDataStorage<EraserPaletteEntity>
 
@@ -43,44 +43,13 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
         }
         .store(in: &cancellables)
     }
-
-    var id: UUID {
-        palette.id
-    }
-
-    var alpha: Int? {
-        palette.alpha
-    }
-
-    func alpha(at index: Int) -> Int? {
-        palette.alpha(at: index)
-    }
-
-    func select(_ index: Int) {
-        palette.select(index)
-    }
-
-    func insert(_ alpha: Int, at index: Int) {
-        palette.insert(alpha, at: index)
-    }
-
-    func update(alphas: [Int], index: Int) {
-        palette.update(alphas: alphas, index: index)
-    }
-
-    func update(alpha: Int, at index: Int) {
-        palette.update(alpha: alpha, at: index)
-    }
-
-    func remove(at index: Int) {
-        palette.remove(at: index)
-    }
 }
 
 extension CoreDataEraserPaletteStorage {
+
     func update(_ entity: EraserPaletteEntity) {
 
-        self.palette.setId(entity.id ?? UUID())
+        palette.setId(entity.id ?? UUID())
 
         // Load alphas from Core Data
         let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
@@ -88,7 +57,7 @@ extension CoreDataEraserPaletteStorage {
         } ?? []
         let index = max(0, min(Int(entity.index), alphas.count - 1))
 
-        self.palette.update(
+        palette.update(
             alphas: alphas,
             index: index
         )
@@ -110,7 +79,7 @@ extension CoreDataEraserPaletteStorage {
             Logger.error(nsError)
             throw nsError
         }
-        self.palette.update(
+        palette.update(
             alphas: result.alphas,
             index: result.index
         )

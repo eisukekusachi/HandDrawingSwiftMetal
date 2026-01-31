@@ -202,18 +202,18 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.brushPaletteStorage.palette.$index
+        viewModel.brushPalette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
-                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
+                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
+                let newColor = viewModel.brushPalette.colors[index]
                 self.brushDrawingRenderer.setColor(newColor)
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPaletteStorage.palette.$index
+        viewModel.eraserPalette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
+                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPalette.alphas[index]
                 self.eraserDrawingRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
@@ -280,7 +280,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: viewModel.brushPaletteStorage.palette,
+                palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
         )
@@ -301,7 +301,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: viewModel.eraserPaletteStorage.palette,
+                palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
         )

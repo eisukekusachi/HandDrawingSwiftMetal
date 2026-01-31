@@ -13,9 +13,9 @@ import UIKit
 
 /// Color palette managed by Core Data
 @MainActor
-public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, ObservableObject {
+public final class CoreDataBrushPaletteStorage: ObservableObject {
 
-    @Published private(set) var palette: BrushPalette
+    private var palette: BrushPalette
 
     private let storage: CoreDataStorage<BrushPaletteEntity>
 
@@ -24,12 +24,6 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
     init(palette: BrushPalette, context: NSManagedObjectContext) {
         self.palette = palette
         self.storage = .init(context: context)
-
-        // Propagate changes from children to the parent
-        palette.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
@@ -45,44 +39,13 @@ public final class CoreDataBrushPaletteStorage: BrushPaletteProtocol, Observable
         }
         .store(in: &cancellables)
     }
-
-    var id: UUID {
-        palette.id
-    }
-
-    var color: UIColor? {
-        palette.color
-    }
-
-    func color(at index: Int) -> UIColor? {
-        palette.color(at: index)
-    }
-
-    func select(_ index: Int) {
-        palette.select(index)
-    }
-
-    func insert(_ color: UIColor, at index: Int) {
-        palette.insert(color, at: index)
-    }
-
-    func update(colors: [UIColor], index: Int) {
-        palette.update(colors: colors, index: index)
-    }
-
-    func update(color: UIColor, at index: Int) {
-        palette.update(color: color, at: index)
-    }
-
-    func remove(at index: Int) {
-        palette.remove(at: index)
-    }
 }
 
 extension CoreDataBrushPaletteStorage {
+
     func update(_ entity: BrushPaletteEntity) {
 
-        self.palette.setId(entity.id ?? UUID())
+        palette.setId(entity.id ?? UUID())
 
         let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
             guard let hex = $0.hex else { return nil }
@@ -90,10 +53,7 @@ extension CoreDataBrushPaletteStorage {
         } ?? []
         let index = max(0, min(Int(entity.index), colors.count - 1))
 
-        self.palette.update(
-            colors: colors,
-            index: index
-        )
+        palette.update(colors: colors, index: index)
     }
 
     func update(directoryURL: URL) throws {
@@ -130,8 +90,8 @@ private extension CoreDataBrushPaletteStorage {
             let request = self.storage.fetchRequest()
         else { return }
 
-        let index  = target.index
-        let hexes  = target.colors.map { $0.hex() }
+        let index = target.index
+        let hexes = target.colors.map { $0.hex() }
         let id: UUID = target.id
 
         await context.perform { [context] in

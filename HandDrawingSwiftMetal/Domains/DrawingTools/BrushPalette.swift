@@ -8,27 +8,7 @@
 import Combine
 import UIKit
 
-@MainActor
-protocol BrushPaletteProtocol {
-
-    var id: UUID { get }
-
-    var color: UIColor? { get }
-
-    func color(at index: Int) -> UIColor?
-
-    func select(_ index: Int)
-
-    func insert(_ color: UIColor, at index: Int)
-
-    func update(colors: [UIColor], index: Int)
-
-    func update(color: UIColor, at index: Int)
-
-    func remove(at index: Int)
-}
-
-public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
+public final class BrushPalette: ObservableObject {
 
     private(set) var id: UUID
 
@@ -37,8 +17,8 @@ public final class BrushPalette: BrushPaletteProtocol, ObservableObject {
 
     public init(
         id: UUID = UUID(),
-        colors: [UIColor],
-        index: Int
+        colors: [UIColor] = [.black],
+        index: Int = 0
     ) {
         self.id = id
 
