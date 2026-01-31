@@ -111,11 +111,14 @@ final class HandDrawingViewModel: ObservableObject {
     }
 
     func setup(configuration: CanvasConfiguration) throws {
+        // Retain the file suffix
         _fileSuffix = configuration.fileSuffix
 
+        // Fetch data from Core Data
         try fetchDataFromCoreDataIfAvailable()
 
         Task {
+            // Create a list of file items
             await fileItemList(
                 fileSuffix: _fileSuffix
             )
