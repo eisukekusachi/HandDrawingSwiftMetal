@@ -99,11 +99,15 @@ private extension CoreDataProjectStorage {
                 // Fetch or create root
                 let entity = try context.fetch(request).first ?? ProjectEntity(context: context)
 
+                let currentProjectName = entity.projectName
+                let currentCreatedAt = entity.createdAt
+                let currentUpdatedAt = entity.updatedAt
+
                 // Return if no changes
                 guard
-                    entity.projectName != projectName ||
-                    entity.createdAt != createdAt ||
-                    entity.updatedAt != updatedAt
+                    currentProjectName != projectName ||
+                    currentCreatedAt != createdAt ||
+                    currentUpdatedAt != updatedAt
                 else { return }
 
                 // Update entities only if values have actually changed

@@ -90,9 +90,9 @@ private extension CoreDataBrushPaletteStorage {
             let request = self.storage.fetchRequest()
         else { return }
 
+        let id: UUID = target.id
         let index = target.index
         let hexes = target.colors.map { $0.hex() }
-        let id: UUID = target.id
 
         await context.perform { [context] in
             do {
@@ -100,11 +100,15 @@ private extension CoreDataBrushPaletteStorage {
 
                 let currentId = entity.id
                 let currentIndex = Int(entity.index)
-                let currentHexes: [String] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap { $0.hex } ?? []
+                let currentHexes: [String] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
+                    $0.hex
+                } ?? []
 
                 // Return if no changes
                 guard
-                    currentId != id || currentIndex != index || currentHexes != hexes
+                    currentId != id ||
+                    currentIndex != index ||
+                    currentHexes != hexes
                 else { return }
 
                 if currentId != id {

@@ -91,9 +91,9 @@ private extension CoreDataEraserPaletteStorage {
             let request = self.storage.fetchRequest()
         else { return }
 
-        let index  = target.index
-        let alphas  = target.alphas
-        let id: UUID = target.id
+        let id = target.id
+        let index = target.index
+        let alphas = target.alphas
 
         await context.perform { [context] in
             do {
@@ -101,11 +101,15 @@ private extension CoreDataEraserPaletteStorage {
 
                 let currentId = entity.id
                 let currentIndex = Int(entity.index)
-                let currentAlphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
+                let currentAlphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
+                    Int($0.alpha)
+                } ?? []
 
                 // Return if no changes
                 guard
-                    currentId != id || currentIndex != index || currentAlphas != alphas
+                    currentId != id ||
+                    currentIndex != index ||
+                    currentAlphas != alphas
                 else { return }
 
                 if currentId != id {

@@ -100,26 +100,26 @@ private extension CoreDataDrawingToolStorage {
             let request = self.storage.fetchRequest()
         else { return }
 
+        let id: UUID = target.id
+        let type: Int = target.type.rawValue
         let brushDiameter: Int = target.brushDiameter
         let eraserDiameter: Int = target.eraserDiameter
-        let type: Int = target.type.rawValue
-        let id: UUID = target.id
 
         await context.perform { [context] in
             do {
                 let entity = try context.fetch(request).first ?? DrawingToolEntity(context: context)
 
                 let currentId = entity.id
+                let currentType = Int(entity.type)
                 let currentBrushDiameter = Int(entity.brushDiameter)
                 let currentEraserDiameter = Int(entity.eraserDiameter)
-                let currentType = Int(entity.type)
 
                 // Return if no changes
                 guard
                     currentId != id ||
+                    currentType != type ||
                     currentBrushDiameter != brushDiameter ||
-                    currentEraserDiameter != eraserDiameter ||
-                    currentType != type
+                    currentEraserDiameter != eraserDiameter
                 else { return }
 
                 if currentId != id {
