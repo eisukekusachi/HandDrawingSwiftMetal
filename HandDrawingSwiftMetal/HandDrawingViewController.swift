@@ -178,15 +178,15 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.didUndo
-            .sink { [weak self] state in
-                self?.contentView.setUndoRedoButtonState(state)
-            }
-            .store(in: &cancellables)
-
         contentView.canvasView.undoTextureLayers.didEmitUndoObjectPair
             .sink { [weak self] undoObjectPair in
                 self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.didUndo
+            .sink { [weak self] state in
+                self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
 
