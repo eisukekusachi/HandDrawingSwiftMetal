@@ -13,9 +13,9 @@ import UIKit
 
 /// DrawingTool managed by Core Data
 @MainActor
-final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
+final class CoreDataDrawingToolStorage {
 
-    @Published private(set) var drawingTool: DrawingTool
+    private let drawingTool: DrawingTool
 
     private let storage: CoreDataStorage<DrawingToolEntity>
 
@@ -28,12 +28,6 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
         self.drawingTool = drawingTool
         self.storage = .init(context: context)
 
-        // Propagate changes from children to the parent
-        drawingTool.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
-
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
             drawingTool.$brushDiameter.map { _ in () }.eraseToAnyPublisher(),
@@ -41,39 +35,13 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
             drawingTool.$type.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] in
-            guard let self else { return }
-            Task { await self.save(self.drawingTool) }
+        .sink {
+            Task { [weak self] in
+                guard let self else { return }
+                await self.save(self.drawingTool)
+            }
         }
         .store(in: &cancellables)
-    }
-
-    var id: UUID {
-        drawingTool.id
-    }
-
-    var type: DrawingToolType {
-        drawingTool.type
-    }
-
-    var brushDiameter: Int {
-        drawingTool.brushDiameter
-    }
-
-    var eraserDiameter: Int {
-        drawingTool.eraserDiameter
-    }
-
-    func setDrawingTool(_ type: DrawingToolType) {
-        drawingTool.setDrawingTool(type)
-    }
-
-    func setBrushDiameter(_ diameter: Int) {
-        drawingTool.setBrushDiameter(diameter)
-    }
-
-    func setEraserDiameter(_ diameter: Int) {
-        drawingTool.setEraserDiameter(diameter)
     }
 }
 

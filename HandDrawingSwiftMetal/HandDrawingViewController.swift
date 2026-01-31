@@ -218,13 +218,13 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.drawingToolStorage.drawingTool.$brushDiameter
+        viewModel.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
                 self?.brushDrawingRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
+        viewModel.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
                 self?.eraserDrawingRenderer.setDiameter(diameter)
             }
@@ -253,7 +253,7 @@ extension HandDrawingViewController {
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
             viewModel.toggleDrawingTool()
-            contentView.updateDrawingComponents(viewModel.drawingToolStorage.type)
+            contentView.updateDrawingComponents(viewModel.drawingTool.type)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.canvasView.undo()
@@ -263,12 +263,12 @@ extension HandDrawingViewController {
         }
 
         contentView.dragBrushSlider = { [weak self] value in
-            self?.viewModel.drawingToolStorage.setBrushDiameter(
+            self?.viewModel.drawingTool.setBrushDiameter(
                 BrushDrawingRenderer.diameterIntValue(value)
             )
         }
         contentView.dragEraserSlider = { [weak self] value in
-            self?.viewModel.drawingToolStorage.setEraserDiameter(
+            self?.viewModel.drawingTool.setEraserDiameter(
                 EraserDrawingRenderer.diameterIntValue(value)
             )
         }
@@ -322,11 +322,11 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
-        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
-        contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
-        contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
-        contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
+        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        contentView.updateDrawingComponents(viewModel.drawingTool.type)
+        contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
+        contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
     }
 }
 

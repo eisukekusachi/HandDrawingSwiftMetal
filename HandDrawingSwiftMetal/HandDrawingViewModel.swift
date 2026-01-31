@@ -43,13 +43,15 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
+    let drawingTool = DrawingTool()
+
     let projectStorage: CoreDataProjectStorage
 
     private let projectStorageController: PersistenceController
 
     private let drawingToolStorageController: PersistenceController
 
-    @Published var drawingToolStorage: CoreDataDrawingToolStorage
+    private var drawingToolStorage: CoreDataDrawingToolStorage
     @Published var brushPaletteStorage: CoreDataBrushPaletteStorage
     @Published var eraserPaletteStorage: CoreDataEraserPaletteStorage
 
@@ -89,7 +91,7 @@ final class HandDrawingViewModel: ObservableObject {
             )
         )
         self.drawingToolStorage = CoreDataDrawingToolStorage(
-            drawingTool: DrawingTool(),
+            drawingTool: drawingTool,
             context: drawingToolStorageController.viewContext
         )
         self.brushPaletteStorage = CoreDataBrushPaletteStorage(
@@ -147,8 +149,8 @@ extension HandDrawingViewModel {
     }
 
     func toggleDrawingTool() {
-        drawingToolStorage.setDrawingTool(
-            drawingToolStorage.type == .brush ? .eraser: .brush
+        drawingTool.setDrawingTool(
+            drawingTool.type == .brush ? .eraser: .brush
         )
     }
 
@@ -242,7 +244,7 @@ extension HandDrawingViewModel {
 
                 try await action?(workingDirectoryURL)
 
-                try DrawingToolArchiveModel(drawingToolStorage.drawingTool).write(in: workingDirectoryURL)
+                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
                 try BrushPaletteArchiveModel(brushPaletteStorage.palette).write(in: workingDirectoryURL)
                 try EraserPaletteArchiveModel(eraserPaletteStorage.palette).write(in: workingDirectoryURL)
                 try ProjectArchiveModel(projectStorage).write(in: workingDirectoryURL)
