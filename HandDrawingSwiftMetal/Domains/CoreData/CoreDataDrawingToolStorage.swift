@@ -64,12 +64,6 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
         drawingTool.eraserDiameter
     }
 
-    func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
-        drawingTool.setDrawingTool(type)
-        drawingTool.setBrushDiameter(brushDiameter)
-        drawingTool.setEraserDiameter(eraserDiameter)
-    }
-
     func setDrawingTool(_ type: DrawingToolType) {
         drawingTool.setDrawingTool(type)
     }
@@ -84,13 +78,22 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
 }
 
 extension CoreDataDrawingToolStorage {
+
+    func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
+        drawingTool.setDrawingTool(type)
+        drawingTool.setBrushDiameter(brushDiameter)
+        drawingTool.setEraserDiameter(eraserDiameter)
+    }
+
     func update(_ entity: DrawingToolEntity) {
 
         drawingTool.setId(entity.id ?? UUID())
 
-        setDrawingTool(.init(rawValue: Int(entity.type)))
-        setBrushDiameter(Int(entity.brushDiameter))
-        setEraserDiameter(Int(entity.eraserDiameter))
+        update(
+            type: .init(rawValue: Int(entity.type)),
+            brushDiameter: Int(entity.brushDiameter),
+            eraserDiameter: Int(entity.eraserDiameter)
+        )
     }
 
     func update(directoryURL: URL) throws {
@@ -109,9 +112,12 @@ extension CoreDataDrawingToolStorage {
             Logger.error(nsError)
             throw nsError
         }
-        self.drawingTool.setDrawingTool(.init(rawValue: result.type))
-        self.drawingTool.setBrushDiameter(result.brushDiameter)
-        self.drawingTool.setEraserDiameter(result.eraserDiameter)
+
+        update(
+            type: .init(rawValue: result.type),
+            brushDiameter: result.brushDiameter,
+            eraserDiameter: result.eraserDiameter
+        )
     }
 
     func fetch() throws -> DrawingToolEntity? {
@@ -142,7 +148,10 @@ private extension CoreDataDrawingToolStorage {
 
                 // Return if no changes
                 guard
-                    currentId != id || currentBrushDiameter != brushDiameter || currentEraserDiameter != eraserDiameter || currentType != type
+                    currentId != id ||
+                    currentBrushDiameter != brushDiameter ||
+                    currentEraserDiameter != eraserDiameter ||
+                    currentType != type
                 else { return }
 
                 if currentId != id {
