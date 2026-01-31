@@ -12,46 +12,19 @@ import UIKit
 @MainActor
 struct DrawingToolTests {
 
-    @Test("Confirms it falls back to default values when no data is stored")
-    func testInitWithDefaults() async throws {
-        let tool = DrawingTool(
-            initialBrushDiameter: 8,
-            initialEraserDiameter: 8
-        )
+    typealias Subject = DrawingTool
 
-        #expect(tool.type == .brush)
-        #expect(tool.brushDiameter == 8)
-        #expect(tool.eraserDiameter == 8)
-    }
-
-    @Test("Confirms it can set the drawing tool type")
-    func testSetDrawingTool() async throws {
+    @Test
+    func `The drawing tool is switched`() {
         let tool = DrawingTool()
         #expect(tool.type == .brush)
 
-        tool.setDrawingTool(.eraser)
+        tool.swapTool(.brush)
+
         #expect(tool.type == .eraser)
-    }
 
-    @Test("Confirms it can set the brush diameter with Int")
-    func testSetBrushDiameterInt() async throws {
-        let tool = DrawingTool(
-            initialBrushDiameter: 8
-        )
-        #expect(tool.brushDiameter == 8)
+        tool.swapTool(.eraser)
 
-        tool.setBrushDiameter(25)
-        #expect(tool.brushDiameter == 25)
-    }
-
-    @Test("Confirms it can set the eraser diameter with Int")
-    func testSetEraserDiameterInt() async throws {
-        let tool = DrawingTool(
-            initialEraserDiameter: 8
-        )
-        #expect(tool.eraserDiameter == 8)
-
-        tool.setEraserDiameter(30)
-        #expect(tool.eraserDiameter == 30)
+        #expect(tool.type == .brush)
     }
 }

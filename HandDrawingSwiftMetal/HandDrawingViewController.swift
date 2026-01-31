@@ -263,14 +263,10 @@ extension HandDrawingViewController {
         }
 
         contentView.dragBrushSlider = { [weak self] value in
-            self?.viewModel.drawingTool.setBrushDiameter(
-                BrushDrawingRenderer.diameterIntValue(value)
-            )
+            self?.viewModel.drawingTool.brushDiameter = BrushDrawingRenderer.diameterIntValue(value)
         }
         contentView.dragEraserSlider = { [weak self] value in
-            self?.viewModel.drawingTool.setEraserDiameter(
-                EraserDrawingRenderer.diameterIntValue(value)
-            )
+            self?.viewModel.drawingTool.eraserDiameter = EraserDrawingRenderer.diameterIntValue(value)
         }
     }
 

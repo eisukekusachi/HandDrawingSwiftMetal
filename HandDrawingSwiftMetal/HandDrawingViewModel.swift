@@ -151,9 +151,7 @@ extension HandDrawingViewModel {
     }
 
     func toggleDrawingTool() {
-        drawingTool.setDrawingTool(
-            drawingTool.type == .brush ? .eraser: .brush
-        )
+        drawingTool.swapTool(drawingTool.type)
     }
 
     func resetCoreData() {

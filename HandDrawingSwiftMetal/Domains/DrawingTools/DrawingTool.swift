@@ -7,13 +7,13 @@
 
 import UIKit
 
-public final class DrawingTool: ObservableObject {
+final class DrawingTool: ObservableObject {
 
     private(set) var id: UUID
 
-    @Published private(set) var type: DrawingToolType = .brush
-    @Published private(set) var brushDiameter: Int = 8
-    @Published private(set) var eraserDiameter: Int = 8
+    @Published var type: DrawingToolType = .brush
+    @Published var brushDiameter: Int = 8
+    @Published var eraserDiameter: Int = 8
 
     public init(
         id: UUID = UUID(),
@@ -26,23 +26,12 @@ public final class DrawingTool: ObservableObject {
         self.brushDiameter = brushDiameter
         self.eraserDiameter = eraserDiameter
     }
-}
-
-extension DrawingTool {
 
     func setId(_ id: UUID) {
         self.id = id
     }
 
-    func setDrawingTool(_ type: DrawingToolType) {
-        self.type = type
-    }
-
-    func setBrushDiameter(_ diameter: Int) {
-        self.brushDiameter = diameter
-    }
-
-    func setEraserDiameter(_ diameter: Int) {
-        self.eraserDiameter = diameter
+    func swapTool(_ type: DrawingToolType) {
+        self.type = type == .brush ? .eraser: .brush
     }
 }

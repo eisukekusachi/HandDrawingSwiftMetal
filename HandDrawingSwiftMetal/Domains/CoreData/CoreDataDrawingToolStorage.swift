@@ -48,9 +48,9 @@ final class CoreDataDrawingToolStorage {
 extension CoreDataDrawingToolStorage {
 
     func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
-        drawingTool.setDrawingTool(type)
-        drawingTool.setBrushDiameter(brushDiameter)
-        drawingTool.setEraserDiameter(eraserDiameter)
+        drawingTool.type = type
+        drawingTool.brushDiameter = brushDiameter
+        drawingTool.eraserDiameter = eraserDiameter
     }
 
     func update(_ entity: DrawingToolEntity) {
