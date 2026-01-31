@@ -8,6 +8,7 @@
 import CanvasView
 import UIKit
 
+@MainActor
 protocol DrawingToolProtocol {
 
     var id: UUID { get }

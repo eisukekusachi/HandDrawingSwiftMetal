@@ -9,6 +9,7 @@ import Combine
 import CoreData
 import UIKit
 
+@MainActor
 protocol EraserPaletteProtocol {
 
     var id: UUID { get }

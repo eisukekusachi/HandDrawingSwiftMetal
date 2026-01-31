@@ -121,14 +121,15 @@ extension CoreDataDrawingToolStorage {
 
 private extension CoreDataDrawingToolStorage {
     func save(_ target: DrawingTool) async {
-        guard let context = self.storage.context else { return }
+        guard
+            let context = self.storage.context,
+            let request = self.storage.fetchRequest()
+        else { return }
 
         let brushDiameter: Int = target.brushDiameter
         let eraserDiameter: Int = target.eraserDiameter
         let type: Int = target.type.rawValue
         let id: UUID = target.id
-
-        let request = self.storage.fetchRequest()
 
         await context.perform { [context] in
             do {

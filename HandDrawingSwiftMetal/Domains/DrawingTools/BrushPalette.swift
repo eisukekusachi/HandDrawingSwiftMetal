@@ -8,6 +8,7 @@
 import Combine
 import UIKit
 
+@MainActor
 protocol BrushPaletteProtocol {
 
     var id: UUID { get }

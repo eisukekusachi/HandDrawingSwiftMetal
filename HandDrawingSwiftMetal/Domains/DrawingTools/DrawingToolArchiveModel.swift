@@ -15,6 +15,7 @@ struct DrawingToolArchiveModel: Codable, Sendable {
 }
 
 extension DrawingToolArchiveModel {
+    @MainActor
     init(_ drawingTool: DrawingTool) {
         type = drawingTool.type.rawValue
         brushDiameter = drawingTool.brushDiameter

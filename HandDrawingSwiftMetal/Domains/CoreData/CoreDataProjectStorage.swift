@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/01/23.
 //
 
+import CanvasView
 import Combine
 import UIKit
 
@@ -133,7 +134,12 @@ private extension CoreDataProjectStorage {
     }
 
     func save(_ target: ProjectData) async {
-        guard let storage, let context = storage.context else { return }
+        guard
+            let storage,
+            let context = storage.context,
+            let request = storage.fetchRequest()
+        else { return }
+
         guard hasEntityInModel(named: entityNameInModel, context: context) else {
             return
         }
@@ -141,8 +147,6 @@ private extension CoreDataProjectStorage {
         let projectName = target.projectName
         let createdAt = target.createdAt
         let updatedAt = target.updatedAt
-
-        let request = storage.fetchRequest()
 
         await context.perform { [context] in
             do {
