@@ -191,9 +191,6 @@ extension CanvasViewModel {
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
-        // Reset undo when the update of CanvasViewModel completes
-        //textureLayers.resetUndo()
-
         refreshCanvasAfterComposition()
     }
 }
