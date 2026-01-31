@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/08/25.
 //
 
-import CanvasView
 import Foundation
 
 struct EraserPaletteArchiveModel: Codable, Sendable {
@@ -14,6 +13,7 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
 }
 
 extension EraserPaletteArchiveModel {
+    @MainActor
     init(_ palette: EraserPalette) {
         self.index = palette.index
         self.alphas = palette.alphas

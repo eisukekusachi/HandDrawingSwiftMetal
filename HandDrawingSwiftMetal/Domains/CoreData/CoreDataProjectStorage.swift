@@ -5,26 +5,23 @@
 //  Created by Eisuke Kusachi on 2026/01/23.
 //
 
+import CanvasView
 import Combine
 import UIKit
 
 @preconcurrency import CoreData
 
-@MainActor final class CoreDataProjectStorage: ObservableObject {
+@MainActor
+final class CoreDataProjectStorage {
 
-    var projectName: String { project.projectName }
-    var createdAt: Date { project.createdAt }
-    var updatedAt: Date { project.updatedAt }
+    private let project: ProjectData
 
-    private var project = ProjectData()
-    private let storage: AnyCoreDataStorage<ProjectEntity>?
+    private let storage: CoreDataStorage<ProjectEntity>
     private var cancellables = Set<AnyCancellable>()
 
-    private let entityNameInModel = "ProjectEntity"
-
-    init(storage: AnyCoreDataStorage<ProjectEntity>?) {
-        self.storage = storage
-        self.updateAll(newProjectName: Calendar.currentDate)
+    init(project: ProjectData, context: NSManagedObjectContext) {
+        self.project = project
+        self.storage = .init(context: context)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -46,44 +43,14 @@ import UIKit
 extension CoreDataProjectStorage {
 
     func fetch() throws -> ProjectEntity? {
-        guard
-            let storage,
-            let context = storage.context,
-            // Skip fetch to avoid a crash if an entity was removed from the model
-            hasEntityInModel(named: entityNameInModel, context: context)
-        else { return nil }
-        return try storage.fetch()
-    }
-
-    func update(
-        projectName: String? = nil,
-        createdAt: Date? = nil,
-        updatedAt: Date? = nil
-    ) {
-        if let projectName {
-            project.projectName = projectName
-        }
-        if let createdAt {
-            project.createdAt = createdAt
-        }
-        if let updatedAt {
-            project.updatedAt = updatedAt
-        }
-    }
-
-    func update(_ model: ProjectData) {
-        update(
-            projectName: model.projectName,
-            createdAt: model.createdAt,
-            updatedAt: model.updatedAt
-        )
+        try storage.fetch()
     }
 
     func update(_ entity: ProjectEntity) {
         if let projectName = entity.projectName,
            let createdAt = entity.createdAt,
            let updatedAt = entity.updatedAt {
-            update(
+            project.update(
                 projectName: projectName,
                 createdAt: createdAt,
                 updatedAt: updatedAt
@@ -108,52 +75,39 @@ extension CoreDataProjectStorage {
             throw nsError
         }
 
-        update(
+        project.update(
             projectName: result.projectName,
             createdAt: result.createdAt,
             updatedAt: result.updatedAt
         )
     }
-
-    func updateAll(newProjectName: String) {
-        project.updateAll(newProjectName: newProjectName)
-    }
-
-    func updateUpdatedAt() {
-        project.updateUpdatedAt()
-    }
 }
 
 private extension CoreDataProjectStorage {
-
-    func hasEntityInModel(named name: String, context: NSManagedObjectContext) -> Bool {
-        guard !name.isEmpty else { return false }
-        guard let model = context.persistentStoreCoordinator?.managedObjectModel else { return false }
-        return model.entitiesByName[name] != nil
-    }
-
     func save(_ target: ProjectData) async {
-        guard let storage, let context = storage.context else { return }
-        guard hasEntityInModel(named: entityNameInModel, context: context) else {
-            return
-        }
+        guard
+            let context = storage.context,
+            let request = storage.fetchRequest()
+        else { return }
 
         let projectName = target.projectName
         let createdAt = target.createdAt
         let updatedAt = target.updatedAt
-
-        let request = storage.fetchRequest()
 
         await context.perform { [context] in
             do {
                 // Fetch or create root
                 let entity = try context.fetch(request).first ?? ProjectEntity(context: context)
 
+                let currentProjectName = entity.projectName
+                let currentCreatedAt = entity.createdAt
+                let currentUpdatedAt = entity.updatedAt
+
                 // Return if no changes
                 guard
-                    entity.projectName != projectName ||
-                    entity.createdAt != createdAt ||
-                    entity.updatedAt != updatedAt
+                    currentProjectName != projectName ||
+                    currentCreatedAt != createdAt ||
+                    currentUpdatedAt != updatedAt
                 else { return }
 
                 // Update entities only if values have actually changed

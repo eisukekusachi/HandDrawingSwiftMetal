@@ -23,6 +23,22 @@ public final class ProjectData {
         self.updatedAt = updatedAt
     }
 
+    func update(
+        projectName: String? = nil,
+        createdAt: Date? = nil,
+        updatedAt: Date? = nil
+    ) {
+        if let projectName {
+            self.projectName = projectName
+        }
+        if let createdAt {
+            self.createdAt = createdAt
+        }
+        if let updatedAt {
+            self.updatedAt = updatedAt
+        }
+    }
+
     public func updateAll(newProjectName: String) {
         self.projectName = newProjectName
         self.createdAt = Date()

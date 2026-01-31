@@ -34,16 +34,16 @@ class HandDrawingViewController: UIViewController {
 
     public var zipFileURL: URL {
         FileManager.documentsFileURL(
-            projectName: viewModel.projectStorage.projectName,
+            projectName: viewModel.project.projectName,
             suffix: viewModel.fileSuffix
         )
     }
 
     var currentLocalFileItem: LocalFileItem {
         .init(
-            title: viewModel.projectStorage.projectName,
-            createdAt: viewModel.projectStorage.createdAt,
-            updatedAt: viewModel.projectStorage.updatedAt,
+            title: viewModel.project.projectName,
+            createdAt: viewModel.project.createdAt,
+            updatedAt: viewModel.project.updatedAt,
             image: contentView.canvasView.thumbnail(),
             fileURL: URL.documents.appendingPathComponent(
                 viewModel.projectFileName()
@@ -84,7 +84,7 @@ class HandDrawingViewController: UIViewController {
                     ],
                     configuration: configuration
                 )
-                self.viewModel.setup(configuration: configuration)
+                try self.viewModel.setup(configuration: configuration)
 
                 // Set the undo limit
                 self.contentView.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
@@ -152,6 +152,8 @@ extension HandDrawingViewController {
         contentView.canvasView.setupCompletion
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
+                self?.contentView.canvasView.resetUndo()
+
                 self?.textureLayerViewPresenter.update(
                     textureLayers: result.textureLayers
                 )
@@ -163,7 +165,7 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 // Update the project's updatedAt value to the current time
-                self?.viewModel.projectStorage.update(
+                self?.viewModel.project.update(
                     updatedAt: Date()
                 )
             }
@@ -173,6 +175,12 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
                 self?.showAlert(error)
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.undoTextureLayers.didEmitUndoObjectPair
+            .sink { [weak self] undoObjectPair in
+                self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)
             }
             .store(in: &cancellables)
 
@@ -202,29 +210,29 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.brushPaletteStorage.palette.$index
+        viewModel.brushPalette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPaletteStorage.palette.colors.count else { return }
-                let newColor = viewModel.brushPaletteStorage.palette.colors[index]
+                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
+                let newColor = viewModel.brushPalette.colors[index]
                 self.brushDrawingRenderer.setColor(newColor)
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPaletteStorage.palette.$index
+        viewModel.eraserPalette.$index
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPaletteStorage.palette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPaletteStorage.palette.alphas[index]
+                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
+                let newAlpha = viewModel.eraserPalette.alphas[index]
                 self.eraserDrawingRenderer.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingToolStorage.drawingTool.$brushDiameter
+        viewModel.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
                 self?.brushDrawingRenderer.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
-        viewModel.drawingToolStorage.drawingTool.$eraserDiameter
+        viewModel.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
                 self?.eraserDrawingRenderer.setDiameter(diameter)
             }
@@ -253,7 +261,7 @@ extension HandDrawingViewController {
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
             viewModel.toggleDrawingTool()
-            contentView.updateDrawingComponents(viewModel.drawingToolStorage.type)
+            contentView.updateDrawingComponents(viewModel.drawingTool.type)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.canvasView.undo()
@@ -263,14 +271,10 @@ extension HandDrawingViewController {
         }
 
         contentView.dragBrushSlider = { [weak self] value in
-            self?.viewModel.drawingToolStorage.setBrushDiameter(
-                BrushDrawingRenderer.diameterIntValue(value)
-            )
+            self?.viewModel.drawingTool.brushDiameter = BrushDrawingRenderer.diameterIntValue(value)
         }
         contentView.dragEraserSlider = { [weak self] value in
-            self?.viewModel.drawingToolStorage.setEraserDiameter(
-                EraserDrawingRenderer.diameterIntValue(value)
-            )
+            self?.viewModel.drawingTool.eraserDiameter = EraserDrawingRenderer.diameterIntValue(value)
         }
     }
 
@@ -284,7 +288,7 @@ extension HandDrawingViewController {
 
         let brushPaletteHostingView = UIHostingController(
             rootView: BrushPaletteView(
-                palette: viewModel.brushPaletteStorage.palette,
+                palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
         )
@@ -305,7 +309,7 @@ extension HandDrawingViewController {
 
         let eraserPaletteHostingView = UIHostingController(
             rootView: EraserPaletteView(
-                palette: viewModel.eraserPaletteStorage.palette,
+                palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
         )
@@ -322,11 +326,11 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
-        brushDrawingRenderer.setDiameter(viewModel.drawingToolStorage.brushDiameter)
-        eraserDrawingRenderer.setDiameter(viewModel.drawingToolStorage.eraserDiameter)
-        contentView.updateDrawingComponents(viewModel.drawingToolStorage.drawingTool.type)
-        contentView.setBrushDiameterSlider(viewModel.drawingToolStorage.brushDiameter)
-        contentView.setEraserDiameterSlider(viewModel.drawingToolStorage.eraserDiameter)
+        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
+        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        contentView.updateDrawingComponents(viewModel.drawingTool.type)
+        contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
+        contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
     }
 }
 

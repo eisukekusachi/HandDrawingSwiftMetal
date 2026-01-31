@@ -13,9 +13,9 @@ import UIKit
 
 /// Alpha palette managed by Core Data
 @MainActor
-public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, ObservableObject {
+final class CoreDataEraserPaletteStorage {
 
-    @Published private(set) var palette: EraserPalette
+    private var palette: EraserPalette
 
     private let storage: CoreDataStorage<EraserPaletteEntity>
 
@@ -24,12 +24,6 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
     init(palette: EraserPalette, context: NSManagedObjectContext) {
         self.palette = palette
         self.storage = .init(context: context)
-
-        // Propagate changes from children to the parent
-        palette.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
@@ -43,44 +37,17 @@ public final class CoreDataEraserPaletteStorage: EraserPaletteProtocol, Observab
         }
         .store(in: &cancellables)
     }
-
-    var id: UUID {
-        palette.id
-    }
-
-    var alpha: Int? {
-        palette.alpha
-    }
-
-    func alpha(at index: Int) -> Int? {
-        palette.alpha(at: index)
-    }
-
-    func select(_ index: Int) {
-        palette.select(index)
-    }
-
-    func insert(_ alpha: Int, at index: Int) {
-        palette.insert(alpha, at: index)
-    }
-
-    func update(alphas: [Int], index: Int) {
-        palette.update(alphas: alphas, index: index)
-    }
-
-    func update(alpha: Int, at index: Int) {
-        palette.update(alpha: alpha, at: index)
-    }
-
-    func remove(at index: Int) {
-        palette.remove(at: index)
-    }
 }
 
 extension CoreDataEraserPaletteStorage {
+
+    func fetch() throws -> EraserPaletteEntity? {
+        try storage.fetch()
+    }
+
     func update(_ entity: EraserPaletteEntity) {
 
-        self.palette.setId(entity.id ?? UUID())
+        palette.setId(entity.id ?? UUID())
 
         // Load alphas from Core Data
         let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
@@ -88,7 +55,7 @@ extension CoreDataEraserPaletteStorage {
         } ?? []
         let index = max(0, min(Int(entity.index), alphas.count - 1))
 
-        self.palette.update(
+        palette.update(
             alphas: alphas,
             index: index
         )
@@ -110,26 +77,23 @@ extension CoreDataEraserPaletteStorage {
             Logger.error(nsError)
             throw nsError
         }
-        self.palette.update(
+        palette.update(
             alphas: result.alphas,
             index: result.index
         )
-    }
-
-    func fetch() throws -> EraserPaletteEntity? {
-        try storage.fetch()
     }
 }
 
 private extension CoreDataEraserPaletteStorage {
     func save(_ target: EraserPalette) async {
-        guard let context = self.storage.context else { return }
+        guard
+            let context = self.storage.context,
+            let request = self.storage.fetchRequest()
+        else { return }
 
-        let index  = target.index
-        let alphas  = target.alphas
-        let id: UUID = target.id
-
-        let request = self.storage.fetchRequest()
+        let id = target.id
+        let index = target.index
+        let alphas = target.alphas
 
         await context.perform { [context] in
             do {
@@ -137,11 +101,15 @@ private extension CoreDataEraserPaletteStorage {
 
                 let currentId = entity.id
                 let currentIndex = Int(entity.index)
-                let currentAlphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap { Int($0.alpha) } ?? []
+                let currentAlphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
+                    Int($0.alpha)
+                } ?? []
 
                 // Return if no changes
                 guard
-                    currentId != id || currentIndex != index || currentAlphas != alphas
+                    currentId != id ||
+                    currentIndex != index ||
+                    currentAlphas != alphas
                 else { return }
 
                 if currentId != id {

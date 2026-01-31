@@ -25,7 +25,7 @@ struct ProjectArchiveModel: Codable, Sendable {
 }
 
 extension ProjectArchiveModel {
-    @MainActor init(_ model: CoreDataProjectStorage) throws {
+    @MainActor init(_ model: ProjectData) throws {
         self.projectName = model.projectName
         self.createdAt = model.createdAt
         self.updatedAt = model.updatedAt

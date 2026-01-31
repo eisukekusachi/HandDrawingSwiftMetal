@@ -5,30 +5,9 @@
 //  Created by Eisuke Kusachi on 2025/08/23.
 //
 
-import Combine
-import CoreData
 import UIKit
 
-protocol EraserPaletteProtocol {
-
-    var id: UUID { get }
-
-    var alpha: Int? { get }
-
-    func alpha(at index: Int) -> Int?
-
-    func select(_ index: Int)
-
-    func insert(_ alpha: Int, at index: Int)
-
-    func update(alphas: [Int], index: Int)
-
-    func update(alpha: Int, at index: Int)
-
-    func remove(at index: Int)
-}
-
-public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
+public final class EraserPalette: ObservableObject {
 
     private(set) var id: UUID
 
@@ -37,8 +16,8 @@ public final class EraserPalette: EraserPaletteProtocol, ObservableObject {
 
     public init(
         id: UUID = UUID(),
-        alphas: [Int],
-        index: Int
+        alphas: [Int] = [255],
+        index: Int = 0
     ) {
         self.id = id
 
@@ -60,14 +39,6 @@ extension EraserPalette {
 
     func alpha(at index: Int) -> Int? {
         self.alphas.indices.contains(index) ? alphas[index] : nil
-    }
-
-    func update(
-        alphas: [Int] = [],
-        currentIndex: Int = 0
-    ) {
-        self.alphas = alphas
-        self.index = max(0, min(currentIndex, alphas.count - 1))
     }
 
     func select(_ index: Int) {

@@ -13,9 +13,9 @@ import UIKit
 
 /// DrawingTool managed by Core Data
 @MainActor
-final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
+final class CoreDataDrawingToolStorage {
 
-    @Published private(set) var drawingTool: DrawingTool
+    private let drawingTool: DrawingTool
 
     private let storage: CoreDataStorage<DrawingToolEntity>
 
@@ -28,12 +28,6 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
         self.drawingTool = drawingTool
         self.storage = .init(context: context)
 
-        // Propagate changes from children to the parent
-        drawingTool.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.objectWillChange.send() }
-            .store(in: &cancellables)
-
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
             drawingTool.$brushDiameter.map { _ in () }.eraseToAnyPublisher(),
@@ -41,56 +35,37 @@ final class CoreDataDrawingToolStorage: DrawingToolProtocol, ObservableObject {
             drawingTool.$type.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] in
-            guard let self else { return }
-            Task { await self.save(self.drawingTool) }
+        .sink {
+            Task { [weak self] in
+                guard let self else { return }
+                await self.save(self.drawingTool)
+            }
         }
         .store(in: &cancellables)
-    }
-
-    var id: UUID {
-        drawingTool.id
-    }
-
-    var type: DrawingToolType {
-        drawingTool.type
-    }
-
-    var brushDiameter: Int {
-        drawingTool.brushDiameter
-    }
-
-    var eraserDiameter: Int {
-        drawingTool.eraserDiameter
-    }
-
-    func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
-        drawingTool.setDrawingTool(type)
-        drawingTool.setBrushDiameter(brushDiameter)
-        drawingTool.setEraserDiameter(eraserDiameter)
-    }
-
-    func setDrawingTool(_ type: DrawingToolType) {
-        drawingTool.setDrawingTool(type)
-    }
-
-    func setBrushDiameter(_ diameter: Int) {
-        drawingTool.setBrushDiameter(diameter)
-    }
-
-    func setEraserDiameter(_ diameter: Int) {
-        drawingTool.setEraserDiameter(diameter)
     }
 }
 
 extension CoreDataDrawingToolStorage {
+
+    func fetch() throws -> DrawingToolEntity? {
+        try storage.fetch()
+    }
+
+    func update(type: DrawingToolType, brushDiameter: Int, eraserDiameter: Int) {
+        drawingTool.type = type
+        drawingTool.brushDiameter = brushDiameter
+        drawingTool.eraserDiameter = eraserDiameter
+    }
+
     func update(_ entity: DrawingToolEntity) {
 
         drawingTool.setId(entity.id ?? UUID())
 
-        setDrawingTool(.init(rawValue: Int(entity.type)))
-        setBrushDiameter(Int(entity.brushDiameter))
-        setEraserDiameter(Int(entity.eraserDiameter))
+        update(
+            type: .init(rawValue: Int(entity.type)),
+            brushDiameter: Int(entity.brushDiameter),
+            eraserDiameter: Int(entity.eraserDiameter)
+        )
     }
 
     func update(directoryURL: URL) throws {
@@ -109,39 +84,42 @@ extension CoreDataDrawingToolStorage {
             Logger.error(nsError)
             throw nsError
         }
-        self.drawingTool.setDrawingTool(.init(rawValue: result.type))
-        self.drawingTool.setBrushDiameter(result.brushDiameter)
-        self.drawingTool.setEraserDiameter(result.eraserDiameter)
-    }
 
-    func fetch() throws -> DrawingToolEntity? {
-        try storage.fetch()
+        update(
+            type: .init(rawValue: result.type),
+            brushDiameter: result.brushDiameter,
+            eraserDiameter: result.eraserDiameter
+        )
     }
 }
 
 private extension CoreDataDrawingToolStorage {
     func save(_ target: DrawingTool) async {
-        guard let context = self.storage.context else { return }
+        guard
+            let context = self.storage.context,
+            let request = self.storage.fetchRequest()
+        else { return }
 
+        let id: UUID = target.id
+        let type: Int = target.type.rawValue
         let brushDiameter: Int = target.brushDiameter
         let eraserDiameter: Int = target.eraserDiameter
-        let type: Int = target.type.rawValue
-        let id: UUID = target.id
-
-        let request = self.storage.fetchRequest()
 
         await context.perform { [context] in
             do {
                 let entity = try context.fetch(request).first ?? DrawingToolEntity(context: context)
 
                 let currentId = entity.id
+                let currentType = Int(entity.type)
                 let currentBrushDiameter = Int(entity.brushDiameter)
                 let currentEraserDiameter = Int(entity.eraserDiameter)
-                let currentType = Int(entity.type)
 
                 // Return if no changes
                 guard
-                    currentId != id || currentBrushDiameter != brushDiameter || currentEraserDiameter != eraserDiameter || currentType != type
+                    currentId != id ||
+                    currentType != type ||
+                    currentBrushDiameter != brushDiameter ||
+                    currentEraserDiameter != eraserDiameter
                 else { return }
 
                 if currentId != id {
