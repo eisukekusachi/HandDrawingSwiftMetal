@@ -45,11 +45,6 @@ public final class CanvasViewModel {
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
 
-    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
-    }
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
-
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
     var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
         setupCompletionSubject.eraseToAnyPublisher()
@@ -106,14 +101,12 @@ public final class CanvasViewModel {
     }
 
     func setup(
+        textureLayersState: TextureLayersState?,
         drawingRenderers: [DrawingRenderer] = [],
         configuration: CanvasConfiguration
     ) async throws {
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
-
-        // Set the undo count
-        self.textureLayers.setLevelsOfUndo(undoCount: configuration.undoCount)
 
         self.bindData()
 
@@ -128,7 +121,7 @@ public final class CanvasViewModel {
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
         try await setupCanvas(
-            textureLayersState: textureLayersStateFromCoreDataEntity,
+            textureLayersState: textureLayersState,
             configuration: configuration
         )
     }
@@ -198,21 +191,11 @@ extension CanvasViewModel {
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
-        // Reset undo when the update of CanvasViewModel completes
-        textureLayers.resetUndo()
-
         refreshCanvasAfterComposition()
     }
 }
 
 extension CanvasViewModel {
-    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
-    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        guard
-            let entity = try? (textureLayers.textureLayers as? CoreDataTextureLayers)?.fetch()
-        else { return nil }
-        return try? .init(entity: entity)
-    }
 
     private func bindData() {
         // The canvas is updated every frame during drawing
@@ -268,13 +251,6 @@ extension CanvasViewModel {
                     )
                     self.refreshCanvasAfterComposition()
                 }
-            }
-            .store(in: &cancellables)
-
-        textureLayers.didUndo
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.didUndoSubject.send(state)
             }
             .store(in: &cancellables)
 
@@ -654,13 +630,6 @@ public extension CanvasViewModel {
 
         drawingRenderer = drawingRenderers[drawingToolIndex]
         drawingRenderer?.prepareNextStroke()
-    }
-
-    func undo() {
-        textureLayers.undo()
-    }
-    func redo() {
-        textureLayers.redo()
     }
 
     func exportFiles(

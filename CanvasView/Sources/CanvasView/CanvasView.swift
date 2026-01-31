@@ -12,6 +12,12 @@ import UIKit
 
 open class CanvasView: UIView {
 
+    public let undoTextureLayers: UndoTextureLayers
+
+    public let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+
+    public var cancellables = Set<AnyCancellable>()
+
     public var isDrawing: AnyPublisher<Bool, Never> {
         viewModel.isDrawing
     }
@@ -31,11 +37,6 @@ open class CanvasView: UIView {
         alertSubject.eraseToAnyPublisher()
     }
     private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
-    }
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
     public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
@@ -68,6 +69,8 @@ open class CanvasView: UIView {
         )
     }
 
+    @Published var textureLayersStorage: CoreDataTextureLayersStorage
+
     public static let thumbnailName: String = "thumbnail.png"
 
     /// The single Metal device instance used throughout the app
@@ -81,11 +84,15 @@ open class CanvasView: UIView {
 
     private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+    private let textureLayersStorageController: PersistenceController
 
-    private let persistenceController: PersistenceController
-
-    private var cancellables = Set<AnyCancellable>()
+    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
+    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
+        guard
+            let entity = try? textureLayersStorage.fetch()
+        else { return nil }
+        return try? .init(entity: entity)
+    }
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -106,9 +113,17 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.persistenceController = .init(
+        self.textureLayersStorageController = .init(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
+        )
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
         )
         self.viewModel = .init(
             dependencies: .init(
@@ -117,18 +132,14 @@ open class CanvasView: UIView {
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 ),
-                textureLayers: .init(
-                    textureLayers: CoreDataTextureLayers(
-                        renderer: renderer,
-                        repository: textureLayersDocumentsRepository,
-                        context: persistenceController.viewContext
-                    ),
-                    renderer: renderer,
-                    inMemoryRepository: undoTextureInMemoryRepository
-                ),
+                textureLayers: undoTextureLayers,
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
+        )
+        self.textureLayersStorage = .init(
+            textureLayers: undoTextureLayers,
+            context: textureLayersStorageController.viewContext
         )
         super.init(frame: .zero)
     }
@@ -151,9 +162,17 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.persistenceController = .init(
+        self.textureLayersStorageController = .init(
             xcdatamodeldName: "CanvasStorage",
             location: .swiftPackageManager
+        )
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
         )
         self.viewModel = .init(
             dependencies: .init(
@@ -162,18 +181,14 @@ open class CanvasView: UIView {
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 ),
-                textureLayers: .init(
-                    textureLayers: CoreDataTextureLayers(
-                        renderer: renderer,
-                        repository: textureLayersDocumentsRepository,
-                        context: persistenceController.viewContext
-                    ),
-                    renderer: renderer,
-                    inMemoryRepository: undoTextureInMemoryRepository
-                ),
+                textureLayers: undoTextureLayers,
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
+        )
+        self.textureLayersStorage = .init(
+            textureLayers: undoTextureLayers,
+            context: textureLayersStorageController.viewContext
         )
         super.init(coder: coder)
     }
@@ -186,6 +201,7 @@ open class CanvasView: UIView {
         addEvents()
         bindData()
         try await viewModel.setup(
+            textureLayersState: textureLayersStateFromCoreDataEntity,
             drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
                 renderer: renderer,
                 drawingRenderers: drawingRenderers
@@ -240,12 +256,6 @@ open class CanvasView: UIView {
                 self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
-
-        viewModel.didUndo
-            .sink { [weak self] value in
-                self?.didUndoSubject.send(value)
-            }
-            .store(in: &cancellables)
     }
 
     public override func layoutSubviews() {
@@ -292,13 +302,6 @@ open class CanvasView: UIView {
 
     public func setDrawingTool(_ drawingToolType: Int) {
         viewModel.setDrawingTool(drawingToolType)
-    }
-
-    public func undo() {
-        viewModel.undo()
-    }
-    public func redo() {
-        viewModel.redo()
     }
 }
 

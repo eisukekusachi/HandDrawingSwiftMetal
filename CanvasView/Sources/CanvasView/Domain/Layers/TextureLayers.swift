@@ -10,7 +10,7 @@ import MetalKit
 import UIKit
 
 /// A class that manages texture layers
-public class TextureLayers: TextureLayersProtocol, ObservableObject {
+open class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Emits when a canvas update is requested
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -60,6 +60,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
 
+    public let renderer: MTLRendering?
+
     public var layers: [TextureLayerItem] {
         _layers
     }
@@ -71,8 +73,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public var textureSize: CGSize {
         _textureSize
     }
-
-    private var renderer: MTLRendering?
 
     /// Store and manage texture layer textures in the Documents folder for persistence
     private var documentsRepository: TextureLayersDocumentsRepositoryProtocol?
@@ -96,15 +96,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         self.documentsRepository = repository
     }
 
-    public func updateSkippingThumbnail(
-        textureLayersState: TextureLayersState
-    ) {
-        self._layers = textureLayersState.layers.map { .init(model: $0) }
-        self._selectedLayerId = textureLayersState.selectedLayerId
-        self._textureSize = textureLayersState.textureSize
-    }
-
-    public func addNewLayer(at index: Int) async throws {
+    open func addNewLayer(at index: Int) async throws {
         guard
             let renderer,
             let newTexture = MTLTextureCreator.makeTexture(
@@ -112,7 +104,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
                 height: Int(textureSize.height),
                 with: renderer.device
             )
-            else { return }
+        else { return }
 
         try await addLayer(
             layer: .init(
@@ -126,7 +118,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
+    open func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
             let renderer,
             let documentsRepository,
@@ -155,7 +147,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             )
     }
 
-    public func removeLayer(layerIndexToDelete index: Int) async throws {
+    open func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
             let documentsRepository,
             let selectedLayerId = selectedLayer?.id,
@@ -178,11 +170,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             .removeTexture(selectedLayerId)
     }
 
-    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        try await documentsRepository?.writeTextureToDisk(texture: texture, for: id)
-    }
-
-    public func moveLayer(indices: MoveLayerIndices) {
+    open func moveLayer(indices: MoveLayerIndices) {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
@@ -195,18 +183,106 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    public func selectLayer(_ id: LayerId) {
+    open func selectLayer(_ id: LayerId) {
         _selectedLayerId = id
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
+    open func beginAlphaChange() {
         // Do nothing
     }
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
+    open func endAlphaChange() {
         // Do nothing
+    }
+
+    open func updateTitle(_ id: LayerId, title: String) {
+        guard
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        let layer = _layers[index]
+
+        _layers[index] = .init(
+            id: layer.id,
+            title: title,
+            alpha: layer.alpha,
+            isVisible: layer.isVisible,
+            thumbnail: layer.thumbnail
+        )
+    }
+
+    open func updateVisibility(_ id: LayerId, isVisible: Bool) {
+        guard
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        let layer = _layers[index]
+
+        _layers[index] = .init(
+            id: layer.id,
+            title: layer.title,
+            alpha: layer.alpha,
+            isVisible: isVisible,
+            thumbnail: layer.thumbnail
+        )
+    }
+
+    open func updateAlpha(_ id: LayerId, alpha: Int) {
+        guard
+            let index = index(for: id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        let layer = _layers[index]
+
+        _layers[index] = .init(
+            id: layer.id,
+            title: layer.title,
+            alpha: alpha,
+            isVisible: layer.isVisible,
+            thumbnail: layer.thumbnail
+        )
+
+        _alpha = alpha
+    }
+
+    open func updateLayer(_ layer: TextureLayerItem) {
+        guard
+            let index = index(for: layer.id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            return
+        }
+
+        _layers[index] = layer
+    }
+}
+
+extension TextureLayers {
+    public func updateSkippingThumbnail(
+        textureLayersState: TextureLayersState
+    ) {
+        self._layers = textureLayersState.layers.map { .init(model: $0) }
+        self._selectedLayerId = textureLayersState.selectedLayerId
+        self._textureSize = textureLayersState.textureSize
+    }
+
+    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
+        try await documentsRepository?.writeTextureToDisk(texture: texture, for: id)
     }
 
     /// Copies a texture for the given `LayerId`
@@ -220,18 +296,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
-    }
-
-    public func updateLayer(_ layer: TextureLayerItem) {
-        guard
-            let index = index(for: layer.id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
-            return
-        }
-
-        _layers[index] = layer
     }
 
     public func updateThumbnail(_ id: LayerId) async throws {
@@ -257,68 +321,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
            isVisible: layer.isVisible,
            thumbnail: texture.makeThumbnail()
        )
-    }
-
-    public func updateTitle(_ id: LayerId, title: String) {
-        guard
-            let index = index(for: id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
-            return
-        }
-
-        let layer = _layers[index]
-
-        _layers[index] = .init(
-            id: layer.id,
-            title: title,
-            alpha: layer.alpha,
-            isVisible: layer.isVisible,
-            thumbnail: layer.thumbnail
-        )
-    }
-
-    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
-        guard
-            let index = index(for: id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
-            return
-        }
-
-        let layer = _layers[index]
-
-        _layers[index] = .init(
-            id: layer.id,
-            title: layer.title,
-            alpha: layer.alpha,
-            isVisible: isVisible,
-            thumbnail: layer.thumbnail
-        )
-    }
-
-    public func updateAlpha(_ id: LayerId, alpha: Int) {
-        guard
-            let index = index(for: id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
-            return
-        }
-
-        let layer = _layers[index]
-
-        _layers[index] = .init(
-            id: layer.id,
-            title: layer.title,
-            alpha: alpha,
-            isVisible: layer.isVisible,
-            thumbnail: layer.thumbnail
-        )
-
-        _alpha = alpha
     }
 
     /// Requests a partial canvas update

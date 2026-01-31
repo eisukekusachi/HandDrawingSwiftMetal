@@ -14,26 +14,26 @@ import UIKit
 public let saveDebounceMilliseconds: Int = 500
 
 /// Texture layers managed by Core Data
-@MainActor
-public final class CoreDataTextureLayers: TextureLayers {
+@MainActor public final class CoreDataTextureLayersStorage: ObservableObject {
+
+    private(set) var textureLayers: any TextureLayersProtocol
 
     private var storage: CoreDataStorage<TextureLayerArrayStorageEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        renderer: MTLRendering,
-        repository: TextureLayersDocumentsRepositoryProtocol? = nil,
+        textureLayers: any TextureLayersProtocol,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
-        super.init(renderer: renderer, repository: repository)
+        self.textureLayers = textureLayers
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
-            self.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
+            self.textureLayers.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
+            self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
@@ -49,21 +49,21 @@ public final class CoreDataTextureLayers: TextureLayers {
     }
 }
 
-private extension CoreDataTextureLayers {
+private extension CoreDataTextureLayersStorage {
     func save() async {
         guard
             let storage,
             let context = storage.context,
-            layers.count != 0,
-            textureSize != .zero,
-            let selectedLayerId = selectedLayer?.id
+            let request = storage.fetchRequest(),
+            textureLayers.layers.count != 0,
+            textureLayers.textureSize != .zero,
+            let selectedLayerId = textureLayers.selectedLayer?.id
         else { return }
 
-        let newTextureSize = self.textureSize
+        let newTextureSize = self.textureLayers.textureSize
         let newSelectedLayerId = selectedLayerId
-        let newLayers = layers.map { TextureLayerModel(item: $0) }
+        let newLayers = textureLayers.layers.map { TextureLayerModel(item: $0) }
 
-        let request = storage.fetchRequest()
         request.fetchLimit = 1
 
         await context.perform { [context] in

@@ -10,26 +10,24 @@ import UIKit
 
 /// A class that manages texture layers with undo functionality
 @MainActor
-public final class UndoTextureLayers: ObservableObject {
+public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
 
-    @Published private(set) var textureLayers: any TextureLayersProtocol
+    public var textureLayers: any TextureLayersProtocol
 
     /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
         inMemoryRepository != nil
     }
 
-    /// Emits `UndoRedoButtonState` when the undo stack changes
-    public var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
-        didUndoSubject.eraseToAnyPublisher()
+    /// Emits an `UndoRedoObjectPair` upon undo registration
+    public var didEmitUndoObjectPair: AnyPublisher<UndoRedoObjectPair, Never> {
+        didEmitUndoObjectPairSubject.eraseToAnyPublisher()
     }
-    private let didUndoSubject: PassthroughSubject<UndoRedoButtonState, Never> = .init()
-
-    private let undoManager = UndoManager()
+    private let didEmitUndoObjectPairSubject: PassthroughSubject<UndoRedoObjectPair, Never> = .init()
 
     /// A repository that stores textures for undo operations.
     /// The textures are stored and managed in memory to avoid blocking the main thread.
-    private(set) var inMemoryRepository: UndoTextureInMemoryRepository? = nil
+    private var inMemoryRepository: UndoTextureInMemoryRepository? = nil
 
     private var renderer: MTLRendering
 
@@ -49,14 +47,6 @@ public final class UndoTextureLayers: ObservableObject {
         self.textureLayers = textureLayers
         self.renderer = renderer
         self.inMemoryRepository = inMemoryRepository
-
-        // Set an initial value to prevent out-of-memory errors when no limit is applied
-        self.undoManager.levelsOfUndo = 8
-        self.undoManager.groupsByEvent = false
-    }
-
-    public func setLevelsOfUndo(undoCount: Int) {
-        self.undoManager.levelsOfUndo = undoCount
     }
 
     public func initializeUndoTextures(
@@ -69,33 +59,197 @@ public final class UndoTextureLayers: ObservableObject {
             with: renderer.device
         )
     }
-}
 
-public extension UndoTextureLayers {
+    public func addNewLayer(at index: Int) async throws {
+        guard
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: renderer.device
+            )
+            else { return }
 
-    func undo() {
-        undoManager.undo()
-        didUndoSubject.send(.init(undoManager))
+        try await addLayer(
+            layer: .init(
+                id: LayerId(),
+                title: TimeStampFormatter.currentDate,
+                alpha: 255,
+                isVisible: true
+            ),
+            newTexture: newTexture,
+            at: index
+        )
     }
-    func redo() {
-        undoManager.redo()
-        didUndoSubject.send(.init(undoManager))
-    }
-    func resetUndo() {
-        guard let inMemoryRepository else { return }
 
-        inMemoryRepository.removeAll()
-        undoManager.removeAllActions()
-        didUndoSubject.send(.init(undoManager))
-        cancellables = Set<AnyCancellable>()
+    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
+        guard
+            let undoNewTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: newTexture,
+                renderer: renderer
+            )
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+
+        try await textureLayers.addLayer(layer: layer, newTexture: newTexture, at: index)
+
+        await pushUndoAdditionObject(
+            newTexture: undoNewTexture,
+            undoRedoObject: .init(
+                // Create a deletion undo object to cancel the addition
+                undoObject: UndoDeletionObject(
+                    layerToBeDeleted: layer
+                ),
+                redoObject: UndoAdditionObject(
+                    layerToBeAdded: layer,
+                    at: index,
+                    renderer: renderer
+                )
+            )
+        )
     }
 
-    func setUndoDrawing(
+    public func removeLayer(layerIndexToDelete index: Int) async throws {
+        guard
+            let selectedLayer = textureLayers.selectedLayer,
+            let newTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)?.texture
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+
+        try await textureLayers.removeLayer(layerIndexToDelete: index)
+
+        try await pushUndoDeletionObject(
+            restorationNewTexture: newTexture,
+            undoRedoObject: .init(
+                // Create a addition undo object to cancel the deletion
+                undoObject: UndoAdditionObject(
+                    layerToBeAdded: .init(item: selectedLayer),
+                    at: index,
+                    renderer: renderer
+                ),
+                redoObject: UndoDeletionObject(
+                    layerToBeDeleted: .init(item: selectedLayer)
+                )
+            )
+        )
+    }
+
+    public func moveLayer(indices: MoveLayerIndices) {
+        guard
+            let selectedLayer = textureLayers.selectedLayer
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+
+        textureLayers.moveLayer(indices: indices)
+
+        let redoObject = UndoMoveObject(
+            indices: indices,
+            selectedLayerId: selectedLayer.id,
+            layer: .init(item: selectedLayer)
+        )
+        didEmitUndoObjectPairSubject.send(
+            .init(
+                undoObject: redoObject.reversedObject,
+                redoObject: redoObject
+            )
+        )
+    }
+
+    public func selectLayer(_ id: LayerId) {
+        guard let undoSelectdLayer = textureLayers.selectedLayer else { return }
+
+        textureLayers.selectLayer(id)
+
+        guard let redoSelectdLayer = textureLayers.selectedLayer else { return }
+
+        didEmitUndoObjectPairSubject.send(
+            .init(
+                undoObject: UndoSelectionObject(
+                    layer: .init(item: undoSelectdLayer)
+                ),
+                redoObject: UndoSelectionObject(
+                    layer: .init(item: redoSelectdLayer)
+                )
+            )
+        )
+    }
+
+    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
+    public func beginAlphaChange() {
+        guard let alpha = textureLayers.selectedLayer?.alpha else { return }
+        self.previousAlphaForUndo = alpha
+    }
+
+    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
+    public func endAlphaChange() {
+        guard
+            let selectedLayer = textureLayers.selectedLayer
+        else {
+            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            return
+        }
+        guard
+            let oldAlpha = self.previousAlphaForUndo,
+            oldAlpha != selectedLayer.alpha
+        else { return }
+
+        didEmitUndoObjectPairSubject.send(
+            .init(
+                undoObject: UndoAlphaChangedObject(
+                    layer: .init(item: selectedLayer),
+                    withNewAlpha: Int(oldAlpha)
+                ),
+                redoObject: UndoAlphaChangedObject(
+                    layer: .init(item: selectedLayer),
+                    withNewAlpha: selectedLayer.alpha
+                )
+            )
+        )
+
+        self.previousAlphaForUndo = nil
+    }
+
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
+        guard
+            let undoSelectdLayer = textureLayers.layer(id)
+        else { return }
+
+        textureLayers.updateVisibility(id, isVisible: isVisible)
+
+        didEmitUndoObjectPairSubject.send(
+            .init(
+                undoObject: UndoVisibilityObject(
+                    layer: .init(
+                        id: undoSelectdLayer.id,
+                        title: undoSelectdLayer.title,
+                        alpha: undoSelectdLayer.alpha,
+                        isVisible: !isVisible
+                    )
+                ),
+                redoObject: UndoVisibilityObject(
+                    layer: .init(
+                        id: undoSelectdLayer.id,
+                        title: undoSelectdLayer.title,
+                        alpha: undoSelectdLayer.alpha,
+                        isVisible: isVisible
+                    )
+                )
+            )
+        )
+    }
+
+    public func setUndoDrawing(
         texture: MTLTexture?
     ) async {
         await setDrawingUndoObject(texture: texture)
     }
-    func pushUndoDrawingObjectToUndoStack(
+
+    public func pushUndoDrawingObjectToUndoStack(
         texture: MTLTexture?
     ) async throws {
         try await pushUndoDrawingObject(texture: texture)
@@ -185,7 +339,7 @@ private extension UndoTextureLayers {
                     id: redoTextureId
                 )
 
-            pushUndoObject(
+            didEmitUndoObjectPairSubject.send(
                 .init(
                     undoObject: undoObject,
                     redoObject: redoObject
@@ -218,7 +372,7 @@ private extension UndoTextureLayers {
                     id: undoTextureId
                 )
 
-            pushUndoObject(undoRedoObject)
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
 
         } catch {
             // No action on error
@@ -246,296 +400,16 @@ private extension UndoTextureLayers {
                     id: undoTextureId
                 )
 
-            pushUndoObject(undoRedoObject)
+            didEmitUndoObjectPairSubject.send(undoRedoObject)
 
         } catch {
             // No action on error
             Logger.error(error)
         }
     }
-
-    func pushUndoObject(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        guard let inMemoryRepository else { return }
-
-        let undoObject = undoRedoObject.undoObject
-        let redoObject = undoRedoObject.redoObject
-
-        undoObject.deinitSubject
-            .sink(receiveValue: { result in
-                guard let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? inMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        redoObject.deinitSubject
-            .sink(receiveValue: { result in
-                guard let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? inMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        registerUndo(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
 }
 
-private extension UndoTextureLayers {
-
-    func registerUndo(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        undoManager.beginUndoGrouping()
-        undoManager.registerUndo(withTarget: self) { [weak self] _ in
-            self?.performUndo(undoRedoObject.undoObject)
-
-            // Redo Registration
-            self?.pushUndoObject(undoRedoObject.reversed())
-        }
-        undoManager.endUndoGrouping()
-        didUndoSubject.send(.init(undoManager))
-    }
-
-    func performUndo(
-        _ undoObject: UndoObject
-    ) {
-        guard let inMemoryRepository else { return }
-
-        Task {
-            do {
-                try await undoObject.applyUndo(
-                    layers: textureLayers,
-                    repository: inMemoryRepository
-                )
-
-            } catch {
-                Logger.error(error)
-            }
-        }
-    }
-}
-
-extension UndoTextureLayers: TextureLayersProtocol {
-
-    public func addNewLayer(at index: Int) async throws {
-        guard
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: renderer.device
-            )
-            else { return }
-
-        try await addLayer(
-            layer: .init(
-                id: LayerId(),
-                title: TimeStampFormatter.currentDate,
-                alpha: 255,
-                isVisible: true
-            ),
-            newTexture: newTexture,
-            at: index
-        )
-    }
-
-    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
-            return
-        }
-
-        let redoObject = UndoAdditionObject(
-            layerToBeAdded: layer,
-            at: index,
-            renderer: renderer
-        )
-
-        // Create a deletion undo object to cancel the addition
-        let undoObject = UndoDeletionObject(
-            layerToBeDeleted: layer,
-            selectedLayerIdAfterDeletion: selectedLayer.id
-        )
-
-        try await textureLayers.addLayer(layer: layer, newTexture: newTexture, at: index)
-
-        let undoNewTexture = try await MTLTextureCreator.duplicateTexture(
-            texture: newTexture,
-            renderer: renderer
-        )
-
-        await pushUndoAdditionObject(
-            newTexture: undoNewTexture,
-            undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-
-    public func removeLayer(layerIndexToDelete index: Int) async throws {
-        guard
-            let selectedLayer = textureLayers.selectedLayer,
-            let newTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)?.texture
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
-            return
-        }
-
-        let selectedLayerModel: TextureLayerModel = .init(item: selectedLayer)
-
-        // Add an undo object to the undo stack
-        let redoObject = UndoDeletionObject(
-            layerToBeDeleted: selectedLayerModel,
-            selectedLayerIdAfterDeletion: selectedLayer.id
-        )
-
-        // Create a addition undo object to cancel the deletion
-        let undoObject = UndoAdditionObject(
-            layerToBeAdded: selectedLayerModel,
-            at: index,
-            renderer: renderer
-        )
-
-        try await textureLayers.removeLayer(layerIndexToDelete: index)
-
-        try await pushUndoDeletionObject(
-            restorationNewTexture: newTexture,
-            undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-
-    public func moveLayer(indices: MoveLayerIndices) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
-            return
-        }
-
-        let redoObject = UndoMoveObject(
-            indices: indices,
-            selectedLayerId: selectedLayer.id,
-            layer: .init(item: selectedLayer)
-        )
-
-        let undoObject = redoObject.reversedObject
-
-        textureLayers.moveLayer(indices: indices)
-
-        pushUndoObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-
-    public func selectLayer(_ id: LayerId) {
-        guard let undoSelectdLayer = textureLayers.selectedLayer else { return }
-        let undoObject = UndoSelectionObject(
-            layer: .init(item: undoSelectdLayer)
-        )
-
-        textureLayers.selectLayer(id)
-
-        guard let redoSelectdLayer = textureLayers.selectedLayer else { return }
-        let redoObject = UndoSelectionObject(
-            layer: .init(item: redoSelectdLayer)
-        )
-
-        pushUndoObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
-
-    /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
-        guard let _ = inMemoryRepository else { return }
-
-        guard let alpha = textureLayers.selectedLayer?.alpha else { return }
-        self.previousAlphaForUndo = alpha
-    }
-
-    /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
-        guard
-            let _ = inMemoryRepository,
-            let selectedLayer = textureLayers.selectedLayer
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
-            return
-        }
-        guard
-            let oldAlpha = self.previousAlphaForUndo,
-            oldAlpha != selectedLayer.alpha
-        else { return }
-
-        let undoObject = UndoAlphaChangedObject(
-            layer: .init(item: selectedLayer),
-            withNewAlpha: Int(oldAlpha)
-        )
-        let redoObject = UndoAlphaChangedObject(
-            layer: .init(item: selectedLayer),
-            withNewAlpha: selectedLayer.alpha
-        )
-
-        pushUndoObject(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-
-        self.previousAlphaForUndo = nil
-    }
-
-    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
-        guard
-            let undoSelectdLayer = textureLayers.layer(id)
-        else { return }
-
-        textureLayers.updateVisibility(id, isVisible: isVisible)
-
-        pushUndoObject(
-            .init(
-                undoObject: UndoVisibilityObject(
-                    layer: .init(
-                        id: undoSelectdLayer.id,
-                        title: undoSelectdLayer.title,
-                        alpha: undoSelectdLayer.alpha,
-                        isVisible: undoSelectdLayer.isVisible
-                    )
-                ),
-                redoObject: UndoVisibilityObject(
-                    layer: .init(
-                        id: undoSelectdLayer.id,
-                        title: undoSelectdLayer.title,
-                        alpha: undoSelectdLayer.alpha,
-                        isVisible: isVisible
-                    )
-                )
-            )
-        )
-    }
+extension UndoTextureLayers {
 
     public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
         textureLayers.canvasUpdateRequestedPublisher

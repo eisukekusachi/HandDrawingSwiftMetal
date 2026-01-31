@@ -20,7 +20,7 @@ import UIKit
     public init(
         textureSize: CGSize? = nil,
         fileSuffix: String = "",
-        undoCount: Int = 24,
+        undoCount: Int = 12,
         environmentConfiguration: EnvironmentConfiguration = .init()
     ) {
         // The screen size is used when the value is nil

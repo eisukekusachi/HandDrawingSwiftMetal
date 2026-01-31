@@ -11,7 +11,7 @@ import Combine
 
 final class HandDrawingContentView: UIView {
 
-    @IBOutlet private(set) weak var canvasView: CanvasView!
+    @IBOutlet private(set) weak var canvasView: HandDrawingCanvasView!
 
     @IBOutlet private weak var resetTransformButton: UIButton!
     @IBOutlet private weak var saveButton: UIButton!
@@ -73,13 +73,6 @@ final class HandDrawingContentView: UIView {
         }
 
         backgroundColor = .white
-    }
-
-    func undo() {
-        canvasView.undo()
-    }
-    func redo() {
-        canvasView.redo()
     }
 
     func updateDrawingComponents(_ tool: DrawingToolType) {

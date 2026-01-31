@@ -11,6 +11,6 @@ struct MockCoreDataStorage<E: NSManagedObject>: CoreDataStorageProtocol {
     let context: NSManagedObjectContext?
     let value: E?
 
-    func fetchRequest() -> NSFetchRequest<E> { NSFetchRequest<E>() }
+    func fetchRequest() -> NSFetchRequest<Entity>? { NSFetchRequest<E>() }
     func fetch() throws -> E? { value }
 }
