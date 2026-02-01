@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class EraserPalette: ObservableObject {
+final class EraserPalette: ObservableObject {
 
     private(set) var id: UUID
 

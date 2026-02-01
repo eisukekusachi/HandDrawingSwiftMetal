@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25C56" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="TextureLayerArrayEntity" representedClassName="TextureLayerArrayEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="selectedLayerId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="textureHeight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="textureWidth" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="textureLayerItems" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="TextureLayerEntity" inverseName="textureLayerArray" inverseEntity="TextureLayerEntity"/>
+    </entity>
+    <entity name="TextureLayerEntity" representedClassName="TextureLayerEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="alpha" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isVisible" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="textureLayerArray" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TextureLayerArrayEntity" inverseName="textureLayerItems" inverseEntity="TextureLayerArrayEntity"/>
+    </entity>
+</model>

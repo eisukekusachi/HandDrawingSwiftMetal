@@ -30,7 +30,7 @@ final class CoreDataBrushPaletteStorage {
             palette.$index.map { _ in () }.eraseToAnyPublisher(),
             palette.$colors.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
             Task {

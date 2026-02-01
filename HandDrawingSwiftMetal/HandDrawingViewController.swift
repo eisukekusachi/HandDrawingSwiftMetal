@@ -55,6 +55,9 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
 
+        // TODO: Remove this after moving undoTextureLayers to HandDrawingSwiftMetal https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/183
+        viewModel.setupStorage(textureLayers: contentView.canvasView.undoTextureLayers)
+
         addEvents()
         bindData()
         layoutViews()
@@ -82,6 +85,7 @@ class HandDrawingViewController: UIViewController {
                         self.brushDrawingRenderer,
                         self.eraserDrawingRenderer
                     ],
+                    textureLayersState: viewModel.textureLayersStateFromCoreDataEntity,
                     configuration: configuration
                 )
                 try self.viewModel.setup(configuration: configuration)

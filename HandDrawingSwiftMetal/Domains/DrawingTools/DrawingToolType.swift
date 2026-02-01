@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum DrawingToolType: Int, Sendable {
+enum DrawingToolType: Int, Sendable {
     case brush = 0
     case eraser = 1
 

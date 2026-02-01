@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class BrushPalette: ObservableObject {
+final class BrushPalette: ObservableObject {
 
     private(set) var id: UUID
 
