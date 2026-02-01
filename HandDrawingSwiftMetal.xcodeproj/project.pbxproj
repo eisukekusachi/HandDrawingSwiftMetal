@@ -50,6 +50,7 @@
 		D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69392F246BA800B66608 /* LocalFileItem.swift */; };
 		D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */; };
 		D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */; };
+		D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
@@ -131,6 +132,7 @@
 		D49C69392F246BA800B66608 /* LocalFileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileItem.swift; sourceTree = "<group>"; };
 		D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectArchiveModel.swift; sourceTree = "<group>"; };
 		D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
+		D49C69472F2EE29C00B66608 /* TextureLayerStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TextureLayerStorage.xcdatamodel; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
@@ -311,6 +313,7 @@
 				D40CDF062B4128670059527E /* ColorAssets.xcassets */,
 				D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */,
 				D49C691D2F23A3F400B66608 /* ProjectStorage.xcdatamodeld */,
+				D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -632,6 +635,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
+				D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */,
 				D49C691F2F23A3F400B66608 /* ProjectStorage.xcdatamodeld in Sources */,
 				D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */,
 				D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */,
@@ -1049,6 +1053,16 @@
 			);
 			currentVersion = D49C691E2F23A3F400B66608 /* ProjectStorage.xcdatamodel */;
 			path = ProjectStorage.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+		D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				D49C69472F2EE29C00B66608 /* TextureLayerStorage.xcdatamodel */,
+			);
+			currentVersion = D49C69472F2EE29C00B66608 /* TextureLayerStorage.xcdatamodel */;
+			path = TextureLayerStorage.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
