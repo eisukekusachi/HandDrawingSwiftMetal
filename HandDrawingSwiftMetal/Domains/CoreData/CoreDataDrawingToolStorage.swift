@@ -34,7 +34,7 @@ final class CoreDataDrawingToolStorage {
             drawingTool.$eraserDiameter.map { _ in () }.eraseToAnyPublisher(),
             drawingTool.$type.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink {
             Task { [weak self] in
                 guard let self else { return }

@@ -1,11 +1,12 @@
 //
 //  CoreDataStorage.swift
-//  CanvasView
+//  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/09/15.
+//  Created by Eisuke Kusachi on 2026/02/01.
 //
 
 import CoreData
+import Foundation
 
 public protocol CoreDataStorageProtocol {
     associatedtype Entity: NSManagedObject

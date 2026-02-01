@@ -69,8 +69,6 @@ open class CanvasView: UIView {
         )
     }
 
-    @Published var textureLayersStorage: CoreDataTextureLayersStorage
-
     public static let thumbnailName: String = "thumbnail.png"
 
     /// The single Metal device instance used throughout the app
@@ -83,8 +81,6 @@ open class CanvasView: UIView {
     private let viewModel: CanvasViewModel
 
     private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
-
-    private let textureLayersStorageController: PersistenceController
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -105,10 +101,6 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.textureLayersStorageController = .init(
-            xcdatamodeldName: "CanvasStorage",
-            location: .swiftPackageManager
-        )
         self.undoTextureLayers = .init(
             textureLayers: TextureLayers(
                 renderer: renderer,
@@ -128,10 +120,6 @@ open class CanvasView: UIView {
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
-        )
-        self.textureLayersStorage = .init(
-            textureLayers: undoTextureLayers,
-            context: textureLayersStorageController.viewContext
         )
         super.init(frame: .zero)
     }
@@ -154,10 +142,6 @@ open class CanvasView: UIView {
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.textureLayersStorageController = .init(
-            xcdatamodeldName: "CanvasStorage",
-            location: .swiftPackageManager
-        )
         self.undoTextureLayers = .init(
             textureLayers: TextureLayers(
                 renderer: renderer,
@@ -177,10 +161,6 @@ open class CanvasView: UIView {
                 textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                 undoTextureInMemoryRepository: undoTextureInMemoryRepository
             )
-        )
-        self.textureLayersStorage = .init(
-            textureLayers: undoTextureLayers,
-            context: textureLayersStorageController.viewContext
         )
         super.init(coder: coder)
     }

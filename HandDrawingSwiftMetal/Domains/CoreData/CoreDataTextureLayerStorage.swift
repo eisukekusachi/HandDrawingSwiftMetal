@@ -33,7 +33,7 @@ import UIKit
             self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
             self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
         )
-        .debounce(for: .milliseconds(saveDebounceMilliseconds), scheduler: RunLoop.main)
+        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
             Task {
                 await self?.save()
