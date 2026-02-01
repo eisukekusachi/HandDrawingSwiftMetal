@@ -86,14 +86,6 @@ open class CanvasView: UIView {
 
     private let textureLayersStorageController: PersistenceController
 
-    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
-    private var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        guard
-            let entity = try? textureLayersStorage.fetch()
-        else { return nil }
-        return try? .init(entity: entity)
-    }
-
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
@@ -195,13 +187,14 @@ open class CanvasView: UIView {
 
     public func setup(
         drawingRenderers: [DrawingRenderer],
+        textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
     ) async throws {
         layoutViews()
         addEvents()
         bindData()
         try await viewModel.setup(
-            textureLayersState: textureLayersStateFromCoreDataEntity,
+            textureLayersState: textureLayersState,
             drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
                 renderer: renderer,
                 drawingRenderers: drawingRenderers

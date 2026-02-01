@@ -16,7 +16,7 @@ public let saveDebounceMilliseconds: Int = 500
 /// Texture layers managed by Core Data
 @MainActor public final class CoreDataTextureLayersStorage: ObservableObject {
 
-    private(set) var textureLayers: any TextureLayersProtocol
+    private var textureLayers: any TextureLayersProtocol
 
     private var storage: CoreDataStorage<TextureLayerArrayStorageEntity>?
 
