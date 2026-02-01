@@ -97,9 +97,12 @@ private extension CoreDataTextureLayerStorage {
                 var newTextureLayerItems: [TextureLayerEntity] = []
 
                 // Fetch or create root
-                let arrayEntity: TextureLayerArrayEntity = try context.fetch(request).first ?? TextureLayerArrayEntity(context: context)
+                let entity = try context.fetch(request).first ?? TextureLayerArrayEntity(context: context)
 
-                let textureLayerItems: [TextureLayerEntity] = arrayEntity.textureLayerItems?.compactMap { $0 as? TextureLayerEntity } ?? []
+                let textureLayerItems: [TextureLayerEntity] = entity.textureLayerItems?
+                    .compactMap {
+                        $0 as? TextureLayerEntity
+                    } ?? []
                 let textureLayerDictionary: Dictionary<UUID, TextureLayerEntity> = .init(
                     uniqueKeysWithValues: textureLayerItems.compactMap {
                         guard let id = $0.id else { return nil }
@@ -109,14 +112,14 @@ private extension CoreDataTextureLayerStorage {
 
                 for layer in layers {
                     // Reuse the existing entity if found, otherwise create a new one.
-                    let entity = textureLayerDictionary[layer.id] ?? TextureLayerEntity(context: context)
+                    let layerEntity = textureLayerDictionary[layer.id] ?? TextureLayerEntity(context: context)
 
-                    if entity.id != layer.id { entity.id = layer.id }
-                    if entity.title != layer.title { entity.title = layer.title }
-                    if entity.alpha != Int16(layer.alpha) { entity.alpha = Int16(layer.alpha) }
-                    if entity.isVisible != layer.isVisible { entity.isVisible = layer.isVisible }
+                    if layerEntity.id != layer.id { layerEntity.id = layer.id }
+                    if layerEntity.title != layer.title { layerEntity.title = layer.title }
+                    if layerEntity.alpha != Int16(layer.alpha) { layerEntity.alpha = Int16(layer.alpha) }
+                    if layerEntity.isVisible != layer.isVisible { layerEntity.isVisible = layer.isVisible }
 
-                    newTextureLayerItems.append(entity)
+                    newTextureLayerItems.append(layerEntity)
                 }
                 let newTextureLayerIds = newTextureLayerItems.compactMap({ $0.id })
 
@@ -130,19 +133,20 @@ private extension CoreDataTextureLayerStorage {
                         context.delete(entity)
                     }
 
-                // Update entities only if values have actually changed
+                if entity.textureWidth != Int16(textureSize.width) {
+                    entity.textureWidth = Int16(textureSize.width)
+                }
+                if entity.textureHeight != Int16(textureSize.height) {
+                    entity.textureHeight = Int16(textureSize.height)
+                }
+                if entity.selectedLayerId != selectedLayerId {
+                    entity.selectedLayerId = selectedLayerId
+                }
+                // Update the relationship to persist changes even when only the order has changed
                 if textureLayerItems.compactMap({ $0.id }) != newTextureLayerIds {
-                    arrayEntity.textureLayerItems = NSOrderedSet(array: newTextureLayerItems)
+                    entity.textureLayerItems = NSOrderedSet(array: newTextureLayerItems)
                 }
-                if arrayEntity.textureWidth != Int16(textureSize.width) {
-                    arrayEntity.textureWidth = Int16(textureSize.width)
-                }
-                if arrayEntity.textureHeight != Int16(textureSize.height) {
-                    arrayEntity.textureHeight = Int16(textureSize.height)
-                }
-                if arrayEntity.selectedLayerId != selectedLayerId {
-                    arrayEntity.selectedLayerId = selectedLayerId
-                }
+
                 if context.hasChanges {
                     try context.save()
                 }
