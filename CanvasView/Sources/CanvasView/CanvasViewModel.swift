@@ -61,7 +61,7 @@ public final class CanvasViewModel {
     private var canvasRenderer: CanvasRenderer
 
     /// Undoable texture layers
-    private let textureLayers: UndoTextureLayers
+    private var textureLayers: UndoTextureLayers?
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
@@ -97,14 +97,15 @@ public final class CanvasViewModel {
         dependencies: CanvasViewDependencies
     ) {
         self.canvasRenderer = dependencies.canvasRenderer
-        self.textureLayers = dependencies.textureLayers
     }
 
     func setup(
+        textureLayers: UndoTextureLayers,
         textureLayersState: TextureLayersState?,
         drawingRenderers: [DrawingRenderer] = [],
         configuration: CanvasConfiguration
     ) async throws {
+        self.textureLayers = textureLayers
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
 
@@ -164,6 +165,8 @@ extension CanvasViewModel {
         workingDirectoryURL: URL,
         textureLayersState: TextureLayersState
     ) async throws {
+        guard let textureLayers else { return }
+
         // Restore the repository using TextureLayersState
         try await canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromSavedData(
             url: workingDirectoryURL,
@@ -184,7 +187,7 @@ extension CanvasViewModel {
         // Update the thumbnails
         Task { [weak self] in
             for layer in result.textureLayers.layers {
-                try await self?.textureLayers.updateThumbnail(layer.id)
+                try await self?.textureLayers?.updateThumbnail(layer.id)
             }
         }
 
@@ -216,14 +219,14 @@ extension CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the canvas
-        textureLayers.canvasUpdateRequestedPublisher
+        textureLayers?.canvasUpdateRequestedPublisher
             .sink { [weak self] in
                 self?.refreshCanvasAfterComposition()
             }
             .store(in: &cancellables)
 
         // Update the canvas with the texture used for undoing drawing operations
-        textureLayers.canvasDrawingUpdateRequested
+        textureLayers?.canvasDrawingUpdateRequested
             .sink { [weak self] texture in
                 guard
                     let `self`,
@@ -239,11 +242,12 @@ extension CanvasViewModel {
             .store(in: &cancellables)
 
         // Update the entire canvas, including all drawing textures
-        textureLayers.fullCanvasUpdateRequestedPublisher
+        textureLayers?.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
                 guard
                     let `self`,
-                    let context = CanvasTextureLayersContext(textureLayers: self.textureLayers)
+                    let textureLayers = self.textureLayers,
+                    let context = CanvasTextureLayersContext(textureLayers: textureLayers)
                 else { return }
                 Task {
                     try await self.canvasRenderer.refreshTexturesFromRepository(
@@ -277,6 +281,8 @@ extension CanvasViewModel {
     private func setupDefaultCanvas(
         textureLayersState: TextureLayersState
     ) async throws {
+        guard let textureLayers else { return }
+
         // Initialize the repository using TextureLayersState
         try await canvasRenderer.textureLayersDocumentsRepository.initializeStorage(
             newTextureLayersState: textureLayersState
@@ -295,6 +301,8 @@ extension CanvasViewModel {
     private func setupCanvasFromCoreData(
         textureLayersState: TextureLayersState
     ) async throws {
+        guard let textureLayers else { return }
+
         // Restore the repository using TextureLayersState
         try canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
@@ -312,6 +320,8 @@ extension CanvasViewModel {
 
     /// Sets up `CanvasRenderer` with updated `textureLayers`
     private func setupCanvasRenderer(textureLayersState: TextureLayersState) async throws {
+        guard let textureLayers else { return }
+
         let textureSize = textureLayersState.textureSize
 
         // Update textureLayers using textureLayersState
@@ -377,6 +387,7 @@ extension CanvasViewModel {
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
             guard
+                let textureLayers,
                 let drawingRenderer,
                 let textureSize = canvasRenderer.textureSize,
                 let displayTextureSize = canvasRenderer.displayTextureSize
@@ -463,6 +474,7 @@ extension CanvasViewModel {
         view: UIView
     ) {
         guard
+            let textureLayers,
             let drawingRenderer,
             let textureSize = canvasRenderer.textureSize,
             let displayTextureSize = canvasRenderer.displayTextureSize
@@ -554,20 +566,23 @@ extension CanvasViewModel {
     /// Called when a stroke is completed
     private func onCompleteDrawing() {
         guard
+            let textureLayers,
             let layerId = textureLayers.selectedLayer?.id,
             let selectedLayerTexture = canvasRenderer.selectedLayerTexture
         else { return }
 
         drawingDebouncer.perform { [weak self] in
             Task(priority: .utility) { [weak self] in
-                guard let self else { return }
+                guard
+                    let self
+                else { return }
                 do {
                     try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
                         texture: selectedLayerTexture,
                         for: layerId
                     )
 
-                    self.textureLayers.updateThumbnail(
+                    self.textureLayers?.updateThumbnail(
                         layerId,
                         texture: selectedLayerTexture
                     )
@@ -637,6 +652,8 @@ public extension CanvasViewModel {
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
+        guard let textureLayers else { return }
+
         do {
             // Save the thumbnail image into the working directory
             try thumbnail(length: thumbnailLength)?.pngData()?.write(
@@ -805,7 +822,7 @@ extension CanvasViewModel {
     private func refreshCanvasAfterComposition(
         useRealtimeDrawingTexture: Bool = false
     ) {
-        guard let selectedLayer = textureLayers.selectedLayer else { return }
+        guard let selectedLayer = textureLayers?.selectedLayer else { return }
 
         canvasRenderer.refreshCanvasAfterComposition(
             useRealtimeDrawingTexture: useRealtimeDrawingTexture,

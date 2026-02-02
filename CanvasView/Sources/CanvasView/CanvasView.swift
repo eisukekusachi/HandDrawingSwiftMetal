@@ -174,6 +174,7 @@ open class CanvasView: UIView {
         addEvents()
         bindData()
         try await viewModel.setup(
+            textureLayers: undoTextureLayers,
             textureLayersState: textureLayersState,
             drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
                 renderer: renderer,
