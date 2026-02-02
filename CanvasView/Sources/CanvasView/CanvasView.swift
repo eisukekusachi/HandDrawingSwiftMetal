@@ -115,10 +115,7 @@ open class CanvasView: UIView {
                     renderer: renderer,
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
-                ),
-                textureLayers: undoTextureLayers,
-                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
+                )
             )
         )
         super.init(frame: .zero)
@@ -156,10 +153,7 @@ open class CanvasView: UIView {
                     renderer: renderer,
                     repository: textureLayersDocumentsRepository,
                     displayView: displayView
-                ),
-                textureLayers: undoTextureLayers,
-                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
+                )
             )
         )
         super.init(coder: coder)
