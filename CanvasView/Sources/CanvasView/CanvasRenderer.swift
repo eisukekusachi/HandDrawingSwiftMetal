@@ -26,9 +26,6 @@ import Combine
         displayView.displayTexture?.size
     }
 
-    /// Repository that manages textures stored in the documents folder
-    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
-
     /// Texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedLayerTexture` and `unselectedTopTexture`
     private(set) var canvasTexture: MTLTexture?
 
@@ -66,7 +63,6 @@ import Combine
 
     public init(
         renderer: MTLRendering,
-        repository: TextureLayersDocumentsRepositoryProtocol,
         displayView: CanvasDisplayable
     ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
@@ -76,7 +72,6 @@ import Combine
             fatalError("Metal is not supported on this device.")
         }
         self.renderer = renderer
-        self.textureLayersDocumentsRepository = repository
         self.displayView = displayView
         self.flippedTextureBuffers = buffer
     }
@@ -157,9 +152,11 @@ extension CanvasRenderer {
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func refreshTexturesFromRepository(
+        repository: TextureLayersDocumentsRepositoryProtocol?,
         context: CanvasTextureLayersContext
     ) async throws {
         guard
+            let repository,
             let unselectedBottomTexture,
             let selectedLayerTexture,
             let realtimeDrawingTexture,
@@ -193,7 +190,7 @@ extension CanvasRenderer {
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         // Get textures from the Documents directory
-        let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
+        let textures = try await repository.duplicatedTextures(
             context.layers.map { $0.id }
         )
 

@@ -89,6 +89,8 @@ public final class CanvasViewModel {
 
     private let transforming = Transforming()
 
+    private var textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+
     private var cancellables = Set<AnyCancellable>()
 
     public static let thumbnailLength: CGFloat = 500
@@ -101,11 +103,13 @@ public final class CanvasViewModel {
 
     func setup(
         textureLayers: UndoTextureLayers,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
         textureLayersState: TextureLayersState?,
         drawingRenderers: [DrawingRenderer] = [],
         configuration: CanvasConfiguration
     ) async throws {
         self.textureLayers = textureLayers
+        self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
 
@@ -168,7 +172,7 @@ extension CanvasViewModel {
         guard let textureLayers else { return }
 
         // Restore the repository using TextureLayersState
-        try await canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromSavedData(
+        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
             url: workingDirectoryURL,
             textureLayersState: textureLayersState
         )
@@ -251,6 +255,7 @@ extension CanvasViewModel {
                 else { return }
                 Task {
                     try await self.canvasRenderer.refreshTexturesFromRepository(
+                        repository: self.textureLayersDocumentsRepository,
                         context: context
                     )
                     self.refreshCanvasAfterComposition()
@@ -284,7 +289,7 @@ extension CanvasViewModel {
         guard let textureLayers else { return }
 
         // Initialize the repository using TextureLayersState
-        try await canvasRenderer.textureLayersDocumentsRepository.initializeStorage(
+        try await textureLayersDocumentsRepository?.initializeStorage(
             newTextureLayersState: textureLayersState
         )
 
@@ -304,7 +309,7 @@ extension CanvasViewModel {
         guard let textureLayers else { return }
 
         // Restore the repository using TextureLayersState
-        try canvasRenderer.textureLayersDocumentsRepository.restoreStorageFromCoreData(
+        try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
         )
 
@@ -345,6 +350,7 @@ extension CanvasViewModel {
             textureSize: textureSize
         )
         try await canvasRenderer.refreshTexturesFromRepository(
+            repository: textureLayersDocumentsRepository,
             context: context
         )
 
@@ -577,7 +583,7 @@ extension CanvasViewModel {
                     let self
                 else { return }
                 do {
-                    try await self.canvasRenderer.textureLayersDocumentsRepository.writeTextureToDisk(
+                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
                         texture: selectedLayerTexture,
                         for: layerId
                     )
@@ -652,7 +658,10 @@ public extension CanvasViewModel {
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
-        guard let textureLayers else { return }
+        guard
+            let textureLayers,
+            let textureLayersDocumentsRepository
+        else { return }
 
         do {
             // Save the thumbnail image into the working directory
@@ -670,7 +679,7 @@ public extension CanvasViewModel {
 
         do {
             // Copy all textures from the textureRepository
-            let textures = try await canvasRenderer.textureLayersDocumentsRepository.duplicatedTextures(
+            let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
                 textureLayers.layers.map { $0.id }
             )
 

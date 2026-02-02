@@ -113,7 +113,6 @@ open class CanvasView: UIView {
             dependencies: .init(
                 canvasRenderer: .init(
                     renderer: renderer,
-                    repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 )
             )
@@ -151,7 +150,6 @@ open class CanvasView: UIView {
             dependencies: .init(
                 canvasRenderer: .init(
                     renderer: renderer,
-                    repository: textureLayersDocumentsRepository,
                     displayView: displayView
                 )
             )
@@ -169,6 +167,7 @@ open class CanvasView: UIView {
         bindData()
         try await viewModel.setup(
             textureLayers: undoTextureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             textureLayersState: textureLayersState,
             drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
                 renderer: renderer,
