@@ -26,12 +26,6 @@ public final class CanvasViewModel {
     /// A temporary value is assigned to avoid making it optional.
     private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
 
-    /// Emits `true` while drawing is in progress
-    var isDrawing: AnyPublisher<Bool, Never> {
-        isDrawingSubject.eraseToAnyPublisher()
-    }
-    private let isDrawingSubject = PassthroughSubject<Bool, Never>()
-
     private var isFinishedDrawing: Bool {
         drawingTouchPhase == .ended
     }
@@ -50,6 +44,16 @@ public final class CanvasViewModel {
         setupCompletionSubject.eraseToAnyPublisher()
     }
     private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+
+    var fingerDrawingDidBegin: AnyPublisher<Void, Never> {
+        fingerDrawingDidBeginSubject.eraseToAnyPublisher()
+    }
+    private let fingerDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
+
+    var pencilDrawingDidBegin: AnyPublisher<Void, Never> {
+        pencilDrawingDidBeginSubject.eraseToAnyPublisher()
+    }
+    private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
 
     /// A publisher that emits `Void` when drawing completes
     var drawingCompletion: AnyPublisher<Void, Never> {
@@ -209,16 +213,6 @@ extension CanvasViewModel {
         drawingDisplayLink.update
             .sink { [weak self] in
                 self?.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
-        // Execute when the drawing is complete
-        drawingDebouncer.isProcessing
-            .sink { [weak self] isProcessing in
-                if !isProcessing {
-                    // Set isDrawingSubject to false when drawing is complete
-                    self?.isDrawingSubject.send(false)
-                }
             }
             .store(in: &cancellables)
 
@@ -393,7 +387,6 @@ extension CanvasViewModel {
         switch touchGesture.update(fingerStroke.touchHistories) {
         case .drawing:
             guard
-                let textureLayers,
                 let drawingRenderer,
                 let textureSize = canvasRenderer.textureSize,
                 let displayTextureSize = canvasRenderer.displayTextureSize
@@ -401,19 +394,12 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
+                fingerDrawingDidBeginSubject.send()
 
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
 
                 drawingRenderer.beginFingerStroke()
-
-                isDrawingSubject.send(true)
-
-                Task {
-                    await textureLayers.setUndoDrawing(
-                        texture: canvasRenderer.selectedLayerTexture
-                    )
-                }
             }
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
@@ -480,7 +466,6 @@ extension CanvasViewModel {
         view: UIView
     ) {
         guard
-            let textureLayers,
             let drawingRenderer,
             let textureSize = canvasRenderer.textureSize,
             let displayTextureSize = canvasRenderer.displayTextureSize
@@ -488,16 +473,9 @@ extension CanvasViewModel {
 
         // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
+            pencilDrawingDidBeginSubject.send()
 
             drawingRenderer.beginPencilStroke()
-
-            isDrawingSubject.send(true)
-
-            Task {
-                await textureLayers.setUndoDrawing(
-                    texture: canvasRenderer.selectedLayerTexture
-                )
-            }
         }
 
         pencilStroke.appendActualTouches(
@@ -552,10 +530,11 @@ extension CanvasViewModel {
 
             currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
+                    self?.drawingCompletionSubject.send()
+
                     // Reset parameters on drawing completion
                     self?.prepareNextStroke()
 
-                    self?.drawingCompletionSubject.send(())
                     self?.onCompleteDrawing()
                 }
             }
@@ -597,12 +576,6 @@ extension CanvasViewModel {
                     Logger.error(error)
                 }
             }
-        }
-
-        Task {
-            try await textureLayers.pushUndoDrawingObjectToUndoStack(
-                texture: selectedLayerTexture
-            )
         }
     }
 

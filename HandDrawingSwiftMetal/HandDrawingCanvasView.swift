@@ -16,12 +16,58 @@ import UIKit
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
+    public var textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+
+    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
+
+    public var undoTextureLayers: UndoTextureLayers?
+
     override init() {
         super.init()
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
+        )
     }
 
     @MainActor required init?(coder: NSCoder) {
         super.init(coder: coder)
+        do {
+            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage",
+                renderer: renderer
+            )
+        } catch {
+            fatalError("Failed to initialize the canvas")
+        }
+        self.undoTextureInMemoryRepository = .init(
+            renderer: renderer
+        )
+        self.undoTextureLayers = .init(
+            textureLayers: TextureLayers(
+                renderer: renderer,
+                repository: textureLayersDocumentsRepository
+            ),
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
+        )
     }
 
     override func didMoveToWindow() {
@@ -47,7 +93,7 @@ extension HandDrawingCanvasView {
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
+                try? self.undoTextureInMemoryRepository?.removeTexture(
                     undoTextureId
                 )
             })
@@ -57,19 +103,23 @@ extension HandDrawingCanvasView {
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
+                try? self.undoTextureInMemoryRepository?.removeTexture(
                     undoTextureId
                 )
             })
             .store(in: &cancellables)
 
         undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
-            guard let `self` else { return }
+            Task { [weak self] in
+                guard
+                    let `self`,
+                    let undoTextureLayers = self.undoTextureLayers,
+                    let undoTextureInMemoryRepository
+                else { return }
 
-            Task {
                 do {
                     try await undoRedoObject.undoObject.applyUndo(
-                        layers: self.undoTextureLayers.textureLayers,
+                        layers: undoTextureLayers.textureLayers,
                         repository: undoTextureInMemoryRepository
                     )
                 } catch {
@@ -78,7 +128,7 @@ extension HandDrawingCanvasView {
             }
 
             // Redo Registration
-            self.registerUndoObjectPair(undoRedoObject.reversed())
+            self?.registerUndoObjectPair(undoRedoObject.reversed())
         }
 
         didUndoSubject.send(
@@ -102,7 +152,7 @@ extension HandDrawingCanvasView {
     }
     func resetUndo() {
         guard let undoManager else { return }
-        undoTextureInMemoryRepository.removeAll()
+        undoTextureInMemoryRepository?.removeAll()
         undoManager.removeAllActions()
         didUndoSubject.send(
             .init(undoManager)

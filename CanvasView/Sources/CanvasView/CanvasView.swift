@@ -12,14 +12,15 @@ import UIKit
 
 open class CanvasView: UIView {
 
-    public let undoTextureLayers: UndoTextureLayers
+    /// The single Metal device instance used throughout the app
+    public let sharedDevice: MTLDevice
 
-    public let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+    public let renderer: MTLRendering
 
     public var cancellables = Set<AnyCancellable>()
 
-    public var isDrawing: AnyPublisher<Bool, Never> {
-        viewModel.isDrawing
+    public var selectedLayerTexture: MTLTexture? {
+        canvasRenderer.selectedLayerTexture
     }
 
     public var displayTexture: MTLTexture? {
@@ -43,6 +44,16 @@ open class CanvasView: UIView {
         setupCompletionSubject.eraseToAnyPublisher()
     }
     private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+
+    public var fingerDrawingDidBegin: AnyPublisher<Void, Never> {
+        fingerDrawingDidBeginSubject.eraseToAnyPublisher()
+    }
+    private let fingerDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
+
+    public var pencilDrawingDidBegin: AnyPublisher<Void, Never> {
+        pencilDrawingDidBeginSubject.eraseToAnyPublisher()
+    }
+    private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
 
     /// A publisher that emits `Void` when drawing completes
     public var drawingCompletion: AnyPublisher<Void, Never> {
@@ -71,16 +82,11 @@ open class CanvasView: UIView {
 
     public static let thumbnailName: String = "thumbnail.png"
 
-    /// The single Metal device instance used throughout the app
-    private let sharedDevice: MTLDevice
-
-    private let renderer: MTLRendering
-
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
 
-    private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    private let canvasRenderer: CanvasRenderer
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -89,32 +95,14 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
+
+        self.canvasRenderer = .init(
             renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            displayView: displayView
         )
         self.viewModel = .init(
             dependencies: .init(
-                canvasRenderer: .init(
-                    renderer: renderer,
-                    displayView: displayView
-                )
+                canvasRenderer: canvasRenderer
             )
         )
         super.init(frame: .zero)
@@ -126,38 +114,22 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
+
+        self.canvasRenderer = .init(
             renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            displayView: displayView
         )
         self.viewModel = .init(
             dependencies: .init(
-                canvasRenderer: .init(
-                    renderer: renderer,
-                    displayView: displayView
-                )
+                canvasRenderer: self.canvasRenderer
             )
         )
         super.init(coder: coder)
     }
 
     public func setup(
+        undoTextureLayers: UndoTextureLayers,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
         drawingRenderers: [DrawingRenderer],
         textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
@@ -208,6 +180,18 @@ open class CanvasView: UIView {
             .sink { [weak self] result in
                 self?.viewModel.completeSetup(result: result)
                 self?.setupCompletionSubject.send(result)
+            }
+            .store(in: &cancellables)
+
+        viewModel.fingerDrawingDidBegin
+            .sink { [weak self] in
+                self?.fingerDrawingDidBeginSubject.send(())
+            }
+            .store(in: &cancellables)
+
+        viewModel.pencilDrawingDidBegin
+            .sink { [weak self] in
+                self?.pencilDrawingDidBeginSubject.send(())
             }
             .store(in: &cancellables)
 

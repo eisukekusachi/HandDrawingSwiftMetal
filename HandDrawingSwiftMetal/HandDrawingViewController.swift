@@ -55,8 +55,10 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
 
+        guard let undoTextureLayers = contentView.canvasView.undoTextureLayers else { return }
+
         // TODO: Remove this after moving undoTextureLayers to HandDrawingSwiftMetal https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/183
-        viewModel.setupStorage(textureLayers: contentView.canvasView.undoTextureLayers)
+        viewModel.setupStorage(textureLayers: undoTextureLayers)
 
         addEvents()
         bindData()
@@ -71,7 +73,11 @@ class HandDrawingViewController: UIViewController {
         showActivityIndicator(true)
         showContentView(false)
         Task { [weak self] in
-            guard let `self` else { return }
+            guard
+                let `self`,
+                let undoTextureLayers = contentView.canvasView.undoTextureLayers,
+                let textureLayersDocumentsRepository = contentView.canvasView.textureLayersDocumentsRepository
+            else { return }
 
             defer {
                 self.showActivityIndicator(false)
@@ -81,6 +87,8 @@ class HandDrawingViewController: UIViewController {
                 let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
 
                 try await contentView.canvasView.setup(
+                    undoTextureLayers: undoTextureLayers,
+                    textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                     drawingRenderers: [
                         self.brushDrawingRenderer,
                         self.eraserDrawingRenderer
@@ -145,13 +153,6 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
-        contentView.canvasView.isDrawing
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isDrawing in
-                // Disable the components during the drawing
-                self?.enableComponentsInteraction(!isDrawing)
-            }
-            .store(in: &cancellables)
 
         contentView.canvasView.setupCompletion
             .receive(on: DispatchQueue.main)
@@ -165,11 +166,46 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        contentView.canvasView.fingerDrawingDidBegin
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                guard let `self` else { return }
+                self.enableComponentsInteraction(false)
+                Task {
+                    await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                        texture: self.contentView.canvasView.selectedLayerTexture
+                    )
+                }
+            }
+            .store(in: &cancellables)
+
+        contentView.canvasView.pencilDrawingDidBegin
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                guard let `self` else { return }
+                self.enableComponentsInteraction(false)
+                Task {
+                    await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                        texture: self.contentView.canvasView.selectedLayerTexture
+                    )
+                }
+            }
+            .store(in: &cancellables)
+
         contentView.canvasView.drawingCompletion
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
+                guard let `self` else { return }
+                Task {
+                    try await self.contentView.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
+                        texture: self.contentView.canvasView.selectedLayerTexture
+                    )
+                }
+
+                self.enableComponentsInteraction(true)
+
                 // Update the project's updatedAt value to the current time
-                self?.viewModel.project.update(
+                self.viewModel.project.update(
                     updatedAt: Date()
                 )
             }
@@ -182,7 +218,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.undoTextureLayers.didEmitUndoObjectPair
+        contentView.canvasView.undoTextureLayers?.didEmitUndoObjectPair
             .sink { [weak self] undoObjectPair in
                 self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)
             }
