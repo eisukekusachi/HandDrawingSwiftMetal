@@ -626,82 +626,6 @@ public extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
     }
 
-    func exportFiles(
-        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
-        device: MTLDevice,
-        to workingDirectoryURL: URL
-    ) async throws {
-        guard
-            let textureLayers,
-            let textureLayersDocumentsRepository
-        else { return }
-
-        do {
-            // Save the thumbnail image into the working directory
-            try thumbnail(length: thumbnailLength)?.pngData()?.write(
-                to: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to create the thumbnail", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Copy all textures from the textureRepository
-            let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
-                textureLayers.layers.map { $0.id }
-            )
-
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for texture in textures {
-                    group.addTask {
-                        try await texture.write(
-                            in: workingDirectoryURL,
-                            device: device
-                        )
-                    }
-                }
-                try await group.waitForAll()
-            }
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to create the textures", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Save the texture layers as JSON
-            try TextureLayersArchiveModel(
-                layers: textureLayers.layers.map { .init(item: $0) },
-                layerIndex: textureLayers.selectedIndex ?? 0,
-                textureSize: textureLayers.textureSize
-            ).write(
-                in: workingDirectoryURL
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to save the texture layers", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-    }
-
-    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
-        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
-        )
-    }
-
     /// Returns drawing renderers ready for drawing, creating a default renderer if needed
     static func resolveDrawingRenderers(
         renderer: MTLRendering,
@@ -720,6 +644,14 @@ public extension CanvasViewModel {
         }
         return resolvedDrawingRenderers
     }
+
+    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
+        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: length,
+            scale: 1.0
+        )
+    }
+
 }
 
 extension CanvasViewModel {

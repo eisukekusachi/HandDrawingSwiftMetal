@@ -23,6 +23,10 @@ open class CanvasView: UIView {
         canvasRenderer.selectedLayerTexture
     }
 
+    public var canvasTexture: MTLTexture? {
+        canvasRenderer.canvasTexture
+    }
+
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
@@ -233,17 +237,6 @@ open class CanvasView: UIView {
         try await viewModel.restoreCanvasFromDocumentsFolder(
             workingDirectoryURL: workingDirectoryURL,
             textureLayersState: textureLayerState
-        )
-    }
-
-    public func exportFiles(
-        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
-        to workingDirectoryURL: URL
-    ) async throws {
-        try await viewModel.exportFiles(
-            thumbnailLength: thumbnailLength,
-            device: sharedDevice,
-            to: workingDirectoryURL
         )
     }
 

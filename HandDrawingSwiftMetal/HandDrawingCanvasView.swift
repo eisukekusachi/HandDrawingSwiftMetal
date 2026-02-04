@@ -22,6 +22,8 @@ import UIKit
 
     public var undoTextureLayers: UndoTextureLayers?
 
+    private let viewModel = HandDrawingCanvasViewModel()
+
     override init() {
         super.init()
         do {
@@ -80,6 +82,19 @@ import UIKit
     private func setupInitialUndoManager() {
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         undoManager?.levelsOfUndo = 8
+    }
+}
+
+extension HandDrawingCanvasView {
+    func save(to workingDirectoryURL: URL) async throws {
+        try await viewModel.exportFiles(
+            canvasTexture: canvasTexture,
+            thumbnailLength: 500,
+            textureLayers: undoTextureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+            device: sharedDevice,
+            to: workingDirectoryURL
+        )
     }
 }
 
