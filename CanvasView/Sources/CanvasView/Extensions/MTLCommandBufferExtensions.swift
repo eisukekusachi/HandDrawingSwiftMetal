@@ -7,7 +7,8 @@
 
 @preconcurrency import MetalKit
 
-extension MTLCommandBuffer {
+@MainActor
+public extension MTLCommandBuffer {
     func commitAndWaitAsync() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             self.addCompletedHandler { @Sendable result in

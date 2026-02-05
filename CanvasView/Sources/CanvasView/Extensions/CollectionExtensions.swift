@@ -7,9 +7,9 @@
 
 import Foundation
 
-extension Collection where Index == Int {
+public extension Collection where Index == Int {
 
-    func safeSlice(lower: Int, upper: Int) -> SubSequence {
+    public func safeSlice(lower: Int, upper: Int) -> SubSequence {
         guard
             lower <= upper,
             indices.contains(lower),

@@ -21,12 +21,12 @@ public struct IdentifiedTexture: Hashable, @unchecked Sendable {
     }
 
     /// Converts a single IdentifiedTexture to a dictionary [UUID: MTLTexture]
-    static func dictionary(from item: IdentifiedTexture) -> [UUID: MTLTexture] {
+    public static func dictionary(from item: IdentifiedTexture) -> [UUID: MTLTexture] {
         [item.id: item.texture]
     }
 
     /// Converts a Set of IdentifiedTexture to a dictionary [UUID: MTLTexture]
-    static func dictionary(from set: Set<IdentifiedTexture>) -> [UUID: MTLTexture] {
+    public static func dictionary(from set: Set<IdentifiedTexture>) -> [UUID: MTLTexture] {
         Dictionary(
             uniqueKeysWithValues: set.compactMap { item in
                 return (item.id, item.texture)

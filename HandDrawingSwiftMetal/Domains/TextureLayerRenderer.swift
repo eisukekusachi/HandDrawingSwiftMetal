@@ -1,39 +1,19 @@
 //
-//  CanvasRenderer.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerRenderer.swift
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/04/06.
+//  Created by Eisuke Kusachi on 2026/02/05.
 //
 
-import Combine
+import CanvasView
+import UIKit
+
 @preconcurrency import MetalKit
 
-/// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
-@MainActor public final class CanvasRenderer: ObservableObject {
+@MainActor
+public class TextureLayerRenderer {
 
-    /// Command buffer for a single frame
-    public var currentFrameCommandBuffer: MTLCommandBuffer? {
-        displayView.currentFrameCommandBuffer
-    }
-
-    /// Size of the canvas texture
-    public var textureSize: CGSize? {
-        canvasTexture?.size
-    }
-
-    /// Size of the texture rendered on the screen
-    public var displayTextureSize: CGSize? {
-        displayView.displayTexture?.size
-    }
-
-    /// Texture that combines the background color and the textures of `unselectedBottomTexture`, `selectedLayerTexture` and `unselectedTopTexture`
-    private(set) var canvasTexture: MTLTexture?
-
-    /// Texture of the selected layer
-    private(set) var selectedLayerTexture: MTLTexture?
-
-    /// Texture used during drawing
-    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
+    public var backgroundColor: UIColor = .white
 
     /// Texture that combines the textures of all layers below the selected layer
     private var unselectedBottomTexture: MTLTexture?
@@ -41,29 +21,13 @@ import Combine
     /// Texture that combines the textures of all layers above the selected layer
     private var unselectedTopTexture: MTLTexture?
 
-    private var frameSize: CGSize = .zero
-
-    private var matrix: CGAffineTransform = .identity
-
     private let renderer: MTLRendering
 
     /// Buffers used to draw textures with vertical flipping
     private let flippedTextureBuffers: MTLTextureBuffers
 
-    /// Background color of the canvas
-    private var backgroundColor: UIColor = .white
-
-    /// Base background color of the canvas. this color that appears when the canvas is rotated or moved
-    private var baseBackgroundColor: UIColor = .lightGray
-
-    /// View for displaying content on the screen
-    private let displayView: CanvasDisplayable
-
-    private var cancellables = Set<AnyCancellable>()
-
     public init(
         renderer: MTLRendering,
-        displayView: CanvasDisplayable
     ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
@@ -72,20 +36,7 @@ import Combine
             fatalError("Metal is not supported on this device.")
         }
         self.renderer = renderer
-        self.displayView = displayView
         self.flippedTextureBuffers = buffer
-    }
-
-    public func setup(
-        backgroundColor: UIColor?,
-        baseBackgroundColor: UIColor?
-    ) {
-        if let backgroundColor {
-            self.backgroundColor = backgroundColor
-        }
-        if let baseBackgroundColor {
-            self.baseBackgroundColor = baseBackgroundColor
-        }
     }
 
     public func setupTextures(textureSize: CGSize) throws {
@@ -94,10 +45,9 @@ import Combine
             Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
+                title: String(localized: "Error"),
                 message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)",
-                    bundle: .module
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
                 )
             )
             Logger.error(error)
@@ -106,16 +56,12 @@ import Combine
 
         guard
             let unselectedBottomTexture = makeTexture(textureSize),
-            let selectedLayerTexture = makeTexture(textureSize),
-            let unselectedTopTexture = makeTexture(textureSize),
-            let canvasTexture = makeTexture(textureSize),
-            let realtimeDrawingTexture = makeTexture(textureSize)
+            let unselectedTopTexture = makeTexture(textureSize)
         else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
+                title: String(localized: "Error"),
                 message: String(
-                    localized: "Failed to create new texture",
-                    bundle: .module
+                    localized: "Failed to create new texture"
                 )
             )
             Logger.error(error)
@@ -123,30 +69,9 @@ import Combine
         }
         self.unselectedBottomTexture = unselectedBottomTexture
         self.unselectedBottomTexture?.label = "unselectedBottomTexture"
-        self.selectedLayerTexture = selectedLayerTexture
-        self.selectedLayerTexture?.label = "selectedLayerTexture"
         self.unselectedTopTexture = unselectedTopTexture
         self.unselectedTopTexture?.label = "unselectedTopTexture"
-        self.canvasTexture = canvasTexture
-        self.canvasTexture?.label = "canvasTexture"
-        self.realtimeDrawingTexture = realtimeDrawingTexture
-        self.realtimeDrawingTexture?.label = "realtimeDrawingTexture"
     }
-
-    public func setFrameSize(_ size: CGSize) {
-        self.frameSize = size
-    }
-
-    public func setMatrix(_ matrix: CGAffineTransform) {
-        self.matrix = matrix
-    }
-
-    public func resetCommandBuffer() {
-        displayView.resetCommandBuffer()
-    }
-}
-
-extension CanvasRenderer {
 
     /// Refreshes `selectedLayerTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
@@ -158,8 +83,6 @@ extension CanvasRenderer {
         guard
             let repository,
             let unselectedBottomTexture,
-            let selectedLayerTexture,
-            let realtimeDrawingTexture,
             let unselectedTopTexture,
             let newCommandBuffer = renderer.newCommandBuffer
         else {
@@ -185,8 +108,6 @@ extension CanvasRenderer {
         )
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
-        renderer.clearTexture(texture: selectedLayerTexture, with: newCommandBuffer)
-        renderer.clearTexture(texture: realtimeDrawingTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
         // Get textures from the Documents directory
@@ -204,22 +125,8 @@ extension CanvasRenderer {
 
         drawTextures(
             repositoryTextures: textures,
-            using: [opaqueLayer],
-            on: selectedLayerTexture,
-            with: newCommandBuffer
-        )
-
-        drawTextures(
-            repositoryTextures: textures,
             using: topLayers,
             on: unselectedTopTexture,
-            with: newCommandBuffer
-        )
-
-        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
-        renderer.copyTexture(
-            srcTexture: selectedLayerTexture,
-            dstTexture: realtimeDrawingTexture,
             with: newCommandBuffer
         )
 
@@ -229,7 +136,11 @@ extension CanvasRenderer {
     /// Refreshes the entire screen using textures
     public func refreshCanvasAfterComposition(
         useRealtimeDrawingTexture: Bool,
-        selectedLayer: TextureLayerModel
+        selectedLayer: TextureLayerModel,
+        selectedLayerTexture: MTLTexture?,
+        realtimeDrawingTexture: MTLTexture?,
+        canvasTexture: MTLTexture?,
+        commandBuffer: MTLCommandBuffer?
     ) {
         guard
             let canvasTexture,
@@ -237,19 +148,19 @@ extension CanvasRenderer {
             let selectedLayerTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
-            let currentFrameCommandBuffer
+            let commandBuffer
         else { return }
 
         renderer.fillColor(
             texture: canvasTexture,
             withRGB: backgroundColor.rgb,
-            with: currentFrameCommandBuffer
+            with: commandBuffer
         )
 
         renderer.mergeTexture(
             texture: unselectedBottomTexture,
             into: canvasTexture,
-            with: currentFrameCommandBuffer
+            with: commandBuffer
         )
 
         if selectedLayer.isVisible {
@@ -257,59 +168,16 @@ extension CanvasRenderer {
                 texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
-                with: currentFrameCommandBuffer
+                with: commandBuffer
             )
         }
 
         renderer.mergeTexture(
             texture: unselectedTopTexture,
             into: canvasTexture,
-            with: currentFrameCommandBuffer
-        )
-
-        drawCanvasToDisplay()
-    }
-
-    /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
-    public func drawCanvasToDisplay() {
-        guard
-            let displayTexture = displayView.displayTexture,
-            let currentFrameCommandBuffer
-        else { return }
-
-        renderer.drawTexture(
-            texture: canvasTexture,
-            matrix: matrix,
-            frameSize: frameSize,
-            backgroundColor: baseBackgroundColor,
-            on: displayTexture,
-            with: currentFrameCommandBuffer
-        )
-
-        displayView.setNeedsDisplay()
-    }
-
-    /// Draws the given texture onto `selectedLayerTexture`
-    func drawSelectedLayerTexture(
-        from texture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        guard
-            let texture,
-            let selectedLayerTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: selectedLayerTexture,
             with: commandBuffer
         )
     }
-}
-
-extension CanvasRenderer {
 
     private func bottomLayers(selectedIndex: Int, layers: [TextureLayerModel]) -> [TextureLayerModel] {
         layers.safeSlice(lower: 0, upper: selectedIndex - 1).filter { $0.isVisible }
@@ -338,7 +206,7 @@ extension CanvasRenderer {
                 )
             } else {
                 let message = "id: \(layer.id.uuidString)"
-                Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
+                Logger.error(String(format: String(localized: "Unable to find %@"), message))
             }
         }
     }
@@ -349,22 +217,5 @@ extension CanvasRenderer {
             height: Int(textureSize.height),
             with: renderer.device
         )
-    }
-}
-
-@MainActor public struct CanvasTextureLayersContext {
-
-    public let selectedLayer: TextureLayerModel
-    public let selectedIndex: Int
-    public let layers: [TextureLayerModel]
-
-    public init?(textureLayers: any TextureLayersProtocol) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer,
-            let selectedIndex = textureLayers.selectedIndex
-        else { return nil }
-        self.selectedLayer = .init(item: selectedLayer)
-        self.selectedIndex = selectedIndex
-        self.layers = textureLayers.layers.map { .init(item: $0) }
     }
 }
