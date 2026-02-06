@@ -30,7 +30,7 @@ import Combine
     private(set) var canvasTexture: MTLTexture?
 
     /// Texture of the selected layer
-    private(set) var selectedLayerTexture: MTLTexture?
+    private(set) var currentTexture: MTLTexture?
 
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
@@ -106,7 +106,7 @@ import Combine
 
         guard
             let unselectedBottomTexture = makeTexture(textureSize),
-            let selectedLayerTexture = makeTexture(textureSize),
+            let currentTexture = makeTexture(textureSize),
             let unselectedTopTexture = makeTexture(textureSize),
             let canvasTexture = makeTexture(textureSize),
             let realtimeDrawingTexture = makeTexture(textureSize)
@@ -123,8 +123,8 @@ import Combine
         }
         self.unselectedBottomTexture = unselectedBottomTexture
         self.unselectedBottomTexture?.label = "unselectedBottomTexture"
-        self.selectedLayerTexture = selectedLayerTexture
-        self.selectedLayerTexture?.label = "selectedLayerTexture"
+        self.currentTexture = currentTexture
+        self.currentTexture?.label = "currentTexture"
         self.unselectedTopTexture = unselectedTopTexture
         self.unselectedTopTexture?.label = "unselectedTopTexture"
         self.canvasTexture = canvasTexture
@@ -158,7 +158,7 @@ extension CanvasRenderer {
         guard
             let repository,
             let unselectedBottomTexture,
-            let selectedLayerTexture,
+            let currentTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -185,7 +185,7 @@ extension CanvasRenderer {
         )
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
-        renderer.clearTexture(texture: selectedLayerTexture, with: newCommandBuffer)
+        renderer.clearTexture(texture: currentTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: realtimeDrawingTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
 
@@ -205,7 +205,7 @@ extension CanvasRenderer {
         drawTextures(
             repositoryTextures: textures,
             using: [opaqueLayer],
-            on: selectedLayerTexture,
+            on: currentTexture,
             with: newCommandBuffer
         )
 
@@ -218,7 +218,7 @@ extension CanvasRenderer {
 
         // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
         renderer.copyTexture(
-            srcTexture: selectedLayerTexture,
+            srcTexture: currentTexture,
             dstTexture: realtimeDrawingTexture,
             with: newCommandBuffer
         )
@@ -234,7 +234,7 @@ extension CanvasRenderer {
         guard
             let canvasTexture,
             let unselectedBottomTexture,
-            let selectedLayerTexture,
+            let currentTexture,
             let realtimeDrawingTexture,
             let unselectedTopTexture,
             let currentFrameCommandBuffer
@@ -254,7 +254,7 @@ extension CanvasRenderer {
 
         if selectedLayer.isVisible {
             renderer.mergeTexture(
-                texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
+                texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : currentTexture,
                 alpha: selectedLayer.alpha,
                 into: canvasTexture,
                 with: currentFrameCommandBuffer
@@ -296,14 +296,14 @@ extension CanvasRenderer {
     ) {
         guard
             let texture,
-            let selectedLayerTexture
+            let currentTexture
         else { return }
 
         renderer.drawTexture(
             texture: texture,
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
-            on: selectedLayerTexture,
+            on: currentTexture,
             with: commandBuffer
         )
     }

@@ -19,8 +19,8 @@ open class CanvasView: UIView {
 
     public var cancellables = Set<AnyCancellable>()
 
-    public var selectedLayerTexture: MTLTexture? {
-        canvasRenderer.selectedLayerTexture
+    public var currentTexture: MTLTexture? {
+        canvasRenderer.currentTexture
     }
 
     public var canvasTexture: MTLTexture? {

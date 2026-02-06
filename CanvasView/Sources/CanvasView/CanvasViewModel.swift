@@ -510,13 +510,13 @@ extension CanvasViewModel {
     private func onDrawingDisplayLinkFrame() {
         guard
             let drawingRenderer,
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture,
+            let currentTexture = canvasRenderer.currentTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
             let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
-            baseTexture: selectedLayerTexture,
+            baseTexture: currentTexture,
             on: realtimeDrawingTexture,
             with: currentFrameCommandBuffer
         )
@@ -553,7 +553,7 @@ extension CanvasViewModel {
         guard
             let textureLayers,
             let layerId = textureLayers.selectedLayer?.id,
-            let selectedLayerTexture = canvasRenderer.selectedLayerTexture
+            let currentTexture = canvasRenderer.currentTexture
         else { return }
 
         drawingDebouncer.perform { [weak self] in
@@ -563,13 +563,13 @@ extension CanvasViewModel {
                 else { return }
                 do {
                     try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
-                        texture: selectedLayerTexture,
+                        texture: currentTexture,
                         for: layerId
                     )
 
                     self.textureLayers?.updateThumbnail(
                         layerId,
-                        texture: selectedLayerTexture
+                        texture: currentTexture
                     )
 
                 } catch {

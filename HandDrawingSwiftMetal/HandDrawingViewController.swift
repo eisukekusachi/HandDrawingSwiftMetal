@@ -173,7 +173,7 @@ extension HandDrawingViewController {
                 self.enableComponentsInteraction(false)
                 Task {
                     await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
-                        texture: self.contentView.canvasView.selectedLayerTexture
+                        texture: self.contentView.canvasView.currentTexture
                     )
                 }
             }
@@ -186,7 +186,7 @@ extension HandDrawingViewController {
                 self.enableComponentsInteraction(false)
                 Task {
                     await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
-                        texture: self.contentView.canvasView.selectedLayerTexture
+                        texture: self.contentView.canvasView.currentTexture
                     )
                 }
             }
@@ -198,7 +198,7 @@ extension HandDrawingViewController {
                 guard let `self` else { return }
                 Task {
                     try await self.contentView.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
-                        texture: self.contentView.canvasView.selectedLayerTexture
+                        texture: self.contentView.canvasView.currentTexture
                     )
                 }
 
