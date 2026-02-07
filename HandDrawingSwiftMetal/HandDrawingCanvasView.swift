@@ -26,6 +26,8 @@ import UIKit
 
     private let textureLayersStorageController: PersistenceController
 
+    private var textureLayersState: TextureLayersState?
+
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
@@ -108,6 +110,68 @@ import UIKit
         setupInitialUndoManager()
     }
 
+    func newCanvas() async throws {
+        guard let undoTextureLayers else { return }
+
+        let textureLayersState: TextureLayersState = .init(
+            textureSize: undoTextureLayers.textureSize
+        )
+
+        try await textureLayersDocumentsRepository?.initializeStorage(
+            newTextureLayersState: textureLayersState
+        )
+        undoTextureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayersState
+        )
+
+        try await super.newCanvas(
+            textureLayers: undoTextureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+        )
+    }
+
+    public func loadFiles(in workingDirectoryURL: URL) async throws {
+        guard let undoTextureLayers else { return }
+
+        // Load texture layer data from the JSON file
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
+
+        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
+            url: workingDirectoryURL,
+            textureLayersState: textureLayerState
+        )
+        undoTextureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayerState
+        )
+
+        try await super.restoreCanvas(
+            textureLayers: undoTextureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+        )
+    }
+
+    private func commonInit() {
+        if let entity = try? textureLayerStorage?.fetch(),
+           let state = textureLayerStorage?.convertData(entity: entity) {
+
+            textureLayersState = state
+
+            do {
+                try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
+                    textureLayersState: state
+                )
+                undoTextureLayers?.updateSkippingThumbnail(
+                    textureLayersState: state
+                )
+            } catch {
+                
+            }
+        }
+    }
+
     private func bindData() {
         drawingCompletion
             .sink { [weak self] result in
@@ -171,6 +235,57 @@ import UIKit
 }
 
 extension HandDrawingCanvasView {
+
+    func setup(
+        drawingRenderers: [DrawingRenderer],
+        configuration: CanvasConfiguration
+    ) async throws {
+        guard
+            let undoTextureLayers
+        else { return }
+
+        if let entity = try? textureLayerStorage?.fetch(),
+           let state = textureLayerStorage?.convertData(entity: entity) {
+
+            textureLayersState = state
+
+            try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
+                textureLayersState: state
+            )
+            undoTextureLayers.updateSkippingThumbnail(
+                textureLayersState: state
+            )
+        } else {
+            let textureLayersState: TextureLayersState = .init(textureSize: configuration.textureSize)
+
+            try await textureLayersDocumentsRepository?.initializeStorage(
+                newTextureLayersState: textureLayersState
+            )
+
+            undoTextureLayers.updateSkippingThumbnail(
+                textureLayersState: textureLayersState
+            )
+        }
+
+        try await setup(
+            undoTextureLayers: undoTextureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
+            drawingRenderers: drawingRenderers,
+            textureLayersState: textureLayersState,
+            configuration: configuration
+        )
+    }
+
+    func setupCompletion(textureSize: CGSize) {
+
+        // Initialize the textures used for Undo
+        if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
+            undoTextureLayers.initializeUndoTextures(
+                textureSize: textureSize
+            )
+        }
+    }
+
     func save(to workingDirectoryURL: URL) async throws {
         try await viewModel.exportFiles(
             canvasTexture: canvasTexture,

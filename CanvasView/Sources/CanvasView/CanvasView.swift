@@ -217,26 +217,24 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
-    public func newCanvas(
-        textureSize: CGSize
+    open func newCanvas(
+        textureLayers: UndoTextureLayers,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
-        try await viewModel.newCanvas(
-            textureSize: textureSize
+        try await viewModel.setupCanvas(
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
+        viewModel.resetTransforming()
     }
 
-    public func loadFiles(
-        in workingDirectoryURL: URL
+    public func restoreCanvas(
+        textureLayers: UndoTextureLayers,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
-
-        try await viewModel.restoreCanvasFromDocumentsFolder(
-            workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: textureLayerState
+        try await viewModel.setupCanvas(
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
     }
 

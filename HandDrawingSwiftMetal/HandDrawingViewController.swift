@@ -69,9 +69,7 @@ class HandDrawingViewController: UIViewController {
         showContentView(false)
         Task { [weak self] in
             guard
-                let `self`,
-                let undoTextureLayers = contentView.canvasView.undoTextureLayers,
-                let textureLayersDocumentsRepository = contentView.canvasView.textureLayersDocumentsRepository
+                let `self`
             else { return }
 
             defer {
@@ -82,13 +80,10 @@ class HandDrawingViewController: UIViewController {
                 let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
 
                 try await contentView.canvasView.setup(
-                    undoTextureLayers: undoTextureLayers,
-                    textureLayersDocumentsRepository: textureLayersDocumentsRepository,
                     drawingRenderers: [
                         self.brushDrawingRenderer,
                         self.eraserDrawingRenderer
                     ],
-                    textureLayersState: nil,
                     configuration: configuration
                 )
                 try self.viewModel.setup(configuration: configuration)
@@ -116,11 +111,8 @@ class HandDrawingViewController: UIViewController {
                 self.showActivityIndicator(true)
 
                 do {
-                    let textureSize = canvasView.currentTextureSize
+                    try await canvasView.newCanvas()
 
-                    try await canvasView.newCanvas(
-                        textureSize: textureSize
-                    )
                     self.viewModel.resetCoreData()
 
                     self.updateComponents()
@@ -157,6 +149,7 @@ extension HandDrawingViewController {
                     let textureLayers = self.contentView.canvasView.undoTextureLayers
                 else { return }
 
+                self.contentView.canvasView.setupCompletion(textureSize: result.textureSize)
                 self.contentView.canvasView.resetUndo()
 
                 // Update the thumbnails

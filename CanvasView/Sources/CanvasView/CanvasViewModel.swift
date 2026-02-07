@@ -78,6 +78,8 @@ public final class CanvasViewModel {
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
 
+    private let transforming = Transforming()
+
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
     private var drawingRenderers: [DrawingRenderer] = []
@@ -87,13 +89,6 @@ public final class CanvasViewModel {
 
     /// Display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
-
-    /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
-
-    private let transforming = Transforming()
-
-    private var textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -113,7 +108,6 @@ public final class CanvasViewModel {
         configuration: CanvasConfiguration
     ) async throws {
         self.textureLayers = textureLayers
-        self.textureLayersDocumentsRepository = textureLayersDocumentsRepository
         self.drawingRenderers = drawingRenderers
         self.drawingRenderer = self.drawingRenderers[0]
 
@@ -130,8 +124,8 @@ public final class CanvasViewModel {
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
         try await setupCanvas(
-            textureLayersState: textureLayersState,
-            configuration: configuration
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
     }
 }
@@ -139,51 +133,19 @@ public final class CanvasViewModel {
 extension CanvasViewModel {
 
     func setupCanvas(
-        textureLayersState: TextureLayersState?,
-        configuration: CanvasConfiguration
+        textureLayers: UndoTextureLayers?,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
-        // Restore the canvas using textureLayersState if it exists
-        if let textureLayersState {
-            do {
-                try await setupCanvasFromCoreData(
-                    textureLayersState: textureLayersState
-                )
-                return
-            } catch {
-                Logger.error(error)
-            }
-        }
+        guard let textureLayers else { return }
 
-        // Setup the canvas with the default settings
-        do {
-            try await setupDefaultCanvas(
-                textureLayersState: .init(textureSize: configuration.textureSize)
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to initialize the canvas", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-    }
-
-    func restoreCanvasFromDocumentsFolder(
-        workingDirectoryURL: URL,
-        textureLayersState: TextureLayersState
-    ) async throws {
-        // Restore the repository using TextureLayersState
-        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
-            url: workingDirectoryURL,
-            textureLayersState: textureLayersState
+        try await setupCanvasRenderer(
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
-
-        try await setupCanvasRenderer(textureLayersState: textureLayersState)
 
         setupCompletionSubject.send(
             .init(
-                textureSize: textureLayersState.textureSize
+                textureSize: textureLayers.textureSize
             )
         )
     }
@@ -255,52 +217,13 @@ extension CanvasViewModel {
         )
     }
 
-    private func setupDefaultCanvas(
-        textureLayersState: TextureLayersState
-    ) async throws {
-        // Initialize the repository using TextureLayersState
-        try await textureLayersDocumentsRepository?.initializeStorage(
-            newTextureLayersState: textureLayersState
-        )
-
-        try await setupCanvasRenderer(textureLayersState: textureLayersState)
-
-        setupCompletionSubject.send(
-            .init(
-                textureSize: textureLayersState.textureSize
-            )
-        )
-    }
-
-    private func setupCanvasFromCoreData(
-        textureLayersState: TextureLayersState
-    ) async throws {
-        // Restore the repository using TextureLayersState
-        try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-            textureLayersState: textureLayersState
-        )
-
-        try await setupCanvasRenderer(textureLayersState: textureLayersState)
-
-        setupCompletionSubject.send(
-            .init(
-                textureSize: textureLayersState.textureSize
-            )
-        )
-    }
-
     /// Sets up `CanvasRenderer` with updated `textureLayers`
-    private func setupCanvasRenderer(textureLayersState: TextureLayersState) async throws {
-        guard let textureLayers else { return }
-
-        let textureSize = textureLayersState.textureSize
-
-        // Update textureLayers using textureLayersState
-        textureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
-
+    private func setupCanvasRenderer(
+        textureLayers: UndoTextureLayers?,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+    ) async throws {
         guard
+            let textureLayers,
             let context = CanvasTextureLayersContext(textureLayers: textureLayers)
         else {
             let error = NSError(
@@ -310,6 +233,8 @@ extension CanvasViewModel {
             Logger.error(error)
             throw error
         }
+
+        let textureSize = textureLayers.textureSize
 
         // Update canvasRenderer using textureLayers
         try canvasRenderer.setupTextures(
@@ -323,13 +248,6 @@ extension CanvasViewModel {
         // Initialize the textures in DrawingRenderer
         for i in 0 ..< drawingRenderers.count {
             drawingRenderers[i].setupTextures(
-                textureSize: textureSize
-            )
-        }
-
-        // Initialize the textures used for Undo
-        if textureLayers.isUndoEnabled {
-            textureLayers.initializeUndoTextures(
                 textureSize: textureSize
             )
         }
@@ -547,10 +465,12 @@ public extension CanvasViewModel {
     }
 
     func newCanvas(
-        textureSize: CGSize
+        textureLayers: UndoTextureLayers,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
     ) async throws {
-        try await setupDefaultCanvas(
-            textureLayersState: TextureLayersState(textureSize: textureSize)
+        try await setupCanvas(
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
         )
         transforming.setMatrix(.identity)
     }
