@@ -207,14 +207,17 @@ extension CanvasViewModel {
         self.refreshCanvas()
     }
 
-    func updateCurrentTextureUsingRepository() {
+    func updateCurrentTextureUsingRepository(
+        textureLayers: UndoTextureLayers?,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+    ) {
         guard
-            let textureLayers = self.textureLayers,
+            let textureLayers,
             let context = CanvasTextureLayersContext(textureLayers: textureLayers)
         else { return }
         Task {
             try await self.canvasRenderer.refreshTexturesFromRepository(
-                repository: self.textureLayersDocumentsRepository,
+                repository: textureLayersDocumentsRepository,
                 context: context
             )
             self.refreshCanvas()

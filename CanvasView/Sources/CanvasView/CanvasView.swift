@@ -252,8 +252,14 @@ open class CanvasView: UIView {
         viewModel.updateCurrentTexture(texture)
     }
 
-    public func updateCurrentTextureUsingRepository() {
-        viewModel.updateCurrentTextureUsingRepository()
+    public func updateCurrentTextureUsingRepository(
+        textureLayers: UndoTextureLayers?,
+        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+    ) {
+        viewModel.updateCurrentTextureUsingRepository(
+            textureLayers: textureLayers,
+            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+        )
     }
 
     public func refreshCanvas() {

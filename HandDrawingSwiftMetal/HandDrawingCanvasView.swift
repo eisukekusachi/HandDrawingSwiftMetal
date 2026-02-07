@@ -133,7 +133,11 @@ import UIKit
         // Update the entire canvas, including all drawing textures
         undoTextureLayers?.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
-                self?.updateCurrentTextureUsingRepository()
+                guard let `self` else { return }
+                self.updateCurrentTextureUsingRepository(
+                    textureLayers: self.undoTextureLayers,
+                    textureLayersDocumentsRepository: self.textureLayersDocumentsRepository
+                )
             }
             .store(in: &cancellables)
     }
