@@ -59,11 +59,11 @@ open class CanvasView: UIView {
     }
     private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
 
-    /// A publisher that emits `Void` when drawing completes
-    public var drawingCompletion: AnyPublisher<Void, Never> {
+    /// A publisher that emits `MTLTexture?` when drawing completes
+    public var drawingCompletion: AnyPublisher<MTLTexture?, Never> {
         drawingCompletionSubject.eraseToAnyPublisher()
     }
-    private let drawingCompletionSubject = PassthroughSubject<Void, Never>()
+    private let drawingCompletionSubject = PassthroughSubject<MTLTexture?, Never>()
 
     public func thumbnail() -> UIImage? {
         viewModel.thumbnail()
@@ -200,8 +200,8 @@ open class CanvasView: UIView {
             .store(in: &cancellables)
 
         viewModel.drawingCompletion
-            .sink { [weak self] in
-                self?.drawingCompletionSubject.send(())
+            .sink { [weak self] result in
+                self?.drawingCompletionSubject.send(result)
             }
             .store(in: &cancellables)
 

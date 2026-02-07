@@ -22,6 +22,9 @@ import UIKit
 
     public var undoTextureLayers: UndoTextureLayers?
 
+    /// A debouncer used to prevent continuous input during drawing
+    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
+
     private let viewModel = HandDrawingCanvasViewModel()
 
     override init() {
@@ -84,6 +87,35 @@ import UIKit
     }
 
     private func bindData() {
+        drawingCompletion
+            .sink { [weak self] result in
+                self?.drawingDebouncer.perform {
+                    Task(priority: .utility) { [weak self] in
+                        guard
+                            let self,
+                            let result,
+                            let layerId = self.undoTextureLayers?.selectedLayer?.id
+                        else { return }
+
+                        do {
+                            try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
+                                texture: result,
+                                for: layerId
+                            )
+
+                            self.undoTextureLayers?.updateThumbnail(
+                                layerId,
+                                texture: result
+                            )
+
+                        } catch {
+                            Logger.error(error)
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         // Update the canvas
         undoTextureLayers?.canvasUpdateRequestedPublisher
             .sink { [weak self] in

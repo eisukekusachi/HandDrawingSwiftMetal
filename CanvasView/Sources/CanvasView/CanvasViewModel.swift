@@ -55,11 +55,11 @@ public final class CanvasViewModel {
     }
     private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
 
-    /// A publisher that emits `Void` when drawing completes
-    var drawingCompletion: AnyPublisher<Void, Never> {
+    /// A publisher that emits `MTLTexture?` when drawing completes
+    var drawingCompletion: AnyPublisher<MTLTexture?, Never> {
         drawingCompletionSubject.eraseToAnyPublisher()
     }
-    private let drawingCompletionSubject = PassthroughSubject<Void, Never>()
+    private let drawingCompletionSubject = PassthroughSubject<MTLTexture?, Never>()
 
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
@@ -499,12 +499,14 @@ extension CanvasViewModel {
 
             currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    self?.drawingCompletionSubject.send()
+                    guard let `self` else { return }
+
+                    self.drawingCompletionSubject.send(
+                        self.canvasRenderer.currentTexture
+                    )
 
                     // Reset parameters on drawing completion
-                    self?.prepareNextStroke()
-
-                    self?.onCompleteDrawing()
+                    self.prepareNextStroke()
                 }
             }
         } else if isCancelledDrawing {
@@ -515,37 +517,6 @@ extension CanvasViewModel {
         refreshCanvas(
             useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
-    }
-
-    /// Called when a stroke is completed
-    private func onCompleteDrawing() {
-        guard
-            let textureLayers,
-            let layerId = textureLayers.selectedLayer?.id,
-            let currentTexture = canvasRenderer.currentTexture
-        else { return }
-
-        drawingDebouncer.perform { [weak self] in
-            Task(priority: .utility) { [weak self] in
-                guard
-                    let self
-                else { return }
-                do {
-                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
-                        texture: currentTexture,
-                        for: layerId
-                    )
-
-                    self.textureLayers?.updateThumbnail(
-                        layerId,
-                        texture: currentTexture
-                    )
-
-                } catch {
-                    Logger.error(error)
-                }
-            }
-        }
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes
