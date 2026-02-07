@@ -22,12 +22,19 @@ import UIKit
 
     public var undoTextureLayers: UndoTextureLayers?
 
+    private var textureLayerStorage: CoreDataTextureLayerStorage?
+
+    private let textureLayersStorageController: PersistenceController
+
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
     private let viewModel = HandDrawingCanvasViewModel()
 
     override init() {
+        self.textureLayersStorageController = PersistenceController(
+            xcdatamodeldName: "TextureLayerStorage"
+        )
         super.init()
         do {
             self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
@@ -50,10 +57,19 @@ import UIKit
             inMemoryRepository: undoTextureInMemoryRepository
         )
 
+        guard let undoTextureLayers else { return }
+        self.textureLayerStorage = .init(
+            textureLayers: undoTextureLayers,
+            context: textureLayersStorageController.viewContext
+        )
+
         bindData()
     }
 
     @MainActor required init?(coder: NSCoder) {
+        self.textureLayersStorageController = PersistenceController(
+            xcdatamodeldName: "TextureLayerStorage"
+        )
         super.init(coder: coder)
         do {
             self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
@@ -74,6 +90,12 @@ import UIKit
             ),
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
+        )
+
+        guard let undoTextureLayers else { return }
+        self.textureLayerStorage = .init(
+            textureLayers: undoTextureLayers,
+            context: textureLayersStorageController.viewContext
         )
 
         bindData()

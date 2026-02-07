@@ -43,10 +43,6 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
-    var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        textureLayerStorage?.textureLayersStateFromCoreDataEntity
-    }
-
     let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
     let brushPalette: BrushPalette
@@ -56,11 +52,9 @@ final class HandDrawingViewModel: ObservableObject {
     private let drawingToolStorage: CoreDataDrawingToolStorage
     private let brushPaletteStorage: CoreDataBrushPaletteStorage
     private let eraserPaletteStorage: CoreDataEraserPaletteStorage
-    private var textureLayerStorage: CoreDataTextureLayerStorage?
 
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
-    private let textureLayersStorageController: PersistenceController
 
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
@@ -95,9 +89,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.drawingToolStorageController = PersistenceController(
             xcdatamodeldName: "DrawingToolStorage"
         )
-        self.textureLayersStorageController = PersistenceController(
-            xcdatamodeldName: "TextureLayerStorage"
-        )
         self.projectStorage = .init(
             project: project,
             context: projectStorageController.viewContext
@@ -113,13 +104,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.eraserPaletteStorage = .init(
             palette: eraserPalette,
             context: drawingToolStorageController.viewContext
-        )
-    }
-
-    func setupStorage(textureLayers: any TextureLayersProtocol) {
-        self.textureLayerStorage = .init(
-            textureLayers: textureLayers,
-            context: textureLayersStorageController.viewContext
         )
     }
 
