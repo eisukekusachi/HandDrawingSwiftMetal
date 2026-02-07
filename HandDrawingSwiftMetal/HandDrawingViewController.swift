@@ -157,12 +157,24 @@ extension HandDrawingViewController {
         contentView.canvasView.setupCompletion
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
-                self?.contentView.canvasView.resetUndo()
+                guard
+                    let `self`,
+                    let textureLayers = self.contentView.canvasView.undoTextureLayers
+                else { return }
 
-                self?.textureLayerViewPresenter.update(
-                    textureLayers: result.textureLayers
+                self.contentView.canvasView.resetUndo()
+
+                // Update the thumbnails
+                Task {
+                    for layer in textureLayers.textureLayers.layers {
+                        try await textureLayers.updateThumbnail(layer.id)
+                    }
+                }
+
+                self.textureLayerViewPresenter.update(
+                    textureLayers: textureLayers
                 )
-                self?.contentView.initialize()
+                self.contentView.initialize()
             }
             .store(in: &cancellables)
 

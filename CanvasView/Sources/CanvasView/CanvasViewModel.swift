@@ -173,8 +173,6 @@ extension CanvasViewModel {
         workingDirectoryURL: URL,
         textureLayersState: TextureLayersState
     ) async throws {
-        guard let textureLayers else { return }
-
         // Restore the repository using TextureLayersState
         try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
             url: workingDirectoryURL,
@@ -185,20 +183,12 @@ extension CanvasViewModel {
 
         setupCompletionSubject.send(
             .init(
-                textureSize: textureLayersState.textureSize,
-                textureLayers: textureLayers
+                textureSize: textureLayersState.textureSize
             )
         )
     }
 
     func completeSetup(result: CanvasConfigurationResult) {
-        // Update the thumbnails
-        Task { [weak self] in
-            for layer in result.textureLayers.layers {
-                try await self?.textureLayers?.updateThumbnail(layer.id)
-            }
-        }
-
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
@@ -265,8 +255,6 @@ extension CanvasViewModel {
     private func setupDefaultCanvas(
         textureLayersState: TextureLayersState
     ) async throws {
-        guard let textureLayers else { return }
-
         // Initialize the repository using TextureLayersState
         try await textureLayersDocumentsRepository?.initializeStorage(
             newTextureLayersState: textureLayersState
@@ -276,8 +264,7 @@ extension CanvasViewModel {
 
         setupCompletionSubject.send(
             .init(
-                textureSize: textureLayersState.textureSize,
-                textureLayers: textureLayers
+                textureSize: textureLayersState.textureSize
             )
         )
     }
@@ -285,8 +272,6 @@ extension CanvasViewModel {
     private func setupCanvasFromCoreData(
         textureLayersState: TextureLayersState
     ) async throws {
-        guard let textureLayers else { return }
-
         // Restore the repository using TextureLayersState
         try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
             textureLayersState: textureLayersState
@@ -296,8 +281,7 @@ extension CanvasViewModel {
 
         setupCompletionSubject.send(
             .init(
-                textureSize: textureLayersState.textureSize,
-                textureLayers: textureLayers
+                textureSize: textureLayersState.textureSize
             )
         )
     }

@@ -12,13 +12,9 @@ public struct CanvasConfigurationResult {
 
     public let textureSize: CGSize
 
-    public let textureLayers: any TextureLayersProtocol
-
     public init(
-        textureSize: CGSize,
-        textureLayers: any TextureLayersProtocol
+        textureSize: CGSize
     ) {
         self.textureSize = textureSize
-        self.textureLayers = textureLayers
     }
 }
