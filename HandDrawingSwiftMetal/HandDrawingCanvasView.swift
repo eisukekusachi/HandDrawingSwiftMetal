@@ -46,6 +46,8 @@ import UIKit
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
+
+        bindData()
     }
 
     @MainActor required init?(coder: NSCoder) {
@@ -70,6 +72,8 @@ import UIKit
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
+
+        bindData()
     }
 
     override func didMoveToWindow() {
@@ -77,6 +81,29 @@ import UIKit
         // Configure undoManager here because it may be nil
         // before the view is attached to a window, causing settings to be ignored.
         setupInitialUndoManager()
+    }
+
+    private func bindData() {
+        // Update the canvas
+        undoTextureLayers?.canvasUpdateRequestedPublisher
+            .sink { [weak self] in
+                self?.refreshCanvas()
+            }
+            .store(in: &cancellables)
+
+        // Update the canvas with the texture used for undoing drawing operations
+        undoTextureLayers?.canvasDrawingUpdateRequested
+            .sink { [weak self] texture in
+                self?.updateCurrentTexture(texture)
+            }
+            .store(in: &cancellables)
+
+        // Update the entire canvas, including all drawing textures
+        undoTextureLayers?.fullCanvasUpdateRequestedPublisher
+            .sink { [weak self] in
+                self?.updateCurrentTextureUsingRepository()
+            }
+            .store(in: &cancellables)
     }
 
     private func setupInitialUndoManager() {

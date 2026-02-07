@@ -247,6 +247,18 @@ open class CanvasView: UIView {
     public func setDrawingTool(_ drawingToolType: Int) {
         viewModel.setDrawingTool(drawingToolType)
     }
+
+    public func updateCurrentTexture(_ texture: MTLTexture?) {
+        viewModel.updateCurrentTexture(texture)
+    }
+
+    public func updateCurrentTextureUsingRepository() {
+        viewModel.updateCurrentTextureUsingRepository()
+    }
+
+    public func refreshCanvas() {
+        viewModel.refreshCanvas()
+    }
 }
 
 extension CanvasView: FingerInputGestureRecognizerSender {

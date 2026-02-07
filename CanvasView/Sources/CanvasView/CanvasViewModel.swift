@@ -202,7 +202,33 @@ extension CanvasViewModel {
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
-        refreshCanvasAfterComposition()
+        refreshCanvas()
+    }
+
+    func updateCurrentTexture(_ texture: MTLTexture?) {
+        guard
+            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
+        else { return }
+
+        self.canvasRenderer.drawSelectedLayerTexture(
+            from: texture,
+            with: currentFrameCommandBuffer
+        )
+        self.refreshCanvas()
+    }
+
+    func updateCurrentTextureUsingRepository() {
+        guard
+            let textureLayers = self.textureLayers,
+            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
+        else { return }
+        Task {
+            try await self.canvasRenderer.refreshTexturesFromRepository(
+                repository: self.textureLayersDocumentsRepository,
+                context: context
+            )
+            self.refreshCanvas()
+        }
     }
 }
 
@@ -213,47 +239,6 @@ extension CanvasViewModel {
         drawingDisplayLink.update
             .sink { [weak self] in
                 self?.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
-        // Update the canvas
-        textureLayers?.canvasUpdateRequestedPublisher
-            .sink { [weak self] in
-                self?.refreshCanvasAfterComposition()
-            }
-            .store(in: &cancellables)
-
-        // Update the canvas with the texture used for undoing drawing operations
-        textureLayers?.canvasDrawingUpdateRequested
-            .sink { [weak self] texture in
-                guard
-                    let `self`,
-                    let currentFrameCommandBuffer = self.canvasRenderer.currentFrameCommandBuffer
-                else { return }
-
-                self.canvasRenderer.drawSelectedLayerTexture(
-                    from: texture,
-                    with: currentFrameCommandBuffer
-                )
-                self.refreshCanvasAfterComposition()
-            }
-            .store(in: &cancellables)
-
-        // Update the entire canvas, including all drawing textures
-        textureLayers?.fullCanvasUpdateRequestedPublisher
-            .sink { [weak self] in
-                guard
-                    let `self`,
-                    let textureLayers = self.textureLayers,
-                    let context = CanvasTextureLayersContext(textureLayers: textureLayers)
-                else { return }
-                Task {
-                    try await self.canvasRenderer.refreshTexturesFromRepository(
-                        repository: self.textureLayersDocumentsRepository,
-                        context: context
-                    )
-                    self.refreshCanvasAfterComposition()
-                }
             }
             .store(in: &cancellables)
 
@@ -543,7 +528,7 @@ extension CanvasViewModel {
             prepareNextStroke()
         }
 
-        refreshCanvasAfterComposition(
+        refreshCanvas(
             useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
         )
     }
@@ -581,7 +566,7 @@ extension CanvasViewModel {
 
     /// Called when the display texture size changes, such as when the device orientation changes
     func onUpdateDisplayTexture() {
-        refreshCanvasAfterComposition()
+        refreshCanvas()
     }
 }
 
@@ -652,6 +637,16 @@ public extension CanvasViewModel {
         )
     }
 
+    func refreshCanvas(
+        useRealtimeDrawingTexture: Bool = false
+    ) {
+        guard let selectedLayer = textureLayers?.selectedLayer else { return }
+
+        canvasRenderer.refreshCanvas(
+            useRealtimeDrawingTexture: useRealtimeDrawingTexture,
+            selectedLayer: .init(item: selectedLayer)
+        )
+    }
 }
 
 extension CanvasViewModel {
@@ -731,16 +726,5 @@ extension CanvasViewModel {
         }
 
         canvasRenderer.drawCanvasToDisplay()
-    }
-
-    private func refreshCanvasAfterComposition(
-        useRealtimeDrawingTexture: Bool = false
-    ) {
-        guard let selectedLayer = textureLayers?.selectedLayer else { return }
-
-        canvasRenderer.refreshCanvasAfterComposition(
-            useRealtimeDrawingTexture: useRealtimeDrawingTexture,
-            selectedLayer: .init(item: selectedLayer)
-        )
     }
 }

@@ -227,7 +227,7 @@ extension CanvasRenderer {
     }
 
     /// Refreshes the entire screen using textures
-    public func refreshCanvasAfterComposition(
+    public func refreshCanvas(
         useRealtimeDrawingTexture: Bool,
         selectedLayer: TextureLayerModel
     ) {
