@@ -124,10 +124,8 @@ import UIKit
             textureLayersState: textureLayersState
         )
 
-        try await super.newCanvas(
-            textureLayers: undoTextureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
+        super.resetTransforming()
+        try await super.updateCanvas(undoTextureLayers.textureSize)
     }
 
     public func loadFiles(in workingDirectoryURL: URL) async throws {
@@ -147,10 +145,7 @@ import UIKit
             textureLayersState: textureLayerState
         )
 
-        try await super.restoreCanvas(
-            textureLayers: undoTextureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
+        try await super.updateCanvas(textureLayerState.textureSize)
     }
 
     private func commonInit() {
@@ -173,6 +168,14 @@ import UIKit
     }
 
     private func bindData() {
+
+        setupCompletion
+            .sink { [weak self] result in
+                guard let `self` else { return }
+                self.currentTexture = makeTexture(result.textureSize)
+            }
+            .store(in: &cancellables)
+
         drawingCompletion
             .sink { [weak self] result in
                 self?.drawingDebouncer.perform {
@@ -220,10 +223,7 @@ import UIKit
         undoTextureLayers?.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.updateCurrentTextureUsingRepository(
-                    textureLayers: self.undoTextureLayers,
-                    textureLayersDocumentsRepository: self.textureLayersDocumentsRepository
-                )
+                self.updateCurrentTextureUsingRepository()
             }
             .store(in: &cancellables)
     }
@@ -231,6 +231,14 @@ import UIKit
     private func setupInitialUndoManager() {
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         undoManager?.levelsOfUndo = 8
+    }
+
+    private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
+        MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: renderer.device
+        )
     }
 }
 
@@ -255,25 +263,27 @@ extension HandDrawingCanvasView {
             undoTextureLayers.updateSkippingThumbnail(
                 textureLayersState: state
             )
+
+            try await setup(
+                textureLayersState: state,
+                configuration: configuration
+            )
         } else {
-            let textureLayersState: TextureLayersState = .init(textureSize: configuration.textureSize)
+            let state: TextureLayersState = .init(textureSize: configuration.textureSize)
 
             try await textureLayersDocumentsRepository?.initializeStorage(
-                newTextureLayersState: textureLayersState
+                newTextureLayersState: state
             )
 
             undoTextureLayers.updateSkippingThumbnail(
-                textureLayersState: textureLayersState
+                textureLayersState: state
+            )
+
+            try await setup(
+                textureLayersState: state,
+                configuration: configuration
             )
         }
-
-        try await setup(
-            undoTextureLayers: undoTextureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-            drawingRenderers: drawingRenderers,
-            textureLayersState: textureLayersState,
-            configuration: configuration
-        )
     }
 
     func setupCompletion(textureSize: CGSize) {

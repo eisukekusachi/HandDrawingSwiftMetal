@@ -20,7 +20,9 @@ open class CanvasView: UIView {
     public var cancellables = Set<AnyCancellable>()
 
     public var currentTexture: MTLTexture? {
-        canvasRenderer.currentTexture
+        didSet {
+            viewModel.currentTexture = currentTexture
+        }
     }
 
     public var canvasTexture: MTLTexture? {
@@ -120,22 +122,13 @@ open class CanvasView: UIView {
     }
 
     public func setup(
-        undoTextureLayers: UndoTextureLayers,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
-        drawingRenderers: [DrawingRenderer],
-        textureLayersState: TextureLayersState?,
+        textureLayersState: TextureLayersState,
         configuration: CanvasConfiguration
     ) async throws {
-        guard !drawingRenderers.isEmpty else {
-            fatalError("Drawing renderers must not be empty.")
-        }
-
         layoutViews()
         addEvents()
         bindData()
         try await viewModel.setup(
-            textureLayers: undoTextureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             textureLayersState: textureLayersState,
             configuration: configuration
         )
@@ -170,8 +163,9 @@ open class CanvasView: UIView {
 
         viewModel.setupCompletion
             .sink { [weak self] result in
-                self?.viewModel.completeSetup(result: result)
-                self?.setupCompletionSubject.send(result)
+                guard let `self` else { return }
+                self.viewModel.completeSetup(result: result)
+                self.setupCompletionSubject.send(result)
             }
             .store(in: &cancellables)
 
@@ -198,25 +192,10 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
-    open func newCanvas(
-        textureLayers: UndoTextureLayers,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
+    public func updateCanvas(
+        _ textureSize: CGSize
     ) async throws {
-        try await viewModel.setupCanvas(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
-        viewModel.resetTransforming()
-    }
-
-    public func restoreCanvas(
-        textureLayers: UndoTextureLayers,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-    ) async throws {
-        try await viewModel.setupCanvas(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
+        try await viewModel.updateCanvas(textureSize)
     }
 
     public func resetTransforming() {
@@ -231,14 +210,8 @@ open class CanvasView: UIView {
         viewModel.updateCurrentTexture(texture)
     }
 
-    public func updateCurrentTextureUsingRepository(
-        textureLayers: UndoTextureLayers?,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-    ) {
-        viewModel.updateCurrentTextureUsingRepository(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
+    public func updateCurrentTextureUsingRepository() {
+        viewModel.updateCurrentTextureUsingRepository()
     }
 
     public func refreshCanvas() {

@@ -54,11 +54,10 @@ public final class CanvasViewModel {
     }
     private let drawingCompletionSubject = PassthroughSubject<MTLTexture?, Never>()
 
+    public var currentTexture: MTLTexture?
+
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
-
-    /// Undoable texture layers
-    private var textureLayers: UndoTextureLayers?
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
@@ -93,12 +92,9 @@ public final class CanvasViewModel {
     }
 
     func setup(
-        textureLayers: UndoTextureLayers,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
-        textureLayersState: TextureLayersState?,
+        textureLayersState: TextureLayersState,
         configuration: CanvasConfiguration
     ) async throws {
-        self.textureLayers = textureLayers
 
         self.bindData()
 
@@ -112,83 +108,33 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-        try await setupCanvas(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
+        try await updateCanvas(textureLayersState.textureSize)
     }
 }
 
 extension CanvasViewModel {
 
-    func setupCanvas(
-        textureLayers: UndoTextureLayers?,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-    ) async throws {
-        guard
-            let textureLayers,
-            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to initialize the canvas", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        let textureSize = textureLayers.textureSize
+    func updateCanvas(_ textureSize: CGSize) async throws {
 
         // Update canvasRenderer using textureLayers
         try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
         try await canvasRenderer.refreshTexturesFromRepository(
-            repository: textureLayersDocumentsRepository,
-            context: context
+            currentTexture: currentTexture
         )
 
         setupCompletionSubject.send(
             .init(
-                textureSize: textureLayers.textureSize
+                textureSize: textureSize
             )
         )
     }
-
     func completeSetup(result: CanvasConfigurationResult) {
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
         refreshCanvas()
-    }
-
-    func updateCurrentTexture(_ texture: MTLTexture?) {
-        guard
-            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
-        else { return }
-
-        self.canvasRenderer.drawSelectedLayerTexture(
-            from: texture,
-            with: currentFrameCommandBuffer
-        )
-        self.refreshCanvas()
-    }
-
-    func updateCurrentTextureUsingRepository(
-        textureLayers: UndoTextureLayers?,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-    ) {
-        guard
-            let textureLayers,
-            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
-        else { return }
-        Task {
-            try await self.canvasRenderer.refreshTexturesFromRepository(
-                repository: textureLayersDocumentsRepository,
-                context: context
-            )
-            self.refreshCanvas()
-        }
     }
 }
 
@@ -369,7 +315,7 @@ extension CanvasViewModel {
     private func onDrawingDisplayLinkFrame() {
         guard
             let drawingRenderer,
-            let currentTexture = canvasRenderer.currentTexture,
+            let currentTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
             let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
@@ -383,6 +329,7 @@ extension CanvasViewModel {
         // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
             canvasRenderer.drawSelectedLayerTexture(
+                currentTexture: currentTexture,
                 from: canvasRenderer.realtimeDrawingTexture,
                 with: currentFrameCommandBuffer
             )
@@ -392,7 +339,7 @@ extension CanvasViewModel {
                     guard let `self` else { return }
 
                     self.drawingCompletionSubject.send(
-                        self.canvasRenderer.currentTexture
+                        self.currentTexture
                     )
 
                     // Reset parameters on drawing completion
@@ -433,17 +380,6 @@ public extension CanvasViewModel {
         return nil
     }
 
-    func newCanvas(
-        textureLayers: UndoTextureLayers,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
-    ) async throws {
-        try await setupCanvas(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
-        )
-        transforming.setMatrix(.identity)
-    }
-
     func resetTransforming() {
         transforming.setMatrix(.identity)
         canvasRenderer.drawCanvasToDisplay()
@@ -461,14 +397,34 @@ public extension CanvasViewModel {
         )
     }
 
+    func updateCurrentTexture(_ texture: MTLTexture?) {
+        guard
+            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
+        else { return }
+
+        self.canvasRenderer.drawSelectedLayerTexture(
+            currentTexture: currentTexture,
+            from: texture,
+            with: currentFrameCommandBuffer
+        )
+        self.refreshCanvas()
+    }
+
+    func updateCurrentTextureUsingRepository() {
+        Task {
+            try await self.canvasRenderer.refreshTexturesFromRepository(
+                currentTexture: currentTexture
+            )
+            self.refreshCanvas()
+        }
+    }
+
     func refreshCanvas(
         useRealtimeDrawingTexture: Bool = false
     ) {
-        guard let selectedLayer = textureLayers?.selectedLayer else { return }
-
         canvasRenderer.refreshCanvas(
-            useRealtimeDrawingTexture: useRealtimeDrawingTexture,
-            selectedLayer: .init(item: selectedLayer)
+            currentTexture: currentTexture,
+            useRealtimeDrawingTexture: useRealtimeDrawingTexture
         )
     }
 }
