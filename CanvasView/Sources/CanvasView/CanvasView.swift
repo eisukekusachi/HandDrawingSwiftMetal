@@ -31,18 +31,6 @@ open class CanvasView: UIView {
         displayView.displayTexture
     }
 
-    /// A publisher that emits a request to show or hide the activity indicator
-    public var activityIndicator: AnyPublisher<Bool, Never> {
-        activityIndicatorSubject.eraseToAnyPublisher()
-    }
-    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
-
-    /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<CanvasError, Never> {
-        alertSubject.eraseToAnyPublisher()
-    }
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
     public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
         setupCompletionSubject.eraseToAnyPublisher()
@@ -202,13 +190,6 @@ open class CanvasView: UIView {
         viewModel.drawingCompletion
             .sink { [weak self] result in
                 self?.drawingCompletionSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        viewModel.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.alertSubject.send(error)
             }
             .store(in: &cancellables)
     }

@@ -220,13 +220,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.showAlert(error)
-            }
-            .store(in: &cancellables)
-
         contentView.canvasView.undoTextureLayers?.didEmitUndoObjectPair
             .sink { [weak self] undoObjectPair in
                 self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)

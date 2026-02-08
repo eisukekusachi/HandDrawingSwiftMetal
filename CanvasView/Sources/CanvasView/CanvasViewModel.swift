@@ -32,12 +32,6 @@ public final class CanvasViewModel {
         drawingTouchPhase == .cancelled
     }
 
-    /// A publisher that emits a request to show the alert
-    var alert: AnyPublisher<CanvasError, Never> {
-        alertSubject.eraseToAnyPublisher()
-    }
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
     var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
         setupCompletionSubject.eraseToAnyPublisher()
@@ -131,11 +125,27 @@ extension CanvasViewModel {
         textureLayers: UndoTextureLayers?,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
-        guard let textureLayers else { return }
+        guard
+            let textureLayers,
+            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Failed to initialize the canvas", bundle: .module)
+            )
+            Logger.error(error)
+            throw error
+        }
 
-        try await setupCanvasRenderer(
-            textureLayers: textureLayers,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository
+        let textureSize = textureLayers.textureSize
+
+        // Update canvasRenderer using textureLayers
+        try canvasRenderer.setupTextures(
+            textureSize: textureSize
+        )
+        try await canvasRenderer.refreshTexturesFromRepository(
+            repository: textureLayersDocumentsRepository,
+            context: context
         )
 
         setupCompletionSubject.send(
@@ -209,35 +219,6 @@ extension CanvasViewModel {
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
             transformingGestureRecognitionSecond
-        )
-    }
-
-    /// Sets up `CanvasRenderer` with updated `textureLayers`
-    private func setupCanvasRenderer(
-        textureLayers: UndoTextureLayers?,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-    ) async throws {
-        guard
-            let textureLayers,
-            let context = CanvasTextureLayersContext(textureLayers: textureLayers)
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Failed to initialize the canvas", bundle: .module)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        let textureSize = textureLayers.textureSize
-
-        // Update canvasRenderer using textureLayers
-        try canvasRenderer.setupTextures(
-            textureSize: textureSize
-        )
-        try await canvasRenderer.refreshTexturesFromRepository(
-            repository: textureLayersDocumentsRepository,
-            context: context
         )
     }
 }
