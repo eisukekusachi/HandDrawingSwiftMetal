@@ -138,6 +138,10 @@ open class CanvasView: UIView {
         textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
     ) async throws {
+        guard !drawingRenderers.isEmpty else {
+            fatalError("Drawing renderers must not be empty.")
+        }
+
         layoutViews()
         addEvents()
         bindData()
@@ -145,10 +149,6 @@ open class CanvasView: UIView {
             textureLayers: undoTextureLayers,
             textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             textureLayersState: textureLayersState,
-            drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
-                renderer: renderer,
-                drawingRenderers: drawingRenderers
-            ),
             configuration: configuration
         )
     }
@@ -242,8 +242,8 @@ open class CanvasView: UIView {
         viewModel.resetTransforming()
     }
 
-    public func setDrawingTool(_ drawingToolType: Int) {
-        viewModel.setDrawingTool(drawingToolType)
+    public func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
+        viewModel.setDrawingTool(drawingRenderer)
     }
 
     public func updateCurrentTexture(_ texture: MTLTexture?) {

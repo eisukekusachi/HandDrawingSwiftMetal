@@ -10,6 +10,7 @@ import MetalKit
 /// Renderer for erasing lines
 @MainActor
 public final class EraserDrawingRenderer: DrawingRenderer {
+
     public var displayRealtimeDrawingTexture: Bool {
         _displayRealtimeDrawingTexture
     }
@@ -20,14 +21,9 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     }
     private var _diameter: Int = 8
 
-    public var renderer: MTLRendering? {
-        _renderer
-    }
-    private var _renderer: MTLRendering?
+    private var renderer: MTLRendering?
 
     private var alpha: Int = 255
-
-    private var frameSize: CGSize = .zero
 
     private var textureSize: CGSize?
     private var drawingTexture: MTLTexture?
@@ -61,7 +57,7 @@ public extension EraserDrawingRenderer {
             Logger.error(error)
             fatalError("Metal is not supported on this device.")
         }
-        self._renderer = renderer
+        self.renderer = renderer
         self.flippedTextureBuffers = buffers
     }
 
@@ -94,10 +90,6 @@ public extension EraserDrawingRenderer {
 
         clearTextures(with: newCommandBuffer)
         newCommandBuffer.commit()
-    }
-
-    func setFrameSize(_ frameSize: CGSize) {
-        self.frameSize = frameSize
     }
 
     func setDiameter(_ diameter: Int) {

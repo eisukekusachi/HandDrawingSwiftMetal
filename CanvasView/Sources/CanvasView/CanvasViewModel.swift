@@ -18,7 +18,6 @@ public final class CanvasViewModel {
     var frameSize: CGSize = .zero {
         didSet {
             canvasRenderer.setFrameSize(frameSize)
-            drawingRenderers.forEach { $0.setFrameSize(frameSize) }
         }
     }
 
@@ -82,7 +81,6 @@ public final class CanvasViewModel {
 
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
-    private var drawingRenderers: [DrawingRenderer] = []
 
     /// Touch phase for drawing
     private var drawingTouchPhase: UITouch.Phase?
@@ -104,12 +102,9 @@ public final class CanvasViewModel {
         textureLayers: UndoTextureLayers,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
         textureLayersState: TextureLayersState?,
-        drawingRenderers: [DrawingRenderer] = [],
         configuration: CanvasConfiguration
     ) async throws {
         self.textureLayers = textureLayers
-        self.drawingRenderers = drawingRenderers
-        self.drawingRenderer = self.drawingRenderers[0]
 
         self.bindData()
 
@@ -244,13 +239,6 @@ extension CanvasViewModel {
             repository: textureLayersDocumentsRepository,
             context: context
         )
-
-        // Initialize the textures in DrawingRenderer
-        for i in 0 ..< drawingRenderers.count {
-            drawingRenderers[i].setupTextures(
-                textureSize: textureSize
-            )
-        }
     }
 }
 
@@ -480,32 +468,9 @@ public extension CanvasViewModel {
         canvasRenderer.drawCanvasToDisplay()
     }
 
-    func setDrawingTool(_ drawingToolIndex: Int) {
-        guard
-            drawingToolIndex < drawingRenderers.count
-        else { return }
-
-        drawingRenderer = drawingRenderers[drawingToolIndex]
-        drawingRenderer?.prepareNextStroke()
-    }
-
-    /// Returns drawing renderers ready for drawing, creating a default renderer if needed
-    static func resolveDrawingRenderers(
-        renderer: MTLRendering,
-        drawingRenderers: [DrawingRenderer]
-    ) -> [DrawingRenderer] {
-        var resolvedDrawingRenderers: [DrawingRenderer] = drawingRenderers
-
-        if resolvedDrawingRenderers.isEmpty {
-            resolvedDrawingRenderers = [BrushDrawingRenderer()]
-        }
-
-        resolvedDrawingRenderers.forEach {
-            $0.setup(
-                renderer: renderer
-            )
-        }
-        return resolvedDrawingRenderers
+    func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
+        self.drawingRenderer = drawingRenderer
+        self.drawingRenderer?.prepareNextStroke()
     }
 
     func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {

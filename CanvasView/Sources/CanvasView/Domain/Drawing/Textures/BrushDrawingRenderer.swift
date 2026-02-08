@@ -20,14 +20,9 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     }
     private var _diameter: Int = 8
 
-    public var renderer: MTLRendering? {
-        _renderer
-    }
-    private var _renderer: MTLRendering?
+    private var renderer: MTLRendering?
 
     private var color: UIColor = .black
-
-    private var frameSize: CGSize = .zero
 
     private var textureSize: CGSize?
     private var drawingTexture: MTLTexture?
@@ -58,7 +53,7 @@ public extension BrushDrawingRenderer {
             Logger.error(error)
             fatalError("Metal is not supported on this device.")
         }
-        self._renderer = renderer
+        self.renderer = renderer
         self.flippedTextureBuffers = buffers
     }
 
@@ -85,10 +80,6 @@ public extension BrushDrawingRenderer {
 
         clearTextures(with: newCommandBuffer)
         newCommandBuffer.commit()
-    }
-
-    func setFrameSize(_ frameSize: CGSize) {
-        self.frameSize = frameSize
     }
 
     func setDiameter(_ diameter: Int) {

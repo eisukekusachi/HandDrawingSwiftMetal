@@ -27,8 +27,10 @@ class HandDrawingViewController: UIViewController {
 
     private let paletteHeight: CGFloat = 44
 
-    private let brushDrawingRenderer = BrushDrawingRenderer()
-    private let eraserDrawingRenderer = EraserDrawingRenderer()
+    private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
+        .brush: BrushDrawingRenderer(),
+        .eraser: EraserDrawingRenderer()
+    ]
 
     private let viewModel = HandDrawingViewModel()
 
@@ -79,11 +81,13 @@ class HandDrawingViewController: UIViewController {
             do {
                 let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
 
+                self.drawingRenderers.forEach {
+                    $0.value.setup(
+                        renderer: self.contentView.canvasView.renderer
+                    )
+                }
                 try await contentView.canvasView.setup(
-                    drawingRenderers: [
-                        self.brushDrawingRenderer,
-                        self.eraserDrawingRenderer
-                    ],
+                    drawingRenderers: self.drawingRenderers.map { $0.value },
                     configuration: configuration
                 )
                 try self.viewModel.setup(configuration: configuration)
@@ -157,6 +161,11 @@ extension HandDrawingViewController {
                     for layer in textureLayers.textureLayers.layers {
                         try await textureLayers.updateThumbnail(layer.id)
                     }
+                }
+
+                // Initialize the textures in DrawingRenderer
+                for renderer in drawingRenderers.values {
+                    renderer.setupTextures(textureSize: result.textureSize)
                 }
 
                 self.textureLayerViewPresenter.update(
@@ -254,7 +263,7 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
-                self.brushDrawingRenderer.setColor(newColor)
+                (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(newColor)
             }
             .store(in: &cancellables)
 
@@ -262,19 +271,19 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
-                self.eraserDrawingRenderer.setAlpha(newAlpha)
+                (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
-                self?.brushDrawingRenderer.setDiameter(diameter)
+                (self?.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
-                self?.eraserDrawingRenderer.setDiameter(diameter)
+                (self?.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(diameter)
             }
             .store(in: &cancellables)
     }
@@ -299,9 +308,15 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            guard let `self` else { return }
-            viewModel.toggleDrawingTool()
-            contentView.updateDrawingComponents(viewModel.drawingTool.type)
+            guard
+                let `self`
+            else { return }
+            self.viewModel.toggleDrawingTool()
+
+            self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+            guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
+            self.contentView.canvasView.setDrawingTool(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.canvasView.undo()
@@ -366,9 +381,14 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
-        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
-        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
+        (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
+
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+        guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
+        contentView.canvasView.setDrawingTool(renderer)
+
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
     }

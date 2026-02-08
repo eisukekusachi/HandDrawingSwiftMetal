@@ -83,8 +83,6 @@ final class HandDrawingContentView: UIView {
 
         eraserDiameterSlider.isHidden = tool != .eraser
         eraserPaletteView.isHidden = tool != .eraser
-
-        canvasView.setDrawingTool(tool.rawValue)
     }
 
     func setBrushDiameterSlider(_ value: Int) {
