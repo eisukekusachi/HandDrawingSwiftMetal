@@ -113,13 +113,6 @@ import TextureLayerView
 
     func bindData() {
 
-        setupCompletion
-            .sink { [weak self] result in
-                guard let `self` else { return }
-                self.currentTexture = makeTexture(result.textureSize)
-            }
-            .store(in: &cancellables)
-
         drawingEvent
             .compactMap { event -> MTLTexture? in
                 guard case let .strokeCompleted(texture) = event else { return nil }

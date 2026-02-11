@@ -122,6 +122,11 @@ extension CanvasViewModel {
         // Update currentTextureSize
         currentTextureSize = result.textureSize
 
+        currentTexture = canvasRenderer.makeTexture(
+            currentTextureSize,
+            label: "currentTexture"
+        )
+
         refreshCanvas()
     }
 }

@@ -193,7 +193,7 @@ extension CanvasRenderer {
 }
 
 extension CanvasRenderer {
-    private func makeTexture(
+    func makeTexture(
         _ textureSize: CGSize,
         label: String
     ) -> MTLTexture? {

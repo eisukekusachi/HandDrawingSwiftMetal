@@ -20,9 +20,7 @@ open class CanvasView: UIView {
     public var cancellables = Set<AnyCancellable>()
 
     public var currentTexture: MTLTexture? {
-        didSet {
-            viewModel.currentTexture = currentTexture
-        }
+        viewModel.currentTexture
     }
 
     public var canvasTexture: MTLTexture? {
@@ -118,6 +116,7 @@ open class CanvasView: UIView {
         layoutViews()
         addEvents()
         bindData()
+
         try await viewModel.setup(
             textureSize: textureSize,
             configuration: configuration
