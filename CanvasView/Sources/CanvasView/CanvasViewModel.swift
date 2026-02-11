@@ -38,21 +38,11 @@ public final class CanvasViewModel {
     }
     private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
-    var fingerDrawingDidBegin: AnyPublisher<Void, Never> {
-        fingerDrawingDidBeginSubject.eraseToAnyPublisher()
+    /// Emits drawing-related events
+    var drawingEvent: AnyPublisher<DrawingEvent, Never> {
+        drawingEventSubject.eraseToAnyPublisher()
     }
-    private let fingerDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
-
-    var pencilDrawingDidBegin: AnyPublisher<Void, Never> {
-        pencilDrawingDidBeginSubject.eraseToAnyPublisher()
-    }
-    private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
-
-    /// A publisher that emits `MTLTexture?` when drawing completes
-    var drawingCompletion: AnyPublisher<MTLTexture?, Never> {
-        drawingCompletionSubject.eraseToAnyPublisher()
-    }
-    private let drawingCompletionSubject = PassthroughSubject<MTLTexture?, Never>()
+    private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
 
     public var currentTexture: MTLTexture?
 
@@ -197,7 +187,7 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
-                fingerDrawingDidBeginSubject.send()
+                drawingEventSubject.send(.fingerStrokeBegan)
 
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
@@ -276,7 +266,7 @@ extension CanvasViewModel {
 
         // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
-            pencilDrawingDidBeginSubject.send()
+            drawingEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke()
         }
@@ -334,10 +324,13 @@ extension CanvasViewModel {
 
             currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    guard let `self` else { return }
+                    guard
+                        let `self`,
+                        let currentTexture = self.currentTexture
+                    else { return }
 
-                    self.drawingCompletionSubject.send(
-                        self.currentTexture
+                    self.drawingEventSubject.send(
+                        .strokeCompleted(texture: currentTexture)
                     )
 
                     // Reset parameters on drawing completion

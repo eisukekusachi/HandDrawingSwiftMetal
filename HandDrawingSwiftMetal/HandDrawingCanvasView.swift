@@ -120,32 +120,13 @@ import TextureLayerView
             }
             .store(in: &cancellables)
 
-        drawingCompletion
+        drawingEvent
+            .compactMap { event -> MTLTexture? in
+                guard case let .strokeCompleted(texture) = event else { return nil }
+                return texture
+            }
             .sink { [weak self] result in
-                self?.drawingDebouncer.perform {
-                    Task(priority: .utility) { [weak self] in
-                        guard
-                            let self,
-                            let result,
-                            let layerId = self.undoTextureLayers?.selectedLayer?.id
-                        else { return }
-
-                        do {
-                            try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
-                                texture: result,
-                                for: layerId
-                            )
-
-                            self.undoTextureLayers?.updateThumbnail(
-                                layerId,
-                                texture: result
-                            )
-
-                        } catch {
-                            Logger.error(error)
-                        }
-                    }
-                }
+                self?.completeDrawing(result)
             }
             .store(in: &cancellables)
 
@@ -170,6 +151,33 @@ import TextureLayerView
                 print("fullCanvasUpdateRequestedPublisher")
             }
             .store(in: &cancellables)
+    }
+
+    private func completeDrawing(_ texture: MTLTexture?) {
+        drawingDebouncer.perform {
+            Task(priority: .utility) { [weak self] in
+                guard
+                    let self,
+                    let texture,
+                    let layerId = self.undoTextureLayers?.selectedLayer?.id
+                else { return }
+
+                do {
+                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
+                        texture: texture,
+                        for: layerId
+                    )
+
+                    self.undoTextureLayers?.updateThumbnail(
+                        layerId,
+                        texture: texture
+                    )
+
+                } catch {
+                    Logger.error(error)
+                }
+            }
+        }
     }
 
     private func setupInitialUndoManager() {

@@ -33,27 +33,17 @@ open class CanvasView: UIView {
         displayView.displayTexture
     }
 
+    /// Emits drawing-related events
+    public var drawingEvent: AnyPublisher<DrawingEvent, Never> {
+        drawingEventSubject.eraseToAnyPublisher()
+    }
+    private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
+
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
     public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
         setupCompletionSubject.eraseToAnyPublisher()
     }
     private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
-
-    public var fingerDrawingDidBegin: AnyPublisher<Void, Never> {
-        fingerDrawingDidBeginSubject.eraseToAnyPublisher()
-    }
-    private let fingerDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
-
-    public var pencilDrawingDidBegin: AnyPublisher<Void, Never> {
-        pencilDrawingDidBeginSubject.eraseToAnyPublisher()
-    }
-    private let pencilDrawingDidBeginSubject = PassthroughSubject<Void, Never>()
-
-    /// A publisher that emits `MTLTexture?` when drawing completes
-    public var drawingCompletion: AnyPublisher<MTLTexture?, Never> {
-        drawingCompletionSubject.eraseToAnyPublisher()
-    }
-    private let drawingCompletionSubject = PassthroughSubject<MTLTexture?, Never>()
 
     public func thumbnail() -> UIImage? {
         viewModel.thumbnail()
@@ -161,29 +151,17 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
+        viewModel.drawingEvent
+            .sink { [weak self] result in
+                self?.drawingEventSubject.send(result)
+            }
+            .store(in: &cancellables)
+
         viewModel.setupCompletion
             .sink { [weak self] result in
                 guard let `self` else { return }
                 self.viewModel.completeSetup(result: result)
                 self.setupCompletionSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        viewModel.fingerDrawingDidBegin
-            .sink { [weak self] in
-                self?.fingerDrawingDidBeginSubject.send(())
-            }
-            .store(in: &cancellables)
-
-        viewModel.pencilDrawingDidBegin
-            .sink { [weak self] in
-                self?.pencilDrawingDidBeginSubject.send(())
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingCompletion
-            .sink { [weak self] result in
-                self?.drawingCompletionSubject.send(result)
             }
             .store(in: &cancellables)
     }

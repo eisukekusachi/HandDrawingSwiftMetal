@@ -175,48 +175,38 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.fingerDrawingDidBegin
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+        contentView.canvasView.drawingEvent
+            .sink { [weak self] event in
                 guard let `self` else { return }
-                self.enableComponentsInteraction(false)
-                Task {
-                    await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
-                        texture: self.contentView.canvasView.currentTexture
+                switch event {
+                case .fingerStrokeBegan:
+                    self.enableComponentsInteraction(false)
+                    Task {
+                        await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+                case .pencilStrokeBegan:
+                    self.enableComponentsInteraction(false)
+                    Task {
+                        await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+                case .strokeCompleted:
+                    Task {
+                        try await self.contentView.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+
+                    self.enableComponentsInteraction(true)
+
+                    // Update the project's updatedAt value to the current time
+                    self.viewModel.project.update(
+                        updatedAt: Date()
                     )
                 }
-            }
-            .store(in: &cancellables)
-
-        contentView.canvasView.pencilDrawingDidBegin
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                guard let `self` else { return }
-                self.enableComponentsInteraction(false)
-                Task {
-                    await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
-                        texture: self.contentView.canvasView.currentTexture
-                    )
-                }
-            }
-            .store(in: &cancellables)
-
-        contentView.canvasView.drawingCompletion
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                guard let `self` else { return }
-                Task {
-                    try await self.contentView.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
-                        texture: self.contentView.canvasView.currentTexture
-                    )
-                }
-
-                self.enableComponentsInteraction(true)
-
-                // Update the project's updatedAt value to the current time
-                self.viewModel.project.update(
-                    updatedAt: Date()
-                )
             }
             .store(in: &cancellables)
 
