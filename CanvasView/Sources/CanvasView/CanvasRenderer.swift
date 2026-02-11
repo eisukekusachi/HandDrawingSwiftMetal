@@ -124,33 +124,6 @@ import Combine
 
 extension CanvasRenderer {
 
-    /// Refreshes `selectedLayerTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
-    /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
-    /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func refreshTexturesFromRepository(
-        currentTexture: MTLTexture?
-    ) async throws {
-        guard
-            let currentTexture,
-            let realtimeDrawingTexture,
-            let newCommandBuffer = renderer.newCommandBuffer
-        else {
-            return
-        }
-
-        renderer.clearTexture(texture: currentTexture, with: newCommandBuffer)
-        renderer.clearTexture(texture: realtimeDrawingTexture, with: newCommandBuffer)
-
-        // Make selectedLayerTexture and realtimeDrawingTexture contain the same pixels
-        renderer.copyTexture(
-            srcTexture: currentTexture,
-            dstTexture: realtimeDrawingTexture,
-            with: newCommandBuffer
-        )
-
-        try await newCommandBuffer.commitAndWaitAsync()
-    }
-
     /// Refreshes the entire screen using textures
     public func refreshCanvas(
         currentTexture: MTLTexture?,

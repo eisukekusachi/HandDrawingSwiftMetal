@@ -120,9 +120,7 @@ extension CanvasViewModel {
         try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
-        try await canvasRenderer.refreshTexturesFromRepository(
-            currentTexture: currentTexture
-        )
+        try await canvasRenderer.drawCanvasToDisplay()
 
         setupCompletionSubject.send(
             .init(
@@ -408,15 +406,6 @@ public extension CanvasViewModel {
             with: currentFrameCommandBuffer
         )
         self.refreshCanvas()
-    }
-
-    func updateCurrentTextureUsingRepository() {
-        Task {
-            try await self.canvasRenderer.refreshTexturesFromRepository(
-                currentTexture: currentTexture
-            )
-            self.refreshCanvas()
-        }
     }
 
     func refreshCanvas(

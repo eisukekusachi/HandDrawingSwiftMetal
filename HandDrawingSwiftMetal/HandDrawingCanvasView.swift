@@ -111,45 +111,7 @@ import TextureLayerView
         setupInitialUndoManager()
     }
 
-    func newCanvas() async throws {
-        guard let undoTextureLayers else { return }
-
-        let textureLayersState: TextureLayersState = .init(
-            textureSize: undoTextureLayers.textureSize
-        )
-
-        try await textureLayersDocumentsRepository?.initializeStorage(
-            newTextureLayersState: textureLayersState
-        )
-        undoTextureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
-
-        super.resetTransforming()
-        try await super.updateCanvas(undoTextureLayers.textureSize)
-    }
-
-    public func loadFiles(in workingDirectoryURL: URL) async throws {
-        guard let undoTextureLayers else { return }
-
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
-
-        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
-            url: workingDirectoryURL,
-            textureLayersState: textureLayerState
-        )
-        undoTextureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayerState
-        )
-
-        try await super.updateCanvas(textureLayerState.textureSize)
-    }
-
-    private func bindData() {
+    func bindData() {
 
         setupCompletion
             .sink { [weak self] result in
@@ -205,7 +167,7 @@ import TextureLayerView
         undoTextureLayers?.fullCanvasUpdateRequestedPublisher
             .sink { [weak self] in
                 guard let `self` else { return }
-                self.updateCurrentTextureUsingRepository()
+                print("fullCanvasUpdateRequestedPublisher")
             }
             .store(in: &cancellables)
     }
@@ -269,7 +231,6 @@ extension HandDrawingCanvasView {
     }
 
     func setupCompletion(textureSize: CGSize) {
-
         // Initialize the textures used for Undo
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
             undoTextureLayers.initializeUndoTextures(
@@ -278,7 +239,25 @@ extension HandDrawingCanvasView {
         }
     }
 
-    func save(to workingDirectoryURL: URL) async throws {
+    func newCanvas() async throws {
+        guard let undoTextureLayers else { return }
+
+        let textureLayersState: TextureLayersState = .init(
+            textureSize: undoTextureLayers.textureSize
+        )
+
+        try await textureLayersDocumentsRepository?.initializeStorage(
+            newTextureLayersState: textureLayersState
+        )
+        undoTextureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayersState
+        )
+
+        super.resetTransforming()
+        try await super.updateCanvas(undoTextureLayers.textureSize)
+    }
+
+    func saveFiles(to workingDirectoryURL: URL) async throws {
         try await viewModel.exportFiles(
             canvasTexture: canvasTexture,
             thumbnailLength: 500,
@@ -288,9 +267,53 @@ extension HandDrawingCanvasView {
             to: workingDirectoryURL
         )
     }
+
+    func loadFiles(in workingDirectoryURL: URL) async throws {
+        guard let undoTextureLayers else { return }
+
+        // Load texture layer data from the JSON file
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
+
+        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
+            url: workingDirectoryURL,
+            textureLayersState: textureLayerState
+        )
+        undoTextureLayers.updateSkippingThumbnail(
+            textureLayersState: textureLayerState
+        )
+
+        try await super.updateCanvas(textureLayerState.textureSize)
+    }
 }
 
 extension HandDrawingCanvasView {
+
+    func undo() {
+        guard let undoManager else { return }
+        undoManager.undo()
+        didUndoSubject.send(
+            .init(undoManager)
+        )
+    }
+    func redo() {
+        guard let undoManager else { return }
+        undoManager.redo()
+        didUndoSubject.send(
+            .init(undoManager)
+        )
+    }
+    func resetUndo() {
+        guard let undoManager else { return }
+        undoTextureInMemoryRepository?.removeAll()
+        undoManager.removeAllActions()
+        didUndoSubject.send(
+            .init(undoManager)
+        )
+    }
+
     func registerUndoObjectPair(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
@@ -338,29 +361,6 @@ extension HandDrawingCanvasView {
             self?.registerUndoObjectPair(undoRedoObject.reversed())
         }
 
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-
-    func undo() {
-        guard let undoManager else { return }
-        undoManager.undo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    func redo() {
-        guard let undoManager else { return }
-        undoManager.redo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    func resetUndo() {
-        guard let undoManager else { return }
-        undoTextureInMemoryRepository?.removeAll()
-        undoManager.removeAllActions()
         didUndoSubject.send(
             .init(undoManager)
         )

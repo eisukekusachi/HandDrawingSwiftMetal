@@ -459,7 +459,7 @@ extension HandDrawingViewController {
         viewModel.saveProject(
             action: { [weak self] workingDirectoryURL in
 
-                try await self?.contentView.canvasView.save(
+                try await self?.contentView.canvasView.saveFiles(
                     to: workingDirectoryURL
                 )
             },

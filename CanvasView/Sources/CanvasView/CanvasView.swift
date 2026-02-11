@@ -210,10 +210,6 @@ open class CanvasView: UIView {
         viewModel.updateCurrentTexture(texture)
     }
 
-    public func updateCurrentTextureUsingRepository() {
-        viewModel.updateCurrentTextureUsingRepository()
-    }
-
     public func refreshCanvas() {
         viewModel.refreshCanvas()
     }
