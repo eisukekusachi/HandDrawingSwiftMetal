@@ -26,6 +26,12 @@ public struct CanvasTextureLayersContext {
     }
 }
 
+struct CurrentDrawingTexture {
+    let isVisible: Bool
+    let alpha: Int
+    let currentTexture: MTLTexture?
+}
+
 @MainActor
 public class TextureLayerRenderer {
 
@@ -110,14 +116,6 @@ public class TextureLayerRenderer {
             layers: context.layers
         )
 
-        // The selected texture is kept opaque here because transparency is applied when used
-        let opaqueLayer: TextureLayerModel = .init(
-            id: context.selectedLayer.id,
-            title: context.selectedLayer.title,
-            alpha: 255,
-            isVisible: context.selectedLayer.isVisible
-        )
-
         let topLayers = topLayers(
             selectedIndex: context.selectedIndex,
             layers: context.layers
@@ -150,19 +148,14 @@ public class TextureLayerRenderer {
     }
 
     /// Refreshes the entire screen using textures
-    public func refreshCanvas(
-        useRealtimeDrawingTexture: Bool,
-        selectedLayer: TextureLayerModel,
-        selectedLayerTexture: MTLTexture?,
-        realtimeDrawingTexture: MTLTexture?,
+    func refreshCanvas(
+        currentDrawingTexture: CurrentDrawingTexture,
         canvasTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer?
     ) {
         guard
             let canvasTexture,
             let unselectedBottomTexture,
-            let selectedLayerTexture,
-            let realtimeDrawingTexture,
             let unselectedTopTexture,
             let commandBuffer
         else { return }
@@ -179,10 +172,10 @@ public class TextureLayerRenderer {
             with: commandBuffer
         )
 
-        if selectedLayer.isVisible {
+        if currentDrawingTexture.isVisible, let texture = currentDrawingTexture.currentTexture {
             renderer.mergeTexture(
-                texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : selectedLayerTexture,
-                alpha: selectedLayer.alpha,
+                texture: texture,
+                alpha: currentDrawingTexture.alpha,
                 into: canvasTexture,
                 with: commandBuffer
             )

@@ -9,6 +9,7 @@ import CanvasView
 import Combine
 import Foundation
 import MetalKit
+import TextureLayerView
 
 /// An undo object for removing a texture layer
 public final class UndoDeletionObject: UndoObject {

@@ -9,6 +9,7 @@ import CanvasView
 import Combine
 import Foundation
 import MetalKit
+import TextureLayerView
 
 /// An undo object for updating a texture layer
 public final class UndoAlphaChangedObject: UndoObject {

@@ -4,6 +4,8 @@
 //
 //  Created by Eisuke Kusachi on 2025/12/29.
 //
+
+import CanvasView
 import Foundation
 @preconcurrency import MetalKit
 

@@ -5,7 +5,9 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
+import CanvasView
 import Foundation
+import TextureLayerView
 @preconcurrency import MetalKit
 
 /// A repository that manages textures for undo operations.
@@ -41,8 +43,8 @@ public final class UndoTextureInMemoryRepository {
         // If the file exists, delete it
         guard textures.keys.contains(id) else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to find \(id.uuidString)", bundle: .module)
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find \(id.uuidString)")
             )
             throw error
         }
@@ -54,8 +56,8 @@ public final class UndoTextureInMemoryRepository {
         // If it doesn’t exist, add it
         guard textures[id] == nil else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "File already exists", bundle: .module)
+                title: String(localized: "Error"),
+                message: String(localized: "File already exists")
             )
             Logger.error(error)
             throw error
@@ -67,8 +69,8 @@ public final class UndoTextureInMemoryRepository {
     public func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: "\(String(localized: "File not found", bundle: .module)):\(id.uuidString)"
+                title: String(localized: "Error"),
+                message: "\(String(localized: "File not found")):\(id.uuidString)"
             )
             Logger.error(error)
             throw error

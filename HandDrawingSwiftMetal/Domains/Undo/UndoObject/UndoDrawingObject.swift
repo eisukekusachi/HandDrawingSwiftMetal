@@ -9,6 +9,7 @@ import CanvasView
 import Combine
 import Foundation
 import MetalKit
+import TextureLayerView
 
 /// An undo object for drawing
 final class UndoDrawingObject: UndoObject {

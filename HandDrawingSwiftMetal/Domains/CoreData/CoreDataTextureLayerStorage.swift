@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import UIKit
+import TextureLayerView
 
 @preconcurrency import CoreData
 

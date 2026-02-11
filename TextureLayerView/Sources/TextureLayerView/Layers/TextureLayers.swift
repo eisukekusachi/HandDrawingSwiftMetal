@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/04/13.
 //
 
+import CanvasView
 import Combine
 import MetalKit
 import UIKit
@@ -154,7 +155,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             layerCount > 1
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 
@@ -202,7 +203,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 
@@ -222,7 +223,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 
@@ -242,7 +243,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 
@@ -264,7 +265,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             let index = index(for: layer.id)
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 
@@ -308,7 +309,7 @@ extension TextureLayers {
             let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)", bundle: .module))
+            Logger.error(String(localized: "Unable to find \(value)"))
             return
         }
 

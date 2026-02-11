@@ -122,14 +122,14 @@ open class CanvasView: UIView {
     }
 
     public func setup(
-        textureLayersState: TextureLayersState,
+        textureSize: CGSize,
         configuration: CanvasConfiguration
     ) async throws {
         layoutViews()
         addEvents()
         bindData()
         try await viewModel.setup(
-            textureLayersState: textureLayersState,
+            textureSize: textureSize,
             configuration: configuration
         )
     }

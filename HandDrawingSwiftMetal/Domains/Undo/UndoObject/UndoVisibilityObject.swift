@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import Foundation
+import TextureLayerView
 
 /// An undo object for reverting layer visibility
 public final class UndoVisibilityObject: UndoObject {

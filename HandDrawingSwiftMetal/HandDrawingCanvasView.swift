@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import UIKit
+import TextureLayerView
 
 @objc final class HandDrawingCanvasView: CanvasView {
 
@@ -264,8 +265,8 @@ extension HandDrawingCanvasView {
                 textureLayersState: state
             )
 
-            try await setup(
-                textureLayersState: state,
+            try await super.setup(
+                textureSize: state.textureSize,
                 configuration: configuration
             )
         } else {
@@ -279,8 +280,8 @@ extension HandDrawingCanvasView {
                 textureLayersState: state
             )
 
-            try await setup(
-                textureLayersState: state,
+            try await super.setup(
+                textureSize: state.textureSize,
                 configuration: configuration
             )
         }

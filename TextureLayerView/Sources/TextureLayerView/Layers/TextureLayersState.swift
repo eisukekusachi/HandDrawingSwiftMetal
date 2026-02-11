@@ -5,6 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/08/11.
 //
 
+import CanvasView
+import CoreData
 import UIKit
 
 /// A struct that represents the state of TextureLayers. Its layers property is never empty

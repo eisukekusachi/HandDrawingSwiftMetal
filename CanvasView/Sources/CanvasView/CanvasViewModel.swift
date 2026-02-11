@@ -92,7 +92,7 @@ public final class CanvasViewModel {
     }
 
     func setup(
-        textureLayersState: TextureLayersState,
+        textureSize: CGSize,
         configuration: CanvasConfiguration
     ) async throws {
 
@@ -108,7 +108,7 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
         )
-        try await updateCanvas(textureLayersState.textureSize)
+        try await updateCanvas(textureSize)
     }
 }
 

@@ -8,6 +8,7 @@
 import CanvasView
 import Foundation
 import MetalKit
+import TextureLayerView
 
 @MainActor
 final class HandDrawingCanvasViewModel: ObservableObject {

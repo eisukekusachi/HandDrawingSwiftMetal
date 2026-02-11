@@ -5,7 +5,9 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
+import CanvasView
 import Foundation
+
 @preconcurrency import MetalKit
 
 /// Manages and persists `TextureLayers` textures on disk
@@ -100,8 +102,8 @@ import Foundation
                 )
             else {
                 let error = NSError(
-                    title: String(localized: "Error", bundle: .module),
-                    message: String(localized: "Unable to load required data", bundle: .module)
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to load required data")
                 )
                 Logger.error(error)
                 throw error
@@ -150,8 +152,8 @@ import Foundation
                 )
             else {
                 let error = NSError(
-                    title: String(localized: "Error", bundle: .module),
-                    message: String(localized: "Unable to load required data", bundle: .module)
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to load required data")
                 )
                 Logger.error(error)
                 throw error
@@ -179,8 +181,8 @@ extension TextureLayersDocumentsRepository {
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
         if textureSize == .zero {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Texture size is zero", bundle: .module)
+                title: String(localized: "Error"),
+                message: String(localized: "Texture size is zero")
             )
             Logger.error(error)
             throw error
@@ -196,8 +198,8 @@ extension TextureLayersDocumentsRepository {
             )
         else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: "\(String(localized: "File not found", bundle: .module)):\(destinationUrl.path)"
+                title: String(localized: "Error"),
+                message: "\(String(localized: "File not found")):\(destinationUrl.path)"
             )
             Logger.error(error)
             throw error
@@ -242,8 +244,8 @@ extension TextureLayersDocumentsRepository {
         else {
             // Log the error only, as nothing can be done
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Unable to find \(id.uuidString)", bundle: .module)
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find \(id.uuidString)")
             )
             throw error
         }
@@ -258,8 +260,8 @@ extension TextureLayersDocumentsRepository {
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "File already exists", bundle: .module)
+                title: String(localized: "Error"),
+                message: String(localized: "File already exists")
             )
             Logger.error(error)
             throw error
@@ -282,8 +284,8 @@ extension TextureLayersDocumentsRepository {
             FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: "\(String(localized: "File not found", bundle: .module))"
+                title: String(localized: "Error"),
+                message: "\(String(localized: "File not found"))"
             )
             Logger.error(error)
             throw error
@@ -299,8 +301,8 @@ extension TextureLayersDocumentsRepository {
             )
         } catch {
             let error = NSError(
-                title: String(localized :"Error", bundle: .module),
-                message: String(localized :"Failed to update texture", bundle: .module)
+                title: String(localized :"Error"),
+                message: String(localized :"Failed to update texture")
             )
             Logger.error(error)
             throw error

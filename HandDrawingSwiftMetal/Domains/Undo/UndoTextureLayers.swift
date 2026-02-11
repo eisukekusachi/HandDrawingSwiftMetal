@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import UIKit
+import TextureLayerView
 
 /// A class that manages texture layers with undo functionality
 @MainActor

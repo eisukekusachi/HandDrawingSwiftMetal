@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import Foundation
+import TextureLayerView
 
 public protocol UndoObject {
     /// The texture ID used for the undo operation
