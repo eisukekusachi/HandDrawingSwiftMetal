@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/09/23.
 //
 
+import CanvasView
 import Combine
 import UIKit
 
@@ -88,7 +89,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
                 renderer: renderer
             )
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
             return
         }
 
@@ -115,7 +116,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
             let selectedLayer = textureLayers.selectedLayer,
             let newTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)?.texture
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
             return
         }
 
@@ -141,7 +142,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
             return
         }
 
@@ -190,7 +191,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
             return
         }
         guard
@@ -265,7 +266,7 @@ private extension UndoTextureLayers {
             let texture,
             let previousDrawingTextureForUndo
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "previousDrawingTextureForUndo"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "previousDrawingTextureForUndo"))
             return
         }
 
@@ -288,7 +289,7 @@ private extension UndoTextureLayers {
         guard
             let selectedLayer = textureLayers.selectedLayer
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "selectedLayer"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
             return
         }
 
@@ -298,7 +299,7 @@ private extension UndoTextureLayers {
                 renderer: renderer
             )
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoTexture"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "undoTexture"))
             return
         }
 
@@ -308,7 +309,7 @@ private extension UndoTextureLayers {
                 renderer: renderer
             )
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "redoTexture"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "redoTexture"))
             return
         }
         let undoObject = UndoDrawingObject(
@@ -388,7 +389,7 @@ private extension UndoTextureLayers {
             let undoTextureId = undoRedoObject.undoObject.undoTextureId,
             let inMemoryRepository
         else {
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), "undoRedoObject.texture"))
+            Logger.error(String(format: String(localized: "Unable to find %@"), "undoRedoObject.texture"))
             return
         }
 

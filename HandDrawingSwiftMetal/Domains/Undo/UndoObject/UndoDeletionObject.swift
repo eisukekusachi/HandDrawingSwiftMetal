@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/06/26.
 //
 
+import CanvasView
 import Combine
 import Foundation
 import MetalKit
@@ -35,7 +36,7 @@ public final class UndoDeletionObject: UndoObject {
             let index = layers.index(for: textureLayer.id)
         else {
             let message = "id: \(textureLayer.id.uuidString)"
-            Logger.error(String(format: String(localized: "Unable to find %@", bundle: .module), message))
+            Logger.error(String(format: String(localized: "Unable to find %@"), message))
             return
         }
 

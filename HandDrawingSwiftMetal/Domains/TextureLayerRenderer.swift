@@ -11,6 +11,22 @@ import UIKit
 @preconcurrency import MetalKit
 
 @MainActor
+public struct CanvasTextureLayersContext {
+    public let selectedLayer: TextureLayerModel
+    public let selectedIndex: Int
+    public let layers: [TextureLayerModel]
+    public init?(textureLayers: any TextureLayersProtocol) {
+        guard
+            let selectedLayer = textureLayers.selectedLayer,
+            let selectedIndex = textureLayers.selectedIndex
+        else { return nil }
+        self.selectedLayer = .init(item: selectedLayer)
+        self.selectedIndex = selectedIndex
+        self.layers = textureLayers.layers.map { .init(item: $0) }
+    }
+}
+
+@MainActor
 public class TextureLayerRenderer {
 
     public var backgroundColor: UIColor = .white
