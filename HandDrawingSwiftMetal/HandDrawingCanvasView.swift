@@ -149,25 +149,6 @@ import TextureLayerView
         try await super.updateCanvas(textureLayerState.textureSize)
     }
 
-    private func commonInit() {
-        if let entity = try? textureLayerStorage?.fetch(),
-           let state = textureLayerStorage?.convertData(entity: entity) {
-
-            textureLayersState = state
-
-            do {
-                try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-                    textureLayersState: state
-                )
-                undoTextureLayers?.updateSkippingThumbnail(
-                    textureLayersState: state
-                )
-            } catch {
-                
-            }
-        }
-    }
-
     private func bindData() {
 
         setupCompletion
