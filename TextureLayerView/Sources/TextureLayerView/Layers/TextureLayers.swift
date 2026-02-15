@@ -13,17 +13,17 @@ import UIKit
 /// A class that manages texture layers
 open class TextureLayers: TextureLayersProtocol, ObservableObject {
 
-    /// Emits when a canvas update is requested
-    public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        canvasUpdateRequestedSubject.eraseToAnyPublisher()
+    /// Emits when the current layer update is requested
+    public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
+        currentLayerUpdateRequestedSubject.eraseToAnyPublisher()
     }
-    private let canvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
+    private let currentLayerUpdateRequestedSubject = PassthroughSubject<Void, Never>()
 
-    /// Emits when a canvas update is requested with `MTLTexture`
-    public var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> {
-        canvasDrawingUpdateRequestedSubject.eraseToAnyPublisher()
+    /// Emits when the current layer update is requested with `MTLTexture`
+    public var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> {
+        currentLayerUpdateWithNewCurrentTextureRequestedSubject.eraseToAnyPublisher()
     }
-    private let canvasDrawingUpdateRequestedSubject = PassthroughSubject<MTLTexture, Never>()
+    private let currentLayerUpdateWithNewCurrentTextureRequestedSubject = PassthroughSubject<MTLTexture, Never>()
 
     /// Emits when a full canvas update is requested
     public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
@@ -326,12 +326,12 @@ extension TextureLayers {
 
     /// Requests a partial canvas update
     public func requestCanvasUpdate() {
-        canvasUpdateRequestedSubject.send(())
+        currentLayerUpdateRequestedSubject.send(())
     }
 
     /// Requests a partial canvas update with `MTLTexture`
     public func requestCanvasDrawingUpdate(_ texture: MTLTexture) {
-        canvasDrawingUpdateRequestedSubject.send(texture)
+        currentLayerUpdateWithNewCurrentTextureRequestedSubject.send(texture)
     }
 
     /// Requests a full canvas update (all layers composited)

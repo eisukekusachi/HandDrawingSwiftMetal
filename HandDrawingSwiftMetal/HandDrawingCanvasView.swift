@@ -123,15 +123,16 @@ import TextureLayerView
             }
             .store(in: &cancellables)
 
-        // Update the canvas
-        undoTextureLayers?.canvasUpdateRequestedPublisher
+        // Update the current layer
+        undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
                 self?.refreshCanvas()
             }
             .store(in: &cancellables)
 
-        // Update the canvas with the texture used for undoing drawing operations
-        undoTextureLayers?.canvasDrawingUpdateRequested
+        // Update the canvas with a new texture
+        // Mainly used for undoing drawing operations
+        undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
                 self?.updateCurrentTexture(texture)
             }

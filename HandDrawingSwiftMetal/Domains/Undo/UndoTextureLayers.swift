@@ -413,12 +413,12 @@ private extension UndoTextureLayers {
 
 extension UndoTextureLayers {
 
-    public var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.canvasUpdateRequestedPublisher
+    public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
+        textureLayers.currentLayerUpdateRequested
     }
 
-    public var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> {
-        textureLayers.canvasDrawingUpdateRequested
+    public var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> {
+        textureLayers.currentLayerUpdateWithNewCurrentTextureRequested
     }
 
     public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {

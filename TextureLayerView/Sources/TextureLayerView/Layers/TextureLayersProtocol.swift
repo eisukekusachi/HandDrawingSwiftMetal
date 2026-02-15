@@ -14,10 +14,10 @@ import MetalKit
 public protocol TextureLayersProtocol: ObservableObject {
 
     /// Emits when a canvas update is requested
-    var canvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
+    var currentLayerUpdateRequested: AnyPublisher<Void, Never> { get }
 
     /// Emits when a canvas update is requested with `MTLTexture`
-    var canvasDrawingUpdateRequested: AnyPublisher<MTLTexture, Never> { get }
+    var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> { get }
 
     /// Emits when a full canvas update is requested
     var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }

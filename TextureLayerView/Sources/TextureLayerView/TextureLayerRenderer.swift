@@ -11,28 +11,6 @@ import UIKit
 @preconcurrency import MetalKit
 
 @MainActor
-public struct CanvasTextureLayersContext {
-    public let selectedLayer: TextureLayerModel
-    public let selectedIndex: Int
-    public let layers: [TextureLayerModel]
-    public init?(textureLayers: any TextureLayersProtocol) {
-        guard
-            let selectedLayer = textureLayers.selectedLayer,
-            let selectedIndex = textureLayers.selectedIndex
-        else { return nil }
-        self.selectedLayer = .init(item: selectedLayer)
-        self.selectedIndex = selectedIndex
-        self.layers = textureLayers.layers.map { .init(item: $0) }
-    }
-}
-
-struct CurrentDrawingTexture {
-    let isVisible: Bool
-    let alpha: Int
-    let currentTexture: MTLTexture?
-}
-
-@MainActor
 public class TextureLayerRenderer {
 
     public var backgroundColor: UIColor = .white
@@ -99,8 +77,8 @@ public class TextureLayerRenderer {
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func refreshTexturesFromRepository(
-        repository: TextureLayersDocumentsRepositoryProtocol?,
-        context: CanvasTextureLayersContext
+        context: TextureLayersContext,
+        repository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
         guard
             let repository,
@@ -149,7 +127,7 @@ public class TextureLayerRenderer {
 
     /// Refreshes the entire screen using textures
     func refreshCanvas(
-        currentDrawingTexture: CurrentDrawingTexture,
+        textureLayer: TextureLayerContext,
         canvasTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer?
     ) {
@@ -172,10 +150,11 @@ public class TextureLayerRenderer {
             with: commandBuffer
         )
 
-        if currentDrawingTexture.isVisible, let texture = currentDrawingTexture.currentTexture {
+        if textureLayer.isVisible,
+           let texture = textureLayer.texture {
             renderer.mergeTexture(
                 texture: texture,
-                alpha: currentDrawingTexture.alpha,
+                alpha: textureLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
             )
