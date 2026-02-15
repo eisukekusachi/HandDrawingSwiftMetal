@@ -64,6 +64,9 @@ open class CanvasView: UIView {
 
     public static let thumbnailName: String = "thumbnail.png"
 
+    /// Display link for realtime drawing
+    private var drawingDisplayLink = DrawingDisplayLink()
+
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
@@ -147,6 +150,19 @@ open class CanvasView: UIView {
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
                 self?.viewModel.onUpdateDisplayTexture()
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingTouchPhase
+            .sink { [weak self] touchPhase in
+                self?.drawingDisplayLink.run(touchPhase)
+            }
+            .store(in: &cancellables)
+
+        // The canvas is updated every frame during drawing
+        drawingDisplayLink.update
+            .sink { [weak self] in
+                self?.viewModel.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
 

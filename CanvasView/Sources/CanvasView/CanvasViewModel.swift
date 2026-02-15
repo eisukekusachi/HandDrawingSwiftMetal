@@ -26,10 +26,10 @@ public final class CanvasViewModel {
     private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
 
     private var isFinishedDrawing: Bool {
-        drawingTouchPhase == .ended
+        drawingTouchPhaseSubject.value == .ended
     }
     private var isCancelledDrawing: Bool {
-        drawingTouchPhase == .cancelled
+        drawingTouchPhaseSubject.value == .cancelled
     }
 
     /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
@@ -43,6 +43,11 @@ public final class CanvasViewModel {
         drawingEventSubject.eraseToAnyPublisher()
     }
     private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
+
+    var drawingTouchPhase: AnyPublisher<UITouch.Phase?, Never> {
+        drawingTouchPhaseSubject.eraseToAnyPublisher()
+    }
+    private let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
 
     public var currentTexture: MTLTexture?
 
@@ -64,12 +69,6 @@ public final class CanvasViewModel {
 
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
-
-    /// Touch phase for drawing
-    private var drawingTouchPhase: UITouch.Phase?
-
-    /// Display link for realtime drawing
-    private var drawingDisplayLink = DrawingDisplayLink()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -110,7 +109,7 @@ extension CanvasViewModel {
         try canvasRenderer.setupTextures(
             textureSize: textureSize
         )
-        try await canvasRenderer.drawCanvasToDisplay()
+        canvasRenderer.drawCanvasToDisplay()
 
         setupCompletionSubject.send(
             .init(
@@ -134,13 +133,6 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func bindData() {
-        // The canvas is updated every frame during drawing
-        drawingDisplayLink.update
-            .sink { [weak self] in
-                self?.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
         transforming.matrixPublisher
             .sink { [weak self] matrix in
                 self?.canvasRenderer.setMatrix(matrix)
@@ -202,9 +194,6 @@ extension CanvasViewModel {
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
 
-            // Update the touch phase for drawing
-            drawingTouchPhase = drawingTouchPhase(pointArray)
-
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
                     from: pointArray,
@@ -218,8 +207,9 @@ extension CanvasViewModel {
 
             fingerStroke.updateDrawingLineEndPoint()
 
-            drawingDisplayLink.run(
-                drawingTouchPhase ?? .ended
+            // Update the touch phase for drawing
+            drawingTouchPhaseSubject.send(
+                drawingTouchPhase(pointArray)
             )
 
         case .transforming:
@@ -284,9 +274,6 @@ extension CanvasViewModel {
 
         let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
 
-        // Update the touch phase for drawing
-        drawingTouchPhase = drawingTouchPhase(pointArray)
-
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
                 from: pointArray,
@@ -299,13 +286,14 @@ extension CanvasViewModel {
         )
         pencilStroke.setDrawingLineEndPoint()
 
-        drawingDisplayLink.run(
-            drawingTouchPhase ?? .ended
+        // Update the touch phase for drawing
+        drawingTouchPhaseSubject.send(
+            drawingTouchPhase(pointArray)
         )
     }
 
     /// Called on every display-link frame while drawing is active
-    private func onDrawingDisplayLinkFrame() {
+    func onDrawingDisplayLinkFrame() {
         guard
             let drawingRenderer,
             let currentTexture,
@@ -449,9 +437,7 @@ extension CanvasViewModel {
 
         transforming.resetMatrix()
 
-        drawingDisplayLink.stop()
-
-        drawingTouchPhase = nil
+        drawingTouchPhaseSubject.send(nil)
 
         drawingRenderer?.prepareNextStroke()
     }
@@ -460,7 +446,8 @@ extension CanvasViewModel {
         touchGesture.reset()
 
         fingerStroke.reset()
-        drawingDisplayLink.stop()
+
+        drawingTouchPhaseSubject.send(nil)
     }
     private func resetFingerDrawingRelatedParameters() {
         fingerStroke.reset()

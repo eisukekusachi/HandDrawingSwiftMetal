@@ -25,15 +25,17 @@ public final class DrawingDisplayLink {
         displayLink?.isPaused = isPaused
     }
 
-    public func run(_ touchPhase: UITouch.Phase) {
+    public func run(_ touchPhase: UITouch.Phase?) {
         if isCurrentlyDrawing(touchPhase) {
             displayLink?.isPaused = false
         } else {
-            displayLink?.isPaused = true
+            if displayLink?.isPaused == false {
+                // Since the touchEnded process remains,
+                // `updateCanvasWhileDrawing()` is executed once to handle the final update.
+                updateSubject.send()
+            }
 
-            // Since the touchEnded process remains,
-            // `updateCanvasWhileDrawing()` is executed once to handle the final update.
-            updateSubject.send(())
+            displayLink?.isPaused = true
         }
     }
 
@@ -45,13 +47,13 @@ public final class DrawingDisplayLink {
 extension DrawingDisplayLink {
 
     @objc private func displayLinkFrame() {
-        updateSubject.send(())
+        updateSubject.send()
     }
 }
 
 extension DrawingDisplayLink {
 
-    private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase) -> Bool {
+    private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase?) -> Bool {
         switch touchPhase {
         case .began, .moved, .stationary: return true
         default: return false
