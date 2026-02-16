@@ -125,14 +125,13 @@ import Combine
 extension CanvasRenderer {
 
     /// Refreshes the entire screen using textures
-    public func refreshCanvas(
+    public func updateCanvasTexture(
         currentTexture: MTLTexture?,
-        useRealtimeDrawingTexture: Bool
+        canvasTexture: MTLTexture?
     ) {
         guard
             let canvasTexture,
             let currentTexture,
-            let realtimeDrawingTexture,
             let currentFrameCommandBuffer
         else { return }
 
@@ -143,13 +142,11 @@ extension CanvasRenderer {
         )
 
         renderer.mergeTexture(
-            texture: useRealtimeDrawingTexture ? realtimeDrawingTexture : currentTexture,
+            texture: currentTexture,
             alpha: 255,
             into: canvasTexture,
             with: currentFrameCommandBuffer
         )
-
-        drawCanvasToDisplay()
     }
 
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
@@ -187,6 +184,11 @@ extension CanvasRenderer {
             buffers: flippedTextureBuffers,
             withBackgroundColor: .clear,
             on: currentTexture,
+            with: commandBuffer
+        )
+
+        renderer.clearTexture(
+            texture: texture,
             with: commandBuffer
         )
     }

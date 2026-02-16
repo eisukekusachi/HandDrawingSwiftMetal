@@ -126,7 +126,10 @@ extension CanvasViewModel {
             label: "currentTexture"
         )
 
-        refreshCanvas()
+        updateCanvasTexture(
+            currentTexture: currentTexture
+        )
+        canvasRenderer.drawCanvasToDisplay()
     }
 }
 
@@ -295,6 +298,7 @@ extension CanvasViewModel {
     /// Called on every display-link frame while drawing is active
     func onDrawingDisplayLinkFrame() {
         guard
+            touchGesture.state == .drawing,
             let drawingRenderer,
             let currentTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
@@ -320,10 +324,7 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    guard
-                        let currentTexture = self?.currentTexture
-                    else { return }
-
+                    guard let currentTexture = self?.currentTexture else { return }
                     self?.drawingEventSubject.send(
                         .strokeCompleted(texture: currentTexture)
                     )
@@ -334,14 +335,18 @@ extension CanvasViewModel {
             prepareNextStroke(commandBuffer: commandBuffer)
         }
 
-        refreshCanvas(
-            useRealtimeDrawingTexture: drawingRenderer.displayRealtimeDrawingTexture
+        updateCanvasTexture(
+            currentTexture: drawingRenderer.displayRealtimeDrawingTexture ? realtimeDrawingTexture : currentTexture
         )
+        canvasRenderer.drawCanvasToDisplay()
     }
 
     /// Called when the display texture size changes, such as when the device orientation changes
     func onUpdateDisplayTexture() {
-        refreshCanvas()
+        updateCanvasTexture(
+            currentTexture: currentTexture
+        )
+        canvasRenderer.drawCanvasToDisplay()
     }
 }
 
@@ -385,20 +390,23 @@ public extension CanvasViewModel {
             let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
-        self.canvasRenderer.drawSelectedLayerTexture(
+        canvasRenderer.drawSelectedLayerTexture(
             currentTexture: currentTexture,
             from: texture,
             with: currentFrameCommandBuffer
         )
-        self.refreshCanvas()
+        updateCanvasTexture(
+            currentTexture: currentTexture
+        )
+        canvasRenderer.drawCanvasToDisplay()
     }
 
-    func refreshCanvas(
-        useRealtimeDrawingTexture: Bool = false
+    func updateCanvasTexture(
+        currentTexture: MTLTexture?
     ) {
-        canvasRenderer.refreshCanvas(
+        canvasRenderer.updateCanvasTexture(
             currentTexture: currentTexture,
-            useRealtimeDrawingTexture: useRealtimeDrawingTexture
+            canvasTexture: canvasRenderer.canvasTexture
         )
     }
 }

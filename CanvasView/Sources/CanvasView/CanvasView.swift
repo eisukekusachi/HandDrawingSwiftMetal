@@ -204,7 +204,7 @@ open class CanvasView: UIView {
     }
 
     public func refreshCanvas() {
-        viewModel.refreshCanvas()
+        viewModel.onUpdateDisplayTexture()
     }
 }
 
