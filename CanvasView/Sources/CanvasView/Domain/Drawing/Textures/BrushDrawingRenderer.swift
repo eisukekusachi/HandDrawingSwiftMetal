@@ -164,12 +164,13 @@ public extension BrushDrawingRenderer {
         guard
             let newCommandBuffer = renderer?.newCommandBuffer
         else { return }
-
-        clearTextures(with: newCommandBuffer)
+        prepareNextStroke(with: newCommandBuffer)
         newCommandBuffer.commit()
+    }
 
+    func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
+        clearTextures(with: commandBuffer)
         drawingCurve = nil
-
         _displayRealtimeDrawingTexture = false
     }
 }

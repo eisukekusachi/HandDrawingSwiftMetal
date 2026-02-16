@@ -298,13 +298,13 @@ extension CanvasViewModel {
             let drawingRenderer,
             let currentTexture,
             let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
-            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
+            let commandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
         drawingRenderer.drawStroke(
             baseTexture: currentTexture,
             on: realtimeDrawingTexture,
-            with: currentFrameCommandBuffer
+            with: commandBuffer
         )
 
         // The finalization process is performed when drawing is completed
@@ -312,27 +312,26 @@ extension CanvasViewModel {
             canvasRenderer.drawSelectedLayerTexture(
                 currentTexture: currentTexture,
                 from: canvasRenderer.realtimeDrawingTexture,
-                with: currentFrameCommandBuffer
+                with: commandBuffer
             )
 
-            currentFrameCommandBuffer.addCompletedHandler { @Sendable _ in
+            // Reset parameters on drawing completion
+            prepareNextStroke(commandBuffer: commandBuffer)
+
+            commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
                     guard
-                        let `self`,
-                        let currentTexture = self.currentTexture
+                        let currentTexture = self?.currentTexture
                     else { return }
 
-                    self.drawingEventSubject.send(
+                    self?.drawingEventSubject.send(
                         .strokeCompleted(texture: currentTexture)
                     )
-
-                    // Reset parameters on drawing completion
-                    self.prepareNextStroke()
                 }
             }
         } else if isCancelledDrawing {
             // Prepare for the next drawing when the drawing is cancelled.
-            prepareNextStroke()
+            prepareNextStroke(commandBuffer: commandBuffer)
         }
 
         refreshCanvas(
@@ -428,7 +427,7 @@ extension CanvasViewModel {
         }
     }
 
-    private func prepareNextStroke() {
+    private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
         inputDevice.reset()
         touchGesture.reset()
 
@@ -439,7 +438,7 @@ extension CanvasViewModel {
 
         drawingTouchPhaseSubject.send(nil)
 
-        drawingRenderer?.prepareNextStroke()
+        drawingRenderer?.prepareNextStroke(with: commandBuffer)
     }
 
     private func resetFingerGestureParameters() {

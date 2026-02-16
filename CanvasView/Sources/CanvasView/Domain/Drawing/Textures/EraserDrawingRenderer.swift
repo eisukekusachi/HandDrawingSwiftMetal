@@ -179,13 +179,16 @@ public extension EraserDrawingRenderer {
     }
 
     func prepareNextStroke() {
-        guard let newCommandBuffer = renderer?.newCommandBuffer else { return }
-
-        clearTextures(with: newCommandBuffer)
+        guard
+            let newCommandBuffer = renderer?.newCommandBuffer
+        else { return }
+        prepareNextStroke(with: newCommandBuffer)
         newCommandBuffer.commit()
+    }
 
+    func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
+        clearTextures(with: commandBuffer)
         drawingCurve = nil
-
         _displayRealtimeDrawingTexture = false
     }
 }

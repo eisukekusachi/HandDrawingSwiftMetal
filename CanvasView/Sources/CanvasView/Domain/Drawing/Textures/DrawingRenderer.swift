@@ -43,4 +43,5 @@ public protocol DrawingRenderer: AnyObject {
 
     /// Prepares for the next stroke
     func prepareNextStroke()
+    func prepareNextStroke(with commandBuffer: MTLCommandBuffer)
 }
