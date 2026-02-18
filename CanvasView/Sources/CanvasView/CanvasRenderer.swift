@@ -29,9 +29,6 @@ import Combine
     /// Texture that combines the background color and the textures of `currentTexture`
     private(set) var canvasTexture: MTLTexture?
 
-    /// Texture used during drawing
-    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
-
     private var frameSize: CGSize = .zero
 
     private var matrix: CGAffineTransform = .identity
@@ -92,8 +89,7 @@ import Combine
         }
 
         guard
-            let canvasTexture = makeTexture(textureSize, label: "canvasTexture"),
-            let realtimeDrawingTexture = makeTexture(textureSize, label: "realtimeDrawingTexture")
+            let canvasTexture = makeTexture(textureSize, label: "canvasTexture")
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
@@ -106,7 +102,6 @@ import Combine
             throw error
         }
         self.canvasTexture = canvasTexture
-        self.realtimeDrawingTexture = realtimeDrawingTexture
     }
 
     public func setFrameSize(_ size: CGSize) {

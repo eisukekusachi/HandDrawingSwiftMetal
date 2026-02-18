@@ -29,6 +29,8 @@ import TextureLayerView
 
     private var textureLayersState: TextureLayersState?
 
+    private var textureLayerRenderer: TextureLayerRenderer?
+
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
@@ -59,6 +61,7 @@ import TextureLayerView
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
+        self.textureLayerRenderer = .init(renderer: renderer)
 
         guard let undoTextureLayers else { return }
         self.textureLayerStorage = .init(
@@ -94,6 +97,7 @@ import TextureLayerView
             renderer: renderer,
             inMemoryRepository: undoTextureInMemoryRepository
         )
+        self.textureLayerRenderer = .init(renderer: renderer)
 
         guard let undoTextureLayers else { return }
         self.textureLayerStorage = .init(
@@ -123,10 +127,14 @@ import TextureLayerView
             }
             .store(in: &cancellables)
 
-        // Update the current layer
+        // Update the current texture
+        // Mainly used for undoing alpha changes
         undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
-                self?.refreshCanvas()
+                Task {
+                    try? await self?.updateCanvasTexture()
+                    self?.drawCanvasToDisplay()
+                }
             }
             .store(in: &cancellables)
 
@@ -134,19 +142,47 @@ import TextureLayerView
         // Mainly used for undoing drawing operations
         undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
-                self?.updateCurrentTexture(texture)
+                Task {
+                    try? await self?.updateCanvasTexture()
+                    self?.drawCanvasToDisplay()
+                }
             }
             .store(in: &cancellables)
 
-        // Update the entire canvas, including all drawing textures
-        undoTextureLayers?.fullCanvasUpdateRequestedPublisher
+        // Update the entire canvas
+        // Mainly used to undo adding/removing operations
+        undoTextureLayers?.fullCanvasUpdateRequested
             .sink { [weak self] in
-                guard let `self` else { return }
-                print("fullCanvasUpdateRequestedPublisher")
+                Task {
+                    try? await self?.updateFullCanvasTexture()
+                    self?.drawCanvasToDisplay()
+                }
             }
             .store(in: &cancellables)
     }
 
+    func updateFullCanvasTexture() async throws {
+        guard
+            let undoTextureLayers,
+            let selectedLayer = undoTextureLayers.selectedLayer,
+            let textureLayers: TextureLayersRenderContext = .init(textureLayers: undoTextureLayers)
+        else {
+            return
+        }
+
+        let currentTexture = try await textureLayerRenderer?.getTexture(
+            id: selectedLayer.id,
+            repository: textureLayersDocumentsRepository
+        )?.texture
+        try setCurrentTexture(currentTexture)
+
+        try await textureLayerRenderer?.refreshTexturesFromRepository(
+            textureLayers: textureLayers,
+            repository: textureLayersDocumentsRepository
+        )
+
+        try await updateCanvasTexture()
+    }
     private func completeDrawing(_ texture: MTLTexture?) {
         drawingDebouncer.perform {
             Task(priority: .utility) { [weak self] in
@@ -174,6 +210,31 @@ import TextureLayerView
         }
     }
 
+    override func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        updateCanvasTexture(realtimeDrawingTexture)
+    }
+
+    override func updateCanvasTexture() async throws {
+        updateCanvasTexture(currentTexture)
+    }
+
+    private func updateCanvasTexture(_ texture: MTLTexture?) {
+        guard
+            let selectedLayer = undoTextureLayers?.selectedLayer
+        else {
+            return
+        }
+
+        textureLayerRenderer?.updateCanvasTexture(
+            textureLayer: .init(
+                isVisible: selectedLayer.isVisible,
+                alpha: selectedLayer.alpha,
+                texture: texture ?? currentTexture
+            ),
+            canvasTexture: canvasTexture,
+            commandBuffer: currentFrameCommandBuffer
+        )
+    }
     private func setupInitialUndoManager() {
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         undoManager?.levelsOfUndo = 8
@@ -238,6 +299,16 @@ extension HandDrawingCanvasView {
             undoTextureLayers.initializeUndoTextures(
                 textureSize: textureSize
             )
+        }
+
+        do {
+            Task {
+                try textureLayerRenderer?.setupTextures(textureSize: textureSize)
+                try await updateFullCanvasTexture()
+                drawCanvasToDisplay()
+            }
+        } catch {
+
         }
     }
 

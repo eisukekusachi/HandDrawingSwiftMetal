@@ -49,7 +49,24 @@ public final class CanvasViewModel {
     }
     private let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
 
-    public var currentTexture: MTLTexture?
+    var currentTextureDisplaying: AnyPublisher<Void, Never> {
+        currentTextureDisplayingSubject.eraseToAnyPublisher()
+    }
+    private let currentTextureDisplayingSubject = PassthroughSubject<Void, Never>()
+
+    var realtimeDrawingTextureDisplaying: AnyPublisher<Void, Never> {
+        realtimeDrawingTextureDisplayingSubject.eraseToAnyPublisher()
+    }
+    private let realtimeDrawingTextureDisplayingSubject = PassthroughSubject<Void, Never>()
+
+    public var displayRealtimeDrawingTexture: Bool {
+        drawingRenderer?.displayRealtimeDrawingTexture ?? false
+    }
+
+    private(set) var currentTexture: MTLTexture?
+
+    /// Texture used during drawing
+    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
@@ -126,9 +143,12 @@ extension CanvasViewModel {
             label: "currentTexture"
         )
 
-        updateCanvasTexture(
-            currentTexture: currentTexture
+        realtimeDrawingTexture = canvasRenderer.makeTexture(
+            currentTextureSize,
+            label: "realtimeDrawingTexture"
         )
+
+        updateCanvasTexture()
         canvasRenderer.drawCanvasToDisplay()
     }
 }
@@ -301,7 +321,7 @@ extension CanvasViewModel {
             touchGesture.state == .drawing,
             let drawingRenderer,
             let currentTexture,
-            let realtimeDrawingTexture = canvasRenderer.realtimeDrawingTexture,
+            let realtimeDrawingTexture,
             let commandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
@@ -315,7 +335,7 @@ extension CanvasViewModel {
         if isFinishedDrawing {
             canvasRenderer.drawSelectedLayerTexture(
                 currentTexture: currentTexture,
-                from: canvasRenderer.realtimeDrawingTexture,
+                from: realtimeDrawingTexture,
                 with: commandBuffer
             )
 
@@ -335,17 +355,14 @@ extension CanvasViewModel {
             prepareNextStroke(commandBuffer: commandBuffer)
         }
 
-        updateCanvasTexture(
-            currentTexture: drawingRenderer.displayRealtimeDrawingTexture ? realtimeDrawingTexture : currentTexture
-        )
-        canvasRenderer.drawCanvasToDisplay()
+        if displayRealtimeDrawingTexture {
+            realtimeDrawingTextureDisplayingSubject.send()
+        } else {
+            currentTextureDisplayingSubject.send()
+        }
     }
 
-    /// Called when the display texture size changes, such as when the device orientation changes
-    func onUpdateDisplayTexture() {
-        updateCanvasTexture(
-            currentTexture: currentTexture
-        )
+    func drawCanvasToDisplay() {
         canvasRenderer.drawCanvasToDisplay()
     }
 }
@@ -385,27 +402,33 @@ public extension CanvasViewModel {
         )
     }
 
-    func updateCurrentTexture(_ texture: MTLTexture?) {
+    func setCurrentTexture(_ texture: MTLTexture?) throws {
         guard
-            let currentFrameCommandBuffer = canvasRenderer.currentFrameCommandBuffer
-        else { return }
-
-        canvasRenderer.drawSelectedLayerTexture(
-            currentTexture: currentTexture,
-            from: texture,
-            with: currentFrameCommandBuffer
-        )
-        updateCanvasTexture(
-            currentTexture: currentTexture
-        )
-        canvasRenderer.drawCanvasToDisplay()
+            let texture,
+            Int(texture.width) >= canvasMinimumTextureLength &&
+            Int(texture.height) >= canvasMinimumTextureLength
+        else {
+            let error = NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(
+                    localized: "Texture size is below the minimum: \(texture?.width ?? 0) \(texture?.height ?? 0)",
+                    bundle: .module
+                )
+            )
+            Logger.error(error)
+            throw error
+        }
+        self.currentTexture = texture
     }
 
+    func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        updateCanvasTexture(using: realtimeDrawingTexture)
+    }
     func updateCanvasTexture(
-        currentTexture: MTLTexture?
+        using texture: MTLTexture? = nil
     ) {
         canvasRenderer.updateCanvasTexture(
-            currentTexture: currentTexture,
+            currentTexture: texture ?? currentTexture,
             canvasTexture: canvasRenderer.canvasTexture
         )
     }

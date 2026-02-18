@@ -26,7 +26,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
     private let currentLayerUpdateWithNewCurrentTextureRequestedSubject = PassthroughSubject<MTLTexture, Never>()
 
     /// Emits when a full canvas update is requested
-    public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
+    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
         fullCanvasUpdateRequestedSubject.eraseToAnyPublisher()
     }
     private let fullCanvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()

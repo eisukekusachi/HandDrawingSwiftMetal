@@ -20,7 +20,7 @@ public protocol TextureLayersProtocol: ObservableObject {
     var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> { get }
 
     /// Emits when a full canvas update is requested
-    var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> { get }
+    var fullCanvasUpdateRequested: AnyPublisher<Void, Never> { get }
 
     /// Emits whenever `layers` change
     var layersPublisher: AnyPublisher<[TextureLayerItem], Never> { get }

@@ -1,5 +1,5 @@
 //
-//  TextureLayersContext.swift
+//  TextureLayersRenderContext.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2026/02/15.
@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-public struct TextureLayersContext {
+public struct TextureLayersRenderContext {
 
     public let selectedIndex: Int
     public let layers: [TextureLayerModel]

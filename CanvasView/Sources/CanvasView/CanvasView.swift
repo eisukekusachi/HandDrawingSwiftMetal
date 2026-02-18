@@ -27,6 +27,11 @@ open class CanvasView: UIView {
         canvasRenderer.canvasTexture
     }
 
+    /// The size of the texture currently set on the canvas
+    public var currentTextureSize: CGSize {
+        viewModel.currentTextureSize
+    }
+
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
@@ -47,11 +52,6 @@ open class CanvasView: UIView {
         viewModel.thumbnail()
     }
 
-    /// The size of the texture currently set on the canvas
-    public var currentTextureSize: CGSize {
-        viewModel.currentTextureSize
-    }
-
     /// The size of the screen
     public static var screenSize: CGSize {
         let scale = UIScreen.main.scale
@@ -60,6 +60,14 @@ open class CanvasView: UIView {
             width: size.width * scale,
             height: size.height * scale
         )
+    }
+
+    public var realtimeDrawingTexture: MTLTexture? {
+        viewModel.realtimeDrawingTexture
+    }
+
+    public var currentFrameCommandBuffer: MTLCommandBuffer? {
+        displayView.currentFrameCommandBuffer
     }
 
     public static let thumbnailName: String = "thumbnail.png"
@@ -149,7 +157,26 @@ open class CanvasView: UIView {
     private func bindData() {
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
-                self?.viewModel.onUpdateDisplayTexture()
+                Task {
+                    try? await self?.updateCanvasTexture()
+                    self?.drawCanvasToDisplay()
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.currentTextureDisplaying
+            .sink { [weak self] in
+                Task {
+                    try? await self?.updateCanvasTexture()
+                    self?.drawCanvasToDisplay()
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.realtimeDrawingTextureDisplaying
+            .sink { [weak self] in
+                self?.updateCanvasTextureUsingRealtimeDrawingTexture()
+                self?.drawCanvasToDisplay()
             }
             .store(in: &cancellables)
 
@@ -185,12 +212,6 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
-    public func updateCanvas(
-        _ textureSize: CGSize
-    ) async throws {
-        try await viewModel.updateCanvas(textureSize)
-    }
-
     public func resetTransforming() {
         viewModel.resetTransforming()
     }
@@ -199,12 +220,26 @@ open class CanvasView: UIView {
         viewModel.setDrawingTool(drawingRenderer)
     }
 
-    public func updateCurrentTexture(_ texture: MTLTexture?) {
-        viewModel.updateCurrentTexture(texture)
+    public func setCurrentTexture(_ texture: MTLTexture?) throws {
+        try viewModel.setCurrentTexture(texture)
     }
 
-    public func refreshCanvas() {
-        viewModel.onUpdateDisplayTexture()
+    public func updateCanvas(
+        _ textureSize: CGSize
+    ) async throws {
+        try await viewModel.updateCanvas(textureSize)
+    }
+
+    open func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        viewModel.updateCanvasTextureUsingRealtimeDrawingTexture()
+    }
+
+    open func updateCanvasTexture() async throws {
+        viewModel.updateCanvasTexture()
+    }
+
+    public func drawCanvasToDisplay() {
+        viewModel.drawCanvasToDisplay()
     }
 }
 

@@ -73,11 +73,18 @@ public class TextureLayerRenderer {
         self.unselectedTopTexture?.label = "unselectedTopTexture"
     }
 
+    public func getTexture(
+        id: LayerId,
+        repository: TextureLayersDocumentsRepositoryProtocol?
+    ) async throws -> IdentifiedTexture? {
+        try await repository?.duplicatedTexture(id)
+    }
+
     /// Refreshes `selectedLayerTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func refreshTexturesFromRepository(
-        context: TextureLayersContext,
+        textureLayers: TextureLayersRenderContext,
         repository: TextureLayersDocumentsRepositoryProtocol?
     ) async throws {
         guard
@@ -90,13 +97,13 @@ public class TextureLayerRenderer {
         }
 
         let bottomLayers = bottomLayers(
-            selectedIndex: context.selectedIndex,
-            layers: context.layers
+            selectedIndex: textureLayers.selectedIndex,
+            layers: textureLayers.layers
         )
 
         let topLayers = topLayers(
-            selectedIndex: context.selectedIndex,
-            layers: context.layers
+            selectedIndex: textureLayers.selectedIndex,
+            layers: textureLayers.layers
         )
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
@@ -104,7 +111,7 @@ public class TextureLayerRenderer {
 
         // Get textures from the Documents directory
         let textures = try await repository.duplicatedTextures(
-            context.layers.map { $0.id }
+            textureLayers.layers.map { $0.id }
         )
 
         // Update the class’s textures with the retrieved textures
@@ -126,8 +133,8 @@ public class TextureLayerRenderer {
     }
 
     /// Refreshes the entire screen using textures
-    func refreshCanvas(
-        textureLayer: TextureLayerContext,
+    public func updateCanvasTexture(
+        textureLayer: TextureLayerRenderContext,
         canvasTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer?
     ) {

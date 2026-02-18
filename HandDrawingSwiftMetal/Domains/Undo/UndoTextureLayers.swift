@@ -421,8 +421,8 @@ extension UndoTextureLayers {
         textureLayers.currentLayerUpdateWithNewCurrentTextureRequested
     }
 
-    public var fullCanvasUpdateRequestedPublisher: AnyPublisher<Void, Never> {
-        textureLayers.fullCanvasUpdateRequestedPublisher
+    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
+        textureLayers.fullCanvasUpdateRequested
     }
 
     public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
