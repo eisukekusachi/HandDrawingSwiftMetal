@@ -116,7 +116,6 @@ import TextureLayerView
     }
 
     func bindData() {
-
         drawingEvent
             .compactMap { event -> MTLTexture? in
                 guard case let .strokeCompleted(texture) = event else { return nil }
@@ -143,7 +142,8 @@ import TextureLayerView
         undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
                 Task {
-                    try? await self?.updateCanvasTexture()
+                    try self?.setCurrentTexture(texture)
+                    try await self?.updateCanvasTexture()
                     self?.drawCanvasToDisplay()
                 }
             }
