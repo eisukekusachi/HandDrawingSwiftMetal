@@ -35,6 +35,7 @@
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
 		D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */; };
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
+		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
@@ -135,6 +136,7 @@
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrowConfiguration.swift; sourceTree = "<group>"; };
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
+		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
@@ -272,16 +274,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D426FC9C2E5DD88600CC116D /* Domains */ = {
+		D426FC9C2E5DD88600CC116D /* Domain */ = {
 			isa = PBXGroup;
 			children = (
-				D41C72172E6C479500D524DE /* CoreData */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
 				D426FC9E2E5DD90500CC116D /* FileIO */,
-				D49C693F2F24A10100B66608 /* Project */,
 				D48CA0722F3C18D3008C6E9E /* Undo */,
 			);
-			path = Domains;
+			path = Domain;
 			sourceTree = "<group>";
 		};
 		D426FC9D2E5DD8CD00CC116D /* DrawingTools */ = {
@@ -316,9 +316,9 @@
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
 				D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */,
-				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 				D4DF37732E914492009B8F2A /* Throttle.swift */,
+				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -407,6 +407,34 @@
 			path = Project;
 			sourceTree = "<group>";
 		};
+		D49D7DC92F49FA5800B178EF /* Alert */ = {
+			isa = PBXGroup;
+			children = (
+				D46AD0A72F49CC880051C0D7 /* CanvasError.swift */,
+				D4F525722EAC96BE00439FFF /* ToastMessage.swift */,
+			);
+			path = Alert;
+			sourceTree = "<group>";
+		};
+		D49D7DCA2F49FAB200B178EF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D42F40992B4402EC00B32707 /* Components */,
+				D4513AAF2AF63A3C00CA4438 /* FileView */,
+				D49D7DCB2F49FAD600B178EF /* HandDrawingCanvasView */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D49D7DCB2F49FAD600B178EF /* HandDrawingCanvasView */ = {
+			isa = PBXGroup;
+			children = (
+				D49C69102F224F1200B66608 /* HandDrawingCanvasView.swift */,
+				D49C695A2F324E7900B66608 /* HandDrawingCanvasViewModel.swift */,
+			);
+			path = HandDrawingCanvasView;
+			sourceTree = "<group>";
+		};
 		D4E1ECD02752388C00D4A23D = {
 			isa = PBXGroup;
 			children = (
@@ -433,24 +461,21 @@
 		D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */ = {
 			isa = PBXGroup;
 			children = (
-				D49C69292F23A75000B66608 /* Utils */,
+				D426FC9C2E5DD88600CC116D /* Domain */,
+				D47FD3E52E2B20C600F3F514 /* Extensions */,
 				D4F525742EAC96C600439FFF /* Models */,
 				D4F5256B2EAC60F200439FFF /* Repositories */,
-				D426FC9C2E5DD88600CC116D /* Domains */,
+				D47FD3E62E2B20E800F3F514 /* Resources */,
+				D49C69292F23A75000B66608 /* Utils */,
+				D49D7DCA2F49FAB200B178EF /* Views */,
 				D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */,
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
-				D49C69102F224F1200B66608 /* HandDrawingCanvasView.swift */,
-				D49C695A2F324E7900B66608 /* HandDrawingCanvasViewModel.swift */,
 				D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */,
 				D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */,
 				D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */,
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
-				D47FD3E52E2B20C600F3F514 /* Extensions */,
-				D42F40992B4402EC00B32707 /* Components */,
-				D4513AAF2AF63A3C00CA4438 /* FileView */,
-				D47FD3E62E2B20E800F3F514 /* Resources */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
 			);
 			path = HandDrawingSwiftMetal;
@@ -477,9 +502,9 @@
 		D4F5256B2EAC60F200439FFF /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
-				D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */,
 				D4F5256E2EAC614B00439FFF /* FileInput.swift */,
 				D4F525702EAC616600439FFF /* FileOutput.swift */,
+				D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */,
 				D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */,
 			);
 			path = Repositories;
@@ -488,7 +513,9 @@
 		D4F525742EAC96C600439FFF /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D4F525722EAC96BE00439FFF /* ToastMessage.swift */,
+				D49D7DC92F49FA5800B178EF /* Alert */,
+				D41C72172E6C479500D524DE /* CoreData */,
+				D49C693F2F24A10100B66608 /* Project */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -659,6 +686,7 @@
 			files = (
 				D49C69282F23A6D900B66608 /* CalendarExtensions.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */,
+				D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */,
 				D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */,
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,

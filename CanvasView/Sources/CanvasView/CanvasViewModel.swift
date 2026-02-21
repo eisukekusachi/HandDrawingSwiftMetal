@@ -77,7 +77,7 @@ public final class CanvasViewModel {
     private let pencilStroke = PencilStroke()
 
     /// Manages input from pen and finger
-    private let inputDevice = InputDeviceState()
+    private let deviceInput = DeviceInputState()
 
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
@@ -88,8 +88,6 @@ public final class CanvasViewModel {
     private var drawingRenderer: DrawingRenderer?
 
     private var cancellables = Set<AnyCancellable>()
-
-    public static let thumbnailLength: CGFloat = 500
 
     init(
         dependencies: CanvasViewDependencies
@@ -185,10 +183,10 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        inputDevice.update(.finger)
+        deviceInput.update(.finger)
 
         // Return if a pen input is in progress
-        guard inputDevice.isNotPencil else { return }
+        guard deviceInput.isNotPencil else { return }
 
         fingerStroke.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
@@ -257,10 +255,10 @@ extension CanvasViewModel {
         view: UIView
     ) {
         // Reset parameters if a finger drawing is in progress
-        if inputDevice.isFinger {
+        if deviceInput.isFinger {
             resetFingerDrawingRelatedParameters()
         }
-        inputDevice.update(.pencil)
+        deviceInput.update(.pencil)
 
         pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
@@ -395,13 +393,6 @@ public extension CanvasViewModel {
         self.drawingRenderer?.prepareNextStroke()
     }
 
-    func thumbnail(length: CGFloat = CanvasViewModel.thumbnailLength) -> UIImage? {
-        canvasRenderer.canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
-        )
-    }
-
     func setCurrentTexture(_ texture: MTLTexture?) throws {
         guard
             let texture,
@@ -459,7 +450,7 @@ extension CanvasViewModel {
     }
 
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
-        inputDevice.reset()
+        deviceInput.reset()
         touchGesture.reset()
 
         fingerStroke.reset()

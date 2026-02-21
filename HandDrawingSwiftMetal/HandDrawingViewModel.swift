@@ -43,6 +43,8 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
+    private let thumbnailName: String = "thumbnail.png"
+
     let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
     let brushPalette: BrushPalette
@@ -302,7 +304,7 @@ extension HandDrawingViewModel {
 
                 // Load the thubnail
                 let data = try Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
+                    contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
                 )
 
                 _fileList.append(

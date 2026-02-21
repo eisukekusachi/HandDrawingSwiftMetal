@@ -12,30 +12,6 @@ import UIKit
 
 open class CanvasView: UIView {
 
-    /// The single Metal device instance used throughout the app
-    public let sharedDevice: MTLDevice
-
-    public let renderer: MTLRendering
-
-    public var cancellables = Set<AnyCancellable>()
-
-    public var currentTexture: MTLTexture? {
-        viewModel.currentTexture
-    }
-
-    public var canvasTexture: MTLTexture? {
-        canvasRenderer.canvasTexture
-    }
-
-    /// The size of the texture currently set on the canvas
-    public var currentTextureSize: CGSize {
-        viewModel.currentTextureSize
-    }
-
-    public var displayTexture: MTLTexture? {
-        displayView.displayTexture
-    }
-
     /// Emits drawing-related events
     public var drawingEvent: AnyPublisher<DrawingEvent, Never> {
         drawingEventSubject.eraseToAnyPublisher()
@@ -48,29 +24,32 @@ open class CanvasView: UIView {
     }
     private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
 
-    public func thumbnail() -> UIImage? {
-        viewModel.thumbnail()
-    }
+    /// The single Metal device instance used throughout the app
+    public let sharedDevice: MTLDevice
 
-    /// The size of the screen
-    public static var screenSize: CGSize {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-        return .init(
-            width: size.width * scale,
-            height: size.height * scale
-        )
+    public let renderer: MTLRendering
+
+    public var cancellables = Set<AnyCancellable>()
+
+    public var currentTexture: MTLTexture? {
+        viewModel.currentTexture
     }
 
     public var realtimeDrawingTexture: MTLTexture? {
         viewModel.realtimeDrawingTexture
     }
 
+    public var displayTexture: MTLTexture? {
+        displayView.displayTexture
+    }
+
+    public var canvasTexture: MTLTexture? {
+        canvasRenderer.canvasTexture
+    }
+
     public var currentFrameCommandBuffer: MTLCommandBuffer? {
         displayView.currentFrameCommandBuffer
     }
-
-    public static let thumbnailName: String = "thumbnail.png"
 
     /// Display link for realtime drawing
     private var drawingDisplayLink = DrawingDisplayLink()
@@ -88,7 +67,6 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-
         self.canvasRenderer = .init(
             renderer: renderer,
             displayView: displayView
@@ -107,7 +85,6 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-
         self.canvasRenderer = .init(
             renderer: renderer,
             displayView: displayView
@@ -155,12 +132,39 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
+        viewModel.setupCompletion
+            .sink { [weak self] result in
+                guard let `self` else { return }
+                self.viewModel.completeSetup(result: result)
+                self.setupCompletionSubject.send(result)
+            }
+            .store(in: &cancellables)
+
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
                 Task {
                     try? await self?.updateCanvasTexture()
                     self?.drawCanvasToDisplay()
                 }
+            }
+            .store(in: &cancellables)
+
+        // The canvas is updated every frame during drawing
+        drawingDisplayLink.update
+            .sink { [weak self] in
+                self?.viewModel.onDrawingDisplayLinkFrame()
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingTouchPhase
+            .sink { [weak self] touchPhase in
+                self?.drawingDisplayLink.run(touchPhase)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingEvent
+            .sink { [weak self] result in
+                self?.drawingEventSubject.send(result)
             }
             .store(in: &cancellables)
 
@@ -177,33 +181,6 @@ open class CanvasView: UIView {
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingRealtimeDrawingTexture()
                 self?.drawCanvasToDisplay()
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingTouchPhase
-            .sink { [weak self] touchPhase in
-                self?.drawingDisplayLink.run(touchPhase)
-            }
-            .store(in: &cancellables)
-
-        // The canvas is updated every frame during drawing
-        drawingDisplayLink.update
-            .sink { [weak self] in
-                self?.viewModel.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingEvent
-            .sink { [weak self] result in
-                self?.drawingEventSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        viewModel.setupCompletion
-            .sink { [weak self] result in
-                guard let `self` else { return }
-                self.viewModel.completeSetup(result: result)
-                self.setupCompletionSubject.send(result)
             }
             .store(in: &cancellables)
     }
@@ -224,9 +201,7 @@ open class CanvasView: UIView {
         try viewModel.setCurrentTexture(texture)
     }
 
-    public func updateCanvas(
-        _ textureSize: CGSize
-    ) async throws {
+    public func updateCanvas(_ textureSize: CGSize) async throws {
         try await viewModel.updateCanvas(textureSize)
     }
 

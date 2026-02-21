@@ -46,7 +46,10 @@ class HandDrawingViewController: UIViewController {
             title: viewModel.project.projectName,
             createdAt: viewModel.project.createdAt,
             updatedAt: viewModel.project.updatedAt,
-            image: contentView.canvasView.thumbnail(),
+            image: contentView.canvasView.canvasTexture?.uiImage?.resizeWithAspectRatio(
+                height: HandDrawingCanvasView.thumbnailLength,
+                scale: 1.0
+            ),
             fileURL: URL.documents.appendingPathComponent(
                 viewModel.projectFileName()
             )

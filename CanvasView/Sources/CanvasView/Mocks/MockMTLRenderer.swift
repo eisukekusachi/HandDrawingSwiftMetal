@@ -1,8 +1,8 @@
 //
 //  MockMTLRenderer.swift
-//  HandDrawingSwiftMetalTests
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/01/25.
+//  Created by Eisuke Kusachi on 2026/02/21.
 //
 
 import Metal
