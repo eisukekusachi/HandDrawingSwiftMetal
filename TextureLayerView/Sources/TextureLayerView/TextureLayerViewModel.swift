@@ -16,7 +16,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
-    @Published public var isDragging: Bool = false
+    @Published public var isAlphaSliderDragging: Bool = false
 
     public var selectedLayer: TextureLayerItem? {
         textureLayers?.selectedLayer
@@ -53,6 +53,7 @@ public final class TextureLayerViewModel: ObservableObject {
             .sink { [weak self] alpha in
                 guard
                     let `self`,
+                    self.isAlphaSliderDragging,
                     let textureLayers = self.textureLayers,
                     let selectedLayerId = self.selectedLayerId
                 else { return }
@@ -67,7 +68,7 @@ public final class TextureLayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        $isDragging
+        $isAlphaSliderDragging
             .sink { [weak self] isDragging in
                 if isDragging {
                     self?.textureLayers?.beginAlphaChange()
