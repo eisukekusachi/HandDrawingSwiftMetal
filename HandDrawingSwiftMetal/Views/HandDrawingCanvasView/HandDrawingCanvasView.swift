@@ -163,6 +163,32 @@ import TextureLayerView
             .store(in: &cancellables)
     }
 
+    private func completeDrawing(_ texture: MTLTexture?) {
+        drawingDebouncer.perform {
+            Task(priority: .utility) { [weak self] in
+                guard
+                    let texture,
+                    let layerId = self?.undoTextureLayers?.selectedLayer?.id
+                else { return }
+
+                do {
+                    try await self?.textureLayersDocumentsRepository?.writeTextureToDisk(
+                        texture: texture,
+                        for: layerId
+                    )
+
+                    self?.undoTextureLayers?.updateThumbnail(
+                        layerId,
+                        texture: texture
+                    )
+
+                } catch {
+                    Logger.error(error)
+                }
+            }
+        }
+    }
+
     func updateFullCanvasTexture() async throws {
         guard
             let undoTextureLayers,
@@ -185,46 +211,20 @@ import TextureLayerView
 
         try await updateCanvasTextureUsingCurrentTexture()
     }
-    private func completeDrawing(_ texture: MTLTexture?) {
-        drawingDebouncer.perform {
-            Task(priority: .utility) { [weak self] in
-                guard
-                    let self,
-                    let texture,
-                    let layerId = self.undoTextureLayers?.selectedLayer?.id
-                else { return }
-
-                do {
-                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
-                        texture: texture,
-                        for: layerId
-                    )
-
-                    self.undoTextureLayers?.updateThumbnail(
-                        layerId,
-                        texture: texture
-                    )
-
-                } catch {
-                    Logger.error(error)
-                }
-            }
-        }
-    }
 
     override func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
-        // Initialize the textures used for Undo
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
+            // Initialize the textures used for Undo
             undoTextureLayers.initializeUndoTextures(
                 textureSize: textureSize
             )
+            resetUndo()
         }
-
-        resetUndo()
 
         try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
 
         try await updateFullCanvasTexture()
+
         drawCanvasToDisplay()
     }
 
@@ -253,6 +253,7 @@ import TextureLayerView
             commandBuffer: currentFrameCommandBuffer
         )
     }
+
     private func setupInitialUndoManager() {
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         undoManager?.levelsOfUndo = 8

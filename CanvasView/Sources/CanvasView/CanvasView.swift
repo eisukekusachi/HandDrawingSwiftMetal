@@ -126,20 +126,24 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
-        viewModel.canvasSizeDidChange
-            .sink { [weak self] textureSize in
-                Task { [weak self] in
-                    try? await self?.completeCanvasSizeChange(textureSize)
-                    self?.canvasSizeDidChangeSubject.send(textureSize)
-                }
-            }
-            .store(in: &cancellables)
 
+        // Receives an event when displayTexture size changes.
+        // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
                 Task {
                     try? await self?.updateCanvasTextureUsingCurrentTexture()
                     self?.drawCanvasToDisplay()
+                }
+            }
+            .store(in: &cancellables)
+
+        // Receives an event when canvasTexture size changes
+        viewModel.canvasSizeDidChange
+            .sink { [weak self] textureSize in
+                Task { [weak self] in
+                    try? await self?.completeCanvasSizeChange(textureSize)
+                    self?.canvasSizeDidChangeSubject.send(textureSize)
                 }
             }
             .store(in: &cancellables)
@@ -201,6 +205,7 @@ open class CanvasView: UIView {
     }
 
     open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
+        try await updateCanvasTextureUsingCurrentTexture()
         drawCanvasToDisplay()
     }
 

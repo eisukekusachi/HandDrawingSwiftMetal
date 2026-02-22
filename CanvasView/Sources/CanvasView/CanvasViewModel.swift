@@ -136,8 +136,6 @@ extension CanvasViewModel {
         // Update currentTextureSize
         currentTextureSize = textureSize
 
-        updateCanvasTexture()
-
         canvasSizeDidChangeSubject.send(textureSize)
     }
 }
