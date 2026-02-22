@@ -21,14 +21,24 @@ public final class MTLRenderer: Sendable, MTLRendering {
         commandQueue?.makeCommandBuffer()
     }
 
-    private let commandQueue: MTLCommandQueue?
+    /// Buffers used to draw textures with vertical flipping
+    private let flippedTextureBuffers: MTLTextureBuffers
 
     private let pipelines: MTLPipelines
 
+    private let commandQueue: MTLCommandQueue?
+
     init(device: MTLDevice?) {
         guard let device else { fatalError("Device is nil") }
+        guard let buffer = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: device
+        ) else {
+            fatalError("Metal is not supported on this device.")
+        }
 
         self._device = device
+        self.flippedTextureBuffers = buffer
         self.pipelines = MTLPipelines(device: device)
         self.commandQueue = device.makeCommandQueue()
     }
@@ -227,6 +237,31 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.setBytes(&alpha, length: MemoryLayout<Float>.size, index: 3)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
         encoder?.endEncoding()
+    }
+
+    /// Applies the source texture to the destination texture and clears the source texture
+    public func applyTexture(
+        _ srcTexture: MTLTexture?,
+        to dstTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        guard
+            let srcTexture,
+            let dstTexture
+        else { return }
+
+        drawTexture(
+            texture: srcTexture,
+            buffers: flippedTextureBuffers,
+            withBackgroundColor: .clear,
+            on: dstTexture,
+            with: commandBuffer
+        )
+
+        clearTexture(
+            texture: srcTexture,
+            with: commandBuffer
+        )
     }
 
     public func fillColor(

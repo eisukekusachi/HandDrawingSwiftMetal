@@ -89,6 +89,14 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         recordCall()
     }
 
+    func applyTexture(
+        _ srcTexture: MTLTexture?,
+        to dstTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        recordCall()
+    }
+
     func fillColor(
         texture: MTLTexture,
         withRGB rgb: IntRGB,

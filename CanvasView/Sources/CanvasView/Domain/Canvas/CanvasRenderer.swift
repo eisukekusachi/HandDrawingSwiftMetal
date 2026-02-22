@@ -163,27 +163,14 @@ extension CanvasRenderer {
         displayView.setNeedsDisplay()
     }
 
-    /// Draws the given texture onto `selectedLayerTexture`
-    func drawSelectedLayerTexture(
-        currentTexture: MTLTexture?,
-        from texture: MTLTexture?,
+    func applyTexture(
+        _ srcTexture: MTLTexture?,
+        to dstTexture: MTLTexture?,
         with commandBuffer: MTLCommandBuffer
     ) {
-        guard
-            let texture,
-            let currentTexture
-        else { return }
-
-        renderer.drawTexture(
-            texture: texture,
-            buffers: flippedTextureBuffers,
-            withBackgroundColor: .clear,
-            on: currentTexture,
-            with: commandBuffer
-        )
-
-        renderer.clearTexture(
-            texture: texture,
+        renderer.applyTexture(
+            srcTexture,
+            to: dstTexture,
             with: commandBuffer
         )
     }
