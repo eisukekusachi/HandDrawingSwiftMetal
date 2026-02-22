@@ -30,9 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
     @Published private var selectedLayerId: UUID? {
         didSet {
             // Update the slider value when selectedLayerId changes
-            if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
-                currentAlpha = layer.alpha
-            }
+            updateCurrentAlpha()
         }
     }
 
@@ -44,7 +42,11 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers: any TextureLayersProtocol
     ) {
         self.textureLayers = textureLayers
+
+        cancellables.removeAll()
         subscribe()
+
+        updateCurrentAlpha()
     }
 
     private func subscribe() {
@@ -170,6 +172,15 @@ public extension TextureLayerViewModel {
                 )
             )
             textureLayers.requestFullCanvasUpdate()
+        }
+    }
+}
+
+extension TextureLayerViewModel {
+
+    private func updateCurrentAlpha() {
+        if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
+            currentAlpha = layer.alpha
         }
     }
 }
