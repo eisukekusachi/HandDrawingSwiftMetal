@@ -12,75 +12,53 @@ import UIKit
 
 open class CanvasView: UIView {
 
-    public let undoTextureLayers: UndoTextureLayers
+    /// Emits drawing-related events
+    public var drawingEvent: AnyPublisher<DrawingEvent, Never> {
+        drawingEventSubject.eraseToAnyPublisher()
+    }
+    private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
 
-    public let undoTextureInMemoryRepository: UndoTextureInMemoryRepository
+    /// A publisher that emits `CGSize` when `CanvasView` setup completes
+    public var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
+        canvasSizeDidChangeSubject.eraseToAnyPublisher()
+    }
+    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
-    public var cancellables = Set<AnyCancellable>()
+    /// The single Metal device instance used throughout the app
+    public let sharedDevice: MTLDevice
 
-    public var isDrawing: AnyPublisher<Bool, Never> {
-        viewModel.isDrawing
+    public let renderer: MTLRendering
+
+    public var currentTexture: MTLTexture? {
+        viewModel.currentTexture
+    }
+
+    public var realtimeDrawingTexture: MTLTexture? {
+        viewModel.realtimeDrawingTexture
     }
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
     }
 
-    /// A publisher that emits a request to show or hide the activity indicator
-    public var activityIndicator: AnyPublisher<Bool, Never> {
-        activityIndicatorSubject.eraseToAnyPublisher()
-    }
-    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
-
-    /// A publisher that emits a request to show the alert
-    public var alert: AnyPublisher<CanvasError, Never> {
-        alertSubject.eraseToAnyPublisher()
-    }
-    private let alertSubject = PassthroughSubject<CanvasError, Never>()
-
-    /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
-    public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
-        setupCompletionSubject.eraseToAnyPublisher()
-    }
-    private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
-
-    /// A publisher that emits `Void` when drawing completes
-    public var drawingCompletion: AnyPublisher<Void, Never> {
-        drawingCompletionSubject.eraseToAnyPublisher()
-    }
-    private let drawingCompletionSubject = PassthroughSubject<Void, Never>()
-
-    public func thumbnail() -> UIImage? {
-        viewModel.thumbnail()
+    public var canvasTexture: MTLTexture? {
+        canvasRenderer.canvasTexture
     }
 
-    /// The size of the texture currently set on the canvas
-    public var currentTextureSize: CGSize {
-        viewModel.currentTextureSize
+    public var currentFrameCommandBuffer: MTLCommandBuffer? {
+        displayView.currentFrameCommandBuffer
     }
 
-    /// The size of the screen
-    public static var screenSize: CGSize {
-        let scale = UIScreen.main.scale
-        let size = UIScreen.main.bounds.size
-        return .init(
-            width: size.width * scale,
-            height: size.height * scale
-        )
-    }
-
-    public static let thumbnailName: String = "thumbnail.png"
-
-    /// The single Metal device instance used throughout the app
-    private let sharedDevice: MTLDevice
-
-    private let renderer: MTLRendering
+    /// Display link for realtime drawing
+    private var drawingDisplayLink = DrawingDisplayLink()
 
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
 
-    private let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    private let canvasRenderer: CanvasRenderer
+
+    private var cancellables = Set<AnyCancellable>()
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -89,37 +67,12 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
+        self.canvasRenderer = .init(
             renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            displayView: displayView
         )
         self.viewModel = .init(
-            dependencies: .init(
-                canvasRenderer: .init(
-                    renderer: renderer,
-                    repository: textureLayersDocumentsRepository,
-                    displayView: displayView
-                ),
-                textureLayers: undoTextureLayers,
-                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
-            )
+            canvasRenderer: canvasRenderer
         )
         super.init(frame: .zero)
     }
@@ -130,55 +83,24 @@ open class CanvasView: UIView {
         self.sharedDevice = sharedDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
+        self.canvasRenderer = .init(
             renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            displayView: displayView
         )
         self.viewModel = .init(
-            dependencies: .init(
-                canvasRenderer: .init(
-                    renderer: renderer,
-                    repository: textureLayersDocumentsRepository,
-                    displayView: displayView
-                ),
-                textureLayers: undoTextureLayers,
-                textureLayersDocumentsRepository: textureLayersDocumentsRepository,
-                undoTextureInMemoryRepository: undoTextureInMemoryRepository
-            )
+            canvasRenderer: canvasRenderer
         )
         super.init(coder: coder)
     }
 
     public func setup(
-        drawingRenderers: [DrawingRenderer],
-        textureLayersState: TextureLayersState?,
         configuration: CanvasConfiguration
     ) async throws {
         layoutViews()
         addEvents()
         bindData()
+
         try await viewModel.setup(
-            textureLayersState: textureLayersState,
-            drawingRenderers: CanvasViewModel.resolveDrawingRenderers(
-                renderer: renderer,
-                drawingRenderers: drawingRenderers
-            ),
             configuration: configuration
         )
     }
@@ -204,29 +126,62 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
+        // Receives an event when displayTexture size changes.
+        // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
-                self?.viewModel.onUpdateDisplayTexture()
+                Task {
+                    try? await self?.updateCanvasTextureUsingCurrentTexture()
+                    self?.drawCanvasToDisplay()
+                }
             }
             .store(in: &cancellables)
 
-        viewModel.setupCompletion
-            .sink { [weak self] result in
-                self?.viewModel.completeSetup(result: result)
-                self?.setupCompletionSubject.send(result)
+        // Receives an event when canvasTexture size changes
+        viewModel.canvasSizeDidChange
+            .sink { [weak self] textureSize in
+                Task { [weak self] in
+                    try? await self?.completeCanvasSizeChange(textureSize)
+                    self?.canvasSizeDidChangeSubject.send(textureSize)
+                }
             }
             .store(in: &cancellables)
 
-        viewModel.drawingCompletion
+        // The canvas is updated every frame during drawing
+        drawingDisplayLink.update
             .sink { [weak self] in
-                self?.drawingCompletionSubject.send(())
+                self?.viewModel.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
 
-        viewModel.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.alertSubject.send(error)
+        viewModel.drawingTouchPhase
+            .sink { [weak self] touchPhase in
+                self?.drawingDisplayLink.run(touchPhase)
+            }
+            .store(in: &cancellables)
+
+        viewModel.drawingEvent
+            .sink { [weak self] result in
+                self?.drawingEventSubject.send(result)
+            }
+            .store(in: &cancellables)
+
+        viewModel.currentTextureDisplaying
+            .sink { [weak self] in
+                Task {
+                    try? await self?.updateCanvasTextureUsingCurrentTexture()
+                    self?.drawCanvasToDisplay()
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.realtimeDrawingTextureDisplaying
+            .sink { [weak self] in
+                self?.updateCanvasTextureUsingRealtimeDrawingTexture()
+                self?.drawCanvasToDisplay()
             }
             .store(in: &cancellables)
     }
@@ -235,46 +190,37 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
-    public func newCanvas(
-        textureSize: CGSize
-    ) async throws {
-        try await viewModel.newCanvas(
-            textureSize: textureSize
-        )
-    }
-
-    public func loadFiles(
-        in workingDirectoryURL: URL
-    ) async throws {
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
-
-        try await viewModel.restoreCanvasFromDocumentsFolder(
-            workingDirectoryURL: workingDirectoryURL,
-            textureLayersState: textureLayerState
-        )
-    }
-
-    public func exportFiles(
-        thumbnailLength: CGFloat = CanvasViewModel.thumbnailLength,
-        to workingDirectoryURL: URL
-    ) async throws {
-        try await viewModel.exportFiles(
-            thumbnailLength: thumbnailLength,
-            device: sharedDevice,
-            to: workingDirectoryURL
-        )
-    }
-
     public func resetTransforming() {
         viewModel.resetTransforming()
     }
 
-    public func setDrawingTool(_ drawingToolType: Int) {
-        viewModel.setDrawingTool(drawingToolType)
+    public func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
+        viewModel.setDrawingTool(drawingRenderer)
+    }
+
+    public func setCurrentTexture(_ texture: MTLTexture?) throws {
+        try viewModel.setCurrentTexture(texture)
+    }
+
+    public func resizeCanvas(_ textureSize: CGSize) throws {
+        try viewModel.resizeCanvas(textureSize)
+    }
+
+    open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
+        try await updateCanvasTextureUsingCurrentTexture()
+        drawCanvasToDisplay()
+    }
+
+    open func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        viewModel.updateCanvasTextureUsingRealtimeDrawingTexture()
+    }
+
+    open func updateCanvasTextureUsingCurrentTexture() async throws {
+        viewModel.updateCanvasTexture()
+    }
+
+    public func drawCanvasToDisplay() {
+        viewModel.drawCanvasToDisplay()
     }
 }
 

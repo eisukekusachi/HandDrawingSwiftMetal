@@ -1,0 +1,57 @@
+//
+//  UndoObjectProtocol.swift
+//  HandDrawingSwiftMetal
+//
+//  Created by Eisuke Kusachi on 2025/05/19.
+//
+
+import CanvasView
+import Combine
+import Foundation
+import MetalKit
+import TextureLayerView
+
+/// An undo object for drawing
+final class UndoDrawingObject: UndoObject {
+
+    let undoTextureId: UndoTextureId? = UndoTextureId()
+
+    let textureLayer: TextureLayerModel
+
+    let deinitSubject = PassthroughSubject<UndoObject, Never>()
+
+    private let renderer: MTLRendering
+
+    deinit {
+        deinitSubject.send(self)
+    }
+
+    init(
+        layer: TextureLayerModel,
+        renderer: MTLRendering
+    ) {
+        self.textureLayer = layer
+        self.renderer = renderer
+    }
+
+    @MainActor
+    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
+        guard
+            let undoTextureId,
+            let newTexture = try await MTLTextureCreator.duplicateTexture(
+                texture: repository.texture(id: undoTextureId),
+                renderer: renderer
+            )
+        else { return }
+
+        let textureLayerId = textureLayer.id
+
+        Task {
+            try await layers.writeTextureToDisk(texture: newTexture, for: textureLayerId)
+            layers.updateThumbnail(textureLayerId, texture: newTexture)
+        }
+
+        layers.selectLayer(textureLayerId)
+        layers.requestCanvasDrawingUpdate(newTexture)
+    }
+}

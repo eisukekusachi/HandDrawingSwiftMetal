@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Collection where Index == Int {
+public extension Collection where Index == Int {
 
     func safeSlice(lower: Int, upper: Int) -> SubSequence {
         guard
@@ -20,5 +20,4 @@ extension Collection where Index == Int {
 
         return self[lower ... upper]
     }
-
 }

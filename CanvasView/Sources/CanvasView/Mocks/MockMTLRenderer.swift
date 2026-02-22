@@ -1,8 +1,8 @@
 //
 //  MockMTLRenderer.swift
-//  HandDrawingSwiftMetalTests
+//  CanvasView
 //
-//  Created by Eisuke Kusachi on 2025/01/25.
+//  Created by Eisuke Kusachi on 2026/02/21.
 //
 
 import Metal
@@ -85,6 +85,14 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
         buffers: MTLTextureBuffers,
         from destinationTexture: any MTLTexture,
         with commandBuffer: any MTLCommandBuffer
+    ) {
+        recordCall()
+    }
+
+    func applyTexture(
+        _ srcTexture: MTLTexture?,
+        to dstTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
     ) {
         recordCall()
     }

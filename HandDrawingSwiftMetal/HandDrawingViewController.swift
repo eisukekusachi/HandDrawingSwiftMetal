@@ -16,7 +16,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var canvasConfiguration: CanvasConfiguration?
+    private var configuration: ProjectConfiguration?
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -27,8 +27,10 @@ class HandDrawingViewController: UIViewController {
 
     private let paletteHeight: CGFloat = 44
 
-    private let brushDrawingRenderer = BrushDrawingRenderer()
-    private let eraserDrawingRenderer = EraserDrawingRenderer()
+    private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
+        .brush: BrushDrawingRenderer(),
+        .eraser: EraserDrawingRenderer()
+    ]
 
     private let viewModel = HandDrawingViewModel()
 
@@ -44,7 +46,10 @@ class HandDrawingViewController: UIViewController {
             title: viewModel.project.projectName,
             createdAt: viewModel.project.createdAt,
             updatedAt: viewModel.project.updatedAt,
-            image: contentView.canvasView.thumbnail(),
+            image: contentView.canvasView.canvasTexture?.uiImage?.resizeWithAspectRatio(
+                height: HandDrawingCanvasView.thumbnailLength,
+                scale: 1.0
+            ),
             fileURL: URL.documents.appendingPathComponent(
                 viewModel.projectFileName()
             )
@@ -55,19 +60,16 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
 
-        // TODO: Remove this after moving undoTextureLayers to HandDrawingSwiftMetal https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/183
-        viewModel.setupStorage(textureLayers: contentView.canvasView.undoTextureLayers)
-
         addEvents()
         bindData()
         layoutViews()
 
         setupTextureLayerViewPresenter()
         setupNewCanvasDialogPresenter()
-        setupCanvasView()
+        setup()
     }
 
-    private func setupCanvasView() {
+    private func setup() {
         showActivityIndicator(true)
         showContentView(false)
         Task { [weak self] in
@@ -78,15 +80,18 @@ class HandDrawingViewController: UIViewController {
                 self.showContentView(true)
             }
             do {
-                let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
+                let configuration: ProjectConfiguration = self.configuration ?? .init(
+                    canvasConfiguration: .init()
+                )
 
+                self.drawingRenderers.forEach {
+                    $0.value.setup(
+                        renderer: self.contentView.canvasView.renderer
+                    )
+                }
                 try await contentView.canvasView.setup(
-                    drawingRenderers: [
-                        self.brushDrawingRenderer,
-                        self.eraserDrawingRenderer
-                    ],
-                    textureLayersState: viewModel.textureLayersStateFromCoreDataEntity,
-                    configuration: configuration
+                    drawingRenderers: self.drawingRenderers.map { $0.value },
+                    configuration: configuration.canvasConfiguration
                 )
                 try self.viewModel.setup(configuration: configuration)
 
@@ -113,11 +118,8 @@ class HandDrawingViewController: UIViewController {
                 self.showActivityIndicator(true)
 
                 do {
-                    let textureSize = canvasView.currentTextureSize
+                    try await canvasView.newCanvas()
 
-                    try await canvasView.newCanvas(
-                        textureSize: textureSize
-                    )
                     self.viewModel.resetCoreData()
 
                     self.updateComponents()
@@ -145,44 +147,72 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
-        contentView.canvasView.isDrawing
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isDrawing in
-                // Disable the components during the drawing
-                self?.enableComponentsInteraction(!isDrawing)
-            }
-            .store(in: &cancellables)
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
 
-        contentView.canvasView.setupCompletion
+        contentView.canvasView.canvasSizeDidChange
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                self?.contentView.canvasView.resetUndo()
+            .sink { [weak self] textureSize in
+                guard
+                    let `self`,
+                    let textureLayers = self.contentView.canvasView.undoTextureLayers
+                else { return }
 
-                self?.textureLayerViewPresenter.update(
-                    textureLayers: result.textureLayers
+                // Initialize the textures in DrawingRenderer
+                for renderer in drawingRenderers.values {
+                    renderer.initializeTextures(textureSize: textureSize)
+                }
+
+                self.textureLayerViewPresenter.update(
+                    textureLayers: textureLayers
                 )
-                self?.contentView.initialize()
+                self.contentView.initialize()
+
+                // Update the thumbnails
+                Task {
+                    for layer in textureLayers.textureLayers.layers {
+                        try await textureLayers.updateThumbnail(layer.id)
+                    }
+                }
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.drawingCompletion
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                // Update the project's updatedAt value to the current time
-                self?.viewModel.project.update(
-                    updatedAt: Date()
-                )
+        contentView.canvasView.drawingEvent
+            .sink { [weak self] event in
+                guard let `self` else { return }
+                switch event {
+                case .fingerStrokeBegan:
+                    self.enableComponentsInteraction(false)
+                    Task {
+                        await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+                case .pencilStrokeBegan:
+                    self.enableComponentsInteraction(false)
+                    Task {
+                        await self.contentView.canvasView.undoTextureLayers?.setUndoDrawing(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+                case .strokeCompleted:
+                    Task {
+                        try await self.contentView.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
+                            texture: self.contentView.canvasView.currentTexture
+                        )
+                    }
+
+                    self.enableComponentsInteraction(true)
+
+                    // Update the project's updatedAt value to the current time
+                    self.viewModel.project.update(
+                        updatedAt: Date()
+                    )
+                }
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.alert
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.showAlert(error)
-            }
-            .store(in: &cancellables)
-
-        contentView.canvasView.undoTextureLayers.didEmitUndoObjectPair
+        contentView.canvasView.undoTextureLayers?.didEmitUndoObjectPair
             .sink { [weak self] undoObjectPair in
                 self?.contentView.canvasView.registerUndoObjectPair(undoObjectPair)
             }
@@ -218,7 +248,7 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
-                self.brushDrawingRenderer.setColor(newColor)
+                (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(newColor)
             }
             .store(in: &cancellables)
 
@@ -226,19 +256,19 @@ extension HandDrawingViewController {
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
-                self.eraserDrawingRenderer.setAlpha(newAlpha)
+                (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$brushDiameter
             .sink { [weak self] diameter in
-                self?.brushDrawingRenderer.setDiameter(diameter)
+                (self?.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(diameter)
             }
             .store(in: &cancellables)
 
         viewModel.drawingTool.$eraserDiameter
             .sink { [weak self] diameter in
-                self?.eraserDrawingRenderer.setDiameter(diameter)
+                (self?.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(diameter)
             }
             .store(in: &cancellables)
     }
@@ -263,9 +293,15 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            guard let `self` else { return }
-            viewModel.toggleDrawingTool()
-            contentView.updateDrawingComponents(viewModel.drawingTool.type)
+            guard
+                let `self`
+            else { return }
+            self.viewModel.toggleDrawingTool()
+
+            self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+            guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
+            self.contentView.canvasView.setDrawingTool(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.contentView.canvasView.undo()
@@ -330,9 +366,14 @@ extension HandDrawingViewController {
     }
 
     private func updateComponents() {
-        brushDrawingRenderer.setDiameter(viewModel.drawingTool.brushDiameter)
-        eraserDrawingRenderer.setDiameter(viewModel.drawingTool.eraserDiameter)
+        (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
+        (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
+
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+        guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
+        contentView.canvasView.setDrawingTool(renderer)
+
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
     }
@@ -409,7 +450,8 @@ extension HandDrawingViewController {
     private func saveProject() {
         viewModel.saveProject(
             action: { [weak self] workingDirectoryURL in
-                try await self?.contentView.canvasView.exportFiles(
+
+                try await self?.contentView.canvasView.saveFiles(
                     to: workingDirectoryURL
                 )
             },
@@ -424,7 +466,7 @@ extension HandDrawingViewController {
     }
 
     private func saveImage() {
-        if let image = contentView.canvasView.displayTexture?.uiImage {
+        if let image = contentView.canvasView.canvasTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
@@ -446,10 +488,10 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        canvasConfiguration: CanvasConfiguration
+        configuration: ProjectConfiguration
     ) -> Self {
         let viewController = Self()
-        viewController.canvasConfiguration = canvasConfiguration
+        viewController.configuration = configuration
         return viewController
     }
 }

@@ -1,0 +1,25 @@
+//
+//  UndoObject.swift
+//  HandDrawingSwiftMetal
+//
+//  Created by Eisuke Kusachi on 2025/06/21.
+//
+
+import CanvasView
+import Combine
+import Foundation
+import TextureLayerView
+
+public protocol UndoObject {
+    /// The texture ID used for the undo operation
+    var undoTextureId: UndoTextureId? { get }
+
+    /// The texture layer targeted by the undo operation
+    var textureLayer: TextureLayerModel { get }
+
+    /// A subject that emits an UndoObjectProtocol instance when the undo object is deallocated
+    var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
+
+    @MainActor
+    func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws
+}

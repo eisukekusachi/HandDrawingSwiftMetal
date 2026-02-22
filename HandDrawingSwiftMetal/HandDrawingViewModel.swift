@@ -43,9 +43,7 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private var _fileList: [LocalFileItem] = []
 
-    var textureLayersStateFromCoreDataEntity: TextureLayersState? {
-        textureLayerStorage?.textureLayersStateFromCoreDataEntity
-    }
+    private let thumbnailName: String = "thumbnail.png"
 
     let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
@@ -56,11 +54,9 @@ final class HandDrawingViewModel: ObservableObject {
     private let drawingToolStorage: CoreDataDrawingToolStorage
     private let brushPaletteStorage: CoreDataBrushPaletteStorage
     private let eraserPaletteStorage: CoreDataEraserPaletteStorage
-    private var textureLayerStorage: CoreDataTextureLayerStorage?
 
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
-    private let textureLayersStorageController: PersistenceController
 
     /// Repository that manages files in the Documents directory
     private let localFileRepository: LocalFileRepository = LocalFileRepository(
@@ -95,9 +91,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.drawingToolStorageController = PersistenceController(
             xcdatamodeldName: "DrawingToolStorage"
         )
-        self.textureLayersStorageController = PersistenceController(
-            xcdatamodeldName: "TextureLayerStorage"
-        )
         self.projectStorage = .init(
             project: project,
             context: projectStorageController.viewContext
@@ -116,14 +109,7 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    func setupStorage(textureLayers: any TextureLayersProtocol) {
-        self.textureLayerStorage = .init(
-            textureLayers: textureLayers,
-            context: textureLayersStorageController.viewContext
-        )
-    }
-
-    func setup(configuration: CanvasConfiguration) throws {
+    func setup(configuration: ProjectConfiguration) throws {
         // Retain the file suffix
         _fileSuffix = configuration.fileSuffix
 
@@ -318,7 +304,7 @@ extension HandDrawingViewModel {
 
                 // Load the thubnail
                 let data = try Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(CanvasView.thumbnailName)
+                    contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
                 )
 
                 _fileList.append(

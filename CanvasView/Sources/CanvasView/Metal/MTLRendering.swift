@@ -64,6 +64,13 @@ public protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
+    /// Applies `srcTexture` to `dstTexture` and clears `srcTexture`
+    func applyTexture(
+        _ srcTexture: MTLTexture?,
+        to dstTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    )
+
     func fillColor(
         texture: MTLTexture,
         withRGB rgb: IntRGB,

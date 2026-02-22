@@ -16,7 +16,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
-    @Published public var isDragging: Bool = false
+    @Published public var isAlphaSliderDragging: Bool = false
 
     public var selectedLayer: TextureLayerItem? {
         textureLayers?.selectedLayer
@@ -30,9 +30,7 @@ public final class TextureLayerViewModel: ObservableObject {
     @Published private var selectedLayerId: UUID? {
         didSet {
             // Update the slider value when selectedLayerId changes
-            if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
-                currentAlpha = layer.alpha
-            }
+            updateCurrentAlpha()
         }
     }
 
@@ -44,15 +42,22 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers: any TextureLayersProtocol
     ) {
         self.textureLayers = textureLayers
-        subscribe()
+
+        bindData()
+
+        updateCurrentAlpha()
     }
 
-    private func subscribe() {
+    private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
         // Bind the alpha slider
         $currentAlpha
             .sink { [weak self] alpha in
                 guard
                     let `self`,
+                    self.isAlphaSliderDragging,
                     let textureLayers = self.textureLayers,
                     let selectedLayerId = self.selectedLayerId
                 else { return }
@@ -67,7 +72,7 @@ public final class TextureLayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        $isDragging
+        $isAlphaSliderDragging
             .sink { [weak self] isDragging in
                 if isDragging {
                     self?.textureLayers?.beginAlphaChange()
@@ -169,6 +174,15 @@ public extension TextureLayerViewModel {
                 )
             )
             textureLayers.requestFullCanvasUpdate()
+        }
+    }
+}
+
+extension TextureLayerViewModel {
+
+    private func updateCurrentAlpha() {
+        if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
+            currentAlpha = layer.alpha
         }
     }
 }

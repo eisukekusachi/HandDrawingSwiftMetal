@@ -13,7 +13,7 @@ private let bitsPerComponent = 8
 
 public enum MTLTextureCreator {
 
-    static func makeTexture(
+    public static func makeTexture(
         label: String? = nil,
         url: URL,
         size: CGSize,
@@ -23,6 +23,7 @@ public enum MTLTextureCreator {
             let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals
         else { return nil }
         return try MTLTextureCreator.makeTexture(
+            label: label,
             width: Int(size.width),
             height: Int(size.height),
             from: hexadecimalData,
