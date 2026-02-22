@@ -27,6 +27,10 @@ public final class TouchGestureState {
 
 public extension TouchGestureState {
 
+    func setDrawing() {
+        state = .drawing
+    }
+
     func setDrawingGestureRecognitionSecond(_ second: TimeInterval) {
         drawingGestureRecognitionSecond = second
     }

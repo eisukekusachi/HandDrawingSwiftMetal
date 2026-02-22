@@ -252,6 +252,8 @@ extension CanvasViewModel {
         }
         deviceInput.update(.pencil)
 
+        touchGesture.setDrawing()
+
         pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
                 .filter({ $0.type == .pencil })
