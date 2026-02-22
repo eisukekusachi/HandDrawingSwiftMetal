@@ -133,7 +133,7 @@ import TextureLayerView
         undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
                 Task {
-                    try? await self?.updateCanvasTexture()
+                    try? await self?.updateCanvasTextureUsingCurrentTexture()
                     self?.drawCanvasToDisplay()
                 }
             }
@@ -145,7 +145,7 @@ import TextureLayerView
             .sink { [weak self] texture in
                 Task {
                     try self?.setCurrentTexture(texture)
-                    try await self?.updateCanvasTexture()
+                    try await self?.updateCanvasTextureUsingCurrentTexture()
                     self?.drawCanvasToDisplay()
                 }
             }
@@ -183,7 +183,7 @@ import TextureLayerView
             repository: textureLayersDocumentsRepository
         )
 
-        try await updateCanvasTexture()
+        try await updateCanvasTextureUsingCurrentTexture()
     }
     private func completeDrawing(_ texture: MTLTexture?) {
         drawingDebouncer.perform {
@@ -232,7 +232,7 @@ import TextureLayerView
         updateCanvasTexture(realtimeDrawingTexture)
     }
 
-    override func updateCanvasTexture() async throws {
+    override func updateCanvasTextureUsingCurrentTexture() async throws {
         updateCanvasTexture(currentTexture)
     }
 
