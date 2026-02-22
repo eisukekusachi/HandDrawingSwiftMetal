@@ -29,8 +29,6 @@ open class CanvasView: UIView {
 
     public let renderer: MTLRendering
 
-    public var cancellables = Set<AnyCancellable>()
-
     public var currentTexture: MTLTexture? {
         viewModel.currentTexture
     }
@@ -59,6 +57,8 @@ open class CanvasView: UIView {
     private let viewModel: CanvasViewModel
 
     private let canvasRenderer: CanvasRenderer
+
+    private var cancellables = Set<AnyCancellable>()
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -126,6 +126,8 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
 
         // Receives an event when displayTexture size changes.
         // Mainly used when the device rotates.

@@ -36,6 +36,8 @@ import TextureLayerView
 
     private let viewModel = HandDrawingCanvasViewModel()
 
+    private var cancellables = Set<AnyCancellable>()
+
     public static let thumbnailLength: CGFloat = 500
 
     override init() {
@@ -118,6 +120,9 @@ import TextureLayerView
     }
 
     func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
         drawingEvent
             .compactMap { event -> MTLTexture? in
                 guard case let .strokeCompleted(texture) = event else { return nil }

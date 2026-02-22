@@ -147,6 +147,8 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
 
         contentView.canvasView.canvasSizeDidChange
             .receive(on: DispatchQueue.main)

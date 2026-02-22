@@ -43,13 +43,15 @@ public final class TextureLayerViewModel: ObservableObject {
     ) {
         self.textureLayers = textureLayers
 
-        cancellables.removeAll()
-        subscribe()
+        bindData()
 
         updateCurrentAlpha()
     }
 
-    private func subscribe() {
+    private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
         // Bind the alpha slider
         $currentAlpha
             .sink { [weak self] alpha in

@@ -143,6 +143,9 @@ extension CanvasViewModel {
 extension CanvasViewModel {
 
     private func bindData() {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
         transforming.matrixPublisher
             .sink { [weak self] matrix in
                 self?.canvasRenderer.setMatrix(matrix)
