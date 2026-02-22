@@ -466,7 +466,7 @@ extension HandDrawingViewController {
     }
 
     private func saveImage() {
-        if let image = contentView.canvasView.displayTexture?.uiImage {
+        if let image = contentView.canvasView.canvasTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
