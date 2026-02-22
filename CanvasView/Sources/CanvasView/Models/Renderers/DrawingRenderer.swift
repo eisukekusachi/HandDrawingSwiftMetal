@@ -20,7 +20,7 @@ public protocol DrawingRenderer: AnyObject {
     func setup(renderer: MTLRendering)
 
     /// Sets up textures for realtime drawing
-    func setupTextures(textureSize: CGSize)
+    func initializeTextures(textureSize: CGSize)
 
     /// Finger drawing has started
     func beginFingerStroke()

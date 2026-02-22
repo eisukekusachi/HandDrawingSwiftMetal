@@ -61,7 +61,7 @@ public extension EraserDrawingRenderer {
         self.flippedTextureBuffers = buffers
     }
 
-    func setupTextures(textureSize: CGSize) {
+    func initializeTextures(textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer

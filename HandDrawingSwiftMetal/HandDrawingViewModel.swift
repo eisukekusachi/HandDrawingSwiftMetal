@@ -109,7 +109,7 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    func setup(configuration: CanvasConfiguration) throws {
+    func setup(configuration: ProjectConfiguration) throws {
         // Retain the file suffix
         _fileSuffix = configuration.fileSuffix
 

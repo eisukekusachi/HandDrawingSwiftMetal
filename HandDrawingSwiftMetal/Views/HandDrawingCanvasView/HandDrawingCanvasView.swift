@@ -212,6 +212,22 @@ import TextureLayerView
         }
     }
 
+    override func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
+        // Initialize the textures used for Undo
+        if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
+            undoTextureLayers.initializeUndoTextures(
+                textureSize: textureSize
+            )
+        }
+
+        resetUndo()
+
+        try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
+
+        try await updateFullCanvasTexture()
+        drawCanvasToDisplay()
+    }
+
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
         updateCanvasTexture(realtimeDrawingTexture)
     }
@@ -274,11 +290,12 @@ extension HandDrawingCanvasView {
             )
 
             try await super.setup(
-                textureSize: state.textureSize,
-                configuration: configuration
+                configuration: configuration.textureSize(state.textureSize)
             )
         } else {
-            let state: TextureLayersState = .init(textureSize: configuration.textureSize)
+            let state: TextureLayersState = .init(
+                textureSize: configuration.textureSize
+            )
 
             try await textureLayersDocumentsRepository?.initializeStorage(
                 newTextureLayersState: state
@@ -289,28 +306,8 @@ extension HandDrawingCanvasView {
             )
 
             try await super.setup(
-                textureSize: state.textureSize,
                 configuration: configuration
             )
-        }
-    }
-
-    func setupCompletion(textureSize: CGSize) {
-        // Initialize the textures used for Undo
-        if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
-            undoTextureLayers.initializeUndoTextures(
-                textureSize: textureSize
-            )
-        }
-
-        do {
-            Task {
-                try textureLayerRenderer?.setupTextures(textureSize: textureSize)
-                try await updateFullCanvasTexture()
-                drawCanvasToDisplay()
-            }
-        } catch {
-
         }
     }
 
@@ -328,8 +325,9 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayersState
         )
 
+        try super.resizeCanvas(undoTextureLayers.textureSize)
+
         super.resetTransforming()
-        try await super.updateCanvas(undoTextureLayers.textureSize)
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
@@ -360,7 +358,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        try await super.updateCanvas(textureLayerState.textureSize)
+        try super.resizeCanvas(textureLayerState.textureSize)
     }
 }
 

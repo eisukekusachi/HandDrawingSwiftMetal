@@ -16,7 +16,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var canvasConfiguration: CanvasConfiguration?
+    private var configuration: ProjectConfiguration?
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -66,23 +66,23 @@ class HandDrawingViewController: UIViewController {
 
         setupTextureLayerViewPresenter()
         setupNewCanvasDialogPresenter()
-        setupCanvasView()
+        setup()
     }
 
-    private func setupCanvasView() {
+    private func setup() {
         showActivityIndicator(true)
         showContentView(false)
         Task { [weak self] in
-            guard
-                let `self`
-            else { return }
+            guard let `self` else { return }
 
             defer {
                 self.showActivityIndicator(false)
                 self.showContentView(true)
             }
             do {
-                let configuration: CanvasConfiguration = self.canvasConfiguration ?? .init()
+                let configuration: ProjectConfiguration = self.configuration ?? .init(
+                    canvasConfiguration: .init()
+                )
 
                 self.drawingRenderers.forEach {
                     $0.value.setup(
@@ -91,7 +91,7 @@ class HandDrawingViewController: UIViewController {
                 }
                 try await contentView.canvasView.setup(
                     drawingRenderers: self.drawingRenderers.map { $0.value },
-                    configuration: configuration
+                    configuration: configuration.canvasConfiguration
                 )
                 try self.viewModel.setup(configuration: configuration)
 
@@ -148,16 +148,23 @@ class HandDrawingViewController: UIViewController {
 extension HandDrawingViewController {
     private func bindData() {
 
-        contentView.canvasView.setupCompletion
+        contentView.canvasView.canvasSizeDidChange
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+            .sink { [weak self] textureSize in
                 guard
                     let `self`,
                     let textureLayers = self.contentView.canvasView.undoTextureLayers
                 else { return }
 
-                self.contentView.canvasView.setupCompletion(textureSize: result.textureSize)
-                self.contentView.canvasView.resetUndo()
+                // Initialize the textures in DrawingRenderer
+                for renderer in drawingRenderers.values {
+                    renderer.initializeTextures(textureSize: textureSize)
+                }
+
+                self.textureLayerViewPresenter.update(
+                    textureLayers: textureLayers
+                )
+                self.contentView.initialize()
 
                 // Update the thumbnails
                 Task {
@@ -165,16 +172,6 @@ extension HandDrawingViewController {
                         try await textureLayers.updateThumbnail(layer.id)
                     }
                 }
-
-                // Initialize the textures in DrawingRenderer
-                for renderer in drawingRenderers.values {
-                    renderer.setupTextures(textureSize: result.textureSize)
-                }
-
-                self.textureLayerViewPresenter.update(
-                    textureLayers: textureLayers
-                )
-                self.contentView.initialize()
             }
             .store(in: &cancellables)
 
@@ -489,10 +486,10 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     static func create(
-        canvasConfiguration: CanvasConfiguration
+        configuration: ProjectConfiguration
     ) -> Self {
         let viewController = Self()
-        viewController.canvasConfiguration = canvasConfiguration
+        viewController.configuration = configuration
         return viewController
     }
 }

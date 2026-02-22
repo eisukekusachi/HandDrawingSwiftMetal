@@ -10,60 +10,41 @@ import UIKit
 @MainActor public struct CanvasConfiguration {
     public let textureSize: CGSize
 
-    /// File extension used when saving a file
-    public let fileSuffix: String
+    /// The background color of the canvas
+    let backgroundColor: UIColor
 
-    public let undoCount: Int
+    /// The base background color of the canvas. this color that appears when the canvas is rotated or moved.
+    let baseBackgroundColor: UIColor
 
-    public let environmentConfiguration: EnvironmentConfiguration
+    /// The duration in seconds that must pass to recognize a drawing gesture
+    let drawingGestureRecognitionSecond: TimeInterval
+
+    /// The duration in seconds that must pass to recognize a transforming gesture
+    let transformingGestureRecognitionSecond: TimeInterval
 
     public init(
         textureSize: CGSize? = nil,
-        fileSuffix: String = "",
-        undoCount: Int = 12,
-        environmentConfiguration: EnvironmentConfiguration = .init()
+        backgroundColor: UIColor = .white,
+        baseBackgroundColor: UIColor = UIColor(230, 230, 230),
+        drawingGestureRecognitionSecond: TimeInterval = 0.1,
+        transformingGestureRecognitionSecond: TimeInterval = 0.05
     ) {
         // The screen size is used when the value is nil
         self.textureSize = textureSize ?? Self.screenSize
-        self.fileSuffix = Self.sanitizedFileExtension(fileSuffix)
-        self.undoCount = undoCount
-        self.environmentConfiguration = environmentConfiguration
+        self.backgroundColor = backgroundColor
+        self.baseBackgroundColor = baseBackgroundColor
+        self.drawingGestureRecognitionSecond = drawingGestureRecognitionSecond
+        self.transformingGestureRecognitionSecond = transformingGestureRecognitionSecond
     }
 
-    /// Returns a sanitized file extension (without a leading dot)
-    static func sanitizedFileExtension(_ input: String?) -> String {
-        guard
-            var ext = input?.trimmingCharacters(in: .whitespacesAndNewlines),
-            !ext.isEmpty
-        else { return "" }
-
-        // Allow ".ext" style input
-        if ext.hasPrefix(".") { ext.removeFirst() }
-
-        ext = ext.lowercased()
-
-        // Reject invalid characters
-        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789")
-        if ext.unicodeScalars.contains(where: { !allowed.contains($0) }) {
-            return ""
-        }
-
-        // Reject unreasonable length
-        guard (1...16).contains(ext.count) else {
-            return ""
-        }
-
-        // Explicitly disallow common image formats
-        if [
-            "png",
-            "jpg",
-            "jpeg",
-            "bmp"
-        ].contains(ext) {
-            return ""
-        }
-
-        return ext
+    public func textureSize(_ textureSize: CGSize) -> Self {
+        .init(
+            textureSize: textureSize,
+            backgroundColor: backgroundColor,
+            baseBackgroundColor: baseBackgroundColor,
+            drawingGestureRecognitionSecond: drawingGestureRecognitionSecond,
+            transformingGestureRecognitionSecond: transformingGestureRecognitionSecond
+        )
     }
 
     /// The size of the screen

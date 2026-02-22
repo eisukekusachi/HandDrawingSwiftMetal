@@ -18,11 +18,11 @@ open class CanvasView: UIView {
     }
     private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
 
-    /// A publisher that emits `CanvasConfigurationResult` when `CanvasView` setup completes
-    public var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
-        setupCompletionSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CGSize` when `CanvasView` setup completes
+    public var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
+        canvasSizeDidChangeSubject.eraseToAnyPublisher()
     }
-    private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
     /// The single Metal device instance used throughout the app
     public let sharedDevice: MTLDevice
@@ -72,9 +72,7 @@ open class CanvasView: UIView {
             displayView: displayView
         )
         self.viewModel = .init(
-            dependencies: .init(
-                canvasRenderer: canvasRenderer
-            )
+            canvasRenderer: canvasRenderer
         )
         super.init(frame: .zero)
     }
@@ -90,15 +88,12 @@ open class CanvasView: UIView {
             displayView: displayView
         )
         self.viewModel = .init(
-            dependencies: .init(
-                canvasRenderer: self.canvasRenderer
-            )
+            canvasRenderer: canvasRenderer
         )
         super.init(coder: coder)
     }
 
     public func setup(
-        textureSize: CGSize,
         configuration: CanvasConfiguration
     ) async throws {
         layoutViews()
@@ -106,7 +101,6 @@ open class CanvasView: UIView {
         bindData()
 
         try await viewModel.setup(
-            textureSize: textureSize,
             configuration: configuration
         )
     }
@@ -132,11 +126,12 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
-        viewModel.setupCompletion
-            .sink { [weak self] result in
-                guard let `self` else { return }
-                self.viewModel.completeSetup(result: result)
-                self.setupCompletionSubject.send(result)
+        viewModel.canvasSizeDidChange
+            .sink { [weak self] textureSize in
+                Task { [weak self] in
+                    try? await self?.completeCanvasSizeChange(textureSize)
+                    self?.canvasSizeDidChangeSubject.send(textureSize)
+                }
             }
             .store(in: &cancellables)
 
@@ -201,8 +196,12 @@ open class CanvasView: UIView {
         try viewModel.setCurrentTexture(texture)
     }
 
-    public func updateCanvas(_ textureSize: CGSize) async throws {
-        try await viewModel.updateCanvas(textureSize)
+    public func resizeCanvas(_ textureSize: CGSize) throws {
+        try viewModel.resizeCanvas(textureSize)
+    }
+
+    open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
+        drawCanvasToDisplay()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {

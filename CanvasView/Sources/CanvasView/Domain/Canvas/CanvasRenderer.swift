@@ -72,7 +72,7 @@ import Combine
         if let baseBackgroundColor { self.baseBackgroundColor = baseBackgroundColor }
     }
 
-    public func setupTextures(textureSize: CGSize) throws {
+    public func initializeTextures(textureSize: CGSize) throws {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength

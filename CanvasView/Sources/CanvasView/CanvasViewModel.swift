@@ -32,11 +32,11 @@ public final class CanvasViewModel {
         drawingTouchPhaseSubject.value == .cancelled
     }
 
-    /// A publisher that emits `CanvasConfigurationResult` when `CanvasViewModel` setup completes
-    var setupCompletion: AnyPublisher<CanvasConfigurationResult, Never> {
-        setupCompletionSubject.eraseToAnyPublisher()
+    /// A publisher that emits `CGSize` when the canvas size changes
+    var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
+        canvasSizeDidChangeSubject.eraseToAnyPublisher()
     }
-    private let setupCompletionSubject = PassthroughSubject<CanvasConfigurationResult, Never>()
+    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
     /// Emits drawing-related events
     var drawingEvent: AnyPublisher<DrawingEvent, Never> {
@@ -90,64 +90,55 @@ public final class CanvasViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        dependencies: CanvasViewDependencies
+        canvasRenderer: CanvasRenderer
     ) {
-        self.canvasRenderer = dependencies.canvasRenderer
+        self.canvasRenderer = canvasRenderer
     }
 
     func setup(
-        textureSize: CGSize,
         configuration: CanvasConfiguration
     ) async throws {
 
-        self.bindData()
+        bindData()
 
-        let environmentConfiguration = configuration.environmentConfiguration
+        canvasRenderer.setup(
+            backgroundColor: configuration.backgroundColor,
+            baseBackgroundColor: configuration.baseBackgroundColor
+        )
+        setupTouchGesture(
+            drawingGestureRecognitionSecond: configuration.drawingGestureRecognitionSecond,
+            transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
+        )
 
-        self.canvasRenderer.setup(
-            backgroundColor: environmentConfiguration.backgroundColor,
-            baseBackgroundColor: environmentConfiguration.baseBackgroundColor
-        )
-        self.setupTouchGesture(
-            drawingGestureRecognitionSecond: environmentConfiguration.drawingGestureRecognitionSecond,
-            transformingGestureRecognitionSecond: environmentConfiguration.transformingGestureRecognitionSecond
-        )
-        try await updateCanvas(textureSize)
+        try resizeCanvas(configuration.textureSize)
     }
 }
 
 extension CanvasViewModel {
 
-    func updateCanvas(_ textureSize: CGSize) async throws {
+    func resizeCanvas(_ textureSize: CGSize) throws {
 
         // Update canvasRenderer using textureLayers
-        try canvasRenderer.setupTextures(
+        try canvasRenderer.initializeTextures(
             textureSize: textureSize
         )
-        canvasRenderer.drawCanvasToDisplay()
-
-        setupCompletionSubject.send(
-            .init(
-                textureSize: textureSize
-            )
-        )
-    }
-    func completeSetup(result: CanvasConfigurationResult) {
-        // Update currentTextureSize
-        currentTextureSize = result.textureSize
 
         currentTexture = canvasRenderer.makeTexture(
-            currentTextureSize,
+            textureSize,
             label: "currentTexture"
         )
 
         realtimeDrawingTexture = canvasRenderer.makeTexture(
-            currentTextureSize,
+            textureSize,
             label: "realtimeDrawingTexture"
         )
 
+        // Update currentTextureSize
+        currentTextureSize = textureSize
+
         updateCanvasTexture()
-        canvasRenderer.drawCanvasToDisplay()
+
+        canvasSizeDidChangeSubject.send(textureSize)
     }
 }
 
