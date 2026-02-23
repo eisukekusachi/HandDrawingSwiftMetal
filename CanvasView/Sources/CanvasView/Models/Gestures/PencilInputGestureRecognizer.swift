@@ -7,36 +7,41 @@
 
 import UIKit
 
-@MainActor protocol PencilInputGestureRecognizerSender {
+@MainActor protocol PencilInputGestureRecognizerSender: AnyObject {
     func sendPencilEstimatedTouches(_ touches: Set<UITouch>, with event: UIEvent?, on view: UIView)
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView)
 }
 
 final class PencilInputGestureRecognizer: UIGestureRecognizer {
 
-    private var gestureDelegate: PencilInputGestureRecognizerSender?
+    private weak var gestureDelegate: PencilInputGestureRecognizerSender?
 
     init(delegate: PencilInputGestureRecognizerSender) {
         super.init(target: nil, action: nil)
         allowedTouchTypes = [UITouch.TouchType.pencil.rawValue as NSNumber]
-
+        delaysTouchesBegan = false
+        delaysTouchesEnded = false
         gestureDelegate = delegate
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
+        state = .began
         gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
+        state = .changed
         gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
+        state = .ended
         gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
+        state = .cancelled
         gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
 
