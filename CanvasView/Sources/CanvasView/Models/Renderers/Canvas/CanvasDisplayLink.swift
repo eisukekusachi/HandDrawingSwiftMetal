@@ -1,5 +1,5 @@
 //
-//  DrawingDisplayLink.swift
+//  CanvasDisplayLink.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/02/04.
@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 /// Manages the displayLink for realtime drawing
-public final class DrawingDisplayLink {
+public final class CanvasDisplayLink {
 
     // Requesting to update the canvas emits `Void`
     public var update: AnyPublisher<Void, Never> {
@@ -44,14 +44,14 @@ public final class DrawingDisplayLink {
     }
 }
 
-extension DrawingDisplayLink {
+extension CanvasDisplayLink {
 
     @objc private func displayLinkFrame() {
         updateSubject.send()
     }
 }
 
-extension DrawingDisplayLink {
+extension CanvasDisplayLink {
 
     private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase?) -> Bool {
         switch touchPhase {

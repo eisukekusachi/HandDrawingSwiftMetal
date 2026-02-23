@@ -49,14 +49,14 @@ open class CanvasView: UIView {
         displayView.currentFrameCommandBuffer
     }
 
-    /// Display link for realtime drawing
-    private var drawingDisplayLink = DrawingDisplayLink()
-
     private let displayView: CanvasDisplayView
 
     private let viewModel: CanvasViewModel
 
     private let canvasRenderer: CanvasRenderer
+
+    /// Display link for realtime drawing
+    private var canvasDisplayLink = CanvasDisplayLink()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -151,7 +151,7 @@ open class CanvasView: UIView {
             .store(in: &cancellables)
 
         // The canvas is updated every frame during drawing
-        drawingDisplayLink.update
+        canvasDisplayLink.update
             .sink { [weak self] in
                 self?.viewModel.onDrawingDisplayLinkFrame()
             }
@@ -159,7 +159,7 @@ open class CanvasView: UIView {
 
         viewModel.drawingTouchPhase
             .sink { [weak self] touchPhase in
-                self?.drawingDisplayLink.run(touchPhase)
+                self?.canvasDisplayLink.run(touchPhase)
             }
             .store(in: &cancellables)
 
