@@ -276,15 +276,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D426FC9C2E5DD88600CC116D /* Domain */ = {
-			isa = PBXGroup;
-			children = (
-				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
-				D48CA0722F3C18D3008C6E9E /* Undo */,
-			);
-			path = Domain;
-			sourceTree = "<group>";
-		};
 		D426FC9D2E5DD8CD00CC116D /* DrawingTools */ = {
 			isa = PBXGroup;
 			children = (
@@ -463,7 +454,6 @@
 		D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC9C2E5DD88600CC116D /* Domain */,
 				D47FD3E52E2B20C600F3F514 /* Extensions */,
 				D4F525742EAC96C600439FFF /* Models */,
 				D4F5256B2EAC60F200439FFF /* Repositories */,
@@ -519,6 +509,8 @@
 				D41C72172E6C479500D524DE /* CoreData */,
 				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D49C693F2F24A10100B66608 /* Project */,
+				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
+				D48CA0722F3C18D3008C6E9E /* Undo */,
 			);
 			path = Models;
 			sourceTree = "<group>";
