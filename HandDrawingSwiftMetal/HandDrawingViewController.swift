@@ -177,7 +177,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        contentView.canvasView.drawingEvent
+        contentView.canvasView.inputEvent
             .sink { [weak self] event in
                 guard let `self` else { return }
                 switch event {
@@ -202,12 +202,15 @@ extension HandDrawingViewController {
                         )
                     }
 
-                    self.enableComponentsInteraction(true)
-
                     // Update the project's updatedAt value to the current time
                     self.viewModel.project.update(
                         updatedAt: Date()
                     )
+
+                    self.enableComponentsInteraction(true)
+
+                case .strokeCancelled:
+                    self.enableComponentsInteraction(true)
                 }
             }
             .store(in: &cancellables)

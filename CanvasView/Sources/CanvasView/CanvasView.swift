@@ -13,10 +13,10 @@ import UIKit
 open class CanvasView: UIView {
 
     /// Emits drawing-related events
-    public var drawingEvent: AnyPublisher<DrawingEvent, Never> {
-        drawingEventSubject.eraseToAnyPublisher()
+    public var inputEvent: AnyPublisher<InputEvent, Never> {
+        inputEventSubject.eraseToAnyPublisher()
     }
-    private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
+    private let inputEventSubject = PassthroughSubject<InputEvent, Never>()
 
     /// A publisher that emits `CGSize` when `CanvasView` setup completes
     public var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
@@ -163,9 +163,9 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        viewModel.drawingEvent
+        viewModel.inputEvent
             .sink { [weak self] result in
-                self?.drawingEventSubject.send(result)
+                self?.inputEventSubject.send(result)
             }
             .store(in: &cancellables)
 

@@ -39,10 +39,10 @@ public final class CanvasViewModel {
     private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
     /// Emits drawing-related events
-    var drawingEvent: AnyPublisher<DrawingEvent, Never> {
-        drawingEventSubject.eraseToAnyPublisher()
+    var inputEvent: AnyPublisher<InputEvent, Never> {
+        inputEventSubject.eraseToAnyPublisher()
     }
-    private let drawingEventSubject = PassthroughSubject<DrawingEvent, Never>()
+    private let inputEventSubject = PassthroughSubject<InputEvent, Never>()
 
     var drawingTouchPhase: AnyPublisher<UITouch.Phase?, Never> {
         drawingTouchPhaseSubject.eraseToAnyPublisher()
@@ -197,7 +197,7 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
-                drawingEventSubject.send(.fingerStrokeBegan)
+                inputEventSubject.send(.fingerStrokeBegan)
 
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
@@ -276,7 +276,7 @@ extension CanvasViewModel {
 
         // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
-            drawingEventSubject.send(.pencilStrokeBegan)
+            inputEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke()
         }
@@ -336,15 +336,13 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    guard let currentTexture = self?.currentTexture else { return }
-                    self?.drawingEventSubject.send(
-                        .strokeCompleted(texture: currentTexture)
-                    )
+                    self?.inputEventSubject.send(.strokeCompleted)
                 }
             }
         } else if isCancelledDrawing {
             // Prepare for the next drawing when the drawing is cancelled.
             prepareNextStroke(commandBuffer: commandBuffer)
+            inputEventSubject.send(.strokeCancelled)
         }
 
         if displayRealtimeDrawingTexture {
