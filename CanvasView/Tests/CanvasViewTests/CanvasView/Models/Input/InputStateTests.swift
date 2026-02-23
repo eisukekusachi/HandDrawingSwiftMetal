@@ -1,5 +1,5 @@
 //
-//  DeviceInputStateTests.swift
+//  InputStateTests.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/09.
@@ -8,9 +8,9 @@
 import Testing
 @testable import CanvasView
 
-struct InputDeviceStateTests {
+struct InputStateTests {
 
-    private typealias Subject = DeviceInputState
+    private typealias Subject = InputState
 
     @Test
     func `Initial state is .undetermined`() {
@@ -26,11 +26,11 @@ struct InputDeviceStateTests {
 
     @Test(
         arguments: [
-            InputDeviceType.undetermined,
-            InputDeviceType.finger
+            InputType.undetermined,
+            InputType.finger
         ]
     )
-    func `State is not .pencil`(type: InputDeviceType) {
+    func `State is not .pencil`(type: InputType) {
         let subject: Subject = .init(type)
         #expect(subject.isNotPencil == true)
     }

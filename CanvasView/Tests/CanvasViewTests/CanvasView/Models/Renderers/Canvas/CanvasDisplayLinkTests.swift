@@ -1,5 +1,5 @@
 //
-//  DrawingDisplayLinkTests.swift
+//  CanvasDisplayLinkTests.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2026/01/03.
@@ -12,9 +12,9 @@ import Testing
 @testable import CanvasView
 
 @MainActor
-struct DrawingDisplayLinkTests {
+struct CanvasDisplayLinkTests {
 
-    typealias Subject = DrawingDisplayLink
+    typealias Subject = CanvasDisplayLink
 
     @Test(
         arguments: [
