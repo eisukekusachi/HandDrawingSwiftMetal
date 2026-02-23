@@ -280,7 +280,6 @@
 			isa = PBXGroup;
 			children = (
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
-				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D48CA0722F3C18D3008C6E9E /* Undo */,
 			);
 			path = Domain;
@@ -518,6 +517,7 @@
 			children = (
 				D49D7DC92F49FA5800B178EF /* Alert */,
 				D41C72172E6C479500D524DE /* CoreData */,
+				D426FC9E2E5DD90500CC116D /* FileIO */,
 				D49C693F2F24A10100B66608 /* Project */,
 			);
 			path = Models;

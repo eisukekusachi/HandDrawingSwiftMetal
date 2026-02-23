@@ -1,5 +1,5 @@
 //
-//  DeviceInputState.swift
+//  InputState.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
@@ -7,9 +7,9 @@
 
 import Foundation
 
-public final class DeviceInputState {
+public final class InputState {
 
-    public typealias T = DeviceInputType
+    public typealias T = InputType
 
     private(set) var state: T = .undetermined
 
@@ -18,7 +18,7 @@ public final class DeviceInputState {
     }
 }
 
-public extension DeviceInputState {
+public extension InputState {
 
     var isUndetermined: Bool {
         state == .undetermined

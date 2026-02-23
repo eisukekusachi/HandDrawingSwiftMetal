@@ -1,14 +1,15 @@
 //
-//  DrawingEvent.swift
+//  InputEvent.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2026/02/11.
 //
 
-import MetalKit
+import Foundation
 
-public enum DrawingEvent {
+public enum InputEvent {
     case fingerStrokeBegan
     case pencilStrokeBegan
-    case strokeCompleted(texture: MTLTexture)
+    case strokeCompleted
+    case strokeCancelled
 }

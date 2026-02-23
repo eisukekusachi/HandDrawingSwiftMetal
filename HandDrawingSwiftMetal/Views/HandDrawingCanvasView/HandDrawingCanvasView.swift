@@ -32,7 +32,7 @@ import TextureLayerView
     private var textureLayerRenderer: TextureLayerRenderer?
 
     /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
+    private let inputDebouncer: InputDebouncer = .init(delay: 0.25)
 
     private let viewModel = HandDrawingCanvasViewModel()
 
@@ -123,13 +123,10 @@ import TextureLayerView
         // Avoid multiple subscriptions
         cancellables.removeAll()
 
-        drawingEvent
-            .compactMap { event -> MTLTexture? in
-                guard case let .strokeCompleted(texture) = event else { return nil }
-                return texture
-            }
-            .sink { [weak self] result in
-                self?.completeDrawing(result)
+        inputEvent
+            .filter { $0 == .strokeCompleted }
+            .sink { [weak self] _ in
+                self?.completeDrawing()
             }
             .store(in: &cancellables)
 
@@ -168,23 +165,23 @@ import TextureLayerView
             .store(in: &cancellables)
     }
 
-    private func completeDrawing(_ texture: MTLTexture?) {
-        drawingDebouncer.perform {
+    private func completeDrawing() {
+        inputDebouncer.perform {
             Task(priority: .utility) { [weak self] in
                 guard
-                    let texture,
+                    let currentTexture = self?.currentTexture,
                     let layerId = self?.undoTextureLayers?.selectedLayer?.id
                 else { return }
 
                 do {
                     try await self?.textureLayersDocumentsRepository?.writeTextureToDisk(
-                        texture: texture,
+                        texture: currentTexture,
                         for: layerId
                     )
 
                     self?.undoTextureLayers?.updateThumbnail(
                         layerId,
-                        texture: texture
+                        texture: currentTexture
                     )
 
                 } catch {
