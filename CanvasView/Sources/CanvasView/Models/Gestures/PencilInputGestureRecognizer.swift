@@ -21,7 +21,6 @@ final class PencilInputGestureRecognizer: UIGestureRecognizer {
         allowedTouchTypes = [UITouch.TouchType.pencil.rawValue as NSNumber]
         delaysTouchesBegan = false
         delaysTouchesEnded = false
-
         gestureDelegate = delegate
     }
 
@@ -50,9 +49,5 @@ final class PencilInputGestureRecognizer: UIGestureRecognizer {
     override func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>) {
         guard let view else { return }
         gestureDelegate?.sendPencilActualTouches(touches, on: view)
-    }
-
-    override func reset() {
-        super.reset()
     }
 }
