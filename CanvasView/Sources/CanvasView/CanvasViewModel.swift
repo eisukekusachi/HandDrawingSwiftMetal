@@ -77,7 +77,7 @@ public final class CanvasViewModel {
     private let pencilStroke = PencilStroke()
 
     /// Manages input from pen and finger
-    private let deviceInput = DeviceInputState()
+    private let inputState = InputState()
 
     /// Manages on-screen gestures such as drag and pinch
     private let touchGesture = TouchGestureState()
@@ -175,10 +175,10 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        deviceInput.update(.finger)
+        inputState.update(.finger)
 
         // Return if a pen input is in progress
-        guard deviceInput.isNotPencil else { return }
+        guard inputState.isNotPencil else { return }
 
         fingerStroke.appendTouchPointToDictionary(
             UITouch.getFingerTouches(event: event).reduce(into: [:]) {
@@ -247,10 +247,10 @@ extension CanvasViewModel {
         view: UIView
     ) {
         // Reset parameters if a finger drawing is in progress
-        if deviceInput.isFinger {
+        if inputState.isFinger {
             resetFingerDrawingRelatedParameters()
         }
-        deviceInput.update(.pencil)
+        inputState.update(.pencil)
 
         touchGesture.setDrawing()
 
@@ -442,7 +442,7 @@ extension CanvasViewModel {
     }
 
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
-        deviceInput.reset()
+        inputState.reset()
         touchGesture.reset()
 
         fingerStroke.reset()
