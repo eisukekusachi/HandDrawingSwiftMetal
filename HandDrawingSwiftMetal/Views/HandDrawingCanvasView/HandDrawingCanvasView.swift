@@ -32,7 +32,7 @@ import TextureLayerView
     private var textureLayerRenderer: TextureLayerRenderer?
 
     /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
+    private let inputDebouncer: InputDebouncer = .init(delay: 0.25)
 
     private let viewModel = HandDrawingCanvasViewModel()
 
@@ -166,7 +166,7 @@ import TextureLayerView
     }
 
     private func completeDrawing() {
-        drawingDebouncer.perform {
+        inputDebouncer.perform {
             Task(priority: .utility) { [weak self] in
                 guard
                     let currentTexture = self?.currentTexture,
