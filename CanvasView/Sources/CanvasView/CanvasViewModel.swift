@@ -9,8 +9,6 @@ import Combine
 import UIKit
 
 /// A view model that manages canvas rendering and texture layers.
-/// `DrawingRenderer` draws onto the textures of `TextureLayers`,
-/// `CanvasRenderer` composites those textures and renders the result to the display.
 @MainActor
 public final class CanvasViewModel {
 
@@ -63,6 +61,7 @@ public final class CanvasViewModel {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
+    /// Texture to be drawn
     private(set) var currentTexture: MTLTexture?
 
     /// Texture used during drawing
