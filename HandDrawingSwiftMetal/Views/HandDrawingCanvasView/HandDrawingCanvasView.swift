@@ -75,41 +75,8 @@ import TextureLayerView
 
         bindData()
     }
-
-    @MainActor required init?(coder: NSCoder) {
-        self.textureLayersStorageController = PersistenceController(
-            xcdatamodeldName: "TextureLayerStorage"
-        )
-        super.init(coder: coder)
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                renderer: renderer
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
-            renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
-        )
-        self.textureLayerRenderer = .init(renderer: renderer)
-
-        guard let undoTextureLayers else { return }
-        self.textureLayerStorage = .init(
-            textureLayers: undoTextureLayers,
-            context: textureLayersStorageController.viewContext
-        )
-
-        bindData()
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func didMoveToWindow() {

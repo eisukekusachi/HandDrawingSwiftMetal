@@ -77,20 +77,7 @@ open class CanvasView: UIView {
         super.init(frame: .zero)
     }
     public required init?(coder: NSCoder) {
-        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
-            fatalError("Metal is not supported on this device.")
-        }
-        self.sharedDevice = sharedDevice
-        self.renderer = MTLRenderer(device: sharedDevice)
-        self.displayView = .init(renderer: renderer)
-        self.canvasRenderer = .init(
-            renderer: renderer,
-            displayView: displayView
-        )
-        self.viewModel = .init(
-            canvasRenderer: canvasRenderer
-        )
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
 
     public func setup(
