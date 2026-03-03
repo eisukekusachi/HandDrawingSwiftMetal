@@ -75,34 +75,12 @@ open class CanvasView: UIView {
             canvasRenderer: canvasRenderer
         )
         super.init(frame: .zero)
-    }
-    public required init?(coder: NSCoder) {
-        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
-            fatalError("Metal is not supported on this device.")
-        }
-        self.sharedDevice = sharedDevice
-        self.renderer = MTLRenderer(device: sharedDevice)
-        self.displayView = .init(renderer: renderer)
-        self.canvasRenderer = .init(
-            renderer: renderer,
-            displayView: displayView
-        )
-        self.viewModel = .init(
-            canvasRenderer: canvasRenderer
-        )
-        super.init(coder: coder)
-    }
-
-    public func setup(
-        configuration: CanvasConfiguration
-    ) async throws {
         layoutViews()
         addEvents()
         bindData()
-
-        try await viewModel.setup(
-            configuration: configuration
-        )
+    }
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func layoutViews() {
@@ -188,6 +166,14 @@ open class CanvasView: UIView {
 
     public override func layoutSubviews() {
         viewModel.frameSize = frame.size
+    }
+
+    public func setup(
+        configuration: CanvasConfiguration? = nil
+    ) throws {
+        try viewModel.setup(
+            configuration: configuration ?? .init()
+        )
     }
 
     public func resetTransforming() {

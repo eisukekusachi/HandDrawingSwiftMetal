@@ -11,7 +11,7 @@ import Combine
 
 final class HandDrawingContentView: UIView {
 
-    @IBOutlet private(set) weak var canvasView: HandDrawingCanvasView!
+    @IBOutlet private(set) weak var baseView: UIView!
 
     @IBOutlet private weak var resetTransformButton: UIButton!
     @IBOutlet private weak var saveButton: UIButton!
@@ -32,6 +32,7 @@ final class HandDrawingContentView: UIView {
     @IBOutlet weak var undoButton: UIButton!
     @IBOutlet weak var redoButton: UIButton!
 
+    var tapResetTransforming: (() -> Void)?
     var tapSaveButton: (() -> Void)?
     var tapLayerButton: (() -> Void)?
     var tapLoadButton: (() -> Void)?
@@ -59,7 +60,7 @@ final class HandDrawingContentView: UIView {
     }
 
     private func commonInit() {
-        canvasView.alpha = 0.0
+        baseView.alpha = 0.0
 
         addEvents()
 
@@ -69,7 +70,7 @@ final class HandDrawingContentView: UIView {
 
     func initialize() {
         UIView.animate(withDuration: 0.1) { [weak self] in
-            self?.canvasView.alpha = 1.0
+            self?.baseView.alpha = 1.0
         }
 
         backgroundColor = .white
@@ -134,7 +135,7 @@ final class HandDrawingContentView: UIView {
 private extension HandDrawingContentView {
     func addEvents() {
         resetTransformButton.addAction(.init { [weak self] _ in
-            self?.canvasView.resetTransforming()
+            self?.tapResetTransforming?()
         }, for: .touchUpInside)
 
         saveButton.addAction(.init { [weak self] _ in

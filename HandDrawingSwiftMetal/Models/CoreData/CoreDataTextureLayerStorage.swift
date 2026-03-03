@@ -73,7 +73,7 @@ import TextureLayerView
         )
     }
 
-    func convertData(entity: TextureLayerArrayEntity) -> TextureLayersState {
+    func convertData(from entity: TextureLayerArrayEntity) -> TextureLayersState {
 
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }

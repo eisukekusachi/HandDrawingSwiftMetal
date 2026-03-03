@@ -92,13 +92,12 @@ public final class CanvasViewModel {
         canvasRenderer: CanvasRenderer
     ) {
         self.canvasRenderer = canvasRenderer
+        bindData()
     }
 
     func setup(
         configuration: CanvasConfiguration
-    ) async throws {
-
-        bindData()
+    ) throws {
 
         canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,
@@ -117,7 +116,6 @@ extension CanvasViewModel {
 
     func resizeCanvas(_ textureSize: CGSize) throws {
 
-        // Update canvasRenderer using textureLayers
         try canvasRenderer.initializeTextures(
             textureSize: textureSize
         )
@@ -126,13 +124,11 @@ extension CanvasViewModel {
             textureSize,
             label: "currentTexture"
         )
-
         realtimeDrawingTexture = canvasRenderer.makeTexture(
             textureSize,
             label: "realtimeDrawingTexture"
         )
 
-        // Update currentTextureSize
         currentTextureSize = textureSize
 
         canvasSizeDidChangeSubject.send(textureSize)
