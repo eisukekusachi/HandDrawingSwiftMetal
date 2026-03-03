@@ -85,7 +85,7 @@ import TextureLayerView
         setupInitialUndoManager()
     }
 
-    func bindData() {
+    private func bindData() {
         // Avoid multiple subscriptions
         cancellables.removeAll()
 
