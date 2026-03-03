@@ -75,20 +75,19 @@ open class CanvasView: UIView {
             canvasRenderer: canvasRenderer
         )
         super.init(frame: .zero)
+        layoutViews()
+        addEvents()
+        bindData()
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     public func setup(
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration? = nil
     ) async throws {
-        layoutViews()
-        addEvents()
-        bindData()
-
         try await viewModel.setup(
-            configuration: configuration
+            configuration: configuration ?? .init()
         )
     }
 
