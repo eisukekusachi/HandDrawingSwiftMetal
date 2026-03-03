@@ -83,14 +83,6 @@ open class CanvasView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public func setup(
-        configuration: CanvasConfiguration? = nil
-    ) async throws {
-        try await viewModel.setup(
-            configuration: configuration ?? .init()
-        )
-    }
-
     private func layoutViews() {
         addSubview(displayView)
         displayView.translatesAutoresizingMaskIntoConstraints = false
@@ -174,6 +166,14 @@ open class CanvasView: UIView {
 
     public override func layoutSubviews() {
         viewModel.frameSize = frame.size
+    }
+
+    public func setup(
+        configuration: CanvasConfiguration? = nil
+    ) throws {
+        try viewModel.setup(
+            configuration: configuration ?? .init()
+        )
     }
 
     public func resetTransforming() {

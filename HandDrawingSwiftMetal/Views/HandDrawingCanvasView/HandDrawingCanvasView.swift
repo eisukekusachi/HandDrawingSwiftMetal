@@ -72,7 +72,6 @@ import TextureLayerView
             textureLayers: undoTextureLayers,
             context: textureLayersStorageController.viewContext
         )
-
         bindData()
     }
     public required init?(coder: NSCoder) {
@@ -238,47 +237,44 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
-
     func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        guard
-            let undoTextureLayers
-        else { return }
+        guard let undoTextureLayers else { return }
 
-        if let entity = try? textureLayerStorage?.fetch(),
-           let state = textureLayerStorage?.convertData(entity: entity) {
+        let restoredState: TextureLayersState? = {
+            guard
+                let entity = try? textureLayerStorage?.fetch(),
+                let state = textureLayerStorage?.convertData(from: entity)
+            else { return nil }
+            return state
+        }()
 
-            textureLayersState = state
+        let state: TextureLayersState
+        let resolvedConfiguration: CanvasConfiguration
 
+        if let restoredState {
+            state = restoredState
+            resolvedConfiguration = configuration.textureSize(restoredState.textureSize)
+
+            textureLayersState = restoredState
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-                textureLayersState: state
-            )
-            undoTextureLayers.updateSkippingThumbnail(
-                textureLayersState: state
-            )
-
-            try await super.setup(
-                configuration: configuration.textureSize(state.textureSize)
+                textureLayersState: restoredState
             )
         } else {
-            let state: TextureLayersState = .init(
-                textureSize: configuration.textureSize
-            )
+            let newState = TextureLayersState(textureSize: configuration.textureSize)
+            state = newState
+            resolvedConfiguration = configuration
 
             try await textureLayersDocumentsRepository?.initializeStorage(
-                newTextureLayersState: state
-            )
-
-            undoTextureLayers.updateSkippingThumbnail(
-                textureLayersState: state
-            )
-
-            try await super.setup(
-                configuration: configuration
+                newTextureLayersState: newState
             )
         }
+
+        undoTextureLayers.updateSkippingThumbnail(textureLayersState: state)
+
+        try super.setup(configuration: resolvedConfiguration)
     }
 
     func newCanvas() async throws {
