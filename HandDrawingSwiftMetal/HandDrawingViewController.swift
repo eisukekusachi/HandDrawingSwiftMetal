@@ -91,14 +91,14 @@ class HandDrawingViewController: UIViewController {
                         renderer: self.canvasView.renderer
                     )
                 }
-                try await canvasView.setup(
+                try await self.canvasView.setup(
                     drawingRenderers: self.drawingRenderers.map { $0.value },
                     configuration: configuration.canvasConfiguration
                 )
                 try self.viewModel.setup(configuration: configuration)
 
                 // Set the undo limit
-                self.contentView.baseView.undoManager?.levelsOfUndo = configuration.undoCount
+                self.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
                 self.updateComponents()
 
