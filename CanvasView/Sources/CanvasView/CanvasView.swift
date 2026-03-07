@@ -41,10 +41,6 @@ open class CanvasView: UIView {
         viewModel.realtimeDrawingTexture
     }
 
-    public var displayTexture: MTLTexture? {
-        displayView.displayTexture
-    }
-
     public var currentFrameCommandBuffer: MTLCommandBuffer? {
         displayView.currentFrameCommandBuffer
     }
