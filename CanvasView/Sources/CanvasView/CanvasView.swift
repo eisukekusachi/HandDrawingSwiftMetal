@@ -177,24 +177,24 @@ open class CanvasView: UIView {
         viewModel.setCurrentTexture(texture)
     }
 
-    public func updateCanvasView(withNewTextureSize textureSize: CGSize) {
+    public func beginCanvasSizeChange(withNewTextureSize textureSize: CGSize) {
         viewModel.resizeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }
 
     open func completeCanvasSizeChange(_ textureSize: CGSize) {
-        viewModel.updateCanvasTextureUsingCurrentTexture()
+        viewModel.updateCanvasTexture(currentTexture)
         present()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        viewModel.updateCanvasTextureUsingRealtimeDrawingTexture()
+        viewModel.updateCanvasTexture(realtimeDrawingTexture)
         present()
     }
 
     open func updateCanvasTextureUsingCurrentTexture() {
-        viewModel.updateCanvasTextureUsingCurrentTexture()
+        viewModel.updateCanvasTexture(currentTexture)
         present()
     }
 

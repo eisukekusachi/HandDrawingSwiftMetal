@@ -86,8 +86,6 @@ import TextureLayerView
     }
 
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
         strokeEvents
             .filter { $0 == .strokeCompleted }
@@ -100,10 +98,8 @@ import TextureLayerView
         // Mainly used for undoing alpha changes
         undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.present()
-                }
+                self?.updateCanvasTextureUsingCurrentTexture()
+                self?.present()
             }
             .store(in: &cancellables)
 
@@ -111,10 +107,12 @@ import TextureLayerView
         // Mainly used for undoing drawing operations
         undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
-                Task {
+                do {
                     try self?.setCurrentTexture(texture)
-                    try await self?.updateCanvasTextureUsingCurrentTexture()
+                    self?.updateCanvasTextureUsingCurrentTexture()
                     self?.present()
+                } catch {
+
                 }
             }
             .store(in: &cancellables)
@@ -294,11 +292,11 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayersState
         )
 
-        super.updateCanvasView(
+        super.resetTransforming()
+
+        super.beginCanvasSizeChange(
             withNewTextureSize: undoTextureLayers.textureSize
         )
-
-        super.resetTransforming()
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
@@ -329,7 +327,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        super.updateCanvasView(
+        super.beginCanvasSizeChange(
             withNewTextureSize: textureLayerState.textureSize
         )
     }
