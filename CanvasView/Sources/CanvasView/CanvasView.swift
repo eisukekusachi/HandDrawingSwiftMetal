@@ -166,8 +166,8 @@ open class CanvasView: UIView {
         viewModel.resetTransforming()
     }
 
-    public func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
-        viewModel.setDrawingTool(drawingRenderer)
+    public func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+        viewModel.setDrawingRenderer(drawingRenderer)
     }
 
     public func setCurrentTexture(_ texture: MTLTexture?) throws {

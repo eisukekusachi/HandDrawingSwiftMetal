@@ -156,7 +156,7 @@ extension CanvasViewModel {
         )
     }
 
-    func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
+    func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
         self.drawingRenderer = drawingRenderer
         self.drawingRenderer?.prepareNextStroke()
     }

@@ -309,7 +309,7 @@ extension HandDrawingViewController {
             self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
-            self.canvasView.setDrawingTool(renderer)
+            self.canvasView.setDrawingRenderer(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.canvasView.undo()
@@ -391,7 +391,7 @@ extension HandDrawingViewController {
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
         guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
-        canvasView.setDrawingTool(renderer)
+        canvasView.setDrawingRenderer(renderer)
 
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
