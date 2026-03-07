@@ -172,7 +172,7 @@ open class CanvasView: UIView {
         viewModel.setCurrentTexture(texture)
     }
 
-    public func beginCanvasSizeChange(withNewTextureSize textureSize: CGSize) {
+    public func requestCanvasSizeChange(withNewTextureSize textureSize: CGSize) {
         viewModel.resizeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )

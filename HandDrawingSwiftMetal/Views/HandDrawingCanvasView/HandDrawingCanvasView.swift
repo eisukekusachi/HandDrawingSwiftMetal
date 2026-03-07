@@ -292,7 +292,7 @@ extension HandDrawingCanvasView {
 
         super.resetTransforming()
 
-        super.beginCanvasSizeChange(
+        super.requestCanvasSizeChange(
             withNewTextureSize: undoTextureLayers.textureSize
         )
     }
@@ -325,7 +325,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        super.beginCanvasSizeChange(
+        super.requestCanvasSizeChange(
             withNewTextureSize: textureLayerState.textureSize
         )
     }
