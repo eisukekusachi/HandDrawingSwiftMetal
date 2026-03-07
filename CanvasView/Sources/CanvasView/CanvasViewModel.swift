@@ -242,7 +242,7 @@ extension CanvasViewModel {
     ) {
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
-            resetFingerDrawingRelatedParameters()
+            cancelFingerDrawing()
         }
         inputState.update(.pencil)
 
@@ -389,7 +389,8 @@ extension CanvasViewModel {
 
         drawingTouchPhaseSubject.send(nil)
     }
-    private func resetFingerDrawingRelatedParameters() {
+
+    private func cancelFingerDrawing() {
         fingerStroke.reset()
 
         transforming.resetMatrix()
@@ -397,6 +398,7 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
+
         present()
     }
 
