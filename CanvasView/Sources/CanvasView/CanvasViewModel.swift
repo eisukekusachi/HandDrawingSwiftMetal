@@ -19,20 +19,14 @@ public final class CanvasViewModel {
         }
     }
 
-    /// Publishes the canvas size whenever it changes
-    let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
-
     /// Publishes stroke events
     let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
+    /// Publishes canvas events
+    let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
+
     /// Publishes the current touch phase during a drawing interaction
     let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
-
-    /// Publishes `Void` when the current texture should be displayed
-    let currentTextureDisplayingSubject = PassthroughSubject<Void, Never>()
-
-    /// Publishes `Void` when the realtime drawing texture should be displayed
-    let realtimeDrawingTextureDisplayingSubject = PassthroughSubject<Void, Never>()
 
     public var displayRealtimeDrawingTexture: Bool {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
@@ -120,7 +114,9 @@ extension CanvasViewModel {
 
         currentTextureSize = textureSize
 
-        canvasSizeDidChangeSubject.send(textureSize)
+        canvasEventSubject.send(
+            .canvasSizeChanged(textureSize)
+        )
     }
 
     /// Presents `canvasTexture` to the screen
@@ -324,11 +320,9 @@ extension CanvasViewModel {
             strokeEventSubject.send(.strokeCancelled)
         }
 
-        if displayRealtimeDrawingTexture {
-            realtimeDrawingTextureDisplayingSubject.send()
-        } else {
-            currentTextureDisplayingSubject.send()
-        }
+        canvasEventSubject.send(
+            displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
+        )
     }
 }
 

@@ -89,7 +89,7 @@ import TextureLayerView
         // Avoid multiple subscriptions
         cancellables.removeAll()
 
-        strokeEvent
+        strokeEvents
             .filter { $0 == .strokeCompleted }
             .sink { [weak self] _ in
                 self?.completeDrawing()

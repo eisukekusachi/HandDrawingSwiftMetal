@@ -146,10 +146,12 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
-        canvasView.canvasSizeDidChange
+        canvasView.canvasEvents
+            .compactMap { event -> CGSize? in
+                guard case let .canvasSizeChanged(size) = event else { return nil }
+                return size
+            }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureSize in
                 guard
@@ -176,7 +178,8 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        canvasView.strokeEvent
+        canvasView.strokeEvents
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let `self` else { return }
                 switch event {

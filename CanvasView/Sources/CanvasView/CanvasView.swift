@@ -12,17 +12,17 @@ import UIKit
 
 open class CanvasView: UIView {
 
+    /// Emits canvas events
+    public var canvasEvents: AnyPublisher<CanvasEvent, Never> {
+        canvasEventSubject.eraseToAnyPublisher()
+    }
+    private let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
+
     /// Emits stroke events
-    public var strokeEvent: AnyPublisher<StrokeEvent, Never> {
+    public var strokeEvents: AnyPublisher<StrokeEvent, Never> {
         strokeEventSubject.eraseToAnyPublisher()
     }
     private let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
-
-    /// A publisher that emits `CGSize` when `CanvasView` setup completes
-    public var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
-        canvasSizeDidChangeSubject.eraseToAnyPublisher()
-    }
-    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
     /// The single Metal device instance used throughout the app
     public let sharedDevice: MTLDevice
@@ -123,12 +123,30 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // Receives an event when canvasTexture size changes
-        viewModel.canvasSizeDidChangeSubject
-            .sink { [weak self] textureSize in
-                Task { [weak self] in
-                    try? await self?.completeCanvasSizeChange(textureSize)
-                    self?.canvasSizeDidChangeSubject.send(textureSize)
+        viewModel.strokeEventSubject
+            .sink { [weak self] result in
+                self?.strokeEventSubject.send(result)
+            }
+            .store(in: &cancellables)
+
+        viewModel.canvasEventSubject
+            .sink { [weak self] event in
+                switch event {
+                case .canvasSizeChanged(let textureSize):
+                    Task { [weak self] in
+                        try? await self?.completeCanvasSizeChange(textureSize)
+                        self?.canvasEventSubject.send(
+                            .canvasSizeChanged(textureSize)
+                        )
+                    }
+                case .displayCurrentTexture:
+                    Task {
+                        try? await self?.updateCanvasTextureUsingCurrentTexture()
+                        self?.present()
+                    }
+                case .displayRealtimeDrawingTexture:
+                    self?.updateCanvasTextureUsingRealtimeDrawingTexture()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -136,28 +154,6 @@ open class CanvasView: UIView {
         viewModel.drawingTouchPhaseSubject
             .sink { [weak self] touchPhase in
                 self?.canvasDisplayLink.run(touchPhase)
-            }
-            .store(in: &cancellables)
-
-        viewModel.strokeEventSubject
-            .sink { [weak self] result in
-                self?.strokeEventSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        viewModel.currentTextureDisplayingSubject
-            .sink { [weak self] in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.present()
-                }
-            }
-            .store(in: &cancellables)
-
-        viewModel.realtimeDrawingTextureDisplayingSubject
-            .sink { [weak self] in
-                self?.updateCanvasTextureUsingRealtimeDrawingTexture()
-                self?.present()
             }
             .store(in: &cancellables)
     }
