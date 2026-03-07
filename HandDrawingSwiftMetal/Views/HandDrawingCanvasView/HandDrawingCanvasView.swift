@@ -110,7 +110,7 @@ import TextureLayerView
                     try self?.setCurrentTexture(texture)
                     self?.updateCanvasTextureUsingCurrentTexture()
                 } catch {
-
+                    Logger.error(error)
                 }
             }
             .store(in: &cancellables)
