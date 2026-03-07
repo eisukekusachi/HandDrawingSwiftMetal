@@ -185,7 +185,10 @@ open class CanvasView: UIView {
     }
 
     public func setCurrentTexture(_ texture: MTLTexture?) throws {
-        try viewModel.setCurrentTexture(texture)
+        guard texture?.size == viewModel.textureSize else {
+            throw CanvasError.textureSizeMismatch
+        }
+        viewModel.setCurrentTexture(texture)
     }
 
     public func resizeCanvas(_ textureSize: CGSize) throws {

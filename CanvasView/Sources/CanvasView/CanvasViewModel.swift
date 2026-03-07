@@ -379,22 +379,7 @@ public extension CanvasViewModel {
         self.drawingRenderer?.prepareNextStroke()
     }
 
-    func setCurrentTexture(_ texture: MTLTexture?) throws {
-        guard
-            let texture,
-            Int(texture.width) >= canvasMinimumTextureLength &&
-            Int(texture.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Texture size is below the minimum: \(texture?.width ?? 0) \(texture?.height ?? 0)",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
+    func setCurrentTexture(_ texture: MTLTexture?) {
         self.currentTexture = texture
     }
 
