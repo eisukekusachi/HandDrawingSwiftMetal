@@ -99,7 +99,6 @@ import TextureLayerView
         undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingCurrentTexture()
-                self?.present()
             }
             .store(in: &cancellables)
 
@@ -110,7 +109,6 @@ import TextureLayerView
                 do {
                     try self?.setCurrentTexture(texture)
                     self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.present()
                 } catch {
 
                 }
