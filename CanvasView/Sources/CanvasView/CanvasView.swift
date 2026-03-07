@@ -205,7 +205,7 @@ open class CanvasView: UIView {
     }
 
     open func updateCanvasTextureUsingCurrentTexture() async throws {
-        viewModel.updateCanvasTexture()
+        viewModel.updateCanvasTextureUsingCurrentTexture()
     }
 
     public func drawCanvasToDisplay() {

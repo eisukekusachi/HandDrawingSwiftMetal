@@ -384,13 +384,15 @@ public extension CanvasViewModel {
     }
 
     func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        updateCanvasTexture(using: realtimeDrawingTexture)
-    }
-    func updateCanvasTexture(
-        using texture: MTLTexture? = nil
-    ) {
         canvasRenderer.updateCanvasTexture(
-            currentTexture: texture ?? currentTexture,
+            currentTexture: realtimeDrawingTexture,
+            canvasTexture: canvasTexture
+        )
+    }
+
+    func updateCanvasTextureUsingCurrentTexture() {
+        canvasRenderer.updateCanvasTexture(
+            currentTexture: currentTexture,
             canvasTexture: canvasTexture
         )
     }
