@@ -124,6 +124,9 @@ open class CanvasView: UIView {
                 switch event {
                 case .canvasSizeChanged(let textureSize):
                     self?.completeCanvasSizeChange(textureSize)
+                    self?.canvasEventSubject.send(
+                        .canvasSizeChanged(textureSize)
+                    )
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
                 case .displayRealtimeDrawingTexture:
@@ -182,10 +185,6 @@ open class CanvasView: UIView {
     open func completeCanvasSizeChange(_ textureSize: CGSize) {
         viewModel.updateCanvasTexture(currentTexture)
         present()
-
-        canvasEventSubject.send(
-            .canvasSizeChanged(textureSize)
-        )
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
