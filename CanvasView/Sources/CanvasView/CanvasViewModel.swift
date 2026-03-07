@@ -22,8 +22,8 @@ public final class CanvasViewModel {
     /// Publishes the canvas size whenever it changes
     let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
-    /// Publishes drawing-related events
-    let inputEventSubject = PassthroughSubject<InputEvent, Never>()
+    /// Publishes stroke events
+    let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
     /// Publishes the current touch phase during a drawing interaction
     let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
@@ -177,7 +177,7 @@ extension CanvasViewModel {
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
-                inputEventSubject.send(.fingerStrokeBegan)
+                strokeEventSubject.send(.fingerStrokeBegan)
 
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
@@ -255,7 +255,7 @@ extension CanvasViewModel {
 
         // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
-            inputEventSubject.send(.pencilStrokeBegan)
+            strokeEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke()
         }
@@ -315,13 +315,13 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    self?.inputEventSubject.send(.strokeCompleted)
+                    self?.strokeEventSubject.send(.strokeCompleted)
                 }
             }
         } else if isCancelledDrawing {
             // Prepare for the next drawing when the drawing is cancelled.
             prepareNextStroke(commandBuffer: commandBuffer)
-            inputEventSubject.send(.strokeCancelled)
+            strokeEventSubject.send(.strokeCancelled)
         }
 
         if displayRealtimeDrawingTexture {

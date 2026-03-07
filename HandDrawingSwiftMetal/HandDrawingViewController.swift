@@ -176,7 +176,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        canvasView.inputEvent
+        canvasView.strokeEvent
             .sink { [weak self] event in
                 guard let `self` else { return }
                 switch event {
