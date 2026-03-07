@@ -31,8 +31,6 @@ import Combine
 
     private var frameSize: CGSize = .zero
 
-    private var matrix: CGAffineTransform = .identity
-
     private let renderer: MTLRendering
 
     /// Buffers used to draw textures with vertical flipping
@@ -108,10 +106,6 @@ import Combine
         self.frameSize = size
     }
 
-    public func setMatrix(_ matrix: CGAffineTransform) {
-        self.matrix = matrix
-    }
-
     public func resetCommandBuffer() {
         displayView.resetCommandBuffer()
     }
@@ -145,7 +139,9 @@ extension CanvasRenderer {
     }
 
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
-    public func drawCanvasToDisplay() {
+    public func drawCanvasToDisplay(
+        matrix: CGAffineTransform
+    ) {
         guard
             let displayTexture = displayView.displayTexture,
             let currentFrameCommandBuffer

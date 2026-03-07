@@ -92,7 +92,6 @@ public final class CanvasViewModel {
         canvasRenderer: CanvasRenderer
     ) {
         self.canvasRenderer = canvasRenderer
-        bindData()
     }
 
     func setup(
@@ -136,17 +135,6 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
-
-        transforming.matrixPublisher
-            .sink { [weak self] matrix in
-                self?.canvasRenderer.setMatrix(matrix)
-            }
-            .store(in: &cancellables)
-    }
 
     private func setupTouchGesture(
         drawingGestureRecognitionSecond: TimeInterval,
@@ -348,7 +336,9 @@ extension CanvasViewModel {
     }
 
     func drawCanvasToDisplay() {
-        canvasRenderer.drawCanvasToDisplay()
+        canvasRenderer.drawCanvasToDisplay(
+            matrix: transforming.matrix
+        )
     }
 }
 
@@ -372,7 +362,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        canvasRenderer.drawCanvasToDisplay()
+        drawCanvasToDisplay()
     }
 
     func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
@@ -465,7 +455,7 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-        canvasRenderer.drawCanvasToDisplay()
+        drawCanvasToDisplay()
     }
 
     private func transformCanvas() {
@@ -487,6 +477,6 @@ extension CanvasViewModel {
             )
         }
 
-        canvasRenderer.drawCanvasToDisplay()
+        drawCanvasToDisplay()
     }
 }
