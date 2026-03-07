@@ -104,8 +104,6 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
         // Receives an event when displayTexture size changes.
         // Mainly used when the device rotates.
