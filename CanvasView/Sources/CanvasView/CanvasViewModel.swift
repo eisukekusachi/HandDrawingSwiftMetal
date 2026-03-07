@@ -316,7 +316,7 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
-            canvasRenderer.applyTexture(
+            canvasRenderer.applyRealtimeDrawingTexture(
                 realtimeDrawingTexture,
                 to: currentTexture,
                 with: commandBuffer
@@ -344,7 +344,7 @@ extension CanvasViewModel {
     }
 
     func drawCanvasToDisplay() {
-        canvasRenderer.drawCanvasToDisplay(
+        canvasRenderer.drawCanvasTextureToDisplay(
             matrix: transforming.matrix,
             canvasTexture: canvasTexture
         )

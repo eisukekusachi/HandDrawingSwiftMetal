@@ -73,7 +73,7 @@ import Combine
 
 extension CanvasRenderer {
 
-    /// Refreshes the entire screen using textures
+    /// Updates `canvasTexture` using `currentTexture` and the background color
     public func updateCanvasTexture(
         currentTexture: MTLTexture?,
         canvasTexture: MTLTexture?
@@ -98,8 +98,21 @@ extension CanvasRenderer {
         )
     }
 
+    /// Applies `realtimeDrawingTexture` to `currentTexture`, then clears `realtimeDrawingTexture`
+    func applyRealtimeDrawingTexture(
+        _ realtimeDrawingTexture: MTLTexture?,
+        to currentTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.applyTexture(
+            realtimeDrawingTexture,
+            to: currentTexture,
+            with: commandBuffer
+        )
+    }
+
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
-    public func drawCanvasToDisplay(
+    public func drawCanvasTextureToDisplay(
         matrix: CGAffineTransform,
         canvasTexture: MTLTexture?
     ) {
@@ -119,18 +132,6 @@ extension CanvasRenderer {
         )
 
         displayView.setNeedsDisplay()
-    }
-
-    func applyTexture(
-        _ srcTexture: MTLTexture?,
-        to dstTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        renderer.applyTexture(
-            srcTexture,
-            to: dstTexture,
-            with: commandBuffer
-        )
     }
 }
 
