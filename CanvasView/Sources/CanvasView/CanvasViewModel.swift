@@ -52,7 +52,7 @@ public final class CanvasViewModel {
     private(set) var canvasTexture: MTLTexture?
 
     /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
+    private let canvasRenderer: CanvasRenderer
 
     /// Handles input from finger touches
     private let fingerStroke = FingerStroke()
