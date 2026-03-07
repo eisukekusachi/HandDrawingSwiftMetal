@@ -76,6 +76,8 @@
 		D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */; };
+		D4D624BD2F5C0EAA00026589 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D624BC2F5C0EAA00026589 /* Debouncer.swift */; };
+		D4D624BF2F5C0EBF00026589 /* DrawingDebouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D624BE2F5C0EBF00026589 /* DrawingDebouncer.swift */; };
 		D4DF37742E914492009B8F2A /* Throttle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DF37732E914492009B8F2A /* Throttle.swift */; };
 		D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */; };
 		D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */; };
@@ -177,6 +179,8 @@
 		D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
+		D4D624BC2F5C0EAA00026589 /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
+		D4D624BE2F5C0EBF00026589 /* DrawingDebouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingDebouncer.swift; sourceTree = "<group>"; };
 		D4DF37732E914492009B8F2A /* Throttle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttle.swift; sourceTree = "<group>"; };
 		D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandDrawingSwiftMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECDC2752388C00D4A23D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -386,6 +390,7 @@
 			isa = PBXGroup;
 			children = (
 				D49C692B2F23A76400B66608 /* Logger.swift */,
+				D4D624BC2F5C0EAA00026589 /* Debouncer.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -426,6 +431,14 @@
 				D49C695A2F324E7900B66608 /* HandDrawingCanvasViewModel.swift */,
 			);
 			path = HandDrawingCanvasView;
+			sourceTree = "<group>";
+		};
+		D4D624C12F5C116E00026589 /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				D4D624BE2F5C0EBF00026589 /* DrawingDebouncer.swift */,
+			);
+			path = Drawing;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -505,6 +518,7 @@
 		D4F525742EAC96C600439FFF /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D4D624C12F5C116E00026589 /* Drawing */,
 				D49D7DC92F49FA5800B178EF /* Alert */,
 				D41C72172E6C479500D524DE /* CoreData */,
 				D426FC9E2E5DD90500CC116D /* FileIO */,
@@ -693,6 +707,7 @@
 				D48CA0792F3C18D3008C6E9E /* UndoRedoObjectPair.swift in Sources */,
 				D48CA07A2F3C18D3008C6E9E /* UndoRedoButtonState.swift in Sources */,
 				D48CA07B2F3C18D3008C6E9E /* UndoObject.swift in Sources */,
+				D4D624BD2F5C0EAA00026589 /* Debouncer.swift in Sources */,
 				D48CA07C2F3C18D3008C6E9E /* UndoTextureLayers.swift in Sources */,
 				D48CA07D2F3C18D3008C6E9E /* UndoAlphaChangedObject.swift in Sources */,
 				D48CA07E2F3C18D3008C6E9E /* UndoAdditionObject.swift in Sources */,
@@ -708,6 +723,7 @@
 				D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */,
 				D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */,
 				D4168F1C2E59EFE7007F7904 /* BrushPaletteView.swift in Sources */,
+				D4D624BF2F5C0EBF00026589 /* DrawingDebouncer.swift in Sources */,
 				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
 				D49C69572F2F685300B66608 /* CoreDataStorage.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,

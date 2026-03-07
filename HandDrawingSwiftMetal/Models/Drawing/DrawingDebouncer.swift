@@ -1,5 +1,5 @@
 //
-//  InputDebouncer.swift
+//  DrawingDebouncer.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/11/22.
@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// A debouncer to prevent heavy processing from running continuously during drawing
-public final class InputDebouncer {
+public final class DrawingDebouncer {
 
     /// A publisher that emits a Bool to indicate processing and completion states
     var isProcessing: AnyPublisher<Bool, Never> {
