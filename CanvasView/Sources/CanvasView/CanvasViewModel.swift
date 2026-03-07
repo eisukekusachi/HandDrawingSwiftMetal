@@ -93,9 +93,30 @@ public final class CanvasViewModel {
 
         resizeCanvas(configuration.textureSize)
     }
+
+    private func setupTouchGesture(
+        drawingGestureRecognitionSecond: TimeInterval,
+        transformingGestureRecognitionSecond: TimeInterval
+    ) {
+        // Set the gesture recognition durations in seconds
+        self.touchGesture.setDrawingGestureRecognitionSecond(
+            drawingGestureRecognitionSecond
+        )
+        self.touchGesture.setTransformingGestureRecognitionSecond(
+            transformingGestureRecognitionSecond
+        )
+    }
 }
 
 extension CanvasViewModel {
+
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
+        )
+    }
 
     func resizeCanvas(_ textureSize: CGSize) {
 
@@ -119,29 +140,34 @@ extension CanvasViewModel {
         )
     }
 
-    /// Presents `canvasTexture` to the screen
-    func present() {
-        canvasRenderer.drawCanvasTextureToDisplay(
-            matrix: transforming.matrix,
+    func setCurrentTexture(_ texture: MTLTexture?) {
+        self.currentTexture = texture
+    }
+
+    func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        canvasRenderer.updateCanvasTexture(
+            currentTexture: realtimeDrawingTexture,
             canvasTexture: canvasTexture
         )
     }
-}
 
-extension CanvasViewModel {
-
-    private func setupTouchGesture(
-        drawingGestureRecognitionSecond: TimeInterval,
-        transformingGestureRecognitionSecond: TimeInterval
-    ) {
-        // Set the gesture recognition durations in seconds
-        self.touchGesture.setDrawingGestureRecognitionSecond(
-            drawingGestureRecognitionSecond
-        )
-        self.touchGesture.setTransformingGestureRecognitionSecond(
-            transformingGestureRecognitionSecond
+    func updateCanvasTextureUsingCurrentTexture() {
+        canvasRenderer.updateCanvasTexture(
+            currentTexture: currentTexture,
+            canvasTexture: canvasTexture
         )
     }
+
+    func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
+        self.drawingRenderer = drawingRenderer
+        self.drawingRenderer?.prepareNextStroke()
+    }
+
+    func resetTransforming() {
+        transforming.setMatrix(.identity)
+        present()
+    }
+
 }
 
 extension CanvasViewModel {
@@ -322,37 +348,6 @@ extension CanvasViewModel {
 
         canvasEventSubject.send(
             displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
-        )
-    }
-}
-
-public extension CanvasViewModel {
-
-    func resetTransforming() {
-        transforming.setMatrix(.identity)
-        present()
-    }
-
-    func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
-        self.drawingRenderer = drawingRenderer
-        self.drawingRenderer?.prepareNextStroke()
-    }
-
-    func setCurrentTexture(_ texture: MTLTexture?) {
-        self.currentTexture = texture
-    }
-
-    func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        canvasRenderer.updateCanvasTexture(
-            currentTexture: realtimeDrawingTexture,
-            canvasTexture: canvasTexture
-        )
-    }
-
-    func updateCanvasTextureUsingCurrentTexture() {
-        canvasRenderer.updateCanvasTexture(
-            currentTexture: currentTexture,
-            canvasTexture: canvasTexture
         )
     }
 }
