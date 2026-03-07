@@ -134,6 +134,14 @@ extension CanvasViewModel {
 
         canvasSizeDidChangeSubject.send(textureSize)
     }
+
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
+        )
+    }
 }
 
 extension CanvasViewModel {
@@ -334,13 +342,6 @@ extension CanvasViewModel {
             currentTextureDisplayingSubject.send()
         }
     }
-
-    func drawCanvasToDisplay() {
-        canvasRenderer.drawCanvasTextureToDisplay(
-            matrix: transforming.matrix,
-            canvasTexture: canvasTexture
-        )
-    }
 }
 
 public extension CanvasViewModel {
@@ -363,7 +364,7 @@ public extension CanvasViewModel {
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
-        drawCanvasToDisplay()
+        present()
     }
 
     func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
@@ -443,7 +444,7 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-        drawCanvasToDisplay()
+        present()
     }
 
     private func transformCanvas() {
@@ -465,6 +466,6 @@ extension CanvasViewModel {
             )
         }
 
-        drawCanvasToDisplay()
+        present()
     }
 }

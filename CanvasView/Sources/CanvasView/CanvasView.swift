@@ -113,7 +113,7 @@ open class CanvasView: UIView {
             .sink { [weak self] _ in
                 Task {
                     try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -151,7 +151,7 @@ open class CanvasView: UIView {
             .sink { [weak self] in
                 Task {
                     try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -159,7 +159,7 @@ open class CanvasView: UIView {
         viewModel.realtimeDrawingTextureDisplaying
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingRealtimeDrawingTexture()
-                self?.drawCanvasToDisplay()
+                self?.present()
             }
             .store(in: &cancellables)
     }
@@ -199,7 +199,7 @@ open class CanvasView: UIView {
 
     open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
         try await updateCanvasTextureUsingCurrentTexture()
-        drawCanvasToDisplay()
+        present()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
@@ -210,8 +210,8 @@ open class CanvasView: UIView {
         viewModel.updateCanvasTextureUsingCurrentTexture()
     }
 
-    public func drawCanvasToDisplay() {
-        viewModel.drawCanvasToDisplay()
+    public func present() {
+        viewModel.present()
     }
 }
 

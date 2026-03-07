@@ -102,7 +102,7 @@ import TextureLayerView
             .sink { [weak self] in
                 Task {
                     try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -114,7 +114,7 @@ import TextureLayerView
                 Task {
                     try self?.setCurrentTexture(texture)
                     try await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -125,7 +125,7 @@ import TextureLayerView
             .sink { [weak self] in
                 Task {
                     try? await self?.updateFullCanvasTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -193,7 +193,7 @@ import TextureLayerView
 
         try await updateFullCanvasTexture()
 
-        drawCanvasToDisplay()
+        present()
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
