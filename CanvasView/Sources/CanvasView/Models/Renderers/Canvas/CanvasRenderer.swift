@@ -16,18 +16,10 @@ import Combine
         displayView.currentFrameCommandBuffer
     }
 
-    /// Size of the canvas texture
-    public var textureSize: CGSize? {
-        canvasTexture?.size
-    }
-
     /// Size of the texture rendered on the screen
     public var displayTextureSize: CGSize? {
         displayView.displayTexture?.size
     }
-
-    /// Texture that combines the background color and the textures of `currentTexture`
-    private(set) var canvasTexture: MTLTexture?
 
     private var frameSize: CGSize = .zero
 
@@ -70,38 +62,6 @@ import Combine
         if let baseBackgroundColor { self.baseBackgroundColor = baseBackgroundColor }
     }
 
-    public func initializeTextures(textureSize: CGSize) throws {
-        guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        guard
-            let canvasTexture = makeTexture(textureSize, label: "canvasTexture")
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Failed to create new texture",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-        self.canvasTexture = canvasTexture
-    }
-
     public func setFrameSize(_ size: CGSize) {
         self.frameSize = size
     }
@@ -140,11 +100,13 @@ extension CanvasRenderer {
 
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
     public func drawCanvasToDisplay(
-        matrix: CGAffineTransform
+        matrix: CGAffineTransform,
+        canvasTexture: MTLTexture?
     ) {
         guard
-            let displayTexture = displayView.displayTexture,
-            let currentFrameCommandBuffer
+            let currentFrameCommandBuffer,
+            let canvasTexture,
+            let displayTexture = displayView.displayTexture
         else { return }
 
         renderer.drawTexture(

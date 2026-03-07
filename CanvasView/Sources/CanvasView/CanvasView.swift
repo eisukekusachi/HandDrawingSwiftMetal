@@ -29,6 +29,10 @@ open class CanvasView: UIView {
 
     public let renderer: MTLRendering
 
+    public var canvasTexture: MTLTexture? {
+        viewModel.canvasTexture
+    }
+
     public var currentTexture: MTLTexture? {
         viewModel.currentTexture
     }
@@ -39,10 +43,6 @@ open class CanvasView: UIView {
 
     public var displayTexture: MTLTexture? {
         displayView.displayTexture
-    }
-
-    public var canvasTexture: MTLTexture? {
-        canvasRenderer.canvasTexture
     }
 
     public var currentFrameCommandBuffer: MTLCommandBuffer? {

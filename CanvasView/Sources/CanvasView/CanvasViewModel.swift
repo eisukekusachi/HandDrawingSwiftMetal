@@ -61,11 +61,19 @@ public final class CanvasViewModel {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
-    /// Texture to be drawn
-    private(set) var currentTexture: MTLTexture?
+    /// Size of the canvas texture
+    public var textureSize: CGSize? {
+        canvasTexture?.size
+    }
 
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
+
+    /// Texture to be drawn
+    private(set) var currentTexture: MTLTexture?
+
+    /// Texture that combines the background color and the textures of `currentTexture`
+    private(set) var canvasTexture: MTLTexture?
 
     /// A class that manages rendering to the canvas
     private var canvasRenderer: CanvasRenderer
@@ -115,10 +123,10 @@ extension CanvasViewModel {
 
     func resizeCanvas(_ textureSize: CGSize) throws {
 
-        try canvasRenderer.initializeTextures(
-            textureSize: textureSize
+        canvasTexture = canvasRenderer.makeTexture(
+            textureSize,
+            label: "canvasTexture"
         )
-
         currentTexture = canvasRenderer.makeTexture(
             textureSize,
             label: "currentTexture"
@@ -174,7 +182,7 @@ extension CanvasViewModel {
         case .drawing:
             guard
                 let drawingRenderer,
-                let textureSize = canvasRenderer.textureSize,
+                let textureSize,
                 let displayTextureSize = canvasRenderer.displayTextureSize
             else { return }
 
@@ -253,7 +261,7 @@ extension CanvasViewModel {
     ) {
         guard
             let drawingRenderer,
-            let textureSize = canvasRenderer.textureSize,
+            let textureSize,
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
@@ -337,7 +345,8 @@ extension CanvasViewModel {
 
     func drawCanvasToDisplay() {
         canvasRenderer.drawCanvasToDisplay(
-            matrix: transforming.matrix
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
         )
     }
 }
@@ -397,7 +406,7 @@ public extension CanvasViewModel {
     ) {
         canvasRenderer.updateCanvasTexture(
             currentTexture: texture ?? currentTexture,
-            canvasTexture: canvasRenderer.canvasTexture
+            canvasTexture: canvasTexture
         )
     }
 }
