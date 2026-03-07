@@ -28,10 +28,6 @@ public final class CanvasViewModel {
     /// Publishes the current touch phase during a drawing interaction
     let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
 
-    public var displayRealtimeDrawingTexture: Bool {
-        drawingRenderer?.displayRealtimeDrawingTexture ?? false
-    }
-
     /// The size of the texture currently set on the canvas.
     /// A temporary value is assigned to avoid making it optional.
     private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
@@ -58,6 +54,10 @@ public final class CanvasViewModel {
     }
     private var isCancelledDrawing: Bool {
         drawingTouchPhaseSubject.value == .cancelled
+    }
+
+    private var displayRealtimeDrawingTexture: Bool {
+        drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
     /// Manages input from pen and finger
@@ -198,7 +198,7 @@ extension CanvasViewModel {
 
             // Update the touch phase for drawing
             drawingTouchPhaseSubject.send(
-                drawingTouchPhase(pointArray)
+                TouchPhase.drawingTouchPhase(pointArray)
             )
 
         case .transforming:
@@ -278,7 +278,7 @@ extension CanvasViewModel {
 
         // Update the touch phase for drawing
         drawingTouchPhaseSubject.send(
-            drawingTouchPhase(pointArray)
+            TouchPhase.drawingTouchPhase(pointArray)
         )
     }
 
@@ -327,22 +327,6 @@ extension CanvasViewModel {
 }
 
 public extension CanvasViewModel {
-
-    /// Touch phase used for drawing
-    func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
-        if points.contains(where: { $0.phase == .cancelled }) {
-            return .cancelled
-        } else if points.contains(where: { $0.phase == .ended }) {
-            return .ended
-        } else if points.contains(where: { $0.phase == .began }) {
-            return .began
-        } else if points.contains(where: { $0.phase == .moved }) {
-            return .moved
-        } else if points.contains(where: { $0.phase == .stationary }) {
-            return .stationary
-        }
-        return nil
-    }
 
     func resetTransforming() {
         transforming.setMatrix(.identity)
