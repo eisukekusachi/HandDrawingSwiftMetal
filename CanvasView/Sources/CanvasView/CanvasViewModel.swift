@@ -19,47 +19,28 @@ public final class CanvasViewModel {
         }
     }
 
-    /// The size of the texture currently set on the canvas.
-    /// A temporary value is assigned to avoid making it optional.
-    private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
+    /// Publishes the canvas size whenever it changes
+    let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
 
-    private var isFinishedDrawing: Bool {
-        drawingTouchPhaseSubject.value == .ended
-    }
-    private var isCancelledDrawing: Bool {
-        drawingTouchPhaseSubject.value == .cancelled
-    }
+    /// Publishes drawing-related events
+    let inputEventSubject = PassthroughSubject<InputEvent, Never>()
 
-    /// A publisher that emits `CGSize` when the canvas size changes
-    var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
-        canvasSizeDidChangeSubject.eraseToAnyPublisher()
-    }
-    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
+    /// Publishes the current touch phase during a drawing interaction
+    let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
 
-    /// Emits drawing-related events
-    var inputEvent: AnyPublisher<InputEvent, Never> {
-        inputEventSubject.eraseToAnyPublisher()
-    }
-    private let inputEventSubject = PassthroughSubject<InputEvent, Never>()
+    /// Publishes `Void` when the current texture should be displayed
+    let currentTextureDisplayingSubject = PassthroughSubject<Void, Never>()
 
-    var drawingTouchPhase: AnyPublisher<UITouch.Phase?, Never> {
-        drawingTouchPhaseSubject.eraseToAnyPublisher()
-    }
-    private let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
-
-    var currentTextureDisplaying: AnyPublisher<Void, Never> {
-        currentTextureDisplayingSubject.eraseToAnyPublisher()
-    }
-    private let currentTextureDisplayingSubject = PassthroughSubject<Void, Never>()
-
-    var realtimeDrawingTextureDisplaying: AnyPublisher<Void, Never> {
-        realtimeDrawingTextureDisplayingSubject.eraseToAnyPublisher()
-    }
-    private let realtimeDrawingTextureDisplayingSubject = PassthroughSubject<Void, Never>()
+    /// Publishes `Void` when the realtime drawing texture should be displayed
+    let realtimeDrawingTextureDisplayingSubject = PassthroughSubject<Void, Never>()
 
     public var displayRealtimeDrawingTexture: Bool {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
+
+    /// The size of the texture currently set on the canvas.
+    /// A temporary value is assigned to avoid making it optional.
+    private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
 
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
@@ -77,6 +58,13 @@ public final class CanvasViewModel {
     private let fingerStroke = FingerStroke()
     /// Handles input from Apple Pencil
     private let pencilStroke = PencilStroke()
+
+    private var isFinishedDrawing: Bool {
+        drawingTouchPhaseSubject.value == .ended
+    }
+    private var isCancelledDrawing: Bool {
+        drawingTouchPhaseSubject.value == .cancelled
+    }
 
     /// Manages input from pen and finger
     private let inputState = InputState()

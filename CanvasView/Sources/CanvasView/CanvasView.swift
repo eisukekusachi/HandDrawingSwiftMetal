@@ -118,8 +118,15 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
+        // The canvas is updated every frame during drawing
+        canvasDisplayLink.update
+            .sink { [weak self] in
+                self?.viewModel.onDrawingDisplayLinkFrame()
+            }
+            .store(in: &cancellables)
+
         // Receives an event when canvasTexture size changes
-        viewModel.canvasSizeDidChange
+        viewModel.canvasSizeDidChangeSubject
             .sink { [weak self] textureSize in
                 Task { [weak self] in
                     try? await self?.completeCanvasSizeChange(textureSize)
@@ -128,26 +135,19 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // The canvas is updated every frame during drawing
-        canvasDisplayLink.update
-            .sink { [weak self] in
-                self?.viewModel.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingTouchPhase
+        viewModel.drawingTouchPhaseSubject
             .sink { [weak self] touchPhase in
                 self?.canvasDisplayLink.run(touchPhase)
             }
             .store(in: &cancellables)
 
-        viewModel.inputEvent
+        viewModel.inputEventSubject
             .sink { [weak self] result in
                 self?.inputEventSubject.send(result)
             }
             .store(in: &cancellables)
 
-        viewModel.currentTextureDisplaying
+        viewModel.currentTextureDisplayingSubject
             .sink { [weak self] in
                 Task {
                     try? await self?.updateCanvasTextureUsingCurrentTexture()
@@ -156,7 +156,7 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        viewModel.realtimeDrawingTextureDisplaying
+        viewModel.realtimeDrawingTextureDisplayingSubject
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingRealtimeDrawingTexture()
                 self?.present()
