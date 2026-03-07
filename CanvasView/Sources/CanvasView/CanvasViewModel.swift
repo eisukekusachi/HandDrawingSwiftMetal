@@ -71,8 +71,6 @@ public final class CanvasViewModel {
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
 
-    private var cancellables = Set<AnyCancellable>()
-
     init(
         canvasRenderer: CanvasRenderer
     ) {
@@ -167,7 +165,6 @@ extension CanvasViewModel {
         transforming.setMatrix(.identity)
         present()
     }
-
 }
 
 extension CanvasViewModel {
