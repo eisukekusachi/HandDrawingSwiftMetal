@@ -109,10 +109,7 @@ open class CanvasView: UIView {
         // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.present()
-                }
+                self?.updateCanvasTextureUsingCurrentTexture()
             }
             .store(in: &cancellables)
 
@@ -133,20 +130,15 @@ open class CanvasView: UIView {
             .sink { [weak self] event in
                 switch event {
                 case .canvasSizeChanged(let textureSize):
-                    Task { [weak self] in
-                        try? await self?.completeCanvasSizeChange(textureSize)
-                        self?.canvasEventSubject.send(
-                            .canvasSizeChanged(textureSize)
-                        )
-                    }
+                    self?.completeCanvasSizeChange(textureSize)
+                    self?.canvasEventSubject.send(
+                        .canvasSizeChanged(textureSize)
+                    )
                 case .displayCurrentTexture:
-                    Task {
-                        try? await self?.updateCanvasTextureUsingCurrentTexture()
-                        self?.present()
-                    }
+                    self?.updateCanvasTextureUsingCurrentTexture()
+
                 case .displayRealtimeDrawingTexture:
                     self?.updateCanvasTextureUsingRealtimeDrawingTexture()
-                    self?.present()
                 }
             }
             .store(in: &cancellables)
@@ -191,17 +183,19 @@ open class CanvasView: UIView {
         )
     }
 
-    open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
-        try await updateCanvasTextureUsingCurrentTexture()
+    open func completeCanvasSizeChange(_ textureSize: CGSize) {
+        viewModel.updateCanvasTextureUsingCurrentTexture()
         present()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
         viewModel.updateCanvasTextureUsingRealtimeDrawingTexture()
+        present()
     }
 
-    open func updateCanvasTextureUsingCurrentTexture() async throws {
+    open func updateCanvasTextureUsingCurrentTexture() {
         viewModel.updateCanvasTextureUsingCurrentTexture()
+        present()
     }
 
     public func present() {
