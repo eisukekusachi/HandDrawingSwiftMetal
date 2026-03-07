@@ -99,8 +99,7 @@ public final class CanvasViewModel {
 
     func setup(
         configuration: CanvasConfiguration
-    ) throws {
-
+    ) {
         canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,
             baseBackgroundColor: configuration.baseBackgroundColor
@@ -110,13 +109,13 @@ public final class CanvasViewModel {
             transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
         )
 
-        try resizeCanvas(configuration.textureSize)
+        resizeCanvas(configuration.textureSize)
     }
 }
 
 extension CanvasViewModel {
 
-    func resizeCanvas(_ textureSize: CGSize) throws {
+    func resizeCanvas(_ textureSize: CGSize) {
 
         canvasTexture = canvasRenderer.makeTexture(
             textureSize,

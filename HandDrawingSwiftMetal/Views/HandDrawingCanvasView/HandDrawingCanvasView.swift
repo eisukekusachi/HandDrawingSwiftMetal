@@ -237,6 +237,7 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
+    @MainActor
     func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
@@ -256,7 +257,7 @@ extension HandDrawingCanvasView {
 
         if let restoredState {
             state = restoredState
-            resolvedConfiguration = configuration.textureSize(restoredState.textureSize)
+            resolvedConfiguration = configuration.newTextureSize(restoredState.textureSize)
 
             textureLayersState = restoredState
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
@@ -291,7 +292,9 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayersState
         )
 
-        try super.resizeCanvas(undoTextureLayers.textureSize)
+        super.updateCanvasView(
+            withNewTextureSize: undoTextureLayers.textureSize
+        )
 
         super.resetTransforming()
     }
@@ -324,7 +327,9 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        try super.resizeCanvas(textureLayerState.textureSize)
+        super.updateCanvasView(
+            withNewTextureSize: textureLayerState.textureSize
+        )
     }
 }
 

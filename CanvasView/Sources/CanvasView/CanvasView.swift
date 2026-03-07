@@ -171,7 +171,7 @@ open class CanvasView: UIView {
     public func setup(
         configuration: CanvasConfiguration? = nil
     ) throws {
-        try viewModel.setup(
+        viewModel.setup(
             configuration: configuration ?? .init()
         )
     }
@@ -191,8 +191,10 @@ open class CanvasView: UIView {
         viewModel.setCurrentTexture(texture)
     }
 
-    public func resizeCanvas(_ textureSize: CGSize) throws {
-        try viewModel.resizeCanvas(textureSize)
+    public func updateCanvasView(withNewTextureSize textureSize: CGSize) {
+        viewModel.resizeCanvas(
+            CanvasConfiguration.clampedTextureSize(textureSize)
+        )
     }
 
     open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
