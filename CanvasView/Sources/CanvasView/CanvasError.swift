@@ -7,6 +7,13 @@
 
 import Foundation
 
-enum CanvasError: Error {
+public enum CanvasError: Error, LocalizedError {
     case textureSizeMismatch
+
+    public var errorDescription: String? {
+        switch self {
+        case .textureSizeMismatch:
+            return "The texture size does not match the expected canvas size."
+        }
+    }
 }
