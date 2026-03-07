@@ -61,11 +61,6 @@ public final class CanvasViewModel {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
-    /// Size of the canvas texture
-    public var textureSize: CGSize? {
-        canvasTexture?.size
-    }
-
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
@@ -182,7 +177,6 @@ extension CanvasViewModel {
         case .drawing:
             guard
                 let drawingRenderer,
-                let textureSize,
                 let displayTextureSize = canvasRenderer.displayTextureSize
             else { return }
 
@@ -201,7 +195,7 @@ extension CanvasViewModel {
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
                     from: pointArray,
-                    textureSize: textureSize,
+                    textureSize: currentTextureSize,
                     displayTextureSize: displayTextureSize,
                     frameSize: frameSize,
                     diameter: CGFloat(drawingRenderer.diameter)
@@ -261,7 +255,6 @@ extension CanvasViewModel {
     ) {
         guard
             let drawingRenderer,
-            let textureSize,
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
@@ -283,7 +276,7 @@ extension CanvasViewModel {
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
                 from: pointArray,
-                textureSize: textureSize,
+                textureSize: currentTextureSize,
                 displayTextureSize: displayTextureSize,
                 frameSize: frameSize,
                 diameter: CGFloat(drawingRenderer.diameter)
