@@ -90,6 +90,8 @@ public final class CanvasViewModel {
         )
 
         resizeCanvas(configuration.textureSize)
+
+        present()
     }
 
     private func setupTouchGesture(
