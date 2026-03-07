@@ -11,14 +11,7 @@ import Combine
 /// A class that manages canvas transformations
 final class Transforming {
 
-    var matrix: CGAffineTransform {
-        matrixSubject.value
-    }
-
-    var matrixPublisher: AnyPublisher<CGAffineTransform, Never> {
-        matrixSubject.eraseToAnyPublisher()
-    }
-    private let matrixSubject = CurrentValueSubject<CGAffineTransform, Never>(.identity)
+    private(set) var matrix: CGAffineTransform = CGAffineTransform.identity
 
     private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
@@ -71,24 +64,22 @@ extension Transforming {
             )
         else { return }
 
-        matrixSubject.send(
-            storedMatrix.concatenating(newMatrix)
-        )
+        matrix = storedMatrix.concatenating(newMatrix)
     }
 
     func setMatrix(_ matrix: CGAffineTransform) {
-        matrixSubject.send(matrix)
-        storedMatrix = matrix
+        self.matrix = matrix
+        self.storedMatrix = matrix
         resetParameters()
     }
 
     func resetMatrix() {
-        matrixSubject.value = storedMatrix
+        self.matrix = storedMatrix
         resetParameters()
     }
 
     func endTransformation() {
-        storedMatrix = matrixSubject.value
+        self.storedMatrix = matrix
         resetParameters()
     }
 }
