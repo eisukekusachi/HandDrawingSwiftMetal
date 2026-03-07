@@ -38,13 +38,13 @@ struct CanvasConfigurationTests {
     }
 
     @Test
-    func `Calling textureSize() returns a new configuration instance with the specified size`() {
+    func `Calling newTextureSize() returns a new configuration instance with the specified size`() {
         let configuration = CanvasConfiguration(
             textureSize: .init(width: 1000, height: 1000),
             backgroundColor: .red
         )
         let newTextureSize: CGSize = .init(width: 2000, height: 2000)
-        let newConfiguration = configuration.textureSize(newTextureSize)
+        let newConfiguration = configuration.newTextureSize(newTextureSize)
 
         #expect(newConfiguration.textureSize.equalTo(newTextureSize))
         #expect(newConfiguration.backgroundColor == .red)
