@@ -113,13 +113,6 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // The canvas is updated every frame during drawing
-        canvasDisplayLink.update
-            .sink { [weak self] in
-                self?.viewModel.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
         viewModel.strokeEventSubject
             .sink { [weak self] result in
                 self?.strokeEventSubject.send(result)
@@ -131,12 +124,8 @@ open class CanvasView: UIView {
                 switch event {
                 case .canvasSizeChanged(let textureSize):
                     self?.completeCanvasSizeChange(textureSize)
-                    self?.canvasEventSubject.send(
-                        .canvasSizeChanged(textureSize)
-                    )
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
-
                 case .displayRealtimeDrawingTexture:
                     self?.updateCanvasTextureUsingRealtimeDrawingTexture()
                 }
@@ -146,6 +135,13 @@ open class CanvasView: UIView {
         viewModel.drawingTouchPhaseSubject
             .sink { [weak self] touchPhase in
                 self?.canvasDisplayLink.run(touchPhase)
+            }
+            .store(in: &cancellables)
+
+        // The canvas is updated every frame during drawing
+        canvasDisplayLink.update
+            .sink { [weak self] in
+                self?.viewModel.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
     }
@@ -186,6 +182,10 @@ open class CanvasView: UIView {
     open func completeCanvasSizeChange(_ textureSize: CGSize) {
         viewModel.updateCanvasTexture(currentTexture)
         present()
+
+        canvasEventSubject.send(
+            .canvasSizeChanged(textureSize)
+        )
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
