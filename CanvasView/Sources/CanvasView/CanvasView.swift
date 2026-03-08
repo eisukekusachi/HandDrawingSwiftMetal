@@ -163,12 +163,12 @@ open class CanvasView: UIView {
     public func setup(
         _ configuration: CanvasConfiguration? = nil
     ) throws {
-        viewModel.setup(configuration ?? .init())
+        try viewModel.setup(configuration ?? .init())
     }
 
     /// Creates the canvas using the specified texture size
-    public func createCanvas(_ textureSize: CGSize) {
-        viewModel.createCanvas(
+    public func createCanvas(_ textureSize: CGSize) throws {
+        try viewModel.createCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }

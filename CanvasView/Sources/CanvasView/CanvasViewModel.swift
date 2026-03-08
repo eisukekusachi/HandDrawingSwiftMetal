@@ -79,7 +79,10 @@ public final class CanvasViewModel {
 
     func setup(
         _ configuration: CanvasConfiguration
-    ) {
+    ) throws {
+
+        try createCanvas(configuration.textureSize)
+
         canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,
             baseBackgroundColor: configuration.baseBackgroundColor
@@ -88,8 +91,6 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: configuration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
         )
-
-        createCanvas(configuration.textureSize)
     }
 
     private func setupTouchGesture(
@@ -116,20 +117,27 @@ extension CanvasViewModel {
         )
     }
 
-    func createCanvas(_ textureSize: CGSize) {
+    func createCanvas(_ textureSize: CGSize) throws {
+        guard
+            let canvasTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "canvasTexture"
+            ),
+            let currentTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "currentTexture"
+            ),
+            let realtimeDrawingTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "realtimeDrawingTexture"
+            )
+        else {
+            throw CanvasError.failedToCreateCanvas
+        }
 
-        canvasTexture = canvasRenderer.makeTexture(
-            textureSize,
-            label: "canvasTexture"
-        )
-        currentTexture = canvasRenderer.makeTexture(
-            textureSize,
-            label: "currentTexture"
-        )
-        realtimeDrawingTexture = canvasRenderer.makeTexture(
-            textureSize,
-            label: "realtimeDrawingTexture"
-        )
+        self.canvasTexture = canvasTexture
+        self.currentTexture = currentTexture
+        self.realtimeDrawingTexture = realtimeDrawingTexture
 
         currentTextureSize = textureSize
 

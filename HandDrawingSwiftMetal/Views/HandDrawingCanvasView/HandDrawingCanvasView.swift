@@ -296,7 +296,7 @@ extension HandDrawingCanvasView {
 
         super.resetTransforming()
 
-        super.createCanvas(textureSize)
+        try super.createCanvas(textureSize)
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
@@ -327,7 +327,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        super.createCanvas(textureLayerState.textureSize)
+        try super.createCanvas(textureLayerState.textureSize)
     }
 }
 
