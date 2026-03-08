@@ -90,8 +90,6 @@ public final class CanvasViewModel {
         )
 
         createCanvas(configuration.textureSize)
-
-        present()
     }
 
     private func setupTouchGesture(

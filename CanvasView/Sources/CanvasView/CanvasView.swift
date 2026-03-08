@@ -118,10 +118,12 @@ open class CanvasView: UIView {
             .sink { [weak self] event in
                 switch event {
                 case .canvasCreated(let textureSize):
-                    self?.completeCanvasCreation(textureSize)
-                    self?.canvasEventSubject.send(
-                        .canvasCreated(textureSize)
-                    )
+                    Task { [weak self] in
+                        await self?.completeCanvasCreation(textureSize)
+                        self?.canvasEventSubject.send(
+                            .canvasCreated(textureSize)
+                        )
+                    }
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
                 case .displayRealtimeDrawingTexture:
@@ -172,7 +174,7 @@ open class CanvasView: UIView {
     }
 
     /// Called after the canvas has been created
-    open func completeCanvasCreation(_ textureSize: CGSize) {
+    open func completeCanvasCreation(_ textureSize: CGSize) async {
         viewModel.updateCanvasTexture(currentTexture)
         present()
     }
