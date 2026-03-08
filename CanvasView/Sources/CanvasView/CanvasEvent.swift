@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/03/07.
 //
 
-import Foundation
+import UIKit
 
 /// Events emitted by the canvas to notify about rendering updates or state changes
 public enum CanvasEvent {
