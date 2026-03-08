@@ -36,6 +36,7 @@ open class CanvasView: UIView {
         viewModel.realtimeDrawingTexture
     }
 
+    /// Command buffer for a single frame
     public var currentFrameCommandBuffer: MTLCommandBuffer? {
         displayView.currentFrameCommandBuffer
     }
@@ -43,10 +44,13 @@ open class CanvasView: UIView {
     /// The single Metal device instance used throughout the app
     public let sharedDevice: MTLDevice
 
+    /// Executes texture operations
     public let renderer: MTLRendering
 
+    /// View that displays the canvas texture
     private let displayView: CanvasDisplayView
 
+    /// Manages drawing onto the canvas texture and displays the result on the screen
     private let canvasRenderer: CanvasRenderer
 
     /// Display link for realtime drawing
@@ -101,7 +105,7 @@ open class CanvasView: UIView {
 
     private func bindData() {
 
-        // Receives an event when displayTexture size changes.
+        // Subscribes to display texture size changes.
         // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
@@ -109,6 +113,7 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
+        // Subscribes to canvas events
         viewModel.canvasEventSubject
             .sink { [weak self] event in
                 switch event {
@@ -125,19 +130,22 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
+        // Subscribes to stroke events
         viewModel.strokeEventSubject
             .sink { [weak self] result in
                 self?.strokeEventSubject.send(result)
             }
             .store(in: &cancellables)
 
+        // Subscribes to drawing touch phase updates
         viewModel.drawingTouchPhaseSubject
             .sink { [weak self] touchPhase in
+                // Starts or stops the display link depending on the current touch phase
                 self?.canvasDisplayLink.run(touchPhase)
             }
             .store(in: &cancellables)
 
-        // The canvas is updated every frame during drawing
+        // Subscribes to the display link update
         canvasDisplayLink.update
             .sink { [weak self] in
                 self?.viewModel.onDrawingDisplayLinkFrame()
@@ -149,18 +157,21 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
+    /// Sets up the canvas using the specified configuration
     public func setup(
         _ configuration: CanvasConfiguration? = nil
     ) throws {
         viewModel.setup(configuration ?? .init())
     }
 
+    /// Creates the canvas using the specified texture size
     public func createCanvas(_ textureSize: CGSize) {
         viewModel.createCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }
 
+    /// Called after the canvas has been created
     open func completeCanvasCreation(_ textureSize: CGSize) {
         viewModel.updateCanvasTexture(currentTexture)
         present()

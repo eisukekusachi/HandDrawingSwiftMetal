@@ -8,7 +8,7 @@
 import Combine
 @preconcurrency import MetalKit
 
-/// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
+/// Draws textures on `canvasTexture` and displays it on the screen
 @MainActor public final class CanvasRenderer: ObservableObject {
 
     /// Command buffer for a single frame

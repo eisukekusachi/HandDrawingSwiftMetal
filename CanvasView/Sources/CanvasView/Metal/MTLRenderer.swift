@@ -7,6 +7,7 @@
 
 @preconcurrency import MetalKit
 
+/// Executes Metal rendering and texture operations
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
