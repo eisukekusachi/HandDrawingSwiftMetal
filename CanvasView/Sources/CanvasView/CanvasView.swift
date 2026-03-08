@@ -24,11 +24,6 @@ open class CanvasView: UIView {
     }
     private let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
-    /// The single Metal device instance used throughout the app
-    public let sharedDevice: MTLDevice
-
-    public let renderer: MTLRendering
-
     public var canvasTexture: MTLTexture? {
         viewModel.canvasTexture
     }
@@ -45,9 +40,12 @@ open class CanvasView: UIView {
         displayView.currentFrameCommandBuffer
     }
 
-    private let displayView: CanvasDisplayView
+    /// The single Metal device instance used throughout the app
+    public let sharedDevice: MTLDevice
 
-    private let viewModel: CanvasViewModel
+    public let renderer: MTLRendering
+
+    private let displayView: CanvasDisplayView
 
     private let canvasRenderer: CanvasRenderer
 
@@ -55,6 +53,8 @@ open class CanvasView: UIView {
     private var canvasDisplayLink = CanvasDisplayLink()
 
     private var cancellables = Set<AnyCancellable>()
+
+    private let viewModel: CanvasViewModel
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -109,12 +109,6 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        viewModel.strokeEventSubject
-            .sink { [weak self] result in
-                self?.strokeEventSubject.send(result)
-            }
-            .store(in: &cancellables)
-
         viewModel.canvasEventSubject
             .sink { [weak self] event in
                 switch event {
@@ -128,6 +122,12 @@ open class CanvasView: UIView {
                 case .displayRealtimeDrawingTexture:
                     self?.updateCanvasTextureUsingRealtimeDrawingTexture()
                 }
+            }
+            .store(in: &cancellables)
+
+        viewModel.strokeEventSubject
+            .sink { [weak self] result in
+                self?.strokeEventSubject.send(result)
             }
             .store(in: &cancellables)
 
