@@ -121,7 +121,6 @@ import TextureLayerView
             .sink { [weak self] in
                 Task {
                     try? await self?.updateFullCanvasTexture()
-                    self?.present()
                 }
             }
             .store(in: &cancellables)
