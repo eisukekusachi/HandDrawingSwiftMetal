@@ -19,9 +19,35 @@ public final class CanvasViewModel {
         }
     }
 
+    /// Publishes stroke events
+    let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
+
+    /// Publishes canvas events
+    let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
+
+    /// Publishes the current touch phase during a drawing interaction
+    let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
+
     /// The size of the texture currently set on the canvas.
     /// A temporary value is assigned to avoid making it optional.
     private(set) var currentTextureSize: CGSize = .init(width: 768, height: 1024)
+
+    /// Texture used during drawing
+    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
+
+    /// Texture to be drawn
+    private(set) var currentTexture: MTLTexture?
+
+    /// Texture that combines the background color and the textures of `currentTexture`
+    private(set) var canvasTexture: MTLTexture?
+
+    /// A class that manages rendering to the canvas
+    private let canvasRenderer: CanvasRenderer
+
+    /// Handles input from finger touches
+    private let fingerStroke = FingerStroke()
+    /// Handles input from Apple Pencil
+    private let pencilStroke = PencilStroke()
 
     private var isFinishedDrawing: Bool {
         drawingTouchPhaseSubject.value == .ended
@@ -30,50 +56,9 @@ public final class CanvasViewModel {
         drawingTouchPhaseSubject.value == .cancelled
     }
 
-    /// A publisher that emits `CGSize` when the canvas size changes
-    var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
-        canvasSizeDidChangeSubject.eraseToAnyPublisher()
-    }
-    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
-
-    /// Emits drawing-related events
-    var inputEvent: AnyPublisher<InputEvent, Never> {
-        inputEventSubject.eraseToAnyPublisher()
-    }
-    private let inputEventSubject = PassthroughSubject<InputEvent, Never>()
-
-    var drawingTouchPhase: AnyPublisher<UITouch.Phase?, Never> {
-        drawingTouchPhaseSubject.eraseToAnyPublisher()
-    }
-    private let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
-
-    var currentTextureDisplaying: AnyPublisher<Void, Never> {
-        currentTextureDisplayingSubject.eraseToAnyPublisher()
-    }
-    private let currentTextureDisplayingSubject = PassthroughSubject<Void, Never>()
-
-    var realtimeDrawingTextureDisplaying: AnyPublisher<Void, Never> {
-        realtimeDrawingTextureDisplayingSubject.eraseToAnyPublisher()
-    }
-    private let realtimeDrawingTextureDisplayingSubject = PassthroughSubject<Void, Never>()
-
-    public var displayRealtimeDrawingTexture: Bool {
+    private var displayRealtimeDrawingTexture: Bool {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
-
-    /// Texture to be drawn
-    private(set) var currentTexture: MTLTexture?
-
-    /// Texture used during drawing
-    private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
-
-    /// A class that manages rendering to the canvas
-    private var canvasRenderer: CanvasRenderer
-
-    /// Handles input from finger touches
-    private let fingerStroke = FingerStroke()
-    /// Handles input from Apple Pencil
-    private let pencilStroke = PencilStroke()
 
     /// Manages input from pen and finger
     private let inputState = InputState()
@@ -86,18 +71,17 @@ public final class CanvasViewModel {
     /// A class that manages drawing lines onto textures
     private var drawingRenderer: DrawingRenderer?
 
-    private var cancellables = Set<AnyCancellable>()
-
     init(
         canvasRenderer: CanvasRenderer
     ) {
         self.canvasRenderer = canvasRenderer
-        bindData()
     }
 
     func setup(
-        configuration: CanvasConfiguration
+        _ configuration: CanvasConfiguration
     ) throws {
+
+        try createCanvas(configuration.textureSize)
 
         canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,
@@ -107,45 +91,6 @@ public final class CanvasViewModel {
             drawingGestureRecognitionSecond: configuration.drawingGestureRecognitionSecond,
             transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
         )
-
-        try resizeCanvas(configuration.textureSize)
-    }
-}
-
-extension CanvasViewModel {
-
-    func resizeCanvas(_ textureSize: CGSize) throws {
-
-        try canvasRenderer.initializeTextures(
-            textureSize: textureSize
-        )
-
-        currentTexture = canvasRenderer.makeTexture(
-            textureSize,
-            label: "currentTexture"
-        )
-        realtimeDrawingTexture = canvasRenderer.makeTexture(
-            textureSize,
-            label: "realtimeDrawingTexture"
-        )
-
-        currentTextureSize = textureSize
-
-        canvasSizeDidChangeSubject.send(textureSize)
-    }
-}
-
-extension CanvasViewModel {
-
-    private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
-
-        transforming.matrixPublisher
-            .sink { [weak self] matrix in
-                self?.canvasRenderer.setMatrix(matrix)
-            }
-            .store(in: &cancellables)
     }
 
     private func setupTouchGesture(
@@ -159,6 +104,67 @@ extension CanvasViewModel {
         self.touchGesture.setTransformingGestureRecognitionSecond(
             transformingGestureRecognitionSecond
         )
+    }
+}
+
+extension CanvasViewModel {
+
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
+        )
+    }
+
+    func createCanvas(_ textureSize: CGSize) throws {
+        guard
+            let canvasTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "canvasTexture"
+            ),
+            let currentTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "currentTexture"
+            ),
+            let realtimeDrawingTexture = canvasRenderer.makeTexture(
+                textureSize,
+                label: "realtimeDrawingTexture"
+            )
+        else {
+            throw CanvasError.failedToCreateCanvas
+        }
+
+        self.canvasTexture = canvasTexture
+        self.currentTexture = currentTexture
+        self.realtimeDrawingTexture = realtimeDrawingTexture
+
+        currentTextureSize = textureSize
+
+        canvasEventSubject.send(
+            .canvasCreated(textureSize)
+        )
+    }
+
+    func setCurrentTexture(_ texture: MTLTexture?) {
+        self.currentTexture = texture
+    }
+
+    func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+        self.drawingRenderer = drawingRenderer
+        self.drawingRenderer?.prepareNextStroke()
+    }
+
+    func updateCanvasTexture(_ texture: MTLTexture?) {
+        canvasRenderer.updateCanvasTexture(
+            currentTexture: texture,
+            canvasTexture: canvasTexture
+        )
+    }
+
+    func resetTransforming() {
+        transforming.setMatrix(.identity)
+        present()
     }
 }
 
@@ -186,13 +192,12 @@ extension CanvasViewModel {
         case .drawing:
             guard
                 let drawingRenderer,
-                let textureSize = canvasRenderer.textureSize,
                 let displayTextureSize = canvasRenderer.displayTextureSize
             else { return }
 
             // Execute if finger drawing has not yet started
             if fingerStroke.isFingerDrawingInactive {
-                inputEventSubject.send(.fingerStrokeBegan)
+                strokeEventSubject.send(.fingerStrokeBegan)
 
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
@@ -205,7 +210,7 @@ extension CanvasViewModel {
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
                     from: pointArray,
-                    textureSize: textureSize,
+                    textureSize: currentTextureSize,
                     displayTextureSize: displayTextureSize,
                     frameSize: frameSize,
                     diameter: CGFloat(drawingRenderer.diameter)
@@ -217,7 +222,7 @@ extension CanvasViewModel {
 
             // Update the touch phase for drawing
             drawingTouchPhaseSubject.send(
-                drawingTouchPhase(pointArray)
+                TouchPhase.drawingTouchPhase(pointArray)
             )
 
         case .transforming:
@@ -243,7 +248,7 @@ extension CanvasViewModel {
     ) {
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
-            resetFingerDrawingRelatedParameters()
+            cancelFingerDrawing()
         }
         inputState.update(.pencil)
 
@@ -265,13 +270,12 @@ extension CanvasViewModel {
     ) {
         guard
             let drawingRenderer,
-            let textureSize = canvasRenderer.textureSize,
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
         // Execute if it’s the beginning of a touch
         if actualTouches.contains(where: { $0.phase == .began }) {
-            inputEventSubject.send(.pencilStrokeBegan)
+            strokeEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke()
         }
@@ -287,7 +291,7 @@ extension CanvasViewModel {
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
                 from: pointArray,
-                textureSize: textureSize,
+                textureSize: currentTextureSize,
                 displayTextureSize: displayTextureSize,
                 frameSize: frameSize,
                 diameter: CGFloat(drawingRenderer.diameter)
@@ -298,7 +302,7 @@ extension CanvasViewModel {
 
         // Update the touch phase for drawing
         drawingTouchPhaseSubject.send(
-            drawingTouchPhase(pointArray)
+            TouchPhase.drawingTouchPhase(pointArray)
         )
     }
 
@@ -320,7 +324,7 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
-            canvasRenderer.applyTexture(
+            canvasRenderer.applyRealtimeDrawingTexture(
                 realtimeDrawingTexture,
                 to: currentTexture,
                 with: commandBuffer
@@ -331,83 +335,17 @@ extension CanvasViewModel {
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
-                    self?.inputEventSubject.send(.strokeCompleted)
+                    self?.strokeEventSubject.send(.strokeCompleted)
                 }
             }
         } else if isCancelledDrawing {
             // Prepare for the next drawing when the drawing is cancelled.
             prepareNextStroke(commandBuffer: commandBuffer)
-            inputEventSubject.send(.strokeCancelled)
+            strokeEventSubject.send(.strokeCancelled)
         }
 
-        if displayRealtimeDrawingTexture {
-            realtimeDrawingTextureDisplayingSubject.send()
-        } else {
-            currentTextureDisplayingSubject.send()
-        }
-    }
-
-    func drawCanvasToDisplay() {
-        canvasRenderer.drawCanvasToDisplay()
-    }
-}
-
-public extension CanvasViewModel {
-
-    /// Touch phase used for drawing
-    func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
-        if points.contains(where: { $0.phase == .cancelled }) {
-            return .cancelled
-        } else if points.contains(where: { $0.phase == .ended }) {
-            return .ended
-        } else if points.contains(where: { $0.phase == .began }) {
-            return .began
-        } else if points.contains(where: { $0.phase == .moved }) {
-            return .moved
-        } else if points.contains(where: { $0.phase == .stationary }) {
-            return .stationary
-        }
-        return nil
-    }
-
-    func resetTransforming() {
-        transforming.setMatrix(.identity)
-        canvasRenderer.drawCanvasToDisplay()
-    }
-
-    func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
-        self.drawingRenderer = drawingRenderer
-        self.drawingRenderer?.prepareNextStroke()
-    }
-
-    func setCurrentTexture(_ texture: MTLTexture?) throws {
-        guard
-            let texture,
-            Int(texture.width) >= canvasMinimumTextureLength &&
-            Int(texture.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Texture size is below the minimum: \(texture?.width ?? 0) \(texture?.height ?? 0)",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-        self.currentTexture = texture
-    }
-
-    func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        updateCanvasTexture(using: realtimeDrawingTexture)
-    }
-    func updateCanvasTexture(
-        using texture: MTLTexture? = nil
-    ) {
-        canvasRenderer.updateCanvasTexture(
-            currentTexture: texture ?? currentTexture,
-            canvasTexture: canvasRenderer.canvasTexture
+        canvasEventSubject.send(
+            displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
         )
     }
 }
@@ -457,7 +395,8 @@ extension CanvasViewModel {
 
         drawingTouchPhaseSubject.send(nil)
     }
-    private func resetFingerDrawingRelatedParameters() {
+
+    private func cancelFingerDrawing() {
         fingerStroke.reset()
 
         transforming.resetMatrix()
@@ -465,7 +404,8 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-        canvasRenderer.drawCanvasToDisplay()
+
+        present()
     }
 
     private func transformCanvas() {
@@ -487,6 +427,6 @@ extension CanvasViewModel {
             )
         }
 
-        canvasRenderer.drawCanvasToDisplay()
+        present()
     }
 }

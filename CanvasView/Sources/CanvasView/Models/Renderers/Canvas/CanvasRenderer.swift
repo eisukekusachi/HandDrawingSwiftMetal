@@ -8,7 +8,7 @@
 import Combine
 @preconcurrency import MetalKit
 
-/// Renders textures for display by loading and merging layer textures from `TextureLayersDocumentsRepository`
+/// Draws textures on `canvasTexture` and displays it on the screen
 @MainActor public final class CanvasRenderer: ObservableObject {
 
     /// Command buffer for a single frame
@@ -16,22 +16,12 @@ import Combine
         displayView.currentFrameCommandBuffer
     }
 
-    /// Size of the canvas texture
-    public var textureSize: CGSize? {
-        canvasTexture?.size
-    }
-
     /// Size of the texture rendered on the screen
     public var displayTextureSize: CGSize? {
         displayView.displayTexture?.size
     }
 
-    /// Texture that combines the background color and the textures of `currentTexture`
-    private(set) var canvasTexture: MTLTexture?
-
     private var frameSize: CGSize = .zero
-
-    private var matrix: CGAffineTransform = .identity
 
     private let renderer: MTLRendering
 
@@ -72,44 +62,8 @@ import Combine
         if let baseBackgroundColor { self.baseBackgroundColor = baseBackgroundColor }
     }
 
-    public func initializeTextures(textureSize: CGSize) throws {
-        guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        guard
-            let canvasTexture = makeTexture(textureSize, label: "canvasTexture")
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(
-                    localized: "Failed to create new texture",
-                    bundle: .module
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-        self.canvasTexture = canvasTexture
-    }
-
     public func setFrameSize(_ size: CGSize) {
         self.frameSize = size
-    }
-
-    public func setMatrix(_ matrix: CGAffineTransform) {
-        self.matrix = matrix
     }
 
     public func resetCommandBuffer() {
@@ -119,7 +73,7 @@ import Combine
 
 extension CanvasRenderer {
 
-    /// Refreshes the entire screen using textures
+    /// Updates `canvasTexture` using `currentTexture` and the background color
     public func updateCanvasTexture(
         currentTexture: MTLTexture?,
         canvasTexture: MTLTexture?
@@ -144,11 +98,28 @@ extension CanvasRenderer {
         )
     }
 
+    /// Applies `realtimeDrawingTexture` to `currentTexture`, then clears `realtimeDrawingTexture`
+    func applyRealtimeDrawingTexture(
+        _ realtimeDrawingTexture: MTLTexture?,
+        to currentTexture: MTLTexture?,
+        with commandBuffer: MTLCommandBuffer
+    ) {
+        renderer.applyTexture(
+            realtimeDrawingTexture,
+            to: currentTexture,
+            with: commandBuffer
+        )
+    }
+
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
-    public func drawCanvasToDisplay() {
+    public func drawCanvasTextureToDisplay(
+        matrix: CGAffineTransform,
+        canvasTexture: MTLTexture?
+    ) {
         guard
-            let displayTexture = displayView.displayTexture,
-            let currentFrameCommandBuffer
+            let currentFrameCommandBuffer,
+            let canvasTexture,
+            let displayTexture = displayView.displayTexture
         else { return }
 
         renderer.drawTexture(
@@ -161,18 +132,6 @@ extension CanvasRenderer {
         )
 
         displayView.setNeedsDisplay()
-    }
-
-    func applyTexture(
-        _ srcTexture: MTLTexture?,
-        to dstTexture: MTLTexture?,
-        with commandBuffer: MTLCommandBuffer
-    ) {
-        renderer.applyTexture(
-            srcTexture,
-            to: dstTexture,
-            with: commandBuffer
-        )
     }
 }
 

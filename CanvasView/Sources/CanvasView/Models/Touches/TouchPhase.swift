@@ -47,3 +47,22 @@ public extension TouchPhase {
         }
     }
 }
+
+extension TouchPhase {
+
+    /// Touch phase used for drawing
+    static func drawingTouchPhase(_ points: [TouchPoint]) -> UITouch.Phase? {
+        if points.contains(where: { $0.phase == .cancelled }) {
+            return .cancelled
+        } else if points.contains(where: { $0.phase == .ended }) {
+            return .ended
+        } else if points.contains(where: { $0.phase == .began }) {
+            return .began
+        } else if points.contains(where: { $0.phase == .moved }) {
+            return .moved
+        } else if points.contains(where: { $0.phase == .stationary }) {
+            return .stationary
+        }
+        return nil
+    }
+}

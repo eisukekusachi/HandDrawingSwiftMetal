@@ -32,7 +32,7 @@ import TextureLayerView
     private var textureLayerRenderer: TextureLayerRenderer?
 
     /// A debouncer used to prevent continuous input during drawing
-    private let inputDebouncer: InputDebouncer = .init(delay: 0.25)
+    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
     private let viewModel = HandDrawingCanvasViewModel()
 
@@ -86,10 +86,8 @@ import TextureLayerView
     }
 
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
-        inputEvent
+        strokeEvents
             .filter { $0 == .strokeCompleted }
             .sink { [weak self] _ in
                 self?.completeDrawing()
@@ -100,10 +98,7 @@ import TextureLayerView
         // Mainly used for undoing alpha changes
         undoTextureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
-                }
+                self?.updateCanvasTextureUsingCurrentTexture()
             }
             .store(in: &cancellables)
 
@@ -111,10 +106,11 @@ import TextureLayerView
         // Mainly used for undoing drawing operations
         undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
-                Task {
+                do {
                     try self?.setCurrentTexture(texture)
-                    try await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                    self?.updateCanvasTextureUsingCurrentTexture()
+                } catch {
+                    Logger.error(error)
                 }
             }
             .store(in: &cancellables)
@@ -125,14 +121,13 @@ import TextureLayerView
             .sink { [weak self] in
                 Task {
                     try? await self?.updateFullCanvasTexture()
-                    self?.drawCanvasToDisplay()
                 }
             }
             .store(in: &cancellables)
     }
 
     private func completeDrawing() {
-        inputDebouncer.perform {
+        drawingDebouncer.perform {
             Task(priority: .utility) { [weak self] in
                 guard
                     let currentTexture = self?.currentTexture,
@@ -177,10 +172,10 @@ import TextureLayerView
             repository: textureLayersDocumentsRepository
         )
 
-        try await updateCanvasTextureUsingCurrentTexture()
+        updateCanvasTextureUsingCurrentTexture()
     }
 
-    override func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
+    override func completeCanvasCreation(_ textureSize: CGSize) async {
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
             // Initialize the textures used for Undo
             undoTextureLayers.initializeUndoTextures(
@@ -189,19 +184,22 @@ import TextureLayerView
             resetUndo()
         }
 
-        try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
-
-        try await updateFullCanvasTexture()
-
-        drawCanvasToDisplay()
+        do {
+            try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
+            try await updateFullCanvasTexture()
+        } catch {
+            Logger.error(error)
+        }
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
         updateCanvasTexture(realtimeDrawingTexture)
+        present()
     }
 
-    override func updateCanvasTextureUsingCurrentTexture() async throws {
+    override func updateCanvasTextureUsingCurrentTexture() {
         updateCanvasTexture(currentTexture)
+        present()
     }
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
@@ -237,6 +235,7 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
+    @MainActor
     func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
@@ -256,7 +255,7 @@ extension HandDrawingCanvasView {
 
         if let restoredState {
             state = restoredState
-            resolvedConfiguration = configuration.textureSize(restoredState.textureSize)
+            resolvedConfiguration = configuration.newTextureSize(restoredState.textureSize)
 
             textureLayersState = restoredState
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
@@ -274,14 +273,16 @@ extension HandDrawingCanvasView {
 
         undoTextureLayers.updateSkippingThumbnail(textureLayersState: state)
 
-        try super.setup(configuration: resolvedConfiguration)
+        try super.setup(resolvedConfiguration)
     }
 
     func newCanvas() async throws {
         guard let undoTextureLayers else { return }
 
+        let textureSize = undoTextureLayers.textureSize
+
         let textureLayersState: TextureLayersState = .init(
-            textureSize: undoTextureLayers.textureSize
+            textureSize: textureSize
         )
 
         try await textureLayersDocumentsRepository?.initializeStorage(
@@ -291,9 +292,9 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayersState
         )
 
-        try super.resizeCanvas(undoTextureLayers.textureSize)
-
         super.resetTransforming()
+
+        try super.createCanvas(textureSize)
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
@@ -324,7 +325,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        try super.resizeCanvas(textureLayerState.textureSize)
+        try super.createCanvas(textureLayerState.textureSize)
     }
 }
 

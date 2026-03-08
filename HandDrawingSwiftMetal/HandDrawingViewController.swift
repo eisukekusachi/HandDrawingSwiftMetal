@@ -146,10 +146,12 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
-        canvasView.canvasSizeDidChange
+        canvasView.canvasEvents
+            .compactMap { event -> CGSize? in
+                guard case let .canvasCreated(size) = event else { return nil }
+                return size
+            }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureSize in
                 guard
@@ -176,7 +178,8 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        canvasView.inputEvent
+        canvasView.strokeEvents
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let `self` else { return }
                 switch event {
@@ -306,7 +309,7 @@ extension HandDrawingViewController {
             self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
-            self.canvasView.setDrawingTool(renderer)
+            self.canvasView.setDrawingRenderer(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.canvasView.undo()
@@ -388,7 +391,7 @@ extension HandDrawingViewController {
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
         guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
-        canvasView.setDrawingTool(renderer)
+        canvasView.setDrawingRenderer(renderer)
 
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)

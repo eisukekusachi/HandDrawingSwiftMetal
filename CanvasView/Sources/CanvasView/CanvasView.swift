@@ -12,22 +12,21 @@ import UIKit
 
 open class CanvasView: UIView {
 
-    /// Emits drawing-related events
-    public var inputEvent: AnyPublisher<InputEvent, Never> {
-        inputEventSubject.eraseToAnyPublisher()
+    /// Emits canvas events
+    public var canvasEvents: AnyPublisher<CanvasEvent, Never> {
+        canvasEventSubject.eraseToAnyPublisher()
     }
-    private let inputEventSubject = PassthroughSubject<InputEvent, Never>()
+    private let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
 
-    /// A publisher that emits `CGSize` when `CanvasView` setup completes
-    public var canvasSizeDidChange: AnyPublisher<CGSize, Never> {
-        canvasSizeDidChangeSubject.eraseToAnyPublisher()
+    /// Emits stroke events
+    public var strokeEvents: AnyPublisher<StrokeEvent, Never> {
+        strokeEventSubject.eraseToAnyPublisher()
     }
-    private let canvasSizeDidChangeSubject = PassthroughSubject<CGSize, Never>()
+    private let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
-    /// The single Metal device instance used throughout the app
-    public let sharedDevice: MTLDevice
-
-    public let renderer: MTLRendering
+    public var canvasTexture: MTLTexture? {
+        viewModel.canvasTexture
+    }
 
     public var currentTexture: MTLTexture? {
         viewModel.currentTexture
@@ -37,28 +36,29 @@ open class CanvasView: UIView {
         viewModel.realtimeDrawingTexture
     }
 
-    public var displayTexture: MTLTexture? {
-        displayView.displayTexture
-    }
-
-    public var canvasTexture: MTLTexture? {
-        canvasRenderer.canvasTexture
-    }
-
+    /// Command buffer for a single frame
     public var currentFrameCommandBuffer: MTLCommandBuffer? {
         displayView.currentFrameCommandBuffer
     }
 
+    /// The single Metal device instance used throughout the app
+    public let sharedDevice: MTLDevice
+
+    /// Executes texture operations
+    public let renderer: MTLRendering
+
+    /// View that displays the canvas texture
     private let displayView: CanvasDisplayView
 
-    private let viewModel: CanvasViewModel
-
+    /// Manages drawing onto the canvas texture and displays the result on the screen
     private let canvasRenderer: CanvasRenderer
 
     /// Display link for realtime drawing
     private var canvasDisplayLink = CanvasDisplayLink()
 
     private var cancellables = Set<AnyCancellable>()
+
+    private let viewModel: CanvasViewModel
 
     public init() {
         guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
@@ -104,62 +104,53 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
 
-        // Receives an event when displayTexture size changes.
+        // Subscribes to display texture size changes.
         // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
+                self?.updateCanvasTextureUsingCurrentTexture()
+            }
+            .store(in: &cancellables)
+
+        // Subscribes to canvas events
+        viewModel.canvasEventSubject
+            .sink { [weak self] event in
+                switch event {
+                case .canvasCreated(let textureSize):
+                    Task { [weak self] in
+                        await self?.completeCanvasCreation(textureSize)
+                        self?.canvasEventSubject.send(
+                            .canvasCreated(textureSize)
+                        )
+                    }
+                case .displayCurrentTexture:
+                    self?.updateCanvasTextureUsingCurrentTexture()
+                case .displayRealtimeDrawingTexture:
+                    self?.updateCanvasTextureUsingRealtimeDrawingTexture()
                 }
             }
             .store(in: &cancellables)
 
-        // Receives an event when canvasTexture size changes
-        viewModel.canvasSizeDidChange
-            .sink { [weak self] textureSize in
-                Task { [weak self] in
-                    try? await self?.completeCanvasSizeChange(textureSize)
-                    self?.canvasSizeDidChangeSubject.send(textureSize)
-                }
+        // Subscribes to stroke events
+        viewModel.strokeEventSubject
+            .sink { [weak self] result in
+                self?.strokeEventSubject.send(result)
             }
             .store(in: &cancellables)
 
-        // The canvas is updated every frame during drawing
-        canvasDisplayLink.update
-            .sink { [weak self] in
-                self?.viewModel.onDrawingDisplayLinkFrame()
-            }
-            .store(in: &cancellables)
-
-        viewModel.drawingTouchPhase
+        // Subscribes to drawing touch phase updates
+        viewModel.drawingTouchPhaseSubject
             .sink { [weak self] touchPhase in
+                // Starts or stops the display link depending on the current touch phase
                 self?.canvasDisplayLink.run(touchPhase)
             }
             .store(in: &cancellables)
 
-        viewModel.inputEvent
-            .sink { [weak self] result in
-                self?.inputEventSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        viewModel.currentTextureDisplaying
+        // Subscribes to the display link update
+        canvasDisplayLink.update
             .sink { [weak self] in
-                Task {
-                    try? await self?.updateCanvasTextureUsingCurrentTexture()
-                    self?.drawCanvasToDisplay()
-                }
-            }
-            .store(in: &cancellables)
-
-        viewModel.realtimeDrawingTextureDisplaying
-            .sink { [weak self] in
-                self?.updateCanvasTextureUsingRealtimeDrawingTexture()
-                self?.drawCanvasToDisplay()
+                self?.viewModel.onDrawingDisplayLinkFrame()
             }
             .store(in: &cancellables)
     }
@@ -168,45 +159,56 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
+    /// Sets up the canvas using the specified configuration
     public func setup(
-        configuration: CanvasConfiguration? = nil
+        _ configuration: CanvasConfiguration? = nil
     ) throws {
-        try viewModel.setup(
-            configuration: configuration ?? .init()
+        try viewModel.setup(configuration ?? .init())
+    }
+
+    /// Creates the canvas using the specified texture size
+    public func createCanvas(_ textureSize: CGSize) throws {
+        try viewModel.createCanvas(
+            CanvasConfiguration.clampedTextureSize(textureSize)
         )
+    }
+
+    /// Called after the canvas has been created
+    open func completeCanvasCreation(_ textureSize: CGSize) async {
+        viewModel.updateCanvasTexture(currentTexture)
+        present()
+    }
+
+    open func updateCanvasTextureUsingRealtimeDrawingTexture() {
+        viewModel.updateCanvasTexture(realtimeDrawingTexture)
+        present()
+    }
+
+    open func updateCanvasTextureUsingCurrentTexture() {
+        viewModel.updateCanvasTexture(currentTexture)
+        present()
+    }
+
+    public func present() {
+        viewModel.present()
+    }
+}
+
+extension CanvasView {
+
+    public func setCurrentTexture(_ texture: MTLTexture?) throws {
+        guard texture?.size == viewModel.currentTextureSize else {
+            throw CanvasError.textureSizeMismatch
+        }
+        viewModel.setCurrentTexture(texture)
+    }
+
+    public func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+        viewModel.setDrawingRenderer(drawingRenderer)
     }
 
     public func resetTransforming() {
         viewModel.resetTransforming()
-    }
-
-    public func setDrawingTool(_ drawingRenderer: DrawingRenderer) {
-        viewModel.setDrawingTool(drawingRenderer)
-    }
-
-    public func setCurrentTexture(_ texture: MTLTexture?) throws {
-        try viewModel.setCurrentTexture(texture)
-    }
-
-    public func resizeCanvas(_ textureSize: CGSize) throws {
-        try viewModel.resizeCanvas(textureSize)
-    }
-
-    open func completeCanvasSizeChange(_ textureSize: CGSize) async throws {
-        try await updateCanvasTextureUsingCurrentTexture()
-        drawCanvasToDisplay()
-    }
-
-    open func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        viewModel.updateCanvasTextureUsingRealtimeDrawingTexture()
-    }
-
-    open func updateCanvasTextureUsingCurrentTexture() async throws {
-        viewModel.updateCanvasTexture()
-    }
-
-    public func drawCanvasToDisplay() {
-        viewModel.drawCanvasToDisplay()
     }
 }
 

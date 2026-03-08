@@ -7,8 +7,7 @@
 
 @preconcurrency import MetalKit
 
-public let canvasMinimumTextureLength: Int = 16
-
+/// Executes Metal rendering and texture operations
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
