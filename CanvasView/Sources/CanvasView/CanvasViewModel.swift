@@ -78,7 +78,7 @@ public final class CanvasViewModel {
     }
 
     func setup(
-        configuration: CanvasConfiguration
+        _ configuration: CanvasConfiguration
     ) {
         canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,

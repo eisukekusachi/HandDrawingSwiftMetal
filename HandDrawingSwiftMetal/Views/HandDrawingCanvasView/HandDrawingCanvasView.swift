@@ -273,7 +273,7 @@ extension HandDrawingCanvasView {
 
         undoTextureLayers.updateSkippingThumbnail(textureLayersState: state)
 
-        try super.setup(configuration: resolvedConfiguration)
+        try super.setup(resolvedConfiguration)
     }
 
     func newCanvas() async throws {
