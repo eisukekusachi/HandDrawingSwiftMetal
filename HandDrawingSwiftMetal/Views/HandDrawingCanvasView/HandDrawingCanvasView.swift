@@ -190,7 +190,6 @@ import TextureLayerView
         } catch {
             Logger.error(error)
         }
-        present()
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
