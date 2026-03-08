@@ -89,7 +89,7 @@ public final class CanvasViewModel {
             transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
         )
 
-        resizeCanvas(configuration.textureSize)
+        createCanvas(configuration.textureSize)
 
         present()
     }
@@ -118,7 +118,7 @@ extension CanvasViewModel {
         )
     }
 
-    func resizeCanvas(_ textureSize: CGSize) {
+    func createCanvas(_ textureSize: CGSize) {
 
         canvasTexture = canvasRenderer.makeTexture(
             textureSize,
@@ -136,7 +136,7 @@ extension CanvasViewModel {
         currentTextureSize = textureSize
 
         canvasEventSubject.send(
-            .canvasSizeChanged(textureSize)
+            .canvasCreated(textureSize)
         )
     }
 

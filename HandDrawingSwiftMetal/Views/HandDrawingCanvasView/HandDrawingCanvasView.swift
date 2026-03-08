@@ -176,7 +176,7 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    override func completeCanvasSizeChange(_ textureSize: CGSize) {
+    override func completeCanvasCreation(_ textureSize: CGSize) {
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
             // Initialize the textures used for Undo
             undoTextureLayers.initializeUndoTextures(
@@ -279,8 +279,10 @@ extension HandDrawingCanvasView {
     func newCanvas() async throws {
         guard let undoTextureLayers else { return }
 
+        let textureSize = undoTextureLayers.textureSize
+
         let textureLayersState: TextureLayersState = .init(
-            textureSize: undoTextureLayers.textureSize
+            textureSize: textureSize
         )
 
         try await textureLayersDocumentsRepository?.initializeStorage(
@@ -292,9 +294,7 @@ extension HandDrawingCanvasView {
 
         super.resetTransforming()
 
-        super.requestCanvasSizeChange(
-            withNewTextureSize: undoTextureLayers.textureSize
-        )
+        super.createCanvas(textureSize)
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
@@ -325,9 +325,7 @@ extension HandDrawingCanvasView {
             textureLayersState: textureLayerState
         )
 
-        super.requestCanvasSizeChange(
-            withNewTextureSize: textureLayerState.textureSize
-        )
+        super.createCanvas(textureLayerState.textureSize)
     }
 }
 

@@ -118,10 +118,10 @@ open class CanvasView: UIView {
         viewModel.canvasEventSubject
             .sink { [weak self] event in
                 switch event {
-                case .canvasSizeChanged(let textureSize):
-                    self?.completeCanvasSizeChange(textureSize)
+                case .canvasCreated(let textureSize):
+                    self?.completeCanvasCreation(textureSize)
                     self?.canvasEventSubject.send(
-                        .canvasSizeChanged(textureSize)
+                        .canvasCreated(textureSize)
                     )
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
@@ -157,28 +157,13 @@ open class CanvasView: UIView {
         )
     }
 
-    public func resetTransforming() {
-        viewModel.resetTransforming()
-    }
-
-    public func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
-        viewModel.setDrawingRenderer(drawingRenderer)
-    }
-
-    public func setCurrentTexture(_ texture: MTLTexture?) throws {
-        guard texture?.size == viewModel.currentTextureSize else {
-            throw CanvasError.textureSizeMismatch
-        }
-        viewModel.setCurrentTexture(texture)
-    }
-
-    public func requestCanvasSizeChange(withNewTextureSize textureSize: CGSize) {
-        viewModel.resizeCanvas(
+    public func createCanvas(_ textureSize: CGSize) {
+        viewModel.createCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }
 
-    open func completeCanvasSizeChange(_ textureSize: CGSize) {
+    open func completeCanvasCreation(_ textureSize: CGSize) {
         viewModel.updateCanvasTexture(currentTexture)
         present()
     }
@@ -195,6 +180,24 @@ open class CanvasView: UIView {
 
     public func present() {
         viewModel.present()
+    }
+}
+
+extension CanvasView {
+
+    public func setCurrentTexture(_ texture: MTLTexture?) throws {
+        guard texture?.size == viewModel.currentTextureSize else {
+            throw CanvasError.textureSizeMismatch
+        }
+        viewModel.setCurrentTexture(texture)
+    }
+
+    public func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+        viewModel.setDrawingRenderer(drawingRenderer)
+    }
+
+    public func resetTransforming() {
+        viewModel.resetTransforming()
     }
 }
 

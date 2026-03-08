@@ -149,7 +149,7 @@ extension HandDrawingViewController {
 
         canvasView.canvasEvents
             .compactMap { event -> CGSize? in
-                guard case let .canvasSizeChanged(size) = event else { return nil }
+                guard case let .canvasCreated(size) = event else { return nil }
                 return size
             }
             .receive(on: DispatchQueue.main)
