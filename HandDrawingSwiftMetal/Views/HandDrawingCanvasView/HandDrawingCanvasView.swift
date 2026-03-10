@@ -27,9 +27,8 @@ import TextureLayerView
 
     private let textureLayersStorageController: PersistenceController
 
-    private var textureLayersState: TextureLayersState?
-
     private var textureLayerRenderer: TextureLayerRenderer?
+
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
@@ -257,7 +256,6 @@ extension HandDrawingCanvasView {
             state = restoredState
             resolvedConfiguration = configuration.newTextureSize(restoredState.textureSize)
 
-            textureLayersState = restoredState
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
                 textureLayersState: restoredState
             )
