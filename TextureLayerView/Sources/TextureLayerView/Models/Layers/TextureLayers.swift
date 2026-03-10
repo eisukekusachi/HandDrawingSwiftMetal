@@ -11,7 +11,7 @@ import MetalKit
 import UIKit
 
 /// A class that manages texture layers
-open class TextureLayers: TextureLayersProtocol, ObservableObject {
+public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     /// Emits when the current layer update is requested
     public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
@@ -97,7 +97,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         self.documentsRepository = repository
     }
 
-    open func addNewLayer(at index: Int) async throws {
+    public func addNewLayer(at index: Int) async throws {
         guard
             let renderer,
             let newTexture = MTLTextureCreator.makeTexture(
@@ -119,7 +119,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    open func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
+    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
             let renderer,
             let documentsRepository,
@@ -148,7 +148,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             )
     }
 
-    open func removeLayer(layerIndexToDelete index: Int) async throws {
+    public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
             let documentsRepository,
             let selectedLayerId = selectedLayer?.id,
@@ -171,7 +171,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
             .removeTexture(selectedLayerId)
     }
 
-    open func moveLayer(indices: MoveLayerIndices) {
+    public func moveLayer(indices: MoveLayerIndices) {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
@@ -184,21 +184,21 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    open func selectLayer(_ id: LayerId) {
+    public func selectLayer(_ id: LayerId) {
         _selectedLayerId = id
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    open func beginAlphaChange() {
+    public func beginAlphaChange() {
         // Do nothing
     }
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    open func endAlphaChange() {
+    public func endAlphaChange() {
         // Do nothing
     }
 
-    open func updateTitle(_ id: LayerId, title: String) {
+    public func updateTitle(_ id: LayerId, title: String) {
         guard
             let index = index(for: id)
         else {
@@ -218,7 +218,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    open func updateVisibility(_ id: LayerId, isVisible: Bool) {
+    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
             let index = index(for: id)
         else {
@@ -238,7 +238,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
     }
 
-    open func updateAlpha(_ id: LayerId, alpha: Int) {
+    public func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
             let index = index(for: id)
         else {
@@ -260,7 +260,7 @@ open class TextureLayers: TextureLayersProtocol, ObservableObject {
         _alpha = alpha
     }
 
-    open func updateLayer(_ layer: TextureLayerItem) {
+    public func updateLayer(_ layer: TextureLayerItem) {
         guard
             let index = index(for: layer.id)
         else {
