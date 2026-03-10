@@ -223,14 +223,6 @@ import TextureLayerView
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         undoManager?.levelsOfUndo = 8
     }
-
-    private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
-        MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
-    }
 }
 
 extension HandDrawingCanvasView {

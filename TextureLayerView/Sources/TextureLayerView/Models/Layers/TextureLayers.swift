@@ -100,11 +100,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     public func addNewLayer(at index: Int) async throws {
         guard
             let renderer,
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: renderer.device
-            )
+            let newTexture = renderer.makeTexture(textureSize)
         else { return }
 
         try await addLayer(
@@ -124,11 +120,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
             let renderer,
             let documentsRepository,
             // If a texture is provided as an argument, use it. otherwise create a new one.
-            let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
-                width: Int(_textureSize.width),
-                height: Int(_textureSize.height),
-                with: renderer.device
-            )
+            let newTexture: MTLTexture = newTexture ?? renderer.makeTexture(_textureSize)
         else { return }
 
         self._layers.insert(

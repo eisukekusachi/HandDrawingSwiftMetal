@@ -45,11 +45,7 @@ import Foundation
         guard
             let layerId: LayerId = newTextureLayersState.layers.first?.id,
             Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: renderer.device
-            )
+            let newTexture = renderer.makeTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),

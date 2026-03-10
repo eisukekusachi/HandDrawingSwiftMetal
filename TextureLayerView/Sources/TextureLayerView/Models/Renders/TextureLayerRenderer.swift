@@ -55,8 +55,8 @@ public class TextureLayerRenderer {
         }
 
         guard
-            let unselectedBottomTexture = makeTexture(textureSize),
-            let unselectedTopTexture = makeTexture(textureSize)
+            let unselectedBottomTexture = renderer.makeTexture(textureSize),
+            let unselectedTopTexture = renderer.makeTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -204,13 +204,5 @@ public class TextureLayerRenderer {
                 Logger.error(String(format: String(localized: "Unable to find %@"), message))
             }
         }
-    }
-
-    private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
-        MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
     }
 }

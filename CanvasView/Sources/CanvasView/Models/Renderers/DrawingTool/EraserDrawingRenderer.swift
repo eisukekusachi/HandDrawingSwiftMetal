@@ -61,7 +61,7 @@ public extension EraserDrawingRenderer {
         self.flippedTextureBuffers = buffers
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -69,24 +69,9 @@ public extension EraserDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self.drawingTexture = MTLTextureCreator.makeTexture(
-            label: "drawingTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(
-            label: "grayscaleTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
-        self.lineDrawnTexture = MTLTextureCreator.makeTexture(
-            label: "lineDrawnTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
+        self.drawingTexture = renderer.makeTexture(textureSize, label: "drawingTexture")
+        self.grayscaleTexture = renderer.makeTexture(textureSize, label: "grayscaleTexture")
+        self.lineDrawnTexture = renderer.makeTexture(textureSize, label: "lineDrawnTexture")
 
         clearTextures(with: newCommandBuffer)
         newCommandBuffer.commit()

@@ -57,7 +57,7 @@ public extension BrushDrawingRenderer {
         self.flippedTextureBuffers = buffers
     }
 
-    func initializeTextures(textureSize: CGSize) {
+    func initializeTextures(_ textureSize: CGSize) {
         guard
             let renderer,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -65,18 +65,8 @@ public extension BrushDrawingRenderer {
 
         self.textureSize = textureSize
 
-        self.drawingTexture = MTLTextureCreator.makeTexture(
-            label: "drawingTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
-        self.grayscaleTexture = MTLTextureCreator.makeTexture(
-            label: "grayscaleTexture",
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
+        self.drawingTexture = renderer.makeTexture(textureSize)
+        self.grayscaleTexture = renderer.makeTexture(textureSize)
 
         clearTextures(with: newCommandBuffer)
         newCommandBuffer.commit()

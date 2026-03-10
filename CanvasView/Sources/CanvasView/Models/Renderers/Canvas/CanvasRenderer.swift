@@ -140,12 +140,9 @@ extension CanvasRenderer {
         _ textureSize: CGSize,
         label: String
     ) -> MTLTexture? {
-        let texture = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
+        renderer.makeTexture(
+            textureSize,
+            label: label
         )
-        texture?.label = label
-        return texture
     }
 }

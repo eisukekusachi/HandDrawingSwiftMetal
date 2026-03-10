@@ -55,20 +55,12 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
         textureSize: CGSize
     ) {
         // Create a texture for use in drawing undo operations
-        previousDrawingTextureForUndo = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
+        previousDrawingTextureForUndo = renderer.makeTexture(textureSize)
     }
 
     public func addNewLayer(at index: Int) async throws {
         guard
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: renderer.device
-            )
+            let newTexture = renderer.makeTexture(textureSize)
             else { return }
 
         try await addLayer(

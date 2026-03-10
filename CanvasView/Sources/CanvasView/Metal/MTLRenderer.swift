@@ -360,4 +360,26 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
         try await newCommandBuffer.commitAndWaitAsync()
     }
+
+    public func makeTexture(
+        _ textureSize: CGSize,
+        label: String?
+    ) -> MTLTexture? {
+        let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        texture?.label = label
+        return texture
+    }
+
+    public func makeTexture(
+        _ textureSize: CGSize
+    ) -> MTLTexture? {
+        makeTexture(
+            textureSize,
+            label: nil
+        )
+    }
 }

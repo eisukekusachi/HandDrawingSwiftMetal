@@ -143,4 +143,19 @@ final class MockMTLRenderer: MTLRendering, @unchecked Sendable {
     ) {
         recordCall()
     }
+
+    func makeTexture(
+        _ textureSize: CGSize,
+        label: String?
+    ) -> MTLTexture? {
+        recordCall()
+        return nil
+    }
+
+    func makeTexture(
+        _ textureSize: CGSize
+    ) -> MTLTexture? {
+        recordCall()
+        return nil
+    }
 }

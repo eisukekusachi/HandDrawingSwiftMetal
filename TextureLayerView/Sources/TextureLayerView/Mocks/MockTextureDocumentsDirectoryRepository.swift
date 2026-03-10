@@ -118,11 +118,7 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
         duplicatedTexture_callCount += 1
         duplicatedTexture_lastId = id
 
-        let newTexture = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )!
+        let newTexture = renderer.makeTexture(textureSize)!
 
         return .init(id: id, texture: newTexture)
     }

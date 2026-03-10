@@ -103,4 +103,13 @@ public protocol MTLRendering {
         texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
+
+    func makeTexture(
+        _ textureSize: CGSize,
+        label: String?
+    ) -> MTLTexture?
+
+    func makeTexture(
+        _ textureSize: CGSize
+    ) -> MTLTexture?
 }

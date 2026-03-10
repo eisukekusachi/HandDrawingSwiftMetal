@@ -161,7 +161,7 @@ extension HandDrawingViewController {
 
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
-                    renderer.initializeTextures(textureSize: textureSize)
+                    renderer.initializeTextures(textureSize)
                 }
 
                 self.textureLayerViewPresenter.update(
