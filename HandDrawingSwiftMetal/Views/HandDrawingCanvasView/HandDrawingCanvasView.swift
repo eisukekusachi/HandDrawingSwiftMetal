@@ -241,27 +241,27 @@ extension HandDrawingCanvasView {
             return state
         }()
 
-        let state: TextureLayersState
+        let textureLayersState: TextureLayersState
         let resolvedConfiguration: CanvasConfiguration
 
         if let restoredState {
-            state = restoredState
+            textureLayersState = restoredState
             resolvedConfiguration = configuration.newTextureSize(restoredState.textureSize)
 
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-                textureLayersState: restoredState
+                textureLayersState: textureLayersState
             )
         } else {
             let newState = TextureLayersState(textureSize: configuration.textureSize)
-            state = newState
+            textureLayersState = newState
             resolvedConfiguration = configuration
 
             try await textureLayersDocumentsRepository?.initializeStorage(
-                newTextureLayersState: newState
+                newTextureLayersState: textureLayersState
             )
         }
 
-        undoTextureLayers.updateSkippingThumbnail(textureLayersState: state)
+        undoTextureLayers.update(textureLayersState)
 
         try super.setup(resolvedConfiguration)
     }
@@ -278,9 +278,7 @@ extension HandDrawingCanvasView {
         try await textureLayersDocumentsRepository?.initializeStorage(
             newTextureLayersState: textureLayersState
         )
-        undoTextureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
+        undoTextureLayers.update(textureLayersState)
 
         super.resetTransforming()
 
@@ -311,9 +309,7 @@ extension HandDrawingCanvasView {
             url: workingDirectoryURL,
             textureLayersState: textureLayerState
         )
-        undoTextureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayerState
-        )
+        undoTextureLayers.update(textureLayerState)
 
         try super.createCanvas(textureLayerState.textureSize)
     }

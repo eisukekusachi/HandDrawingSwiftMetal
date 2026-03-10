@@ -44,8 +44,8 @@ public protocol TextureLayersProtocol: ObservableObject {
 
     var textureSize: CGSize { get }
 
-    func updateSkippingThumbnail(
-        textureLayersState: TextureLayersState
+    func update(
+        _ textureLayersState: TextureLayersState
     )
 
     func addNewLayer(at index: Int) async throws

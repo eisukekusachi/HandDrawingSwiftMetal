@@ -122,9 +122,7 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                textureLayers.updateSkippingThumbnail(
-                    textureLayersState: state
-                )
+                textureLayers.update(state)
 
                 viewModel.initialize(
                     textureLayers: textureLayers

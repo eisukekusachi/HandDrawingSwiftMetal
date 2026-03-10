@@ -453,12 +453,10 @@ extension UndoTextureLayers {
         textureLayers.textureSize
     }
 
-    public func updateSkippingThumbnail(
-        textureLayersState: TextureLayersState
+    public func update(
+        _ textureLayersState: TextureLayersState
     ) {
-        textureLayers.updateSkippingThumbnail(
-            textureLayersState: textureLayersState
-        )
+        textureLayers.update(textureLayersState)
     }
 
     public func index(for id: LayerId) -> Int? {

@@ -266,8 +266,8 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 }
 
 extension TextureLayers {
-    public func updateSkippingThumbnail(
-        textureLayersState: TextureLayersState
+    public func update(
+        _ textureLayersState: TextureLayersState
     ) {
         self._layers = textureLayersState.layers.map { .init(model: $0) }
         self._selectedLayerId = textureLayersState.selectedLayerId
