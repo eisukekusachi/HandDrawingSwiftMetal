@@ -61,7 +61,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
 
-    public let renderer: MTLRendering?
+    public let device: MTLDevice
 
     public var layers: [TextureLayerItem] {
         _layers
@@ -90,17 +90,20 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     private var oldAlpha: Int?
 
     public init(
-        renderer: MTLRendering?,
+        device: MTLDevice,
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
-        self.renderer = renderer
+        self.device = device
         self.documentsRepository = repository
     }
 
     public func addNewLayer(at index: Int) async throws {
         guard
-            let renderer,
-            let newTexture = renderer.makeTexture(textureSize)
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         else { return }
 
         try await addLayer(
@@ -117,10 +120,13 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let renderer,
             let documentsRepository,
             // If a texture is provided as an argument, use it. otherwise create a new one.
-            let newTexture: MTLTexture = newTexture ?? renderer.makeTexture(_textureSize)
+            let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         else { return }
 
         self._layers.insert(

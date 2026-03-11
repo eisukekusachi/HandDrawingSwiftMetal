@@ -56,7 +56,7 @@ import TextureLayerView
             renderer: renderer
         )
         self.textureLayers = TextureLayers(
-            renderer: renderer,
+            device: sharedDevice,
             repository: textureLayersDocumentsRepository
         )
 

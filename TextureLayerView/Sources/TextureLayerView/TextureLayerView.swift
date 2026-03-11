@@ -43,7 +43,7 @@ private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayers(
-        renderer: nil,
+        device: MTLCreateSystemDefaultDevice()!,
         repository: nil
     )
 
