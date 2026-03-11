@@ -34,9 +34,15 @@ public final class TextureLayerViewModel: ObservableObject {
         }
     }
 
+    private let dependencies: TextureLayerViewDependencies?
+
     private var cancellables = Set<AnyCancellable>()
 
-    public init() {}
+    public init(
+        dependencies: TextureLayerViewDependencies?
+    ) {
+        self.dependencies = dependencies
+    }
 
     public func initialize(
         textureLayers: any TextureLayersProtocol

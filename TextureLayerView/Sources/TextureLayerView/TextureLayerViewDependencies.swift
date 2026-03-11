@@ -9,11 +9,11 @@ import Foundation
 import MetalKit
 
 @MainActor
-final class TextureLayerViewDependencies {
+public final class TextureLayerViewDependencies {
 
-    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    init(device: MTLDevice) {
+    public init(device: MTLDevice) {
         do {
             textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,

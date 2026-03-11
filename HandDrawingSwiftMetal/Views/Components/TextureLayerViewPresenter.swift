@@ -17,7 +17,7 @@ final class TextureLayerViewPresenter {
         @Published public var arrowX: CGFloat = 0
     }
 
-    private let viewModel = TextureLayerViewModel()
+    private let viewModel: TextureLayerViewModel
 
     private var layerViewController: UIHostingController<PopupWithArrowView<TextureLayerView>>!
 
@@ -37,6 +37,9 @@ final class TextureLayerViewPresenter {
     }
 
     init(device: MTLDevice) {
+
+        viewModel = .init(dependencies: .init(device: device))
+
         let layerView = TextureLayerView(
             viewModel: viewModel
         )

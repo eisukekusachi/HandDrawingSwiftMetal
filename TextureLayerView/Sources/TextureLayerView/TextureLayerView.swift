@@ -17,7 +17,7 @@ public struct TextureLayerView: View {
     public init(
         viewModel: TextureLayerViewModel
     ) {
-        self.viewModel = viewModel
+        self._viewModel = .init(wrappedValue: viewModel)
     }
 
     public var body: some View {
@@ -40,7 +40,9 @@ public struct TextureLayerView: View {
 
 @MainActor
 private struct PreviewView: View {
-    private var viewModel = TextureLayerViewModel()
+    private var viewModel = TextureLayerViewModel(
+        dependencies: .init(device: MTLCreateSystemDefaultDevice()!)
+    )
 
     private let textureLayers = TextureLayers(
         device: MTLCreateSystemDefaultDevice()!,
