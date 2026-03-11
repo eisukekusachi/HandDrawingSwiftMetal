@@ -156,7 +156,7 @@ extension HandDrawingViewController {
             .sink { [weak self] textureSize in
                 guard
                     let `self`,
-                    let textureLayers = self.canvasView.undoTextureLayers
+                    let textureLayers = self.canvasView.textureLayers
                 else { return }
 
                 // Initialize the textures in DrawingRenderer
@@ -171,7 +171,7 @@ extension HandDrawingViewController {
 
                 // Update the thumbnails
                 Task {
-                    for layer in textureLayers.textureLayers.layers {
+                    for layer in textureLayers.layers {
                         try await textureLayers.updateThumbnail(layer.id)
                     }
                 }
@@ -185,19 +185,24 @@ extension HandDrawingViewController {
                 switch event {
                 case .fingerStrokeBegan:
                     self.enableComponentsInteraction(false)
+                    /*
                     Task {
                         await self.canvasView.undoTextureLayers?.setUndoDrawing(
                             texture: self.canvasView.currentTexture
                         )
                     }
+                    */
                 case .pencilStrokeBegan:
                     self.enableComponentsInteraction(false)
+                    /*
                     Task {
                         await self.canvasView.undoTextureLayers?.setUndoDrawing(
                             texture: self.canvasView.currentTexture
                         )
                     }
+                    */
                 case .strokeCompleted:
+                    /*
                     Task {
                         try await self.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
                             texture: self.canvasView.currentTexture
@@ -208,7 +213,7 @@ extension HandDrawingViewController {
                     self.viewModel.project.update(
                         updatedAt: Date()
                     )
-
+                    */
                     self.enableComponentsInteraction(true)
 
                 case .strokeCancelled:
@@ -217,6 +222,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        /*
         canvasView.undoTextureLayers?.didEmitUndoObjectPair
             .sink { [weak self] undoObjectPair in
                 self?.canvasView.registerUndoObjectPair(undoObjectPair)
@@ -228,6 +234,7 @@ extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
+        */
 
         viewModel.activityIndicator
             .map { !$0 }

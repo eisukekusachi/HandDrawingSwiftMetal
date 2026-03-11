@@ -21,14 +21,13 @@ import TextureLayerView
 
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
-    public var undoTextureLayers: UndoTextureLayers?
+    public var textureLayers: TextureLayers?
 
     private var textureLayerStorage: CoreDataTextureLayerStorage?
 
     private let textureLayersStorageController: PersistenceController
 
     private var textureLayerRenderer: TextureLayerRenderer?
-
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
@@ -56,19 +55,16 @@ import TextureLayerView
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.undoTextureLayers = .init(
-            textureLayers: TextureLayers(
-                renderer: renderer,
-                repository: textureLayersDocumentsRepository
-            ),
+        self.textureLayers = TextureLayers(
             renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            repository: textureLayersDocumentsRepository
         )
+
         self.textureLayerRenderer = .init(renderer: renderer)
 
-        guard let undoTextureLayers else { return }
+        guard let textureLayers else { return }
         self.textureLayerStorage = .init(
-            textureLayers: undoTextureLayers,
+            textureLayers: textureLayers,
             context: textureLayersStorageController.viewContext
         )
         bindData()
@@ -95,7 +91,7 @@ import TextureLayerView
 
         // Update the current texture
         // Mainly used for undoing alpha changes
-        undoTextureLayers?.currentLayerUpdateRequested
+        textureLayers?.currentLayerUpdateRequested
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingCurrentTexture()
             }
@@ -103,7 +99,7 @@ import TextureLayerView
 
         // Update the canvas with a new texture
         // Mainly used for undoing drawing operations
-        undoTextureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
+        textureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
                 do {
                     try self?.setCurrentTexture(texture)
@@ -116,7 +112,7 @@ import TextureLayerView
 
         // Update the entire canvas
         // Mainly used to undo adding/removing operations
-        undoTextureLayers?.fullCanvasUpdateRequested
+        textureLayers?.fullCanvasUpdateRequested
             .sink { [weak self] in
                 Task {
                     try? await self?.updateFullCanvasTexture()
@@ -130,7 +126,7 @@ import TextureLayerView
             Task(priority: .utility) { [weak self] in
                 guard
                     let currentTexture = self?.currentTexture,
-                    let layerId = self?.undoTextureLayers?.selectedLayer?.id
+                    let layerId = self?.textureLayers?.selectedLayer?.id
                 else { return }
 
                 do {
@@ -139,7 +135,7 @@ import TextureLayerView
                         for: layerId
                     )
 
-                    self?.undoTextureLayers?.updateThumbnail(
+                    self?.textureLayers?.updateThumbnail(
                         layerId,
                         texture: currentTexture
                     )
@@ -153,9 +149,9 @@ import TextureLayerView
 
     func updateFullCanvasTexture() async throws {
         guard
-            let undoTextureLayers,
-            let selectedLayer = undoTextureLayers.selectedLayer,
-            let textureLayers: TextureLayersRenderContext = .init(textureLayers: undoTextureLayers)
+            let textureLayers,
+            let selectedLayer = textureLayers.selectedLayer,
+            let textureLayers: TextureLayersRenderContext = .init(textureLayers: textureLayers)
         else {
             return
         }
@@ -175,6 +171,7 @@ import TextureLayerView
     }
 
     override func completeCanvasCreation(_ textureSize: CGSize) async {
+        /*
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
             // Initialize the textures used for Undo
             undoTextureLayers.initializeUndoTextures(
@@ -182,6 +179,7 @@ import TextureLayerView
             )
             resetUndo()
         }
+        */
 
         do {
             try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
@@ -203,7 +201,7 @@ import TextureLayerView
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
         guard
-            let selectedLayer = undoTextureLayers?.selectedLayer
+            let selectedLayer = textureLayers?.selectedLayer
         else {
             return
         }
@@ -231,7 +229,7 @@ extension HandDrawingCanvasView {
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        guard let undoTextureLayers else { return }
+        guard let textureLayers else { return }
 
         let restoredState: TextureLayersState? = {
             guard
@@ -261,15 +259,15 @@ extension HandDrawingCanvasView {
             )
         }
 
-        undoTextureLayers.update(textureLayersState)
+        textureLayers.update(textureLayersState)
 
         try super.setup(resolvedConfiguration)
     }
 
     func newCanvas() async throws {
-        guard let undoTextureLayers else { return }
+        guard let textureLayers else { return }
 
-        let textureSize = undoTextureLayers.textureSize
+        let textureSize = textureLayers.textureSize
 
         let textureLayersState: TextureLayersState = .init(
             textureSize: textureSize
@@ -278,7 +276,7 @@ extension HandDrawingCanvasView {
         try await textureLayersDocumentsRepository?.initializeStorage(
             newTextureLayersState: textureLayersState
         )
-        undoTextureLayers.update(textureLayersState)
+        textureLayers.update(textureLayersState)
 
         super.resetTransforming()
 
@@ -289,7 +287,7 @@ extension HandDrawingCanvasView {
         try await viewModel.exportFiles(
             canvasTexture: canvasTexture,
             thumbnailLength: 500,
-            textureLayers: undoTextureLayers,
+            textureLayers: textureLayers,
             textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             device: sharedDevice,
             to: workingDirectoryURL
@@ -297,7 +295,7 @@ extension HandDrawingCanvasView {
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        guard let undoTextureLayers else { return }
+        guard let textureLayers else { return }
 
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
@@ -309,7 +307,7 @@ extension HandDrawingCanvasView {
             url: workingDirectoryURL,
             textureLayersState: textureLayerState
         )
-        undoTextureLayers.update(textureLayerState)
+        textureLayers.update(textureLayerState)
 
         try super.createCanvas(textureLayerState.textureSize)
     }
@@ -344,7 +342,7 @@ extension HandDrawingCanvasView {
         _ undoRedoObject: UndoRedoObjectPair
     ) {
         guard let undoManager else { return }
-
+/*
         undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
@@ -369,7 +367,7 @@ extension HandDrawingCanvasView {
             Task { [weak self] in
                 guard
                     let `self`,
-                    let undoTextureLayers = self.undoTextureLayers,
+                    let textureLayers = self.textureLayers,
                     let undoTextureInMemoryRepository
                 else { return }
 
@@ -390,5 +388,6 @@ extension HandDrawingCanvasView {
         didUndoSubject.send(
             .init(undoManager)
         )
+ */
     }
 }
