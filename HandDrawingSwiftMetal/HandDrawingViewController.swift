@@ -21,7 +21,7 @@ class HandDrawingViewController: UIViewController {
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
-    private let textureLayerViewPresenter = TextureLayerViewPresenter()
+    private var textureLayerViewPresenter: TextureLayerViewPresenter?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -131,7 +131,7 @@ class HandDrawingViewController: UIViewController {
     }
 
     private func setupTextureLayerViewPresenter() {
-        textureLayerViewPresenter.setup(
+        textureLayerViewPresenter?.setup(
             configuration: .init(
                 anchorButton: contentView.layerButton,
                 destinationView: contentView,
@@ -164,7 +164,7 @@ extension HandDrawingViewController {
                     renderer.initializeTextures(textureSize)
                 }
 
-                self.textureLayerViewPresenter.update(
+                self.textureLayerViewPresenter?.update(
                     textureLayers: textureLayers
                 )
                 self.contentView.initialize()
@@ -283,7 +283,7 @@ extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.textureLayerViewPresenter.toggleView()
+            self?.textureLayerViewPresenter?.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveProject()
@@ -327,6 +327,9 @@ extension HandDrawingViewController {
     }
 
     private func layoutViews() {
+
+        textureLayerViewPresenter = TextureLayerViewPresenter(device: canvasView.sharedDevice)
+
         if let baseView = contentView.baseView {
             baseView.addSubview(canvasView)
             canvasView.translatesAutoresizingMaskIntoConstraints = false
@@ -405,7 +408,7 @@ extension HandDrawingViewController {
             onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
                 self.presentedViewController?.dismiss(animated: true)
-                self.textureLayerViewPresenter.hide()
+                self.textureLayerViewPresenter?.hide()
                 self.loadProject(zipFileURL: zipFileURL)
             }
         )
@@ -447,7 +450,7 @@ extension HandDrawingViewController {
 
     private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerViewPresenter.enableComponentInteraction(isUserInteractionEnabled)
+        textureLayerViewPresenter?.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 

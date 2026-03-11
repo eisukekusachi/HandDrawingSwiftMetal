@@ -16,16 +16,16 @@ import Foundation
     /// URL of the texture storage
     public let workingDirectoryURL: URL
 
-    private let renderer: MTLRendering
+    private let device: MTLDevice
 
     private var textureSize: CGSize = .zero
 
     public init(
         storageDirectoryURL: URL,
         directoryName: String,
-        renderer: MTLRendering
+        device: MTLDevice
     ) throws {
-        self.renderer = renderer
+        self.device = device
 
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
@@ -45,7 +45,11 @@ import Foundation
         guard
             let layerId: LayerId = newTextureLayersState.layers.first?.id,
             Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
-            let newTexture = renderer.makeTexture(textureSize)
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
@@ -54,6 +58,9 @@ import Foundation
             Logger.error(error)
             throw error
         }
+
+
+
 
         // Delete all textures in the repository
         removeAll()
@@ -94,7 +101,7 @@ import Foundation
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
-                    with: renderer.device
+                    with: device
                 )
             else {
                 let error = NSError(
@@ -144,7 +151,7 @@ import Foundation
                     width: Int(textureSize.width),
                     height: Int(textureSize.height),
                     from: hexadecimalData,
-                    with: renderer.device
+                    with: device
                 )
             else {
                 let error = NSError(
@@ -190,7 +197,7 @@ extension TextureLayersDocumentsRepository {
             let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
-                with: renderer.device
+                with: device
             )
         else {
             let error = NSError(
@@ -268,7 +275,7 @@ extension TextureLayersDocumentsRepository {
             texture: texture
         ).write(
             in: workingDirectoryURL,
-            device: renderer.device
+            device: device
         )
     }
 
@@ -293,7 +300,7 @@ extension TextureLayersDocumentsRepository {
                 texture: texture
             ).write(
                 in: workingDirectoryURL,
-                device: renderer.device
+                device: device
             )
         } catch {
             let error = NSError(

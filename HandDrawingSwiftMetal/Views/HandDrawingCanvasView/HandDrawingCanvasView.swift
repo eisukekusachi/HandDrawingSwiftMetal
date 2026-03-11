@@ -48,7 +48,7 @@ import TextureLayerView
             self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,
                 directoryName: "TextureStorage",
-                renderer: renderer
+                device: sharedDevice
             )
         } catch {
             fatalError("Failed to initialize the canvas")

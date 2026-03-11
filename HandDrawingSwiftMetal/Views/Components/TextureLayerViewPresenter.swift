@@ -36,7 +36,7 @@ final class TextureLayerViewPresenter {
         layerViewController.view.isUserInteractionEnabled = isUserInteractionEnabled
     }
 
-    init() {
+    init(device: MTLDevice) {
         let layerView = TextureLayerView(
             viewModel: viewModel
         )
