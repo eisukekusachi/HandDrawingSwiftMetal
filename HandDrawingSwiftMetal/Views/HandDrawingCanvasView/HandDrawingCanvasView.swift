@@ -150,21 +150,23 @@ import TextureLayerView
     func updateFullCanvasTexture() async throws {
         guard
             let textureLayers,
+            let textureLayersDocumentsRepository,
             let selectedLayer = textureLayers.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(textureLayers: textureLayers)
         else {
             return
         }
 
-        let currentTexture = try await textureLayerRenderer?.getTexture(
-            id: selectedLayer.id,
-            repository: textureLayersDocumentsRepository
-        )?.texture
+        let currentTexture = try await textureLayersDocumentsRepository.duplicatedTexture(selectedLayer.id).texture
         try setCurrentTexture(currentTexture)
 
-        try await textureLayerRenderer?.refreshTexturesFromRepository(
+        let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
+            textureLayers.layers.map { $0.id }
+        )
+
+        try await textureLayerRenderer?.refreshTextures(
             textureLayers: textureLayers,
-            repository: textureLayersDocumentsRepository
+            textures: textures
         )
 
         updateCanvasTextureUsingCurrentTexture()

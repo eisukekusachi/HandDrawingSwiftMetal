@@ -73,22 +73,14 @@ public class TextureLayerRenderer {
         self.unselectedTopTexture?.label = "unselectedTopTexture"
     }
 
-    public func getTexture(
-        id: LayerId,
-        repository: TextureLayersDocumentsRepositoryProtocol?
-    ) async throws -> IdentifiedTexture? {
-        try await repository?.duplicatedTexture(id)
-    }
-
-    /// Refreshes `selectedLayerTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
-    /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
+    /// Refreshes `unselectedBottomTexture`, `unselectedTopTexture`.
+    /// This textures are pre-merged necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func refreshTexturesFromRepository(
+    public func refreshTextures(
         textureLayers: TextureLayersRenderContext,
-        repository: TextureLayersDocumentsRepositoryProtocol?
+        textures: [IdentifiedTexture]
     ) async throws {
         guard
-            let repository,
             let unselectedBottomTexture,
             let unselectedTopTexture,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -108,11 +100,6 @@ public class TextureLayerRenderer {
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
-
-        // Get textures from the Documents directory
-        let textures = try await repository.duplicatedTextures(
-            textureLayers.layers.map { $0.id }
-        )
 
         // Update the class’s textures with the retrieved textures
         drawTextures(
