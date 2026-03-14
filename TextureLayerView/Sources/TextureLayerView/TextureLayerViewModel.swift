@@ -12,8 +12,6 @@ import UIKit
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
 
-    @Published private(set) var layers: [TextureLayerItem] = []
-
     @Published public var currentAlpha: Int = 0
 
     @Published public var isAlphaSliderDragging: Bool = false
@@ -91,12 +89,6 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers?.selectedLayerIdPublisher
             .sink { [weak self] value in
                 self?.selectedLayerId = value
-            }
-            .store(in: &cancellables)
-
-        textureLayers?.layersPublisher
-            .sink { [weak self] value in
-                self?.layers = value
             }
             .store(in: &cancellables)
 
