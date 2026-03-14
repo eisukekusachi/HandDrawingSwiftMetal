@@ -22,14 +22,14 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
     public private(set) var storedTextures: [LayerId: MTLTexture] = [:]
 
     public private(set) var initializeStorage_textureLayersState_callCount = 0
-    public private(set) var initializeStorage_textureLayersState_lastArg: TextureLayersState?
+    public private(set) var initializeStorage_textureLayersState_lastArg: TextureLayersModel?
 
     public private(set) var initializeStorage_newTextureSize_callCount = 0
     public private(set) var initializeStorage_newTextureSize_lastArg: CGSize?
 
     public private(set) var restoreStorage_callCount = 0
     public private(set) var restoreStorage_lastSourceURL: URL?
-    public private(set) var restoreStorage_lastState: TextureLayersState?
+    public private(set) var restoreStorage_lastState: TextureLayersModel?
 
     public private(set) var duplicatedTexture_callCount = 0
     public private(set) var duplicatedTexture_lastId: LayerId?
@@ -63,7 +63,7 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
 
     /// If set, this result is returned from `initializeStorage(newTextureSize:)`.
     /// If nil, the mock returns a simple default state (1 layer) without creating textures.
-    public var initializeStorage_newTextureSize_result: TextureLayersState?
+    public var initializeStorage_newTextureSize_result: TextureLayersModel?
 
     /// If set, this mapping is used to return a specific IdentifiedTexture for `duplicatedTexture`.
     public var duplicatedTexture_stubbedResults: [LayerId: IdentifiedTexture] = [:]
@@ -84,34 +84,34 @@ public final class MockTextureLayersDocumentsRepository: TextureLayersDocumentsR
 
     // MARK: - API
 
-    public func restoreStorageFromCoreData(textureLayersState: TextureLayersState) throws {
+    public func restoreStorageFromCoreData(textureLayers: TextureLayersModel) throws {
         initializeStorage_textureLayersState_callCount += 1
-        initializeStorage_textureLayersState_lastArg = textureLayersState
+        initializeStorage_textureLayersState_lastArg = textureLayers
 
         if let error = initializeStorage_textureLayersState_error { throw error }
 
         // Simulate "retaining" size (like the real repo)
-        self.textureSize = textureLayersState.textureSize
+        self.textureSize = textureLayers.textureSize
     }
 
     public func initializeStorage(
-        newTextureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) async throws {
         initializeStorage_newTextureSize_callCount += 1
-        initializeStorage_newTextureSize_lastArg = newTextureLayersState.textureSize
+        initializeStorage_newTextureSize_lastArg = textureLayers.textureSize
 
-        self.textureSize = newTextureLayersState.textureSize
+        self.textureSize = textureLayers.textureSize
     }
 
-    public func restoreStorageFromSavedData(url sourceFolderURL: URL, textureLayersState: TextureLayersState) async throws {
+    public func restoreStorageFromSavedData(url sourceFolderURL: URL, textureLayers: TextureLayersModel) async throws {
         restoreStorage_callCount += 1
         restoreStorage_lastSourceURL = sourceFolderURL
-        restoreStorage_lastState = textureLayersState
+        restoreStorage_lastState = textureLayers
 
         if let error = restoreStorage_error { throw error }
 
         // Simulate restoring size; texture contents are not loaded in this mock.
-        self.textureSize = textureLayersState.textureSize
+        self.textureSize = textureLayers.textureSize
     }
 
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {

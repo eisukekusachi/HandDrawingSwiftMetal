@@ -48,7 +48,7 @@ import TextureLayerView
     }
 
     /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
-    var textureLayersStateFromCoreDataEntity: TextureLayersState? {
+    var textureLayersStateFromCoreDataEntity: TextureLayersModel? {
         guard
             let entity = try? storage?.fetch()
         else { return nil }
@@ -73,7 +73,7 @@ import TextureLayerView
         )
     }
 
-    func convertData(from entity: TextureLayerArrayEntity) -> TextureLayersState {
+    func convertData(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
 
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }

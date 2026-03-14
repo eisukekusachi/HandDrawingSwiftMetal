@@ -233,7 +233,7 @@ extension HandDrawingCanvasView {
     ) async throws {
         guard let textureLayers else { return }
 
-        let restoredState: TextureLayersState? = {
+        let restoredData: TextureLayersModel? = {
             guard
                 let entity = try? textureLayerStorage?.fetch(),
                 let state = textureLayerStorage?.convertData(from: entity)
@@ -241,27 +241,27 @@ extension HandDrawingCanvasView {
             return state
         }()
 
-        let textureLayersState: TextureLayersState
+        let data: TextureLayersModel
         let resolvedConfiguration: CanvasConfiguration
 
-        if let restoredState {
-            textureLayersState = restoredState
-            resolvedConfiguration = configuration.newTextureSize(restoredState.textureSize)
+        if let restoredData {
+            data = restoredData
+            resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
 
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-                textureLayersState: textureLayersState
+                textureLayers: restoredData
             )
         } else {
-            let newState = TextureLayersState(textureSize: configuration.textureSize)
-            textureLayersState = newState
+            let newData = TextureLayersModel(textureSize: configuration.textureSize)
+            data = newData
             resolvedConfiguration = configuration
 
             try await textureLayersDocumentsRepository?.initializeStorage(
-                newTextureLayersState: textureLayersState
+                textureLayers: newData
             )
         }
 
-        textureLayers.update(textureLayersState)
+        textureLayers.update(data)
 
         try super.setup(resolvedConfiguration)
     }
@@ -271,14 +271,14 @@ extension HandDrawingCanvasView {
 
         let textureSize = textureLayers.textureSize
 
-        let textureLayersState: TextureLayersState = .init(
+        let data: TextureLayersModel = .init(
             textureSize: textureSize
         )
 
         try await textureLayersDocumentsRepository?.initializeStorage(
-            newTextureLayersState: textureLayersState
+            textureLayers: data
         )
-        textureLayers.update(textureLayersState)
+        textureLayers.update(data)
 
         super.resetTransforming()
 
@@ -303,11 +303,11 @@ extension HandDrawingCanvasView {
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
-        let textureLayerState: TextureLayersState = try .init(model: textureLayersArchiveModel)
+        let textureLayerState: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
         try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
             url: workingDirectoryURL,
-            textureLayersState: textureLayerState
+            textureLayers: textureLayerState
         )
         textureLayers.update(textureLayerState)
 

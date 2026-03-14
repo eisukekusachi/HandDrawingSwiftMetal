@@ -49,7 +49,7 @@ private struct PreviewView: View {
         repository: nil
     )
 
-    private let state: TextureLayersState = .init(
+    private let data: TextureLayersModel = .init(
         layers: [
             .init(
                 id: LayerId(),
@@ -93,7 +93,7 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                textureLayers.update(state)
+                textureLayers.update(data)
 
                 viewModel.initialize(
                     textureLayers: textureLayers

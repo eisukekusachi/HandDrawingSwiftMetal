@@ -9,8 +9,8 @@ import CanvasView
 import CoreData
 import UIKit
 
-/// A struct that represents the state of TextureLayers. Its layers property is never empty
-public struct TextureLayersState: Sendable {
+/// A struct that represents the snapshot of `TextureLayersState`
+public struct TextureLayersModel: Sendable {
 
     public let layers: [TextureLayerModel]
 
@@ -40,7 +40,7 @@ public struct TextureLayersState: Sendable {
     }
 }
 
-public extension TextureLayersState {
+public extension TextureLayersModel {
     init(
         model: TextureLayersArchiveModel
     ) throws {

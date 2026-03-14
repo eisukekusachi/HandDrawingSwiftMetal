@@ -39,11 +39,11 @@ import Foundation
     }
 
     public func initializeStorage(
-        newTextureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) async throws {
-        let textureSize = newTextureLayersState.textureSize
+        let textureSize = textureLayers.textureSize
         guard
-            let layerId: LayerId = newTextureLayersState.layers.first?.id,
+            let layerId: LayerId = textureLayers.layers.first?.id,
             Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
@@ -74,10 +74,10 @@ import Foundation
     /// Restore the storage from Core Data.
     /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersState`
     public func restoreStorageFromCoreData(
-        textureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) throws {
         guard FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
+            fileNames: textureLayers.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(workingDirectoryURL)
         ) else {
             let error = NSError(
@@ -88,9 +88,9 @@ import Foundation
             throw error
         }
 
-        let textureSize = textureLayersState.textureSize
+        let textureSize = textureLayers.textureSize
 
-        try textureLayersState.layers.forEach { layer in
+        try textureLayers.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -116,7 +116,7 @@ import Foundation
         // Do nothing since the textures already exist in workingDirectory
 
         // Retain the texture size
-        self.textureSize = textureLayersState.textureSize
+        self.textureSize = textureLayers.textureSize
     }
 
     /// Restore the storage from the saved data.
@@ -124,10 +124,10 @@ import Foundation
     /// and if they do, move them to `workingDirectory`
     public func restoreStorageFromSavedData(
         url sourceFolderURL: URL,
-        textureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) async throws {
         guard FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
+            fileNames: textureLayers.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(sourceFolderURL)
         ) else {
             let error = NSError(
@@ -138,9 +138,9 @@ import Foundation
             throw error
         }
 
-        let textureSize = textureLayersState.textureSize
+        let textureSize = textureLayers.textureSize
 
-        try textureLayersState.layers.forEach { layer in
+        try textureLayers.layers.forEach { layer in
             let textureData = try Data(
                 contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
             )
@@ -167,7 +167,7 @@ import Foundation
         self.removeAll()
 
         // Move all files
-        try textureLayersState.layers.forEach { layer in
+        try textureLayers.layers.forEach { layer in
             try FileManager.default.moveItem(
                 at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                 to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)

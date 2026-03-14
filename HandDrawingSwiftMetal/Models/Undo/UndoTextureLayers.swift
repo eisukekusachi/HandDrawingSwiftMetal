@@ -454,9 +454,9 @@ extension UndoTextureLayers {
     }
 
     public func update(
-        _ textureLayersState: TextureLayersState
+        _ textureLayersModel: TextureLayersModel
     ) {
-        textureLayers.update(textureLayersState)
+        textureLayers.update(textureLayersModel)
     }
 
     public func index(for id: LayerId) -> Int? {

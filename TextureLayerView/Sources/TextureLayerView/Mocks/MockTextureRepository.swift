@@ -35,7 +35,7 @@ final class MockTextureRepository: @unchecked Sendable {
     }
 
     func initializeStorage(
-        textureLayersState: TextureLayersState,
+        textureLayers: TextureLayersModel,
         fallbackTextureSize: CGSize
     ) async throws {
         recordCall()
@@ -43,7 +43,7 @@ final class MockTextureRepository: @unchecked Sendable {
 
     func restoreStorage(
         from sourceFolderURL: URL,
-        textureLayersState: TextureLayersState,
+        textureLayers: TextureLayersModel,
         fallbackTextureSize: CGSize
     ) async throws {
         recordCall()

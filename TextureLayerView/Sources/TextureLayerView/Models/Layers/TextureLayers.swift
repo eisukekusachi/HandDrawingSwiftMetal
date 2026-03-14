@@ -273,11 +273,11 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
 extension TextureLayers {
     public func update(
-        _ textureLayersState: TextureLayersState
+        _ textureLayers: TextureLayersModel
     ) {
-        self._layers = textureLayersState.layers.map { .init(model: $0) }
-        self._selectedLayerId = textureLayersState.selectedLayerId
-        self._textureSize = textureLayersState.textureSize
+        self._layers = textureLayers.layers.map { .init(model: $0) }
+        self._selectedLayerId = textureLayers.selectedLayerId
+        self._textureSize = textureLayers.textureSize
     }
 
     public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {

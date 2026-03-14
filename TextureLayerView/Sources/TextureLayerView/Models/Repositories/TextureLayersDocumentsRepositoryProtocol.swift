@@ -15,16 +15,16 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     var workingDirectoryURL: URL { get }
 
     func initializeStorage(
-        newTextureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) async throws
 
     func restoreStorageFromCoreData(
-        textureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) throws
 
     func restoreStorageFromSavedData(
         url sourceFolderURL: URL,
-        textureLayersState: TextureLayersState
+        textureLayers: TextureLayersModel
     ) async throws
 
     func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture
