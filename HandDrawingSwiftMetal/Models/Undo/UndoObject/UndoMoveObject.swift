@@ -64,10 +64,10 @@ public final class UndoMoveObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
+    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
         layers.moveLayer(
             indices: indices
         )
-        layers.requestFullCanvasUpdate()
+        //layers.requestFullCanvasUpdate()
     }
 }

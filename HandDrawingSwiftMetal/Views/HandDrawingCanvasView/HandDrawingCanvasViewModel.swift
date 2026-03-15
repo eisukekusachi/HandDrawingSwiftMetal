@@ -16,7 +16,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     func exportFiles(
         canvasTexture: MTLTexture?,
         thumbnailLength: CGFloat = 500,
-        textureLayers: (any TextureLayersProtocol)?,
+        textureLayers: TextureLayersState?,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
         device: MTLDevice,
         to workingDirectoryURL: URL

@@ -28,11 +28,11 @@ public final class UndoVisibilityObject: UndoObject {
         self.textureLayer = layer
     }
 
-    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
+    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
         layers.updateVisibility(
             textureLayer.id,
             isVisible: textureLayer.isVisible
         )
-        layers.requestFullCanvasUpdate()
+        //layers.requestFullCanvasUpdate()
     }
 }

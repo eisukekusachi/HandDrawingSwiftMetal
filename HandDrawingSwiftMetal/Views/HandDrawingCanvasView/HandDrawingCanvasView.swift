@@ -21,7 +21,7 @@ import TextureLayerView
 
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
-    public var textureLayers: TextureLayers?
+    public var textureLayersState: TextureLayersState?
 
     private var textureLayerStorage: CoreDataTextureLayerStorage?
 
@@ -55,16 +55,15 @@ import TextureLayerView
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )
-        self.textureLayers = TextureLayers(
-            device: sharedDevice,
-            repository: textureLayersDocumentsRepository
+        self.textureLayersState = TextureLayersState(
+            device: sharedDevice
         )
 
         self.textureLayerRenderer = .init(renderer: renderer)
 
-        guard let textureLayers else { return }
+        guard let textureLayersState else { return }
         self.textureLayerStorage = .init(
-            textureLayers: textureLayers,
+            textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
         )
         bindData()
@@ -88,10 +87,10 @@ import TextureLayerView
                 self?.completeDrawing()
             }
             .store(in: &cancellables)
-
+        /*
         // Update the current texture
         // Mainly used for undoing alpha changes
-        textureLayers?.currentLayerUpdateRequested
+        textureLayersState?.currentLayerUpdateRequested
             .sink { [weak self] in
                 self?.updateCanvasTextureUsingCurrentTexture()
             }
@@ -99,7 +98,7 @@ import TextureLayerView
 
         // Update the canvas with a new texture
         // Mainly used for undoing drawing operations
-        textureLayers?.currentLayerUpdateWithNewCurrentTextureRequested
+        textureLayersState?.currentLayerUpdateWithNewCurrentTextureRequested
             .sink { [weak self] texture in
                 do {
                     try self?.setCurrentTexture(texture)
@@ -112,13 +111,14 @@ import TextureLayerView
 
         // Update the entire canvas
         // Mainly used to undo adding/removing operations
-        textureLayers?.fullCanvasUpdateRequested
+        textureLayersState?.fullCanvasUpdateRequested
             .sink { [weak self] in
                 Task {
                     try? await self?.updateFullCanvasTexture()
                 }
             }
             .store(in: &cancellables)
+        */
     }
 
     private func completeDrawing() {
@@ -126,7 +126,7 @@ import TextureLayerView
             Task(priority: .utility) { [weak self] in
                 guard
                     let currentTexture = self?.currentTexture,
-                    let layerId = self?.textureLayers?.selectedLayer?.id
+                    let layerId = self?.textureLayersState?.selectedLayer?.id
                 else { return }
 
                 do {
@@ -135,7 +135,7 @@ import TextureLayerView
                         for: layerId
                     )
 
-                    self?.textureLayers?.updateThumbnail(
+                    self?.textureLayersState?.updateThumbnail(
                         layerId,
                         texture: currentTexture
                     )
@@ -149,10 +149,10 @@ import TextureLayerView
 
     func updateFullCanvasTexture() async throws {
         guard
-            let textureLayers,
+            let textureLayersState,
             let textureLayersDocumentsRepository,
-            let selectedLayer = textureLayers.selectedLayer,
-            let textureLayers: TextureLayersRenderContext = .init(textureLayers: textureLayers)
+            let selectedLayer = textureLayersState.selectedLayer,
+            let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState)
         else {
             return
         }
@@ -203,7 +203,7 @@ import TextureLayerView
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
         guard
-            let selectedLayer = textureLayers?.selectedLayer
+            let selectedLayer = textureLayersState?.selectedLayer
         else {
             return
         }
@@ -231,7 +231,7 @@ extension HandDrawingCanvasView {
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        guard let textureLayers else { return }
+        guard let textureLayersState else { return }
 
         let restoredData: TextureLayersModel? = {
             guard
@@ -261,15 +261,15 @@ extension HandDrawingCanvasView {
             )
         }
 
-        textureLayers.update(data)
+        textureLayersState.update(data)
 
         try super.setup(resolvedConfiguration)
     }
 
     func newCanvas() async throws {
-        guard let textureLayers else { return }
+        guard let textureLayersState else { return }
 
-        let textureSize = textureLayers.textureSize
+        let textureSize = textureLayersState.textureSize
 
         let data: TextureLayersModel = .init(
             textureSize: textureSize
@@ -278,7 +278,7 @@ extension HandDrawingCanvasView {
         try await textureLayersDocumentsRepository?.initializeStorage(
             textureLayers: data
         )
-        textureLayers.update(data)
+        textureLayersState.update(data)
 
         super.resetTransforming()
 
@@ -289,7 +289,7 @@ extension HandDrawingCanvasView {
         try await viewModel.exportFiles(
             canvasTexture: canvasTexture,
             thumbnailLength: 500,
-            textureLayers: textureLayers,
+            textureLayers: textureLayersState,
             textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             device: sharedDevice,
             to: workingDirectoryURL
@@ -297,21 +297,21 @@ extension HandDrawingCanvasView {
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        guard let textureLayers else { return }
+        guard let textureLayersState else { return }
 
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
-        let textureLayerState: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
         try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
             url: workingDirectoryURL,
-            textureLayers: textureLayerState
+            textureLayers: data
         )
-        textureLayers.update(textureLayerState)
+        textureLayersState.update(data)
 
-        try super.createCanvas(textureLayerState.textureSize)
+        try super.createCanvas(data.textureSize)
     }
 }
 

@@ -15,14 +15,14 @@ import TextureLayerView
 /// Texture layers managed by Core Data
 @MainActor public final class CoreDataTextureLayerStorage: ObservableObject {
 
-    private var textureLayers: any TextureLayersProtocol
+    private var textureLayers: TextureLayersState
 
     private var storage: CoreDataStorage<TextureLayerArrayEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: any TextureLayersProtocol,
+        textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)

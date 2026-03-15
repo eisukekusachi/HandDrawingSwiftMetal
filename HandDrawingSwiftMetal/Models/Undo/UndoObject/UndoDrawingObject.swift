@@ -35,7 +35,7 @@ final class UndoDrawingObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
+    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
         guard
             let undoTextureId,
             let newTexture = try await MTLTextureCreator.duplicateTexture(
@@ -45,7 +45,7 @@ final class UndoDrawingObject: UndoObject {
         else { return }
 
         let textureLayerId = textureLayer.id
-
+/*
         Task {
             try await layers.writeTextureToDisk(texture: newTexture, for: textureLayerId)
             layers.updateThumbnail(textureLayerId, texture: newTexture)
@@ -53,5 +53,6 @@ final class UndoDrawingObject: UndoObject {
 
         layers.selectLayer(textureLayerId)
         layers.requestCanvasDrawingUpdate(newTexture)
+*/
     }
 }

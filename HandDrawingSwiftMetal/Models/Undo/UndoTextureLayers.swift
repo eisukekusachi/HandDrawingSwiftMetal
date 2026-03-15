@@ -12,9 +12,9 @@ import TextureLayerView
 
 /// A class that manages texture layers with undo functionality
 @MainActor
-public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
+public final class UndoTextureLayers: ObservableObject {
 
-    public var textureLayers: any TextureLayersProtocol
+    public var textureLayers: TextureLayersState
 
     /// Is the undo feature enabled
     public var isUndoEnabled: Bool {
@@ -42,7 +42,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: any TextureLayersProtocol,
+        textureLayers: TextureLayersState,
         renderer: MTLRendering,
         inMemoryRepository: UndoTextureInMemoryRepository?
     ) {
@@ -105,6 +105,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
+        /*
         guard
             let selectedLayer = textureLayers.selectedLayer,
             let newTexture = try await textureLayers.duplicatedTexture(selectedLayer.id)?.texture
@@ -129,6 +130,7 @@ public final class UndoTextureLayers: ObservableObject, TextureLayersProtocol {
                 )
             )
         )
+        */
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
@@ -413,10 +415,6 @@ extension UndoTextureLayers {
         textureLayers.currentLayerUpdateWithNewCurrentTextureRequested
     }
 
-    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
-        textureLayers.fullCanvasUpdateRequested
-    }
-
     public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
         textureLayers.layersPublisher
     }
@@ -464,7 +462,8 @@ extension UndoTextureLayers {
     }
 
     public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await textureLayers.duplicatedTexture(id)
+        nil
+        // try await textureLayers.duplicatedTexture(id)
     }
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
@@ -476,7 +475,7 @@ extension UndoTextureLayers {
     }
 
     public func updateThumbnail(_ id: LayerId) async throws {
-        try await textureLayers.updateThumbnail(id)
+        // try await textureLayers.updateThumbnail(id)
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
@@ -492,18 +491,14 @@ extension UndoTextureLayers {
     }
 
     public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        try await textureLayers.writeTextureToDisk(texture: texture, for: id)
+        // try await textureLayers.writeTextureToDisk(texture: texture, for: id)
     }
 
     public func requestCanvasUpdate() {
-        textureLayers.requestCanvasUpdate()
+        // textureLayers.requestCanvasUpdate()
     }
 
     public func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture) {
-        textureLayers.requestCanvasDrawingUpdate(texture)
-    }
-
-    public func requestFullCanvasUpdate() {
-        textureLayers.requestFullCanvasUpdate()
+        // textureLayers.requestCanvasDrawingUpdate(texture)
     }
 }

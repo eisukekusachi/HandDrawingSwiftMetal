@@ -44,9 +44,8 @@ private struct PreviewView: View {
         dependencies: .init(device: MTLCreateSystemDefaultDevice()!)
     )
 
-    private let textureLayers = TextureLayers(
-        device: MTLCreateSystemDefaultDevice()!,
-        repository: nil
+    private let textureLayers = TextureLayersState(
+        device: MTLCreateSystemDefaultDevice()!
     )
 
     private let data: TextureLayersModel = .init(

@@ -11,7 +11,7 @@ import MetalKit
 import UIKit
 
 /// A class that manages texture layers
-public class TextureLayers: TextureLayersProtocol, ObservableObject {
+public class TextureLayersState: ObservableObject {
 
     /// Emits when the current layer update is requested
     public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
@@ -24,12 +24,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         currentLayerUpdateWithNewCurrentTextureRequestedSubject.eraseToAnyPublisher()
     }
     private let currentLayerUpdateWithNewCurrentTextureRequestedSubject = PassthroughSubject<MTLTexture, Never>()
-
-    /// Emits when a full canvas update is requested
-    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
-        fullCanvasUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-    private let fullCanvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
 
     /// Emits whenever `layers` change such as when layers are added or removed
     public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
@@ -75,9 +69,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         _textureSize
     }
 
-    /// Store and manage texture layer textures in the Documents folder for persistence
-    private var documentsRepository: TextureLayersDocumentsRepositoryProtocol?
-
     @Published private var _layers: [TextureLayerItem] = []
 
     @Published private var _selectedLayerId: LayerId?
@@ -90,11 +81,9 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     private var oldAlpha: Int?
 
     public init(
-        device: MTLDevice,
-        repository: TextureLayersDocumentsRepositoryProtocol? = nil
+        device: MTLDevice
     ) {
         self.device = device
-        self.documentsRepository = repository
     }
 
     public func addNewLayer(at index: Int) async throws {
@@ -120,7 +109,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
         guard
-            let documentsRepository,
             // If a texture is provided as an argument, use it. otherwise create a new one.
             let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
@@ -138,17 +126,10 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         )
 
         _selectedLayerId = layer.id
-
-        try await documentsRepository
-            .addTexture(
-                texture: newTexture,
-                id: layer.id
-            )
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
         guard
-            let documentsRepository,
             let selectedLayerId = selectedLayer?.id,
             layerCount > 1
         else {
@@ -164,9 +145,6 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
         _layers.remove(at: index)
 
         _selectedLayerId = newLayerId
-
-        try documentsRepository
-            .removeTexture(selectedLayerId)
     }
 
     public func moveLayer(indices: MoveLayerIndices) {
@@ -271,7 +249,7 @@ public class TextureLayers: TextureLayersProtocol, ObservableObject {
     }
 }
 
-extension TextureLayers {
+extension TextureLayersState {
     public func update(
         _ textureLayers: TextureLayersModel
     ) {
@@ -280,26 +258,12 @@ extension TextureLayers {
         self._textureSize = textureLayers.textureSize
     }
 
-    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        try await documentsRepository?.writeTextureToDisk(texture: texture, for: id)
-    }
-
-    /// Copies a texture for the given `LayerId`
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        try await documentsRepository?.duplicatedTexture(id)
-    }
-
     public func index(for id: LayerId) -> Int? {
         _layers.firstIndex(where: { $0.id == id })
     }
 
     public func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
-    }
-
-    public func updateThumbnail(_ id: LayerId) async throws {
-        guard let identifiedTexture = try await self.documentsRepository?.duplicatedTexture(id) else { return }
-        updateThumbnail(identifiedTexture.id, texture: identifiedTexture.texture)
     }
 
     public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
@@ -320,20 +284,5 @@ extension TextureLayers {
            isVisible: layer.isVisible,
            thumbnail: texture.makeThumbnail()
        )
-    }
-
-    /// Requests a partial canvas update
-    public func requestCanvasUpdate() {
-        currentLayerUpdateRequestedSubject.send(())
-    }
-
-    /// Requests a partial canvas update with `MTLTexture`
-    public func requestCanvasDrawingUpdate(_ texture: MTLTexture) {
-        currentLayerUpdateWithNewCurrentTextureRequestedSubject.send(texture)
-    }
-
-    /// Requests a full canvas update (all layers composited)
-    public func requestFullCanvasUpdate() {
-        fullCanvasUpdateRequestedSubject.send(())
     }
 }

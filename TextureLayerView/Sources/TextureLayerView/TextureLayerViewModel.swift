@@ -12,6 +12,12 @@ import UIKit
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
 
+    /// Emits when a full canvas update is requested
+    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
+        fullCanvasUpdateRequestedSubject.eraseToAnyPublisher()
+    }
+    private let fullCanvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
+
     @Published public var currentAlpha: Int = 0
 
     @Published public var isAlphaSliderDragging: Bool = false
@@ -20,7 +26,7 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers?.selectedLayer
     }
 
-    private(set) var textureLayers: (any TextureLayersProtocol)?
+    private(set) var textureLayers: TextureLayersState?
 
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
@@ -43,7 +49,7 @@ public final class TextureLayerViewModel: ObservableObject {
     }
 
     public func initialize(
-        textureLayers: any TextureLayersProtocol
+        textureLayers: TextureLayersState
     ) {
         self.textureLayers = textureLayers
 
@@ -72,7 +78,7 @@ public final class TextureLayerViewModel: ObservableObject {
                 )
 
                 // Only the alpha of the selected layer can be changed, so other layers will not be updated
-                textureLayers.requestCanvasUpdate()
+                // textureLayers.requestCanvasUpdate()
             }
             .store(in: &cancellables)
 
@@ -121,7 +127,7 @@ public extension TextureLayerViewModel {
                 try await textureLayers.addNewLayer(
                     at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
                 )
-                textureLayers.requestFullCanvasUpdate()
+                fullCanvasUpdateRequestedSubject.send()
             } catch {
                 Logger.error(error)
             }
@@ -137,7 +143,7 @@ public extension TextureLayerViewModel {
 
         Task {
             try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
-            textureLayers.requestFullCanvasUpdate()
+            fullCanvasUpdateRequestedSubject.send()
         }
     }
 
@@ -151,14 +157,14 @@ public extension TextureLayerViewModel {
         textureLayers.updateVisibility(id, isVisible: isVisible)
 
         // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-        textureLayers.requestFullCanvasUpdate()
+        fullCanvasUpdateRequestedSubject.send()
     }
 
     func onTapCell(_ id: UUID) {
         guard let textureLayers else { return }
 
         textureLayers.selectLayer(id)
-        textureLayers.requestFullCanvasUpdate()
+        fullCanvasUpdateRequestedSubject.send()
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
@@ -171,7 +177,7 @@ public extension TextureLayerViewModel {
                     destinationIndex: destination
                 )
             )
-            textureLayers.requestFullCanvasUpdate()
+            fullCanvasUpdateRequestedSubject.send()
         }
     }
 }

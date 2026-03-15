@@ -38,11 +38,11 @@ public final class UndoAlphaChangedObject: UndoObject {
     }
 
     @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
+    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
         layers.updateAlpha(
             textureLayer.id,
             alpha: textureLayer.alpha
         )
-        layers.requestFullCanvasUpdate()
+        //layers.requestFullCanvasUpdate()
     }
 }
