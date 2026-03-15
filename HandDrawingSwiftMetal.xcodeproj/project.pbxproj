@@ -28,12 +28,12 @@
 		D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */; };
 		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
 		D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */; };
+		D449769D2F658D4D00CE2D2F /* PopupPresenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D449769C2F658D4D00CE2D2F /* PopupPresenterView.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
 		D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
-		D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */; };
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
@@ -73,7 +73,6 @@
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4ACE9A62BA85C240077C888 /* NewCanvasDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
-		D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */; };
 		D4D624BD2F5C0EAA00026589 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D624BC2F5C0EAA00026589 /* Debouncer.swift */; };
@@ -132,12 +131,12 @@
 		D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolTests.swift; sourceTree = "<group>"; };
 		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataDrawingToolStorage.swift; sourceTree = "<group>"; };
+		D449769C2F658D4D00CE2D2F /* PopupPresenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopupPresenterView.swift; path = /Users/eisukekusachi/PopupPresenterView.swift; sourceTree = "<absolute>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
 		D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingViewController.xib; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
-		D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrowConfiguration.swift; sourceTree = "<group>"; };
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
@@ -176,7 +175,6 @@
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCanvasDialogPresenter.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
-		D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerViewPresenter.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
 		D4D624BC2F5C0EAA00026589 /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
@@ -310,9 +308,8 @@
 				D4168DAE2E594EA9007F7904 /* Drawingtools */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
 				D4ACE9A52BA85C240077C888 /* NewCanvasDialogPresenter.swift */,
+				D449769C2F658D4D00CE2D2F /* PopupPresenterView.swift */,
 				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
-				D45478CA2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift */,
-				D4CBCE442BAA936E0053F198 /* TextureLayerViewPresenter.swift */,
 				D4DF37732E914492009B8F2A /* Throttle.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 			);
@@ -696,7 +693,6 @@
 				D49C69282F23A6D900B66608 /* CalendarExtensions.swift in Sources */,
 				D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */,
 				D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */,
-				D45478CB2DBC6D8E009CBCF5 /* PopupWithArrowConfiguration.swift in Sources */,
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
@@ -717,6 +713,7 @@
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
+				D449769D2F658D4D00CE2D2F /* PopupPresenterView.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
 				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,
@@ -724,7 +721,6 @@
 				D4168F222E59F14A007F7904 /* UIImageExtensions.swift in Sources */,
 				D4168F1C2E59EFE7007F7904 /* BrushPaletteView.swift in Sources */,
 				D4D624BF2F5C0EBF00026589 /* DrawingDebouncer.swift in Sources */,
-				D4CBCE452BAA936E0053F198 /* TextureLayerViewPresenter.swift in Sources */,
 				D49C69572F2F685300B66608 /* CoreDataStorage.swift in Sources */,
 				D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */,
 				D4168F202E59F101007F7904 /* DoubleStrokeCircle.swift in Sources */,

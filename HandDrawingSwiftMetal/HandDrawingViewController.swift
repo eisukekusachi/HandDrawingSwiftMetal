@@ -9,6 +9,7 @@ import CanvasView
 import UIKit
 import SwiftUI
 import Combine
+import TextureLayerView
 
 class HandDrawingViewController: UIViewController {
 
@@ -20,14 +21,15 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
-
-    private var textureLayerViewPresenter: TextureLayerViewPresenter?
+    private var textureLayerPresenter = PopupViewPresenter()
 
     private var cancellables = Set<AnyCancellable>()
 
     private let paletteHeight: CGFloat = 44
 
     private let canvasView = HandDrawingCanvasView()
+
+    private var textureLayerView: TextureLayerView?
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -62,11 +64,16 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
 
+        textureLayerView = TextureLayerView(
+            viewModel: .init(
+                dependencies: .init(device: canvasView.sharedDevice)
+            )
+        )
+
         addEvents()
         bindData()
         layoutViews()
 
-        setupTextureLayerViewPresenter()
         setupNewCanvasDialogPresenter()
         setup()
     }
@@ -129,19 +136,6 @@ class HandDrawingViewController: UIViewController {
             }
         }
     }
-
-    private func setupTextureLayerViewPresenter() {
-        textureLayerViewPresenter?.setup(
-            configuration: .init(
-                anchorButton: contentView.layerButton,
-                destinationView: contentView,
-                size: .init(
-                    width: 300,
-                    height: 300
-                )
-            )
-        )
-    }
 }
 
 extension HandDrawingViewController {
@@ -163,10 +157,11 @@ extension HandDrawingViewController {
                 for renderer in drawingRenderers.values {
                     renderer.initializeTextures(textureSize)
                 }
-
+/*
                 self.textureLayerViewPresenter?.update(
                     textureLayers: textureLayers
                 )
+ */
                 self.contentView.initialize()
 
                 // Update the thumbnails
@@ -290,7 +285,7 @@ extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.textureLayerViewPresenter?.toggleView()
+            self?.textureLayerPresenter.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveProject()
@@ -334,10 +329,8 @@ extension HandDrawingViewController {
     }
 
     private func layoutViews() {
-
-        textureLayerViewPresenter = TextureLayerViewPresenter(device: canvasView.sharedDevice)
-
         if let baseView = contentView.baseView {
+
             baseView.addSubview(canvasView)
             canvasView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -345,6 +338,32 @@ extension HandDrawingViewController {
                 canvasView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor),
                 canvasView.topAnchor.constraint(equalTo: baseView.topAnchor),
                 canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
+            ])
+
+            let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
+                if let view = self?.textureLayerView {
+                    AnyView(view)
+                } else {
+                    AnyView(EmptyView())
+                }
+            }
+            popupView.presenter.arrowX(
+                contentView.layerButton,
+                to: contentView,
+                dialogWidth: 300
+            )
+
+            let hostingController = UIHostingController(rootView: popupView)
+            hostingController.view.backgroundColor = .clear
+
+            baseView.addSubview(hostingController.view)
+
+            hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                hostingController.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
+                hostingController.view.centerXAnchor.constraint(equalTo: contentView.layerButton.leadingAnchor),
+                hostingController.view.widthAnchor.constraint(equalToConstant: 300),
+                hostingController.view.heightAnchor.constraint(equalToConstant: 300)
             ])
         }
 
@@ -415,7 +434,7 @@ extension HandDrawingViewController {
             onTapItem: { [weak self] zipFileURL in
                 guard let `self` else { return }
                 self.presentedViewController?.dismiss(animated: true)
-                self.textureLayerViewPresenter?.hide()
+                // self.textureLayerViewPresenter?.hide()
                 self.loadProject(zipFileURL: zipFileURL)
             }
         )
@@ -457,7 +476,7 @@ extension HandDrawingViewController {
 
     private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerViewPresenter?.enableComponentInteraction(isUserInteractionEnabled)
+        // textureLayerViewPresenter?.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 
