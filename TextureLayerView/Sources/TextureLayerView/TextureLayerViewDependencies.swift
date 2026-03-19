@@ -13,12 +13,11 @@ public final class TextureLayerViewDependencies {
 
     public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    public init(device: MTLDevice) {
+    public init() {
         do {
             textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                device: device
+                directoryName: "TextureStorage"
             )
         } catch {
             fatalError()

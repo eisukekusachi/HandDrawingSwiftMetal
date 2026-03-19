@@ -46,8 +46,7 @@ import TextureLayerView
         do {
             self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                device: sharedDevice
+                directoryName: "TextureStorage"
             )
         } catch {
             fatalError("Failed to initialize the canvas")
@@ -125,17 +124,19 @@ import TextureLayerView
         drawingDebouncer.perform {
             Task(priority: .utility) { [weak self] in
                 guard
-                    let currentTexture = self?.currentTexture,
-                    let layerId = self?.textureLayersState?.selectedLayer?.id
+                    let `self`,
+                    let currentTexture = self.currentTexture,
+                    let layerId = self.textureLayersState?.selectedLayer?.id
                 else { return }
 
                 do {
-                    try await self?.textureLayersDocumentsRepository?.writeTextureToDisk(
+                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
                         texture: currentTexture,
-                        for: layerId
+                        for: layerId,
+                        device: self.sharedDevice
                     )
 
-                    self?.textureLayersState?.updateThumbnail(
+                    self.textureLayersState?.updateThumbnail(
                         layerId,
                         texture: currentTexture
                     )
@@ -156,11 +157,15 @@ import TextureLayerView
             return
         }
 
-        let currentTexture = try await textureLayersDocumentsRepository.duplicatedTexture(selectedLayer.id).texture
+        let currentTexture = try await textureLayersDocumentsRepository.duplicatedTexture(
+            selectedLayer.id,
+            device: sharedDevice
+        ).texture
         try setCurrentTexture(currentTexture)
 
         let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
-            textureLayers.layers.map { $0.id }
+            textureLayers.layers.map { $0.id },
+            device: sharedDevice
         )
 
         try await textureLayerRenderer?.refreshTextures(
@@ -248,7 +253,8 @@ extension HandDrawingCanvasView {
             resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
 
             try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
-                textureLayers: restoredData
+                textureLayers: restoredData,
+                device: sharedDevice
             )
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
@@ -256,7 +262,8 @@ extension HandDrawingCanvasView {
             resolvedConfiguration = configuration
 
             try await textureLayersDocumentsRepository?.initializeStorage(
-                textureLayers: newData
+                textureLayers: newData,
+                device: sharedDevice
             )
         }
 
@@ -275,7 +282,8 @@ extension HandDrawingCanvasView {
         )
 
         try await textureLayersDocumentsRepository?.initializeStorage(
-            textureLayers: data
+            textureLayers: data,
+            device: sharedDevice
         )
         textureLayersState.update(data)
 
@@ -306,7 +314,8 @@ extension HandDrawingCanvasView {
 
         try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
             url: workingDirectoryURL,
-            textureLayers: data
+            textureLayers: data,
+            device: sharedDevice
         )
         textureLayersState.update(data)
 

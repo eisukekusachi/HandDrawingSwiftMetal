@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2023/12/31.
 //
 
-import CanvasView
 import Combine
 import SwiftUI
 
@@ -51,15 +50,15 @@ public struct TextureLayerView: View {
         }
     }
 
-    public func update(_ state: TextureLayersState) {
-        viewModel.update(state)
+    public func update(_ state: TextureLayersState, device: MTLDevice) {
+        viewModel.update(state, device: device)
     }
 }
 
 @MainActor
 private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel(
-        dependencies: .init(device: MTLCreateSystemDefaultDevice()!)
+        dependencies: .init()
     )
 
     private let textureLayers = TextureLayersState(

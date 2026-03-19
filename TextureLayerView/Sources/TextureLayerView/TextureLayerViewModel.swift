@@ -43,7 +43,8 @@ public final class TextureLayerViewModel: ObservableObject {
     }
 
     public func update(
-        _ textureLayers: TextureLayersState
+        _ textureLayers: TextureLayersState,
+        device: MTLDevice
     ) {
         self.textureLayers = textureLayers
 
@@ -59,7 +60,7 @@ public final class TextureLayerViewModel: ObservableObject {
         Task {
             for layer in textureLayers.layers {
                 let layerId: LayerId = layer.id
-                let texture = try? await self.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(layerId)
+                let texture = try? await self.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(layerId, device: device)
                 textureLayers.updateThumbnail(layerId, texture: texture?.texture)
             }
         }

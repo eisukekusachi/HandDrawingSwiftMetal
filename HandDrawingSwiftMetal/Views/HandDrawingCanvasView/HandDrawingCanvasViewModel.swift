@@ -43,7 +43,8 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         do {
             // Copy all textures from the textureRepository
             let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
-                textureLayers.layers.map { $0.id }
+                textureLayers.layers.map { $0.id },
+                device: device
             )
 
             try await withThrowingTaskGroup(of: Void.self) { group in

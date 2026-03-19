@@ -68,7 +68,7 @@ class HandDrawingViewController: UIViewController {
 
         textureLayerView = TextureLayerView(
             viewModel: .init(
-                dependencies: .init(device: canvasView.sharedDevice)
+                dependencies: .init()
             ),
             onChanged: { event in
                 switch event {
@@ -171,7 +171,7 @@ extension HandDrawingViewController {
 
                 self.contentView.initialize()
 
-                self.textureLayerView?.update(textureLayers)
+                self.textureLayerView?.update(textureLayers, device: canvasView.sharedDevice)
 
                 // Update the thumbnails
                 Task {

@@ -54,7 +54,7 @@ public struct ReversedTextureLayerListView: View {
 
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel(
-        dependencies: .init(device: MTLCreateSystemDefaultDevice()!)
+        dependencies: .init()
     )
 
     private let textureLayers = TextureLayersState(
