@@ -14,12 +14,17 @@ import Foundation
 @MainActor
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
+    public static let shared = try! TextureLayersDocumentsRepository(
+        storageDirectoryURL: URL.applicationSupport,
+        directoryName: "TextureStorage"
+    )
+
     /// URL of the texture storage
     public let workingDirectoryURL: URL
 
     private var textureSize: CGSize = .zero
 
-    public init(
+    private init(
         storageDirectoryURL: URL,
         directoryName: String
     ) throws {

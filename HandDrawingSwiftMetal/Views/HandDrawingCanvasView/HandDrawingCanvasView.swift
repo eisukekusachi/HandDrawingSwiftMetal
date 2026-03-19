@@ -43,14 +43,9 @@ import TextureLayerView
             xcdatamodeldName: "TextureLayerStorage"
         )
         super.init()
-        do {
-            self.textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage"
-            )
-        } catch {
-            fatalError("Failed to initialize the canvas")
-        }
+
+        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository.shared
+
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
         )

@@ -14,14 +14,7 @@ public final class TextureLayerViewDependencies {
     public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     public init() {
-        do {
-            textureLayersDocumentsRepository = try TextureLayersDocumentsRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage"
-            )
-        } catch {
-            fatalError()
-        }
+        textureLayersDocumentsRepository = TextureLayersDocumentsRepository.shared
     }
 }
 
