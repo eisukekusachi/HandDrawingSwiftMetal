@@ -6,7 +6,12 @@
 //
 
 import CanvasView
+import Combine
 import SwiftUI
+
+public enum TextureLayerEvent {
+    case selected
+}
 
 public struct TextureLayerView: View {
 
@@ -14,17 +19,26 @@ public struct TextureLayerView: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
+    private let onChanged: ((TextureLayerEvent) -> Void)
+
     public init(
-        viewModel: TextureLayerViewModel
+        viewModel: TextureLayerViewModel,
+        onChanged: @escaping ((TextureLayerEvent) -> Void)
     ) {
         self._viewModel = .init(wrappedValue: viewModel)
+        self.onChanged = onChanged
     }
 
     public var body: some View {
         VStack {
-            TextureLayerToolbar(viewModel: viewModel)
+            TextureLayerToolbar(
+                viewModel: viewModel
+            )
 
-            ReversedTextureLayerListView(viewModel: viewModel)
+            ReversedTextureLayerListView(
+                viewModel: viewModel,
+                onChanged: onChanged
+            )
 
             TwoRowsSliderView(
                 value: $viewModel.currentAlpha,
@@ -35,6 +49,10 @@ public struct TextureLayerView: View {
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
         }
+    }
+
+    public func update(_ state: TextureLayersState) {
+        viewModel.update(state)
     }
 }
 
@@ -87,7 +105,10 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerView(
-            viewModel: viewModel
+            viewModel: viewModel,
+            onChanged: { _ in
+                print("onChanged")
+            }
         )
         .frame(width: 320, height: 300)
         .onAppear {

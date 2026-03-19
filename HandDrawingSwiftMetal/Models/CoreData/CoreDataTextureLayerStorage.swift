@@ -27,20 +27,6 @@ import TextureLayerView
     ) {
         self.storage = .init(context: context)
         self.textureLayers = textureLayers
-
-        // Save to Core Data when the properties are updated
-        Publishers.Merge3(
-            self.textureLayers.layersPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.textureLayers.selectedLayerIdPublisher.map { _ in () }.eraseToAnyPublisher(),
-            self.textureLayers.textureSizePublisher.map { _ in () }.eraseToAnyPublisher()
-        )
-        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] in
-            Task {
-                await self?.save()
-            }
-        }
-        .store(in: &cancellables)
     }
 
     public func fetch() throws -> TextureLayerArrayEntity? {

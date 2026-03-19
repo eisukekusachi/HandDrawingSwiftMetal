@@ -21,6 +21,8 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
+
+    private var textureLayerPopup: UIHostingController<AnyView>?
     private var textureLayerPresenter = PopupViewPresenter()
 
     private var cancellables = Set<AnyCancellable>()
@@ -67,7 +69,16 @@ class HandDrawingViewController: UIViewController {
         textureLayerView = TextureLayerView(
             viewModel: .init(
                 dependencies: .init(device: canvasView.sharedDevice)
-            )
+            ),
+            onChanged: { event in
+                switch event {
+                case .selected:
+                    Task { [weak self] in
+                        try? await self?.canvasView.updateFullCanvasTexture()
+                    }
+                }
+                print("onChanged \(event)")
+            }
         )
 
         addEvents()
@@ -158,20 +169,14 @@ extension HandDrawingViewController {
                     renderer.initializeTextures(textureSize)
                 }
 
-                textureLayers.layers.forEach {
-                    print($0)
-                }
-/*
-                self.textureLayerViewPresenter?.update(
-                    textureLayers: textureLayers
-                )
- */
                 self.contentView.initialize()
+
+                self.textureLayerView?.update(textureLayers)
 
                 // Update the thumbnails
                 Task {
                     for layer in textureLayers.layers {
-                        // try await textureLayers.updateThumbnail(layer.id)
+                        //try await layer.updateThumbnail(layer.id, texture: layer.)
                     }
                 }
             }
@@ -289,7 +294,9 @@ extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.textureLayerPresenter.toggleView()
+            guard let `self` else { return }
+            self.textureLayerPresenter.toggleView()
+            self.textureLayerPopup?.view.isHidden = self.textureLayerPresenter.isHidden
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveProject()
@@ -344,6 +351,7 @@ extension HandDrawingViewController {
                 canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
             ])
 
+            /*
             let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
                 if let view = self?.textureLayerView {
                     AnyView(view)
@@ -356,19 +364,23 @@ extension HandDrawingViewController {
                 to: contentView,
                 dialogWidth: 300
             )
+            */
 
-            let hostingController = UIHostingController(rootView: popupView)
-            hostingController.view.backgroundColor = .clear
+            textureLayerPopup = UIHostingController(rootView: AnyView(textureLayerView))
+            textureLayerPopup?.view.backgroundColor = .white
 
-            baseView.addSubview(hostingController.view)
-
-            hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                hostingController.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
-                hostingController.view.centerXAnchor.constraint(equalTo: contentView.layerButton.leadingAnchor),
-                hostingController.view.widthAnchor.constraint(equalToConstant: 300),
-                hostingController.view.heightAnchor.constraint(equalToConstant: 300)
-            ])
+            if let popup = textureLayerPopup {
+                baseView.addSubview(popup.view)
+  
+                popup.view.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
+                    popup.view.centerXAnchor.constraint(equalTo: contentView.layerButton.leadingAnchor),
+                    popup.view.widthAnchor.constraint(equalToConstant: 300),
+                    popup.view.heightAnchor.constraint(equalToConstant: 300)
+                ])
+            }
+            // textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
         }
 
         addBrushPalette()

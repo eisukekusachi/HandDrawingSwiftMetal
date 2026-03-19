@@ -12,12 +12,6 @@ import UIKit
 @MainActor
 public final class TextureLayerViewModel: ObservableObject {
 
-    /// Emits when a full canvas update is requested
-    public var fullCanvasUpdateRequested: AnyPublisher<Void, Never> {
-        fullCanvasUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-    private let fullCanvasUpdateRequestedSubject = PassthroughSubject<Void, Never>()
-
     @Published public var currentAlpha: Int = 0
 
     @Published public var isAlphaSliderDragging: Bool = false
@@ -26,7 +20,7 @@ public final class TextureLayerViewModel: ObservableObject {
         textureLayers?.selectedLayer
     }
 
-    private(set) var textureLayers: TextureLayersState?
+    @Published private(set) var textureLayers: TextureLayersState?
 
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
@@ -48,12 +42,33 @@ public final class TextureLayerViewModel: ObservableObject {
         self.dependencies = dependencies
     }
 
+    public func update(
+        _ textureLayers: TextureLayersState
+    ) {
+        self.textureLayers = textureLayers
+
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
+        self.textureLayers?.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        Task {
+            for layer in textureLayers.layers {
+                let layerId: LayerId = layer.id
+                let texture = try? await self.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(layerId)
+                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
+            }
+        }
+    }
+
     public func initialize(
         textureLayers: TextureLayersState
     ) {
         self.textureLayers = textureLayers
-
-        bindData()
 
         updateCurrentAlpha()
     }
@@ -91,22 +106,6 @@ public final class TextureLayerViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-
-        textureLayers?.selectedLayerIdPublisher
-            .sink { [weak self] value in
-                self?.selectedLayerId = value
-            }
-            .store(in: &cancellables)
-
-        textureLayers?.alphaPublisher
-            .removeDuplicates()
-            .filter { [weak self] alpha in
-                self?.currentAlpha != alpha
-            }
-            .sink { [weak self] alpha in
-                self?.currentAlpha = alpha
-            }
-            .store(in: &cancellables)
     }
 }
 
@@ -127,7 +126,7 @@ public extension TextureLayerViewModel {
                 try await textureLayers.addNewLayer(
                     at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
                 )
-                fullCanvasUpdateRequestedSubject.send()
+                // fullCanvasUpdateRequestedSubject.send()
             } catch {
                 Logger.error(error)
             }
@@ -143,7 +142,7 @@ public extension TextureLayerViewModel {
 
         Task {
             try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
-            fullCanvasUpdateRequestedSubject.send()
+            // fullCanvasUpdateRequestedSubject.send()
         }
     }
 
@@ -157,14 +156,11 @@ public extension TextureLayerViewModel {
         textureLayers.updateVisibility(id, isVisible: isVisible)
 
         // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-        fullCanvasUpdateRequestedSubject.send()
+        // fullCanvasUpdateRequestedSubject.send()
     }
 
     func onTapCell(_ id: UUID) {
-        guard let textureLayers else { return }
-
-        textureLayers.selectLayer(id)
-        fullCanvasUpdateRequestedSubject.send()
+        textureLayers?.selectLayer(id)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
@@ -177,7 +173,7 @@ public extension TextureLayerViewModel {
                     destinationIndex: destination
                 )
             )
-            fullCanvasUpdateRequestedSubject.send()
+            // fullCanvasUpdateRequestedSubject.send()
         }
     }
 }

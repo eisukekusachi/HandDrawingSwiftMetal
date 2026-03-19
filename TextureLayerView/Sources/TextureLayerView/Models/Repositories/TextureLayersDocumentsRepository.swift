@@ -59,9 +59,6 @@ import Foundation
             throw error
         }
 
-
-
-
         // Delete all textures in the repository
         removeAll()
 

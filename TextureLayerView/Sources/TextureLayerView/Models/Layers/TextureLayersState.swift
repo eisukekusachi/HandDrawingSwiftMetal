@@ -13,38 +13,6 @@ import UIKit
 /// A class that manages texture layers
 public class TextureLayersState: ObservableObject {
 
-    /// Emits when the current layer update is requested
-    public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
-        currentLayerUpdateRequestedSubject.eraseToAnyPublisher()
-    }
-    private let currentLayerUpdateRequestedSubject = PassthroughSubject<Void, Never>()
-
-    /// Emits when the current layer update is requested with `MTLTexture`
-    public var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> {
-        currentLayerUpdateWithNewCurrentTextureRequestedSubject.eraseToAnyPublisher()
-    }
-    private let currentLayerUpdateWithNewCurrentTextureRequestedSubject = PassthroughSubject<MTLTexture, Never>()
-
-    /// Emits whenever `layers` change such as when layers are added or removed
-    public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
-        $_layers.eraseToAnyPublisher()
-    }
-
-    /// Emits whenever `selectedLayerId` change
-    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
-        $_selectedLayerId.eraseToAnyPublisher()
-    }
-
-    /// Emits whenever `alpha` change
-    public var alphaPublisher: AnyPublisher<Int, Never> {
-        $_alpha.eraseToAnyPublisher()
-    }
-
-    /// Emits whenever `textureSize` change
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        $_textureSize.eraseToAnyPublisher()
-    }
-
     public var selectedLayer: TextureLayerItem? {
         guard let _selectedLayerId else { return nil }
         return _layers.first(where: { $0.id == _selectedLayerId })
@@ -266,8 +234,9 @@ extension TextureLayersState {
         _layers.first(where: { $0.id == id })
     }
 
-    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
+    public func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
         guard
+            let texture,
             let index = index(for: id)
         else {
             let value: String = "index: \(String(describing: index))"

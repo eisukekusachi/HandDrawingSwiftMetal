@@ -12,6 +12,8 @@ public struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
+    let onChanged: ((TextureLayerEvent) -> Void)
+
     public var body: some View {
         List {
             ForEach(
@@ -29,6 +31,7 @@ public struct ReversedTextureLayerListView: View {
                         viewModel.onTapCell(
                             targetLayer.id
                         )
+                        onChanged(.selected)
                     },
                     didTapVisibleButton: { targetLayer in
                         viewModel.onTapVisibleButton(
@@ -60,7 +63,10 @@ private struct PreviewView: View {
 
     var body: some View {
         ReversedTextureLayerListView(
-            viewModel: viewModel
+            viewModel: viewModel,
+            onChanged: { _ in
+                print("onChanged")
+            }
         )
         .frame(width: 256, height: 300)
         .onAppear {

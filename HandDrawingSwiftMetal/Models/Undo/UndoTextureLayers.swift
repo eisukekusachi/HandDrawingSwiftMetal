@@ -59,6 +59,7 @@ public final class UndoTextureLayers: ObservableObject {
     }
 
     public func addNewLayer(at index: Int) async throws {
+        /*
         guard
             let newTexture = renderer.makeTexture(textureSize)
             else { return }
@@ -73,6 +74,7 @@ public final class UndoTextureLayers: ObservableObject {
             newTexture: newTexture,
             at: index
         )
+        */
     }
 
     public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
@@ -402,103 +404,5 @@ private extension UndoTextureLayers {
             // No action on error
             Logger.error(error)
         }
-    }
-}
-
-extension UndoTextureLayers {
-
-    public var currentLayerUpdateRequested: AnyPublisher<Void, Never> {
-        textureLayers.currentLayerUpdateRequested
-    }
-
-    public var currentLayerUpdateWithNewCurrentTextureRequested: AnyPublisher<MTLTexture, Never> {
-        textureLayers.currentLayerUpdateWithNewCurrentTextureRequested
-    }
-
-    public var layersPublisher: AnyPublisher<[TextureLayerItem], Never> {
-        textureLayers.layersPublisher
-    }
-
-    public var selectedLayerIdPublisher: AnyPublisher<LayerId?, Never> {
-        textureLayers.selectedLayerIdPublisher
-    }
-
-    public var alphaPublisher: AnyPublisher<Int, Never> {
-        textureLayers.alphaPublisher
-    }
-
-    public var textureSizePublisher: AnyPublisher<CGSize, Never> {
-        textureLayers.textureSizePublisher
-    }
-
-    public var selectedLayer: TextureLayerItem? {
-        textureLayers.selectedLayer
-    }
-
-    public var selectedIndex: Int? {
-        textureLayers.selectedIndex
-    }
-
-    public var layers: [TextureLayerItem] {
-        textureLayers.layers
-    }
-
-    public var layerCount: Int {
-        textureLayers.layerCount
-    }
-
-    public var textureSize: CGSize {
-        textureLayers.textureSize
-    }
-
-    public func update(
-        _ textureLayersModel: TextureLayersModel
-    ) {
-        textureLayers.update(textureLayersModel)
-    }
-
-    public func index(for id: LayerId) -> Int? {
-        textureLayers.index(for: id)
-    }
-
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture? {
-        nil
-        // try await textureLayers.duplicatedTexture(id)
-    }
-
-    public func layer(_ id: LayerId) -> TextureLayerItem? {
-        textureLayers.layer(id)
-    }
-
-    public func updateLayer(_ layer: TextureLayerItem) {
-        textureLayers.updateLayer(layer)
-    }
-
-    public func updateThumbnail(_ id: LayerId) async throws {
-        // try await textureLayers.updateThumbnail(id)
-    }
-
-    public func updateThumbnail(_ id: LayerId, texture: MTLTexture) {
-        textureLayers.updateThumbnail(id, texture: texture)
-    }
-
-    public func updateTitle(_ id: LayerId, title: String) {
-        textureLayers.updateTitle(id, title: title)
-    }
-
-    public func updateAlpha(_ id: LayerId, alpha: Int) {
-        textureLayers.updateAlpha(id, alpha: alpha)
-    }
-
-    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        // try await textureLayers.writeTextureToDisk(texture: texture, for: id)
-    }
-
-    public func requestCanvasUpdate() {
-        // textureLayers.requestCanvasUpdate()
-    }
-
-    public func requestCanvasDrawingUpdate(_ texture: RealtimeDrawingTexture) {
-        // textureLayers.requestCanvasDrawingUpdate(texture)
     }
 }

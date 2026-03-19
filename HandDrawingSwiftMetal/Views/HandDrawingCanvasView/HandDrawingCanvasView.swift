@@ -139,7 +139,6 @@ import TextureLayerView
                         layerId,
                         texture: currentTexture
                     )
-
                 } catch {
                     Logger.error(error)
                 }
