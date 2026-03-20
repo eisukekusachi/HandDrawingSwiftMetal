@@ -26,41 +26,6 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     ) {
         self.dependencies = dependencies ?? HandDrawingCanvasViewDependencies()
     }
-
-    func initializeStorage(
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) async throws {
-        guard let dependencies else { return }
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
-
-    func restoreStorageFromWorkingDirectory(
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) throws {
-        guard let dependencies else { return }
-        try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
-
-    func restoreStorage(
-        url sourceFolderURL: URL,
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) async throws {
-        guard let dependencies else { return }
-        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-            url: sourceFolderURL,
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
 }
 
 extension HandDrawingCanvasViewModel {
@@ -68,6 +33,50 @@ extension HandDrawingCanvasViewModel {
         self.textureLayersState = TextureLayersState(
             device: device
         )
+    }
+
+    func onSetup(
+        restoredData: TextureLayersModel?,
+        configuration: CanvasConfiguration,
+        device: MTLDevice
+    ) async throws -> CanvasConfiguration? {
+        let data: TextureLayersModel
+        let resolvedConfiguration: CanvasConfiguration
+
+        if let restoredData {
+            do {
+                try restoreStorageFromWorkingDirectory(
+                    textureLayers: restoredData,
+                    device: device
+                )
+
+                data = restoredData
+                resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
+
+            } catch {
+                // Initialize the storage on error
+                let newData = TextureLayersModel(textureSize: configuration.textureSize)
+                try await initializeStorage(
+                    textureLayers: newData,
+                    device: device
+                )
+                data = newData
+                resolvedConfiguration = configuration
+            }
+
+        } else {
+            let newData = TextureLayersModel(textureSize: configuration.textureSize)
+            try await initializeStorage(
+                textureLayers: newData,
+                device: device
+            )
+            data = newData
+            resolvedConfiguration = configuration
+        }
+
+        textureLayersState?.update(data)
+
+        return resolvedConfiguration
     }
 
     func onCompleteDrawing(
@@ -215,6 +224,43 @@ extension HandDrawingCanvasViewModel {
         guard let dependencies else { return nil }
         return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
+            device: device
+        )
+    }
+}
+
+private extension HandDrawingCanvasViewModel {
+    func initializeStorage(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+
+    func restoreStorageFromWorkingDirectory(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) throws {
+        guard let dependencies else { return }
+        try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+
+    func restoreStorage(
+        url sourceFolderURL: URL,
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
+            url: sourceFolderURL,
+            textureLayers: textureLayers,
             device: device
         )
     }

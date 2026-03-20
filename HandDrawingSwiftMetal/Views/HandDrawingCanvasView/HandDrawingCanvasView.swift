@@ -65,6 +65,7 @@ import TextureLayerView
         )
         bindData()
     }
+
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -220,13 +221,10 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
-    @MainActor
     func setup(
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        guard let textureLayersState = viewModel.textureLayersState else { return }
-
         let restoredData: TextureLayersModel? = {
             guard
                 let entity = try? textureLayerStorage?.fetch(),
@@ -235,29 +233,11 @@ extension HandDrawingCanvasView {
             return state
         }()
 
-        let data: TextureLayersModel
-        let resolvedConfiguration: CanvasConfiguration
-
-        if let restoredData {
-            do {
-                (data, resolvedConfiguration) = try restoreStorage(
-                    configuration: configuration,
-                    restoredTextureLayers: restoredData
-                )
-            } catch {
-                // Initialize the storage on error
-                (data, resolvedConfiguration) = try await initializedStorage(
-                    configuration: configuration
-                )
-            }
-
-        } else {
-            (data, resolvedConfiguration) = try await initializedStorage(
-                configuration: configuration
-            )
-        }
-
-        textureLayersState.update(data)
+        let resolvedConfiguration = try await viewModel.onSetup(
+            restoredData: restoredData,
+            configuration: configuration,
+            device: sharedDevice
+        )
 
         try super.setup(resolvedConfiguration)
     }
@@ -362,32 +342,5 @@ extension HandDrawingCanvasView {
             .init(undoManager)
         )
  */
-    }
-}
-
-private extension HandDrawingCanvasView {
-
-    func restoreStorage(
-        configuration: CanvasConfiguration,
-        restoredTextureLayers: TextureLayersModel
-    ) throws -> (TextureLayersModel, CanvasConfiguration) {
-        try viewModel.restoreStorageFromWorkingDirectory(
-            textureLayers: restoredTextureLayers,
-            device: sharedDevice
-        )
-
-        return (restoredTextureLayers, configuration.newTextureSize(restoredTextureLayers.textureSize))
-    }
-    func initializedStorage(
-        configuration: CanvasConfiguration
-    ) async throws -> (TextureLayersModel, CanvasConfiguration) {
-        let newData = TextureLayersModel(textureSize: configuration.textureSize)
-
-        try await viewModel.initializeStorage(
-            textureLayers: newData,
-            device: sharedDevice
-        )
-
-        return (newData, configuration)
     }
 }
