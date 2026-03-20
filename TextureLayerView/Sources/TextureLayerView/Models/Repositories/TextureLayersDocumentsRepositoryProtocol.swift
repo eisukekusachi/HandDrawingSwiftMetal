@@ -19,7 +19,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         device: MTLDevice
     ) async throws
 
-    func restoreStorage(
+    func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws
@@ -30,12 +30,31 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         device: MTLDevice
     ) async throws
 
-    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture
-    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]
+    func duplicatedTexture(
+        _ id: LayerId,
+        device: MTLDevice
+    ) async throws -> IdentifiedTexture
+
+    func duplicatedTextures(
+        _ ids: [LayerId],
+        device: MTLDevice
+    ) async throws -> [IdentifiedTexture]
+
+    func addTexture(
+        texture: MTLTexture,
+        id: LayerId,
+        device: MTLDevice
+    ) async throws
 
     func removeAll()
-    func removeTexture(_ id: LayerId) throws
 
-    func addTexture(texture: MTLTexture, id: LayerId, device: MTLDevice) async throws
-    func writeTextureToDisk(texture: MTLTexture, for id: LayerId, device: MTLDevice) async throws
+    func removeTexture(
+        _ id: LayerId
+    ) throws
+
+    func writeTextureToDisk(
+        texture: MTLTexture,
+        for id: LayerId,
+        device: MTLDevice
+    ) async throws
 }

@@ -32,6 +32,17 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         )
     }
 
+    func restoreStorageFromWorkingDirectory(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) throws {
+        guard let dependencies else { return }
+        try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+
     func restoreStorage(
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
@@ -40,17 +51,6 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         guard let dependencies else { return }
         try await dependencies.textureLayersDocumentsRepository.restoreStorage(
             url: sourceFolderURL,
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
-
-    func restoreStorage(
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) throws {
-        guard let dependencies else { return }
-        try dependencies.textureLayersDocumentsRepository.restoreStorage(
             textureLayers: textureLayers,
             device: device
         )

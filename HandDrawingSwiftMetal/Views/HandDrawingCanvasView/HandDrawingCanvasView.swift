@@ -243,10 +243,11 @@ extension HandDrawingCanvasView {
             data = restoredData
             resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
 
-            try viewModel.restoreStorage(
+            try viewModel.restoreStorageFromWorkingDirectory(
                 textureLayers: restoredData,
                 device: sharedDevice
             )
+
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
             data = newData
