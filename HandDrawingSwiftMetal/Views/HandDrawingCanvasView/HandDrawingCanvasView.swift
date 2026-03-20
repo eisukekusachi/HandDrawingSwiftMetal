@@ -17,9 +17,11 @@ import TextureLayerView
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
+    var textureLayersState: TextureLayersState? {
+        viewModel.textureLayersState
+    }
 
-    public var textureLayersState: TextureLayersState?
+    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
     private var textureLayerStorage: CoreDataTextureLayerStorage?
 
@@ -43,16 +45,15 @@ import TextureLayerView
 
         super.init()
 
+        viewModel.setup(device: sharedDevice)
+
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
-        )
-        self.textureLayersState = TextureLayersState(
-            device: sharedDevice
         )
 
         self.textureLayerRenderer = .init(renderer: renderer)
 
-        guard let textureLayersState else { return }
+        guard let textureLayersState = viewModel.textureLayersState else { return }
         self.textureLayerStorage = .init(
             textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
@@ -118,19 +119,14 @@ import TextureLayerView
                 guard
                     let `self`,
                     let currentTexture = self.currentTexture,
-                    let layerId = self.textureLayersState?.selectedLayer?.id
+                    let layerId = self.viewModel.textureLayersState?.selectedLayer?.id
                 else { return }
 
                 do {
-                    try await self.viewModel.writeTexture(
+                    try await self.viewModel.onCompleteDrawing(
                         texture: currentTexture,
                         for: layerId,
                         device: self.sharedDevice
-                    )
-
-                    self.textureLayersState?.updateThumbnail(
-                        layerId,
-                        texture: currentTexture
                     )
                 } catch {
                     Logger.error(error)
@@ -141,7 +137,7 @@ import TextureLayerView
 
     func updateFullCanvasTexture() async throws {
         guard
-            let textureLayersState,
+            let textureLayersState = viewModel.textureLayersState,
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
             let currentTexture = try await viewModel.duplicatedTexture(
@@ -198,7 +194,7 @@ import TextureLayerView
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
         guard
-            let selectedLayer = textureLayersState?.selectedLayer
+            let selectedLayer = viewModel.textureLayersState?.selectedLayer
         else {
             return
         }
@@ -226,7 +222,7 @@ extension HandDrawingCanvasView {
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        guard let textureLayersState else { return }
+        guard let textureLayersState = viewModel.textureLayersState else { return }
 
         let restoredData: TextureLayersModel? = {
             guard
@@ -264,7 +260,7 @@ extension HandDrawingCanvasView {
     }
 
     func newCanvas() async throws {
-        guard let textureLayersState else { return }
+        guard let textureLayersState = viewModel.textureLayersState else { return }
 
         let textureSize = textureLayersState.textureSize
 
@@ -284,6 +280,8 @@ extension HandDrawingCanvasView {
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
+        guard let textureLayersState = viewModel.textureLayersState else { return }
+
         try await viewModel.exportFiles(
             canvasTexture: canvasTexture,
             thumbnailLength: 500,
@@ -294,7 +292,7 @@ extension HandDrawingCanvasView {
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        guard let textureLayersState else { return }
+        guard let textureLayersState = viewModel.textureLayersState else { return }
 
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(

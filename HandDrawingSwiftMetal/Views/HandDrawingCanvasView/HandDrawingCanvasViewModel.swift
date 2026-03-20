@@ -15,10 +15,18 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     private var dependencies: HandDrawingCanvasViewDependencies?
 
+    public var textureLayersState: TextureLayersState?
+
     init(
         dependencies: HandDrawingCanvasViewDependencies? = nil
     ) {
         self.dependencies = dependencies ?? HandDrawingCanvasViewDependencies()
+    }
+
+    func setup(device: MTLDevice) {
+        self.textureLayersState = TextureLayersState(
+            device: device
+        )
     }
 
     func initializeStorage(
@@ -55,6 +63,24 @@ final class HandDrawingCanvasViewModel: ObservableObject {
             device: device
         )
     }
+
+    func onCompleteDrawing(
+        texture: MTLTexture,
+        for id: LayerId,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+            texture: texture,
+            for: id,
+            device: device
+        )
+
+        textureLayersState?.updateThumbnail(
+            id,
+            texture: texture
+        )
+    }
 }
 
 extension HandDrawingCanvasViewModel {
@@ -70,19 +96,6 @@ extension HandDrawingCanvasViewModel {
         guard let dependencies else { return nil }
         return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
-            device: device
-        )
-    }
-
-    func writeTexture(
-        texture: MTLTexture,
-        for id: LayerId,
-        device: MTLDevice
-    ) async throws {
-        guard let dependencies else { return }
-        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
-            texture: texture,
-            for: id,
             device: device
         )
     }
